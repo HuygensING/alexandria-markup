@@ -1,9 +1,6 @@
 package lmnl_importer;
 
-import data_model.Document;
-import data_model.Limen;
-import data_model.TextNode;
-import data_model.TextRange;
+import data_model.*;
 import lmnl_antlr.LMNLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
@@ -20,34 +17,58 @@ public class LMNLImporter {
     Document document = new Document();
     Limen limen = document.value();
     Token token;
-    Stack<TextRange> textRangeCache = new Stack<>();
+    Stack<TextRange> textRangeStack = new Stack<>();
+    Stack<Annotation> annotationStack = new Stack<>();
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
         String ruleName = lexer.getRuleNames()[token.getType() - 1];
         String modeName = lexer.getModeNames()[lexer._mode];
-        System.out.println(token + ": " + ruleName + ": " + modeName);
+//        System.out.println(token + ": " + ruleName + ": " + modeName);
         switch (ruleName) {
           case "BEGIN_OPEN_RANGE":
             break;
           case "Name_Open_Range":
             TextRange textRange = new TextRange(limen, token.getText());
-            textRangeCache.push(textRange);
+            textRangeStack.push(textRange);
             break;
           case "END_OPEN_RANGE":
             break;
-          case "TEXT":
-            TextNode textNode = new TextNode(token.getText());
-            textRangeCache.peek().addTextNode(textNode);
-            limen.addTextNode(textNode);
-            break;
+
           case "BEGIN_CLOSE_RANGE":
             break;
           case "Name_Close_Range":
             break;
           case "END_CLOSE_RANGE":
-            textRangeCache.pop();
+            limen.addTextRange(textRangeStack.pop());
             break;
+
+          case "BEGIN_OPEN_ANNO":
+            break;
+          case "Name_Open_Annotation":
+            Annotation annotation = new Annotation(token.getText());
+            annotationStack.push(annotation);
+            break;
+          case "ANNO_TEXT":
+            annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
+            break;
+          case "END_OPEN_ANNO":
+            break;
+
+          case "BEGIN_CLOSE_ANNO":
+            break;
+          case "Name_Close_Annotation":
+            break;
+          case "END_CLOSE_ANNO":
+            textRangeStack.peek().addAnnotation(annotationStack.pop());
+            break;
+
+          case "TEXT":
+            TextNode textNode = new TextNode(token.getText());
+            textRangeStack.peek().addTextNode(textNode);
+            limen.addTextNode(textNode);
+            break;
+
           default:
             break;
         }

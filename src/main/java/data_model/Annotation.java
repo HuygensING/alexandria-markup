@@ -10,9 +10,18 @@ import java.util.List;
 public class Annotation {
     private final String tag;
     private final Limen limen;
+    private final List<Annotation> annotations = new ArrayList<>();
 
     public Annotation(String tag) {
         this.tag = tag;
         this.limen = new Limen();
+    }
+
+    public Limen value() {
+        return limen;
+    }
+
+    public List<Annotation> annotations() {
+        return annotations;
     }
 }

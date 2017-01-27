@@ -1,13 +1,11 @@
 package lmnl_importer;
 
-import data_model.Document;
-import data_model.Limen;
-import data_model.TextNode;
-import data_model.TextRange;
+import data_model.*;
 import org.junit.Test;
 
 import java.util.Iterator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -16,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 public class LMNLImporterTest {
 
     @Test
-    public void testTextRangeAnnotation() {
+        public void testTextRangeAnnotation() {
         String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
         LMNLImporter importer = new LMNLImporter();
         Document actual = importer.importLMNL(input);
@@ -29,13 +27,24 @@ public class LMNLImporterTest {
         // - with one annotation on it.
         Document expected = new Document();
         Limen limen = expected.value();
-        TextNode t1 = new TextNode("He manages to keep the upper hand");
         TextRange r1 = new TextRange(limen, "l");
+        Annotation a1 = simpleAnnotation("n","144");
+        r1.addAnnotation(a1);
+        TextNode t1 = new TextNode("He manages to keep the upper hand");
         r1.addTextNode(t1);
-        limen.addTextRange(r1);
         limen.addTextNode(t1);
+        limen.addTextRange(r1);
 
         assertTrue(compareDocuments(expected, actual));
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+    }
+
+    private Annotation simpleAnnotation(String tag, String content) {
+        Annotation a1 = new Annotation(tag);
+        Limen annotationLimen = a1.value();
+        TextNode annotationText = new TextNode(content);
+        annotationLimen.addTextNode(annotationText);
+        return a1;
     }
 
     // I could use a matcher framework here

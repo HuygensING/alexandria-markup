@@ -23,4 +23,8 @@ public class TextRange {
         this.textNodes.add(node);
         this.owner.associateTextWithRange(node, this);
     }
+
+    public void addAnnotation(Annotation annotation) {
+        this.annotations.add(annotation);
+    }
 }
