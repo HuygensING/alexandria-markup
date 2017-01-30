@@ -24,7 +24,7 @@ public class LMNLImporter {
       if (token.getType() != Token.EOF) {
         String ruleName = getRuleName(lexer, token);
         String modeName = getModeName(lexer);
-//        System.out.println(token + ": " + ruleName + ": " + modeName);
+        System.out.println(token + ": " + ruleName + ": " + modeName);
         switch (ruleName) {
           case "BEGIN_OPEN_RANGE":
             handleOpenRange(lexer, textRangeStack, limen, annotationStack);
@@ -41,7 +41,7 @@ public class LMNLImporter {
             break;
 
           default:
-            System.out.println("unexpected token: " + token + ": " + ruleName + ": " + modeName);
+            System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
             break;
         }
       }
@@ -74,15 +74,7 @@ public class LMNLImporter {
           break;
 
         case "BEGIN_OPEN_ANNO":
-          break;
-        case "Name_Open_Annotation":
-          Annotation annotation = new Annotation(token.getText());
-          annotationStack.push(annotation);
-          break;
-        case "ANNO_TEXT":
-          annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
-          break;
-        case "END_OPEN_ANNO":
+          handleOpenAnnotation(lexer, textRangeStack, limen, annotationStack);
           break;
 
         case "BEGIN_CLOSE_ANNO":
@@ -93,7 +85,31 @@ public class LMNLImporter {
           textRangeStack.peek().addAnnotation(annotationStack.pop());
           break;
         default:
-          System.out.println("unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          break;
+      }
+    }
+  }
+
+  private void handleOpenAnnotation(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen, Stack<Annotation> annotationStack) {
+    boolean goOn = true;
+    while (goOn) {
+      Token token = lexer.nextToken();
+      String ruleName = getRuleName(lexer, token);
+      String modeName = getModeName(lexer);
+      switch (ruleName) {
+        case "Name_Open_Annotation":
+          Annotation annotation = new Annotation(token.getText());
+          annotationStack.push(annotation);
+          break;
+        case "ANNO_TEXT":
+          annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
+          break;
+        case "END_OPEN_ANNO":
+          goOn = false;
+          break;
+        default:
+          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
     }
@@ -113,7 +129,7 @@ public class LMNLImporter {
           goOn = false;
           break;
         default:
-          System.out.println("unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
     }

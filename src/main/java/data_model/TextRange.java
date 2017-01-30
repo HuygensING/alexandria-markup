@@ -27,4 +27,8 @@ public class TextRange {
     public void addAnnotation(Annotation annotation) {
         this.annotations.add(annotation);
     }
+
+    public String getTag() {
+        return tag;
+    }
 }

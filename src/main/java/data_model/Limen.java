@@ -13,7 +13,7 @@ import java.util.*;
 public class Limen {
 
     private final List<TextNode> textNodeList;
-    private final List<TextRange> textRangeList;
+    public final List<TextRange> textRangeList;
     private final Map<TextNode, List<TextRange>> textNodeToTextRange;
 
     public Limen() {
