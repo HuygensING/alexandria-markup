@@ -4,6 +4,8 @@ import data_model.*;
 import lmnl_antlr.LMNLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Stack;
 
@@ -11,6 +13,7 @@ import java.util.Stack;
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporter {
+  Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   public Document importLMNL(String input) {
     LMNLLexer lexer = new LMNLLexer(new ANTLRInputStream(input));
@@ -41,7 +44,7 @@ public class LMNLImporter {
             break;
 
           default:
-            System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+            LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
             break;
         }
       }
@@ -74,24 +77,17 @@ public class LMNLImporter {
           break;
 
         case "BEGIN_OPEN_ANNO":
-          handleOpenAnnotation(lexer, textRangeStack, limen, annotationStack);
+          handleAnnotation(lexer, textRangeStack, limen, annotationStack);
           break;
 
-        case "BEGIN_CLOSE_ANNO":
-          break;
-        case "Name_Close_Annotation":
-          break;
-        case "END_CLOSE_ANNO":
-          textRangeStack.peek().addAnnotation(annotationStack.pop());
-          break;
         default:
-          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
     }
   }
 
-  private void handleOpenAnnotation(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen, Stack<Annotation> annotationStack) {
+  private void handleAnnotation(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen, Stack<Annotation> annotationStack) {
     boolean goOn = true;
     while (goOn) {
       Token token = lexer.nextToken();
@@ -106,10 +102,18 @@ public class LMNLImporter {
           annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
           break;
         case "END_OPEN_ANNO":
+//          goOn = false;
+          break;
+        case "BEGIN_CLOSE_ANNO":
+          break;
+        case "Name_Close_Annotation":
+          break;
+        case "END_CLOSE_ANNO":
+          textRangeStack.peek().addAnnotation(annotationStack.pop());
           goOn = false;
           break;
         default:
-          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
     }
@@ -129,7 +133,7 @@ public class LMNLImporter {
           goOn = false;
           break;
         default:
-          System.out.println("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
     }
