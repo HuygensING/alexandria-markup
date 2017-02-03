@@ -1,8 +1,14 @@
 package lmnl_importer;
 
 import data_model.*;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,13 +19,12 @@ import static org.junit.Assert.assertTrue;
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporterTest {
+  Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
 
   @Test
   public void testTextRangeAnnotation() {
     String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
-    LMNLImporter importer = new LMNLImporter();
-    Document actual = importer.importLMNL(input);
-
+    Document actual = new LMNLImporter().importLMNL(input);
 
     // Expectations:
     // We expect a Document
@@ -42,15 +47,15 @@ public class LMNLImporterTest {
 
   @Test
   public void testLexingComplex() {
-    String input = "[excerpt\n" +
-            "  [source [date}1915{][title}The Housekeeper{]]\n" +
-            "  [author\n" +
-            "    [name}Robert Frost{]\n" +
-            "    [dates}1874-1963{]] }\n" +
-            "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n" +
-            "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n" +
-            "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n" +
-            "{excerpt]";
+    String input = "[excerpt\n"//
+            + "  [source [date}1915{][title}The Housekeeper{]]\n"//
+            + "  [author\n"//
+            + "    [name}Robert Frost{]\n"//
+            + "    [dates}1874-1963{]] }\n"//
+            + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
+            + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+            + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+            + "{excerpt]";
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
@@ -59,7 +64,7 @@ public class LMNLImporterTest {
     assertThat(value.textRangeList).hasSize(7);
     List<TextRange> textRangeList = value.textRangeList;
 
-    textRangeList.stream().map(TextRange::getTag).map(t->"["+t+"}").forEach(System.out::print);
+    textRangeList.stream().map(TextRange::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
     TextRange textRange1 = textRangeList.get(0);
     assertThat(textRange1.getTag()).isEqualTo("excerpt");
 
@@ -68,6 +73,22 @@ public class LMNLImporterTest {
 
     TextRange textRange3 = textRangeList.get(2);
     assertThat(textRange3.getTag()).isEqualTo("l");
+  }
+
+  @Test
+  public void testLMNL1kings12() throws IOException {
+    InputStream input = FileUtils.openInputStream(new File("data/1kings12.lmnl"));
+    Document document = new LMNLImporter().importLMNL(input);
+    LOG.info("document={}", document);
+    assertThat(document).isNotNull();
+  }
+
+  @Test
+  public void testLMNLOzymandias() throws IOException {
+    InputStream input = FileUtils.openInputStream(new File("data/ozymandias-voices-wap.lmnl"));
+    Document document = new LMNLImporter().importLMNL(input);
+    LOG.info("document={}", document);
+    assertThat(document).isNotNull();
   }
 
   private Annotation simpleAnnotation(String tag, String content) {

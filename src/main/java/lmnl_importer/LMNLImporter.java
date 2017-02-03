@@ -7,6 +7,8 @@ import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Stack;
 
 /**
@@ -16,7 +18,22 @@ public class LMNLImporter {
   Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   public Document importLMNL(String input) {
-    LMNLLexer lexer = new LMNLLexer(new ANTLRInputStream(input));
+    ANTLRInputStream antlrInputStream = new ANTLRInputStream(input);
+    return importLMNL(antlrInputStream);
+  }
+
+  public Document importLMNL(InputStream input) {
+    try {
+      ANTLRInputStream antlrInputStream = new ANTLRInputStream(input);
+      return importLMNL(antlrInputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Document importLMNL(ANTLRInputStream antlrInputStream) {
+    LMNLLexer lexer = new LMNLLexer(antlrInputStream);
     Document document = new Document();
     Limen limen = document.value();
     Token token;
@@ -51,7 +68,6 @@ public class LMNLImporter {
     } while (token.getType() != Token.EOF);
     return document;
   }
-
 
   private String getModeName(LMNLLexer lexer) {
     return lexer.getModeNames()[lexer._mode];
@@ -102,7 +118,7 @@ public class LMNLImporter {
           annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
           break;
         case "END_OPEN_ANNO":
-//          goOn = false;
+          // goOn = false;
           break;
         case "BEGIN_CLOSE_ANNO":
           break;
