@@ -7,28 +7,49 @@ import java.util.List;
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class TextRange {
-    private final Limen owner;
-    private final String tag;
-    private final List<Annotation> annotations;
-    private final List<TextNode> textNodes;
+  private final Limen owner;
+  private final String tag;
+  private final List<Annotation> annotations;
+  private final List<TextNode> textNodes;
 
-    public TextRange(Limen owner, String tag) {
-        this.owner = owner;
-        this.tag = tag;
-        this.annotations = new ArrayList<>();
-        this.textNodes = new ArrayList<>();
-    }
+  public TextRange(Limen owner, String tag) {
+    this.owner = owner;
+    this.tag = tag;
+    this.annotations = new ArrayList<>();
+    this.textNodes = new ArrayList<>();
+  }
 
-    public void addTextNode(TextNode node) {
-        this.textNodes.add(node);
-        this.owner.associateTextWithRange(node, this);
-    }
+  public TextRange addTextNode(TextNode node) {
+    this.textNodes.add(node);
+    this.owner.associateTextWithRange(node, this);
+    return this;
+  }
 
-    public void addAnnotation(Annotation annotation) {
-        this.annotations.add(annotation);
-    }
+  public TextRange addAnnotation(Annotation annotation) {
+    this.annotations.add(annotation);
+    return this;
+  }
 
-    public String getTag() {
-        return tag;
+  public String getTag() {
+    return tag;
+  }
+
+  public TextRange setFirstAndLastTextNode(TextNode firstTextNode, TextNode lastTextNode) {
+    this.textNodes.clear();
+    addTextNode(firstTextNode);
+    if (firstTextNode != lastTextNode) {
+      TextNode next = firstTextNode.getNextTextNode();
+      while (next != lastTextNode) {
+        addTextNode(next);
+        next = next.getNextTextNode();
+      }
     }
+    return this;
+  }
+
+  public TextRange setOnlyTextNode(TextNode textNode) {
+    this.textNodes.clear();
+    addTextNode(textNode);
+    return this;
+  }
 }
