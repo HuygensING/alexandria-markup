@@ -11,14 +11,14 @@ import java.util.*;
  */
 public class Limen {
 
-  private final List<TextNode> textNodeList;
+  public final List<TextNode> textNodeList;
   public final List<TextRange> textRangeList;
   private final Map<TextNode, List<TextRange>> textNodeToTextRange;
 
   public Limen() {
     this.textNodeList = new ArrayList<>();
     this.textRangeList = new ArrayList<>();
-    this.textNodeToTextRange = new HashMap<>();
+    this.textNodeToTextRange = new LinkedHashMap<>();
   }
 
   public Limen addTextNode(TextNode textNode) {

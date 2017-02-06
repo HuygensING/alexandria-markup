@@ -102,77 +102,76 @@ public class LMNLImporterTest {
             .addAnnotation(name)
             .addAnnotation(dates)
             ;
+    Annotation n144 = simpleAnnotation("n","144");
+    Annotation n145 = simpleAnnotation("n","145");
+    Annotation n146 = simpleAnnotation("n","146");
     TextRange excerpt = new TextRange(limen, "excerpt")
             .addAnnotation(source)
             .addAnnotation(author)
             .setFirstAndLastTextNode(tn00,tn10)
-//            .addTextNode(tn01)
-//            .addTextNode(tn02)
-//            .addTextNode(tn03)
-//            .addTextNode(tn04)
-//            .addTextNode(tn05)
-//            .addTextNode(tn06)
-//            .addTextNode(tn07)
-//            .addTextNode(tn08)
-//            .addTextNode(tn09)
-//            .addTextNode(tn10)
             ;
     // 3 sentences
     TextRange s1 = new TextRange(limen, "s")
             .setFirstAndLastTextNode(tn01,tn03)
-//            .addTextNode(tn01)
-//            .addTextNode(tn02)
-//            .addTextNode(tn03)
             ;
     TextRange s2 = new TextRange(limen, "s")
             .setOnlyTextNode(tn05)
-//            .addTextNode(tn05)
             ;
     TextRange s3 = new TextRange(limen, "s")
             .setFirstAndLastTextNode(tn07,tn09)
-//            .addTextNode(tn07)
-//            .addTextNode(tn08)
-//            .addTextNode(tn09)
             ;
     // 3 lines
     TextRange l1 = new TextRange(limen, "l")
             .setOnlyTextNode(tn01)
-//            .addTextNode(tn01)
+            .addAnnotation(n144)
             ;
     TextRange l2 = new TextRange(limen, "l")
             .setFirstAndLastTextNode(tn03,tn07)
-//            .addTextNode(tn03)
-//            .addTextNode(tn04)
-//            .addTextNode(tn05)
-//            .addTextNode(tn06)
-//            .addTextNode(tn07)
+            .addAnnotation(n145)
             ;
     TextRange l3 = new TextRange(limen, "l")
             .setOnlyTextNode(tn09)
-//            .addTextNode(tn09)
+            .addAnnotation(n146)
             ;
 
     limen.setFirstAndLastTextNode(tn00,tn10)
-//            .addTextNode(tn01)
-//            .addTextNode(tn02)
-//            .addTextNode(tn03)
-//            .addTextNode(tn04)
-//            .addTextNode(tn05)
-//            .addTextNode(tn06)
-//            .addTextNode(tn07)
-//            .addTextNode(tn08)
-//            .addTextNode(tn09)
-//            .addTextNode(tn10)
             .addTextRange(excerpt)
             .addTextRange(s1)
-            .addTextRange(s2)
-            .addTextRange(s3)
             .addTextRange(l1)
             .addTextRange(l2)
+            .addTextRange(s2)
+            .addTextRange(s3)
             .addTextRange(l3)
     ;
 
-    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+    assertActualMatchesExpected(actual,expected);
+  }
+
+  private void assertActualMatchesExpected(Document actual, Document expected) {
+    Limen actualLimen = actual.value();
+    List<TextRange> actualTextRangeList = actualLimen.textRangeList;
+    List<TextNode> actualTextNodeList = actualLimen.textNodeList;
+
+    Limen expectedLimen = expected.value();
+    List<TextRange> expectedTextRangeList = expectedLimen.textRangeList;
+    List<TextNode> expectedTextNodeList = expectedLimen.textNodeList;
+
+    assertThat(actualTextNodeList).hasSize(expectedTextNodeList.size());
+    for (int i = 0; i < expectedTextNodeList.size(); i++) {
+      TextNode actualTextNode = actualTextNodeList.get(i);
+      TextNode expectedTextNode = expectedTextNodeList.get(i);
+      assertThat(actualTextNode).isEqualToComparingFieldByFieldRecursively(expectedTextNode);
+    }
+
+    assertThat(actualTextRangeList).hasSize(expectedTextRangeList.size());
+    for (int i = 0; i < expectedTextRangeList.size(); i++) {
+      TextRange actualTextRange = actualTextRangeList.get(i);
+      TextRange expectedTextRange = expectedTextRangeList.get(i);
+      assertThat(actualTextRange.getTag()).isEqualTo(expectedTextRange.getTag());
+      assertThat(actualTextRange).isEqualToComparingFieldByFieldRecursively(expectedTextRange);
+    }
+
+//    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
   }
 
   @Test
