@@ -43,6 +43,7 @@ public class TextRange {
         addTextNode(next);
         next = next.getNextTextNode();
       }
+      addTextNode(next);
     }
     return this;
   }

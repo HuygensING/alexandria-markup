@@ -17,6 +17,68 @@ import java.util.Stack;
 public class LMNLImporter {
   Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
+  static class ImporterContext {
+    private Stack<Limen> limenStack = new Stack<>();
+    private Stack<TextRange> textRangeStack = new Stack<>();
+    private Stack<Annotation> annotationStack = new Stack<>();
+    private LMNLLexer lexer;
+
+    public ImporterContext(LMNLLexer lexer) {
+      this.lexer = lexer;
+    }
+
+    public Token nextToken() {
+      return lexer.nextToken();
+    }
+
+    public String getModeName() {
+      return lexer.getModeNames()[lexer._mode];
+    }
+
+    public String getRuleName() {
+      return lexer.getRuleNames()[lexer.getToken().getType() - 1];
+    }
+
+    public void pushLimen(Limen limen) {
+      limenStack.push(limen);
+    }
+
+    public Limen currentLimen() {
+      return limenStack.peek();
+    }
+
+    public void pushTextRange(TextRange textRange) {
+      textRangeStack.push(textRange);
+      currentLimen().addTextRange(textRange);
+    }
+
+    private TextRange currentTextRange() {
+      return textRangeStack.peek();
+    }
+
+//    public TextRange currentTextRange() {
+//      return textRangeStack.peek();
+//    }
+
+    public void addTextNode(TextNode textNode) {
+      currentTextRange().addTextNode(textNode);
+      currentLimen().addTextNode(textNode);
+    }
+
+    public void addAnnotation(Annotation annotation) {
+      currentTextRange().addAnnotation(annotation);
+      annotationStack.push(annotation);
+    }
+
+    public Limen currentAnnotationLimen() {
+      return annotationStack.peek().value();
+    }
+
+    public void closeCurrentAnnotation() {
+      annotationStack.pop();
+    }
+  }
+
   public Document importLMNL(String input) {
     ANTLRInputStream antlrInputStream = new ANTLRInputStream(input);
     return importLMNL(antlrInputStream);
@@ -34,30 +96,34 @@ public class LMNLImporter {
 
   private Document importLMNL(ANTLRInputStream antlrInputStream) {
     LMNLLexer lexer = new LMNLLexer(antlrInputStream);
+    ImporterContext context = new ImporterContext(lexer);
     Document document = new Document();
     Limen limen = document.value();
+    context.pushLimen(limen);
+    handleDefaultMode(context);
+    return document;
+  }
+
+  private void handleDefaultMode(ImporterContext context) {
     Token token;
-    Stack<TextRange> textRangeStack = new Stack<>();
-    Stack<Annotation> annotationStack = new Stack<>();
     do {
-      token = lexer.nextToken();
+      token = context.nextToken();
       if (token.getType() != Token.EOF) {
-        String ruleName = getRuleName(lexer, token);
-        String modeName = getModeName(lexer);
-        System.out.println(token + ": " + ruleName + ": " + modeName);
+        String ruleName = context.getRuleName();
+        String modeName = context.getModeName();
+        log("defaultMode", ruleName, modeName, token);
         switch (ruleName) {
           case "BEGIN_OPEN_RANGE":
-            handleOpenRange(lexer, textRangeStack, limen, annotationStack);
+            handleOpenRange(context);
             break;
 
           case "BEGIN_CLOSE_RANGE":
-            handleCloseRange(lexer, textRangeStack, limen);
+            handleCloseRange(context);
             break;
 
           case "TEXT":
             TextNode textNode = new TextNode(token.getText());
-            textRangeStack.peek().addTextNode(textNode);
-            limen.addTextNode(textNode);
+            context.addTextNode(textNode);
             break;
 
           default:
@@ -66,93 +132,99 @@ public class LMNLImporter {
         }
       }
     } while (token.getType() != Token.EOF);
-    return document;
   }
 
-  private String getModeName(LMNLLexer lexer) {
-    return lexer.getModeNames()[lexer._mode];
-  }
 
-  private String getRuleName(LMNLLexer lexer, Token token) {
-    return lexer.getRuleNames()[token.getType() - 1];
-  }
-
-  private void handleOpenRange(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen, Stack<Annotation> annotationStack) {
+  private void handleOpenRange(ImporterContext context) {
     boolean goOn = true;
     while (goOn) {
-      Token token = lexer.nextToken();
-      String ruleName = getRuleName(lexer, token);
-      String modeName = getModeName(lexer);
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log("handleOpenRange", ruleName, modeName, token);
       switch (ruleName) {
         case "Name_Open_Range":
-          TextRange textRange = new TextRange(limen, token.getText());
-          textRangeStack.push(textRange);
+          TextRange textRange = new TextRange(context.currentLimen(), token.getText());
+          context.pushTextRange(textRange);
           break;
         case "END_OPEN_RANGE":
           goOn = false;
           break;
 
         case "BEGIN_OPEN_ANNO":
-          handleAnnotation(lexer, textRangeStack, limen, annotationStack);
+          handleAnnotation(context);
           break;
 
         default:
-          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          String handleOpenRange = "handleOpenRange";
+          LOG.error(handleOpenRange + ": unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
+      goOn = goOn && token.getType() != Token.EOF;
     }
   }
 
-  private void handleAnnotation(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen, Stack<Annotation> annotationStack) {
+  private void handleAnnotation(ImporterContext context) {
     boolean goOn = true;
     while (goOn) {
-      Token token = lexer.nextToken();
-      String ruleName = getRuleName(lexer, token);
-      String modeName = getModeName(lexer);
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log("handleAnnotation", ruleName, modeName, token);
       switch (ruleName) {
         case "Name_Open_Annotation":
           Annotation annotation = new Annotation(token.getText());
-          annotationStack.push(annotation);
+          context.addAnnotation(annotation);
           break;
         case "ANNO_TEXT":
-          annotationStack.peek().value().addTextNode(new TextNode(token.getText()));
+          context.currentAnnotationLimen().addTextNode(new TextNode(token.getText()));
           break;
         case "END_OPEN_ANNO":
-          // goOn = false;
+          break;
+        case "OPEN_ANNO_IN_ANNO":
+          handleAnnotation(context);
           break;
         case "BEGIN_CLOSE_ANNO":
           break;
         case "Name_Close_Annotation":
           break;
+        case "END_ANONYMOUS_ANNO":
         case "END_CLOSE_ANNO":
-          textRangeStack.peek().addAnnotation(annotationStack.pop());
+          context.closeCurrentAnnotation();
           goOn = false;
           break;
         default:
-          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          LOG.error("handleAnnotation: unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
+      goOn = goOn && token.getType() != Token.EOF;
     }
   }
 
-  private void handleCloseRange(LMNLLexer lexer, Stack<TextRange> textRangeStack, Limen limen) {
+  private void handleCloseRange(ImporterContext context) {
     boolean goOn = true;
     while (goOn) {
-      Token token = lexer.nextToken();
-      String ruleName = getRuleName(lexer, token);
-      String modeName = getModeName(lexer);
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log("handleCloseRange", ruleName, modeName, token);
       switch (ruleName) {
         case "Name_Close_Range":
           break;
         case "END_CLOSE_RANGE":
-          limen.addTextRange(textRangeStack.pop());
           goOn = false;
           break;
         default:
-          LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          String handleCloseRange = "handleCloseRange";
+          LOG.error(handleCloseRange + ": unexpected token: " + token + ": " + ruleName + ": " + modeName);
           break;
       }
+      goOn = goOn && token.getType() != Token.EOF;
     }
+  }
+
+  private void log(String mode, String ruleName, String modeName, Token token) {
+    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:{}", mode, ruleName, modeName, token);
   }
 
 }

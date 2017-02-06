@@ -41,6 +41,7 @@ public class Limen {
         addTextNode(next);
         next = next.getNextTextNode();
       }
+      addTextNode(next);
     }
     return this;
   }
