@@ -47,7 +47,7 @@ public class LMNLImporter {
       return limenStack.peek();
     }
 
-    public void pushTextRange(TextRange textRange) {
+    public void openTextRange(TextRange textRange) {
       textRangeStack.push(textRange);
       currentLimen().addTextRange(textRange);
     }
@@ -65,7 +65,7 @@ public class LMNLImporter {
       currentLimen().addTextNode(textNode);
     }
 
-    public void addAnnotation(Annotation annotation) {
+    public void openAnnotation(Annotation annotation) {
       currentTextRange().addAnnotation(annotation);
       annotationStack.push(annotation);
     }
@@ -74,7 +74,7 @@ public class LMNLImporter {
       return annotationStack.peek().value();
     }
 
-    public void closeCurrentAnnotation() {
+    public void closeAnnotation() {
       annotationStack.pop();
     }
   }
@@ -112,16 +112,16 @@ public class LMNLImporter {
         String ruleName = context.getRuleName();
         String modeName = context.getModeName();
         log("defaultMode", ruleName, modeName, token);
-        switch (ruleName) {
-          case "BEGIN_OPEN_RANGE":
+        switch (token.getType()) {
+          case LMNLLexer.BEGIN_OPEN_RANGE:
             handleOpenRange(context);
             break;
 
-          case "BEGIN_CLOSE_RANGE":
+          case LMNLLexer.BEGIN_CLOSE_RANGE:
             handleCloseRange(context);
             break;
 
-          case "TEXT":
+          case LMNLLexer.TEXT:
             TextNode textNode = new TextNode(token.getText());
             context.addTextNode(textNode);
             break;
@@ -142,17 +142,16 @@ public class LMNLImporter {
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
       log("handleOpenRange", ruleName, modeName, token);
-      switch (ruleName) {
-        case "Name_Open_Range":
+      switch (token.getType()) {
+        case LMNLLexer.Name_Open_Range:
           TextRange textRange = new TextRange(context.currentLimen(), token.getText());
-          context.pushTextRange(textRange);
+          context.openTextRange(textRange);
           break;
-        case "END_OPEN_RANGE":
-          goOn = false;
-          break;
-
-        case "BEGIN_OPEN_ANNO":
+        case LMNLLexer.BEGIN_OPEN_ANNO:
           handleAnnotation(context);
+          break;
+        case LMNLLexer.END_OPEN_RANGE:
+          goOn = false;
           break;
 
         default:
@@ -171,26 +170,28 @@ public class LMNLImporter {
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
       log("handleAnnotation", ruleName, modeName, token);
-      switch (ruleName) {
-        case "Name_Open_Annotation":
+      switch (token.getType()) {
+        case LMNLLexer.Name_Open_Annotation:
           Annotation annotation = new Annotation(token.getText());
-          context.addAnnotation(annotation);
+          context.openAnnotation(annotation);
           break;
-        case "ANNO_TEXT":
-          context.currentAnnotationLimen().addTextNode(new TextNode(token.getText()));
-          break;
-        case "END_OPEN_ANNO":
-          break;
-        case "OPEN_ANNO_IN_ANNO":
+        case LMNLLexer.OPEN_ANNO_IN_ANNO:
           handleAnnotation(context);
           break;
-        case "BEGIN_CLOSE_ANNO":
+        case LMNLLexer.END_OPEN_ANNO:
           break;
-        case "Name_Close_Annotation":
+
+        case LMNLLexer.ANNO_TEXT:
+          context.currentAnnotationLimen().addTextNode(new TextNode(token.getText()));
           break;
-        case "END_ANONYMOUS_ANNO":
-        case "END_CLOSE_ANNO":
-          context.closeCurrentAnnotation();
+
+        case LMNLLexer.BEGIN_CLOSE_ANNO:
+          break;
+        case LMNLLexer.Name_Close_Annotation:
+          break;
+        case LMNLLexer.END_ANONYMOUS_ANNO:
+        case LMNLLexer.END_CLOSE_ANNO:
+          context.closeAnnotation();
           goOn = false;
           break;
         default:
@@ -208,10 +209,10 @@ public class LMNLImporter {
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
       log("handleCloseRange", ruleName, modeName, token);
-      switch (ruleName) {
-        case "Name_Close_Range":
+      switch (token.getType()) {
+        case LMNLLexer.Name_Close_Range:
           break;
-        case "END_CLOSE_RANGE":
+        case LMNLLexer.END_CLOSE_RANGE:
           goOn = false;
           break;
         default:
