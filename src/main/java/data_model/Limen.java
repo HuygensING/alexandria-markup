@@ -23,6 +23,10 @@ public class Limen {
 
   public Limen addTextNode(TextNode textNode) {
     this.textNodeList.add(textNode);
+    if (textNodeList.size() > 1) {
+      TextNode previousTextNode = textNodeList.get(textNodeList.size() - 2);
+      textNode.setPreviousTextNode(previousTextNode);
+    }
     return this;
   }
 
