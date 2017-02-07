@@ -34,4 +34,12 @@ public class Annotation {
   public String toString() {
     return "[" + tag + "}";
   }
+
+  public String getTag() {
+    return tag;
+  }
+
+  public List<Annotation> getAnnotations() {
+    return annotations;
+  }
 }

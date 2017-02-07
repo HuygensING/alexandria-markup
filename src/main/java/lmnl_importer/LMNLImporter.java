@@ -9,76 +9,78 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporter {
-  Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
+  static Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   static class ImporterContext {
     private Stack<Limen> limenStack = new Stack<>();
-    private Map<String, TextRange> openTextRanges = new HashMap<>();
+//    private Map<String, TextRange> openTextRanges = new HashMap<>();
+    private Deque<TextRange> openTextRangeDeque = new ArrayDeque<>();
     private Stack<TextRange> openTextRangeStack = new Stack<>();
     private Stack<Annotation> annotationStack = new Stack<>();
     private LMNLLexer lexer;
 
-    public ImporterContext(LMNLLexer lexer) {
+    ImporterContext(LMNLLexer lexer) {
       this.lexer = lexer;
     }
 
-    public Token nextToken() {
+    Token nextToken() {
       return lexer.nextToken();
     }
 
-    public String getModeName() {
+    String getModeName() {
       return lexer.getModeNames()[lexer._mode];
     }
 
-    public String getRuleName() {
+    String getRuleName() {
       return lexer.getRuleNames()[lexer.getToken().getType() - 1];
     }
 
-    public void pushLimen(Limen limen) {
+    void pushLimen(Limen limen) {
       limenStack.push(limen);
     }
 
-    public Limen currentLimen() {
+    Limen currentLimen() {
       return limenStack.peek();
     }
 
-    public void openTextRange(TextRange textRange) {
-      openTextRanges.put(textRange.getTag(), textRange);
+    void openTextRange(TextRange textRange) {
+//      openTextRanges.put(textRange.getTag(), textRange);
+      openTextRangeDeque.push(textRange);
       openTextRangeStack.push(textRange);
       currentLimen().addTextRange(textRange);
     }
 
-    public void pushOpenTextRange(String rangeName) {
-      TextRange textRange = openTextRanges.get(rangeName);
+    void pushOpenTextRange(String rangeName) {
+//      TextRange textRange = openTextRanges.get(rangeName);
+      TextRange textRange = openTextRangeDeque.stream()
+          .filter(tr->tr.getTag().equals(rangeName))
+          .findFirst()
+          .get();
       openTextRangeStack.push(textRange);
     }
 
-    public void popOpenTextRange() {
+    void popOpenTextRange() {
       openTextRangeStack.pop();
     }
 
-    public void closeTextRange() {
+    void closeTextRange() {
       TextRange textrange = openTextRangeStack.pop();
-      openTextRanges.remove(textrange.getTag());
+//      openTextRanges.remove(textrange.getTag());
+      openTextRangeDeque.remove(textrange);
     }
-//    public TextRange currentTextRange() {
-//      return openTextRangeStack.peek();
-//    }
 
-    public void addTextNode(TextNode textNode) {
-      openTextRanges.values().forEach(tr -> tr.addTextNode(textNode));
+    void addTextNode(TextNode textNode) {
+      openTextRangeDeque.descendingIterator().forEachRemaining(tr -> tr.addTextNode(textNode));
       currentLimen().addTextNode(textNode);
     }
 
-    public void openAnnotation(Annotation annotation) {
+    void openAnnotation(Annotation annotation) {
       if (annotationStack.isEmpty()) {
         currentTextRange().addAnnotation(annotation);
       } else {
@@ -91,11 +93,11 @@ public class LMNLImporter {
       return openTextRangeStack.peek();
     }
 
-    public Limen currentAnnotationLimen() {
+    Limen currentAnnotationLimen() {
       return annotationStack.peek().value();
     }
 
-    public void closeAnnotation() {
+    void closeAnnotation() {
       annotationStack.pop();
     }
 
@@ -175,6 +177,12 @@ public class LMNLImporter {
           context.popOpenTextRange();
           goOn = false;
           break;
+        case LMNLLexer.END_ANONYMOUS_RANGE:
+          TextNode textNode = new TextNode("");
+          context.addTextNode(textNode);
+          context.closeTextRange();
+          goOn = false;
+          break;
 
         default:
           String handleOpenRange = "handleOpenRange";
@@ -236,7 +244,7 @@ public class LMNLImporter {
           String rangeName = token.getText();
           context.pushOpenTextRange(rangeName);
           break;
-        case LMNLLexer.BEGIN_OPEN_ANNO:
+        case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
           handleAnnotation(context);
           break;
         case LMNLLexer.END_CLOSE_RANGE:
@@ -253,7 +261,7 @@ public class LMNLImporter {
   }
 
   private void log(String mode, String ruleName, String modeName, Token token) {
-    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:<{}>", mode, ruleName, modeName, token.getText().replace("\n", "\\n"));
+//    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:<{}>", mode, ruleName, modeName, token.getText().replace("\n", "\\n"));
   }
 
 }
