@@ -1,9 +1,16 @@
 package lmnl_antlr;
 
+import org.antlr.runtime.RecognitionException;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.atn.ATNState;
+import org.antlr.v4.tool.DOTGenerator;
+
+import org.antlr.v4.tool.Grammar;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -12,14 +19,16 @@ import java.util.List;
  */
 public class TestTheLMNLLexer {
 
+    static final Logger LOG = LoggerFactory.getLogger(TestTheLMNLLexer.class);
+
     @Test
-    public void testLexerTextWithOneRange() {
+    public void testLexerTextWithOneRange() throws RecognitionException {
         String input = "[l}He manages to keep the upper hand{l]";
         setupLexer(input);
     }
 
     @Test
-    public void testLexerComplexExample() {
+    public void testLexerComplexExample() throws RecognitionException {
         String input = "[excerpt\n" +
                 "  [source [date}1915{][title}The Housekeeper{]]\n" +
                 "  [author\n" +
@@ -32,7 +41,7 @@ public class TestTheLMNLLexer {
         setupLexer(input);
     }
 
-    private void setupLexer(String input) {
+    private void setupLexer(String input) throws RecognitionException {
         LMNLLexer lexer = new LMNLLexer(new ANTLRInputStream(input));
 
         // This gets all the tokens at once, it does not stop for errors

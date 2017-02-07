@@ -4,3 +4,4 @@ create (d:Document{id:"d1"})-[:FIRST_TEXT_SEGMENT]->(ts:TextSegment{text:"He man
        (r)-[:FIRST_TEXT_SEGMENT]->(ts),
        (r)-[:LAST_TEXT_SEGMENT]->(ts),
        (r)-[:HAS_ANNOTATION{n:1}]->(a:Annotation{name:"n"})-[:FIRST_TEXT_SEGMENT]->(at:TextSegment{text:"144"});
+match (d:Document{id:"d1"})-[*]-(o) return d,o;
