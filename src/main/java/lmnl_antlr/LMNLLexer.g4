@@ -19,14 +19,16 @@ mode INSIDE_RANGE_OPENER;
 END_ANONYMOUS_RANGE     :   ']'                     -> popMode ;
 END_OPEN_RANGE          :   '}'                     -> popMode ;
 BEGIN_OPEN_ANNO         :   '['                     -> pushMode(INSIDE_ANNOTATION_OPENER) ;
-Name_Open_Range         :   NameStartChar NameChar* ;
+Name_Open_Range         :   NameStartChar NameChar* ('=' NameChar+)? ;
 RANGE_S                 :   [ \t\r\n]               -> skip ;
 
 // ----------------- Everything INSIDE of a RANGE CLOSER -------------
 mode INSIDE_RANGE_CLOSER;
 
 END_CLOSE_RANGE         :   ']'                     -> popMode ;
-Name_Close_Range        :   NameStartChar NameChar* ;
+BEGIN_OPEN_ANNO_IN_RANGE_CLOSER :   '['                     -> pushMode(INSIDE_ANNOTATION_OPENER) ;
+Name_Close_Range        :   NameStartChar NameChar* ('=' NameChar+)? ;
+RANGE_S2                :   [ \t\r\n]               -> skip ;
 
 // ------------------ Everything INSIDE of a ANNOTATION OPENER -----------
 // NOTE: Annotation openers are close to range openers, but not the same!
