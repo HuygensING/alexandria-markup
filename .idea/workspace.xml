@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="987eaf2f-d929-4fcc-864e-70b248660b68" name="Default" comment="Merge branch 'develop' of github.com:brambg/Institute-Materials-2017 into develop&#10;&#10;# Conflicts:&#10;#&#9;alexandria/lmnl-grammar/.gitignore&#10;">
+    <list default="true" id="987eaf2f-d929-4fcc-864e-70b248660b68" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.java" afterPath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.tokens" afterPath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.tokens" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -907,7 +904,14 @@
       <option name="project" value="LOCAL" />
       <updated>1486549638588</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Merge branch 'develop' of github.com:brambg/Institute-Materials-2017 into develop&#10;&#10;# Conflicts:&#10;#&#9;alexandria/lmnl-grammar/.gitignore&#10;">
+      <created>1486549654869</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1486549654869</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TestHistory">
