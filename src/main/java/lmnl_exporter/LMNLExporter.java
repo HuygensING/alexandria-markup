@@ -63,7 +63,7 @@ public class LMNLExporter {
     return tagBuilder.append("}");
   }
 
-  private StringBuilder toLMNL(Annotation annotation) {
+  public StringBuilder toLMNL(Annotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
     annotation.getAnnotations().forEach(a1 ->
         annotationBuilder.append(" ").append(toLMNL(a1))

@@ -140,7 +140,6 @@ public class LMNLImporterTest {
     assertActualMatchesExpected(actual, expected);
   }
 
-
   @Test
   public void testLMNL1kings12() throws IOException {
     String pathname = "data/1kings12.lmnl";
@@ -148,31 +147,36 @@ public class LMNLImporterTest {
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("document={}", actual);
 
-    Document expected = new Document();
-    Limen limen = expected.value();
-    TextRange excerpt = new TextRange(limen, "excerpt");
+    logLMNL(actual);
+
+    Limen actualLimen = actual.value();
+    List<TextRange> actualTextRangeList = actualLimen.textRangeList;
+
+    TextRange excerpt = actualTextRangeList.get(0);
+    assertThat(excerpt.getTag()).isEqualTo("excerpt");
+
+    List<Annotation> annotations = excerpt.getAnnotations();
+    assertThat(annotations).hasSize(1); // just the soutce annotation;
+
     Annotation source = simpleAnnotation("source");
     Annotation book = simpleAnnotation("book", "1 Kings");
     source.addAnnotation(book);
     Annotation chapter = simpleAnnotation("chapter", "12");
     source.addAnnotation(chapter);
-    excerpt.addAnnotation(source);
+    String actualSourceLMNL = lmnlExporter.toLMNL(annotations.get(0)).toString();
+    String expectedSourceLMNL = lmnlExporter.toLMNL(source).toString();
+    assertThat(actualSourceLMNL).isEqualTo(expectedSourceLMNL);
 
-    TextRange verse1 = new TextRange(limen, "verse");
-    TextNode t1 = new TextNode("And he said unto them, ");
-    verse1.addTextNode(t1);
+    TextRange q1 = actualTextRangeList.get(2);
+    assertThat(q1.getTag()).isEqualTo("q"); // first q
+    assertThat(q1.textNodes).hasSize(2); // has 2 textnodes
 
-//    TextNode t1 = new TextNode("He manages to keep the upper hand");
-//    excerpt.addTextNode(t1);
-//    limen.addTextNode(t1);
+    TextRange q2 = actualTextRangeList.get(3);
+    assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
+    assertThat(q2.textNodes).hasSize(1); // has 1 textnode
 
-    limen.addTextRange(excerpt);
-
-    logLMNL(actual);
 //    compareLMNL(pathname, actual);
-//    assertActualMatchesExpected(actual, expected);
   }
-
 
   @Test
   public void testLMNLOzymandias() throws IOException {

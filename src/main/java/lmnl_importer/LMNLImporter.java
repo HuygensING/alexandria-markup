@@ -129,13 +129,14 @@ public class LMNLImporter {
   }
 
   private void handleDefaultMode(ImporterContext context) {
+    String methodName = "defaultMode";
     Token token;
     do {
       token = context.nextToken();
       if (token.getType() != Token.EOF) {
         String ruleName = context.getRuleName();
         String modeName = context.getModeName();
-        log("defaultMode", ruleName, modeName, token);
+        log(methodName, ruleName, modeName, token);
         switch (token.getType()) {
           case LMNLLexer.BEGIN_OPEN_RANGE:
             handleOpenRange(context);
@@ -151,7 +152,7 @@ public class LMNLImporter {
             break;
 
           default:
-            LOG.error("!unexpected token: " + token + ": " + ruleName + ": " + modeName);
+            handleUnexpectedToken(methodName, token, ruleName, modeName);
             break;
         }
       }
@@ -159,12 +160,13 @@ public class LMNLImporter {
   }
 
   private void handleOpenRange(ImporterContext context) {
+    String methodName = "handleOpenRange";
     boolean goOn = true;
     while (goOn) {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log("handleOpenRange", ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Range:
           TextRange textRange = new TextRange(context.currentLimen(), token.getText());
@@ -185,8 +187,7 @@ public class LMNLImporter {
           break;
 
         default:
-          String handleOpenRange = "handleOpenRange";
-          LOG.error(handleOpenRange + ": unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
           break;
       }
       goOn = goOn && token.getType() != Token.EOF;
@@ -194,12 +195,13 @@ public class LMNLImporter {
   }
 
   private void handleAnnotation(ImporterContext context) {
+    String methodName = "handleAnnotation";
     boolean goOn = true;
     while (goOn) {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log("handleAnnotation", ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Annotation:
           Annotation annotation = new Annotation(token.getText());
@@ -225,7 +227,7 @@ public class LMNLImporter {
           goOn = false;
           break;
         default:
-          LOG.error("handleAnnotation: unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
           break;
       }
       goOn = goOn && token.getType() != Token.EOF;
@@ -233,12 +235,13 @@ public class LMNLImporter {
   }
 
   private void handleCloseRange(ImporterContext context) {
+    String methodName = "handleCloseRange";
     boolean goOn = true;
     while (goOn) {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log("handleCloseRange", ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token);
       switch (token.getType()) {
         case LMNLLexer.Name_Close_Range:
           String rangeName = token.getText();
@@ -252,12 +255,17 @@ public class LMNLImporter {
           goOn = false;
           break;
         default:
-          String handleCloseRange = "handleCloseRange";
-          LOG.error(handleCloseRange + ": unexpected token: " + token + ": " + ruleName + ": " + modeName);
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
           break;
       }
       goOn = goOn && token.getType() != Token.EOF;
     }
+  }
+
+  private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
+    String message = methodName + ": unexpected token: " + token + ": " + ruleName + ": " + modeName;
+    LOG.error(message);
+    throw new RuntimeException(message);
   }
 
   private void log(String mode, String ruleName, String modeName, Token token) {
