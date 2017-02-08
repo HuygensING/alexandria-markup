@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -50,14 +52,14 @@ public class LMNLImporterTest {
   @Test
   public void testLexingComplex() {
     String input = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
-        + "{excerpt]";
+            + "  [source [date}1915{][title}The Housekeeper{]]\n"//
+            + "  [author\n"//
+            + "    [name}Robert Frost{]\n"//
+            + "    [dates}1874-1963{]] }\n"//
+            + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
+            + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+            + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+            + "{excerpt]";
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
@@ -95,46 +97,46 @@ public class LMNLImporterTest {
     Annotation date = simpleAnnotation("date", "1915");
     Annotation title = simpleAnnotation("title", "The Housekeeper");
     Annotation source = simpleAnnotation("source")
-        .addAnnotation(date)
-        .addAnnotation(title);
+            .addAnnotation(date)
+            .addAnnotation(title);
     Annotation name = simpleAnnotation("name", "Robert Frost");
     Annotation dates = simpleAnnotation("dates", "1874-1963");
     Annotation author = simpleAnnotation("author")
-        .addAnnotation(name)
-        .addAnnotation(dates);
+            .addAnnotation(name)
+            .addAnnotation(dates);
     Annotation n144 = simpleAnnotation("n", "144");
     Annotation n145 = simpleAnnotation("n", "145");
     Annotation n146 = simpleAnnotation("n", "146");
     TextRange excerpt = new TextRange(limen, "excerpt")
-        .addAnnotation(source)
-        .addAnnotation(author)
-        .setFirstAndLastTextNode(tn00, tn10);
+            .addAnnotation(source)
+            .addAnnotation(author)
+            .setFirstAndLastTextNode(tn00, tn10);
     // 3 sentences
     TextRange s1 = new TextRange(limen, "s")
-        .setFirstAndLastTextNode(tn01, tn03);
+            .setFirstAndLastTextNode(tn01, tn03);
     TextRange s2 = new TextRange(limen, "s")
-        .setOnlyTextNode(tn05);
+            .setOnlyTextNode(tn05);
     TextRange s3 = new TextRange(limen, "s")
-        .setFirstAndLastTextNode(tn07, tn09);
+            .setFirstAndLastTextNode(tn07, tn09);
     // 3 lines
     TextRange l1 = new TextRange(limen, "l")
-        .setOnlyTextNode(tn01)
-        .addAnnotation(n144);
+            .setOnlyTextNode(tn01)
+            .addAnnotation(n144);
     TextRange l2 = new TextRange(limen, "l")
-        .setFirstAndLastTextNode(tn03, tn07)
-        .addAnnotation(n145);
+            .setFirstAndLastTextNode(tn03, tn07)
+            .addAnnotation(n145);
     TextRange l3 = new TextRange(limen, "l")
-        .setOnlyTextNode(tn09)
-        .addAnnotation(n146);
+            .setOnlyTextNode(tn09)
+            .addAnnotation(n146);
 
     limen.setFirstAndLastTextNode(tn00, tn10)
-        .addTextRange(excerpt)
-        .addTextRange(s1)
-        .addTextRange(l1)
-        .addTextRange(l2)
-        .addTextRange(s2)
-        .addTextRange(s3)
-        .addTextRange(l3)
+            .addTextRange(excerpt)
+            .addTextRange(s1)
+            .addTextRange(l1)
+            .addTextRange(l2)
+            .addTextRange(s2)
+            .addTextRange(s3)
+            .addTextRange(l3)
     ;
 
     assertActualMatchesExpected(actual, expected);
@@ -185,6 +187,10 @@ public class LMNLImporterTest {
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("document={}", actual);
     logLMNL(actual);
+    assertThat(actual.value().hasTextNodes()).isTrue();
+    String lmnl = lmnlExporter.toLMNL(actual);
+    assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
+    assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous textrange
 //    compareLMNL(pathname, actual);
   }
 

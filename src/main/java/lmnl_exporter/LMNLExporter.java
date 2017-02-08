@@ -34,15 +34,18 @@ public class LMNLExporter {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         List<TextRange> textRanges = limen.getTextRanges(tn);
-        List<TextRange> toOpen = new ArrayList<>();
-        toOpen.addAll(textRanges);
-        toOpen.removeAll(openTextRanges);
+
         List<TextRange> toClose = new ArrayList<>();
         toClose.addAll(openTextRanges);
         toClose.removeAll(textRanges);
         Collections.reverse(toClose);
         toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
+
+        List<TextRange> toOpen = new ArrayList<>();
+        toOpen.addAll(textRanges);
+        toOpen.removeAll(openTextRanges);
         toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
+
         openTextRanges.removeAll(toClose);
         openTextRanges.addAll(toOpen);
         lmnlBuilder.append(tn.getContent());
@@ -51,22 +54,26 @@ public class LMNLExporter {
     }
   }
 
-  private StringBuilder toCloseTag(TextRange tr) {
-    return new StringBuilder("{").append(tr.getTag()).append("]");
+  private StringBuilder toCloseTag(TextRange textRange) {
+    return textRange.isAnonymous()
+            ? new StringBuilder()
+            : new StringBuilder("{").append(textRange.getTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(TextRange tr) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(tr.getTag());
-    tr.getAnnotations().forEach(a ->
-        tagBuilder.append(" ").append(toLMNL(a))
+  private StringBuilder toOpenTag(TextRange textRange) {
+    StringBuilder tagBuilder = new StringBuilder("[").append(textRange.getTag());
+    textRange.getAnnotations().forEach(a ->
+            tagBuilder.append(" ").append(toLMNL(a))
     );
-    return tagBuilder.append("}");
+    return textRange.isAnonymous()
+            ? tagBuilder.append("]")
+            : tagBuilder.append("}");
   }
 
   public StringBuilder toLMNL(Annotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
     annotation.getAnnotations().forEach(a1 ->
-        annotationBuilder.append(" ").append(toLMNL(a1))
+            annotationBuilder.append(" ").append(toLMNL(a1))
     );
     Limen limen = annotation.value();
     if (limen.hasTextNodes()) {
