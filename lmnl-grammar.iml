@@ -23,7 +23,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="Maven: org.assertj:assertj-core:3.6.1" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.6" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4:4.6" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr-runtime:3.5.2" level="project" />
