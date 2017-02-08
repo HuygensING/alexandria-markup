@@ -44,12 +44,6 @@
             <version>${antlr.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.6</version>
-        </dependency>
-
         <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
