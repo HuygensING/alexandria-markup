@@ -1,9 +1,9 @@
-package lmnl_exporter;
+package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import data_model.Annotation;
-import data_model.Document;
-import data_model.Limen;
-import data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

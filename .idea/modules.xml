@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/lmnl-grammar.iml" filepath="$PROJECT_DIR$/lmnl-grammar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/alexandria-lmnl.iml" filepath="$PROJECT_DIR$/alexandria-lmnl.iml" />
     </modules>
   </component>
 </project>

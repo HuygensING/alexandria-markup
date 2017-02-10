@@ -1,7 +1,7 @@
-package lmnl_importer;
+package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import data_model.*;
-import lmnl_exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;

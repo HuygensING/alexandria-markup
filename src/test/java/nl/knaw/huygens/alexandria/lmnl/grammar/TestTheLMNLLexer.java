@@ -1,18 +1,12 @@
-package lmnl_antlr;
+package nl.knaw.huygens.alexandria.lmnl.grammar;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.atn.ATNState;
-import org.antlr.v4.tool.DOTGenerator;
 
-import org.antlr.v4.tool.Grammar;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Created by Ronald Haentjens Dekker on 28/12/16.

@@ -1,4 +1,4 @@
-package data_model;
+package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.

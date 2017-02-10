@@ -1,8 +1,4 @@
-package data_model;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.

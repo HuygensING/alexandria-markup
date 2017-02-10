@@ -1,5 +1,5 @@
-// Generated from C:/Users/bramb/workspaces/alexandria/Institute-Materials-2017/alexandria/lmnl-grammar/src/main/java/lmnl_antlr\LMNLLexer.g4 by ANTLR 4.6
-package lmnl_antlr;
+// Generated from C:/Users/bramb/workspaces/alexandria/alexandria-lmnl/src/main/antlr\LMNLLexer.g4 by ANTLR 4.6
+package nl.knaw.huygens.alexandria.lmnl.grammar;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

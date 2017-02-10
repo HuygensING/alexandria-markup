@@ -1,7 +1,7 @@
-package lmnl_importer;
+package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import data_model.*;
-import lmnl_antlr.LMNLLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;

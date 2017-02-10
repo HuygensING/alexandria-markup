@@ -1,4 +1,4 @@
-package data_model;
+package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 import java.util.ArrayList;
 import java.util.List;
