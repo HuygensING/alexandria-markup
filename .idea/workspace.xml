@@ -2,28 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a7665be7-1751-4c92-8788-e034afc15ed6" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lmnl-grammar.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/gen/java/lmnl_antlr/LMNLLexer.tokens" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/data_model/Annotation.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/data_model/Annotation.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/data_model/Document.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/data_model/Document.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/data_model/Limen.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/data_model/Limen.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/data_model/TextNode.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/data_model/TextNode.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/data_model/TextRange.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/data_model/TextRange.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/lmnl_antlr/LMNLLexer.g4" afterPath="$PROJECT_DIR$/src/main/antlr/LMNLLexer.g4" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/lmnl_exporter/LMNLExporter.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/exporter/LMNLExporter.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/lmnl_importer/LMNLImporter.java" afterPath="$PROJECT_DIR$/src/main/java/nl/knaw/huygens/alexandria/lmnl/importer/LMNLImporter.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/test/java/lmnl_antlr/TestTheLMNLLexer.java" afterPath="$PROJECT_DIR$/src/test/java/nl/knaw/huygens/alexandria/lmnl/grammar/TestTheLMNLLexer.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/test/java/lmnl_importer/LMNLImporterTest.java" afterPath="$PROJECT_DIR$/src/test/java/nl/knaw/huygens/alexandria/lmnl/importer/LMNLImporterTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_11.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_11.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_antlr_antlr4_runtime_4_6.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_antlr_antlr4_runtime_4_6.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
     </list>
@@ -63,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LMNLLexer.g4" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LMNLLexer.g4" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/antlr/LMNLLexer.g4">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1125">
-              <caret line="45" column="30" lean-forward="true" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
+              <caret line="45" column="30" lean-forward="false" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
               <folding>
                 <element signature="e#0#3241#0" expanded="true" />
               </folding>
@@ -75,11 +53,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
+      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="125">
-              <caret line="5" column="22" lean-forward="false" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
+            <state relative-caret-position="850">
+              <caret line="34" column="37" lean-forward="false" selection-start-line="34" selection-start-column="37" selection-end-line="34" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -560,7 +538,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="3829" y="-11" width="3862" height="2182" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -570,7 +548,7 @@
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32969758" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32969758" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969758" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Execute Anonymous" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -625,21 +603,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="5" column="22" lean-forward="false" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/antlr/LMNLLexer.g4">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1125">
-          <caret line="45" column="30" lean-forward="true" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
+          <caret line="45" column="30" lean-forward="false" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
           <folding>
             <element signature="e#0#3241#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="34" column="37" lean-forward="false" selection-start-line="34" selection-start-column="37" selection-end-line="34" selection-end-column="37" />
+          <folding />
         </state>
       </provider>
     </entry>
