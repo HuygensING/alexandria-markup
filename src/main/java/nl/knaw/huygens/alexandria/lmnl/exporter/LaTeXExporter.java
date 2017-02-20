@@ -59,7 +59,7 @@ public class LaTeXExporter {
         openTextRanges.removeAll(toClose);
         openTextRanges.addAll(toOpen);
 
-        String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "[NL]");
+        String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
         String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
         String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
         latexBuilder.append(nodeLine);
@@ -69,20 +69,20 @@ public class LaTeXExporter {
           String drawLine = "    \\draw [->] (tn" + (i - 1) + ") -- (tn" + i + ");\n";
           latexBuilder.append(drawLine);
         }
-        toClose.forEach(tr -> {
-          int textRangeIndex = textRangeIndices.get(tr);
-          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + (i-1) + ");\n";
-          latexBuilder.append(drawLine);
-        });
-        toOpen.forEach(tr -> {
-          textRangeIndices.put(tr,textRangeCounter.get());
-          int textRangeIndex = textRangeCounter.getAndIncrement();
-          String relPos2 = textRangeIndex == 0 ? "below=of tn" + i : ("right=of tr" + (textRangeIndex - 1));
-          String textRangeLine = "    \\node[textrange] (tr" + textRangeIndex + ") [" + relPos2 + "] {" + tr.getTag() + "};\n";
-          latexBuilder.append(textRangeLine);
-          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + i + ");\n";
-          latexBuilder.append(drawLine);
-        });
+//        toClose.forEach(tr -> {
+//          int textRangeIndex = textRangeIndices.get(tr);
+//          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + (i-1) + ");\n";
+//          latexBuilder.append(drawLine);
+//        });
+//        toOpen.forEach(tr -> {
+//          textRangeIndices.put(tr,textRangeCounter.get());
+//          int textRangeIndex = textRangeCounter.getAndIncrement();
+//          String relPos2 = textRangeIndex == 0 ? "below=of tn" + i : ("right=of tr" + (textRangeIndex - 1));
+//          String textRangeLine = "    \\node[textrange] (tr" + textRangeIndex + ") [" + relPos2 + "] {" + tr.getTag() + "};\n";
+//          latexBuilder.append(textRangeLine);
+//          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + i + ");\n";
+//          latexBuilder.append(drawLine);
+//        });
       });
 //      openTextRanges.forEach(tr -> latexBuilder.append(toCloseTag(tr)));
     }
