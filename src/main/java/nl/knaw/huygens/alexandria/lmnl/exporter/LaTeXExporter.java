@@ -63,11 +63,12 @@ public class LaTeXExporter {
         String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
         String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
         latexBuilder.append(nodeLine);
-//        String drawDocLine = "    \\draw [->] (doc) -- (tn" + i + ");\n";
-//        latexBuilder.append(drawDocLine);
         if (textNodeCounter.get() > 1) {
           String drawLine = "    \\draw [->] (tn" + (i - 1) + ") -- (tn" + i + ");\n";
           latexBuilder.append(drawLine);
+        }else{
+          String drawDocLine = "    \\draw [->] (doc) -- (tn" + i + ");\n";
+          latexBuilder.append(drawDocLine);
         }
 //        toClose.forEach(tr -> {
 //          int textRangeIndex = textRangeIndices.get(tr);
