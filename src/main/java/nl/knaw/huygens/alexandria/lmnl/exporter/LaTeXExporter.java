@@ -20,7 +20,7 @@ public class LaTeXExporter {
             .append("\\usepackage{tikz}\n")
             .append("\\usepackage{latexsym}\n")
             .append("\\usepackage[utf8x]{inputenc}\n")
-            .append("\\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")
+            .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")
             .append("\n")
             .append("\\begin{document}\n")
             .append("\\begin{inctext}\n")
@@ -39,7 +39,8 @@ public class LaTeXExporter {
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
-    ColorPicker colorPicker = new ColorPicker("red", "green", "blue", "orange", "purple");
+    ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green",
+            "lightgray", "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
@@ -105,7 +106,7 @@ public class LaTeXExporter {
     Map<TextRange, Integer> layerIndex = calculateLayerIndex(limen.textRangeList, textNodeIndices);
     limen.textRangeList.forEach(tr -> {
       int rangeLayerIndex = layerIndex.get(tr);
-      float textRangeRow = 0.7f * (rangeLayerIndex + 1);
+      float textRangeRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       TextNode firstTextNode = tr.textNodes.get(0);
       TextNode lastTextNode = tr.textNodes.get(tr.textNodes.size() - 1);
@@ -127,7 +128,7 @@ public class LaTeXExporter {
               .append(" and 0 of tn")
               .append(last)
               .append("]{};\n");
-      latexBuilder.append("    \\draw[color=").append(color).append("] (tr").append(rangeLayerIndex).append("b) -- (tr").append(rangeLayerIndex).append("e);\n");
+      latexBuilder.append("    \\draw[Bar-Bar,thick,color=").append(color).append("] (tr").append(rangeLayerIndex).append("b) -- (tr").append(rangeLayerIndex).append("e);\n");
     });
   }
 
@@ -145,9 +146,9 @@ public class LaTeXExporter {
           int lastTextNodeInLayer = lastTextNodeUsedInLayer.get(layerNo);
           if (firstTextNodeIndex > lastTextNodeInLayer) {
             goOn = false;
-          }else{
+          } else {
             layerNo += 1;
-            if (!lastTextNodeUsedInLayer.containsKey(layerNo)){
+            if (!lastTextNodeUsedInLayer.containsKey(layerNo)) {
               goOn = false;
             }
           }
