@@ -22,21 +22,22 @@ public class LaTexExporterTest {
   @Test
   public void testLaTeXOutput1() {
     String laTeX = laTeXFromLMNLString("[l [n}144{n]}He manages to keep the upper hand{l]");
-    LOG.info("latex=\n{}", laTeX);
+    printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
+
 
   @Test
   public void testLaTeXOutput2() throws IOException {
     String laTeX = laTeXFromLMNLFile("data/1kings12.lmnl");
-    LOG.info("latex=\n{}", laTeX);
+    printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
   public void testLaTeXOutput3() throws IOException {
     String laTeX = laTeXFromLMNLFile("data/ozymandias-voices-wap.lmnl");
-    LOG.info("latex=\n{}", laTeX);
+    printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
@@ -55,6 +56,9 @@ public class LaTexExporterTest {
     LaTeXExporter exporter = new LaTeXExporter();
     return exporter.toLaTeX(document);
   }
-}
 
-//  String pathname = ;
+  private void printLaTeX(String laTeX) {
+    System.out.println(laTeX);
+//    LOG.info("latex=\n{}", laTeX);
+  }
+}

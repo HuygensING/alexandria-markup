@@ -44,8 +44,6 @@ public class LaTeXExporter {
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      AtomicInteger textRangeCounter = new AtomicInteger(0);
-      Map<TextRange, Integer> textRangeIndices = new HashMap<>();
       Map<TextNode, Integer> textNodeIndices = new HashMap<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         int i = textNodeCounter.getAndIncrement();
@@ -84,7 +82,6 @@ public class LaTeXExporter {
     });
   }
 
-
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
     String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
@@ -105,9 +102,10 @@ public class LaTeXExporter {
   private void markTextRanges(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
     AtomicInteger textRangeCounter = new AtomicInteger(0);
     latexBuilder.append("\n    % TextRanges");
+    Map<TextRange, Integer> layerIndex = calculateLayerIndex(limen.textRangeList, textNodeIndices);
     limen.textRangeList.forEach(tr -> {
-      int textRangeIndex = textRangeCounter.getAndIncrement();
-      float textRangeRow = 0.7f * (textRangeIndex + 1);
+      int rangeLayerIndex = layerIndex.get(tr);
+      float textRangeRow = 0.7f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       TextNode firstTextNode = tr.textNodes.get(0);
       TextNode lastTextNode = tr.textNodes.get(tr.textNodes.size() - 1);
@@ -116,22 +114,49 @@ public class LaTeXExporter {
       latexBuilder.append("\n    \\node[label=below right:{$")
               .append(tr.getTag())
               .append("$}](tr")
-              .append(textRangeIndex)
+              .append(rangeLayerIndex)
               .append("b)[below left=")
               .append(textRangeRow)
               .append(" and 0 of tn")
               .append(first)
               .append("]{};\n");
       latexBuilder.append("    \\node[](tr")
-              .append(textRangeIndex)
+              .append(rangeLayerIndex)
               .append("e)[below right=")
               .append(textRangeRow)
               .append(" and 0 of tn")
               .append(last)
               .append("]{};\n");
-      latexBuilder.append("    \\draw[color=").append(color).append("] (tr").append(textRangeIndex).append("b) -- (tr").append(textRangeIndex).append("e);\n");
-
+      latexBuilder.append("    \\draw[color=").append(color).append("] (tr").append(rangeLayerIndex).append("b) -- (tr").append(rangeLayerIndex).append("e);\n");
     });
+  }
+
+  private Map<TextRange, Integer> calculateLayerIndex(List<TextRange> textranges, Map<TextNode, Integer> textNodeIndex) {
+//    return textRangeCounter.getAndIncrement();
+    Map<TextRange, Integer> index = new HashMap<>();
+    Map<Integer, Integer> lastTextNodeUsedInLayer = new HashMap<>();
+    textranges.forEach(tr -> {
+      int firstTextNodeIndex = textNodeIndex.get(tr.textNodes.get(0));
+      int lastTextNodeIndex = textNodeIndex.get(tr.textNodes.get(tr.textNodes.size() - 1));
+      int layerNo = 0;
+      if (!index.isEmpty()) {
+        boolean goOn = true;
+        while (goOn) {
+          int lastTextNodeInLayer = lastTextNodeUsedInLayer.get(layerNo);
+          if (firstTextNodeIndex > lastTextNodeInLayer) {
+            goOn = false;
+          }else{
+            layerNo += 1;
+            if (!lastTextNodeUsedInLayer.containsKey(layerNo)){
+              goOn = false;
+            }
+          }
+        }
+      }
+      index.put(tr, layerNo);
+      lastTextNodeUsedInLayer.put(layerNo, lastTextNodeIndex);
+    });
+    return index;
   }
 
   public StringBuilder toLMNL(Annotation annotation) {
