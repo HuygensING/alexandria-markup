@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -128,15 +129,23 @@ public class LaTeXExporter {
               .append(" and 0 of tn")
               .append(last)
               .append("]{};\n");
-      latexBuilder.append("    \\draw[Bar-Bar,thick,color=").append(color).append("] (tr").append(rangeLayerIndex).append("b) -- (tr").append(rangeLayerIndex).append("e);\n");
+      latexBuilder.append("    \\draw[Bar-Bar,thick,color=")
+              .append(color).append("] (tr")
+              .append(rangeLayerIndex)
+              .append("b) -- (tr")
+              .append(rangeLayerIndex)
+              .append("e);\n");
     });
   }
 
   private Map<TextRange, Integer> calculateLayerIndex(List<TextRange> textranges, Map<TextNode, Integer> textNodeIndex) {
 //    return textRangeCounter.getAndIncrement();
+    Map<String, List<TextRange>> map = textranges.stream().collect(Collectors.groupingBy(TextRange::getTag));
+
     Map<TextRange, Integer> index = new HashMap<>();
     Map<Integer, Integer> lastTextNodeUsedInLayer = new HashMap<>();
-    textranges.forEach(tr -> {
+//    map.values().stream().flatMap(List::stream).forEach(tr -> {
+      textranges.forEach(tr -> {
       int firstTextNodeIndex = textNodeIndex.get(tr.textNodes.get(0));
       int lastTextNodeIndex = textNodeIndex.get(tr.textNodes.get(tr.textNodes.size() - 1));
       int layerNo = 0;
