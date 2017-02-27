@@ -16,11 +16,14 @@ public class LaTeXExporter {
   public String toLaTeX(Document document) {
     StringBuilder latexBuilder = new StringBuilder();
     latexBuilder.append("\\documentclass{article}\n")
+            .append("\\usepackage{incgraph}\n")
             .append("\\usepackage{tikz}\n")
             .append("\\usepackage{latexsym}\n")
             .append("\\usepackage[utf8x]{inputenc}\n")
             .append("\\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")
-            .append("\n").append("\\begin{document}\n")
+            .append("\n")
+            .append("\\begin{document}\n")
+            .append("\\begin{inctext}\n")
             .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")
             .append("  \\begin{tikzpicture}\n")
             .append("    [textnode/.style={rectangle,draw=black!50,thick,rounded corners},\n")
@@ -30,21 +33,23 @@ public class LaTeXExporter {
     Limen limen = document.value();
     appendLimen(latexBuilder, limen);
     latexBuilder.append("  \\end{tikzpicture}\n")
+            .append("\\end{inctext}\n")
             .append("\\end{document}\n");
     return latexBuilder.toString();
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
-    ColorPicker colorPicker = new ColorPicker("red","green","blue","brown","orange");
+    ColorPicker colorPicker = new ColorPicker("red", "green", "blue", "orange", "purple");
+    latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
       AtomicInteger textRangeCounter = new AtomicInteger(0);
-      Map<TextRange,Integer> textRangeIndices = new HashMap<>();
-      Map<TextNode,Integer> textNodeIndices = new HashMap<>();
+      Map<TextRange, Integer> textRangeIndices = new HashMap<>();
+      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         int i = textNodeCounter.getAndIncrement();
-        textNodeIndices.put(tn,i);
+        textNodeIndices.put(tn, i);
         List<TextRange> textRanges = limen.getTextRanges(tn);
 
         List<TextRange> toClose = new ArrayList<>();
@@ -60,45 +65,25 @@ public class LaTeXExporter {
         openTextRanges.addAll(toOpen);
 
         addTextNode(latexBuilder, tn, i);
-//        if (textNodeCounter.get() > 1) {
-//          String drawLine = "    \\draw [->] (tn" + (i - 1) + ") -- (tn" + i + ");\n";
-//          latexBuilder.append(drawLine);
-//        }else{
-//          String drawDocLine = "    \\draw [->] (doc) -- (tn" + i + ");\n";
-//          latexBuilder.append(drawDocLine);
-//        }
-//        toClose.forEach(tr -> {
-//          int textRangeIndex = textRangeIndices.get(tr);
-//          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + (i-1) + ");\n";
-//          latexBuilder.append(drawLine);
-//        });
-//        toOpen.forEach(tr -> {
-//          textRangeIndices.put(tr,textRangeCounter.get());
-//          int textRangeIndex = textRangeCounter.getAndIncrement();
-//          String relPos2 = textRangeIndex == 0 ? "below=of tn" + i : ("right=of tr" + (textRangeIndex - 1));
-//          String textRangeLine = "    \\node[textrange] (tr" + textRangeIndex + ") [" + relPos2 + "] {" + tr.getTag() + "};\n";
-//          latexBuilder.append(textRangeLine);
-//          String drawLine = "    \\draw [->] (tr" + textRangeIndex + ") -- (tn" + i + ");\n";
-//          latexBuilder.append(drawLine);
-//        });
       });
-//      openTextRanges.forEach(tr -> latexBuilder.append(toCloseTag(tr)));
       connectTextNodes(latexBuilder, textNodeCounter);
-      drawTextRangesAsSets(latexBuilder, limen, colorPicker, textNodeIndices);
+      markTextRanges(latexBuilder, limen, colorPicker, textNodeIndices);
+//      drawTextRangesAsSets(latexBuilder, limen, colorPicker, textNodeIndices);
     }
   }
 
   private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
-    limen.textRangeList.forEach(tr->{
+    limen.textRangeList.forEach(tr -> {
       String color = colorPicker.nextColor();
-      latexBuilder.append("    \\node[draw=").append(color).append(",shape=ellipse,fit=");
-      tr.textNodes.forEach(tn->{
+      latexBuilder.append("    \\node[draw=").append(color).append(",shape=rectangle,fit=");
+      tr.textNodes.forEach(tn -> {
         int i = textNodeIndices.get(tn);
         latexBuilder.append("(tn").append(i).append(")");
       });
       latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
     });
   }
+
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
     String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
@@ -108,14 +93,46 @@ public class LaTeXExporter {
   }
 
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {
-    latexBuilder.append("\\graph {");
-    latexBuilder.append("(doc)");
+    latexBuilder.append("");
+    latexBuilder.append("\n    % connect TextNodes\n    \\graph{")
+            .append("(doc)");
     for (int i = 0; i < textNodeCounter.get(); i++) {
       latexBuilder.append(" -> (tn").append(i).append(")");
     }
     latexBuilder.append("};\n");
   }
 
+  private void markTextRanges(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
+    AtomicInteger textRangeCounter = new AtomicInteger(0);
+    latexBuilder.append("\n    % TextRanges");
+    limen.textRangeList.forEach(tr -> {
+      int textRangeIndex = textRangeCounter.getAndIncrement();
+      float textRangeRow = 0.7f * (textRangeIndex + 1);
+      String color = colorPicker.nextColor();
+      TextNode firstTextNode = tr.textNodes.get(0);
+      TextNode lastTextNode = tr.textNodes.get(tr.textNodes.size() - 1);
+      int first = textNodeIndices.get(firstTextNode);
+      int last = textNodeIndices.get(lastTextNode);
+      latexBuilder.append("\n    \\node[label=below right:{$")
+              .append(tr.getTag())
+              .append("$}](tr")
+              .append(textRangeIndex)
+              .append("b)[below left=")
+              .append(textRangeRow)
+              .append(" and 0 of tn")
+              .append(first)
+              .append("]{};\n");
+      latexBuilder.append("    \\node[](tr")
+              .append(textRangeIndex)
+              .append("e)[below right=")
+              .append(textRangeRow)
+              .append(" and 0 of tn")
+              .append(last)
+              .append("]{};\n");
+      latexBuilder.append("    \\draw[color=").append(color).append("] (tr").append(textRangeIndex).append("b) -- (tr").append(textRangeIndex).append("e);\n");
+
+    });
+  }
 
   public StringBuilder toLMNL(Annotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
