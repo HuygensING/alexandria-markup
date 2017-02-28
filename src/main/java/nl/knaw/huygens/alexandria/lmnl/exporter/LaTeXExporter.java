@@ -11,7 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by bramb on 07/02/2017.
  */
 public class LaTeXExporter {
-  public static final Comparator<TextRangeLayer> ON_MAX_RANGE_SIZE = Comparator.comparingInt(TextRangeLayer::getMaxRangeSize);
+  public static final Comparator<TextRangeLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(TextRangeLayer::getTag)
+      .thenComparing(Comparator.comparingInt(TextRangeLayer::getMaxRangeSize));
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
 
   public String toLaTeX(Document document) {
@@ -163,6 +164,10 @@ public class LaTeXExporter {
 
     public boolean hasTag(String tag) {
       return tags.contains(tag);
+    }
+
+    public String getTag(){
+      return tags.iterator().next();
     }
 
     public int getMaxRangeSize() {
