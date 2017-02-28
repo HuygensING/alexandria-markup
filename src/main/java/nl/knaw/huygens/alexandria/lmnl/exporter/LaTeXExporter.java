@@ -136,6 +136,16 @@ public class LaTeXExporter {
           .append("b) -- (tr")
           .append(rangeLayerIndex)
           .append("e);\n");
+      latexBuilder.append("    \\draw[thin,color=lightgray] (tr")
+          .append(rangeLayerIndex)
+          .append("b.east) -- (tn")
+          .append(first)
+          .append(".west);\n");
+      latexBuilder.append("    \\draw[thin,color=lightgray] (tr")
+          .append(rangeLayerIndex)
+          .append("e.west) -- (tn")
+          .append(last)
+          .append(".east);\n");
     });
   }
 
