@@ -6,42 +6,42 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Created by bramb on 07/02/2017.
  */
 public class LaTeXExporter {
+  public static final Comparator<TextRangeLayer> ON_MAX_RANGE_SIZE = Comparator.comparingInt(TextRangeLayer::getMaxRangeSize);
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
 
   public String toLaTeX(Document document) {
     StringBuilder latexBuilder = new StringBuilder();
     latexBuilder.append("\\documentclass{article}\n")
-            .append("\\usepackage{incgraph}\n")
-            .append("\\usepackage{tikz}\n")
-            .append("\\usepackage{latexsym}\n")
-            .append("\\usepackage[utf8x]{inputenc}\n")
-            .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")
-            .append("\n")
-            .append("\\begin{document}\n")
-            .append("\\begin{inctext}\n")
-            .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")
-            .append("  \\begin{tikzpicture}\n")
-            .append("    [textnode/.style={rectangle,draw=black!50,thick,rounded corners},\n")
-            .append("     textrange/.style={rectangle,draw=blue!50,thick},\n")
-            .append("     document/.style={circle,draw=black!50,thick}]\n")
-            .append("    \\node[document] (doc) {document};\n");
+        .append("\\usepackage{incgraph}\n")
+        .append("\\usepackage{tikz}\n")
+        .append("\\usepackage{latexsym}\n")
+        .append("\\usepackage[utf8x]{inputenc}\n")
+        .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")
+        .append("\n")
+        .append("\\begin{document}\n")
+        .append("\\begin{inctext}\n")
+        .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")
+        .append("  \\begin{tikzpicture}\n")
+        .append("    [textnode/.style={rectangle,draw=black!50,thick,rounded corners},\n")
+        .append("     textrange/.style={rectangle,draw=blue!50,thick},\n")
+        .append("     document/.style={circle,draw=black!50,thick}]\n")
+        .append("    \\node[document] (doc) {document};\n");
     Limen limen = document.value();
     appendLimen(latexBuilder, limen);
     latexBuilder.append("  \\end{tikzpicture}\n")
-            .append("\\end{inctext}\n")
-            .append("\\end{document}\n");
+        .append("\\end{inctext}\n")
+        .append("\\end{document}\n");
     return latexBuilder.toString();
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
     ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green",
-            "lightgray", "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
+        "lightgray", "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
@@ -94,7 +94,7 @@ public class LaTeXExporter {
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {
     latexBuilder.append("");
     latexBuilder.append("\n    % connect TextNodes\n    \\graph{")
-            .append("(doc)");
+        .append("(doc)");
     for (int i = 0; i < textNodeCounter.get(); i++) {
       latexBuilder.append(" -> (tn").append(i).append(")");
     }
@@ -114,75 +114,98 @@ public class LaTeXExporter {
       int first = textNodeIndices.get(firstTextNode);
       int last = textNodeIndices.get(lastTextNode);
       latexBuilder.append("\n    \\node[label=below right:{$")
-              .append(tr.getTag())
-              .append("$}](tr")
-              .append(rangeLayerIndex)
-              .append("b)[below left=")
-              .append(textRangeRow)
-              .append(" and 0 of tn")
-              .append(first)
-              .append("]{};\n");
+          .append(tr.getTag())
+          .append("$}](tr")
+          .append(rangeLayerIndex)
+          .append("b)[below left=")
+          .append(textRangeRow)
+          .append(" and 0 of tn")
+          .append(first)
+          .append("]{};\n");
       latexBuilder.append("    \\node[](tr")
-              .append(rangeLayerIndex)
-              .append("e)[below right=")
-              .append(textRangeRow)
-              .append(" and 0 of tn")
-              .append(last)
-              .append("]{};\n");
+          .append(rangeLayerIndex)
+          .append("e)[below right=")
+          .append(textRangeRow)
+          .append(" and 0 of tn")
+          .append(last)
+          .append("]{};\n");
       latexBuilder.append("    \\draw[Bar-Bar,thick,color=")
-              .append(color).append("] (tr")
-              .append(rangeLayerIndex)
-              .append("b) -- (tr")
-              .append(rangeLayerIndex)
-              .append("e);\n");
+          .append(color).append("] (tr")
+          .append(rangeLayerIndex)
+          .append("b) -- (tr")
+          .append(rangeLayerIndex)
+          .append("e);\n");
     });
+  }
+
+  private static class TextRangeLayer {
+    final Map<TextNode, Integer> textNodeIndex;
+
+    List<TextRange> textRanges = new ArrayList<>();
+    Set<String> tags = new HashSet<>();
+    int maxRangeSize = 1; // the number of textnodes of the biggest textrange
+    int lastTextNodeUsed = 0;
+
+    TextRangeLayer(Map<TextNode, Integer> textNodeIndex) {
+      this.textNodeIndex = textNodeIndex;
+    }
+
+    public void addTextRange(TextRange textRange) {
+      textRanges.add(textRange);
+      tags.add(normalize(textRange.getTag()));
+      maxRangeSize = Math.max(maxRangeSize, textRange.textNodes.size());
+      lastTextNodeUsed = textNodeIndex.get(textRange.textNodes.get(textRange.textNodes.size() - 1));
+    }
+
+    public List<TextRange> getTextRanges() {
+      return textRanges;
+    }
+
+    public boolean hasTag(String tag) {
+      return tags.contains(tag);
+    }
+
+    public int getMaxRangeSize() {
+      return maxRangeSize;
+    }
+
+    public boolean canAdd(TextRange textRange) {
+      String nTag = normalize(textRange.getTag());
+      if (!tags.contains(nTag)){
+        return false;
+      }
+      TextNode firstTextNode = textRange.textNodes.get(0);
+      int firstTextNodeIndex = textNodeIndex.get(firstTextNode);
+      return  (firstTextNodeIndex > lastTextNodeUsed);
+    }
+
+    private String normalize(String tag){
+      return tag.replaceFirst("=.*$","");
+    }
   }
 
   private Map<TextRange, Integer> calculateLayerIndex(List<TextRange> textranges, Map<TextNode, Integer> textNodeIndex) {
-//    return textRangeCounter.getAndIncrement();
-    Map<String, List<TextRange>> map = textranges.stream().collect(Collectors.groupingBy(TextRange::getTag));
+    List<TextRangeLayer> layers = new ArrayList<>();
+    textranges.forEach(tr -> {
+      Optional<TextRangeLayer> oLayer = layers.stream().filter(layer -> layer.canAdd(tr)).findFirst();
+      if (oLayer.isPresent()) {
+        oLayer.get().addTextRange(tr);
 
-    Map<TextRange, Integer> index = new HashMap<>();
-    Map<Integer, Integer> lastTextNodeUsedInLayer = new HashMap<>();
-//    map.values().stream().flatMap(List::stream).forEach(tr -> {
-      textranges.forEach(tr -> {
-      int firstTextNodeIndex = textNodeIndex.get(tr.textNodes.get(0));
-      int lastTextNodeIndex = textNodeIndex.get(tr.textNodes.get(tr.textNodes.size() - 1));
-      int layerNo = 0;
-      if (!index.isEmpty()) {
-        boolean goOn = true;
-        while (goOn) {
-          int lastTextNodeInLayer = lastTextNodeUsedInLayer.get(layerNo);
-          if (firstTextNodeIndex > lastTextNodeInLayer) {
-            goOn = false;
-          } else {
-            layerNo += 1;
-            if (!lastTextNodeUsedInLayer.containsKey(layerNo)) {
-              goOn = false;
-            }
-          }
-        }
+      } else {
+        TextRangeLayer layer = new TextRangeLayer(textNodeIndex);
+        layer.addTextRange(tr);
+        layers.add(layer);
       }
-      index.put(tr, layerNo);
-      lastTextNodeUsedInLayer.put(layerNo, lastTextNodeIndex);
     });
-    return index;
-  }
 
-  public StringBuilder toLMNL(Annotation annotation) {
-    StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotations().forEach(a1 ->
-            annotationBuilder.append(" ").append(toLMNL(a1))
-    );
-    Limen limen = annotation.value();
-    if (limen.hasTextNodes()) {
-      annotationBuilder.append("}");
-      appendLimen(annotationBuilder, limen);
-      annotationBuilder.append("{").append(annotation.getTag()).append("]");
-    } else {
-      annotationBuilder.append("]");
-    }
-    return annotationBuilder;
+    AtomicInteger layerCounter = new AtomicInteger();
+    Map<TextRange, Integer> index = new HashMap<>();
+    layers.stream().sorted(ON_MAX_RANGE_SIZE).forEach(layer -> {
+      int i = layerCounter.getAndIncrement();
+      layer.getTextRanges().forEach(tr -> index.put(tr, i));
+    });
+
+    return index;
   }
 
 }
