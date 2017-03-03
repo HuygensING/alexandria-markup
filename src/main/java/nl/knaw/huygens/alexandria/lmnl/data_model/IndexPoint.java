@@ -27,10 +27,11 @@ public class IndexPoint {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof IndexPoint){
+    if (obj instanceof IndexPoint) {
       IndexPoint other = (IndexPoint) obj;
-      return other.textRangeIndex == textRangeIndex && other.textNodeIndex == textRangeIndex;
+      return (other.textRangeIndex == textRangeIndex) && (other.textNodeIndex == textNodeIndex);
     }
     return false;
   }
+
 }

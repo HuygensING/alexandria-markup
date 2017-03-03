@@ -511,7 +511,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
       if (axis == TEXTNODE_AXIS)
         return TEXTNODE_INDEX_COMPARATOR.compare(o1, o2);
 //      if (axis == TEXTRANGE_AXIS)
-        return TEXTRANGE_INDEX_COMPARATOR.compare(o1, o2);
+      return TEXTRANGE_INDEX_COMPARATOR.compare(o1, o2);
 //      return Z_COMPARATOR.compare(o1, o2);
     }
 
@@ -572,9 +572,8 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
       StringBuilder builder = new StringBuilder();
 
       if (node.parent != null) {
-        String side = "left";
-        if (node.parent.greater != null && node.id.equals(node.parent.greater.id))
-          side = "right";
+        boolean isRight = node.parent.greater != null && node.id.equals(node.parent.greater.id);
+        String side = isRight ? "right" : "left";
         builder.append(prefix + (isTail ? "└── " : "├── ") + "[" + side + "] " + "depth=" + node.depth + " id="
                 + node.id + "\n");
       } else {
