@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +48,14 @@ public class LMNLImporterTest {
     logLMNL(actual);
     assertTrue(compareDocuments(expected, actual));
     assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
+    LOG.info("indexpoints={}", indexPoints);
+    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
+    LOG.info("kdtree=\n{}",kdTree);
+    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   @Test
@@ -140,6 +149,14 @@ public class LMNLImporterTest {
     ;
 
     assertActualMatchesExpected(actual, expected);
+
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
+    LOG.info("indexpoints={}", indexPoints);
+    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
+    LOG.info("kdtree=\n{}",kdTree);
+//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   @Test
@@ -178,6 +195,13 @@ public class LMNLImporterTest {
     assertThat(q2.textNodes).hasSize(1); // has 1 textnode
 
 //    compareLMNL(pathname, actual);
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
+    LOG.info("indexpoints={}", indexPoints);
+    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
+    LOG.info("kdtree=\n{}",kdTree);
+//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   @Test
@@ -192,6 +216,14 @@ public class LMNLImporterTest {
     assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
     assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous textrange
 //    compareLMNL(pathname, actual);
+
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
+    LOG.info("indexpoints={}", indexPoints);
+    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
+    LOG.info("kdtree=\n{}",kdTree);
+//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
