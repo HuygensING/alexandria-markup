@@ -3,6 +3,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -49,12 +51,9 @@ public class LMNLImporterTest {
     assertTrue(compareDocuments(expected, actual));
     assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
 
+    List<IndexPoint> indexPoints = logKdTree(actual);
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
-    LOG.info("indexpoints={}", indexPoints);
-    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
-    LOG.info("kdtree=\n{}",kdTree);
     assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
@@ -72,21 +71,21 @@ public class LMNLImporterTest {
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
-//    Limen value = actual.value();
+    // Limen value = actual.value();
 
-//    TextRange textRange = new TextRange(value, "excerpt");
-//    assertThat(value.textRangeList).hasSize(7);
-//    List<TextRange> textRangeList = value.textRangeList;
-//
-//    textRangeList.stream().map(TextRange::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
-//    TextRange textRange1 = textRangeList.get(0);
-//    assertThat(textRange1.getTag()).isEqualTo("excerpt");
-//
-//    TextRange textRange2 = textRangeList.get(1);
-//    assertThat(textRange2.getTag()).isEqualTo("s");
-//
-//    TextRange textRange3 = textRangeList.get(2);
-//    assertThat(textRange3.getTag()).isEqualTo("l");
+    // TextRange textRange = new TextRange(value, "excerpt");
+    // assertThat(value.textRangeList).hasSize(7);
+    // List<TextRange> textRangeList = value.textRangeList;
+    //
+    // textRangeList.stream().map(TextRange::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
+    // TextRange textRange1 = textRangeList.get(0);
+    // assertThat(textRange1.getTag()).isEqualTo("excerpt");
+    //
+    // TextRange textRange2 = textRangeList.get(1);
+    // assertThat(textRange2.getTag()).isEqualTo("s");
+    //
+    // TextRange textRange3 = textRangeList.get(2);
+    // assertThat(textRange3.getTag()).isEqualTo("l");
 
     Document expected = new Document();
     Limen limen = expected.value();
@@ -105,58 +104,31 @@ public class LMNLImporterTest {
 
     Annotation date = simpleAnnotation("date", "1915");
     Annotation title = simpleAnnotation("title", "The Housekeeper");
-    Annotation source = simpleAnnotation("source")
-            .addAnnotation(date)
-            .addAnnotation(title);
+    Annotation source = simpleAnnotation("source").addAnnotation(date).addAnnotation(title);
     Annotation name = simpleAnnotation("name", "Robert Frost");
     Annotation dates = simpleAnnotation("dates", "1874-1963");
-    Annotation author = simpleAnnotation("author")
-            .addAnnotation(name)
-            .addAnnotation(dates);
+    Annotation author = simpleAnnotation("author").addAnnotation(name).addAnnotation(dates);
     Annotation n144 = simpleAnnotation("n", "144");
     Annotation n145 = simpleAnnotation("n", "145");
     Annotation n146 = simpleAnnotation("n", "146");
-    TextRange excerpt = new TextRange(limen, "excerpt")
-            .addAnnotation(source)
-            .addAnnotation(author)
-            .setFirstAndLastTextNode(tn00, tn10);
+    TextRange excerpt = new TextRange(limen, "excerpt").addAnnotation(source).addAnnotation(author).setFirstAndLastTextNode(tn00, tn10);
     // 3 sentences
-    TextRange s1 = new TextRange(limen, "s")
-            .setFirstAndLastTextNode(tn01, tn03);
-    TextRange s2 = new TextRange(limen, "s")
-            .setOnlyTextNode(tn05);
-    TextRange s3 = new TextRange(limen, "s")
-            .setFirstAndLastTextNode(tn07, tn09);
+    TextRange s1 = new TextRange(limen, "s").setFirstAndLastTextNode(tn01, tn03);
+    TextRange s2 = new TextRange(limen, "s").setOnlyTextNode(tn05);
+    TextRange s3 = new TextRange(limen, "s").setFirstAndLastTextNode(tn07, tn09);
     // 3 lines
-    TextRange l1 = new TextRange(limen, "l")
-            .setOnlyTextNode(tn01)
-            .addAnnotation(n144);
-    TextRange l2 = new TextRange(limen, "l")
-            .setFirstAndLastTextNode(tn03, tn07)
-            .addAnnotation(n145);
-    TextRange l3 = new TextRange(limen, "l")
-            .setOnlyTextNode(tn09)
-            .addAnnotation(n146);
+    TextRange l1 = new TextRange(limen, "l").setOnlyTextNode(tn01).addAnnotation(n144);
+    TextRange l2 = new TextRange(limen, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+    TextRange l3 = new TextRange(limen, "l").setOnlyTextNode(tn09).addAnnotation(n146);
 
-    limen.setFirstAndLastTextNode(tn00, tn10)
-            .addTextRange(excerpt)
-            .addTextRange(s1)
-            .addTextRange(l1)
-            .addTextRange(l2)
-            .addTextRange(s2)
-            .addTextRange(s3)
-            .addTextRange(l3)
-    ;
+    limen.setFirstAndLastTextNode(tn00, tn10).addTextRange(excerpt).addTextRange(s1).addTextRange(l1).addTextRange(l2).addTextRange(s2).addTextRange(s3).addTextRange(l3);
 
     assertActualMatchesExpected(actual, expected);
 
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
-    LOG.info("indexpoints={}", indexPoints);
-    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
-    LOG.info("kdtree=\n{}",kdTree);
-//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+    List<IndexPoint> indexPoints = logKdTree(actual);
+    // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   @Test
@@ -194,14 +166,11 @@ public class LMNLImporterTest {
     assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
     assertThat(q2.textNodes).hasSize(1); // has 1 textnode
 
-//    compareLMNL(pathname, actual);
+    // compareLMNL(pathname, actual);
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
-    LOG.info("indexpoints={}", indexPoints);
-    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
-    LOG.info("kdtree=\n{}",kdTree);
-//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+    List<IndexPoint> indexPoints = logKdTree(actual);
+    // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   @Test
@@ -215,15 +184,12 @@ public class LMNLImporterTest {
     String lmnl = lmnlExporter.toLMNL(actual);
     assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
     assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous textrange
-//    compareLMNL(pathname, actual);
+    // compareLMNL(pathname, actual);
 
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
-    LOG.info("indexpoints={}", indexPoints);
-    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
-    LOG.info("kdtree=\n{}",kdTree);
-//    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+    List<IndexPoint> indexPoints = logKdTree(actual);
+    // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
@@ -274,7 +240,7 @@ public class LMNLImporterTest {
     String expectedLMNL = lmnlExporter.toLMNL(expected);
     LOG.info("LMNL={}", actualLMNL);
     assertThat(actualLMNL).isEqualTo(expectedLMNL);
-//    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+    // assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
   }
 
   // I could use a matcher framework here
@@ -297,4 +263,72 @@ public class LMNLImporterTest {
   private void logLMNL(Document actual) {
     LOG.info("LMNL=\n{}", lmnlExporter.toLMNL(actual));
   }
+
+  private List<IndexPoint> logKdTree(Document actual) {
+    List<IndexPoint> indexPoints = actual.value().getIndexPoints();
+    LOG.info("indexpoints={}", indexPoints);
+    String latex1 = latexMatrix(actual.value().textNodeList, actual.value().textRangeList, indexPoints);
+    LOG.info("matrix=\n{}", latex1);
+    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
+    LOG.info("kdtree=\n{}", kdTree);
+    return indexPoints;
+  }
+
+  private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints) {
+    List<String> rangeLabels = textRangeList.stream().map(TextRange::getTag).collect(Collectors.toList());
+    List<String> rangeIndex = new ArrayList();
+    rangeIndex.add("");
+    for (int i = 0; i < rangeLabels.size(); i++) {
+      rangeIndex.add(String.valueOf(i));
+    }
+    rangeLabels.add(0, "");
+    rangeLabels.add("");
+    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
+    StringBuilder latexBuilder = new StringBuilder()//
+            .append("\\documentclass{article}\n")//
+            .append("\\usepackage{array,graphicx}\n")//
+            .append("\\newcommand*\\rot{\\rotatebox{90}}\n")//
+            .append("\\usepackage{incgraph}\n")//
+            .append("\\begin{document}\n")//
+            .append("\\begin{table}[]\n")//
+            .append("\\begin{inctext}\n")//
+            .append("\\centering\n")//
+            .append("\\begin{tabular}{" + tabularContent + "}\n")//
+            .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & ")) + "\\\\\n")//
+            .append("\\hline\n")//
+            ;
+
+    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
+    IndexPoint nextIndexPoint = pointIterator.next();
+    for (int i = 0; i < textNodeList.size(); i++) {
+      List<String> row = new ArrayList<>();
+      String content = textNodeList.get(i).getContent()//
+              .replaceAll(" ", "\\\\textvisiblespace ")//
+              .replaceAll("\n", "\\\\textbackslash n");
+
+      row.add(String.valueOf(i));
+      for (int j = 0; j < textRangeList.size(); j++) {
+        if (i == nextIndexPoint.getTextNodeIndex() && j == nextIndexPoint.getTextRangeIndex()) {
+          row.add("X");
+          if (pointIterator.hasNext()) {
+            nextIndexPoint = pointIterator.next();
+          }
+
+        } else {
+          row.add(" ");
+        }
+      }
+      row.add(content);
+      latexBuilder.append(row.stream().collect(Collectors.joining(" & ")) + "\\\\ \\hline\n");
+    }
+
+    latexBuilder//
+            .append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")) + "\\\\\n")//
+            .append("\\end{tabular}\n")//
+            .append("\\end{inctext}\n")//
+            .append("\\end{table}\n")//
+            .append("\\end{document}");
+    return latexBuilder.toString();
+  }
+
 }
