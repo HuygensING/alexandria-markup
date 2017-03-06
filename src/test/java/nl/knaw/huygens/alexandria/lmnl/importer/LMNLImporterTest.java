@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporterTest {
-  Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
-  LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
+  final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
+  final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
 
   @Test
   public void testTextRangeAnnotation() {
@@ -252,7 +252,7 @@ public class LMNLImporterTest {
       TextNode t2 = i2.next();
       result = compareTextNodes(t1, t2);
     }
-    return true;
+    return result;
   }
 
   private boolean compareTextNodes(TextNode t1, TextNode t2) {

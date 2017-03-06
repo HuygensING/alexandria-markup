@@ -35,7 +35,7 @@ public class TestTheLMNLLexer {
         setupLexer(input);
     }
 
-    private void setupLexer(String input) throws RecognitionException {
+    private void setupLexer(String input) {
         LMNLLexer lexer = new LMNLLexer(new ANTLRInputStream(input));
 
         // This gets all the tokens at once, it does not stop for errors

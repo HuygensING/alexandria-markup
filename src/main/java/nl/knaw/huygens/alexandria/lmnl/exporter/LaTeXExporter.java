@@ -152,8 +152,8 @@ public class LaTeXExporter {
   private static class TextRangeLayer {
     final Map<TextNode, Integer> textNodeIndex;
 
-    List<TextRange> textRanges = new ArrayList<>();
-    Set<String> tags = new HashSet<>();
+    final List<TextRange> textRanges = new ArrayList<>();
+    final Set<String> tags = new HashSet<>();
     int maxRangeSize = 1; // the number of textnodes of the biggest textrange
     int lastTextNodeUsed = 0;
 

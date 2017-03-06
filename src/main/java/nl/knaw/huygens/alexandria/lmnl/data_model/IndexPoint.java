@@ -4,8 +4,8 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  * Created by bramb on 3-3-2017.
  */
 public class IndexPoint {
-  int textNodeIndex;
-  int textRangeIndex;
+  final int textNodeIndex;
+  final int textRangeIndex;
 
   public IndexPoint(int textNodeIndex, int textRangeIndex) {
     this.textNodeIndex = textNodeIndex;

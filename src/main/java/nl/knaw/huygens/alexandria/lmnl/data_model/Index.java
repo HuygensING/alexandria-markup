@@ -1,10 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by bramb on 2-3-2017.
@@ -15,7 +12,7 @@ public class Index {
   private class KDNode extends IndexPoint {
     KDNode leftNode;
     KDNode rightNode;
-    Dimension dimension;
+    final Dimension dimension;
 
     public KDNode(int textNodeIndex, int textRangeIndex, Dimension dimension) {
       super(textNodeIndex, textRangeIndex);
@@ -39,7 +36,7 @@ public class Index {
     }
   }
 
-  KDNode root;
+  final KDNode root;
 
 
   public Index(Limen limen) {
@@ -49,6 +46,7 @@ public class Index {
 
   public List<TextNode> getTextNodesinTextRange(TextRange textRange) {
     List<TextNode> textNodes = new ArrayList<>();
+    // TODO
     return textNodes;
   }
 }
