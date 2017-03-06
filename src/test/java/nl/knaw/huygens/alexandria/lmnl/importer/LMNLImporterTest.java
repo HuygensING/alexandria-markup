@@ -199,8 +199,7 @@ public class LMNLImporterTest {
   }
 
   private Annotation simpleAnnotation(String tag) {
-    Annotation a1 = new Annotation(tag);
-    return a1;
+    return new Annotation(tag);
   }
 
   private Annotation simpleAnnotation(String tag, String content) {
@@ -232,7 +231,7 @@ public class LMNLImporterTest {
       TextRange actualTextRange = actualTextRangeList.get(i);
       TextRange expectedTextRange = expectedTextRangeList.get(i);
       assertThat(actualTextRange.getTag()).isEqualTo(expectedTextRange.getTag());
-      Comparator<TextRange> textRangeComparator = (tr0, tr1) -> tr0.getTag().compareTo(tr1.getTag());
+      Comparator<TextRange> textRangeComparator = Comparator.comparing(TextRange::getTag);
       assertThat(actualTextRange).usingComparator(textRangeComparator).isEqualTo(expectedTextRange);
     }
 
@@ -321,7 +320,6 @@ public class LMNLImporterTest {
             .append("\\begin{figure}\n")
 //            .append("\\begin{inctext}\n")
             .append("\\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]\n");
-    ;
     KdTree.KdNode root = kdTree.getRoot();
     IndexPoint rootIP = root.getContent();
     latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(rootIP.toString()).append("};\n");
@@ -341,11 +339,11 @@ public class LMNLImporterTest {
 
   private void appendChildTree(StringBuilder latexBuilder, KdTree.KdNode kdnode, String style) {
     if (kdnode == null) {
-      latexBuilder.append("[.\\node[" + style + "]{};\n]\n");
+      latexBuilder.append("[.\\node[").append(style).append("]{};\n]\n");
       return;
     }
     IndexPoint content = kdnode.getContent();
-    latexBuilder.append("[.\\node[" + style + "]{").append(content.toString()).append("};\n");
+    latexBuilder.append("[.\\node[").append(style).append("]{").append(content.toString()).append("};\n");
     String nextStyle = (style.equals("textNodeAxis") ? "textRangeAxis" : "textNodeAxis");
     if (!(kdnode.getLesser() == null && kdnode.getGreater() == null)) {
       appendChildTree(latexBuilder, kdnode.getLesser(), nextStyle);
@@ -357,7 +355,7 @@ public class LMNLImporterTest {
 
   private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints) {
     List<String> rangeLabels = textRangeList.stream().map(TextRange::getTag).collect(Collectors.toList());
-    List<String> rangeIndex = new ArrayList();
+    List<String> rangeIndex = new ArrayList<>();
     rangeIndex.add("");
     for (int i = 0; i < rangeLabels.size(); i++) {
       rangeIndex.add(String.valueOf(i));
@@ -373,9 +371,7 @@ public class LMNLImporterTest {
             .append("\\begin{document}\n")//
             .append("\\begin{table}[]\n")//
             .append("\\begin{inctext}\n")//
-            .append("\\centering\n")//
-            .append("\\begin{tabular}{" + tabularContent + "}\n")//
-            .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & ")) + "\\\\\n")//
+            .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
             .append("\\hline\n")//
             ;
 
@@ -400,11 +396,11 @@ public class LMNLImporterTest {
         }
       }
       row.add(content);
-      latexBuilder.append(row.stream().collect(Collectors.joining(" & ")) + "\\\\ \\hline\n");
+      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
     }
 
-    latexBuilder//
-            .append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")) + "\\\\\n")//
+    latexBuilder.append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")))//
+            .append("\\\\\n")//
             .append("\\end{tabular}\n")//
             .append("\\end{inctext}\n")//
             .append("\\end{table}\n")//
