@@ -23,6 +23,8 @@ import java.util.List;
 public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
   private final int k = 2;
+
+
   private KdNode root = null;
 
   private static final Comparator<IndexPoint> TEXTNODE_INDEX_COMPARATOR = new Comparator<IndexPoint>() {
@@ -144,6 +146,10 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     }
 
     return node;
+  }
+
+  public KdNode getRoot() {
+    return root;
   }
 
   /**
@@ -575,6 +581,18 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     public String toString() {
       return "k=" + k + " depth=" + depth + " id=" + id.toString();
     }
+
+    public IndexPoint getContent() {
+      return id;
+    }
+    public KdNode getLesser() {
+      return lesser;
+    }
+
+    public KdNode getGreater() {
+      return greater;
+    }
+
   }
 
   static class TreePrinter {

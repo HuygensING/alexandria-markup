@@ -271,8 +271,89 @@ public class LMNLImporterTest {
     LOG.info("matrix=\n{}", latex1);
     KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
     LOG.info("kdtree=\n{}", kdTree);
+    String latexKdTree = latexKdTree(kdTree);
+    LOG.info("latex tree=\n{}", latexKdTree);
     return indexPoints;
   }
+
+  private String latexKdTree(KdTree<IndexPoint> kdTree) {
+    StringBuilder latexBuilder = new StringBuilder()//
+            .append("\\documentclass[landscape]{article}\n")//
+            .append("\\usepackage[utf8]{inputenc}\n")//
+            .append("\\usepackage[T1]{fontenc}\n")//
+            .append("\\usepackage{incgraph}\n")//
+            .append("\\usepackage{caption}\n")//
+            .append("\\usepackage[margin=1in]{geometry}\n")//
+            .append("\\usepackage{tikz-qtree}\n")//
+            .append("\\usetikzlibrary{shadows,trees}\n")//
+            .append("\\begin{document}\n")//
+            .append("\\tikzset{font=\\small,\n" +
+                    "%edge from parent fork down,\n" +
+                    "level distance=1.5cm,\n" +
+                    "textNodeAxis/.style=\n" +
+                    "    {top color=white,\n" +
+                    "    bottom color=blue!25,\n" +
+                    "    circle,\n" +
+                    "    minimum height=8mm,\n" +
+                    "    draw=blue!75,\n" +
+                    "    very thick,\n" +
+                    "    drop shadow,\n" +
+                    "    align=center,\n" +
+                    "    text depth = 0pt\n" +
+                    "    },\n" +
+                    "textRangeAxis/.style=\n" +
+                    "    {top color=white,\n" +
+                    "    bottom color=green!25,\n" +
+                    "    circle,\n" +
+                    "    minimum height=8mm,\n" +
+                    "    draw=green!75,\n" +
+                    "    very thick,\n" +
+                    "    drop shadow,\n" +
+                    "    align=center,\n" +
+                    "    text depth = 0pt\n" +
+                    "    },\n" +
+                    "edge from parent/.style=\n" +
+                    "    {draw=black!50,\n" +
+                    "    thick\n" +
+                    "    }}\n" +
+                    "\n" +
+                    "\\centering\n")//
+            .append("\\begin{figure}\n")
+//            .append("\\begin{inctext}\n")
+            .append("\\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]\n");
+    ;
+    KdTree.KdNode root = kdTree.getRoot();
+    IndexPoint rootIP = root.getContent();
+    latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(rootIP.toString()).append("};\n");
+    appendChildTree(latexBuilder, root.getLesser(), "textRangeAxis");
+    appendChildTree(latexBuilder, root.getGreater(), "textRangeAxis");
+    latexBuilder
+            .append("]\n")//
+            .append("\\end{tikzpicture}\n")//
+            .append("\\centering\n")//
+            .append("\\caption*{(a,b) = (TextNodeIndex, TextRangeIndex)}\n")//
+//            .append("\\end{inctext}\n")//
+            .append("\\end{figure}\n")//
+            .append("\\end{document}")//
+    ;
+    return latexBuilder.toString();
+  }
+
+  private void appendChildTree(StringBuilder latexBuilder, KdTree.KdNode kdnode, String style) {
+    if (kdnode == null) {
+      latexBuilder.append("[.\\node[" + style + "]{};\n]\n");
+      return;
+    }
+    IndexPoint content = kdnode.getContent();
+    latexBuilder.append("[.\\node[" + style + "]{").append(content.toString()).append("};\n");
+    String nextStyle = (style.equals("textNodeAxis") ? "textRangeAxis" : "textNodeAxis");
+    if (!(kdnode.getLesser() == null && kdnode.getGreater() == null)) {
+      appendChildTree(latexBuilder, kdnode.getLesser(), nextStyle);
+      appendChildTree(latexBuilder, kdnode.getGreater(), nextStyle);
+    }
+    latexBuilder.append("]\n");
+  }
+
 
   private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints) {
     List<String> rangeLabels = textRangeList.stream().map(TextRange::getTag).collect(Collectors.toList());
