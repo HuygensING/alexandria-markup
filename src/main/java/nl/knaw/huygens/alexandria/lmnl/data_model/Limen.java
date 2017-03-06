@@ -2,6 +2,7 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Created by Ronald Haentjens Dekker on 25/01/17.
@@ -78,12 +79,30 @@ public class Limen {
     for (int i = 0; i < textRangeList.size(); i++) {
       textRangeIndex.put(textRangeList.get(i), i);
     }
+    List<TextRange> textRangesToInvert = textRangeList.stream()//
+            .filter(this::containsAtLeastHalfOfAllTextNodes)//
+            .collect(Collectors.toList());
 
     List<IndexPoint> list = new ArrayList<>();
     AtomicInteger textNodeIndex = new AtomicInteger(0);
     textNodeList.forEach(tn -> {
       int i = textNodeIndex.getAndIncrement();
-      getTextRanges(tn).forEach(tr -> {
+
+      // all the TextRanges associated with this TextNode
+      List<TextRange> textRanges = getTextRanges(tn);
+
+      // all the TextRanges that should be inverted and are NOT associated with this TextNode
+      List<TextRange> relevantInvertedTextRanges = textRangesToInvert.stream()//
+              .filter(tr -> !textRanges.contains(tr))//
+              .collect(Collectors.toList());
+
+      // ignore those TextRanges associated with this TextNode that should be inverted
+      textRanges.removeAll(textRangesToInvert);
+
+      // add all the TextRanges that should be inverted and are NOT associated with this TextNode
+      textRanges.addAll(relevantInvertedTextRanges);
+
+      textRanges.forEach(tr -> {
         int j = textRangeIndex.get(tr);
         IndexPoint point = new IndexPoint(i, j);
         list.add(point);
@@ -93,7 +112,9 @@ public class Limen {
     return list;
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TextRange textRange){
-    return textRange.textNodes.size() >= textNodeList.size()/2d;
+  public boolean containsAtLeastHalfOfAllTextNodes(TextRange textRange) {
+    int textNodeSize = textNodeList.size();
+    return textNodeSize > 2 //
+            && textRange.textNodes.size() >= textNodeSize / 2d;
   }
 }
