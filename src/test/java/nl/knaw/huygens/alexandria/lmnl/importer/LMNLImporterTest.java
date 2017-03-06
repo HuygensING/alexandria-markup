@@ -20,9 +20,6 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by Ronald Haentjens Dekker on 29/12/16.
- */
 public class LMNLImporterTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
   final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
@@ -275,6 +272,61 @@ public class LMNLImporterTest {
     return indexPoints;
   }
 
+  private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints) {
+    List<String> rangeLabels = textRangeList.stream().map(TextRange::getTag).collect(Collectors.toList());
+    List<String> rangeIndex = new ArrayList<>();
+    rangeIndex.add("");
+    for (int i = 0; i < rangeLabels.size(); i++) {
+      rangeIndex.add(String.valueOf(i));
+    }
+    rangeLabels.add(0, "");
+    rangeLabels.add("");
+    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
+    StringBuilder latexBuilder = new StringBuilder()//
+            .append("\\documentclass{article}\n")//
+            .append("\\usepackage{array,graphicx}\n")//
+            .append("\\newcommand*\\rot{\\rotatebox{90}}\n")//
+            .append("\\usepackage{incgraph}\n")//
+            .append("\\begin{document}\n")//
+            .append("\\begin{table}[]\n")//
+            .append("\\begin{inctext}\n")//
+            .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
+            .append("\\hline\n")//
+            ;
+
+    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
+    IndexPoint nextIndexPoint = pointIterator.next();
+    for (int i = 0; i < textNodeList.size(); i++) {
+      List<String> row = new ArrayList<>();
+      String content = textNodeList.get(i).getContent()//
+              .replaceAll(" ", "\\\\textvisiblespace ")//
+              .replaceAll("\n", "\\\\textbackslash n");
+
+      row.add(String.valueOf(i));
+      for (int j = 0; j < textRangeList.size(); j++) {
+        if (i == nextIndexPoint.getTextNodeIndex() && j == nextIndexPoint.getTextRangeIndex()) {
+          row.add("X");
+          if (pointIterator.hasNext()) {
+            nextIndexPoint = pointIterator.next();
+          }
+
+        } else {
+          row.add(" ");
+        }
+      }
+      row.add(content);
+      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
+    }
+
+    latexBuilder.append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")))//
+            .append("\\\\\n")//
+            .append("\\end{tabular}\n")//
+            .append("\\end{inctext}\n")//
+            .append("\\end{table}\n")//
+            .append("\\end{document}");
+    return latexBuilder.toString();
+  }
+
   private String latexKdTree(KdTree<IndexPoint> kdTree) {
     StringBuilder latexBuilder = new StringBuilder()//
             .append("\\documentclass[landscape]{article}\n")//
@@ -351,61 +403,4 @@ public class LMNLImporterTest {
     }
     latexBuilder.append("]\n");
   }
-
-
-  private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints) {
-    List<String> rangeLabels = textRangeList.stream().map(TextRange::getTag).collect(Collectors.toList());
-    List<String> rangeIndex = new ArrayList<>();
-    rangeIndex.add("");
-    for (int i = 0; i < rangeLabels.size(); i++) {
-      rangeIndex.add(String.valueOf(i));
-    }
-    rangeLabels.add(0, "");
-    rangeLabels.add("");
-    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
-    StringBuilder latexBuilder = new StringBuilder()//
-            .append("\\documentclass{article}\n")//
-            .append("\\usepackage{array,graphicx}\n")//
-            .append("\\newcommand*\\rot{\\rotatebox{90}}\n")//
-            .append("\\usepackage{incgraph}\n")//
-            .append("\\begin{document}\n")//
-            .append("\\begin{table}[]\n")//
-            .append("\\begin{inctext}\n")//
-            .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
-            .append("\\hline\n")//
-            ;
-
-    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
-    IndexPoint nextIndexPoint = pointIterator.next();
-    for (int i = 0; i < textNodeList.size(); i++) {
-      List<String> row = new ArrayList<>();
-      String content = textNodeList.get(i).getContent()//
-              .replaceAll(" ", "\\\\textvisiblespace ")//
-              .replaceAll("\n", "\\\\textbackslash n");
-
-      row.add(String.valueOf(i));
-      for (int j = 0; j < textRangeList.size(); j++) {
-        if (i == nextIndexPoint.getTextNodeIndex() && j == nextIndexPoint.getTextRangeIndex()) {
-          row.add("X");
-          if (pointIterator.hasNext()) {
-            nextIndexPoint = pointIterator.next();
-          }
-
-        } else {
-          row.add(" ");
-        }
-      }
-      row.add(content);
-      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
-    }
-
-    latexBuilder.append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")))//
-            .append("\\\\\n")//
-            .append("\\end{tabular}\n")//
-            .append("\\end{inctext}\n")//
-            .append("\\end{table}\n")//
-            .append("\\end{document}");
-    return latexBuilder.toString();
-  }
-
 }
