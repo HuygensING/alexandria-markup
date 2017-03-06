@@ -278,8 +278,8 @@ public class LMNLImporterTest {
     return indexPoints;
   }
 
-  private String latexMatrix(List<TextNode> textNodeList, List<TextRange> textRangeList, List<IndexPoint> indexPoints, Set<Integer> longTextRangeIndexes) {
-    List<String> rangeLabels = textRangeList.stream()
+  private String latexMatrix(List<TextNode> allTextNodes, List<TextRange> allTextRanges, List<IndexPoint> indexPoints, Set<Integer> longTextRangeIndexes) {
+    List<String> rangeLabels = allTextRanges.stream()
             .map(TextRange::getTag)
             .collect(Collectors.toList());
     List<String> rangeIndex = new ArrayList<>();
@@ -304,14 +304,10 @@ public class LMNLImporterTest {
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
     IndexPoint nextIndexPoint = pointIterator.next();
-    for (int i = 0; i < textNodeList.size(); i++) {
+    for (int i = 0; i < allTextNodes.size(); i++) {
       List<String> row = new ArrayList<>();
-      String content = textNodeList.get(i).getContent()//
-              .replaceAll(" ", "\\\\textvisiblespace ")//
-              .replaceAll("\n", "\\\\textbackslash n");
-
       row.add(String.valueOf(i));
-      for (int j = 0; j < textRangeList.size(); j++) {
+      for (int j = 0; j < allTextRanges.size(); j++) {
         if (i == nextIndexPoint.getTextNodeIndex() && j == nextIndexPoint.getTextRangeIndex()) {
           String cell = longTextRangeIndexes.contains(j) ? "\\underline{X}" : "X";
           row.add(cell);
@@ -323,6 +319,9 @@ public class LMNLImporterTest {
           row.add(" ");
         }
       }
+      String content = allTextNodes.get(i).getContent()//
+              .replaceAll(" ", "\\\\textvisiblespace ")//
+              .replaceAll("\n", "\\\\textbackslash n");
       row.add(content);
       latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
     }
