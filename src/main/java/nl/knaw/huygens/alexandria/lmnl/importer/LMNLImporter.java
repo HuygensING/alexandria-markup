@@ -15,15 +15,15 @@ import java.util.*;
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporter {
-  static Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
+  static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   static class ImporterContext {
-    private Stack<Limen> limenStack = new Stack<>();
+    private final Stack<Limen> limenStack = new Stack<>();
 //    private Map<String, TextRange> openTextRanges = new HashMap<>();
-    private Deque<TextRange> openTextRangeDeque = new ArrayDeque<>();
-    private Stack<TextRange> openTextRangeStack = new Stack<>();
-    private Stack<Annotation> annotationStack = new Stack<>();
-    private LMNLLexer lexer;
+    private final Deque<TextRange> openTextRangeDeque = new ArrayDeque<>();
+    private final Stack<TextRange> openTextRangeStack = new Stack<>();
+    private final Stack<Annotation> annotationStack = new Stack<>();
+    private final LMNLLexer lexer;
 
     ImporterContext(LMNLLexer lexer) {
       this.lexer = lexer;
