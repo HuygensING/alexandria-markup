@@ -303,16 +303,16 @@ public class LMNLImporterTest {
             ;
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
-    IndexPoint nextIndexPoint = pointIterator.next();
+    IndexPoint indexPoint = pointIterator.next();
     for (int i = 0; i < allTextNodes.size(); i++) {
       List<String> row = new ArrayList<>();
       row.add(String.valueOf(i));
       for (int j = 0; j < allTextRanges.size(); j++) {
-        if (i == nextIndexPoint.getTextNodeIndex() && j == nextIndexPoint.getTextRangeIndex()) {
+        if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getTextRangeIndex()) {
           String cell = longTextRangeIndexes.contains(j) ? "\\underline{X}" : "X";
           row.add(cell);
           if (pointIterator.hasNext()) {
-            nextIndexPoint = pointIterator.next();
+            indexPoint = pointIterator.next();
           }
 
         } else {

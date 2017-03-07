@@ -80,8 +80,8 @@ public class Limen {
       textRangeIndex.put(textRangeList.get(i), i);
     }
     List<TextRange> textRangesToInvert = textRangeList.stream()//
-            .filter(this::containsAtLeastHalfOfAllTextNodes)//
-            .collect(Collectors.toList());
+        .filter(this::containsAtLeastHalfOfAllTextNodes)//
+        .collect(Collectors.toList());
 
     List<IndexPoint> list = new ArrayList<>();
     AtomicInteger textNodeIndex = new AtomicInteger(0);
@@ -93,8 +93,8 @@ public class Limen {
 
       // all the TextRanges that should be inverted and are NOT associated with this TextNode
       List<TextRange> relevantInvertedTextRanges = textRangesToInvert.stream()//
-              .filter(tr -> !textRanges.contains(tr))//
-              .collect(Collectors.toList());
+          .filter(tr -> !textRanges.contains(tr))//
+          .collect(Collectors.toList());
 
       // ignore those TextRanges associated with this TextNode that should be inverted
       textRanges.removeAll(textRangesToInvert);
@@ -102,11 +102,13 @@ public class Limen {
       // add all the TextRanges that should be inverted and are NOT associated with this TextNode
       textRanges.addAll(relevantInvertedTextRanges);
 
-      textRanges.forEach(tr -> {
-        int j = textRangeIndex.get(tr);
-        IndexPoint point = new IndexPoint(i, j);
-        list.add(point);
-      });
+      textRanges.stream()//
+          .sorted(Comparator.comparingInt(textRangeIndex::get))//
+          .forEach(tr -> {
+            int j = textRangeIndex.get(tr);
+            IndexPoint point = new IndexPoint(i, j);
+            list.add(point);
+          });
     });
 
     return list;
@@ -115,6 +117,6 @@ public class Limen {
   public boolean containsAtLeastHalfOfAllTextNodes(TextRange textRange) {
     int textNodeSize = textNodeList.size();
     return textNodeSize > 2 //
-            && textRange.textNodes.size() >= textNodeSize / 2d;
+        && textRange.textNodes.size() >= textNodeSize / 2d;
   }
 }
