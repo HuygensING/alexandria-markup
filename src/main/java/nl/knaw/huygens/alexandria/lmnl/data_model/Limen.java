@@ -1,8 +1,12 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Ronald Haentjens Dekker on 25/01/17.
@@ -72,46 +76,6 @@ public class Limen {
 
   public boolean hasTextNodes() {
     return !textNodeList.isEmpty();
-  }
-
-  public List<IndexPoint> getIndexPoints() {
-    Map<TextRange, Integer> textRangeIndex = new HashMap<>(textRangeList.size());
-    for (int i = 0; i < textRangeList.size(); i++) {
-      textRangeIndex.put(textRangeList.get(i), i);
-    }
-    List<TextRange> textRangesToInvert = textRangeList.stream()//
-        .filter(this::containsAtLeastHalfOfAllTextNodes)//
-        .collect(Collectors.toList());
-
-    List<IndexPoint> list = new ArrayList<>();
-    AtomicInteger textNodeIndex = new AtomicInteger(0);
-    textNodeList.forEach(tn -> {
-      int i = textNodeIndex.getAndIncrement();
-
-      // all the TextRanges associated with this TextNode
-      Set<TextRange> textRanges = getTextRanges(tn);
-
-      // all the TextRanges that should be inverted and are NOT associated with this TextNode
-      List<TextRange> relevantInvertedTextRanges = textRangesToInvert.stream()//
-          .filter(tr -> !textRanges.contains(tr))//
-          .collect(Collectors.toList());
-
-      // ignore those TextRanges associated with this TextNode that should be inverted
-      textRanges.removeAll(textRangesToInvert);
-
-      // add all the TextRanges that should be inverted and are NOT associated with this TextNode
-      textRanges.addAll(relevantInvertedTextRanges);
-
-      textRanges.stream()//
-          .sorted(Comparator.comparingInt(textRangeIndex::get))//
-          .forEach(tr -> {
-            int j = textRangeIndex.get(tr);
-            IndexPoint point = new IndexPoint(i, j);
-            list.add(point);
-          });
-    });
-
-    return list;
   }
 
   public boolean containsAtLeastHalfOfAllTextNodes(TextRange textRange) {

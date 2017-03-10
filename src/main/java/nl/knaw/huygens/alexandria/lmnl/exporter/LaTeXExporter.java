@@ -115,17 +115,17 @@ public class LaTeXExporter {
     }
   }
 
-  private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
-    limen.textRangeList.forEach(tr -> {
-      String color = colorPicker.nextColor();
-      latexBuilder.append("    \\node[draw=").append(color).append(",shape=rectangle,fit=");
-      tr.textNodes.forEach(tn -> {
-        int i = textNodeIndices.get(tn);
-        latexBuilder.append("(tn").append(i).append(")");
-      });
-      latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
-    });
-  }
+//  private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
+//    limen.textRangeList.forEach(tr -> {
+//      String color = colorPicker.nextColor();
+//      latexBuilder.append("    \\node[draw=").append(color).append(",shape=rectangle,fit=");
+//      tr.textNodes.forEach(tn -> {
+//        int i = textNodeIndices.get(tn);
+//        latexBuilder.append("(tn").append(i).append(")");
+//      });
+//      latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
+//    });
+//  }
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
     String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
