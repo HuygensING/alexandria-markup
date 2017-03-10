@@ -51,7 +51,7 @@ public class LaTeXExporter {
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         int i = textNodeCounter.getAndIncrement();
         textNodeIndices.put(tn, i);
-        List<TextRange> textRanges = limen.getTextRanges(tn);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
 
         List<TextRange> toClose = new ArrayList<>();
         toClose.addAll(openTextRanges);

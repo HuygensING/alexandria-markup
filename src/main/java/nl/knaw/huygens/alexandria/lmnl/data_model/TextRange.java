@@ -61,4 +61,14 @@ public class TextRange {
   public boolean isAnonymous() {
     return textNodes.size() == 1 && "".equals(textNodes.get(0).getContent());
   }
+
+  public boolean hasId() {
+    return tag.contains("=");
+  }
+
+  public void joinWith(TextRange textRange) {
+    this.textNodes.addAll(textRange.textNodes);
+    this.annotations.addAll(textRange.getAnnotations());
+  }
+
 }

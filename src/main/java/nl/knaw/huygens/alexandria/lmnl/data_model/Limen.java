@@ -15,7 +15,7 @@ public class Limen {
 
   public final List<TextNode> textNodeList;
   public final List<TextRange> textRangeList;
-  private final Map<TextNode, List<TextRange>> textNodeToTextRange;
+  private final Map<TextNode, Set<TextRange>> textNodeToTextRange;
 
   public Limen() {
     this.textNodeList = new ArrayList<>();
@@ -58,16 +58,16 @@ public class Limen {
   }
 
   public void associateTextWithRange(TextNode node, TextRange textRange) {
-    textNodeToTextRange.computeIfAbsent(node, f -> new ArrayList<>()).add(textRange);
+    textNodeToTextRange.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(textRange);
   }
 
   public Iterator<TextNode> getTextNodeIterator() {
     return this.textNodeList.iterator();
   }
 
-  public List<TextRange> getTextRanges(TextNode node) {
-    List<TextRange> textRanges = textNodeToTextRange.get(node);
-    return textRanges == null ? new ArrayList<>() : textRanges;
+  public Set<TextRange> getTextRanges(TextNode node) {
+    Set<TextRange> textRanges = textNodeToTextRange.get(node);
+    return textRanges == null ? new LinkedHashSet<>() : textRanges;
   }
 
   public boolean hasTextNodes() {
@@ -89,7 +89,7 @@ public class Limen {
       int i = textNodeIndex.getAndIncrement();
 
       // all the TextRanges associated with this TextNode
-      List<TextRange> textRanges = getTextRanges(tn);
+      Set<TextRange> textRanges = getTextRanges(tn);
 
       // all the TextRanges that should be inverted and are NOT associated with this TextNode
       List<TextRange> relevantInvertedTextRanges = textRangesToInvert.stream()//

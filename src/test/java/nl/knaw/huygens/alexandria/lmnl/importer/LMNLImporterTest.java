@@ -186,6 +186,19 @@ public class LMNLImporterTest {
     // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
+  @Test
+  public void testDiscontinuousRanges(){
+    String input = "'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'";
+    Document actual = new LMNLImporter().importLMNL(input);
+    LOG.info("textNodes={}", actual.value().textNodeList);
+    LOG.info("textRanges={}", actual.value().textRangeList);
+    assertThat(actual.value().hasTextNodes()).isTrue();
+    assertThat(actual.value().textRangeList).hasSize(1);
+    String lmnl = lmnlExporter.toLMNL(actual);
+    LOG.info("lmnl={}", lmnl);
+    assertThat(lmnl).isEqualTo(input);
+  }
+
   private void compareLMNL(String pathname, Document actual) throws IOException {
     String inLMNL = FileUtils.readFileToString(new File(pathname));
     String outLMNL = lmnlExporter.toLMNL(actual);
