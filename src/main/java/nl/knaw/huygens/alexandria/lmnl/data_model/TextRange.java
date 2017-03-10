@@ -61,4 +61,33 @@ public class TextRange {
   public boolean isAnonymous() {
     return textNodes.size() == 1 && "".equals(textNodes.get(0).getContent());
   }
+
+  public boolean hasId() {
+    return tag.contains("=");
+  }
+
+  public void joinWith(TextRange textRange) {
+    this.textNodes.addAll(textRange.textNodes);
+    textRange.textNodes.forEach(tn -> {
+      owner.disAssociateTextWithRange(tn, textRange);
+      owner.associateTextWithRange(tn, this);
+    });
+    this.annotations.addAll(textRange.getAnnotations());
+  }
+
+  public boolean isContinuous() {
+    boolean isContinuous = true;
+    TextNode textNode = textNodes.get(0);
+    TextNode expectedNext = textNode.getNextTextNode();
+    for (int i = 1; i < textNodes.size(); i++) {
+      textNode = textNodes.get(i);
+      if (!textNode.equals(expectedNext)) {
+        isContinuous = false;
+        break;
+      }
+      expectedNext = textNode.getNextTextNode();
+    }
+    return isContinuous;
+  }
+
 }

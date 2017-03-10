@@ -33,7 +33,7 @@ public class LMNLExporter {
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
-        List<TextRange> textRanges = limen.getTextRanges(tn);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
 
         List<TextRange> toClose = new ArrayList<>();
         toClose.addAll(openTextRanges);

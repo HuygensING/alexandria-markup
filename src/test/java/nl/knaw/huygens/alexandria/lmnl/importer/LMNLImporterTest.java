@@ -1,21 +1,30 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 public class LMNLImporterTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
@@ -45,7 +54,10 @@ public class LMNLImporterTest {
     assertTrue(compareDocuments(expected, actual));
     assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
 
-    List<IndexPoint> indexPoints = logKdTree(actual);
+    logKdTree(actual);
+    NodeRangeIndex index = new NodeRangeIndex(actual.value());
+    List<IndexPoint> indexPoints = index.getIndexPoints();
+    logKdTree(actual);
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
     assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
@@ -54,14 +66,14 @@ public class LMNLImporterTest {
   @Test
   public void testLexingComplex() {
     String input = "[excerpt\n"//
-            + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-            + "  [author\n"//
-            + "    [name}Robert Frost{]\n"//
-            + "    [dates}1874-1963{]] }\n"//
-            + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-            + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-            + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
-            + "{excerpt]";
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
+        + "  [author\n"//
+        + "    [name}Robert Frost{]\n"//
+        + "    [dates}1874-1963{]] }\n"//
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+        + "{excerpt]";
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
@@ -121,7 +133,7 @@ public class LMNLImporterTest {
 
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = logKdTree(actual);
+    logKdTree(actual);
     // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
@@ -161,9 +173,10 @@ public class LMNLImporterTest {
     assertThat(q2.textNodes).hasSize(1); // has 1 textnode
 
     // compareLMNL(pathname, actual);
+    logKdTree(actual);
+
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = logKdTree(actual);
     // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
@@ -180,10 +193,27 @@ public class LMNLImporterTest {
     assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous textrange
     // compareLMNL(pathname, actual);
 
+    logKdTree(actual);
+
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
-    List<IndexPoint> indexPoints = logKdTree(actual);
     // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+  }
+
+  @Test
+  public void testDiscontinuousRanges() {
+    String input = "'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'";
+    Document actual = new LMNLImporter().importLMNL(input);
+    LOG.info("textNodes={}", actual.value().textNodeList);
+    LOG.info("textRanges={}", actual.value().textRangeList);
+    assertThat(actual.value().hasTextNodes()).isTrue();
+    assertThat(actual.value().textRangeList).hasSize(1);
+    String lmnl = lmnlExporter.toLMNL(actual);
+    LOG.info("lmnl={}", lmnl);
+    assertThat(lmnl).isEqualTo(input);
+    LaTeXExporter latex = new LaTeXExporter(actual);
+    LOG.info("matrix=\n{}", latex.exportMatrix());
+    LOG.info("kdtree=\n{}", latex.exportKdTree());
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
@@ -257,168 +287,12 @@ public class LMNLImporterTest {
     LOG.info("LMNL=\n{}", lmnlExporter.toLMNL(actual));
   }
 
-  private List<IndexPoint> logKdTree(Document actual) {
-    Limen limen = actual.value();
-    List<IndexPoint> indexPoints = limen.getIndexPoints();
-
-    Set<Integer> longTextRangeIndexes = new HashSet<>();
-    for (int i = 0; i < limen.textRangeList.size(); i++) {
-      if (limen.containsAtLeastHalfOfAllTextNodes(limen.textRangeList.get(i))) {
-        longTextRangeIndexes.add(i);
-      }
-    }
-
-    LOG.info("indexpoints={}", indexPoints);
-    String latex1 = latexMatrix(limen.textNodeList, limen.textRangeList, indexPoints, longTextRangeIndexes);
+  private void logKdTree(Document actual) {
+    LaTeXExporter latexExporter = new LaTeXExporter(actual);
+    String latex1 = latexExporter.exportMatrix();
     LOG.info("matrix=\n{}", latex1);
-    KdTree<IndexPoint> kdTree = new KdTree<>(indexPoints);
-    LOG.info("kdtree=\n{}", kdTree);
-    String latexKdTree = latexKdTree(kdTree, longTextRangeIndexes);
+    String latexKdTree = latexExporter.exportKdTree();
     LOG.info("latex tree=\n{}", latexKdTree);
-    return indexPoints;
   }
 
-  private String latexMatrix(List<TextNode> allTextNodes, List<TextRange> allTextRanges, List<IndexPoint> indexPoints, Set<Integer> longTextRangeIndexes) {
-    List<String> rangeLabels = allTextRanges.stream()
-            .map(TextRange::getTag)
-            .collect(Collectors.toList());
-    List<String> rangeIndex = new ArrayList<>();
-    rangeIndex.add("");
-    for (int i = 0; i < rangeLabels.size(); i++) {
-      rangeIndex.add(String.valueOf(i));
-    }
-    rangeLabels.add(0, "");
-    rangeLabels.add("");
-    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
-    StringBuilder latexBuilder = new StringBuilder()//
-            .append("\\documentclass{article}\n")//
-            .append("\\usepackage{array,graphicx}\n")//
-            .append("\\newcommand*\\rot{\\rotatebox{90}}\n")//
-            .append("\\usepackage{incgraph}\n")//
-            .append("\\begin{document}\n")//
-            .append("\\begin{table}[]\n")//
-            .append("\\begin{inctext}\n")//
-            .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
-            .append("\\hline\n")//
-            ;
-
-    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
-    IndexPoint indexPoint = pointIterator.next();
-    for (int i = 0; i < allTextNodes.size(); i++) {
-      List<String> row = new ArrayList<>();
-      row.add(String.valueOf(i));
-      for (int j = 0; j < allTextRanges.size(); j++) {
-        if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getTextRangeIndex()) {
-          String cell = longTextRangeIndexes.contains(j) ? "\\underline{X}" : "X";
-          row.add(cell);
-          if (pointIterator.hasNext()) {
-            indexPoint = pointIterator.next();
-          }
-
-        } else {
-          row.add(" ");
-        }
-      }
-      String content = allTextNodes.get(i).getContent()//
-              .replaceAll(" ", "\\\\textvisiblespace ")//
-              .replaceAll("\n", "\\\\textbackslash n");
-      row.add(content);
-      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
-    }
-
-    latexBuilder.append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")))//
-            .append("\\\\\n")//
-            .append("\\end{tabular}\n")//
-            .append("\\end{inctext}\n")//
-            .append("\\end{table}\n")//
-            .append("\\end{document}");
-    return latexBuilder.toString();
-  }
-
-  private String latexKdTree(KdTree<IndexPoint> kdTree, Set<Integer> longTextRangeIndexes) {
-    StringBuilder latexBuilder = new StringBuilder()//
-            .append("\\documentclass[landscape]{article}\n")//
-            .append("\\usepackage[utf8]{inputenc}\n")//
-            .append("\\usepackage[T1]{fontenc}\n")//
-            .append("\\usepackage{incgraph}\n")//
-            .append("\\usepackage{caption}\n")//
-            .append("\\usepackage[margin=1in]{geometry}\n")//
-            .append("\\usepackage{tikz-qtree}\n")//
-            .append("\\usetikzlibrary{shadows,trees}\n")//
-            .append("\\begin{document}\n")//
-            .append("\\tikzset{font=\\small,\n" +
-                    "%edge from parent fork down,\n" +
-                    "level distance=1.5cm,\n" +
-                    "textNodeAxis/.style=\n" +
-                    "    {top color=white,\n" +
-                    "    bottom color=blue!25,\n" +
-                    "    circle,\n" +
-                    "    minimum height=8mm,\n" +
-                    "    draw=blue!75,\n" +
-                    "    very thick,\n" +
-                    "    drop shadow,\n" +
-                    "    align=center,\n" +
-                    "    text depth = 0pt\n" +
-                    "    },\n" +
-                    "textRangeAxis/.style=\n" +
-                    "    {top color=white,\n" +
-                    "    bottom color=green!25,\n" +
-                    "    circle,\n" +
-                    "    minimum height=8mm,\n" +
-                    "    draw=green!75,\n" +
-                    "    very thick,\n" +
-                    "    drop shadow,\n" +
-                    "    align=center,\n" +
-                    "    text depth = 0pt\n" +
-                    "    },\n" +
-                    "edge from parent/.style=\n" +
-                    "    {draw=black!50,\n" +
-                    "    thick\n" +
-                    "    }}\n" +
-                    "\n" +
-                    "\\centering\n")//
-            .append("\\begin{figure}\n")
-//            .append("\\begin{inctext}\n")
-            .append("\\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]\n");
-    KdTree.KdNode root = kdTree.getRoot();
-    IndexPoint rootIP = root.getContent();
-    String content = toNodeContent(rootIP, longTextRangeIndexes);
-    latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(content).append("};\n");
-    appendChildTree(latexBuilder, root.getLesser(), "textRangeAxis", longTextRangeIndexes);
-    appendChildTree(latexBuilder, root.getGreater(), "textRangeAxis", longTextRangeIndexes);
-    latexBuilder
-            .append("]\n")//
-            .append("\\end{tikzpicture}\n")//
-            .append("\\centering\n")//
-            .append("\\caption*{(a,b) = (TextNodeIndex, TextRangeIndex)}\n")//
-//            .append("\\end{inctext}\n")//
-            .append("\\end{figure}\n")//
-            .append("\\end{document}")//
-    ;
-    return latexBuilder.toString();
-  }
-
-  private String toNodeContent(IndexPoint indexPoint, Set<Integer> longTextRangeIndexes) {
-    String content = indexPoint.toString();
-    if (longTextRangeIndexes.contains(indexPoint.getTextRangeIndex())){
-      return "\\underline{"+content+"}";
-    }
-    return content;
-  }
-
-  private void appendChildTree(StringBuilder latexBuilder, KdTree.KdNode kdnode, String style, Set<Integer> longTextRangeIndexes) {
-    if (kdnode == null) {
-      latexBuilder.append("[.\\node[").append(style).append("]{};\n]\n");
-      return;
-    }
-    IndexPoint indexPoint = kdnode.getContent();
-    String content = toNodeContent(indexPoint, longTextRangeIndexes);
-    latexBuilder.append("[.\\node[").append(style).append("]{").append(content).append("};\n");
-    String nextStyle = (style.equals("textNodeAxis") ? "textRangeAxis" : "textNodeAxis");
-    if (!(kdnode.getLesser() == null && kdnode.getGreater() == null)) {
-      appendChildTree(latexBuilder, kdnode.getLesser(), nextStyle, longTextRangeIndexes);
-      appendChildTree(latexBuilder, kdnode.getGreater(), nextStyle, longTextRangeIndexes);
-    }
-    latexBuilder.append("]\n");
-  }
 }
