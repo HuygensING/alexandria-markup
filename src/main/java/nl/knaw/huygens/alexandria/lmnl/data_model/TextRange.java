@@ -71,4 +71,18 @@ public class TextRange {
     this.annotations.addAll(textRange.getAnnotations());
   }
 
+  public boolean isContinuous() {
+    boolean isContinuous=true;
+    TextNode textNode = textNodes.get(0);
+    TextNode expectedNext = textNode.getNextTextNode();
+    for (int i = 1; i < textNodes.size(); i++) {
+      textNode = textNodes.get(i);
+      if (!textNode.equals(expectedNext)){
+        isContinuous = false;
+        break;
+      }
+    }
+    return isContinuous;
+  }
+
 }

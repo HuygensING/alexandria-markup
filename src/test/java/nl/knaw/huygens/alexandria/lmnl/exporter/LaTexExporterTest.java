@@ -26,7 +26,6 @@ public class LaTexExporterTest {
     assertThat(laTeX).isNotBlank();
   }
 
-
   @Test
   public void testLaTeXOutput2() throws IOException {
     String laTeX = laTeXFromLMNLFile("data/1kings12.lmnl");
@@ -40,6 +39,14 @@ public class LaTexExporterTest {
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
+
+  @Test
+  public void testLaTeXOutputWithDiscontinuation() {
+    String laTeX = laTeXFromLMNLString("'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'");
+    printLaTeX(laTeX);
+    assertThat(laTeX).isNotBlank();
+  }
+
 
   private String laTeXFromLMNLString(String input) {
     Document document = new LMNLImporter().importLMNL(input);
