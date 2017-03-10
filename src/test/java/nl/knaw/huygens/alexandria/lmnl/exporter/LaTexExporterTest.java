@@ -60,8 +60,8 @@ public class LaTexExporterTest {
   }
 
   private String toLaTeX(Document document) {
-    LaTeXExporter exporter = new LaTeXExporter();
-    return exporter.toLaTeX(document);
+    LaTeXExporter exporter = new LaTeXExporter(document);
+    return exporter.exportDocument();
   }
 
   private void printLaTeX(String laTeX) {
