@@ -1,17 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
 /**
  * Created by bramb on 15-2-2017.
@@ -47,6 +48,34 @@ public class LaTexExporterTest {
     assertThat(laTeX).isNotBlank();
   }
 
+  @Test
+  public void testLaTexOutputDataFiles() throws IOException {
+    processLMNLFile("alice-excerpt");
+    processLMNLFile("1kings12");
+    processLMNLFile("ozymandias-voices-wap");
+  }
+
+  private void processLMNLFile(String basename) throws IOException {
+    InputStream input = FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
+    Document document = new LMNLImporter().importLMNL(input);
+    LaTeXExporter exporter = new LaTeXExporter(document);
+
+    String laTeX = exporter.exportDocument();
+    assertThat(laTeX).isNotBlank();
+    LOG.info("document=\n{}", laTeX);
+    String outDir = "out/";
+    FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
+
+    String matrix = exporter.exportMatrix();
+    assertThat(matrix).isNotBlank();
+    LOG.info("matrix=\n{}", laTeX);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-matrix.tex"), matrix, "UTF-8");
+
+    String kdTree = exporter.exportKdTree();
+    assertThat(kdTree).isNotBlank();
+    LOG.info("k-d tree=\n{}", kdTree);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
+  }
 
   private String laTeXFromLMNLString(String input) {
     Document document = new LMNLImporter().importLMNL(input);
@@ -66,6 +95,6 @@ public class LaTexExporterTest {
 
   private void printLaTeX(String laTeX) {
     System.out.println(laTeX);
-//    LOG.info("latex=\n{}", laTeX);
+    // LOG.info("latex=\n{}", laTeX);
   }
 }

@@ -9,7 +9,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class NodeRangeIndex {
+  final Logger LOG = LoggerFactory.getLogger(NodeRangeIndex.class);
 
   private List<IndexPoint> indexPoints;
   private KdTree<IndexPoint> kdTree;
@@ -33,6 +37,7 @@ public class NodeRangeIndex {
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
       limen.textNodeList.forEach(tn -> {
+        LOG.info("TextNode={}", tn);
         int i = textNodeIndex.getAndIncrement();
 
         // all the TextRanges associated with this TextNode

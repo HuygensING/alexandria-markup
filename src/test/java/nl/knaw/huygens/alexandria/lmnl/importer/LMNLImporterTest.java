@@ -211,6 +211,9 @@ public class LMNLImporterTest {
     String lmnl = lmnlExporter.toLMNL(actual);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(input);
+    LaTeXExporter latex = new LaTeXExporter(actual);
+    LOG.info("matrix=\n{}", latex.exportMatrix());
+    LOG.info("kdtree=\n{}", latex.exportKdTree());
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {

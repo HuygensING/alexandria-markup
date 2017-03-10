@@ -65,6 +65,10 @@ public class Limen {
     textNodeToTextRange.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(textRange);
   }
 
+  public void disAssociateTextWithRange(TextNode node, TextRange textRange) {
+    textNodeToTextRange.computeIfAbsent(node, f -> new LinkedHashSet<>()).remove(textRange);
+  }
+
   public Iterator<TextNode> getTextNodeIterator() {
     return this.textNodeList.iterator();
   }

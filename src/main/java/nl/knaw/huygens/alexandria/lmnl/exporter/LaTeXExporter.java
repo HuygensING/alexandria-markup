@@ -1,15 +1,31 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
@@ -115,17 +131,17 @@ public class LaTeXExporter {
     }
   }
 
-//  private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
-//    limen.textRangeList.forEach(tr -> {
-//      String color = colorPicker.nextColor();
-//      latexBuilder.append("    \\node[draw=").append(color).append(",shape=rectangle,fit=");
-//      tr.textNodes.forEach(tn -> {
-//        int i = textNodeIndices.get(tn);
-//        latexBuilder.append("(tn").append(i).append(")");
-//      });
-//      latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
-//    });
-//  }
+  // private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
+  // limen.textRangeList.forEach(tr -> {
+  // String color = colorPicker.nextColor();
+  // latexBuilder.append(" \\node[draw=").append(color).append(",shape=rectangle,fit=");
+  // tr.textNodes.forEach(tn -> {
+  // int i = textNodeIndices.get(tn);
+  // latexBuilder.append("(tn").append(i).append(")");
+  // });
+  // latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
+  // });
+  // }
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
     String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
@@ -171,6 +187,7 @@ public class LaTeXExporter {
             TextNode nextTextNode = textNodeIterator.next();
             if (nextTextNode.equals(expectedNextNode)) {
               lastTextNode = nextTextNode;
+              expectedNextNode = lastTextNode.getNextTextNode();
               goOn = textNodeIterator.hasNext();
 
             } else {
