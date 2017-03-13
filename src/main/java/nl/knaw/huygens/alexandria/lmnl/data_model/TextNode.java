@@ -9,7 +9,7 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
 public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
-  private TextNode nextTextNode = null;     // for the rightmost (last) TextNode, this is null;
+  private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
 
   public TextNode(String content) {
     this.content = content;
@@ -47,6 +47,9 @@ public class TextNode {
   public String toString() {
     return "\"" + content.replace("\n", "\\n") + "\"";
   }
+
+  public void setContent(String content) {
+    this.content = content;
+
+  }
 }
-
-
