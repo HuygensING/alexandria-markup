@@ -1,5 +1,6 @@
 package nl.knaw.huygens.alexandria.lmnl.modifier;
 
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,6 +141,7 @@ public class LMNLModifier {
     });
     logTextNodes(limen.textNodeList);
     logTextRanges(limen.textRangeList);
+//    LMNLImporter.joinDiscontinuedRanges(limen);
   }
 
   private void logTextNodes(List<TextNode> list) {

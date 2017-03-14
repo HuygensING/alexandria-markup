@@ -266,11 +266,11 @@ public class LMNLImporter {
     throw new RuntimeException(message);
   }
 
-  private void joinDiscontinuedRanges(Document document) {
+  private static void joinDiscontinuedRanges(Document document) {
     joinDiscontinuedRanges(document.value());
   }
 
-  private void joinDiscontinuedRanges(Limen limen) {
+  public static void joinDiscontinuedRanges(Limen limen) {
     Map<String, TextRange> textRangesToJoin = new HashMap<>();
     List<TextRange> textRangesToRemove = new ArrayList<>();
     limen.textRangeList.stream()//
@@ -291,7 +291,7 @@ public class LMNLImporter {
         .map(TextRange::getAnnotations)//
         .flatMap(List::stream)//
         .map(Annotation::value)//
-        .forEach(this::joinDiscontinuedRanges);
+        .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
   private void log(String mode, String ruleName, String modeName, Token token) {
