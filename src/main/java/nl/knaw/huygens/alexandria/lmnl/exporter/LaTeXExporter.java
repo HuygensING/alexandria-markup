@@ -64,6 +64,30 @@ public class LaTeXExporter {
     return latexBuilder.toString();
   }
 
+  public String exportTextRangeOverlap() {
+    StringBuilder latexBuilder = new StringBuilder();
+    latexBuilder.append("\\documentclass{article}\n")//
+        .append("\\usepackage{incgraph}\n")//
+        .append("\\usepackage{tikz}\n")//
+        .append("\\usepackage{latexsym}\n")//
+        .append("\\usepackage[utf8x]{inputenc}\n")//
+        .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")//
+        .append("\n")//
+        .append("\\begin{document}\n")//
+        .append("\\begin{inctext}\n")//
+        .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
+        .append("  \\begin{tikzpicture}\n")//
+        .append("    [textnode/.style={rectangle,draw=black!50,thick,rounded corners,align=center},\n")//
+        .append("     textrange/.style={rectangle,draw=blue!50,thick},\n")//
+        .append("     document/.style={circle,draw=black!50,thick}]\n")//
+        .append("    \\node[document] (doc) {document};\n");
+    appendGradedLimen(latexBuilder, limen);
+    latexBuilder.append("  \\end{tikzpicture}\n")//
+        .append("\\end{inctext}\n")//
+        .append("\\end{document}\n");
+    return latexBuilder.toString();
+  }
+
   public String exportMatrix() {
     return exportMatrix(limen.textNodeList, limen.textRangeList, getIndexPoints(), getLongTextRangeIndexes());
   }
@@ -131,6 +155,47 @@ public class LaTeXExporter {
     }
   }
 
+  private void appendGradedLimen(StringBuilder latexBuilder, Limen limen) {
+    int maxTextRangesPerTextNode = limen.textNodeList.parallelStream()
+        .map(limen::getTextRanges)
+        .mapToInt(list -> list.size())
+        .max()
+        .getAsInt();
+    latexBuilder.append("\n    % TextNodes\n");
+    if (limen != null) {
+      Set<TextRange> openTextRanges = new LinkedHashSet<>();
+      AtomicInteger textNodeCounter = new AtomicInteger(0);
+      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
+      limen.getTextNodeIterator().forEachRemaining(tn -> {
+        int i = textNodeCounter.getAndIncrement();
+        textNodeIndices.put(tn, i);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
+
+        List<TextRange> toClose = new ArrayList<>();
+        toClose.addAll(openTextRanges);
+        toClose.removeAll(textRanges);
+        Collections.reverse(toClose);
+
+        List<TextRange> toOpen = new ArrayList<>();
+        toOpen.addAll(textRanges);
+        toOpen.removeAll(openTextRanges);
+
+        openTextRanges.removeAll(toClose);
+        openTextRanges.addAll(toOpen);
+
+        float gradient = limen.getTextRanges(tn).size() / (float) maxTextRangesPerTextNode;
+        addGradedTextNode(latexBuilder, tn, i, colorGradient(gradient));
+      });
+      connectTextNodes(latexBuilder, textNodeCounter);
+    }
+  }
+
+  String[] COLOR_GRADIENT_RED = {"white", "yellow", "orange", "red"};
+
+  private String colorGradient(float gradient) {
+    return COLOR_GRADIENT_RED[Math.round(gradient * (COLOR_GRADIENT_RED.length - 1))];
+  }
+
   // private void drawTextRangesAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
   // limen.textRangeList.forEach(tr -> {
   // String color = colorPicker.nextColor();
@@ -144,9 +209,21 @@ public class LaTeXExporter {
   // }
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
-    String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
+    String content = tn.getContent()//
+        .replaceAll(" ", "\\\\textvisiblespace ")
+        .replaceAll("\n", "\\\\textbackslash n");
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
+    latexBuilder.append(nodeLine);
+  }
+
+  private void addGradedTextNode(StringBuilder latexBuilder, TextNode tn, int i, String fillColor) {
+    String content = tn.getContent()
+        .replaceAll(" ", "\\\\textvisiblespace ")
+        .replaceAll("\n", "\\\\textbackslash n \\\\\\\\")
+        .replaceAll("\\\\textbackslash n \\\\\\\\$", "\\\\textbackslash n");
+    String relPos = i == 0 ? "below=of doc" : ("below=of tn" + (i - 1));
+    String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
@@ -214,7 +291,7 @@ public class LaTeXExporter {
   }
 
   private void appendTextRangePart(StringBuilder latexBuilder, Map<TextNode, Integer> textNodeIndices, TextRange tr, int rangeLayerIndex, float textRangeRow, String color, TextNode firstTextNode,
-      TextNode lastTextNode, int partNo) {
+                                   TextNode lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
     String textRangePartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;
@@ -351,7 +428,7 @@ public class LaTeXExporter {
         .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & ")))
         .append("\\\\\n")//
         .append("\\hline\n")//
-    ;
+        ;
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
     IndexPoint indexPoint = pointIterator.next();
