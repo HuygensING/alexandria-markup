@@ -26,12 +26,13 @@ public class LMNLModifier {
     String currentText = null;
     int currentTextNodeLength = 0;
     // get to starting TextNode
+    int offsetAtEndOfCurrentTextNode = currentOffset + currentTextNodeLength;
     while (goOn) {
       currentText = cursor.getCurrentText();
       currentTextNodeLength = cursor.getCurrentTextLength();
-      if (currentOffset + currentTextNodeLength >= startOffset) {
-        int textSize = currentOffset + currentTextNodeLength;
-        int tailLength = Math.min(textSize, textSize - startOffset + 1);
+      offsetAtEndOfCurrentTextNode = currentOffset + currentTextNodeLength;
+      if (startOffset <= offsetAtEndOfCurrentTextNode) {
+        int tailLength = Math.min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset);
         int headLength = currentTextNodeLength - tailLength;
         String headText = currentText.substring(0, headLength);
         String tailText = currentText.substring(headLength);
@@ -39,12 +40,14 @@ public class LMNLModifier {
           // detach head
           cursor.getCurrentTextNode().setContent(headText);
           TextNode newTextNode = new TextNode(tailText);
+          TextNode nextTextNode = cursor.getCurrentTextNode().getNextTextNode();
           newTextNode.setPreviousTextNode(cursor.getCurrentTextNode());
-          newTextNode.setNextTextNode(cursor.getCurrentTextNode()).getNextTextNode();
+          newTextNode.setNextTextNode(nextTextNode);
           cursor.getCurrentTextNode().setNextTextNode(newTextNode);
           limen.getTextRanges(cursor.getCurrentTextNode()).forEach(tr -> limen.associateTextWithRange(newTextNode, tr));
           limen.associateTextWithRange(newTextNode, newTextRange);
           limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTextNode);
+          cursor.advance();
         }
         goOn = false;
 
@@ -52,24 +55,25 @@ public class LMNLModifier {
         goOn = cursor.canAdvance();
         cursor.advance();
         currentOffset += currentTextNodeLength;
+        offsetAtEndOfCurrentTextNode = currentOffset + currentTextNodeLength;
       }
 
     }
 
     goOn = true;
     while (goOn) {
-      if (currentOffset + currentTextNodeLength < endOffset) {
+      if (offsetAtEndOfCurrentTextNode < endOffset) {
         limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
         goOn = cursor.canAdvance();
         cursor.advance();
         currentOffset += currentTextNodeLength;
+        offsetAtEndOfCurrentTextNode = currentOffset + currentTextNodeLength;
 
       } else {
-        int textSize = currentOffset + currentTextNodeLength;
-        int tailLength = textSize - endOffset;
+        int tailLength = offsetAtEndOfCurrentTextNode - endOffset;
 
-        LOG.info("cursor.getCurrentTextLength()={}", cursor.getCurrentTextLength());
-        LOG.info("textSize={}", textSize);
+//        LOG.info("cursor.getCurrentTextLength()={}", cursor.getCurrentTextLength());
+//        LOG.info("textSize={}", offsetAtEndOfCurrentTextNode);
         int headLength = cursor.getCurrentTextLength() - tailLength;
         String headText = cursor.getCurrentText().substring(0, headLength);
         String tailText = cursor.getCurrentText().substring(headLength);
@@ -78,12 +82,14 @@ public class LMNLModifier {
           // detach head
           cursor.getCurrentTextNode().setContent(tailText);
           TextNode newTextNode = new TextNode(headText);
+          TextNode previousTextNode = cursor.getCurrentTextNode().getPreviousTextNode();
           newTextNode.setNextTextNode(cursor.getCurrentTextNode());
-          newTextNode.setPreviousTextNode(cursor.getCurrentTextNode().getPreviousTextNode());
+          newTextNode.setPreviousTextNode(previousTextNode);
           cursor.getCurrentTextNode().setPreviousTextNode(newTextNode);
           limen.getTextRanges(cursor.getCurrentTextNode()).forEach(tr -> limen.associateTextWithRange(newTextNode, tr));
           limen.associateTextWithRange(newTextNode, newTextRange);
           limen.textNodeList.add(cursor.getTextNodeIndex(), newTextNode);
+          limen.disAssociateTextWithRange(cursor.getCurrentTextNode(),newTextRange);
         }
         goOn = false;
 
@@ -94,23 +100,14 @@ public class LMNLModifier {
 
   class TextNodeCursor {
     private TextNode currentTextNode;
-    private String currentText;
-    private int currentTextLength;
     private int textNodeIndex = 0;
 
     public TextNodeCursor(Limen limen) {
       currentTextNode = limen.textNodeList.get(0);
-      setCurrentTextAndLength();
-    }
-
-    private void setCurrentTextAndLength() {
-      currentText = currentTextNode.getContent();
-      currentTextLength = currentText.length();
     }
 
     public void advance() {
       currentTextNode = currentTextNode.getNextTextNode();
-      setCurrentTextAndLength();
       textNodeIndex++;
     }
 
@@ -119,11 +116,11 @@ public class LMNLModifier {
     }
 
     public String getCurrentText() {
-      return currentText;
+      return currentTextNode.getContent();
     }
 
     public int getCurrentTextLength() {
-      return currentTextLength;
+      return getCurrentText().length();
     }
 
     public int getTextNodeIndex() {
@@ -133,7 +130,6 @@ public class LMNLModifier {
     public boolean canAdvance() {
       return currentTextNode.getNextTextNode() != null;
     }
-
   }
 
 }

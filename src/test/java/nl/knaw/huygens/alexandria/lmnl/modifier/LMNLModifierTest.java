@@ -30,7 +30,9 @@ public class LMNLModifierTest {
 
     LMNLExporter exporter = new LMNLExporter();
     String modifiedLMNL = exporter.toLMNL(document);
+    LOG.info("document.value().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);
+    assertThat(document.value().textNodeList.toString()).isEqualTo("[\"The rain in \", \"Spain\", \" falls mainly on the plain.\"]");
     assertThat(modifiedLMNL).isEqualTo("[text}The rain in [country}Spain{country] falls mainly on the plain.{text]");
   }
 
