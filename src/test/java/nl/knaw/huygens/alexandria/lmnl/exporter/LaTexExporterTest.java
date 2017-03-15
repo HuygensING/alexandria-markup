@@ -66,10 +66,15 @@ public class LaTexExporterTest {
     LOG.info("document=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
 
-    String overlap = exporter.exportTextRangeOverlap();
+    String overlap = exporter.exportTextRangeOverlap1();
     assertThat(overlap).isNotBlank();
     LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
+
+    String coloredText = exporter.exportTextRangeOverlap();
+    assertThat(coloredText).isNotBlank();
+    // LOG.info("overlap=\n{}", overlap);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
