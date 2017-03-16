@@ -68,7 +68,8 @@ public class LaTeXExporter {
   public String exportTextRangeOverlap() {
     StringBuilder latexBuilder = new StringBuilder();
     latexBuilder.append("\\documentclass{article}\n")//
-        .append("\\usepackage{color}\n")//
+        .append("\\usepackage{color,latexsym}\n")//
+        .append("\\usepackage[utf8x]{inputenc}\n")//
         .append("\n")//
         .append("\\begin{document}\n")//
         .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
@@ -202,7 +203,6 @@ public class LaTeXExporter {
 
             int size = limen.getTextRanges(tn).size();
             float gradient = size / (float) maxTextRangesPerTextNode;
-            // Color color = ColorUtil.interpolate(Color.WHITE, Color.BLUE, gradient);
 
             int r = 256 - Math.round(255 * gradient);
             int g = 255;
@@ -224,8 +224,8 @@ public class LaTeXExporter {
         .getAsInt();
     for (int i = 1; i <= maxTextRangesPerTextNode; i++) {
       float gradient = i / (float) maxTextRangesPerTextNode;
-      int r = 256 - Math.round(255 * gradient);
-      int g = 255;
+      int r = 255;
+      int g = 256 - Math.round(255 * gradient);
       int b = 256 - Math.round(255 * gradient);
 
       latexBuilder.append("\\definecolor{color");
@@ -238,6 +238,7 @@ public class LaTeXExporter {
       latexBuilder.append(b);
       latexBuilder.append("}\n");
     }
+    latexBuilder.append("\\noindent\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
@@ -295,17 +296,22 @@ public class LaTeXExporter {
         .replaceAll("\n", "\\\\textbackslash n")//
     ;
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
-    // String nodeLine = " \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + " (" + size + ")};\n";
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
   private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int size) {
-    String content = tn.getContent()//
-    // .replaceAll("\n", "\\\\\\\\\n")//
-    ;
-    String nodeLine = "\\colorbox{color" + size + "}{" + content + "}";
-    latexBuilder.append(nodeLine);
+    String content = tn.getContent();
+    if ("\n".equals(content)) {
+      latexBuilder.append("\\colorbox{color" + size + "}{\\strut \\textbackslash n}\\\\\n");
+    } else {
+      String[] parts = content.split("\n");
+      List<String> colorboxes = new ArrayList<>();
+      for (String part : parts) {
+        colorboxes.add("\\colorbox{color" + size + "}{\\strut " + part + "}");
+      }
+      latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\textbackslash n \\\\\n")));
+    }
   }
 
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {
