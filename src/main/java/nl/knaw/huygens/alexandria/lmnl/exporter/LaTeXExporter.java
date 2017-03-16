@@ -238,6 +238,15 @@ public class LaTeXExporter {
       latexBuilder.append(b);
       latexBuilder.append("}\n");
     }
+    latexBuilder.append("\\noindent Number of ranges: ");
+    for (int i = 1; i <= maxTextRangesPerTextNode; i++) {
+      latexBuilder.append("\\fcolorbox{black}{color");
+      latexBuilder.append(i);
+      latexBuilder.append("}{ ");
+      latexBuilder.append(i);
+      latexBuilder.append(" }");
+    }
+    latexBuilder.append("\\\\\n\n");
     latexBuilder.append("\\noindent\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
@@ -303,14 +312,18 @@ public class LaTeXExporter {
   private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int size) {
     String content = tn.getContent();
     if ("\n".equals(content)) {
-      latexBuilder.append("\\colorbox{color" + size + "}{\\strut \\textbackslash n}\\\\\n");
+      latexBuilder.append("\\fcolorbox{black}{color" + size + "}{\\strut \\textbackslash n}\\\\\n");
     } else {
       String[] parts = content.split("\n");
       List<String> colorboxes = new ArrayList<>();
-      for (String part : parts) {
-        colorboxes.add("\\colorbox{color" + size + "}{\\strut " + part + "}");
+      for (int i = 0; i < parts.length; i++) {
+        String part = parts[i];
+        if (i < parts.length - 1) {
+          part += "\\textbackslash n";
+        }
+        colorboxes.add("\\fcolorbox{black}{color" + size + "}{\\strut " + part + "}");
       }
-      latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\textbackslash n \\\\\n")));
+      latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\\\\n")));
     }
   }
 
