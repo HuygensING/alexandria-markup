@@ -17,6 +17,11 @@ public class Annotation {
     this.limen = new Limen();
   }
 
+  public Annotation(String tag, String content) {
+    this(tag);
+    limen.setOnlyTextNode(new TextNode(content));
+  }
+
   public Limen value() {
     return limen;
   }
