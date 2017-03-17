@@ -68,8 +68,10 @@ public class LaTeXExporter {
   public String exportTextRangeOverlap() {
     StringBuilder latexBuilder = new StringBuilder();
     latexBuilder.append("\\documentclass{article}\n")//
-        .append("\\usepackage{color,latexsym}\n")//
+        .append("\\usepackage{xcolor,latexsym}\n")//
         .append("\\usepackage[utf8x]{inputenc}\n")//
+        .append("\\definecolorseries{rangedepth}{hsb}{last}{yellow!25}{blue}\n")//
+        .append("\\newcommand{\\TextNode}[2]{\\fcolorbox{black}{rangedepth!![#1]}{\\strut #2}}\n")//
         .append("\n")//
         .append("\\begin{document}\n")//
         .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
@@ -144,28 +146,25 @@ public class LaTeXExporter {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
       Map<TextNode, Integer> textNodeIndices = new HashMap<>();
-      limen.getTextNodeIterator().forEachRemaining(
+      limen.getTextNodeIterator().forEachRemaining(tn -> {
+        int i = textNodeCounter.getAndIncrement();
+        textNodeIndices.put(tn, i);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
 
-          tn -> {
+        List<TextRange> toClose = new ArrayList<>();
+        toClose.addAll(openTextRanges);
+        toClose.removeAll(textRanges);
+        Collections.reverse(toClose);
 
-            int i = textNodeCounter.getAndIncrement();
-            textNodeIndices.put(tn, i);
-            Set<TextRange> textRanges = limen.getTextRanges(tn);
+        List<TextRange> toOpen = new ArrayList<>();
+        toOpen.addAll(textRanges);
+        toOpen.removeAll(openTextRanges);
 
-            List<TextRange> toClose = new ArrayList<>();
-            toClose.addAll(openTextRanges);
-            toClose.removeAll(textRanges);
-            Collections.reverse(toClose);
+        openTextRanges.removeAll(toClose);
+        openTextRanges.addAll(toOpen);
 
-            List<TextRange> toOpen = new ArrayList<>();
-            toOpen.addAll(textRanges);
-            toOpen.removeAll(openTextRanges);
-
-            openTextRanges.removeAll(toClose);
-            openTextRanges.addAll(toOpen);
-
-            addTextNode(latexBuilder, tn, i);
-          });
+        addTextNode(latexBuilder, tn, i);
+      });
 
       connectTextNodes(latexBuilder, textNodeCounter);
       markTextRanges(latexBuilder, limen, colorPicker, textNodeIndices);
@@ -181,37 +180,34 @@ public class LaTeXExporter {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
       Map<TextNode, Integer> textNodeIndices = new HashMap<>();
-      limen.getTextNodeIterator().forEachRemaining(
+      limen.getTextNodeIterator().forEachRemaining(tn -> {
+        int i = textNodeCounter.getAndIncrement();
+        textNodeIndices.put(tn, i);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
 
-          tn -> {
+        List<TextRange> toClose = new ArrayList<>();
+        toClose.addAll(openTextRanges);
+        toClose.removeAll(textRanges);
+        Collections.reverse(toClose);
 
-            int i = textNodeCounter.getAndIncrement();
-            textNodeIndices.put(tn, i);
-            Set<TextRange> textRanges = limen.getTextRanges(tn);
+        List<TextRange> toOpen = new ArrayList<>();
+        toOpen.addAll(textRanges);
+        toOpen.removeAll(openTextRanges);
 
-            List<TextRange> toClose = new ArrayList<>();
-            toClose.addAll(openTextRanges);
-            toClose.removeAll(textRanges);
-            Collections.reverse(toClose);
+        openTextRanges.removeAll(toClose);
+        openTextRanges.addAll(toOpen);
 
-            List<TextRange> toOpen = new ArrayList<>();
-            toOpen.addAll(textRanges);
-            toOpen.removeAll(openTextRanges);
+        int size = limen.getTextRanges(tn).size();
+        float gradient = size / (float) maxTextRangesPerTextNode;
 
-            openTextRanges.removeAll(toClose);
-            openTextRanges.addAll(toOpen);
+        int r = 256 - Math.round(255 * gradient);
+        int g = 255;
+        int b = 256 - Math.round(255 * gradient);
+        Color color = new Color(r, g, b);
+        String fillColor = ColorUtil.toLaTeX(color);
 
-            int size = limen.getTextRanges(tn).size();
-            float gradient = size / (float) maxTextRangesPerTextNode;
-
-            int r = 256 - Math.round(255 * gradient);
-            int g = 255;
-            int b = 256 - Math.round(255 * gradient);
-            Color color = new Color(r, g, b);
-            String fillColor = ColorUtil.toLaTeX(color);
-
-            addGradedTextNode(latexBuilder, tn, i, fillColor, size);
-          });
+        addGradedTextNode(latexBuilder, tn, i, fillColor, size);
+      });
 
     }
   }
@@ -222,29 +218,10 @@ public class LaTeXExporter {
         .mapToInt(list -> list.size())//
         .max()//
         .getAsInt();
-    for (int i = 1; i <= maxTextRangesPerTextNode; i++) {
-      float gradient = i / (float) maxTextRangesPerTextNode;
-      int r = 255;
-      int g = 256 - Math.round(255 * gradient);
-      int b = 256 - Math.round(255 * gradient);
-
-      latexBuilder.append("\\definecolor{color");
-      latexBuilder.append(i);
-      latexBuilder.append("}{RGB}{");
-      latexBuilder.append(r);
-      latexBuilder.append(",");
-      latexBuilder.append(g);
-      latexBuilder.append(",");
-      latexBuilder.append(b);
-      latexBuilder.append("}\n");
-    }
+    latexBuilder.append("\\resetcolorseries[").append(maxTextRangesPerTextNode + 1).append("]{rangedepth}\n");
     latexBuilder.append("\\noindent Number of ranges: ");
-    for (int i = 1; i <= maxTextRangesPerTextNode; i++) {
-      latexBuilder.append("\\fcolorbox{black}{color");
-      latexBuilder.append(i);
-      latexBuilder.append("}{ ");
-      latexBuilder.append(i);
-      latexBuilder.append(" }");
+    for (int i = 0; i <= maxTextRangesPerTextNode; i++) {
+      latexBuilder.append("\\TextNode{").append(i).append("}{ ").append(i).append(" }");
     }
     latexBuilder.append("\\\\\n\n");
     latexBuilder.append("\\noindent\n");
@@ -309,10 +286,10 @@ public class LaTeXExporter {
     latexBuilder.append(nodeLine);
   }
 
-  private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int size) {
+  private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int depth) {
     String content = tn.getContent();
     if ("\n".equals(content)) {
-      latexBuilder.append("\\fcolorbox{black}{color" + size + "}{\\strut \\textbackslash n}\\\\\n");
+      latexBuilder.append("\\TextNode{" + depth + "}{\\textbackslash n}\\\\\n");
     } else {
       String[] parts = content.split("\n");
       List<String> colorboxes = new ArrayList<>();
@@ -321,7 +298,7 @@ public class LaTeXExporter {
         if (i < parts.length - 1) {
           part += "\\textbackslash n";
         }
-        colorboxes.add("\\fcolorbox{black}{color" + size + "}{\\strut " + part + "}");
+        colorboxes.add("\\TextNode{" + depth + "}{" + part + "}");
       }
       latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\\\\n")));
     }
