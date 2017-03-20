@@ -59,12 +59,21 @@ public class LaTexExporterTest {
     InputStream input = FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
     Document document = new LMNLImporter().importLMNL(input);
     LaTeXExporter exporter = new LaTeXExporter(document);
+    String outDir = "out/";
 
     String laTeX = exporter.exportDocument();
     assertThat(laTeX).isNotBlank();
     LOG.info("document=\n{}", laTeX);
-    String outDir = "out/";
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
+
+    String overlap = exporter.exportTextRangeOverlap1();
+    assertThat(overlap).isNotBlank();
+    LOG.info("overlap=\n{}", overlap);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
+
+    String coloredText = exporter.exportTextRangeOverlap();
+    assertThat(coloredText).isNotBlank();
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText);
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();

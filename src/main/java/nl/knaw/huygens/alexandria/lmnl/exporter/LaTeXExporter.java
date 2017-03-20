@@ -1,5 +1,6 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
+import java.awt.Color;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
@@ -40,62 +42,49 @@ public class LaTeXExporter {
     this.limen = document.value();
   }
 
-  public String exportDocument() {
+  public String exportTextRangeOverlap() {
+    Map<String, Object> map = new HashMap<>();
+    int maxTextRangesPerTextNode = limen.textNodeList.parallelStream()//
+        .map(limen::getTextRanges)//
+        .mapToInt(list -> list.size())//
+        .max()//
+        .getAsInt();
+    map.put("maxdepth", maxTextRangesPerTextNode);
     StringBuilder latexBuilder = new StringBuilder();
-    latexBuilder.append("\\documentclass{article}\n")//
-        .append("\\usepackage{incgraph}\n")//
-        .append("\\usepackage{tikz}\n")//
-        .append("\\usepackage{latexsym}\n")//
-        .append("\\usepackage[utf8x]{inputenc}\n")//
-        .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")//
-        .append("\n")//
-        .append("\\begin{document}\n")//
-        .append("\\begin{inctext}\n")//
-        .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
-        .append("  \\begin{tikzpicture}\n")//
-        .append("    [textnode/.style={rectangle,draw=black!50,thick,rounded corners},\n")//
-        .append("     textrange/.style={rectangle,draw=blue!50,thick},\n")//
-        .append("     document/.style={circle,draw=black!50,thick}]\n")//
-        .append("    \\node[document] (doc) {document};\n");
-    appendLimen(latexBuilder, limen);
-    latexBuilder.append("  \\end{tikzpicture}\n")//
-        .append("\\end{inctext}\n")//
-        .append("\\end{document}\n");
-    return latexBuilder.toString();
-  }
-
-  public String exportMatrix() {
-    return exportMatrix(limen.textNodeList, limen.textRangeList, getIndexPoints(), getLongTextRangeIndexes());
-  }
-
-  public String exportKdTree() {
-    return exportKdTree(getIndex().getKdTree(), getLongTextRangeIndexes());
-  }
-
-  private List<IndexPoint> getIndexPoints() {
-    if (indexPoints == null) {
-      indexPoints = getIndex().getIndexPoints();
+    if (limen != null) {
+      limen.getTextNodeIterator().forEachRemaining(tn -> {
+        int size = limen.getTextRanges(tn).size();
+        addColoredTextNode(latexBuilder, tn, size);
+      });
     }
-    return indexPoints;
+    map.put("body", latexBuilder.toString());
+    return FreeMarker.templateToString("colored-text.tex.ftl", map, this.getClass());
   }
 
-  private NodeRangeIndex getIndex() {
-    if (index == null) {
-      index = new NodeRangeIndex(limen);
-    }
-    return index;
-  }
-
-  private Set<Integer> getLongTextRangeIndexes() {
-    if (longTextRangeIndexes == null) {
-      longTextRangeIndexes = new HashSet<>();
-      for (int i = 0; i < limen.textRangeList.size(); i++) {
-        if (limen.containsAtLeastHalfOfAllTextNodes(limen.textRangeList.get(i))) {
-          longTextRangeIndexes.add(i);
+  private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int depth) {
+    String content = tn.getContent();
+    if ("\n".equals(content)) {
+      latexBuilder.append("\\TextNode{" + depth + "}{\\textbackslash n}\\\\\n");
+    } else {
+      String[] parts = content.split("\n");
+      List<String> colorboxes = new ArrayList<>();
+      for (int i = 0; i < parts.length; i++) {
+        String part = parts[i];
+        if (i < parts.length - 1) {
+          part += "\\textbackslash n";
         }
+        colorboxes.add("\\TextNode{" + depth + "}{" + part + "}");
       }
+      latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\\\\n")));
     }
-    return longTextRangeIndexes;
+  }
+
+  public String exportDocument() {
+    Map<String, Object> map = new HashMap<>();
+    StringBuilder latexBuilder = new StringBuilder();
+    appendLimen(latexBuilder, limen);
+    map.put("body", latexBuilder.toString());
+    return FreeMarker.templateToString("document.tex.ftl", map, this.getClass());
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
@@ -125,9 +114,180 @@ public class LaTeXExporter {
 
         addTextNode(latexBuilder, tn, i);
       });
+
       connectTextNodes(latexBuilder, textNodeCounter);
       markTextRanges(latexBuilder, limen, colorPicker, textNodeIndices);
       // drawTextRangesAsSets(latexBuilder, limen, colorPicker, textNodeIndices);
+    }
+  }
+
+  private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
+    String content = tn.getContent()//
+        .replaceAll(" ", "\\\\textvisiblespace ")//
+        .replaceAll("\n", "\\\\textbackslash n");
+    String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
+    String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
+    latexBuilder.append(nodeLine);
+  }
+
+  public String exportMatrix() {
+    Map<String, Object> map = new HashMap<>();
+    String body = exportMatrix(limen.textNodeList, limen.textRangeList, getIndexPoints(), getLongTextRangeIndexes());
+    map.put("body", body);
+    return FreeMarker.templateToString("matrix.tex.ftl", map, this.getClass());
+  }
+
+  private String exportMatrix(List<TextNode> allTextNodes, List<TextRange> allTextRanges, List<IndexPoint> indexPoints, Set<Integer> longTextRangeIndexes) {
+    List<String> rangeLabels = allTextRanges.stream().map(TextRange::getTag).collect(Collectors.toList());
+    List<String> rangeIndex = new ArrayList<>();
+    rangeIndex.add("");
+    for (int i = 0; i < rangeLabels.size(); i++) {
+      rangeIndex.add(String.valueOf(i));
+    }
+    rangeLabels.add(0, "");
+    rangeLabels.add("");
+    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
+    StringBuilder latexBuilder = new StringBuilder()//
+        .append("\\begin{tabular}{").append(tabularContent).append("}\n")//
+        .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
+        .append("\\hline\n")//
+    ;
+
+    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
+    IndexPoint indexPoint = pointIterator.next();
+    for (int i = 0; i < allTextNodes.size(); i++) {
+      List<String> row = new ArrayList<>();
+      row.add(String.valueOf(i));
+      for (int j = 0; j < allTextRanges.size(); j++) {
+        if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getTextRangeIndex()) {
+          String cell = longTextRangeIndexes.contains(j) ? "\\underline{X}" : "X";
+          row.add(cell);
+          if (pointIterator.hasNext()) {
+            indexPoint = pointIterator.next();
+          }
+
+        } else {
+          row.add(" ");
+        }
+      }
+      String content = allTextNodes.get(i).getContent()//
+          .replaceAll(" ", "\\\\textvisiblespace ")//
+          .replaceAll("\n", "\\\\textbackslash n");
+      row.add(content);
+      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
+    }
+
+    latexBuilder
+        .append(rangeLabels.stream()//
+            .map(c -> "\\rot{$" + c + "$}")//
+            .collect(Collectors.joining(" & ")))//
+        .append("\\\\\n")//
+        .append("\\end{tabular}\n");
+    return latexBuilder.toString();
+  }
+
+  public String exportKdTree() {
+    Map<String, Object> map = new HashMap<>();
+    String kdTree = exportKdTree(getIndex().getKdTree(), getLongTextRangeIndexes());
+    map.put("body", kdTree);
+    return FreeMarker.templateToString("kdtree.tex.ftl", map, this.getClass());
+  }
+
+  private String exportKdTree(KdTree<IndexPoint> kdTree, Set<Integer> longTextRangeIndexes) {
+    StringBuilder latexBuilder = new StringBuilder();
+    KdTree.KdNode root = kdTree.getRoot();
+    IndexPoint rootIP = root.getContent();
+    String content = toNodeContent(rootIP, longTextRangeIndexes);
+    latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(content).append("};\n");
+    appendChildTree(latexBuilder, root.getLesser(), "textRangeAxis", longTextRangeIndexes);
+    appendChildTree(latexBuilder, root.getGreater(), "textRangeAxis", longTextRangeIndexes);
+    return latexBuilder.append("]\\\\\n").toString();
+  }
+
+  public String exportTextRangeOverlap1() {
+    StringBuilder latexBuilder = new StringBuilder();
+    latexBuilder.append("\\documentclass{article}\n")//
+        .append("\\usepackage{incgraph}\n")//
+        .append("\\usepackage{tikz}\n")//
+        .append("\\usepackage{latexsym}\n")//
+        .append("\\usepackage[utf8x]{inputenc}\n")//
+        .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")//
+        .append("\n")//
+        .append("\\begin{document}\n")//
+        .append("\\begin{inctext}\n")//
+        .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
+        .append("  \\begin{tikzpicture}\n")//
+        .append("    [textnode/.style={rectangle,minimum width=3mm,minimum height=6mm}]\n")//
+    ;
+    appendGradedLimen(latexBuilder, limen);
+    latexBuilder.append("  \\end{tikzpicture}\n")//
+        .append("\\end{inctext}\n")//
+        .append("\\end{document}\n");
+    return latexBuilder.toString();
+  }
+
+  private List<IndexPoint> getIndexPoints() {
+    if (indexPoints == null) {
+      indexPoints = getIndex().getIndexPoints();
+    }
+    return indexPoints;
+  }
+
+  private NodeRangeIndex getIndex() {
+    if (index == null) {
+      index = new NodeRangeIndex(limen);
+    }
+    return index;
+  }
+
+  private Set<Integer> getLongTextRangeIndexes() {
+    if (longTextRangeIndexes == null) {
+      longTextRangeIndexes = new HashSet<>();
+      for (int i = 0; i < limen.textRangeList.size(); i++) {
+        if (limen.containsAtLeastHalfOfAllTextNodes(limen.textRangeList.get(i))) {
+          longTextRangeIndexes.add(i);
+        }
+      }
+    }
+    return longTextRangeIndexes;
+  }
+
+  private void appendGradedLimen(StringBuilder latexBuilder, Limen limen) {
+    int maxTextRangesPerTextNode = limen.textNodeList.parallelStream().map(limen::getTextRanges).mapToInt(list -> list.size()).max().getAsInt();
+    latexBuilder.append("\n    % TextNodes\n");
+    if (limen != null) {
+      Set<TextRange> openTextRanges = new LinkedHashSet<>();
+      AtomicInteger textNodeCounter = new AtomicInteger(0);
+      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
+      limen.getTextNodeIterator().forEachRemaining(tn -> {
+        int i = textNodeCounter.getAndIncrement();
+        textNodeIndices.put(tn, i);
+        Set<TextRange> textRanges = limen.getTextRanges(tn);
+
+        List<TextRange> toClose = new ArrayList<>();
+        toClose.addAll(openTextRanges);
+        toClose.removeAll(textRanges);
+        Collections.reverse(toClose);
+
+        List<TextRange> toOpen = new ArrayList<>();
+        toOpen.addAll(textRanges);
+        toOpen.removeAll(openTextRanges);
+
+        openTextRanges.removeAll(toClose);
+        openTextRanges.addAll(toOpen);
+
+        int size = limen.getTextRanges(tn).size();
+        float gradient = size / (float) maxTextRangesPerTextNode;
+
+        int r = 256 - Math.round(255 * gradient);
+        int g = 255;
+        int b = 256 - Math.round(255 * gradient);
+        Color color = new Color(r, g, b);
+        String fillColor = ColorUtil.toLaTeX(color);
+
+        addGradedTextNode(latexBuilder, tn, i, fillColor, size);
+      });
+
     }
   }
 
@@ -143,10 +303,14 @@ public class LaTeXExporter {
   // });
   // }
 
-  private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
-    String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n");
-    String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
-    String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
+  private void addGradedTextNode(StringBuilder latexBuilder, TextNode tn, int i, String fillColor, int size) {
+    // String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n \\\\\\\\").replaceAll("\\\\textbackslash n \\\\\\\\$", "\\\\textbackslash n");
+    String content = tn.getContent()//
+        .replaceAll(" ", "\\\\textvisiblespace ")//
+        .replaceAll("\n", "\\\\textbackslash n")//
+    ;
+    String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
+    String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
@@ -172,9 +336,11 @@ public class LaTeXExporter {
         TextNode lastTextNode = tr.textNodes.get(tr.textNodes.size() - 1);
         int first = textNodeIndices.get(firstTextNode);
         int last = textNodeIndices.get(lastTextNode);
+
         appendTextRange(latexBuilder, tr, String.valueOf(rangeLayerIndex), textRangeRow, color, first, last);
 
       } else {
+
         Iterator<TextNode> textNodeIterator = tr.textNodes.iterator();
         TextNode firstTextNode = textNodeIterator.next();
         TextNode lastTextNode = firstTextNode;
@@ -201,6 +367,7 @@ public class LaTeXExporter {
 
           finished = finished || !textNodeIterator.hasNext();
         }
+
         appendTextRangePart(latexBuilder, textNodeIndices, tr, rangeLayerIndex, textRangeRow, color, firstTextNode, lastTextNode, partNo);
 
         for (int i = 0; i < partNo; i++) {
@@ -328,98 +495,6 @@ public class LaTeXExporter {
     });
 
     return index;
-  }
-
-  private String exportMatrix(List<TextNode> allTextNodes, List<TextRange> allTextRanges, List<IndexPoint> indexPoints, Set<Integer> longTextRangeIndexes) {
-    List<String> rangeLabels = allTextRanges.stream().map(TextRange::getTag).collect(Collectors.toList());
-    List<String> rangeIndex = new ArrayList<>();
-    rangeIndex.add("");
-    for (int i = 0; i < rangeLabels.size(); i++) {
-      rangeIndex.add(String.valueOf(i));
-    }
-    rangeLabels.add(0, "");
-    rangeLabels.add("");
-    String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
-    StringBuilder latexBuilder = new StringBuilder()//
-        .append("\\documentclass{article}\n")//
-        .append("\\usepackage{array,graphicx}\n")//
-        .append("\\newcommand*\\rot{\\rotatebox{90}}\n")//
-        .append("\\usepackage{incgraph}\n")//
-        .append("\\begin{document}\n")//
-        .append("\\begin{table}[]\n")//
-        .append("\\begin{inctext}\n")//
-        .append("\\centering\n").append("\\begin{tabular}{").append(tabularContent).append("}\n").append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & ")))
-        .append("\\\\\n")//
-        .append("\\hline\n")//
-    ;
-
-    Iterator<IndexPoint> pointIterator = indexPoints.iterator();
-    IndexPoint indexPoint = pointIterator.next();
-    for (int i = 0; i < allTextNodes.size(); i++) {
-      List<String> row = new ArrayList<>();
-      row.add(String.valueOf(i));
-      for (int j = 0; j < allTextRanges.size(); j++) {
-        if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getTextRangeIndex()) {
-          String cell = longTextRangeIndexes.contains(j) ? "\\underline{X}" : "X";
-          row.add(cell);
-          if (pointIterator.hasNext()) {
-            indexPoint = pointIterator.next();
-          }
-
-        } else {
-          row.add(" ");
-        }
-      }
-      String content = allTextNodes.get(i).getContent()//
-          .replaceAll(" ", "\\\\textvisiblespace ")//
-          .replaceAll("\n", "\\\\textbackslash n");
-      row.add(content);
-      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
-    }
-
-    latexBuilder.append(rangeLabels.stream().map(c -> "\\rot{$" + c + "$}").collect(Collectors.joining(" & ")))//
-        .append("\\\\\n")//
-        .append("\\end{tabular}\n")//
-        .append("\\end{inctext}\n")//
-        .append("\\end{table}\n")//
-        .append("\\end{document}");
-    return latexBuilder.toString();
-  }
-
-  private String exportKdTree(KdTree<IndexPoint> kdTree, Set<Integer> longTextRangeIndexes) {
-    StringBuilder latexBuilder = new StringBuilder()//
-        .append("\\documentclass[landscape]{article}\n")//
-        .append("\\usepackage[utf8]{inputenc}\n")//
-        .append("\\usepackage[T1]{fontenc}\n")//
-        .append("\\usepackage{incgraph}\n")//
-        .append("\\usepackage{caption}\n")//
-        .append("\\usepackage[margin=1in]{geometry}\n")//
-        .append("\\usepackage{tikz-qtree}\n")//
-        .append("\\usetikzlibrary{shadows,trees}\n")//
-        .append("\\begin{document}\n")//
-        .append("\\tikzset{font=\\small,\n" + "%edge from parent fork down,\n" + "level distance=1.5cm,\n" + "textNodeAxis/.style=\n" + "    {top color=white,\n" + "    bottom color=blue!25,\n"
-            + "    circle,\n" + "    minimum height=8mm,\n" + "    draw=blue!75,\n" + "    very thick,\n" + "    drop shadow,\n" + "    align=center,\n" + "    text depth = 0pt\n" + "    },\n"
-            + "textRangeAxis/.style=\n" + "    {top color=white,\n" + "    bottom color=green!25,\n" + "    circle,\n" + "    minimum height=8mm,\n" + "    draw=green!75,\n" + "    very thick,\n"
-            + "    drop shadow,\n" + "    align=center,\n" + "    text depth = 0pt\n" + "    },\n" + "edge from parent/.style=\n" + "    {draw=black!50,\n" + "    thick\n" + "    }}\n" + "\n"
-            + "\\centering\n")//
-        .append("\\begin{figure}\n")
-        // .append("\\begin{inctext}\n")
-        .append("\\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]\n");
-    KdTree.KdNode root = kdTree.getRoot();
-    IndexPoint rootIP = root.getContent();
-    String content = toNodeContent(rootIP, longTextRangeIndexes);
-    latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(content).append("};\n");
-    appendChildTree(latexBuilder, root.getLesser(), "textRangeAxis", longTextRangeIndexes);
-    appendChildTree(latexBuilder, root.getGreater(), "textRangeAxis", longTextRangeIndexes);
-    latexBuilder.append("]\n")//
-        .append("\\end{tikzpicture}\n")//
-        .append("\\centering\n")//
-        .append("\\caption*{(a,b) = (TextNodeIndex, TextRangeIndex)}\n")//
-        // .append("\\end{inctext}\n")//
-        .append("\\end{figure}\n")//
-        .append("\\end{document}")//
-    ;
-    return latexBuilder.toString();
   }
 
   private String toNodeContent(IndexPoint indexPoint, Set<Integer> longTextRangeIndexes) {
