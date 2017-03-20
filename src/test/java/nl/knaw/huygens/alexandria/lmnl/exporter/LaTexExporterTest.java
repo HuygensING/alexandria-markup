@@ -73,7 +73,7 @@ public class LaTexExporterTest {
 
     String coloredText = exporter.exportTextRangeOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText);
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
