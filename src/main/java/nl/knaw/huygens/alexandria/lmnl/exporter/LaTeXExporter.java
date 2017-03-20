@@ -340,7 +340,6 @@ public class LaTeXExporter {
         appendTextRange(latexBuilder, tr, String.valueOf(rangeLayerIndex), textRangeRow, color, first, last);
 
       } else {
-
         Iterator<TextNode> textNodeIterator = tr.textNodes.iterator();
         TextNode firstTextNode = textNodeIterator.next();
         TextNode lastTextNode = firstTextNode;
@@ -373,7 +372,7 @@ public class LaTeXExporter {
         for (int i = 0; i < partNo; i++) {
           String leftNode = MessageFormat.format("tr{0}_{1}e", rangeLayerIndex, i);
           String rightNode = MessageFormat.format("tr{0}_{1}b", rangeLayerIndex, (i + 1));
-          latexBuilder.append("    \\draw[densely dashed,color=lightgray] (" + leftNode + ".south) to [out=350,in=190] (" + rightNode + ".south);\n");
+          latexBuilder.append("    \\draw[densely dashed,color=" + color + "] (" + leftNode + ".south) to [out=350,in=190] (" + rightNode + ".south);\n");
         }
       }
 
