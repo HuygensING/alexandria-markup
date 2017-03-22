@@ -82,7 +82,8 @@ text, numbers, kwic?
 
 ---
 
-postgis:
+
+from postgis:
 
 operators:
 && — Returns TRUE if A's bounding box overlaps B's.
@@ -112,4 +113,4 @@ ST_Overlaps — Returns TRUE if the Geometries share space, are of the same dime
 ST_Difference — Returns a geometry that represents that part of geometry A that does not intersect with geometry B.
 ST_Intersection — (T) Returns a geometry that represents the shared portion of geomA and geomB. The geography implementation does a transform to geometry to do the intersection and then transform back to WGS84.
 ST_SymDifference — Returns a geometry that represents the portions of A and B that do not intersect. It is called a symmetric difference because ST_SymDifference(A,B) = ST_SymDifference(B,A).
-ST_Union — Returns a geometry that represents the point set union of the Geometries.
+ST_Union — Returns set union of A and B.
