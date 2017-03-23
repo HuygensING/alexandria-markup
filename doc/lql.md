@@ -18,7 +18,9 @@
 
 - How should we address annotations:
   - _range_identifier_:_annotation_idenifier_
-  
+
+-
+
 ----
 [range relationships](http://lmnl-markup.org/specs/archive/Range_relationships.xhtml):
 (introducing discontinuous ranges changes the types of relationship)
@@ -38,6 +40,8 @@ Relevant functions from [PostGIS](http://postgis.net/docs/manual-2.3/reference.h
 PostGIS is meant for querying over PostGIS Geometry types (2d/3d points, bounding boxes, etc.)
 We may be able to use some of the functions of this language for our LQL.
 
+(description changed to reflect the use in LQL)
+
 #### Operators: (A & B are ranges)
 * && — Returns TRUE if A overlaps B.
 * &< — Returns TRUE if A overlaps or is to the left of B.
@@ -48,25 +52,20 @@ We may be able to use some of the functions of this language for our LQL.
 * @ — Returns TRUE if A is contained by / is a subset of B.
 * ~ — Returns TRUE if A is superset of B.
 
+
 #### Spatial Relationships and Measurements
-* ST_Contains — Returns true if and only if no points of B lie in the exterior of A, and at least one point of the interior of B lies in the interior of A.
-* ST_ContainsProperly — Returns true if B intersects the interior of A but not the boundary (or exterior). A does not contain properly itself, but does contain itself.
-* ST_Covers — Returns 1 (TRUE) if no point in Geometry B is outside Geometry A. For geography: if geography point B is not outside Polygon Geography A
-* ST_CoveredBy — Returns 1 (TRUE) if no point in Geometry/Geography A is outside Geometry/Geography B
-* ST_Crosses — Returns TRUE if the supplied geometries have some, but not all, interior points in common.
-* ST_Touches — Returns TRUE if the geometries have at least one point in common, but their interiors do not intersect.
-* ST_Within — Returns true if the geometry A is completely inside geometry B
-* ST_Intersects — Returns TRUE if the Geometries/Geography "spatially intersect" - (share any portion of space) and FALSE if they don't (they are Disjoint). For geography -- tolerance is 0.00001 meters (so any points that close are considered to intersect)
-* ST_Disjoint — Returns TRUE if the Geometries do not "spatially intersect" - if they do not share any space together
-* ST_Equals — Returns true if the given geometries represent the same geometry. Directionality is ignored.
-* ST_Intersects — Returns TRUE if the Geometries/Geography "spatially intersect" - (share any portion of space) and FALSE if they don't (they are Disjoint). For geography -- tolerance is 0.00001 meters (so any points that close are considered to intersect)
-* ST_Length — Returns the 2d length of the geometry if it is a linestring or multilinestring. geometry are in units of spatial reference and geography are in meters (default spheroid)
-* ST_Overlaps — Returns TRUE if the Geometries share space, are of the same dimension, but are not completely contained by each other.
+* ST_Contains — Returns true iif B is completely within A
+* ST_Touches — Returns TRUE if one of the outermost textnodes of A is directly adjacent to one of the outermost textnodes of B
+* ST_Within — Returns true if A is completely within B
+* ST_Disjoint — Returns TRUE iif there is no overlap between the ranges
+* ST_Equals — Returns true iif the ranges are congruent
+* ST_Length — Returns the total character length of all the textnodes in the range
+* ST_Overlaps — Returns TRUE iif there is an overlap between A & B
 
 #### Geometry Processing
-* ST_Difference — Returns a geometry that represents that part of geometry A that does not intersect with geometry B.
-* ST_Intersection — (T) Returns a geometry that represents the shared portion of geomA and geomB. The geography implementation does a transform to geometry to do the intersection and then transform back to WGS84.
-* ST_SymDifference — Returns a geometry that represents the portions of A and B that do not intersect. It is called a symmetric difference because ST_SymDifference(A,B) = ST_SymDifference(B,A).
+* ST_Difference — Returns the textnodes in A that are not in B
+* ST_Intersection — Returns the textnodes in A that are also in B
+* ST_SymDifference — Returns the the textnodes in A that are not in B + the textnodes in B that are not in A
 * ST_Union — Returns set union of A and B.
 
 #### Dealing with discontinued ranges
@@ -90,7 +89,7 @@ let $novel  := db:open('LMNL-library','Frankenstein.xlmnl')/*
 return lm:ranges('page',$novel)[contains(lm:range-value(.),'Volney')]
   /lm:annotations('n',.)/lm:annotation-value(.)\\
 ```
- 
+
 > This returns 102. (If Volney were mentioned more than once, more than one page number would be returned.)
 
 A `novel.ranges('page').filter(text().contains('Volney')).annotations('n').value()`
@@ -143,3 +142,15 @@ B `select count(*) from ranges where name!='page' and overlap in (select * from 
 
 ---
 
+Other example queries
+
+> get the text of the first line
+
+```
+novel.range('l')[0].text()
+```
+
+```
+select text from range('1')[0];
+
+```
