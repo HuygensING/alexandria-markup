@@ -5,6 +5,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.huygens.alexandria.dropwizard.health.ServerHealthCheck;
 import nl.knaw.huygens.alexandria.dropwizard.resources.AboutResource;
+import nl.knaw.huygens.alexandria.dropwizard.resources.HomePageResource;
 
 public class ServerApplication extends Application<ServerConfiguration> {
 
@@ -22,9 +23,9 @@ public class ServerApplication extends Application<ServerConfiguration> {
   }
 
   @Override
-  public void run(ServerConfiguration configuration,
-                  Environment environment) {
+  public void run(ServerConfiguration configuration, Environment environment) {
     environment.jersey().register(new AboutResource(getName()));
-    environment.healthChecks().register("server",new ServerHealthCheck());
+    environment.jersey().register(new HomePageResource());
+    environment.healthChecks().register("server", new ServerHealthCheck());
   }
 }
