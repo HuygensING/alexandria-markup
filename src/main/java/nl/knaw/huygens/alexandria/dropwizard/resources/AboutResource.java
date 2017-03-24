@@ -8,10 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 
-@Path("RootPaths.DOCUMENTS")
+@Path(RootPaths.ABOUT)
 @Produces(MediaType.APPLICATION_JSON)
 public class AboutResource {
 
@@ -40,9 +38,8 @@ public class AboutResource {
       return appName;
     }
 
-    @JsonSerialize(using = InstantSerializer.class)
-    public Instant getStartedAt() {
-      return startedAt;
+    public String getStartedAt() {
+      return startedAt.toString();
     }
   }
 }
