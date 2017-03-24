@@ -53,6 +53,7 @@ public class LaTexExporterTest {
     processLMNLFile("alice-excerpt");
     processLMNLFile("1kings12");
     processLMNLFile("ozymandias-voices-wap");
+    processLMNLFile("frost-quote-nows");
   }
 
   private void processLMNLFile(String basename) throws IOException {
