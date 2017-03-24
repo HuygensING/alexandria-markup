@@ -35,7 +35,9 @@ public class DocumentsResource {
   public static class SubPaths {
     public static final String LMNL = "lmnl";
     public static final String LATEX = "latex";
-    public static final String RANGEOVELAP = "rangeoverlap";
+    public static final String MARKUPDEPTH = "markupdepth";
+    public static final String MATRIX = "matrix";
+    public static final String KDTREE = "kdtree";
   }
 
   final DocumentService documentService;
@@ -117,13 +119,35 @@ public class DocumentsResource {
   }
 
   @GET
-  @Path("{uuid}/" + SubPaths.RANGEOVELAP)
+  @Path("{uuid}/" + SubPaths.MARKUPDEPTH)
   @Timed
   @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
   public Response getRangeOverlapVisualization(@PathParam("uuid") final UUID uuid) {
     Document document = getExistingDocument(uuid);
     LaTeXExporter latexExporter = new LaTeXExporter(document);
     String latex = latexExporter.exportTextRangeOverlap();
+    return Response.ok(latex).build();
+  }
+
+  @GET
+  @Path("{uuid}/" + SubPaths.MATRIX)
+  @Timed
+  @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
+  public Response getMatrixVisualization(@PathParam("uuid") final UUID uuid) {
+    Document document = getExistingDocument(uuid);
+    LaTeXExporter latexExporter = new LaTeXExporter(document);
+    String latex = latexExporter.exportMatrix();
+    return Response.ok(latex).build();
+  }
+
+  @GET
+  @Path("{uuid}/" + SubPaths.KDTREE)
+  @Timed
+  @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
+  public Response getKdTreeVisualization(@PathParam("uuid") final UUID uuid) {
+    Document document = getExistingDocument(uuid);
+    LaTeXExporter latexExporter = new LaTeXExporter(document);
+    String latex = latexExporter.exportKdTree();
     return Response.ok(latex).build();
   }
 

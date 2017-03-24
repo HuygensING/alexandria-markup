@@ -41,14 +41,23 @@ public class DocumentInfo {
     return URI.create(uriBase + DocumentsResource.SubPaths.LMNL);
   }
 
-  @JsonProperty("^latex")
+  @JsonProperty("^overview")
   public URI getLaTeX1() {
     return URI.create(uriBase + DocumentsResource.SubPaths.LATEX);
   }
 
-  @JsonProperty("^rangeoverlap")
-  public URI getRangeOverlapURI() {
-    return URI.create(uriBase + DocumentsResource.SubPaths.RANGEOVELAP);
+  @JsonProperty("^markupdepth")
+  public URI getMarkupDepthURI() {
+    return URI.create(uriBase + DocumentsResource.SubPaths.MARKUPDEPTH);
   }
 
+  @JsonProperty("^matrix")
+  public URI getMatrixURI() {
+    return URI.create(uriBase + DocumentsResource.SubPaths.MATRIX);
+  }
+
+  @JsonProperty("^kdtree")
+  public URI getKdTreeURI() {
+    return URI.create(uriBase + DocumentsResource.SubPaths.KDTREE);
+  }
 }
