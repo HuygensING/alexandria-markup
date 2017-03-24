@@ -66,7 +66,7 @@ public class LaTexExporterTest {
     LOG.info("document=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
 
-    String overlap = exporter.exportTextRangeOverlap1();
+    String overlap = exporter.exportGradient();
     assertThat(overlap).isNotBlank();
     LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");

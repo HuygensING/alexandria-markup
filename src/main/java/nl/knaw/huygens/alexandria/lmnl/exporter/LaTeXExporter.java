@@ -64,14 +64,14 @@ public class LaTeXExporter {
   private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int depth) {
     String content = tn.getContent();
     if ("\n".equals(content)) {
-      latexBuilder.append("\\TextNode{").append(depth).append("}{\\textbackslash n}\\\\\n");
+      latexBuilder.append("\\TextNode{").append(depth).append("}{\\n}\\\\\n");
     } else {
       String[] parts = content.split("\n");
       List<String> colorboxes = new ArrayList<>();
       for (int i = 0; i < parts.length; i++) {
         String part = parts[i];
         if (i < parts.length - 1) {
-          part += "\\textbackslash n";
+          part += "\\n";
         }
         colorboxes.add("\\TextNode{" + depth + "}{" + part + "}");
       }
@@ -123,8 +123,8 @@ public class LaTeXExporter {
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
     String content = tn.getContent()//
-        .replaceAll(" ", "\\\\textvisiblespace ")//
-        .replaceAll("\n", "\\\\textbackslash n");
+        .replaceAll(" ", "\\\\s ")//
+        .replaceAll("\n", "\\\\n ");
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
@@ -171,8 +171,8 @@ public class LaTeXExporter {
         }
       }
       String content = allTextNodes.get(i).getContent()//
-          .replaceAll(" ", "\\\\textvisiblespace ")//
-          .replaceAll("\n", "\\\\textbackslash n");
+          .replaceAll(" ", "\\\\s ")//
+          .replaceAll("\n", "\\\\n ");
       row.add(content);
       latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
     }
@@ -204,26 +204,12 @@ public class LaTeXExporter {
     return latexBuilder.append("]\\\\\n").toString();
   }
 
-  public String exportTextRangeOverlap1() {
+  public String exportGradient() {
+    Map<String, Object> map = new HashMap<>();
     StringBuilder latexBuilder = new StringBuilder();
-    latexBuilder.append("\\documentclass{article}\n")//
-        .append("\\usepackage{incgraph}\n")//
-        .append("\\usepackage{tikz}\n")//
-        .append("\\usepackage{latexsym}\n")//
-        .append("\\usepackage[utf8x]{inputenc}\n")//
-        .append("\\usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}\n")//
-        .append("\n")//
-        .append("\\begin{document}\n")//
-        .append("\\begin{inctext}\n")//
-        .append("  \\pagenumbering{gobble}% Remove page numbers (and reset to 1)\n")//
-        .append("  \\begin{tikzpicture}\n")//
-        .append("    [textnode/.style={rectangle,minimum width=3mm,minimum height=6mm}]\n")//
-    ;
     appendGradedLimen(latexBuilder, limen);
-    latexBuilder.append("  \\end{tikzpicture}\n")//
-        .append("\\end{inctext}\n")//
-        .append("\\end{document}\n");
-    return latexBuilder.toString();
+    map.put("body", latexBuilder.toString());
+    return FreeMarker.templateToString("gradient.tex.ftl", map, this.getClass());
   }
 
   private List<IndexPoint> getIndexPoints() {
@@ -304,10 +290,9 @@ public class LaTeXExporter {
   // }
 
   private void addGradedTextNode(StringBuilder latexBuilder, TextNode tn, int i, String fillColor, int size) {
-    // String content = tn.getContent().replaceAll(" ", "\\\\textvisiblespace ").replaceAll("\n", "\\\\textbackslash n \\\\\\\\").replaceAll("\\\\textbackslash n \\\\\\\\$", "\\\\textbackslash n");
     String content = tn.getContent()//
-        .replaceAll(" ", "\\\\textvisiblespace ")//
-        .replaceAll("\n", "\\\\textbackslash n")//
+        .replaceAll(" ", "\\\\s ")//
+        .replaceAll("\n", "\\\\n ")//
     ;
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
