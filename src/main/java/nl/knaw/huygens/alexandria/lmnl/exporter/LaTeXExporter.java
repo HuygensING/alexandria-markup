@@ -46,7 +46,7 @@ public class LaTeXExporter {
     Map<String, Object> map = new HashMap<>();
     int maxTextRangesPerTextNode = limen.textNodeList.parallelStream()//
         .map(limen::getTextRanges)//
-        .mapToInt(list -> list.size())//
+        .mapToInt(Set::size)//
         .max()//
         .getAsInt();
     map.put("maxdepth", maxTextRangesPerTextNode);
@@ -64,7 +64,7 @@ public class LaTeXExporter {
   private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int depth) {
     String content = tn.getContent();
     if ("\n".equals(content)) {
-      latexBuilder.append("\\TextNode{" + depth + "}{\\textbackslash n}\\\\\n");
+      latexBuilder.append("\\TextNode{").append(depth).append("}{\\textbackslash n}\\\\\n");
     } else {
       String[] parts = content.split("\n");
       List<String> colorboxes = new ArrayList<>();
@@ -253,7 +253,7 @@ public class LaTeXExporter {
   }
 
   private void appendGradedLimen(StringBuilder latexBuilder, Limen limen) {
-    int maxTextRangesPerTextNode = limen.textNodeList.parallelStream().map(limen::getTextRanges).mapToInt(list -> list.size()).max().getAsInt();
+    int maxTextRangesPerTextNode = limen.textNodeList.parallelStream().map(limen::getTextRanges).mapToInt(Set::size).max().getAsInt();
     latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
@@ -372,7 +372,7 @@ public class LaTeXExporter {
         for (int i = 0; i < partNo; i++) {
           String leftNode = MessageFormat.format("tr{0}_{1}e", rangeLayerIndex, i);
           String rightNode = MessageFormat.format("tr{0}_{1}b", rangeLayerIndex, (i + 1));
-          latexBuilder.append("    \\draw[densely dashed,color=" + color + "] (" + leftNode + ".south) to [out=350,in=190] (" + rightNode + ".south);\n");
+          latexBuilder.append("    \\draw[densely dashed,color=").append(color).append("] (").append(leftNode).append(".south) to [out=350,in=190] (").append(rightNode).append(".south);\n");
         }
       }
 

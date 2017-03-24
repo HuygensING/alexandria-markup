@@ -11,7 +11,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 
-@Path("/about")
+@Path("RootPaths.DOCUMENTS")
 @Produces(MediaType.APPLICATION_JSON)
 public class AboutResource {
 

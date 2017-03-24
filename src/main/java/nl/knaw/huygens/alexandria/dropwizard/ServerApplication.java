@@ -9,6 +9,7 @@ import nl.knaw.huygens.alexandria.dropwizard.resources.AboutResource;
 import nl.knaw.huygens.alexandria.dropwizard.resources.DocumentsResource;
 import nl.knaw.huygens.alexandria.dropwizard.resources.HomePageResource;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
 public class ServerApplication extends Application<ServerConfiguration> {
 
@@ -27,12 +28,14 @@ public class ServerApplication extends Application<ServerConfiguration> {
 
   @Override
   public void run(ServerConfiguration configuration, Environment environment) {
-    DocumentService documentService = new DocumentService();
+    DocumentService documentService = new DocumentService(configuration);
+    LMNLImporter lmnlImporter = new LMNLImporter();
     LMNLExporter lmnlExporter = new LMNLExporter();
 
     environment.jersey().register(new HomePageResource());
     environment.jersey().register(new AboutResource(getName()));
-    environment.jersey().register(new DocumentsResource(documentService, lmnlExporter));
+    environment.jersey().register(new DocumentsResource(documentService, lmnlImporter, lmnlExporter, configuration));
+
     environment.healthChecks().register("server", new ServerHealthCheck());
   }
 }

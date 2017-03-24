@@ -153,7 +153,7 @@
       <artifactId>dropwizard-core</artifactId>
       <version>${dropwizard.version}</version>
     </dependency>
-
+    
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>

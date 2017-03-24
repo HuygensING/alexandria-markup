@@ -5,16 +5,17 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+
+import nl.knaw.huygens.alexandria.dropwizard.resources.DocumentsResource;
+import nl.knaw.huygens.alexandria.dropwizard.resources.RootPaths;
 
 public class DocumentInfo {
   Instant created;
   Instant modified;
-  private UUID documentId;
+  private String uriBase;
 
-  public DocumentInfo(UUID documentId) {
-    this.documentId = documentId;
+  public DocumentInfo(UUID documentId, String baseURL) {
+    this.uriBase = baseURL + "/" + RootPaths.DOCUMENTS + "/" + documentId + "/";
   }
 
   public DocumentInfo setCreated(Instant created) {
@@ -22,9 +23,8 @@ public class DocumentInfo {
     return this;
   }
 
-  @JsonSerialize(using = InstantSerializer.class)
-  public Instant getCreated() {
-    return created;
+  public String getCreated() {
+    return created.toString();
   }
 
   public DocumentInfo setModified(Instant modified) {
@@ -32,24 +32,23 @@ public class DocumentInfo {
     return this;
   }
 
-  @JsonSerialize(using = InstantSerializer.class)
-  public Instant getModified() {
-    return modified;
+  public String getModified() {
+    return modified.toString();
   }
 
   @JsonProperty("^lmnl")
   public URI getLMNLURI() {
-    return URI.create("/documents/" + documentId + "/lmnl");
+    return URI.create(uriBase + DocumentsResource.SubPaths.LMNL);
   }
 
-  @JsonProperty("^latex1")
+  @JsonProperty("^latex")
   public URI getLaTeX1() {
-    return URI.create("/documents/" + documentId + "/latex1");
+    return URI.create(uriBase + DocumentsResource.SubPaths.LATEX);
   }
 
-  @JsonProperty("^latex2")
-  public URI getLaTeX2() {
-    return URI.create("/documents/" + documentId + "/latex2");
+  @JsonProperty("^rangeoverlap")
+  public URI getRangeOverlapURI() {
+    return URI.create(uriBase + DocumentsResource.SubPaths.RANGEOVELAP);
   }
 
 }

@@ -3,7 +3,11 @@ package nl.knaw.huygens.alexandria.dropwizard.resources;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -15,44 +19,71 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableList;
 
+import nl.knaw.huygens.alexandria.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.alexandria.dropwizard.api.DocumentInfo;
 import nl.knaw.huygens.alexandria.dropwizard.api.DocumentService;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
-@Path("/documents")
+@Path(RootPaths.DOCUMENTS)
 @Produces(MediaType.APPLICATION_JSON)
 public class DocumentsResource {
 
-  final DocumentService documentService;
-  private LMNLExporter lmnlExporter;
+  public static class SubPaths {
+    public static final String LMNL = "lmnl";
+    public static final String LATEX = "latex";
+    public static final String RANGEOVELAP = "rangeoverlap";
+  }
 
-  public DocumentsResource(DocumentService documentService, LMNLExporter lmnlExporter) {
+  final DocumentService documentService;
+  private LMNLImporter lmnlImporter;
+  private LMNLExporter lmnlExporter;
+  private ServerConfiguration configuration;
+
+  public DocumentsResource(DocumentService documentService, LMNLImporter lmnlImporter, LMNLExporter lmnlExporter, ServerConfiguration configuration) {
     this.documentService = documentService;
+    this.lmnlImporter = lmnlImporter;
     this.lmnlExporter = lmnlExporter;
+    this.configuration = configuration;
   }
 
   @GET
   @Timed
   public List<URI> getDocumentURIs() {
-    List<URI> list = ImmutableList.of(URI.create("http://localhost:8080/documents/UUID"));
-    return list;
+    return documentService.getDocumentUUIDs()//
+        .stream()//
+        .map(this::documentURI)//
+        .collect(Collectors.toList());
   }
 
   @POST
+  @Consumes(MediaType.TEXT_PLAIN + ";charset=UTF-8")
   @Timed
-  public Response addDocument() {
+  public Response addDocument(@NotNull @Valid String lmnl) {
     UUID documentId = UUID.randomUUID();
-    return Response.created(URI.create("http://localhost:8080/documents/" + documentId)).build();
+    processAndStore(lmnl, documentId);
+    return Response.created(documentURI(documentId)).build();
+  }
+
+  private URI documentURI(UUID documentId) {
+    return URI.create(configuration.getBaseURI() + "/documents/" + documentId);
+  }
+
+  private void processAndStore(String lmnl, UUID documentId) {
+    Document document = lmnlImporter.importLMNL(lmnl);
+    documentService.setDocument(documentId, document);
   }
 
   @PUT
+  @Consumes(MediaType.TEXT_PLAIN + ";charset=UTF-8")
   @Path("{uuid}")
   @Timed
-  public Response setDocument(@PathParam("uuid") final UUID uuid) {
-    return Response.created(URI.create("http://localhost:8080/documents/" + uuid)).build();
+  public Response setDocument(@PathParam("uuid") final UUID uuid, @NotNull @Valid String lmnl) {
+    processAndStore(lmnl, uuid);
+    return Response.created(documentURI(uuid)).build();
   }
 
   @GET
@@ -65,23 +96,40 @@ public class DocumentsResource {
   }
 
   @GET
-  @Path("{uuid}/lmnl")
+  @Path("{uuid}/" + SubPaths.LMNL)
   @Timed
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
   public Response getLMNL(@PathParam("uuid") final UUID uuid) {
-    Document document = documentService.getDocument(uuid)//
-        .orElseThrow(NotFoundException::new);
+    Document document = getExistingDocument(uuid);
     String lmnl = lmnlExporter.toLMNL(document);
     return Response.ok(lmnl).build();
   }
 
   @GET
-  @Path("{uuid}/latex")
+  @Path("{uuid}/" + SubPaths.LATEX)
   @Timed
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
   public Response getLaTeXVisualization(@PathParam("uuid") final UUID uuid) {
-    String latex = "";
+    Document document = getExistingDocument(uuid);
+    LaTeXExporter latexExporter = new LaTeXExporter(document);
+    String latex = latexExporter.exportDocument();
     return Response.ok(latex).build();
+  }
+
+  @GET
+  @Path("{uuid}/" + SubPaths.RANGEOVELAP)
+  @Timed
+  @Produces(MediaType.TEXT_PLAIN + ";charset=UTF-8")
+  public Response getRangeOverlapVisualization(@PathParam("uuid") final UUID uuid) {
+    Document document = getExistingDocument(uuid);
+    LaTeXExporter latexExporter = new LaTeXExporter(document);
+    String latex = latexExporter.exportTextRangeOverlap();
+    return Response.ok(latex).build();
+  }
+
+  private Document getExistingDocument(final UUID uuid) {
+    return documentService.getDocument(uuid)//
+        .orElseThrow(NotFoundException::new);
   }
 
 }
