@@ -5,6 +5,8 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{incgraph,caption,tikz-qtree}
 \usetikzlibrary{shadows,trees}
+\newcommand{\n}{\textbackslash n}
+\newcommand{\s}{\textvisiblespace}
 
 \begin{document}
 	\tikzset{

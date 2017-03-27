@@ -70,6 +70,7 @@
           <target>${java.version}</target>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
@@ -83,6 +84,18 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -128,7 +141,7 @@
 
     <!-- test dependencies -->
     <dependency>
-      <groupId>org.apache.commons</groupId>
+      <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.3.2</version>
     </dependency>
@@ -145,5 +158,36 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>maven.huygens</id>
+      <name>Huygens Maven Repository</name>
+      <url>${huygens-repo}</url>
+    </repository>
+    <snapshotRepository>
+      <id>maven.huygens.snapshot</id>
+      <name>Huygens Maven Snapshot Repository</name>
+      <url>${huygens-repo}</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>huygens</id>
+      <url>http://maven.huygens.knaw.nl/repository/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
 
 </project>

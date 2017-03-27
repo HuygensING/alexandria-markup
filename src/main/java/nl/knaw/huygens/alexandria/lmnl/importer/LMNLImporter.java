@@ -1,15 +1,26 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -67,9 +78,11 @@ public class LMNLImporter {
     }
 
     void closeTextRange() {
-      TextRange textrange = openTextRangeStack.pop();
-      // openTextRanges.remove(textrange.getTag());
-      openTextRangeDeque.remove(textrange);
+      if (!openTextRangeStack.isEmpty()) {
+        TextRange textrange = openTextRangeStack.pop();
+        // openTextRanges.remove(textrange.getTag());
+        openTextRangeDeque.remove(textrange);
+      }
     }
 
     void addTextNode(TextNode textNode) {
