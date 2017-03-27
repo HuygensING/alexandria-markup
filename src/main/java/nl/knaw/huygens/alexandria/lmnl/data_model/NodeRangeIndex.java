@@ -37,7 +37,7 @@ public class NodeRangeIndex {
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
       limen.textNodeList.forEach(tn -> {
-        LOG.info("TextNode={}", tn);
+        LOG.debug("TextNode={}", tn);
         int i = textNodeIndex.getAndIncrement();
 
         // all the TextRanges associated with this TextNode
@@ -71,6 +71,14 @@ public class NodeRangeIndex {
       kdTree = new KdTree<>(getIndexPoints());
     }
     return kdTree;
+  }
+
+  public List<Integer> getRanges(int i) {
+    return null;
+  }
+
+  public List<Integer> getTextNodes(int i) {
+    return null;
   }
 
 }
