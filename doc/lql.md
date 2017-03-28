@@ -1,5 +1,6 @@
 # LQL (LMNL query language)
 
+
 ## Questions/Requirements
 
 - Should we avoid the use of 'range', use 'text set' or 'text node set' instead?
@@ -19,6 +20,10 @@
 
 - How should we address annotations:
   - _markup_identifier_:_annotation_identifier_
+  
+- How to indicate the limen we want to query?
+
+- Do we need to be able to query multiple limen at the same time?
 
 -
 
@@ -156,3 +161,57 @@ B `select text from markup where name = 'phr' and text =~ ".\*[Mm]ark[uU]p.\*"
 Given a certain text, return the markup containing (parts of) this text.
 
 
+## Example text + queries
+
+### text 1
+````
+[excerpt}[p}
+Alice was beginning to get very tired of sitting by her sister on the bank,
+and of having nothing to do: once or twice she had peeped into the book her sister
+was reading, but it had no pictures or conversations in it, 
+[q=a}and what is the use of a book,{q=a]
+thought Alice
+[q=a}without pictures or conversation?{q=a]
+{p]{excerpt]
+````
+
+> Get the quoted text by Alics
+
+`select m.text from markup m where m.name='q' and m.id='a'`
+
+*returns:*
+````
+"and what is the use of a book,without pictures or conversation?"
+````
+
+---
+
+### text 2
+````
+[excerpt [source [book}1 Kings{book] [chapter}12{chapter]]}
+[verse}And he said unto them, [q}What counsel give ye that we may answer this people, who have spoken to me, saying, [q}Make the yoke which thy father did put upon us lighter?{q]{q]{verse]
+[verse}And the young men that were grown up with him spake unto him, saying, [q}Thus shalt thou speak unto this people that spake unto thee, saying, [q=i}Thy father made our yoke heavy, but make thou it lighter unto us;{q=i] thus shalt thou say unto them, [q=j}My little finger shall be thicker than my father's loins.{verse]
+[verse}And now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I will chastise you with scorpions.{q=j]{q]{verse]
+[verse}So Jeroboam and all the people came to Rehoboam the third day, as the king had appointed, saying, [q}Come to me again the third day.{q]{verse]
+{excerpt]
+````
+
+> Get the chapter value
+
+`select m.annotationvalue('source:chapter') from markup m where m.name='excerpt'`
+
+*returns:* 12
+ 
+ (source:chapter) indicates the chapter annotation nested within the source annotation
+ 
+> Get the quoted texts that are inside of other quoted texts
+ 
+`select m.text from markup m where m.name='q' and m in (select q from markup q where q.name='q')
+
+*returns:* 
+````
+"Make the yoke which thy father did put upon us lighter?",
+"Thy father made our yoke heavy, but make thou it lighter unto us;",
+"My little finger shall be thicker than my father's loins.\nAnd now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I will chastise you with scorpions."
+````
+   
