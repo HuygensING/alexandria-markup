@@ -2,22 +2,23 @@
 
 ## Questions/Requirements
 
-- What should we be able to query? query ranges, textnodes, other?
+- Should we avoid the use of 'range', use 'text set' or 'text node set' instead?
+>  use _markup_ instead.
+
+- What should we be able to query? query ~~ranges~~ markup, text ~~nodes~~, other?
 
 - what should the query return? text, numbers, kwic?
 
-- Do we treat all ranges as separate, or also as part of a known hierarchy?
+- Do we treat all ~~ranges~~ markup as separate, or also as part of a known hierarchy?
 
-- Should we avoid the use of 'range', use 'text set' or 'text node set' instead?
-
-- How should we identifying/addressing ranges/textnodesets:
-  - by name : `range('excerpt')`
-  - by name + id : `range('excerpt','e-1')`
-  - by name + index : `range('excerpt')[0]`
+- How should we identify/address ~~ranges/textnodesets~~ markup:
+  - by name : `markup('excerpt')`
+  - by name + id : `markup('excerpt','e-1')`
+  - by name + index : `markup('excerpt')[0]`
   - with/without 'range()' :  `excerpt` , `excerpt[0]`, `excerpt(e-1)`
 
 - How should we address annotations:
-  - _range_identifier_:_annotation_idenifier_
+  - _markup_identifier_:_annotation_identifier_
 
 -
 
@@ -72,11 +73,6 @@ We may be able to use some of the functions of this language for our LQL.
 * isDiscontinued - true iif not all textnodes in the range are consecutive
 With discontinued ranges, you would want a function to get the textnodes in between the leftmost and rightmost textnodes of the range that are not part of the range.
 
----
-
-TODO: regular expressions
-Use regular expressions to find specific textnodes
-
 ----
 
 #### sample queries from [Luminescent](https://www.balisage.net/Proceedings/vol13/print/Piez01/BalisageVol13-Piez01.html#LuminescentQueries)
@@ -94,7 +90,7 @@ return lm:ranges('page',$novel)[contains(lm:range-value(.),'Volney')]
 
 A `novel.ranges('page').filter(text().contains('Volney')).annotations('n').value()`
 
-B `select annotationvalue('n') from ranges where name='page' and text.contains('Volney');`
+B `select annotationvalue('n') from markup where name='page' and text.contains('Volney');`
 
 ---
 
@@ -109,7 +105,7 @@ return distinct-values(
 
 A `novel.ranges('said').annotations('who').value().distinct()`
 
-B `select distinct(annotationvalue('who')) from ranges where name='said';`
+B `select distinct(annotationvalue('who')) from markup where name='said';`
 
 ---
 
@@ -124,7 +120,7 @@ return lm:ranges('said',$novel)[lm:annotations('who',.) = $who]
 
 A `novel.ranges('said').filter(annotationvalue('who').eq($who)).text()`
 
-B `select text from ranges where name='said' and annotationvalue('who')=$who;`
+B `select text from markup where name='said' and annotationvalue('who')=$who;`
 
 ---
 
@@ -138,7 +134,7 @@ return count(
 
 A `novel.ranges('said').overlapping-ranges().filter(not().hasName('page')).count()`
 
-B `select count(*) from ranges where name!='page' and overlap in (select * from ranges where name='said');`
+B `select count(*) from markup where name!='page' and overlap in (select * from markup where name='said');`
 
 ---
 
@@ -146,11 +142,17 @@ Other example queries
 
 > get the text of the first line
 
-```
-novel.range('l')[0].text()
-```
+A `novel.range('l')[0].text()`
 
-```
-select text from range('1')[0];
+B `select text from markup('1')[0];`
 
-```
+---
+
+Use regular expressions to find specific textnodes
+
+B `select text from markup where name = 'phr' and text =~ ".\*[Mm]ark[uU]p.\*"
+
+---
+Given a certain text, return the markup containing (parts of) this text.
+
+
