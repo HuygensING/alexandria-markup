@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toSet;
+
 public class NodeRangeIndex {
   final Logger LOG = LoggerFactory.getLogger(NodeRangeIndex.class);
 
@@ -75,6 +77,12 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getRanges(int i) {
+    return getKdTree().indexpointsForTextNode(i).stream()
+        .map(IndexPoint::getTextRangeIndex)
+        .collect(toSet());
+  }
+
+  public Set<Integer> getRanges0(int i) {
     Set<Integer> rangeIndices = new HashSet<>();
     rangeIndices.addAll(invertedTextRangesIndices);
     StreamSupport.stream(getKdTree().spliterator(), true)//
@@ -92,6 +100,12 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getTextNodes(int i) {
+    return getKdTree().indexpointsForTextRange(i).stream()
+        .map(IndexPoint::getTextNodeIndex)
+        .collect(toSet());
+  }
+
+    public Set<Integer> getTextNodes0(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
     List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)//
         .filter(ip -> ip.getTextRangeIndex() == i)//
@@ -108,7 +122,6 @@ public class NodeRangeIndex {
       textNodeIndices.addAll(relevantTextNodeIndices);
     }
     return textNodeIndices;
-
   }
 
 }
