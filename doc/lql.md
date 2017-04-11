@@ -206,7 +206,7 @@ thought Alice
  
 > Get the quoted texts that are inside of other quoted texts
  
-`select m.text from markup m where m.name='q' and m in (select q from markup q where q.name='q')
+`select m.text from markup m where m.name='q' and m in (select q from markup q where q.name='q')`
 
 *returns:* 
 ````
