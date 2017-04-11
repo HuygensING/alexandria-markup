@@ -175,7 +175,7 @@ thought Alice
 {p]{excerpt]
 ````
 
-> Get the quoted text by Alics
+> Get the quoted text by Alice
 
 `select m.text from markup m where m.name='q' and m.id='a'`
 
