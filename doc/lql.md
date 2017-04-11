@@ -155,7 +155,7 @@ B `select text from markup('1')[0];`
 
 Use regular expressions to find specific textnodes
 
-B `select text from markup where name = 'phr' and text =~ ".\*[Mm]ark[uU]p.\*"
+B `select text from markup where name = 'phr' and text =~ ".\*[Mm]ark[uU]p.\*"`
 
 ---
 Given a certain text, return the markup containing (parts of) this text.
