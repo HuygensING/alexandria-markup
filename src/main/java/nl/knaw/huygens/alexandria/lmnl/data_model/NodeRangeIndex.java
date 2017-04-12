@@ -1,15 +1,21 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toSet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NodeRangeIndex {
   final Logger LOG = LoggerFactory.getLogger(NodeRangeIndex.class);
@@ -77,9 +83,20 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getRanges(int i) {
-    return getKdTree().indexpointsForTextNode(i).stream()
-        .map(IndexPoint::getTextRangeIndex)
-        .collect(toSet());
+    Set<Integer> rangeIndices = new HashSet<>();
+    rangeIndices.addAll(invertedTextRangesIndices);
+    getKdTree().indexpointsForTextNode(i).stream()//
+        // .map(IndexPoint::getTextRangeIndex)//
+        .forEach(ip -> {
+          int textRangeIndex = ip.getTextRangeIndex();
+          if (invertedTextRangesIndices.contains(textRangeIndex)) {
+            // this is an inverted textrange, so this indexpoint means that textnode i is NOT part of this range
+            rangeIndices.remove(textRangeIndex);
+          } else {
+            rangeIndices.add(textRangeIndex);
+          }
+        });
+    return rangeIndices;
   }
 
   public Set<Integer> getRanges0(int i) {
@@ -100,12 +117,25 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getTextNodes(int i) {
-    return getKdTree().indexpointsForTextRange(i).stream()
-        .map(IndexPoint::getTextNodeIndex)
+    Set<Integer> textNodeIndices = new HashSet<>();
+
+    Set<Integer> relevantTextNodeIndices = getKdTree().indexpointsForTextRange(i).stream()//
+        .map(IndexPoint::getTextNodeIndex)//
         .collect(toSet());
+
+    if (invertedTextRangesIndices.contains(i)) {
+      // range i is inverted, so start with all textnodes, then subtract
+      IntStream.range(0, limen.textNodeList.size()).forEach(textNodeIndices::add);
+      textNodeIndices.removeAll(relevantTextNodeIndices);
+
+    } else {
+      // range i is not inverted, so start empty, then add
+      textNodeIndices.addAll(relevantTextNodeIndices);
+    }
+    return textNodeIndices;
   }
 
-    public Set<Integer> getTextNodes0(int i) {
+  public Set<Integer> getTextNodes0(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
     List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)//
         .filter(ip -> ip.getTextRangeIndex() == i)//
