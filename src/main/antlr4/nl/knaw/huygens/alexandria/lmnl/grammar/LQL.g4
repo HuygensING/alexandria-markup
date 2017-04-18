@@ -18,13 +18,22 @@ where_stmt
 
 expr
   : literal_value
+  | IDENTIFIER
+  | IDENTIFIER DOT part
   | expr ( '=' | '==' | '!=' | '<>' ) expr
   | expr K_AND expr
+  | in_expr
+  ;
+
+in_expr
+  : IDENTIFIER IN '(' select_statement ')'
   ;
 
 part
   : TEXT
-  | ANNOTATIONVALUE '(' annotation_identifier ')'
+  | ANNOTATIONVALUE '(\'' annotation_identifier '\')'
+  | NAME
+  | ID
   ;
 
 source
@@ -76,6 +85,17 @@ WHERE
   : W H E R E
   ;
 
+NAME
+  : N A M E
+  ;
+
+ID
+  : I D
+  ;
+
+IN
+  : I N
+  ;
 
 MULTILINE_COMMENT
   : '/*' .*? ( '*/' | EOF ) -> channel(HIDDEN)
