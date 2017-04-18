@@ -5,11 +5,15 @@ lql_script
   ;
 
 statement
-  : select_statement '\n'?
+  : select_stmt '\n'?
   ;
 
-select_statement
-  : SELECT IDENTIFIER DOT part FROM source where_stmt?
+select_stmt
+  : SELECT select_variable FROM source where_stmt?
+  ;
+
+select_variable
+  : IDENTIFIER (DOT part)?
   ;
 
 where_stmt
@@ -26,12 +30,12 @@ expr
   ;
 
 in_expr
-  : IDENTIFIER IN '(' select_statement ')'
+  : IDENTIFIER IN '(' select_stmt ')'
   ;
 
 part
   : TEXT
-  | ANNOTATIONVALUE '(\'' annotation_identifier '\')'
+  | ANNOTATIONVALUE '(' STRING_LITERAL ')'
   | NAME
   | ID
   ;
