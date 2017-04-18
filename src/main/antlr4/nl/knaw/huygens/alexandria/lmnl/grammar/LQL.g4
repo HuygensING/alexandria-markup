@@ -5,32 +5,56 @@ lql_script
   ;
 
 statement
-  : select_statement
+  : select_statement '\n'?
   ;
 
 select_statement
-  : SELECT identifier DOT part FROM source where_stmt
+  : SELECT IDENTIFIER DOT part FROM source where_stmt?
   ;
 
 where_stmt
-  : WHERE
+  : WHERE expr
   ;
 
-identifier
-  :
+expr
+  : literal_value
+  | expr ( '=' | '==' | '!=' | '<>' ) expr
+  | expr K_AND expr
   ;
 
 part
   : TEXT
+  | ANNOTATIONVALUE '(' annotation_identifier ')'
   ;
 
 source
-  : MARKUP
+  : MARKUP IDENTIFIER?
+  ;
+
+literal_value
+  : NUMERIC_LITERAL
+  | STRING_LITERAL
+  ;
+
+annotation_identifier
+  : IDENTIFIER
+  | annotation_identifier ':' IDENTIFIER
   ;
 
 SELECT
   : S E L E C T
   ;
+
+NUMERIC_LITERAL
+  : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )?
+  | '.' DIGIT+ ( E [-+]? DIGIT+ )?
+  ;
+
+STRING_LITERAL
+  : '\'' ( ~'\'' | '\'\'' )* '\''
+  ;
+
+K_AND : A N D;
 
 FROM
   : F R O M
@@ -38,6 +62,10 @@ FROM
 
 TEXT
   : T E X T
+  ;
+
+ANNOTATIONVALUE
+  : A N N O T A T I O N V A L U E
   ;
 
 MARKUP
@@ -49,19 +77,19 @@ WHERE
   ;
 
 
-UNEXPECTED_CHAR
-  : .
-  ;
-
 MULTILINE_COMMENT
   : '/*' .*? ( '*/' | EOF ) -> channel(HIDDEN)
   ;
 
-SPACES
-  : [ \u000B\t\r\n] -> channel(HIDDEN)
+IDENTIFIER
+  : [a-zA-Z_] [a-zA-Z_0-9]*
   ;
 
-fragment DOT : '.';
+SPACES
+  : [ \u000B\t\r\n] -> skip
+  ;
+
+DOT : '.';
 
 fragment DIGIT : [0-9];
 
@@ -91,3 +119,7 @@ fragment W : [wW];
 fragment X : [xX];
 fragment Y : [yY];
 fragment Z : [zZ];
+
+UNEXPECTED_CHAR
+  : .
+  ;
