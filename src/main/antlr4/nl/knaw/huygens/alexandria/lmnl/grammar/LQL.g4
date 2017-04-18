@@ -22,8 +22,7 @@ where_stmt
 
 expr
   : literal_value
-  | IDENTIFIER
-  | IDENTIFIER DOT part
+  | IDENTIFIER (DOT part)?
   | expr ( '=' | '==' | '!=' | '<>' ) expr
   | expr K_AND expr
   | in_expr

@@ -41,7 +41,7 @@ public class LQLTest {
     for (int i = 0; i < tree.getChildCount(); i++) {
       LOG.info("root.child={}", tree.getChild(i).getText());
     }
-    assertThat(allTokens).hasSize(1);
+    assertThat(allTokens).hasSize(19);
   }
 
 }
