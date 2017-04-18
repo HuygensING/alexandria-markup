@@ -1,5 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.grammar;
 
+import nl.knaw.huygens.alexandria.lmnl.lql.MyListener;
+import nl.knaw.huygens.alexandria.lmnl.lql.MyVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -42,6 +44,14 @@ public class LQLTest {
       LOG.info("root.child={}", tree.getChild(i).getText());
     }
     assertThat(allTokens).hasSize(19);
+
+    MyListener listener = new MyListener();
+    parser.lql_script().enterRule(listener);
+
+    MyVisitor visitor = new MyVisitor();
+    Object result = visitor.visit(tree);
+    LOG.info("result={}",result);
+
   }
 
 }
