@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
@@ -26,7 +27,7 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
-public class LMNLImporterTest {
+public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
   final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
 
@@ -208,12 +209,92 @@ public class LMNLImporterTest {
     LOG.info("textRanges={}", actual.value().textRangeList);
     assertThat(actual.value().hasTextNodes()).isTrue();
     assertThat(actual.value().textRangeList).hasSize(1);
+
     String lmnl = lmnlExporter.toLMNL(actual);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(input);
+
     LaTeXExporter latex = new LaTeXExporter(actual);
     LOG.info("matrix=\n{}", latex.exportMatrix());
     LOG.info("kdtree=\n{}", latex.exportKdTree());
+  }
+
+  @Test
+  public void testAnnotationTextWithRanges() {
+    String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    // Expectations:
+    // We expect a Document
+    // - with one text node
+    // - with one range on it
+    // - with one annotation on it.
+    // - that has one range on it.
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "lmnl");
+    // Annotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
+    Annotation a1 = simpleAnnotation("a");
+    Limen annotationLimen = a1.value();
+    TextNode at1 = new TextNode("This is the ");
+    TextNode at2 = new TextNode("annotation");
+    TextRange ar1 = new TextRange(annotationLimen, "type").addTextNode(at2);
+    TextNode at3 = new TextNode(" text");
+    annotationLimen//
+        .addTextNode(at1)//
+        .addTextNode(at2)//
+        .addTextNode(at3)//
+        .addTextRange(ar1);
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("This is the main text");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    assertTrue(compareDocuments(expected, actual));
+    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+
+    logKdTree(actual);
+    NodeRangeIndex index = new NodeRangeIndex(actual.value());
+    List<IndexPoint> indexPoints = index.getIndexPoints();
+    logKdTree(actual);
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+  }
+
+  // @Test
+  public void testComments() {
+    String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    // Comments are ignored, so:
+    // We expect a Document
+    // - with one text node
+    // - with one range on it
+    Document expected = new Document();
+    Limen limen = expected.value();
+    TextRange r1 = new TextRange(limen, "foo");
+    TextNode t1 = new TextNode("FOOBAR");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    assertTrue(compareDocuments(expected, actual));
+    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+
+    logKdTree(actual);
+    NodeRangeIndex index = new NodeRangeIndex(actual.value());
+    List<IndexPoint> indexPoints = index.getIndexPoints();
+    logKdTree(actual);
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {

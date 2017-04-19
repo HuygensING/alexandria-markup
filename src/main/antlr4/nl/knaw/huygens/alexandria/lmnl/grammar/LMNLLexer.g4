@@ -10,59 +10,76 @@ lexer grammar LMNLLexer;
 
 // In the default mode we are outside a Range
 
+BEGIN_COMMMENT
+  : '[!--' -> pushMode(INSIDE_COMMENT)
+  ;
+
 BEGIN_OPEN_RANGE // [ moves into range
-	:   '['	-> pushMode(INSIDE_RANGE_OPENER)
-	;
+  : '['  -> pushMode(INSIDE_RANGE_OPENER)
+  ;
 
 BEGIN_CLOSE_RANGE
-	:   '{'	-> pushMode(INSIDE_RANGE_CLOSER)
-	;
+  : '{'  -> pushMode(INSIDE_RANGE_CLOSER)
+  ;
 
-TEXT	// match any 16 bit char other than { (start close tag) and [ (start open tag)
-	:   ~[{\\[]+
-	;
+TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
+  : ~[{\\[]+
+  ;
+
+// ----------------- Everything INSIDE of a COMMENT ---------------------
+mode INSIDE_COMMENT;
+
+END_COMMENT
+  : '--]' -> popMode
+  ;
+
+COMMENT_TEXT
+  :  ~[{\]]+
+  ;
+
 
 // ----------------- Everything INSIDE of a RANGE OPENER ---------------------
 mode INSIDE_RANGE_OPENER;
 
+
 END_ANONYMOUS_RANGE
-	:   ']'	-> popMode
-	;
+  :   ']'  -> popMode
+  ;
 
 END_OPEN_RANGE
-	:   '}'	-> popMode
-	;
+  :   '}'  -> popMode
+  ;
 
 BEGIN_OPEN_ANNO
-	:   '['	-> pushMode(INSIDE_ANNOTATION_OPENER)
-	;
+  :   '['  -> pushMode(INSIDE_ANNOTATION_OPENER)
+  ;
 
 Name_Open_Range
-	:   NameStartChar NameChar* ('=' NameChar+)?
-	;
+  :   NameStartChar NameChar* ('=' NameChar+)?
+  ;
 
 RANGE_S
-	:   WS	-> skip
-	;
+  :   WS  -> skip
+  ;
 
 // ----------------- Everything INSIDE of a RANGE CLOSER -------------
 mode INSIDE_RANGE_CLOSER;
 
 END_CLOSE_RANGE
-	:   ']'	-> popMode
-	;
+  :   ']'  -> popMode
+  ;
 
 BEGIN_OPEN_ANNO_IN_RANGE_CLOSER
-	:   '['	-> pushMode(INSIDE_ANNOTATION_OPENER)
-	;
+  :   '['  -> pushMode(INSIDE_ANNOTATION_OPENER)
+  ;
 
 Name_Close_Range
-	:   NameStartChar NameChar* ('=' NameChar+)?
-	;
+  :   NameStartChar NameChar* ('=' NameChar+)?
+  ;
 
 RANGE_S2
-	:   WS	-> skip
-	;
+  :   WS  -> skip
+  ;
 
 // ------------------ Everything INSIDE of a ANNOTATION OPENER -----------
 // NOTE: Annotation openers are close to range openers, but not the same!
@@ -70,83 +87,83 @@ RANGE_S2
 mode INSIDE_ANNOTATION_OPENER;
 
 END_ANONYMOUS_ANNO
-	:   ']'	-> popMode
-	;
+  :   ']'  -> popMode
+  ;
 
 END_OPEN_ANNO
-	:   '}'	-> popMode, pushMode(INSIDE_ANNOTATION_TEXT)
-	;
+  :   '}'  -> popMode, pushMode(INSIDE_ANNOTATION_TEXT)
+  ;
 
 OPEN_ANNO_IN_ANNO
-	:   '['	-> pushMode(INSIDE_ANNOTATION_OPENER)
-	;
+  :   '['  -> pushMode(INSIDE_ANNOTATION_OPENER)
+  ;
 
 Name_Open_Annotation
-	:   NameStartChar NameChar*
-	;
+  :   NameStartChar NameChar*
+  ;
 
 ANNO_S
-	:   WS	-> skip
-	;
+  :   WS  -> skip
+  ;
 
 // ----------------- Everything INSIDE of a ANNOTATION CLOSER -------------
 // NOTE: Annotation closers are exact copy of range closers
 mode INSIDE_ANNOTATION_CLOSER;
 
 END_CLOSE_ANNO
-	:   ']'	-> popMode
-	;
+  :   ']'  -> popMode
+  ;
 
 Name_Close_Annotation
-	:   NameStartChar NameChar*
-	;
+  :   NameStartChar NameChar*
+  ;
 
 // ------------------ Inside ANNOTATION TEXT --------------------------------------
 // NOTE:c Annotation text is simi
 mode INSIDE_ANNOTATION_TEXT;
 
-//BEGIN_ANNO_OPEN_RANGE
-//	:   '['	-> pushMode(INSIDE_RANGE_OPENER)
-//	;
+BEGIN_ANNO_OPEN_RANGE
+  : '['  -> pushMode(INSIDE_RANGE_OPENER)
+  ;
 
 BEGIN_CLOSE_ANNO
-	:   '{'	-> popMode, pushMode(INSIDE_ANNOTATION_CLOSER)
-	;
+  :   '{'  -> popMode, pushMode(INSIDE_ANNOTATION_CLOSER)
+  ;
 
-ANNO_TEXT	// match any 16 bit char other than { (start close tag) and [ (start open tag)
-	:   ~[{\\[]+ ;
+ANNO_TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
+  :   ~[{\\[]+ ;
 
 // ----------------- lots of repeated stuff --------------------------
 
 fragment
-DIGIT
-	:	[0-9]
-	;
-
-fragment
 NameChar
-    :   NameStartChar
-	|   '-' | '_' | '.' | DIGIT
-	|   '\u00B7'
-	|   '\u0300'..'\u036F'
-	|   '\u203F'..'\u2040'
-            ;
+  : NameStartChar
+  | '-' | '_' | '.' | DIGIT
+  | '\u00B7'
+  | '\u0300'..'\u036F'
+  | '\u203F'..'\u2040'
+  ;
 
 fragment
 NameStartChar
-	:	[:a-zA-Z]
-	|	'\u2070'..'\u218F'
-	|   '\u2C00'..'\u2FEF'
-	|   '\u3001'..'\uD7FF'
-	|   '\uF900'..'\uFDCF'
-	|   '\uFDF0'..'\uFFFD'
-	;
+  :  [:a-zA-Z]
+  |  '\u2070'..'\u218F'
+  | '\u2C00'..'\u2FEF'
+  | '\u3001'..'\uD7FF'
+  | '\uF900'..'\uFDCF'
+  | '\uFDF0'..'\uFFFD'
+  ;
+
+fragment
+DIGIT
+  :  [0-9]
+  ;
 
 fragment
 WS
-	:	[ \t\r\n]
-	;
+  :  [ \t\r\n]
+  ;
 
 UNEXPECTED_CHAR // Throw unexpected token exception
-	:	.
-	;
+  :  .
+  ;

@@ -17,11 +17,12 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 @RunWith(Parameterized.class)
-public class ImportDataLMNLTest {
+public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   private static Logger LOG = LoggerFactory.getLogger(ImportDataLMNLTest.class);
 
   private String basename;
@@ -47,8 +48,22 @@ public class ImportDataLMNLTest {
   }
 
   private void processLMNLFile(String basename) throws IOException {
-    InputStream input = FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
+    InputStream input = getInputStream(basename);
+    LOG.info("showTokens\n");
+    printTokens(input);
+
+    input = getInputStream(basename);
+    LOG.info("importLMNL\n");
     Document document = new LMNLImporter().importLMNL(input);
+
+    generateLaTeX(basename, document);
+  }
+
+  private InputStream getInputStream(String basename) throws IOException {
+    return FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
+  }
+
+  private void generateLaTeX(String basename, Document document) throws IOException {
     LaTeXExporter exporter = new LaTeXExporter(document);
     String outDir = "out/";
 
