@@ -10,8 +10,8 @@ lexer grammar LMNLLexer;
 
 // In the default mode we are outside a Range
 
-BEGIN_COMMMENT
-  : '[!--' -> pushMode(INSIDE_COMMENT)
+COMMENT
+  : '[!--' .*? '--]' -> skip //channel(HIDDEN)
   ;
 
 BEGIN_OPEN_RANGE // [ moves into range
@@ -26,21 +26,12 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[{\\[]+
   ;
 
-// ----------------- Everything INSIDE of a COMMENT ---------------------
-mode INSIDE_COMMENT;
-
-END_COMMENT
-  : '--]' -> popMode
-  ;
-
-COMMENT_TEXT
-  :  ~[{\]]+
-  ;
-
-
 // ----------------- Everything INSIDE of a RANGE OPENER ---------------------
 mode INSIDE_RANGE_OPENER;
 
+COMMENT_IN_RANGE_OPENER
+  : '[!--' .*? '--]' -> skip // channel(HIDDEN)
+  ;
 
 END_ANONYMOUS_RANGE
   :   ']'  -> popMode
@@ -64,6 +55,10 @@ RANGE_S
 
 // ----------------- Everything INSIDE of a RANGE CLOSER -------------
 mode INSIDE_RANGE_CLOSER;
+
+COMMENT_IN_RANGE_CLOSER
+  : '[!--' .*? '--]' -> skip //channel(HIDDEN)
+  ;
 
 END_CLOSE_RANGE
   :   ']'  -> popMode
@@ -122,16 +117,16 @@ Name_Close_Annotation
 // NOTE:c Annotation text is simi
 mode INSIDE_ANNOTATION_TEXT;
 
-BEGIN_ANNO_OPEN_RANGE
-  : '['  -> pushMode(INSIDE_RANGE_OPENER)
-  ;
+//BEGIN_ANNO_OPEN_RANGE
+//  : '['  -> pushMode(INSIDE_RANGE_OPENER)
+//  ;
 
 BEGIN_CLOSE_ANNO
-  :   '{'  -> popMode, pushMode(INSIDE_ANNOTATION_CLOSER)
+  : '{'  -> popMode, pushMode(INSIDE_ANNOTATION_CLOSER)
   ;
 
 ANNO_TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
-  :   ~[{\\[]+ ;
+  : ~[{\\[]+ ;
 
 // ----------------- lots of repeated stuff --------------------------
 
@@ -146,8 +141,8 @@ NameChar
 
 fragment
 NameStartChar
-  :  [:a-zA-Z]
-  |  '\u2070'..'\u218F'
+  : [:a-zA-Z]
+  | '\u2070'..'\u218F'
   | '\u2C00'..'\u2FEF'
   | '\u3001'..'\uD7FF'
   | '\uF900'..'\uFDCF'
@@ -164,6 +159,6 @@ WS
   :  [ \t\r\n]
   ;
 
-UNEXPECTED_CHAR // Throw unexpected token exception
-  :  .
-  ;
+//UNEXPECTED_CHAR // Throw unexpected token exception
+//  :  .
+//  ;

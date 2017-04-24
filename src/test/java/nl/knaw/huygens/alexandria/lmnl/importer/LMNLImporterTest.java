@@ -267,7 +267,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
   }
 
-  // @Test
+  @Test
   public void testComments() {
     String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
     Document actual = new LMNLImporter().importLMNL(input);
@@ -285,22 +285,19 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     limen.addTextRange(r1);
 
     logLMNL(actual);
-    assertTrue(compareDocuments(expected, actual));
-    assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
-
-    logKdTree(actual);
-    NodeRangeIndex index = new NodeRangeIndex(actual.value());
-    List<IndexPoint> indexPoints = index.getIndexPoints();
-    logKdTree(actual);
-    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
-    expectedIndexPoints.add(new IndexPoint(0, 0));
-    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+    compareLMNL(expected, actual);
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
     String inLMNL = FileUtils.readFileToString(new File(pathname));
     String outLMNL = lmnlExporter.toLMNL(actual);
     assertThat(outLMNL).isEqualTo(inLMNL);
+  }
+
+  private void compareLMNL(Document expected, Document actual) {
+    String expectedLMNL = lmnlExporter.toLMNL(expected);
+    String actualLMNL = lmnlExporter.toLMNL(actual);
+    assertThat(actualLMNL).isEqualTo(expectedLMNL);
   }
 
   private Annotation simpleAnnotation(String tag) {

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,10 +26,25 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   private static Logger LOG = LoggerFactory.getLogger(ImportDataLMNLTest.class);
 
   private String basename;
+  public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
+    @Override
+    public boolean accept(File file) {
+      return isLMNL(file.getName());
+    }
+
+    @Override
+    public boolean accept(File dir, String name) {
+      return isLMNL(name);
+    }
+
+    private boolean isLMNL(String name) {
+      return name.endsWith(".lmnl");
+    }
+  };
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data"), TrueFileFilter.INSTANCE, null)//
+    return FileUtils.listFiles(new File("data"), LMNL_FILE_FILTER, null)//
         .stream()//
         .map(f -> f.getName())//
         .map(n -> n.replace(".lmnl", ""))//
@@ -45,6 +60,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   public void testLMNLFile() throws IOException {
     LOG.info("testing data/{}.lmnl", basename);
     processLMNLFile(basename);
+    LOG.info("done testing data/{}.lmnl", basename);
   }
 
   private void processLMNLFile(String basename) throws IOException {
@@ -53,10 +69,11 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
     printTokens(input);
 
     input = getInputStream(basename);
+    LOG.info("testing data/{}.lmnl", basename);
     LOG.info("importLMNL\n");
     Document document = new LMNLImporter().importLMNL(input);
 
-    generateLaTeX(basename, document);
+    // generateLaTeX(basename, document);
   }
 
   private InputStream getInputStream(String basename) throws IOException {
