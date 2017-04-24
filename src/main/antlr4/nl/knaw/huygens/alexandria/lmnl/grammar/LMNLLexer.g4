@@ -8,6 +8,16 @@
 
 lexer grammar LMNLLexer;
 
+@lexer::header{
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+}
+
+@lexer::members{
+  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in rangeopener/closer, 2 = inside annotation in rangeopener/closer inside annotation in rangeopener/closer, etc.
+  Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
+}
+
 // In the default mode we are outside a Range
 
 COMMENT
@@ -86,7 +96,7 @@ END_ANONYMOUS_ANNO
   ;
 
 END_OPEN_ANNO
-  :   '}'  -> popMode, pushMode(INSIDE_ANNOTATION_TEXT)
+  :   '}'  { annotationDepth++; popMode(); pushMode(INSIDE_ANNOTATION_TEXT); }
   ;
 
 OPEN_ANNO_IN_ANNO
@@ -117,18 +127,57 @@ Name_Close_Annotation
 // NOTE:c Annotation text is simi
 mode INSIDE_ANNOTATION_TEXT;
 
-//BEGIN_ANNO_OPEN_RANGE
-//  : '['  -> pushMode(INSIDE_RANGE_OPENER)
-//  ;
+BEGIN_ANNO_OPEN_RANGE
+  : '[' {
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger());
+    openRangeInAnnotationTextCount.get(annotationDepth).incrementAndGet();
+    pushMode(INSIDE_RANGE_OPENER);
+  }
+  ;
+
+BEGIN_ANNO_CLOSE_RANGE
+  : '{'  {
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger());
+    if (openRangeInAnnotationTextCount.get(annotationDepth).get() == 0) {
+      setType(BEGIN_CLOSE_ANNO);
+      popMode();
+      annotationDepth--;
+      pushMode(INSIDE_ANNOTATION_CLOSER);
+    } else {
+      openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
+      pushMode(INSIDE_RANGE_CLOSER);
+    }
+  }
+  ;
 
 BEGIN_CLOSE_ANNO
-  : '{'  -> popMode, pushMode(INSIDE_ANNOTATION_CLOSER)
+  : '{'  //-> popMode, pushMode(INSIDE_ANNOTATION_CLOSER) // never actually reached, just for defining BEGIN_CLOSE_ANNO (?)
   ;
 
 ANNO_TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
   : ~[{\\[]+ ;
 
 // ----------------- lots of repeated stuff --------------------------
+
+fragment
+TagOpenStartChar
+  : '['
+  ;
+
+fragment
+TagOpenEndChar
+  : '}'
+  ;
+
+fragment
+TagCloseStartChar
+  : '{'
+  ;
+
+fragment
+TagCloseEndChar
+  : ']'
+  ;
 
 fragment
 NameChar
