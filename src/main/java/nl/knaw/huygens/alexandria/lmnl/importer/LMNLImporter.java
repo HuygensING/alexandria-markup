@@ -2,13 +2,8 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -79,7 +74,7 @@ public class LMNLImporter {
     }
 
     void pushOpenTextRange(String rangeName) {
-      // TextRange textRange = openTextRanges.get(rangeName);
+      LOG.info("currentLimenContext().openTextRangeDeque={}",currentLimenContext().openTextRangeDeque.stream().map(TextRange::getTag).collect(Collectors.toList()));
       TextRange textRange = currentLimenContext().openTextRangeDeque.stream()//
           .filter(tr -> tr.getTag().equals(rangeName))//
           .findFirst()//
@@ -94,7 +89,6 @@ public class LMNLImporter {
     void closeTextRange() {
       if (!currentLimenContext().openTextRangeStack.isEmpty()) {
         TextRange textrange = currentLimenContext().openTextRangeStack.pop();
-        // openTextRanges.remove(textrange.getTag());
         currentLimenContext().openTextRangeDeque.remove(textrange);
       }
     }
@@ -161,7 +155,7 @@ public class LMNLImporter {
       if (token.getType() != Token.EOF) {
         String ruleName = context.getRuleName();
         String modeName = context.getModeName();
-        log(methodName, ruleName, modeName, token);
+        log(methodName, ruleName, modeName, token, context);
         switch (token.getType()) {
         case LMNLLexer.BEGIN_OPEN_RANGE:
           handleOpenRange(context);
@@ -197,7 +191,7 @@ public class LMNLImporter {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
       case LMNLLexer.Name_Open_Range:
         TextRange textRange = new TextRange(context.currentLimenContext().limen, token.getText());
@@ -238,7 +232,7 @@ public class LMNLImporter {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
       case LMNLLexer.Name_Open_Annotation:
         Annotation annotation = new Annotation(token.getText());
@@ -295,7 +289,7 @@ public class LMNLImporter {
       Token token = context.nextToken();
       String ruleName = context.getRuleName();
       String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token);
+      log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
       case LMNLLexer.Name_Close_Range:
         String rangeName = token.getText();
@@ -357,8 +351,8 @@ public class LMNLImporter {
         .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
-  private void log(String mode, String ruleName, String modeName, Token token) {
-    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:<{}>", mode, ruleName, modeName, token.getText().replace("\n", "\\n"));
+  private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {
+    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:<{}>,\tlevel:{}", mode, ruleName, modeName, token.getText().replace("\n", "\\n"), context.limenContextStack.size());
   }
 
 }
