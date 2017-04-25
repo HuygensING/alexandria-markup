@@ -388,10 +388,10 @@ public class LMNLImporter {
   }
 
   private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {
-    LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
-        mode, context.limenContextStack.size(), //
-        token.getText().replace("\n", "\\n"), //
-        ruleName, modeName);
+//    LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
+//        mode, context.limenContextStack.size(), //
+//        token.getText().replace("\n", "\\n"), //
+//        ruleName, modeName);
   }
 
 }
