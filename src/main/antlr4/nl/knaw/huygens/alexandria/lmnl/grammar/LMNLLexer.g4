@@ -20,6 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // In the default mode we are outside a Range
 
+ATOM
+  : '{{' .*? '}}' -> skip
+  ;
+
 COMMENT
   : '[!--' .*? '--]' -> skip //channel(HIDDEN)
   ;
@@ -103,7 +107,7 @@ END_OPEN_ANNO
   :   '}'  { annotationDepth++; popMode(); pushMode(INSIDE_ANNOTATION_TEXT); }
   ;
 
-OPEN_ANNO_IN_ANNO
+OPEN_ANNO_IN_ANNO_OPENER
   :   '['  -> pushMode(INSIDE_ANNOTATION_OPENER)
   ;
 
@@ -111,7 +115,7 @@ Name_Open_Annotation
   :   NameStartChar NameChar*
   ;
 
-ANNO_S
+ANNO_OPENER_WS
   :   WS  -> skip
   ;
 
@@ -119,17 +123,29 @@ ANNO_S
 // NOTE: Annotation closers are exact copy of range closers
 mode INSIDE_ANNOTATION_CLOSER;
 
+Name_Close_Annotation
+  :   NameStartChar NameChar*
+  ;
+
+OPEN_ANNO_IN_ANNO_CLOSER
+  :   '['  -> pushMode(INSIDE_ANNOTATION_OPENER)
+  ;
+
 END_CLOSE_ANNO
   :   ']'  -> popMode
   ;
 
-Name_Close_Annotation
-  :   NameStartChar NameChar*
+ANNO_CLOSER_WS
+  :   WS  -> skip
   ;
 
 // ------------------ Inside ANNOTATION TEXT --------------------------------------
 // NOTE:c Annotation text is simi
 mode INSIDE_ANNOTATION_TEXT;
+
+ATOM_IN_ANNOTATION_TEXT
+  : '{{' .*? '}}' -> skip
+  ;
 
 BEGIN_ANNO_OPEN_RANGE
   : '[' {

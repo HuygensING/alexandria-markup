@@ -233,7 +233,8 @@ public class LMNLImporter {
         case LMNLLexer.Name_Open_Annotation:
           annotation.setTag(token.getText());
           break;
-        case LMNLLexer.OPEN_ANNO_IN_ANNO:
+        case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
+        case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
           handleAnnotation(context);
           break;
         case LMNLLexer.END_OPEN_ANNO:
