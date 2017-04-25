@@ -315,6 +315,25 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
+  public void testAtomsAreIgnored() {
+    String input = "[r}Splitting the {{Atom}}.{r]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "r");
+    TextNode t1 = new TextNode("Splitting the .");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+  }
+
+  @Test
   public void testComments() {
     String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
     Document actual = new LMNLImporter().importLMNL(input);
