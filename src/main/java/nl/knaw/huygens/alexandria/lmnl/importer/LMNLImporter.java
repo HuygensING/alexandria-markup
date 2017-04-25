@@ -62,12 +62,15 @@ public class LMNLImporter {
     }
 
     private TextRange currentTextRange() {
-      return openTextRangeStack.peek();
+      return openTextRangeDeque.isEmpty() ? null : openTextRangeStack.peek();
     }
 
     void openAnnotation(Annotation annotation) {
       if (annotationStack.isEmpty()) {
-        currentTextRange().addAnnotation(annotation);
+        TextRange textRange = currentTextRange();
+        if (textRange != null) {
+          textRange.addAnnotation(annotation);
+        }
       } else {
         annotationStack.peek().addAnnotation(annotation);
       }
@@ -115,7 +118,7 @@ public class LMNLImporter {
       return limenContextStack.pop();
     }
 
-    TextRange newTextRange(String tagName){
+    TextRange newTextRange(String tagName) {
       return new TextRange(currentLimenContext().limen, tagName);
     }
 
@@ -150,7 +153,6 @@ public class LMNLImporter {
     void closeAnnotation() {
       currentLimenContext().closeAnnotation();
     }
-
 
   }
 
@@ -386,7 +388,10 @@ public class LMNLImporter {
   }
 
   private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {
-    LOG.info("{}:\truleName:{},\tmodeName:{},\ttoken:<{}>,\tlevel:{}", mode, ruleName, modeName, token.getText().replace("\n", "\\n"), context.limenContextStack.size());
+    LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
+        mode, context.limenContextStack.size(), //
+        token.getText().replace("\n", "\\n"), //
+        ruleName, modeName);
   }
 
 }
