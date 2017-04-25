@@ -44,7 +44,11 @@ COMMENT_IN_RANGE_OPENER
   ;
 
 END_ANONYMOUS_RANGE
-  :   ']'  -> popMode
+  :   ']'  {
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
+    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
+    popMode();
+  }
   ;
 
 END_OPEN_RANGE
@@ -129,7 +133,7 @@ mode INSIDE_ANNOTATION_TEXT;
 
 BEGIN_ANNO_OPEN_RANGE
   : '[' {
-    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger());
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
     openRangeInAnnotationTextCount.get(annotationDepth).incrementAndGet();
     pushMode(INSIDE_RANGE_OPENER);
   }
@@ -137,7 +141,7 @@ BEGIN_ANNO_OPEN_RANGE
 
 BEGIN_ANNO_CLOSE_RANGE
   : '{'  {
-    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger());
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
     if (openRangeInAnnotationTextCount.get(annotationDepth).get() == 0) {
       setType(BEGIN_CLOSE_ANNO);
       popMode();

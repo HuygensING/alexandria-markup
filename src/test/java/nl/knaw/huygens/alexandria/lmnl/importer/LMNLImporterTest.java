@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -256,6 +258,60 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     List<IndexPoint> expectedIndexPoints = new ArrayList<>();
     expectedIndexPoints.add(new IndexPoint(0, 0));
     assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+  }
+
+  @Test
+  public void testAnnotationTextInAnnotationWithRanges() {
+    String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "range1");
+    Annotation a1 = simpleAnnotation("annotation1");
+    Limen annotationLimen = a1.value();
+    TextNode at1 = new TextNode("");
+    TextRange ar11 = new TextRange(annotationLimen, "ra11").addTextNode(at1);
+    TextRange ar12 = new TextRange(annotationLimen, "ra12").addTextNode(at1);
+    annotationLimen//
+        .addTextNode(at1)//
+        .addTextRange(ar11)//
+        .addTextRange(ar12);
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
+  }
+
+  @Test
+  public void testAnonymousAnnotationRangeOpener() {
+    String input = "[range1 [}annotation text{]}bla{range1]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "range1");
+    Annotation a1 = simpleAnnotation("", "annotation text");
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("bla");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
   }
 
   @Test
