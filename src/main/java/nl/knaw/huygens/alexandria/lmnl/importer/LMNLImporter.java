@@ -28,6 +28,59 @@ public class LMNLImporter {
     LimenContext(Limen limen) {
       this.limen = limen;
     }
+
+    void openTextRange(TextRange textRange) {
+      openTextRangeDeque.push(textRange);
+      openTextRangeStack.push(textRange);
+      limen.addTextRange(textRange);
+    }
+
+    void pushOpenTextRange(String rangeName) {
+      LOG.info("currentLimenContext().openTextRangeDeque={}", openTextRangeDeque.stream().map(TextRange::getTag).collect(Collectors.toList()));
+      TextRange textRange = openTextRangeDeque.stream()//
+          .filter(tr -> tr.getTag().equals(rangeName))//
+          .findFirst()//
+          .get();
+      openTextRangeStack.push(textRange);
+    }
+
+    void popOpenTextRange() {
+      openTextRangeStack.pop();
+    }
+
+    void closeTextRange() {
+      if (!openTextRangeStack.isEmpty()) {
+        TextRange textrange = openTextRangeStack.pop();
+        openTextRangeDeque.remove(textrange);
+      }
+    }
+
+    void addTextNode(TextNode textNode) {
+      openTextRangeDeque.descendingIterator()//
+          .forEachRemaining(tr -> tr.addTextNode(textNode));
+      limen.addTextNode(textNode);
+    }
+
+    private TextRange currentTextRange() {
+      return openTextRangeStack.peek();
+    }
+
+    void openAnnotation(Annotation annotation) {
+      if (annotationStack.isEmpty()) {
+        currentTextRange().addAnnotation(annotation);
+      } else {
+        annotationStack.peek().addAnnotation(annotation);
+      }
+      annotationStack.push(annotation);
+    }
+
+    Limen currentAnnotationLimen() {
+      return annotationStack.peek().value();
+    }
+
+    void closeAnnotation() {
+      annotationStack.pop();
+    }
   }
 
   static class ImporterContext {
@@ -62,57 +115,43 @@ public class LMNLImporter {
       return limenContextStack.pop();
     }
 
+    TextRange newTextRange(String tagName){
+      return new TextRange(currentLimenContext().limen, tagName);
+    }
+
     void openTextRange(TextRange textRange) {
-      currentLimenContext().openTextRangeDeque.push(textRange);
-      currentLimenContext().openTextRangeStack.push(textRange);
-      currentLimenContext().limen.addTextRange(textRange);
+      currentLimenContext().openTextRange(textRange);
     }
 
     void pushOpenTextRange(String rangeName) {
-      LOG.info("currentLimenContext().openTextRangeDeque={}", currentLimenContext().openTextRangeDeque.stream().map(TextRange::getTag).collect(Collectors.toList()));
-      TextRange textRange = currentLimenContext().openTextRangeDeque.stream()//
-          .filter(tr -> tr.getTag().equals(rangeName))//
-          .findFirst()//
-          .get();
-      currentLimenContext().openTextRangeStack.push(textRange);
+      currentLimenContext().pushOpenTextRange(rangeName);
     }
 
     void popOpenTextRange() {
-      currentLimenContext().openTextRangeStack.pop();
+      currentLimenContext().popOpenTextRange();
     }
 
     void closeTextRange() {
-      if (!currentLimenContext().openTextRangeStack.isEmpty()) {
-        TextRange textrange = currentLimenContext().openTextRangeStack.pop();
-        currentLimenContext().openTextRangeDeque.remove(textrange);
-      }
+      currentLimenContext().closeTextRange();
     }
 
     void addTextNode(TextNode textNode) {
-      currentLimenContext().openTextRangeDeque.descendingIterator().forEachRemaining(tr -> tr.addTextNode(textNode));
-      currentLimenContext().limen.addTextNode(textNode);
+      currentLimenContext().addTextNode(textNode);
     }
 
     void openAnnotation(Annotation annotation) {
-      if (currentLimenContext().annotationStack.isEmpty()) {
-        currentTextRange().addAnnotation(annotation);
-      } else {
-        currentLimenContext().annotationStack.peek().addAnnotation(annotation);
-      }
-      currentLimenContext().annotationStack.push(annotation);
-    }
-
-    private TextRange currentTextRange() {
-      return currentLimenContext().openTextRangeStack.peek();
+      currentLimenContext().openAnnotation(annotation);
     }
 
     Limen currentAnnotationLimen() {
-      return currentLimenContext().annotationStack.peek().value();
+      return currentLimenContext().currentAnnotationLimen();
     }
 
     void closeAnnotation() {
-      currentLimenContext().annotationStack.pop();
+      currentLimenContext().closeAnnotation();
     }
+
+
   }
 
   public Document importLMNL(String input) {
@@ -188,7 +227,7 @@ public class LMNLImporter {
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Range:
-          TextRange textRange = new TextRange(context.currentLimenContext().limen, token.getText());
+          TextRange textRange = context.newTextRange(token.getText());
           context.openTextRange(textRange);
           break;
         case LMNLLexer.BEGIN_OPEN_ANNO:
