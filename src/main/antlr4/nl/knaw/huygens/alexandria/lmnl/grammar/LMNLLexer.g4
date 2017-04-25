@@ -95,7 +95,7 @@ RANGE_S2
 // NOTE: We can have anonymous annotations!
 mode INSIDE_ANNOTATION_OPENER;
 
-END_ANONYMOUS_ANNO
+END_EMPTY_ANNO
   :   ']'  -> popMode
   ;
 

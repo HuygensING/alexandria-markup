@@ -83,8 +83,8 @@ public class LMNLImporter {
 
     void closeTextRange() {
       if (!currentLimenContext().openTextRangeStack.isEmpty()) {
-      TextRange textrange = currentLimenContext().openTextRangeStack.pop();
-      currentLimenContext().openTextRangeDeque.remove(textrange);
+        TextRange textrange = currentLimenContext().openTextRangeStack.pop();
+        currentLimenContext().openTextRangeDeque.remove(textrange);
       }
     }
 
@@ -221,6 +221,8 @@ public class LMNLImporter {
 
   private void handleAnnotation(ImporterContext context) {
     String methodName = "handleAnnotation";
+    Annotation annotation = new Annotation("");
+    context.openAnnotation(annotation);
     boolean goOn = true;
     while (goOn) {
       Token token = context.nextToken();
@@ -229,8 +231,7 @@ public class LMNLImporter {
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Annotation:
-          Annotation annotation = new Annotation(token.getText());
-          context.openAnnotation(annotation);
+          annotation.setTag(token.getText());
           break;
         case LMNLLexer.OPEN_ANNO_IN_ANNO:
           handleAnnotation(context);
@@ -256,7 +257,7 @@ public class LMNLImporter {
           break;
         case LMNLLexer.END_CLOSE_ANNO:
           context.popLimenContext();
-        case LMNLLexer.END_ANONYMOUS_ANNO:
+        case LMNLLexer.END_EMPTY_ANNO:
           context.closeAnnotation();
           goOn = false;
           break;
