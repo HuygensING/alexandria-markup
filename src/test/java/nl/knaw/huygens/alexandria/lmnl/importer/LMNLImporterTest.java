@@ -1,7 +1,13 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,22 +17,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
-
-public class LMNLImporterTest {
+public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
   final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
 
@@ -66,14 +60,14 @@ public class LMNLImporterTest {
   @Test
   public void testLexingComplex() {
     String input = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
-        + "{excerpt]";
+            + "  [source [date}1915{][title}The Housekeeper{]]\n"//
+            + "  [author\n"//
+            + "    [name}Robert Frost{]\n"//
+            + "    [dates}1874-1963{]] }\n"//
+            + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
+            + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+            + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+            + "{excerpt]";
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
@@ -208,18 +202,149 @@ public class LMNLImporterTest {
     LOG.info("textRanges={}", actual.value().textRangeList);
     assertThat(actual.value().hasTextNodes()).isTrue();
     assertThat(actual.value().textRangeList).hasSize(1);
+
     String lmnl = lmnlExporter.toLMNL(actual);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(input);
+
     LaTeXExporter latex = new LaTeXExporter(actual);
     LOG.info("matrix=\n{}", latex.exportMatrix());
     LOG.info("kdtree=\n{}", latex.exportKdTree());
+  }
+
+  @Test
+  public void testAnnotationTextWithRanges() {
+    String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    // Expectations:
+    // We expect a Document
+    // - with one text node
+    // - with one range on it
+    // - with one annotation on it.
+    // - that has one range on it.
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "lmnl");
+    // Annotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
+    Annotation a1 = simpleAnnotation("a");
+    Limen annotationLimen = a1.value();
+    TextNode at1 = new TextNode("This is the ");
+    TextNode at2 = new TextNode("annotation");
+    TextRange ar1 = new TextRange(annotationLimen, "type").addTextNode(at2);
+    TextNode at3 = new TextNode(" text");
+    annotationLimen//
+            .addTextNode(at1)//
+            .addTextNode(at2)//
+            .addTextNode(at3)//
+            .addTextRange(ar1);
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("This is the main text");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
+
+    logKdTree(actual);
+    NodeRangeIndex index = new NodeRangeIndex(actual.value());
+    List<IndexPoint> indexPoints = index.getIndexPoints();
+    logKdTree(actual);
+    List<IndexPoint> expectedIndexPoints = new ArrayList<>();
+    expectedIndexPoints.add(new IndexPoint(0, 0));
+    assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
+  }
+
+  @Test
+  public void testAnnotationTextInAnnotationWithRanges() {
+    String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "range1");
+    Annotation a1 = simpleAnnotation("annotation1");
+    Limen annotationLimen = a1.value();
+    TextNode at1 = new TextNode("");
+    TextRange ar11 = new TextRange(annotationLimen, "ra11").addTextNode(at1);
+    TextRange ar12 = new TextRange(annotationLimen, "ra12").addTextNode(at1);
+    annotationLimen//
+        .addTextNode(at1)//
+        .addTextRange(ar11)//
+        .addTextRange(ar12);
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
+  }
+
+  @Test
+  public void testAnonymousAnnotationRangeOpener() {
+    String input = "[range1 [}annotation text{]}bla{range1]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "range1");
+    Annotation a1 = simpleAnnotation("", "annotation text");
+    r1.addAnnotation(a1);
+
+    TextNode t1 = new TextNode("bla");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
+  }
+
+  @Test
+  public void testComments() {
+    String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    // Comments are ignored, so:
+    // We expect a Document
+    // - with one text node
+    // - with one range on it
+    Document expected = new Document();
+    Limen limen = expected.value();
+    TextRange r1 = new TextRange(limen, "foo");
+    TextNode t1 = new TextNode("FOOBAR");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
     String inLMNL = FileUtils.readFileToString(new File(pathname));
     String outLMNL = lmnlExporter.toLMNL(actual);
     assertThat(outLMNL).isEqualTo(inLMNL);
+  }
+
+  private void compareLMNL(Document expected, Document actual) {
+    String expectedLMNL = lmnlExporter.toLMNL(expected);
+    String actualLMNL = lmnlExporter.toLMNL(actual);
+    assertThat(actualLMNL).isEqualTo(expectedLMNL);
   }
 
   private Annotation simpleAnnotation(String tag) {

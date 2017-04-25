@@ -265,9 +265,9 @@ public class LaTeXExporter {
         int size = limen.getTextRanges(tn).size();
         float gradient = size / (float) maxTextRangesPerTextNode;
 
-        int r = 256 - Math.round(255 * gradient);
+        int r = 255 - Math.round(255 * gradient);
         int g = 255;
-        int b = 256 - Math.round(255 * gradient);
+        int b = 255 - Math.round(255 * gradient);
         Color color = new Color(r, g, b);
         String fillColor = ColorUtil.toLaTeX(color);
 
