@@ -1,0 +1,33 @@
+package nl.knaw.huygens.alexandria.lmnl.query;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+
+public class LQLQueryHandlerTest {
+  @Test
+  public void testLQLQuery1() {
+    String lmnl = "[excerpt}[p}\n"//
+        + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
+        + "and of having nothing to do: once or twice she had peeped into the book her sister\n" + "was reading, but it had no pictures or conversations in it, \n"//
+        + "[q=a}and what is the use of a book,{q=a]\n"//
+        + "thought Alice\n"//
+        + "[q=a}without pictures or conversation?{q=a]\n"//
+        + "{p]{excerpt]";
+    Document alice = new LMNLImporter().importLMNL(lmnl);
+
+    LQLQueryHandler h = new LQLQueryHandler(alice);
+    String statement = "select m.text from markup m where m.name='q' and m.id='a'";
+    LQLResult result = h.execute(statement);
+    assertThat(result).isNotNull();
+    List<String> expected = new ArrayList<>();
+    expected.add("and what is the use of a book,without pictures or conversation?");
+    assertThat(result.asList()).containsExactlyElementsOf(expected);
+  }
+}
