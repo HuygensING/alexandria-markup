@@ -8,7 +8,7 @@ import java.util.List;
  */
 // Annotations can be on ranges or annotations
 public class Annotation {
-  private final String tag;
+  private String tag;
   private final Limen limen;
   private final List<Annotation> annotations = new ArrayList<>();
 
@@ -40,6 +40,10 @@ public class Annotation {
     return "[" + tag + "}";
   }
 
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+
   public String getTag() {
     return tag;
   }
@@ -48,3 +52,4 @@ public class Annotation {
     return annotations;
   }
 }
+

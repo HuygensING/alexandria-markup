@@ -14,11 +14,8 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
-/**
- * Created by bramb on 15-2-2017.
- */
 public class LaTexExporterTest {
-  private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
+  private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
 
   @Test
   public void testLaTeXOutput1() {
