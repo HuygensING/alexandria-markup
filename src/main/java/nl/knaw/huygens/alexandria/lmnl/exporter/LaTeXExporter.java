@@ -420,10 +420,14 @@ public class LaTeXExporter {
     }
 
     public void addTextRange(TextRange textRange) {
+      LOG.info("textRange={}", textRange.getTag());
       textRanges.add(textRange);
       tags.add(normalize(textRange.getTag()));
-      maxRangeSize = Math.max(maxRangeSize, textRange.textNodes.size());
-      lastTextNodeUsed = textNodeIndex.get(textRange.textNodes.get(textRange.textNodes.size() - 1));
+      int size = textRange.textNodes.size();
+      maxRangeSize = Math.max(maxRangeSize, size);
+      int lastIndex = size - 1;
+      TextNode lastTextNode = textRange.textNodes.get(lastIndex);
+      lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
     public List<TextRange> getTextRanges() {

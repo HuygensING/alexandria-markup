@@ -1,13 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +11,21 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
@@ -60,14 +67,14 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   @Test
   public void testLexingComplex() {
     String input = "[excerpt\n"//
-            + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-            + "  [author\n"//
-            + "    [name}Robert Frost{]\n"//
-            + "    [dates}1874-1963{]] }\n"//
-            + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-            + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-            + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
-            + "{excerpt]";
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
+        + "  [author\n"//
+        + "    [name}Robert Frost{]\n"//
+        + "    [dates}1874-1963{]] }\n"//
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+        + "{excerpt]";
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
@@ -236,10 +243,10 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     TextRange ar1 = new TextRange(annotationLimen, "type").addTextNode(at2);
     TextNode at3 = new TextNode(" text");
     annotationLimen//
-            .addTextNode(at1)//
-            .addTextNode(at2)//
-            .addTextNode(at3)//
-            .addTextRange(ar1);
+        .addTextNode(at1)//
+        .addTextNode(at2)//
+        .addTextNode(at3)//
+        .addTextRange(ar1);
     r1.addAnnotation(a1);
 
     TextNode t1 = new TextNode("This is the main text");
@@ -331,6 +338,26 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
     logLMNL(actual);
     compareLMNL(expected, actual);
+  }
+
+  @Test
+  public void testEmptyRange() {
+    String input = "[empty}{empty]";
+    printTokens(input);
+    Document actual = new LMNLImporter().importLMNL(input);
+
+    Document expected = new Document();
+    Limen limen = expected.value();
+
+    TextRange r1 = new TextRange(limen, "empty");
+    TextNode t1 = new TextNode("");
+    r1.setOnlyTextNode(t1);
+    limen.setOnlyTextNode(t1);
+    limen.addTextRange(r1);
+
+    logLMNL(actual);
+    compareLMNL(expected, actual);
+    assertTrue(compareDocuments(expected, actual));
   }
 
   @Test
