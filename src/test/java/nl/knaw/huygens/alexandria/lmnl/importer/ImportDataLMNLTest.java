@@ -73,7 +73,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
     LOG.info("importLMNL\n");
     Document document = new LMNLImporter().importLMNL(input);
 
-    // generateLaTeX(basename, document);
+    generateLaTeX(basename, document);
   }
 
   private InputStream getInputStream(String basename) throws IOException {
