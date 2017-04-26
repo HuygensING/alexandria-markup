@@ -21,11 +21,11 @@ where_stmt
   ;
 
 expr
-  : literal_value
-  | IDENTIFIER (DOT part)?
-  | expr ( '=' | '==' | '!=' | '<>' ) expr
-  | expr K_AND expr
-  | in_expr
+  : literal_value 							# literalExpression
+  | IDENTIFIER (DOT part)?                  # extendedIdentifier
+  | expr ( '=' | '==' | '!=' | '<>' ) expr  # comparisonExpression
+  | expr K_AND expr                         # joiningExpression
+  | in_expr									# inExpression
   ;
 
 in_expr
