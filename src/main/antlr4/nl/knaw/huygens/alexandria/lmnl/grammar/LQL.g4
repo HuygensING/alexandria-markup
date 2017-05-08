@@ -1,36 +1,40 @@
 grammar LQL;
 
-lql_script
+lqlScript
   : statement* EOF
   ;
 
 statement
-  : select_stmt '\n'?
+  : selectStmt '\n'?
   ;
 
-select_stmt
-  : SELECT select_variable FROM source where_stmt?
+selectStmt
+  : SELECT selectVariable FROM source whereStmt?
   ;
 
-select_variable
-  : IDENTIFIER (DOT part)?
+selectVariable
+  : base (DOT part)?
   | part
   ;
 
-where_stmt
+whereStmt
   : WHERE expr
   ;
 
 expr
-  : literal_value 							# literalExpression
+  : literalValue 							              # literalExpression
   | IDENTIFIER (DOT part)?                  # extendedIdentifier
   | expr ( '=' | '==' | '!=' | '<>' ) expr  # comparisonExpression
   | expr K_AND expr                         # joiningExpression
-  | in_expr									# inExpression
+  | inExpr									                # inExpression
   ;
 
-in_expr
-  : IDENTIFIER IN '(' select_stmt ')'
+inExpr
+  : IDENTIFIER IN '(' selectStmt ')'
+  ;
+
+base
+  : IDENTIFIER
   ;
 
 part
@@ -41,22 +45,30 @@ part
   ;
 
 source
-  : MARKUP IDENTIFIER?
-  | MARKUP '(' literal_value ')' ( '[' index_value ']' )?
+  : MARKUP markupIdentifier?                          # simpleMarkupSource
+  | MARKUP '(' markupName ')' ( '[' indexValue ']' )? # parameterizedMarkupSource
   ;
 
-index_value
+markupIdentifier
+  : IDENTIFIER
+  ;
+
+markupName
+  : STRING_LITERAL
+  ;
+
+indexValue
   : INTEGER
   ;
 
-literal_value
+literalValue
   : NUMERIC_LITERAL
   | STRING_LITERAL
   ;
 
-annotation_identifier
+annotationIdentifier
   : IDENTIFIER
-  | annotation_identifier ':' IDENTIFIER
+  | annotationIdentifier ':' IDENTIFIER
   ;
 
 SELECT

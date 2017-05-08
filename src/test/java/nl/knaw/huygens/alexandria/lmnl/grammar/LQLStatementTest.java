@@ -1,14 +1,6 @@
 package nl.knaw.huygens.alexandria.lmnl.grammar;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +10,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.runners.Parameterized.Parameters;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class LQLStatementTest {
@@ -48,27 +48,27 @@ public class LQLStatementTest {
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
     String line;
     while ((line = reader.readLine()) != null) {
-      data.add(new Object[]{line, b});
+      data.add(new Object[] { line, b });
     }
   }
 
   @Test
   public void testLQLStatementHasExpectedValidity() {
     LOG.info("LQL={}", this.statement);
-    CharStream stream = new ANTLRInputStream(this.statement);
+    CharStream stream = CharStreams.fromString(this.statement);
     LQLLexer lex = new LQLLexer(stream);
-//    List<? extends Token> allTokens = lex.getAllTokens();
-//    for (Token token : allTokens) {
-//      LOG.info("token: [{}] <<{}>>", lex.getRuleNames()[token.getType() - 1], token.getText());
-//    }
-//    lex.reset();
+    // List<? extends Token> allTokens = lex.getAllTokens();
+    // for (Token token : allTokens) {
+    // LOG.info("token: [{}] <<{}>>", lex.getRuleNames()[token.getType() - 1], token.getText());
+    // }
+    // lex.reset();
 
     CommonTokenStream tokens = new CommonTokenStream(lex);
     LQLParser parser = new LQLParser(tokens);
     parser.setBuildParseTree(true);
-    ParseTree tree = parser.lql_script();
+    ParseTree tree = parser.lqlScript();
     LOG.info("tree={}", tree.toStringTree(parser));
-//    assertThat(tree.getChildCount()).isEqualTo(2);
+    // assertThat(tree.getChildCount()).isEqualTo(2);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors);

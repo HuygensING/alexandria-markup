@@ -6,12 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
 public class LQLQueryHandlerTest {
-  @Test
+  Logger LOG = LoggerFactory.getLogger(getClass());
+
+  // @Test
   public void testLQLQuery1() {
     String lmnl = "[excerpt}[p}\n"//
         + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
@@ -25,10 +29,11 @@ public class LQLQueryHandlerTest {
     LQLQueryHandler h = new LQLQueryHandler(alice);
     String statement = "select m.text from markup m where m.name='q' and m.id='a'";
     LQLResult result = h.execute(statement);
+    LOG.info("result={}", result);
     assertThat(result).isNotNull();
     List<String> expected = new ArrayList<>();
     expected.add("and what is the use of a book,without pictures or conversation?");
-    assertThat(result.asList()).containsExactlyElementsOf(expected);
+    assertThat(result.getValues()).containsExactlyElementsOf(expected);
   }
 
   @Test
@@ -41,12 +46,13 @@ public class LQLQueryHandlerTest {
     Document alice = new LMNLImporter().importLMNL(lmnl);
 
     LQLQueryHandler h = new LQLQueryHandler(alice);
-    String statement = "select text from markup('1')[0]";
+    String statement = "select text from markup('l')[0]";
     LQLResult result = h.execute(statement);
+    LOG.info("result.values={}", result.getValues());
     assertThat(result).isNotNull();
     List<String> expected = new ArrayList<>();
     expected.add("line 1");
-    assertThat(result.asList()).containsExactlyElementsOf(expected);
+    assertThat(result.getValues()).containsExactlyElementsOf(expected);
   }
 
 }

@@ -30,7 +30,7 @@ public class LQLTest {
     CommonTokenStream tokens = new CommonTokenStream(lex);
     LQLParser parser = new LQLParser(tokens);
     parser.setBuildParseTree(true);
-    ParseTree tree = parser.lql_script();
+    ParseTree tree = parser.lqlScript();
     LOG.info("tree={}", tree.toStringTree(parser));
     assertThat(tree.getChildCount()).isEqualTo(2);
 

@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LQLLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLSelectStatement;
 import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
 
 public class LQLQueryHandler {
@@ -26,7 +25,7 @@ public class LQLQueryHandler {
     CharStream stream = CharStreams.fromString(statement);
     LQLLexer lex = new LQLLexer(stream);
     CommonTokenStream tokens = new CommonTokenStream(lex);
-    ParseTree tree = new LQLParser(tokens).lql_script();
+    ParseTree tree = new LQLParser(tokens).lqlScript();
     ParseTreeWalker ptw = new ParseTreeWalker();
     LQLQueryListener l = new LQLQueryListener();
     ptw.walk(l, tree);
@@ -41,19 +40,8 @@ public class LQLQueryHandler {
   }
 
   LQLResult execute(LQLStatement statement) {
-    if (statement instanceof LQLSelectStatement) {
-      return executeSelect((LQLSelectStatement) statement);
-    }
-    LQLResult result = new LQLResult();
-    return result;
+    return statement.getLimenProcessor()//
+        .apply(document.value());
   }
 
-  LQLResult executeSelect(LQLSelectStatement select) {
-    LQLResult result = new LQLResult();
-    document.value().textRangeList.stream()//
-        .filter(select.getTextRangeFilter())//
-        .map(select.getTextRangeMapper())//
-    ;
-    return result;
-  }
 }
