@@ -30,4 +30,23 @@ public class LQLQueryHandlerTest {
     expected.add("and what is the use of a book,without pictures or conversation?");
     assertThat(result.asList()).containsExactlyElementsOf(expected);
   }
+
+  @Test
+  public void testLQLQuery2() {
+    String lmnl = "[text}\n"//
+        + "[l}line 1{l]\n"//
+        + "[l}line 2{l]\n"//
+        + "[l}line 3{l]\n"//
+        + "{text]";
+    Document alice = new LMNLImporter().importLMNL(lmnl);
+
+    LQLQueryHandler h = new LQLQueryHandler(alice);
+    String statement = "select text from markup('1')[0]";
+    LQLResult result = h.execute(statement);
+    assertThat(result).isNotNull();
+    List<String> expected = new ArrayList<>();
+    expected.add("line 1");
+    assertThat(result.asList()).containsExactlyElementsOf(expected);
+  }
+
 }

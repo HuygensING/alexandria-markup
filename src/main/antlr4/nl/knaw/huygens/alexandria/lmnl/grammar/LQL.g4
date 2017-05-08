@@ -14,6 +14,7 @@ select_stmt
 
 select_variable
   : IDENTIFIER (DOT part)?
+  | part
   ;
 
 where_stmt
@@ -41,6 +42,11 @@ part
 
 source
   : MARKUP IDENTIFIER?
+  | MARKUP '(' literal_value ')' ( '[' index_value ']' )?
+  ;
+
+index_value
+  : INTEGER
   ;
 
 literal_value
@@ -55,6 +61,10 @@ annotation_identifier
 
 SELECT
   : S E L E C T
+  ;
+
+INTEGER
+  : DIGIT+
   ;
 
 NUMERIC_LITERAL
