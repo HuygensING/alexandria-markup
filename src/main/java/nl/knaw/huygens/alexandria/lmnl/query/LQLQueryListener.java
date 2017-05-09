@@ -1,27 +1,20 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.ParserRuleContext;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLBaseListener;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.*;
+import nl.knaw.huygens.alexandria.lmnl.lql.LQLSelectStatement;
+import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLBaseListener;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.ParameterizedMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.PartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SelectStmtContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SelectVariableContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SourceContext;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLSelectStatement;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LQLQueryListener extends LQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
   private List<LQLStatement> statements = new ArrayList<>();
-  private String text;
 
   @Override
   public void exitSelectStmt(SelectStmtContext ctx) {
@@ -38,6 +31,8 @@ public class LQLQueryListener extends LQLBaseListener {
         statement.setIndex(index);
       }
 
+    } else if (source != null && source instanceof SimpleMarkupSourceContext) {
+      SimpleMarkupSourceContext smsc = (SimpleMarkupSourceContext) source;
     }
 
     SelectVariableContext selectVariable = ctx.selectVariable();
@@ -48,10 +43,6 @@ public class LQLQueryListener extends LQLBaseListener {
 
     getStatements().add(statement);
     super.exitSelectStmt(ctx);
-  }
-
-  private String asString(ParserRuleContext prc) {
-    return prc == null ? null : prc.getText();
   }
 
   public List<LQLStatement> getStatements() {

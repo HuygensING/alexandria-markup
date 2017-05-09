@@ -1,18 +1,17 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LaTexExporterTest {
   private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
@@ -71,7 +70,7 @@ public class LaTexExporterTest {
 
     String coloredText = exporter.exportTextRangeOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();

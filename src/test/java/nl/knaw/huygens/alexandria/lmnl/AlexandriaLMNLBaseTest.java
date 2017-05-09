@@ -1,12 +1,12 @@
 package nl.knaw.huygens.alexandria.lmnl;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 
-import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class AlexandriaLMNLBaseTest {
 
@@ -17,14 +17,14 @@ public class AlexandriaLMNLBaseTest {
     System.out.println("LMNL:");
     System.out.println(input);
     System.out.println("Tokens:");
-    printTokens(new ANTLRInputStream(input));
+    printTokens(CharStreams.fromString(input));
   }
 
   protected void printTokens(InputStream input) throws IOException {
-    printTokens(new ANTLRInputStream(input));
+    printTokens(CharStreams.fromStream(input));
   }
 
-  private void printTokens(ANTLRInputStream inputStream) {
+  private void printTokens(CharStream inputStream) {
     LMNLLexer lexer = new LMNLLexer(inputStream);
     Token token;
     do {

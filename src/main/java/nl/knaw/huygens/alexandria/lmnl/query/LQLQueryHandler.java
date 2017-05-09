@@ -1,17 +1,16 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import java.util.List;
-
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser;
+import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
+import java.util.List;
 
 public class LQLQueryHandler {
 
@@ -23,13 +22,13 @@ public class LQLQueryHandler {
 
   public LQLResult execute(String statement) {
     CharStream stream = CharStreams.fromString(statement);
-    LQLLexer lex = new LQLLexer(stream);
-    CommonTokenStream tokens = new CommonTokenStream(lex);
-    ParseTree tree = new LQLParser(tokens).lqlScript();
-    ParseTreeWalker ptw = new ParseTreeWalker();
-    LQLQueryListener l = new LQLQueryListener();
-    ptw.walk(l, tree);
-    List<LQLStatement> statements = l.getStatements();
+    LQLLexer lqlLexer = new LQLLexer(stream);
+    CommonTokenStream tokens = new CommonTokenStream(lqlLexer);
+    ParseTree parseTree = new LQLParser(tokens).lqlScript();
+    ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+    LQLQueryListener lqlQueryListener = new LQLQueryListener();
+    parseTreeWalker.walk(lqlQueryListener, parseTree);
+    List<LQLStatement> statements = lqlQueryListener.getStatements();
 
     LQLResult result = new LQLResult();
     statements.stream()//

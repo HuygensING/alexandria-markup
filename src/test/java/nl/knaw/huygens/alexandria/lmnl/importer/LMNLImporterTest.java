@@ -1,7 +1,13 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,21 +17,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
@@ -382,7 +375,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {
-    String inLMNL = FileUtils.readFileToString(new File(pathname));
+    String inLMNL = FileUtils.readFileToString(new File(pathname), "UTF-8");
     String outLMNL = lmnlExporter.toLMNL(actual);
     assertThat(outLMNL).isEqualTo(inLMNL);
   }

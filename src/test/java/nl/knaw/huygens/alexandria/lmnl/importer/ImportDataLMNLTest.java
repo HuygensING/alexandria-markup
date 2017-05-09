@@ -1,13 +1,8 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.junit.Test;
@@ -17,9 +12,13 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
@@ -46,7 +45,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   public static Collection<String[]> parameters() {
     return FileUtils.listFiles(new File("data"), LMNL_FILE_FILTER, null)//
         .stream()//
-        .map(f -> f.getName())//
+        .map(File::getName)//
         .map(n -> n.replace(".lmnl", ""))//
         .map(b -> new String[] { b })//
         .collect(Collectors.toList());
@@ -96,7 +95,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
     String coloredText = exporter.exportTextRangeOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();

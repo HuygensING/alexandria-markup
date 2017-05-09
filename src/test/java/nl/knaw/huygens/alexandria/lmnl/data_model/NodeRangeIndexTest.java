@@ -63,8 +63,7 @@ public class NodeRangeIndexTest {
   private NodeRangeIndex index(String lmnl) {
     LMNLImporter importer = new LMNLImporter();
     Document document = importer.importLMNL(lmnl);
-    NodeRangeIndex index = new NodeRangeIndex(document.value());
-    return index;
+    return new NodeRangeIndex(document.value());
   }
 
 }
