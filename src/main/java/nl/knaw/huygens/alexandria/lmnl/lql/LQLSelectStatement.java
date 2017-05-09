@@ -1,14 +1,13 @@
 package nl.knaw.huygens.alexandria.lmnl.lql;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 import nl.knaw.huygens.alexandria.lmnl.query.LQLResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class LQLSelectStatement implements LQLStatement {
 
@@ -45,7 +44,7 @@ public class LQLSelectStatement implements LQLStatement {
       limen.textRangeList.stream()//
           .filter(textRangeFilter)//
           .map(textRangeMapper)//
-          .map(this::logger)//
+//          .map(this::logger)//
           .forEach(result::addValue);
       if (index != null) {
         Object selectedValue = result.getValues().get(index);
