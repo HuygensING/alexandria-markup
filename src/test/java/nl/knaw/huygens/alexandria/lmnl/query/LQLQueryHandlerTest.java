@@ -1,15 +1,16 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
 public class LQLQueryHandlerTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
@@ -27,8 +28,9 @@ public class LQLQueryHandlerTest {
     Document alice = new LMNLImporter().importLMNL(lmnl);
 
     LQLQueryHandler h = new LQLQueryHandler(alice);
-//    String statement = "select m.text from markup m where m.name='q' and m.id='a'";
-    String statement = "select m.text from markup m where m.name='q=a'";
+    // String statement = "select m.text from markup m where m.name='q' and m.id='a'";
+    // String statement = "select m.text from markup m where m.name='q=a'";
+    String statement = "select text from markup where name='q=a'";
     LQLResult result = h.execute(statement);
     LOG.info("result={}", result);
     assertThat(result).isNotNull();

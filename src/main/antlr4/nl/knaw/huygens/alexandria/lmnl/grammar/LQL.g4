@@ -22,8 +22,8 @@ whereClause
   ;
 
 expr
-  : literalValue 						                        # literalExpression
-  | extendedIdentifier ( '=' | '==' ) literalValue  # equalityComparisonExpression
+//  : literalValue 						                        # literalExpression
+  : extendedIdentifier ( '=' | '==' ) literalValue  # equalityComparisonExpression
   | extendedIdentifier ( '!=' | '<>' ) literalValue # inequalityComparisonExpression
   | expr K_AND expr                                 # joiningExpression
   | IDENTIFIER IN '(' selectStmt ')'                # inExpression
@@ -31,6 +31,7 @@ expr
 
 extendedIdentifier
   : base (DOT part)?
+  | part
   ;
 
 base
@@ -38,10 +39,10 @@ base
   ;
 
 part
-  : TEXT
-  | ANNOTATIONVALUE '(' STRING_LITERAL ')'
-  | NAME
-  | ID
+  : TEXT                                   # textPart
+  | ANNOTATIONVALUE '(' STRING_LITERAL ')' # annotationValuePart
+  | NAME                                   # namePart
+  | ID                                     # idPart
   ;
 
 source
