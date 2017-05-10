@@ -77,4 +77,39 @@ public class LQLQueryHandlerTest {
     assertThat(result3.getValues()).containsExactlyElementsOf(expected3);
   }
 
+  @Test
+  public void testLQLQuery3() {
+    String lmnl = "[excerpt [source [book}1 Kings{book] [chapter}12{chapter]]}\n"
+        + "[verse}And he said unto them, [q}What counsel give ye that we may answer this people, who have spoken to me, saying, [q}Make the yoke which thy father did put upon us lighter?{q]{q]{verse]\n"
+        + "[verse}And the young men that were grown up with him spake unto him, saying, [q}Thus shalt thou speak unto this people that spake unto thee, saying, [q=i}Thy father made our yoke heavy, but make thou it lighter unto us;{q=i] thus shalt thou say unto them, [q=j}My little finger shall be thicker than my father's loins.{verse]\n"
+        + "[verse}And now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I will chastise you with scorpions.{q=j]{q]{verse]\n"
+        + "[verse}So Jeroboam and all the people came to Rehoboam the third day, as the king had appointed, saying, [q}Come to me again the third day.{q]{verse]\n" + "{excerpt]";
+    Document kings = new LMNLImporter().importLMNL(lmnl);
+
+    LQLQueryHandler h = new LQLQueryHandler(kings);
+
+    String statement1 = "select annotationText('source:chapter') from markup where name='excerpt'";
+    LQLResult result1 = h.execute(statement1);
+    LOG.info("result1={}", result1);
+    assertThat(result1).isNotNull();
+    List<List<String>> expected1 = new ArrayList<>();
+    List<String> expectedEntry = new ArrayList<>();
+    expectedEntry.add("12");
+    expected1.add(expectedEntry);
+    assertThat(result1.getValues()).containsExactlyElementsOf(expected1);
+
+    // String statement2 = "select m.text from markup m where m.name='q' and m in (select q from markup q where q.name='q')";
+    // LQLResult result2 = h.execute(statement2);
+    // LOG.info("result2={}", result2);
+    // assertThat(result2).isNotNull();
+    // List<String> expected2 = new ArrayList<>();
+    // expected2.add("Make the yoke which thy father did put upon us lighter?");
+    // expected2.add("Thy father made our yoke heavy, but make thou it lighter unto us;");
+    // expected2.add(
+    // "My little finger shall be thicker than my father's loins.\\nAnd now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I
+    // will chastise you with scorpions.");
+    // assertThat(result2.getValues()).containsExactlyElementsOf(expected2);
+
+  }
+
 }

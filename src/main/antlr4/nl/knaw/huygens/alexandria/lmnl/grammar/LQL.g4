@@ -39,10 +39,10 @@ base
   ;
 
 part
-  : TEXT                                   # textPart
-  | ANNOTATIONVALUE '(' STRING_LITERAL ')' # annotationValuePart
-  | NAME                                   # namePart
-  | ID                                     # idPart
+  : TEXT                                        # textPart
+  | NAME                                        # namePart
+  | ID                                          # idPart
+  | ANNOTATIONTEXT '(' annotationIdentifier ')' # annotationValuePart
   ;
 
 source
@@ -68,8 +68,7 @@ literalValue
   ;
 
 annotationIdentifier
-  : IDENTIFIER
-  | annotationIdentifier ':' IDENTIFIER
+  : STRING_LITERAL
   ;
 
 SELECT
@@ -99,8 +98,8 @@ TEXT
   : T E X T
   ;
 
-ANNOTATIONVALUE
-  : A N N O T A T I O N V A L U E
+ANNOTATIONTEXT
+  : A N N O T A T I O N T E X T
   ;
 
 MARKUP
