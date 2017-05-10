@@ -14,11 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LQLQueryHandlerTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  // @Test
+  @Test
   public void testLQLQuery1() {
     String lmnl = "[excerpt}[p}\n"//
         + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
-        + "and of having nothing to do: once or twice she had peeped into the book her sister\n" + "was reading, but it had no pictures or conversations in it, \n"//
+        + "and of having nothing to do: once or twice she had peeped into the book her sister\n"//
+        + "was reading, but it had no pictures or conversations in it, \n"//
         + "[q=a}and what is the use of a book,{q=a]\n"//
         + "thought Alice\n"//
         + "[q=a}without pictures or conversation?{q=a]\n"//
@@ -26,7 +27,8 @@ public class LQLQueryHandlerTest {
     Document alice = new LMNLImporter().importLMNL(lmnl);
 
     LQLQueryHandler h = new LQLQueryHandler(alice);
-    String statement = "select m.text from markup m where m.name='q' and m.id='a'";
+//    String statement = "select m.text from markup m where m.name='q' and m.id='a'";
+    String statement = "select m.text from markup m where m.name='q=a'";
     LQLResult result = h.execute(statement);
     LOG.info("result={}", result);
     assertThat(result).isNotNull();
@@ -71,7 +73,6 @@ public class LQLQueryHandlerTest {
     expected3.add("line 2");
     expected3.add("line 3");
     assertThat(result3.getValues()).containsExactlyElementsOf(expected3);
-
   }
 
 }
