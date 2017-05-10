@@ -9,7 +9,7 @@ statement
   ;
 
 selectStmt
-  : SELECT selectVariable FROM source whereStmt?
+  : SELECT selectVariable FROM source whereClause?
   ;
 
 selectVariable
@@ -17,20 +17,20 @@ selectVariable
   | part
   ;
 
-whereStmt
+whereClause
   : WHERE expr
   ;
 
 expr
-  : literalValue 							              # literalExpression
-  | IDENTIFIER (DOT part)?                  # extendedIdentifier
-  | expr ( '=' | '==' | '!=' | '<>' ) expr  # comparisonExpression
-  | expr K_AND expr                         # joiningExpression
-  | inExpr									                # inExpression
+  : literalValue 						                        # literalExpression
+  | extendedIdentifier ( '=' | '==' ) literalValue  # equalityComparisonExpression
+  | extendedIdentifier ( '!=' | '<>' ) literalValue # inequalityComparisonExpression
+  | expr K_AND expr                                 # joiningExpression
+  | IDENTIFIER IN '(' selectStmt ')'                # inExpression
   ;
 
-inExpr
-  : IDENTIFIER IN '(' selectStmt ')'
+extendedIdentifier
+  : base (DOT part)?
   ;
 
 base
