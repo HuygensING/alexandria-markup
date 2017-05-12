@@ -1,17 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
 public class LaTexExporterTest {
   private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
@@ -50,6 +51,7 @@ public class LaTexExporterTest {
     processLMNLFile("1kings12");
     processLMNLFile("ozymandias-voices-wap");
     processLMNLFile("frost-quote-nows");
+    processLMNLFile("snark81");
   }
 
   private void processLMNLFile(String basename) throws IOException {
