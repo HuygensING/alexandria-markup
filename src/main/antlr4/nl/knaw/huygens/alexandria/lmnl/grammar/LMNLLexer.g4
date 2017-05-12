@@ -37,7 +37,11 @@ BEGIN_CLOSE_RANGE
   ;
 
 TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
-  : ~[{\\[]+
+  : ~[{\\[\r\n]+
+  ;
+
+NL
+  : [\r\n]+ -> skip
   ;
 
 // ----------------- Everything INSIDE of a RANGE OPENER ---------------------
