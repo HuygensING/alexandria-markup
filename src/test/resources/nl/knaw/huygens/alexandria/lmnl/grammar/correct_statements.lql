@@ -1,0 +1,3 @@
+select m.text from markup m where m.name='q' and m.id='a'
+select m.annotationtext('source:chapter') from markup m where m.name='excerpt'
+select m.text from markup m where m.name='q' and m in (select q from markup q where q.name='q')

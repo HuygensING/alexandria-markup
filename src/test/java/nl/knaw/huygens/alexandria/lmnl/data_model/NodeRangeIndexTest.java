@@ -3,7 +3,6 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,11 +42,28 @@ public class NodeRangeIndexTest {
     assertThat(textNodeIndices).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
   }
 
+  @Test
+  public void testIndexWithAlice() {
+    String lmnl = "[excerpt}[p}\n" +
+        "Alice was beginning to get very tired of sitting by her sister on the bank,\n" +
+        "and of having nothing to do: once or twice she had peeped into the book her sister\n" +
+        "was reading, but it had no pictures or conversations in it, \n" +
+        "[q=a}and what is the use of a book,{q=a]\n" +
+        "thought Alice\n" +
+        "[q=a}without pictures or conversation?{q=a]\n" +
+        "{p]{excerpt]";
+    NodeRangeIndex index = index(lmnl);
+    Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a
+    assertThat(textNodeIndices).containsExactly(1, 3);
+
+    Set<Integer> rangeIndices = index.getRanges(1); // indices of ranges that contain textnode 1
+    assertThat(rangeIndices).containsExactly(0, 1, 2); // excerpt,p,q=a
+  }
+
   private NodeRangeIndex index(String lmnl) {
     LMNLImporter importer = new LMNLImporter();
     Document document = importer.importLMNL(lmnl);
-    NodeRangeIndex index = new NodeRangeIndex(document.value());
-    return index;
+    return new NodeRangeIndex(document.value());
   }
 
 }

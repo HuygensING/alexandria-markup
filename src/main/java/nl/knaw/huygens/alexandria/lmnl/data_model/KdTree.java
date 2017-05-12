@@ -14,16 +14,15 @@ import java.util.List;
  * multidimensional search key (e.g. range searches and nearest neighbor
  * searches). k-d trees are a special case of binary space partitioning trees.
  * <p>
- *
+ * <p>
  * based on https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/data_structures/KdTree.java by Justin Wetherell
- *      <phishman3579@gmail.com></a>
- * 
+ * <phishman3579@gmail.com></a>
+ *
  * @see <a href="http://en.wikipedia.org/wiki/K-d_tree">K-d_tree (Wikipedia)</a>
  */
 public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
   private final int k = 2;
-
 
   private KdNode root = null;
 
@@ -68,8 +67,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
    * Constructor for creating a more balanced tree. It uses the
    * "median of points" algorithm.
    *
-   * @param list
-   *          of IndexPoints.
+   * @param list of IndexPoints.
    */
   public KdTree(List<IndexPoint> list) {
     super();
@@ -80,10 +78,8 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
    * Constructor for creating a more balanced tree. It uses the
    * "median of points" algorithm.
    *
-   * @param list
-   *          of IndexPoints.
-   * @param k
-   *          of the tree.
+   * @param list of IndexPoints.
+   * @param k    of the tree.
    */
   public KdTree(List<IndexPoint> list, int k) {
     super();
@@ -93,12 +89,9 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Creates node from list of IndexPoints.
    *
-   * @param list
-   *          of IndexPoints.
-   * @param k
-   *          of the tree.
-   * @param depth
-   *          depth of the node.
+   * @param list  of IndexPoints.
+   * @param k     of the tree.
+   * @param depth depth of the node.
    * @return node created.
    */
   private static KdNode createNode(List<IndexPoint> list, int k, int depth) {
@@ -107,12 +100,12 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
     int axis = depth % k;
     switch (axis) {
-    case TEXTNODE_AXIS:
-      list.sort(TEXTNODE_INDEX_COMPARATOR);
-      break;
-    case TEXTRANGE_AXIS:
-      list.sort(TEXTRANGE_INDEX_COMPARATOR);
-      break;
+      case TEXTNODE_AXIS:
+        list.sort(TEXTNODE_INDEX_COMPARATOR);
+        break;
+      case TEXTRANGE_AXIS:
+        list.sort(TEXTRANGE_INDEX_COMPARATOR);
+        break;
     }
 
     KdNode node = null;
@@ -155,8 +148,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Adds value to the tree. Tree can contain multiple equal values.
    *
-   * @param value
-   *          T to add to the tree.
+   * @param value T to add to the tree.
    * @return True if successfully added to tree.
    */
   public boolean add(T value) {
@@ -197,32 +189,28 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Does the tree contain the value.
    *
-   * @param value
-   *          T to locate in the tree.
+   * @param value T to locate in the tree.
    * @return True if tree contains value.
    */
   public boolean contains(T value) {
     if (value == null || root == null)
       return false;
 
-    KdNode node = getNode(this, value);
+    KdNode node = this.getNode(value);
     return (node != null);
   }
 
   /**
    * Locates T in the tree.
    *
-   * @param tree
-   *          to search.
-   * @param value
-   *          to search for.
+   * @param value to search for.
    * @return KdNode or NULL if not found
    */
-  private static <T extends IndexPoint> KdNode getNode(KdTree<T> tree, T value) {
-    if (tree == null || tree.root == null || value == null)
+  private <T extends IndexPoint> KdNode getNode(T value) {
+    if (root == null || value == null)
       return null;
 
-    KdNode node = tree.root;
+    KdNode node = root;
     while (true) {
       if (node.id.equals(value)) {
         return node;
@@ -245,15 +233,14 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Removes first occurrence of value in the tree.
    *
-   * @param value
-   *          T to remove from the tree.
+   * @param value T to remove from the tree.
    * @return True if value was removed from the tree.
    */
   public boolean remove(T value) {
     if (value == null || root == null)
       return false;
 
-    KdNode node = getNode(this, value);
+    KdNode node = this.getNode(value);
     if (node == null)
       return false;
 
@@ -295,8 +282,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Gets the (sub) tree rooted at root.
    *
-   * @param root
-   *          of tree to get nodes for.
+   * @param root of tree to get nodes for.
    * @return points in (sub) tree, not including root.
    */
   private static List<IndexPoint> getTree(KdNode root) {
@@ -444,10 +430,8 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   /**
    * Adds, in a specified queue, a given node and its related nodes (lesser, greater).
    *
-   * @param node
-   *          Node to check. May be null.
-   * @param results
-   *          Queue containing all found entries. Must not be null.
+   * @param node    Node to check. May be null.
+   * @param results Queue containing all found entries. Must not be null.
    */
   @SuppressWarnings("unchecked")
   private static <T extends IndexPoint> void search(final KdNode node, final Deque<T> results) {
@@ -493,7 +477,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
    * Searches all entries from the first to the last entry.
    *
    * @return Iterator
-   *         allowing to iterate through a collection containing all found entries.
+   * allowing to iterate through a collection containing all found entries.
    */
   public Iterator<T> iterator() {
     final Deque<T> results = new ArrayDeque<>();
@@ -505,12 +489,82 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
    * Searches all entries from the last to the first entry.
    *
    * @return Iterator
-   *         allowing to iterate through a collection containing all found entries.
+   * allowing to iterate through a collection containing all found entries.
    */
   public Iterator<T> reverse_iterator() {
     final Deque<T> results = new ArrayDeque<>();
     search(root, results);
     return results.descendingIterator();
+  }
+
+  public List<IndexPoint> indexpointsForTextNode(int textNodeIndex) {
+    List<IndexPoint> list = new ArrayList<>();
+    KdNode node = root;
+    addTextRangeIndexPointsToList(list, node, textNodeIndex);
+    return list;
+  }
+
+  private void addTextRangeIndexPointsToList(List<IndexPoint> list, KdNode node, int textNodeIndex) {
+    if (node == null) {
+      return;
+    }
+    IndexPoint ip = node.id;
+    if (ip.getTextNodeIndex() == textNodeIndex) {
+      list.add(ip);
+    }
+    if (node.depth == TEXTNODE_AXIS) {
+      int currentTextNodeIndex = ip.getTextNodeIndex();
+      if (textNodeIndex < currentTextNodeIndex) {
+        addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
+
+      } else if (textNodeIndex == currentTextNodeIndex) {
+        addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
+        addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+
+      } else {
+        addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+      }
+
+    } else {
+      addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
+      addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+    }
+
+  }
+
+  public List<IndexPoint> indexpointsForTextRange(int textRangeIndex) {
+    List<IndexPoint> list = new ArrayList<>();
+    KdNode node = root;
+    addTextNodeIndexPointsToList(list, node, textRangeIndex);
+    return list;
+  }
+
+  private void addTextNodeIndexPointsToList(List<IndexPoint> list, KdNode node, int textRangeIndex) {
+    if (node == null) {
+      return;
+    }
+    IndexPoint ip = node.id;
+    if (ip.getTextRangeIndex() == textRangeIndex) {
+      list.add(ip);
+    }
+    if (node.depth == TEXTRANGE_AXIS) {
+      int currentTextRangeIndex = ip.getTextRangeIndex();
+      if (textRangeIndex < currentTextRangeIndex) {
+        addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
+
+      } else if (textRangeIndex == currentTextRangeIndex) {
+        addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
+        addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+
+      } else {
+        addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+      }
+
+    } else {
+      addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
+      addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+    }
+
   }
 
   public static class KdNode implements Comparable<KdNode> {
@@ -585,6 +639,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     public IndexPoint getContent() {
       return id;
     }
+
     public KdNode getLesser() {
       return lesser;
     }

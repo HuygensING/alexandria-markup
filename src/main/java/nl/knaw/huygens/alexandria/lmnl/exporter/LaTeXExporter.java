@@ -1,33 +1,17 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import java.awt.Color;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import java.awt.*;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
@@ -244,10 +228,10 @@ public class LaTeXExporter {
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
+//      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         int i = textNodeCounter.getAndIncrement();
-        textNodeIndices.put(tn, i);
+//        textNodeIndices.put(tn, i);
         Set<TextRange> textRanges = limen.getTextRanges(tn);
 
         List<TextRange> toClose = new ArrayList<>();
@@ -265,9 +249,9 @@ public class LaTeXExporter {
         int size = limen.getTextRanges(tn).size();
         float gradient = size / (float) maxTextRangesPerTextNode;
 
-        int r = 256 - Math.round(255 * gradient);
+        int r = 255 - Math.round(255 * gradient);
         int g = 255;
-        int b = 256 - Math.round(255 * gradient);
+        int b = 255 - Math.round(255 * gradient);
         Color color = new Color(r, g, b);
         String fillColor = ColorUtil.toLaTeX(color);
 
@@ -420,10 +404,14 @@ public class LaTeXExporter {
     }
 
     public void addTextRange(TextRange textRange) {
+      LOG.info("textRange={}", textRange.getTag());
       textRanges.add(textRange);
       tags.add(normalize(textRange.getTag()));
-      maxRangeSize = Math.max(maxRangeSize, textRange.textNodes.size());
-      lastTextNodeUsed = textNodeIndex.get(textRange.textNodes.get(textRange.textNodes.size() - 1));
+      int size = textRange.textNodes.size();
+      maxRangeSize = Math.max(maxRangeSize, size);
+      int lastIndex = size - 1;
+      TextNode lastTextNode = textRange.textNodes.get(lastIndex);
+      lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
     public List<TextRange> getTextRanges() {
