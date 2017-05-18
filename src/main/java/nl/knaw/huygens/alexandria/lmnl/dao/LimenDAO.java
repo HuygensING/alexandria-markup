@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.model;
+package nl.knaw.huygens.alexandria.lmnl.dao;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
@@ -10,12 +10,12 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
-public class ALimen {
+public class LimenDAO {
 
   @PrimaryKey(sequence = "limen_pk_sequence")
   private long id;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = ATextNode.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TextNodeDAO.class)
   List<Long> textNodeIds = new ArrayList<>();
 
   @SecondaryKey(relate = ONE_TO_MANY)
