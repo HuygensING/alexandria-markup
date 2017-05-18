@@ -8,7 +8,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -32,8 +31,8 @@ public class LMNLImporter {
   static class LimenContext {
     private Limen limen;
     private final Deque<TextRange> openTextRangeDeque = new ArrayDeque<>();
-    private final Stack<TextRange> openTextRangeStack = new Stack<>();
-    private final Stack<Annotation> annotationStack = new Stack<>();
+    private final Deque<TextRange> openTextRangeStack = new ArrayDeque<>();
+    private final Deque<Annotation> annotationStack = new ArrayDeque<>();
 
     LimenContext(Limen limen) {
       this.limen = limen;
@@ -102,7 +101,7 @@ public class LMNLImporter {
   }
 
   static class ImporterContext {
-    private final Stack<LimenContext> limenContextStack = new Stack<>();
+    private final Deque<LimenContext> limenContextStack = new ArrayDeque<>();
     private final LMNLLexer lexer;
 
     ImporterContext(LMNLLexer lexer) {
