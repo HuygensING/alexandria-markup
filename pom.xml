@@ -17,7 +17,7 @@
     <antlr.version>4.7</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
     <assertj.version>3.6.1</assertj.version>
-    <berkeleydb.version>3.2.76</berkeleydb.version>
+    <berkeleydb.version>5.0.73</berkeleydb.version>
     <logback.version>1.1.9</logback.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
   </properties>
@@ -126,7 +126,7 @@
     </dependency>
 
     <dependency>
-      <groupId>berkeleydb</groupId>
+      <groupId>com.sleepycat</groupId>
       <artifactId>je</artifactId>
       <version>${berkeleydb.version}</version>
     </dependency>
