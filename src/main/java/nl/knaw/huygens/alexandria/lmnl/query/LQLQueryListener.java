@@ -1,35 +1,22 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLBaseListener;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.*;
+import nl.knaw.huygens.alexandria.lmnl.lql.LQLSelectStatement;
+import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLBaseListener;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.AnnotationValuePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.EqualityComparisonExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.ExprContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.ExtendedIdentifierContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.NamePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.ParameterizedMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.PartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SelectStmtContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SelectVariableContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SimpleMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.SourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.TextPartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LQLParser.WhereClauseContext;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLSelectStatement;
-import nl.knaw.huygens.alexandria.lmnl.lql.LQLStatement;
 
 public class LQLQueryListener extends LQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
