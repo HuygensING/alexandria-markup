@@ -14,11 +14,8 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
-/**
- * Created by bramb on 15-2-2017.
- */
 public class LaTexExporterTest {
-  private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
+  private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
 
   @Test
   public void testLaTeXOutput1() {
@@ -53,6 +50,8 @@ public class LaTexExporterTest {
     processLMNLFile("alice-excerpt");
     processLMNLFile("1kings12");
     processLMNLFile("ozymandias-voices-wap");
+    processLMNLFile("frost-quote-nows");
+    processLMNLFile("snark81");
   }
 
   private void processLMNLFile(String basename) throws IOException {
@@ -66,14 +65,14 @@ public class LaTexExporterTest {
     LOG.info("document=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
 
-    String overlap = exporter.exportTextRangeOverlap1();
+    String overlap = exporter.exportGradient();
     assertThat(overlap).isNotBlank();
     LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
 
     String coloredText = exporter.exportTextRangeOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText);
+    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
