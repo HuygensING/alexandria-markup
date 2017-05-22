@@ -95,7 +95,7 @@ return lm:ranges('page',$novel)[contains(lm:range-value(.),'Volney')]
 
 A `novel.ranges('page').filter(text().contains('Volney')).annotations('n').value()`
 
-B `select annotationvalue('n') from markup where name='page' and text.contains('Volney');`
+B `select annotationtext('n') from markup where name='page' and text.contains('Volney');`
 
 ---
 
@@ -110,7 +110,7 @@ return distinct-values(
 
 A `novel.ranges('said').annotations('who').value().distinct()`
 
-B `select distinct(annotationvalue('who')) from markup where name='said';`
+B `select distinct(annotationtext('who')) from markup where name='said';`
 
 ---
 
@@ -123,9 +123,9 @@ return lm:ranges('said',$novel)[lm:annotations('who',.) = $who]
 ```
 > 48 speeches are returned.
 
-A `novel.ranges('said').filter(annotationvalue('who').eq($who)).text()`
+A `novel.ranges('said').filter(annotationtext('who').eq($who)).text()`
 
-B `select text from markup where name='said' and annotationvalue('who')=$who;`
+B `select text from markup where name='said' and annotationtext('who')=$who;`
 
 ---
 
@@ -139,7 +139,7 @@ return count(
 
 A `novel.ranges('said').overlapping-ranges().filter(not().hasName('page')).count()`
 
-B `select count(*) from markup where name!='page' and overlap in (select * from markup where name='said');`
+B `select count() from markup where name != 'page' and overlap in (select * from markup where name='said');`
 
 ---
 
@@ -149,7 +149,7 @@ Other example queries
 
 A `novel.range('l')[0].text()`
 
-B `select text from markup('1')[0];`
+B `select text[0] from markup where name = 'l';`
 
 ---
 
@@ -198,7 +198,7 @@ thought Alice
 
 > Get the chapter value
 
-`select m.annotationvalue('source:chapter') from markup m where m.name='excerpt'`
+`select m.annotationtext('source:chapter') from markup m where m.name='excerpt'`
 
 *returns:* 12
  
