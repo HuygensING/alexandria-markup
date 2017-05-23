@@ -25,7 +25,6 @@
 
 - Do we need to be able to query multiple limen at the same time?
 
--
 
 ----
 [range relationships](http://lmnl-markup.org/specs/archive/Range_relationships.xhtml):
