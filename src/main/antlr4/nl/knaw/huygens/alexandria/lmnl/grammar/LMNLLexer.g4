@@ -220,12 +220,12 @@ NameStartChar
 
 fragment
 DIGIT
-  :  [0-9]
+  : [0-9]
   ;
 
 fragment
 WS
-  :  [ \t\r\n]
+  : [ \t\r\n]
   ;
 
 //UNEXPECTED_CHAR // Throw unexpected token exception
