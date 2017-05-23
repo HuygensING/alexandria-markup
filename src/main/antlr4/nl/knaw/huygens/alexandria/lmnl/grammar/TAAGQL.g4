@@ -26,6 +26,8 @@ expr
   : extendedIdentifier ( '=' | '==' ) literalValue  # equalityComparisonExpression
   | extendedIdentifier ( '!=' | '<>' ) literalValue # inequalityComparisonExpression
   | expr K_AND expr                                 # joiningExpression
+  | expr K_OR expr                                  # combiningExpression
+  | TEXT CONTAINS STRING_LITERAL                    # textContainsExpression
   | IDENTIFIER IN '(' selectStmt ')'                # inExpression
   ;
 
@@ -90,6 +92,8 @@ STRING_LITERAL
 
 K_AND : A N D;
 
+K_OR : O R;
+
 FROM
   : F R O M
   ;
@@ -108,6 +112,10 @@ MARKUP
 
 WHERE
   : W H E R E
+  ;
+
+CONTAINS
+  : C O N T A I N S
   ;
 
 NAME

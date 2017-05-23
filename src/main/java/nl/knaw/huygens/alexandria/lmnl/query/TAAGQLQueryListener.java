@@ -8,6 +8,7 @@ import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.*;
 import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLSelectStatement;
 import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLStatement;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,8 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
   public String toText(TextRange textRange) {
     StringBuilder textBuilder = new StringBuilder();
     textRange.textNodes.forEach(
-
         textNode -> textBuilder.append(textNode.getContent()));
     return textBuilder.toString();
-
   }
 
   @Override
@@ -112,7 +111,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
 
   private void handleWhereClause(TAAGQLSelectStatement statement, WhereClauseContext whereClause) {
     if (whereClause != null) {
-      Predicate<? super TextRange> filter = handleExpression(whereClause.expr());
+      Predicate<TextRange> filter = handleExpression(whereClause.expr());
       if (filter != null) {
         statement.setTextRangeFilter(filter);
       } else {
@@ -121,8 +120,8 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
     }
   }
 
-  private Predicate<? super TextRange> handleExpression(ExprContext expr) {
-    Predicate<? super TextRange> filter = null;
+  private Predicate<TextRange> handleExpression(ExprContext expr) {
+    Predicate<TextRange> filter = null;
     if (expr instanceof EqualityComparisonExpressionContext) {
       EqualityComparisonExpressionContext ecec = (EqualityComparisonExpressionContext) expr;
       ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
@@ -130,6 +129,24 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
       if (extendedIdentifier.part() instanceof NamePartContext) {
         filter = tr -> tr.getTag().equals(value);
       }
+
+    } else if (expr instanceof JoiningExpressionContext) {
+      JoiningExpressionContext jec = (JoiningExpressionContext) expr;
+      Predicate<TextRange> predicate0 = handleExpression(jec.expr(0));
+      Predicate<TextRange> predicate1 = handleExpression(jec.expr(1));
+      filter = predicate0.and(predicate1);
+
+    } else if (expr instanceof CombiningExpressionContext) {
+      CombiningExpressionContext context = (CombiningExpressionContext) expr;
+      Predicate<TextRange> predicate0 = handleExpression(context.expr(0));
+      Predicate<TextRange> predicate1 = handleExpression(context.expr(1));
+      filter = predicate0.or(predicate1);
+
+    } else if (expr instanceof TextContainsExpressionContext) {
+      TextContainsExpressionContext context = (TextContainsExpressionContext) expr;
+      String substring = stringValue(context.STRING_LITERAL());
+      filter = tr -> toText(tr).contains(substring);
+
     }
     return filter;
   }
@@ -146,8 +163,8 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
     return ctx.getText();
   }
 
-  private String stringValue(ParserRuleContext ctx) {
-    return ctx.getText().replaceAll("'", "");
+  private String stringValue(ParseTree parseTree) {
+    return parseTree.getText().replaceAll("'", "");
   }
 
   private String toAnnotationText(Annotation annotation) {
