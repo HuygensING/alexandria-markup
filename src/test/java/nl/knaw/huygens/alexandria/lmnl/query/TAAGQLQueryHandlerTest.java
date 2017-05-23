@@ -115,7 +115,7 @@ public class TAAGQLQueryHandlerTest {
   }
 
   @Test
-  public void testTAAGQLQuery4() throws IOException {
+  public void testLuminescentQuery1() throws IOException {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
     Document frankenstein = new LMNLImporter().importLMNL(lmnl);
 
@@ -130,7 +130,23 @@ public class TAAGQLQueryHandlerTest {
     expectedEntry.add("102");
     expected1.add(expectedEntry);
     assertThat(result1.getValues()).containsExactlyElementsOf(expected1);
-
   }
 
+  //  @Test
+  public void testLuminescentQuery2() throws IOException {
+    String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
+    Document frankenstein = new LMNLImporter().importLMNL(lmnl);
+
+    TAAGQLQueryHandler h = new TAAGQLQueryHandler(frankenstein);
+
+    String statement1 = "select distinct(annotationText('who')) from markup where name='said'";
+    TAAGQLResult result1 = h.execute(statement1);
+    LOG.info("result1={}", result1);
+    assertThat(result1).isNotNull();
+    List<List<String>> expected1 = new ArrayList<>();
+    List<String> expectedEntry = new ArrayList<>();
+    expectedEntry.add("Creature");
+    expected1.add(expectedEntry);
+    assertThat(result1.getValues()).containsExactlyElementsOf(expected1);
+  }
 }
