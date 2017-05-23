@@ -94,7 +94,7 @@ return lm:ranges('page',$novel)[contains(lm:range-value(.),'Volney')]
 
 A `novel.ranges('page').filter(text().contains('Volney')).annotations('n').value()`
 
-B `select annotationtext('n') from markup where name='page' and text.contains('Volney');`
+B `select annotationText('n') from markup where name='page' and text contains 'Volney';`
 
 ---
 
@@ -109,7 +109,7 @@ return distinct-values(
 
 A `novel.ranges('said').annotations('who').value().distinct()`
 
-B `select distinct(annotationtext('who')) from markup where name='said';`
+B `select distinct(annotationText('who')) from markup where name='said';`
 
 ---
 
