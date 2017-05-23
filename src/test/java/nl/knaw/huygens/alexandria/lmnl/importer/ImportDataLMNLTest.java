@@ -43,7 +43,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data"), LMNL_FILE_FILTER, null)//
+    return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null)//
         .stream()//
         .map(File::getName)//
         .map(n -> n.replace(".lmnl", ""))//
@@ -57,9 +57,9 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLMNLFile() throws IOException {
-    LOG.info("testing data/{}.lmnl", basename);
+    LOG.info("testing data/lmnl/{}.lmnl", basename);
     processLMNLFile(basename);
-    LOG.info("done testing data/{}.lmnl", basename);
+    LOG.info("done testing data/lmnl/{}.lmnl", basename);
   }
 
   private void processLMNLFile(String basename) throws IOException {
@@ -68,7 +68,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
     printTokens(input);
 
     input = getInputStream(basename);
-    LOG.info("testing data/{}.lmnl", basename);
+    LOG.info("testing data/lmnl/{}.lmnl", basename);
     LOG.info("importLMNL\n");
     Document document = new LMNLImporter().importLMNL(input);
 
@@ -76,7 +76,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   }
 
   private InputStream getInputStream(String basename) throws IOException {
-    return FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
+    return FileUtils.openInputStream(new File("data/lmnl/" + basename + ".lmnl"));
   }
 
   private void generateLaTeX(String basename, Document document) throws IOException {

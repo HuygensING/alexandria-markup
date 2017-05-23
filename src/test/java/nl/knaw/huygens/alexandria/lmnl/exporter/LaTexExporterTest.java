@@ -1,18 +1,17 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LaTexExporterTest {
   private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
@@ -26,14 +25,14 @@ public class LaTexExporterTest {
 
   @Test
   public void testLaTeXOutput2() throws IOException {
-    String laTeX = laTeXFromLMNLFile("data/1kings12.lmnl");
+    String laTeX = laTeXFromLMNLFile("data/lmnl/1kings12.lmnl");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
   public void testLaTeXOutput3() throws IOException {
-    String laTeX = laTeXFromLMNLFile("data/ozymandias-voices-wap.lmnl");
+    String laTeX = laTeXFromLMNLFile("data/lmnl/ozymandias-voices-wap.lmnl");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
@@ -55,7 +54,7 @@ public class LaTexExporterTest {
   }
 
   private void processLMNLFile(String basename) throws IOException {
-    InputStream input = FileUtils.openInputStream(new File("data/" + basename + ".lmnl"));
+    InputStream input = FileUtils.openInputStream(new File("data/lmnl/" + basename + ".lmnl"));
     Document document = new LMNLImporter().importLMNL(input);
     LaTeXExporter exporter = new LaTeXExporter(document);
     String outDir = "out/";

@@ -133,7 +133,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLMNL1kings12() throws IOException {
-    String pathname = "data/1kings12.lmnl";
+    String pathname = "data/lmnl/1kings12.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("document={}", actual);
@@ -176,7 +176,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLMNLOzymandias() throws IOException {
-    String pathname = "data/ozymandias-voices-wap.lmnl";
+    String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("document={}", actual);
