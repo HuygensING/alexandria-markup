@@ -76,15 +76,21 @@ public class TexMECSImporterTest {
     assertThat(parseTree.getChild(0)).isNotNull();
   }
 
+  @Test
+  public void testExample1WithCData() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
   private ParseTree testTexMECS(String texMECS) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
     CharStream antlrInputStream = CharStreams.fromString(texMECS);
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
-    // lexer.getAllTokens().forEach(t -> LOG.info("token={}:{}", lexer.getRuleNames()[t.getType() - 1], t));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
-    // tokens.getTokens().stream().forEach(t -> LOG.info("token={}", t));
     TexMECSParser parser = new TexMECSParser(tokens);
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();

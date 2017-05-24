@@ -20,7 +20,7 @@ chunk
 //  | internalEntity
 //  | externalEntity
 //  | characterRef
-//  | cdataSection
+  | cdataSection
   | comment
   | text
   ;
@@ -72,7 +72,7 @@ endTagSet /* WFC: startTagSet match */
 //  ;
 
 cdataSection /* CF: CDATA sections */
-  : CDataOpen cdsecdata CDataClose
+  : BEGIN_CDATA cdsecdata END_CDATA
   ;
 
 cdsecdata
@@ -82,7 +82,8 @@ cdsecdata
   ;
 
 cdchars
-  : CHAR+ // - (CHAR* ('<#CDATA<' | '>#CDATA>') CHAR*)
+//  : CHAR+ // - (CHAR* ('<#CDATA<' | '>#CDATA>') CHAR*)
+  : CDATA
   ;
 
 comment

@@ -6,6 +6,10 @@ BEGIN_COMMENT
   : '<*' -> pushMode(INSIDE_COMMENT)
   ;
 
+BEGIN_CDATA
+  : '<#CDATA<' -> pushMode(INSIDE_CDATA)
+  ;
+
 BEGIN_RESUME_TAG
   : '<+' -> pushMode(INSIDE_START_TAG)
   ;
@@ -90,6 +94,17 @@ END_COMMENT
 
 COMMENT_TEXT
   : ~[*><]+
+  ;
+
+//-----------------
+mode INSIDE_CDATA;
+
+END_CDATA
+  : '>#CDATA>' -> popMode
+  ;
+
+CDATA
+  : ~[>]+
   ;
 
 //-----------------
