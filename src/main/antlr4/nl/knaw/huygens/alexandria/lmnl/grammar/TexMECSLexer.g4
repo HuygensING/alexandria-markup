@@ -2,6 +2,10 @@
 
 lexer grammar TexMECSLexer;
 
+BEGIN_COMMENT
+  : '<*' -> pushMode(INSIDE_COMMENT)
+  ;
+
 BEGIN_RESUME_TAG
   : '<+' -> pushMode(INSIDE_START_TAG)
   ;
@@ -71,6 +75,21 @@ SUFFIX_C
 
 END_END_TAG
   : '>' -> popMode
+  ;
+
+//-----------------
+mode INSIDE_COMMENT;
+
+BEGIN_COMMENT_IN_COMMENT
+  : '<*' -> pushMode(INSIDE_COMMENT)
+  ;
+
+END_COMMENT
+  : '*>' -> popMode
+  ;
+
+COMMENT_TEXT
+  : ~[*><]+
   ;
 
 //-----------------

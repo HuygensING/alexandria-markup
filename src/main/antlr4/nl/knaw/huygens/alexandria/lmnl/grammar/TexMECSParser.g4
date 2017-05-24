@@ -21,7 +21,7 @@ chunk
 //  | externalEntity
 //  | characterRef
 //  | cdataSection
-//  | comment
+  | comment
   | text
   ;
 
@@ -86,7 +86,7 @@ cdchars
   ;
 
 comment
-  : CommentOpen commcontent CommentClose
+  : (BEGIN_COMMENT|BEGIN_COMMENT_IN_COMMENT) commcontent END_COMMENT
   ;
 
 commcontent
@@ -97,6 +97,7 @@ commcontent
 
 commentdata
   : CHAR+ // - (CHAR* (CommentOpen | CommentClose) CHAR*)
+  | COMMENT_TEXT
   ;
 
 eid

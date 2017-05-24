@@ -60,6 +60,22 @@ public class TexMECSImporterTest {
     assertThat(parseTree.getChild(0)).isNotNull();
   }
 
+  @Test
+  public void testExample1WithComment() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  @Test
+  public void testExample1WithNestedComment() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
   private ParseTree testTexMECS(String texMECS) {
     printTokens(texMECS);
 
@@ -74,7 +90,9 @@ public class TexMECSImporterTest {
     ParseTree parseTree = parser.document();
     LOG.info("parseTree={}", parseTree.toStringTree(parser));
     assertThat(parseTree).isNotNull();
-    assertThat(parser.getNumberOfSyntaxErrors()).isEqualTo(0);
+    assertThat(parser.getNumberOfSyntaxErrors())//
+        .withFailMessage("%d Unexpected syntax error(s)", parser.getNumberOfSyntaxErrors())//
+        .isEqualTo(0);
     return parseTree;
   }
 
