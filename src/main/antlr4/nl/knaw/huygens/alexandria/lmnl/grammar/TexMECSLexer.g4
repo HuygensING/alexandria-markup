@@ -2,12 +2,20 @@
 
 lexer grammar TexMECSLexer;
 
+BEGIN_RESUME_TAG
+  : '<+' -> pushMode(INSIDE_OPEN_TAG)
+  ;
+
 BEGIN_OPEN_TAG
   : '<' -> pushMode(INSIDE_OPEN_TAG)
   ;
 
 TEXT
   : ~[<|]+
+  ;
+
+BEGIN_SUSPEND_TAG
+  : '|-' -> pushMode(INSIDE_CLOSE_TAG)
   ;
 
 BEGIN_CLOSE_TAG
@@ -31,6 +39,10 @@ WS
 
 EQUALS
   : '='
+  ;
+
+RESUME
+  : '+'
   ;
 
 STRING

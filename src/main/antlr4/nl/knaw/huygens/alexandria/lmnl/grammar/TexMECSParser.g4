@@ -50,11 +50,11 @@ endTagSet /* WFC: startTagSet match */
   ;
 
 suspendTag /* WFC: suspend-tag OK */
-  : SuspendOpen gi RightAngleBracket
+  : BEGIN_SUSPEND_TAG gi END_CLOSE_TAG
   ;
 
 resumeTag /* WFC: resume-tag OK */
-  : ResumeOpen gi LeftAngleBracket
+  : BEGIN_RESUME_TAG gi END_OPEN_TAG
   ;
 
 internalEntity /* CF: structured internal entities */
