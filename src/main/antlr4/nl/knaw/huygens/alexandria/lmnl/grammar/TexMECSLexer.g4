@@ -42,6 +42,10 @@ END_OPEN_TAG
   : '|' -> popMode
   ;
 
+END_SOLE_TAG
+  : '>' -> popMode
+  ;
+
 //-----------------
 mode INSIDE_CLOSE_TAG;
 

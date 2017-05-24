@@ -20,7 +20,7 @@ public class TexMECSImporterTest {
 
   @Test
   public void testImport1() {
-    String texMECS = "<s id='s-1'|<a~1| John <b| loves |a~1> Mary |b>|s>";
+    String texMECS = "<s id='s-1'|<a~1|John <b|loves|a~1> Mary|b><empty purpose='test'>|s>";
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
