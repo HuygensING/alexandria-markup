@@ -105,14 +105,14 @@ eid
   ;
 
 gi
-  : NAME_O SUFFIX?
-  | NAME_C SUFFIX?
+  : NAME_O SUFFIX_O?
+  | NAME_C SUFFIX_C?
   | SUFFIX
   ;
 
-id
-  : NAME_O /* WFC: unique ID */
-  | NAME_C /* WFC: unique ID */
+id /* WFC: unique ID */
+  : NAME_O
+  | NAME_C
   ;
 
 idref

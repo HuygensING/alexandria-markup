@@ -21,6 +21,10 @@ NAME_O
   : NAME
   ;
 
+SUFFIX_O
+  : SUFFIX
+  ;
+
 WS
   :	[ \t\r\n] -> skip
   ;
@@ -43,6 +47,10 @@ mode INSIDE_CLOSE_TAG;
 
 NAME_C
   : NAME
+  ;
+
+SUFFIX_C
+  : SUFFIX
   ;
 
 END_CLOSE_TAG
