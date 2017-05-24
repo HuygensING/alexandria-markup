@@ -1,11 +1,27 @@
 // based on http://mlcd.blackmesatech.com/mlcd/2003/Papers/texmecs.html
 
-grammar TexMECS;
+grammar TexMECS0;
 
-BEGIN_OPEN_START_TAG
-  : '<' -> pushMode(INSIDE_OPEN_START_TAG)
+document
+  : chunk* EOF
   ;
 
+chunk
+  : soleTag
+  | startTag
+  | endTag
+  | suspendTag
+  | resumeTag
+  | startTagSet
+  | endTagSet
+  | virtualElement
+  | internalEntity
+  | externalEntity
+  | characterRef
+  | cdataSection
+  | comment
+  | datacharacter
+  ;
 
 soleTag
   : '<' eid atts '>'

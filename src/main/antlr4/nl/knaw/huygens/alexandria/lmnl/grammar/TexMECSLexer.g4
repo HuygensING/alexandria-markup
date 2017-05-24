@@ -2,131 +2,54 @@
 
 lexer grammar TexMECSLexer;
 
-document
-  :
-  | document chunk
+BEGIN_OPEN_TAG
+  : '<' -> pushMode(INSIDE_OPEN_TAG)
   ;
 
-chunk
-  : soleTag
-  | startTag
-  | endTag
-  | suspendTag
-  | resumeTag
-  | startTagSet
-  | endTagSet
-  | virtualElement
-  | internalEntity
-  | externalEntity
-  | characterRef
-  | cdataSection
-  | comment
-  | datacharacter
+TEXT
+  : ~[<|]+
   ;
 
-soleTag
-  : '<' eid atts '>'
+BEGIN_CLOSE_TAG
+  : '|' -> pushMode(INSIDE_CLOSE_TAG)
   ;
 
-virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
-  : '<^' eid '^' idref atts '>'
+//-----------------
+mode INSIDE_OPEN_TAG;
+
+NAME_O
+  : NAME
   ;
 
-startTag // WFC: endTag match
-  : '<' eid atts '|'
+WS
+  :	[ \t\r\n] -> skip
   ;
 
-endTag // WFC: startTag match
-  : '|' gi '>'
+EQUALS
+  : '='
   ;
 
-startTagSet // WFC: endTagSet match
-  : '<|' eid atts '||'
+STRING
+  : '"' ~[<"]* '"'
+  | '\'' ~[<']* '\''
   ;
 
-endTagSet /* WFC: startTagSet match */
-  : '||' gi '|>'
+END_OPEN_TAG
+  : '|' -> popMode
   ;
 
-suspendTag /* WFC: suspend-tag OK */
-  : '|-' gi '>'
+//-----------------
+mode INSIDE_CLOSE_TAG;
+
+NAME_C
+  : NAME
   ;
 
-resumeTag /* WFC: resume-tag OK */
-  : '<+' gi '|'
+END_CLOSE_TAG
+  : '>' -> popMode
   ;
 
-internalEntity /* CF: structured internal entities */
-  : '<&' NAME '>'
-  | '<&' NAME S '.' S NAME '>'
-  ;
-
-externalEntity /* CF: external entities */
-  : '<<' URL '>>'
-  ;
-
-characterRef
-  : '<#' D DIGITS '>'     # digitalCharacterRef
-  | '<#' X HEXDIGITS '>'  # hexadecimalCharacterRef
-  ;
-
-cdataSection /* CF: CDATA sections */
-  : '<#CDATA<' cdsecdata '>#CDATA>'
-  ;
-
-cdsecdata
-  :
-  | cdchars cdsecdata
-  | cdataSection cdsecdata
-  ;
-
-cdchars
-  : CHAR+ // - (CHAR* ('<#CDATA<' | '>#CDATA>') CHAR*)
-  ;
-
-comment
-  : '<*' commcontent '*>'
-  ;
-
-commcontent
-  : /* */
-  | commcontent commentdata
-  | commcontent comment
-  ;
-
-commentdata
-  : CHAR+ // - (CHAR* ('<*' | '*>') CHAR*)
-  ;
-
-eid
-  : gi ('@' id)?
-  | '@' id
-  ;
-
-gi
-  : NAME SUFFIX?
-  | SUFFIX
-  ;
-
-id
-  : NAME /* WFC: unique ID */
-  ;
-
-idref
-  : NAME /* WFC: idref OK */
-  ;
-
-atts
-  : avs* S?
-  ;
-
-avs
-  : S NAME S? '=' S? quoted
-  ;
-
-datacharacter
-  : CHAR+
-  ;
+//-----------------
 
 NAME
   : Nameinit Namechar*
@@ -144,37 +67,26 @@ Namechar
   | '-'
   ;
 
-SUFFIX
-  : '~' Namechar*
-  ;
-
-quoted
-  : '"' dqstring '"'
-  | '\'' sqstring '\''
-  ;
-
-dqstring
-  : (DQSTRINGCHAR | internalEntity | characterRef)*
-  ;
-
-sqstring : (SQSTRINGCHAR | internalEntity | characterRef)*
-  ;
-
-DQSTRINGCHAR
-  : ~["]
-  ;
-
-SQSTRINGCHAR
-  : ~[']
-  ;
-
 S
   : [ \t\r\n\u000C]+ //(#x20 | #x9 | #xD | #xA | #x85 | #x2028 | #x2029)+
   ;
 
-URL
-  : ~[>]+ //(CHAR/* - '>'*/)+
+//URL
+//  : ~[>]+ //(CHAR/* - '>'*/)+
+//  ;
+//
+
+SUFFIX
+  : '~' Namechar*
   ;
+
+//DQSTRINGCHAR
+//  : ~["]
+//  ;
+//
+//SQSTRINGCHAR
+//  : ~[']
+//  ;
 
 CHAR
   : [a-zA-Z]
@@ -193,8 +105,46 @@ HEXDIGITS
   : [A-Fa-f0-9]+
   ;
 
-//fragment
+DoublePipeChar : '||';
+
+AtChar : '@';
+
+DQuoteChar : '"';
+
+SQuoteChar : '\'';
+
+CommentOpen : '<*';
+
+CommentClose : '*>';
+
+CDataOpen : '<#CDATA<';
+
+CDataClose : '>#CDATA>';
+
+CharacterRefOpen : '<#';
+
+ExternalEntityOpen : '<<';
+
+ExternalEntityClose : '>>';
+
+Dot : '.';
+
+InternalEntityOpen : '<&';
+
+ResumeOpen : '<+';
+
+SuspendOpen : '|-';
+
+StartTagSetOpen : '<|';
+
+EndTagSetClose : '|>';
+
+VirtualElementOpen : '<^';
+
+Caret : '^';
+
+fragment
 D : 'd' | 'D' ;
 
-//fragment
+fragment
 X : 'x' | 'X' ;
