@@ -1,5 +1,7 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,8 +21,46 @@ public class TexMECSImporterTest {
   final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void testImport1() {
-    String texMECS = "<s id='s-1'|<a~1|John <b|loves|a~1> Mary|-b><empty purpose='test'><+b|very much|b>|s>";
+  public void testExample1() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  @Test
+  public void testExample1WithAttributes() {
+    String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  @Test
+  public void testExample1WithSuffix() {
+    String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  @Test
+  public void testExample1WithSoleTag() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  @Test
+  public void testExample1WithSuspendResumeTags() {
+    String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
+    ParseTree parseTree = testTexMECS(texMECS);
+    assertThat(parseTree.getChildCount()).isEqualTo(14); // 13 chunks + EOF
+    assertThat(parseTree.getChild(0)).isNotNull();
+  }
+
+  private ParseTree testTexMECS(String texMECS) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
@@ -33,13 +73,12 @@ public class TexMECSImporterTest {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
     LOG.info("parseTree={}", parseTree.toStringTree(parser));
-    // ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+    assertThat(parseTree).isNotNull();
+    assertThat(parser.getNumberOfSyntaxErrors()).isEqualTo(0);
+    return parseTree;
   }
 
   protected void printTokens(String input) {
-    // This gets all the tokens at once, it does not stop for errors
-    // List<? extends Token> allTokens = grammar.getAllTokens();
-    // System.out.println(allTokens);
     System.out.println("TexMECS:");
     System.out.println(input);
     System.out.println("Tokens:");
@@ -57,7 +96,7 @@ public class TexMECSImporterTest {
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
-        System.out.println(token + ": " + lexer.getRuleNames()[token.getType() - 1] + " -> " + lexer.getModeNames()[lexer._mode]);
+        System.out.println(token + "\t: " + lexer.getRuleNames()[token.getType() - 1] + "\t -> " + lexer.getModeNames()[lexer._mode]);
       }
     } while (token.getType() != Token.EOF);
   }

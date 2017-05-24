@@ -3,11 +3,11 @@
 lexer grammar TexMECSLexer;
 
 BEGIN_RESUME_TAG
-  : '<+' -> pushMode(INSIDE_OPEN_TAG)
+  : '<+' -> pushMode(INSIDE_START_TAG)
   ;
 
-BEGIN_OPEN_TAG
-  : '<' -> pushMode(INSIDE_OPEN_TAG)
+BEGIN_START_TAG
+  : '<' -> pushMode(INSIDE_START_TAG)
   ;
 
 TEXT
@@ -15,15 +15,15 @@ TEXT
   ;
 
 BEGIN_SUSPEND_TAG
-  : '|-' -> pushMode(INSIDE_CLOSE_TAG)
+  : '|-' -> pushMode(INSIDE_END_TAG)
   ;
 
-BEGIN_CLOSE_TAG
-  : '|' -> pushMode(INSIDE_CLOSE_TAG)
+BEGIN_END_TAG
+  : '|' -> pushMode(INSIDE_END_TAG)
   ;
 
 //-----------------
-mode INSIDE_OPEN_TAG;
+mode INSIDE_START_TAG;
 
 NAME_O
   : NAME
@@ -50,7 +50,7 @@ STRING
   | '\'' ~[<']* '\''
   ;
 
-END_OPEN_TAG
+END_START_TAG
   : '|' -> popMode
   ;
 
@@ -59,7 +59,7 @@ END_SOLE_TAG
   ;
 
 //-----------------
-mode INSIDE_CLOSE_TAG;
+mode INSIDE_END_TAG;
 
 NAME_C
   : NAME
@@ -69,7 +69,7 @@ SUFFIX_C
   : SUFFIX
   ;
 
-END_CLOSE_TAG
+END_END_TAG
   : '>' -> popMode
   ;
 

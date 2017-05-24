@@ -14,32 +14,40 @@ chunk
   | soleTag
   | suspendTag
   | resumeTag
-  | startTagSet
-  | endTagSet
-  | virtualElement
-  | internalEntity
-  | externalEntity
-  | characterRef
-  | cdataSection
-  | comment
+//  | startTagSet
+//  | endTagSet
+//  | virtualElement
+//  | internalEntity
+//  | externalEntity
+//  | characterRef
+//  | cdataSection
+//  | comment
   | text
   ;
 
 startTag // WFC: endTag match
-  : BEGIN_OPEN_TAG eid atts END_OPEN_TAG
+  : BEGIN_START_TAG eid atts END_START_TAG
   ;
 
 endTag // WFC: startTag match
-  : BEGIN_CLOSE_TAG gi END_CLOSE_TAG
+  : BEGIN_END_TAG gi END_END_TAG
   ;
 
 soleTag
-  : BEGIN_OPEN_TAG eid atts END_SOLE_TAG
+  : BEGIN_START_TAG eid atts END_SOLE_TAG
   ;
 
-virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
-  : VirtualElementOpen eid Caret idref atts RightAngleBracket
+suspendTag /* WFC: suspend-tag OK */
+  : BEGIN_SUSPEND_TAG gi END_END_TAG
   ;
+
+resumeTag /* WFC: resume-tag OK */
+  : BEGIN_RESUME_TAG gi END_START_TAG
+  ;
+
+//virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
+//  : VirtualElementOpen eid Caret idref atts RightAngleBracket
+//  ;
 
 startTagSet // WFC: endTagSet match
   : StartTagSetOpen eid atts DoublePipeChar
@@ -49,27 +57,19 @@ endTagSet /* WFC: startTagSet match */
   : DoublePipeChar gi EndTagSetClose
   ;
 
-suspendTag /* WFC: suspend-tag OK */
-  : BEGIN_SUSPEND_TAG gi END_CLOSE_TAG
-  ;
+//internalEntity /* CF: structured internal entities */
+//  : InternalEntityOpen NAME RightAngleBracket
+//  | InternalEntityOpen NAME S Dot S NAME RightAngleBracket
+//  ;
 
-resumeTag /* WFC: resume-tag OK */
-  : BEGIN_RESUME_TAG gi END_OPEN_TAG
-  ;
+//externalEntity /* CF: external entities */
+//  : ExternalEntityOpen URL ExternalEntityClose
+//  ;
 
-internalEntity /* CF: structured internal entities */
-  : InternalEntityOpen NAME RightAngleBracket
-  | InternalEntityOpen NAME S Dot S NAME RightAngleBracket
-  ;
-
-externalEntity /* CF: external entities */
-  : ExternalEntityOpen URL ExternalEntityClose
-  ;
-
-characterRef
-  : CharacterRefOpen D DIGITS RightAngleBracket     # digitalCharacterRef
-  | CharacterRefOpen X HEXDIGITS RightAngleBracket  # hexadecimalCharacterRef
-  ;
+//characterRef
+//  : CharacterRefOpen D DIGITS RightAngleBracket     # digitalCharacterRef
+//  | CharacterRefOpen X HEXDIGITS RightAngleBracket  # hexadecimalCharacterRef
+//  ;
 
 cdataSection /* CF: CDATA sections */
   : CDataOpen cdsecdata CDataClose
