@@ -39,7 +39,6 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   public void exitStartTag(StartTagContext ctx) {
     TextRange textRange = addTextRange(ctx.eid(), ctx.atts());
     openMarkup.add(textRange);
-    super.exitStartTag(ctx);
   }
 
   @Override
@@ -47,13 +46,11 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     TextNode tn = new TextNode(ctx.getText());
     limen.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    super.exitText(ctx);
   }
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
     removeFromOpenMarkup(ctx.gi());
-    super.exitEndTag(ctx);
   }
 
   @Override
@@ -64,8 +61,6 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     TextRange textRange = addTextRange(ctx.eid(), ctx.atts());
     linkTextToMarkup(tn, textRange);
-
-    super.exitSoleTag(ctx);
   }
 
   private void linkTextToMarkup(TextNode tn, TextRange textRange) {
@@ -77,15 +72,12 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   public void exitSuspendTag(SuspendTagContext ctx) {
     TextRange textRange = removeFromOpenMarkup(ctx.gi());
     suspendedMarkup.add(textRange);
-
-    super.exitSuspendTag(ctx);
   }
 
   @Override
   public void exitResumeTag(ResumeTagContext ctx) {
     TextRange textRange = removeFromSuspendedMarkup(ctx);
     openMarkup.add(textRange);
-    super.exitResumeTag(ctx);
   }
 
   private TextRange addTextRange(EidContext eid, AttsContext atts) {
