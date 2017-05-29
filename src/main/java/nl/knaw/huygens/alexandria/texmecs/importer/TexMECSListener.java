@@ -46,7 +46,7 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   public void exitText(TextContext ctx) {
     TextNode tn = new TextNode(ctx.getText());
     limen.addTextNode(tn);
-    openMarkup.forEach(m -> limen.associateTextWithRange(tn, m));
+    openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     super.exitText(ctx);
   }
 
@@ -61,11 +61,16 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     TextNode tn = new TextNode("");
     limen.addTextNode(tn);
 
-    openMarkup.forEach(m -> limen.associateTextWithRange(tn, m));
+    openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     TextRange textRange = addTextRange(ctx.eid(), ctx.atts());
-    limen.associateTextWithRange(tn, textRange);
+    linkTextToMarkup(tn, textRange);
 
     super.exitSoleTag(ctx);
+  }
+
+  private void linkTextToMarkup(TextNode tn, TextRange textRange) {
+    limen.associateTextWithRange(tn, textRange);
+    textRange.addTextNode(tn);
   }
 
   @Override
@@ -102,23 +107,23 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   }
 
   private TextRange removeFromOpenMarkup(GiContext gi) {
-    String tag = gi.NAME_C().getText();
+    String tag = gi.getText();
     TextRange textRange = removeFromTextRangeStack(tag, openMarkup);
     return textRange;
   }
 
   private TextRange removeFromSuspendedMarkup(ResumeTagContext ctx) {
-    String tag = ctx.gi().NAME_O().getText();
+    String tag = ctx.gi().getText();
     TextRange textRange = removeFromTextRangeStack(tag, suspendedMarkup);
     return textRange;
   }
 
-  private TextRange removeFromTextRangeStack(String tag, Deque<TextRange> textRangeStack) {
+  private TextRange removeFromTextRangeStack(String extendedTag, Deque<TextRange> textRangeStack) {
     Iterator<TextRange> descendingIterator = textRangeStack.descendingIterator();
     TextRange textRange = null;
     while (descendingIterator.hasNext()) {
       textRange = descendingIterator.next();
-      if (textRange.getTag().equals(tag)) {
+      if (textRange.getExtendedTag().equals(extendedTag)) {
         break;
       }
     }

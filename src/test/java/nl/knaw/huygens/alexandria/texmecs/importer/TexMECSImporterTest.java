@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -15,7 +17,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
@@ -26,68 +32,86 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 10, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithAttributes() {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s [type}test{type]}[a}John [b}loves{a] Mary{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 10, "[s [type}test{type]}[a}John [b}loves{a] Mary{s]{b]");
+    assertThat(document.value()).isNotNull();
+    TextRange textRange0 = document.value().textRangeList.get(0);
+    assertThat(textRange0.getTag()).isEqualTo("s");
+    Annotation annotation = textRange0.getAnnotations().get(0);
+    assertThat(annotation.getTag()).isEqualTo("type");
+    List<TextNode> textNodeList = annotation.value().textNodeList;
+    assertThat(textNodeList).hasSize(1);
+    assertThat(textNodeList.get(0).getContent()).isEqualTo("test");
   }
 
   @Test
   public void testExample1WithSuffix() {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s~0}[a}John [b}loves{a] Mary{s~0]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 10, "[s~0}[a}John [b}loves{a] Mary{s~0]{b]");
+    assertThat(document.value()).isNotNull();
+    TextRange textRange0 = document.value().textRangeList.get(0);
+    assertThat(textRange0.getTag()).isEqualTo("s");
+    assertThat(textRange0.getSuffix()).isEqualTo("0");
   }
 
   @Test
   public void testExample1WithSoleTag() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]}{s]{empty]");
-    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
+    assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(14); // 13 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 14, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{s]{b]");
+    Limen limen = document.value();
+    assertThat(limen).isNotNull();
+    List<TextRange> textRangeList = limen.textRangeList;
+    assertThat(textRangeList).hasSize(3); // s, a, b
+    TextRange textRange = textRangeList.get(2);
+    assertThat(textRange.getTag()).isEqualTo("b");
+    List<TextNode> textNodes = textRange.textNodes;
+    assertThat(textNodes).hasSize(3);
+    List<String> textNodeContents = textNodes.stream().map(TextNode::getContent).collect(Collectors.toList());
+    assertThat(textNodeContents).containsExactly("loves", " Mary", "very much");
   }
 
   @Test
   public void testExample1WithComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithNestedComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithCData() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
-    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
-    assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
-    assertThat(parseTree.getChild(0)).isNotNull();
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    assertThat(document.value()).isNotNull();
   }
 
-  private ParseTree testTexMECS(String texMECS, String expectedLMNL) {
+  @Test
+  public void testSelfOverlappingElements() {
+    String texMECS = "<e~1|Lorem <e~2|Ipsum |e~1>Dolor...|e~2>";
+    Document document = testTexMECS(texMECS, 8, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
+    assertThat(document.value()).isNotNull();
+  }
+
+  private Document testTexMECS(String texMECS, int expectedChunkCount, String expectedLMNL) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
@@ -111,7 +135,10 @@ public class TexMECSImporterTest {
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(expectedLMNL);
-    return parseTree;
+
+    assertThat(parseTree.getChildCount()).isEqualTo(expectedChunkCount);
+    assertThat(parseTree.getChild(0)).isNotNull();
+    return doc;
   }
 
   protected void printTokens(String input) {
