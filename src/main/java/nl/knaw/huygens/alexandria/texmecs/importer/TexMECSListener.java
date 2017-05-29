@@ -84,8 +84,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   }
 
   private TextRange addTextRange(EidContext eid, AttsContext atts) {
-    String tag = eid.gi().NAME_O().getText();
-    TextRange textRange = new TextRange(limen, tag);
+    String extendedTag = eid.gi().getText();
+    TextRange textRange = new TextRange(limen, extendedTag);
     addAttributes(atts, textRange);
     limen.addTextRange(textRange);
     return textRange;

@@ -26,7 +26,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -34,7 +34,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithAttributes() {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s [type}test{type]}[a}John [b}loves{a] Mary{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -42,7 +42,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSuffix() {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s~0}[a}John [b}loves{a] Mary{s~0]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(10); // 9 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -50,7 +50,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSoleTag() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]}{s]{empty]");
     assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -58,7 +58,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(14); // 13 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -66,7 +66,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -74,7 +74,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithNestedComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
@@ -82,12 +82,12 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithCData() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
-    ParseTree parseTree = testTexMECS(texMECS);
+    ParseTree parseTree = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{s]{b]");
     assertThat(parseTree.getChildCount()).isEqualTo(11); // 10 chunks + EOF
     assertThat(parseTree.getChild(0)).isNotNull();
   }
 
-  private ParseTree testTexMECS(String texMECS) {
+  private ParseTree testTexMECS(String texMECS, String expectedLMNL) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
@@ -110,6 +110,7 @@ public class TexMECSImporterTest {
     LMNLExporter ex = new LMNLExporter();
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);
+    assertThat(lmnl).isEqualTo(expectedLMNL);
     return parseTree;
   }
 

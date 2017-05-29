@@ -1,20 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.taagql;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.query.TAAGQLResult;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.query.TAAGQLResult;
 
 public class TAAGQLSelectStatement implements TAAGQLStatement {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
-  // TAAGQLSelectVariable selectvariable;
-  // TAAGQLSource source;
-  // TAAGQLWhereStatement whereStatement;
 
   Predicate<? super TextRange> textRangeFilter = tr -> true;
   Function<? super TextRange, ? super Object> textRangeMapper = a -> a;
@@ -25,17 +23,9 @@ public class TAAGQLSelectStatement implements TAAGQLStatement {
     this.textRangeFilter = textRangeFilter;
   }
 
-  // public Predicate<? super TextRange> getTextRangeFilter() {
-  // return textRangeFilter;
-  // }
-
   public void setTextRangeMapper(Function<? super TextRange, ? super Object> textRangeMapper) {
     this.textRangeMapper = textRangeMapper;
   }
-
-  // public Function<? super TextRange, ? super Object> getTextRangeMapper() {
-  // return textRangeMapper;
-  // }
 
   @Override
   public Function<Limen, TAAGQLResult> getLimenProcessor() {
@@ -44,7 +34,7 @@ public class TAAGQLSelectStatement implements TAAGQLStatement {
       limen.textRangeList.stream()//
           .filter(textRangeFilter)//
           .map(textRangeMapper)//
-//          .map(this::logger)//
+          // .map(this::logger)//
           .forEach(result::addValue);
       if (index != null) {
         Object selectedValue = result.getValues().get(index);

@@ -1,13 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -25,7 +30,7 @@ public class LMNLExporter {
     StringBuilder lmnlBuilder = new StringBuilder();
     Limen limen = document.value();
     appendLimen(lmnlBuilder, limen);
-//        LOG.info("LMNL={}", lmnlBuilder);
+    // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
@@ -55,26 +60,22 @@ public class LMNLExporter {
   }
 
   private StringBuilder toCloseTag(TextRange textRange) {
-    return textRange.isAnonymous()
-            ? new StringBuilder()
-            : new StringBuilder("{").append(textRange.getTag()).append("]");
+    return textRange.isAnonymous()//
+        ? new StringBuilder()//
+        : new StringBuilder("{").append(textRange.getExtendedTag()).append("]");
   }
 
   private StringBuilder toOpenTag(TextRange textRange) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(textRange.getTag());
-    textRange.getAnnotations().forEach(a ->
-            tagBuilder.append(" ").append(toLMNL(a))
-    );
-    return textRange.isAnonymous()
-            ? tagBuilder.append("]")
-            : tagBuilder.append("}");
+    StringBuilder tagBuilder = new StringBuilder("[").append(textRange.getExtendedTag());
+    textRange.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+    return textRange.isAnonymous()//
+        ? tagBuilder.append("]")//
+        : tagBuilder.append("}");
   }
 
   public StringBuilder toLMNL(Annotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotations().forEach(a1 ->
-            annotationBuilder.append(" ").append(toLMNL(a1))
-    );
+    annotation.getAnnotations().forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
     Limen limen = annotation.value();
     if (limen.hasTextNodes()) {
       annotationBuilder.append("}");
