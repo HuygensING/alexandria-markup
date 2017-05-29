@@ -10,10 +10,13 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 
@@ -94,11 +97,19 @@ public class TexMECSImporterTest {
     TexMECSParser parser = new TexMECSParser(tokens);
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
+    ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+    TexMECSListener listener = new TexMECSListener();
+    parseTreeWalker.walk(listener, parseTree);
     LOG.info("parseTree={}", parseTree.toStringTree(parser));
     assertThat(parseTree).isNotNull();
     assertThat(parser.getNumberOfSyntaxErrors())//
         .withFailMessage("%d Unexpected syntax error(s)", parser.getNumberOfSyntaxErrors())//
         .isEqualTo(0);
+    Document doc = listener.getDocument();
+    assertThat(doc.value()).isNotNull();
+    LMNLExporter ex = new LMNLExporter();
+    String lmnl = ex.toLMNL(doc);
+    LOG.info("lmnl={}", lmnl);
     return parseTree;
   }
 
