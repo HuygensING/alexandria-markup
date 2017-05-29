@@ -1,5 +1,8 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  * <p>
@@ -10,6 +13,7 @@ public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
   private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
+  private Set<TextRange> parents = new HashSet<>();
 
   public TextNode(String content) {
     this.content = content;
@@ -43,13 +47,25 @@ public class TextNode {
     return nextTextNode;
   }
 
-  @Override
-  public String toString() {
-    return "\"" + content.replace("\n", "\\n") + "\"";
-  }
-
   public void setContent(String content) {
     this.content = content;
 
+  }
+
+  public void addParent(TextRange parent) {
+    parents.add(parent);
+  }
+
+  public void removeParent(TextRange parent) {
+    parents.remove(parent);
+  }
+
+  public Set<TextRange> getParents() {
+    return parents;
+  }
+
+  @Override
+  public String toString() {
+    return "\"" + content.replace("\n", "\\n") + "\"";
   }
 }

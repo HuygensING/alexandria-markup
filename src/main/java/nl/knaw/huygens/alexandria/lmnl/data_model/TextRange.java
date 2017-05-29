@@ -1,7 +1,9 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,6 +16,7 @@ public class TextRange {
   private String id = ""; // LMNL, should be unique
   private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
+  private Set<TextRange> parents = new HashSet<>();
   public final List<TextNode> textNodes;
 
   public TextRange(Limen owner, String tag) {
@@ -129,6 +132,18 @@ public class TextRange {
       expectedNext = textNode.getNextTextNode();
     }
     return isContinuous;
+  }
+
+  public void addParent(TextRange parent) {
+    parents.add(parent);
+  }
+
+  public void removeParent(TextRange parent) {
+    parents.remove(parent);
+  }
+
+  public Set<TextRange> getParents() {
+    return parents;
   }
 
 }
