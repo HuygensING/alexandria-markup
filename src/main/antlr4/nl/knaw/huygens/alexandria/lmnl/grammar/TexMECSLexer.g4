@@ -18,6 +18,10 @@ BEGIN_RESUME_TAG
   : '<+' -> pushMode(INSIDE_START_TAG)
   ;
 
+BEGIN_START_TAGSET
+  : '<|' -> pushMode(INSIDE_START_TAG)
+  ;
+
 BEGIN_START_TAG
   : '<' -> pushMode(INSIDE_START_TAG)
   ;
@@ -32,6 +36,10 @@ NL
 
 BEGIN_SUSPEND_TAG
   : '|-' -> pushMode(INSIDE_END_TAG)
+  ;
+
+BEGIN_END_TAGSET
+  : '||' -> pushMode(INSIDE_END_TAG)
   ;
 
 BEGIN_END_TAG
@@ -68,6 +76,10 @@ STRING
   | '\'' ~[<']* '\''
   ;
 
+END_START_TAGSET
+  : '||' -> popMode
+  ;
+
 END_START_TAG
   : '|' -> popMode
   ;
@@ -85,6 +97,10 @@ NAME_C
 
 SUFFIX_C
   : SUFFIX
+  ;
+
+END_END_TAGSET
+  : '|>' -> popMode
   ;
 
 END_END_TAG

@@ -14,8 +14,10 @@ chunk
   | soleTag
   | suspendTag
   | resumeTag
-//  | startTagSet
-//  | endTagSet
+  | startTagSet
+  | endTagSet
+  | startTagSet
+  | endTagSet
   | virtualElement
 //  | internalEntity
 //  | externalEntity
@@ -50,11 +52,11 @@ virtualElement // WFC: idref OK. The idref value in a virtual element must appea
   ;
 
 startTagSet // WFC: endTagSet match
-  : StartTagSetOpen eid atts DoublePipeChar
+  : BEGIN_START_TAGSET eid atts END_START_TAGSET
   ;
 
 endTagSet /* WFC: startTagSet match */
-  : DoublePipeChar gi EndTagSetClose
+  : BEGIN_END_TAGSET gi END_END_TAGSET
   ;
 
 //internalEntity /* CF: structured internal entities */
