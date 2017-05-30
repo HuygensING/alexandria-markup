@@ -1,9 +1,8 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,12 +35,18 @@ public class TexMECSImporter {
   private Document importTexMECS(CharStream antlrInputStream) {
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
-    ParseTree parseTree = new TAAGQLParser(tokens).query();
+    TexMECSParser parser = new TexMECSParser(tokens);
+    parser.setBuildParseTree(true);
+    ParseTree parseTree = parser.document();
+    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    if (numberOfSyntaxErrors > 0) {
+      throw new RuntimeException(numberOfSyntaxErrors + " Syntax errors");
+    }
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-
-    Document document = new Document();
-    Limen limen = document.value();
-    return document;
+    TexMECSListener listener = new TexMECSListener();
+    parseTreeWalker.walk(listener, parseTree);
+    return listener.getDocument();
   }
 
 }

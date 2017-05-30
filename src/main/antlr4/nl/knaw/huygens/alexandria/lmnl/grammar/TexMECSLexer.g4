@@ -10,6 +10,10 @@ BEGIN_CDATA
   : '<#CDATA<' -> pushMode(INSIDE_CDATA)
   ;
 
+BEGIN_VIRTUAL_ELEMENT
+  : '<^' -> pushMode(INSIDE_VIRTUAL_ELEMENT)
+  ;
+
 BEGIN_RESUME_TAG
   : '<+' -> pushMode(INSIDE_START_TAG)
   ;
@@ -19,7 +23,11 @@ BEGIN_START_TAG
   ;
 
 TEXT
-  : ~[<|]+
+  : ~[<|\r\n]+
+  ;
+
+NL
+  : [\r\n]+ -> skip
   ;
 
 BEGIN_SUSPEND_TAG
@@ -40,6 +48,8 @@ NAME_O
 SUFFIX_O
   : SUFFIX
   ;
+
+AtChar : '@';
 
 WS
   :	[ \t\r\n] -> skip
@@ -108,6 +118,30 @@ CDATA
   ;
 
 //-----------------
+mode INSIDE_VIRTUAL_ELEMENT;
+
+END_VIRTUAL_ELEMENT
+  : '>' -> popMode
+  ;
+
+NAME_V
+  : NAME
+  ;
+
+CARET
+  : '^'
+  ;
+
+EQUALS_V
+  : '='
+  ;
+
+STRING_V
+  : '"' ~[<"]* '"'
+  | '\'' ~[<']* '\''
+  ;
+
+//-----------------
 
 NAME
   : Nameinit Namechar*
@@ -165,7 +199,6 @@ HEXDIGITS
 
 DoublePipeChar : '||';
 
-AtChar : '@';
 
 DQuoteChar : '"';
 

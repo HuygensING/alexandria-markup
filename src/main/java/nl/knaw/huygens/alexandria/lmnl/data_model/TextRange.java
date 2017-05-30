@@ -1,11 +1,11 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -31,6 +31,11 @@ public class TextRange {
 
     } else if (tag.contains("=")) {
       String[] parts = tag.split("=");
+      this.tag = parts[0];
+      this.id = parts[1];
+
+    } else if (tag.contains("@")) {
+      String[] parts = tag.split("@");
       this.tag = parts[0];
       this.id = parts[1];
 

@@ -16,7 +16,7 @@ chunk
   | resumeTag
 //  | startTagSet
 //  | endTagSet
-//  | virtualElement
+  | virtualElement
 //  | internalEntity
 //  | externalEntity
 //  | characterRef
@@ -45,9 +45,9 @@ resumeTag /* WFC: resume-tag OK */
   : BEGIN_RESUME_TAG gi END_START_TAG
   ;
 
-//virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
-//  : VirtualElementOpen eid Caret idref atts RightAngleBracket
-//  ;
+virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
+  : BEGIN_VIRTUAL_ELEMENT eid CARET idref atts END_VIRTUAL_ELEMENT
+  ;
 
 startTagSet // WFC: endTagSet match
   : StartTagSetOpen eid atts DoublePipeChar
@@ -103,22 +103,25 @@ commentdata
 
 eid
   : gi (AtChar id)?
+  | gi (EQUALS id)
   | AtChar id
   ;
 
 gi
   : NAME_O SUFFIX_O?
   | NAME_C SUFFIX_C?
+  | NAME_V
   | SUFFIX
   ;
 
 id /* WFC: unique ID */
   : NAME_O
   | NAME_C
+  | NAME_V
   ;
 
 idref
-  : NAME /* WFC: idref OK */
+  : NAME_V /* WFC: idref OK */
   ;
 
 atts
