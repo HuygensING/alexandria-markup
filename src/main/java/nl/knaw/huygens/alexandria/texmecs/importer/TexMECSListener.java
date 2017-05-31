@@ -2,7 +2,12 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
@@ -12,27 +17,40 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.AttsContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EidContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagSetContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.GiContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.ResumeTagContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SoleTagContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagSetContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SuspendTagContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.TextContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.VirtualElementContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
 
 public class TexMECSListener extends TexMECSParserBaseListener {
 
-  Document document = new Document();
-  Limen limen = document.value();
-  Deque<TextRange> openMarkup = new ArrayDeque<>();
-  Deque<TextRange> suspendedMarkup = new ArrayDeque<>();
+  Logger LOG = LoggerFactory.getLogger(getClass());
+
+  private Document document = new Document();
+  private Limen limen = document.value();
+  private Deque<TextRange> openMarkup = new ArrayDeque<>();
+  private Deque<TextRange> suspendedMarkup = new ArrayDeque<>();
+  private boolean insideTagSet = false; // TODO: use this?
+  private HashMap<String, TextRange> identifiedTextRanges = new HashMap<>();
 
   public TexMECSListener() {
-
   }
 
   public Document getDocument() {
     return document;
+  }
+
+  @Override
+  public void exitStartTagSet(StartTagSetContext ctx) {
+    TextRange textRange = addTextRange(ctx.eid(), ctx.atts());
+    openMarkup.add(textRange);
+    insideTagSet = true;
   }
 
   @Override
@@ -50,6 +68,12 @@ public class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
+    removeFromOpenMarkup(ctx.gi());
+  }
+
+  @Override
+  public void exitEndTagSet(EndTagSetContext ctx) {
+    insideTagSet = false;
     removeFromOpenMarkup(ctx.gi());
   }
 
@@ -80,11 +104,33 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     openMarkup.add(textRange);
   }
 
+  @Override
+  public void exitVirtualElement(VirtualElementContext ctx) {
+    String extendedTag = ctx.eid().gi().getText() + "=" + ctx.idref().getText();
+    if (identifiedTextRanges.containsKey(extendedTag)) {
+      TextRange ref = identifiedTextRanges.get(extendedTag);
+      TextRange textRange = addTextRange(ref.getTag(), ctx.atts());
+      ref.textNodes.forEach(tn -> {
+        TextNode copy = new TextNode(tn.getContent());
+        limen.addTextNode(copy);
+        openMarkup.forEach(m -> linkTextToMarkup(copy, m));
+        linkTextToMarkup(copy, textRange);
+      });
+    }
+  }
+
   private TextRange addTextRange(EidContext eid, AttsContext atts) {
-    String extendedTag = eid.gi().getText();
+    String extendedTag = eid.getText();
+    return addTextRange(extendedTag, atts);
+  }
+
+  private TextRange addTextRange(String extendedTag, AttsContext atts) {
     TextRange textRange = new TextRange(limen, extendedTag);
     addAttributes(atts, textRange);
     limen.addTextRange(textRange);
+    if (textRange.hasId()) {
+      identifiedTextRanges.put(extendedTag, textRange);
+    }
     return textRange;
   }
 
@@ -121,5 +167,10 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     }
     textRangeStack.remove(textRange);
     return textRange;
+  }
+
+  @Override
+  public void exitEveryRule(ParserRuleContext ctx) {
+    LOG.info("rule={}, element={}", ctx, ctx.getText());
   }
 }

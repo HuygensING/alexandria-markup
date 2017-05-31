@@ -1,8 +1,9 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class LMNLExporter {
 
   private void appendLimen(StringBuilder lmnlBuilder, Limen limen) {
     if (limen != null) {
-      Set<TextRange> openTextRanges = new LinkedHashSet<>();
+      Deque<TextRange> openTextRanges = new ArrayDeque<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         Set<TextRange> textRanges = limen.getTextRanges(tn);
 
@@ -55,7 +56,8 @@ public class LMNLExporter {
         openTextRanges.addAll(toOpen);
         lmnlBuilder.append(tn.getContent());
       });
-      openTextRanges.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
+      openTextRanges.descendingIterator()//
+          .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
     }
   }
 

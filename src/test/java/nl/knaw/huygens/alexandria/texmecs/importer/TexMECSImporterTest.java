@@ -32,14 +32,14 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
-    Document document = testTexMECS(texMECS, 10, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    Document document = testTexMECS(texMECS, 10, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithAttributes() {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
-    Document document = testTexMECS(texMECS, 10, "[s [type}test{type]}[a}John [b}loves{a] Mary{s]{b]");
+    Document document = testTexMECS(texMECS, 10, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
     TextRange textRange0 = document.value().textRangeList.get(0);
     assertThat(textRange0.getTag()).isEqualTo("s");
@@ -53,7 +53,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSuffix() {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
-    Document document = testTexMECS(texMECS, 10, "[s~0}[a}John [b}loves{a] Mary{s~0]{b]");
+    Document document = testTexMECS(texMECS, 10, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
     assertThat(document.value()).isNotNull();
     TextRange textRange0 = document.value().textRangeList.get(0);
     assertThat(textRange0.getTag()).isEqualTo("s");
@@ -70,7 +70,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
-    Document document = testTexMECS(texMECS, 14, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{s]{b]");
+    Document document = testTexMECS(texMECS, 14, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
     Limen limen = document.value();
     assertThat(limen).isNotNull();
     List<TextRange> textRangeList = limen.textRangeList;
@@ -86,21 +86,21 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithNestedComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithCData() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{s]{b]");
+    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
@@ -108,6 +108,27 @@ public class TexMECSImporterTest {
   public void testSelfOverlappingElements() {
     String texMECS = "<e~1|Lorem <e~2|Ipsum |e~1>Dolor...|e~2>";
     Document document = testTexMECS(texMECS, 8, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
+    assertThat(document.value()).isNotNull();
+  }
+
+  @Test
+  public void testTagSets() {
+    String texMECS = "<|choice||<option|A|option><option|B|option>||choice|>";
+    Document document = testTexMECS(texMECS, 9, "[choice}[option}A{option][option}B{option]{choice]");
+    assertThat(document.value()).isNotNull();
+  }
+
+  @Test
+  public void testVirtualElement() {
+    String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
+    Document document = testTexMECS(texMECS, 9, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
+    assertThat(document.value()).isNotNull();
+  }
+
+  @Test
+  public void testMultipleRoots() {
+    String texMECS = "<a|A|a><a|A|a><a|A|a><a|A|a><a|A|a>";
+    Document document = testTexMECS(texMECS, 16, "[a}A{a][a}A{a][a}A{a][a}A{a][a}A{a]");
     assertThat(document.value()).isNotNull();
   }
 
