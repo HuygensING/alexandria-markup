@@ -1,8 +1,13 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.junit.Test;
@@ -12,13 +17,9 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
@@ -85,12 +86,12 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
     String laTeX = exporter.exportDocument();
     assertThat(laTeX).isNotBlank();
-    LOG.info("document=\n{}", laTeX);
+    // LOG.info("document=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
 
     String overlap = exporter.exportGradient();
     assertThat(overlap).isNotBlank();
-    LOG.info("overlap=\n{}", overlap);
+    // LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
 
     String coloredText = exporter.exportTextRangeOverlap();
@@ -99,12 +100,12 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
-    LOG.info("matrix=\n{}", laTeX);
+    // LOG.info("matrix=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + "-matrix.tex"), matrix, "UTF-8");
 
     String kdTree = exporter.exportKdTree();
     assertThat(kdTree).isNotBlank();
-    LOG.info("k-d tree=\n{}", kdTree);
+    // LOG.info("k-d tree=\n{}", kdTree);
     FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
   }
 
