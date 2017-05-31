@@ -420,7 +420,7 @@ public class LaTeXExporter {
     }
 
     public void addTextRange(TextRange textRange) {
-      LOG.info("textRange={}", textRange.getTag());
+      // LOG.info("textRange={}", textRange.getTag());
       textRanges.add(textRange);
       tags.add(normalize(textRange.getTag()));
       int size = textRange.textNodes.size();
