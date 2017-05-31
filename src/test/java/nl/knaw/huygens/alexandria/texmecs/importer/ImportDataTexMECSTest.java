@@ -1,8 +1,13 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
@@ -15,13 +20,9 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
 @RunWith(Parameterized.class)
 public class ImportDataTexMECSTest {
@@ -46,11 +47,11 @@ public class ImportDataTexMECSTest {
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/texMECS"), MECS_FILE_FILTER, null)//
+    return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)//
         .stream()//
         .map(File::getName)//
         .map(n -> n.replace(".texmecs", ""))//
-        .map(b -> new String[]{b})//
+        .map(b -> new String[] { b })//
         .collect(Collectors.toList());
   }
 

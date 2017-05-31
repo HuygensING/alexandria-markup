@@ -38,7 +38,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
     }
 
     private boolean isLMNL(String name) {
-      return name.endsWith(".lmnl");
+      return name.endsWith(".lmnl") && name.startsWith("f");
     }
   };
 
