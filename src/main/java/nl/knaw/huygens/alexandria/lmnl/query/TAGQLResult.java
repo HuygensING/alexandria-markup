@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TAAGQLResult {
+public class TAGQLResult {
 
-  List<TAAGQLResult> results = new ArrayList<>();
+  List<TAGQLResult> results = new ArrayList<>();
 
   private List<Object> values = new ArrayList<>();
 
-  public void addResult(TAAGQLResult subresult) {
+  public void addResult(TAGQLResult subresult) {
     results.add(subresult);
   }
 
@@ -26,7 +26,7 @@ public class TAAGQLResult {
       return results.get(0).getValues();
     }
     return results.stream()//
-        .map(TAAGQLResult::getValues)//
+        .map(TAGQLResult::getValues)//
         .collect(Collectors.toList());
   }
 }

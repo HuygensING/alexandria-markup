@@ -1,4 +1,4 @@
-grammar TAAGQL;
+grammar TAGQL;
 
 query
   : statement* EOF

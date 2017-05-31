@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.taagql;
+package nl.knaw.huygens.alexandria.lmnl.tagql;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.query.TAAGQLResult;
+import nl.knaw.huygens.alexandria.lmnl.query.TAGQLResult;
 
-public class TAAGQLSelectStatement implements TAAGQLStatement {
+public class TAGQLSelectStatement implements TAGQLStatement {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -28,9 +28,9 @@ public class TAAGQLSelectStatement implements TAAGQLStatement {
   }
 
   @Override
-  public Function<Limen, TAAGQLResult> getLimenProcessor() {
+  public Function<Limen, TAGQLResult> getLimenProcessor() {
     return (Limen limen) -> {
-      TAAGQLResult result = new TAAGQLResult();
+      TAGQLResult result = new TAGQLResult();
       limen.textRangeList.stream()//
           .filter(textRangeFilter)//
           .map(textRangeMapper)//
@@ -38,7 +38,7 @@ public class TAAGQLSelectStatement implements TAAGQLStatement {
           .forEach(result::addValue);
       if (index != null) {
         Object selectedValue = result.getValues().get(index);
-        TAAGQLResult result2 = new TAAGQLResult();
+        TAGQLResult result2 = new TAGQLResult();
         result2.addValue(selectedValue);
         return result2;
       }

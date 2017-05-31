@@ -1,5 +1,9 @@
 package nl.knaw.huygens.alexandria.lmnl.grammar;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -9,18 +13,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class TAAGQLTest {
+public class TAGQLTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void testCorrectTAAGQLStatement() {
+  public void testCorrectTAGQLStatement() {
     String statement = "select m.text from markup m where m.name='q' and m.id='a'";
     CharStream stream = CharStreams.fromString(statement);
-    TAAGQLLexer lex = new TAAGQLLexer(stream);
+    TAGQLLexer lex = new TAGQLLexer(stream);
     List<? extends Token> allTokens = lex.getAllTokens();
     for (Token token : allTokens) {
       LOG.info("token: [{}] <<{}>>", lex.getRuleNames()[token.getType() - 1], token.getText());
@@ -28,7 +28,7 @@ public class TAAGQLTest {
     lex.reset();
 
     CommonTokenStream tokens = new CommonTokenStream(lex);
-    TAAGQLParser parser = new TAAGQLParser(tokens);
+    TAGQLParser parser = new TAGQLParser(tokens);
     parser.setBuildParseTree(true);
     ParseTree tree = parser.query();
     LOG.info("tree={}", tree.toStringTree(parser));
@@ -44,7 +44,7 @@ public class TAAGQLTest {
     assertThat(allTokens).hasSize(19);
 
     // MyListener listener = new MyListener();
-    // parser.TAAGQL_script().enterRule(listener);
+    // parser.TAGQL_script().enterRule(listener);
     //
     // MyVisitor visitor = new MyVisitor();
     // Object result = visitor.visit(tree);

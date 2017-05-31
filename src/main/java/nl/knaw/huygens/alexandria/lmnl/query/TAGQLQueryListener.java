@@ -15,32 +15,32 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLBaseListener;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.AnnotationValuePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.CombiningExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.EqualityComparisonExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ExprContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ExtendedIdentifierContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.JoiningExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.NamePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ParameterizedMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.PartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SelectStmtContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SelectVariableContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SimpleMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.TextContainsExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.TextPartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.WhereClauseContext;
-import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLSelectStatement;
-import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLStatement;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLBaseListener;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.AnnotationValuePartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.CombiningExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.EqualityComparisonExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ExprContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ExtendedIdentifierContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.JoiningExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.NamePartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ParameterizedMarkupSourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.PartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SelectStmtContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SelectVariableContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SimpleMarkupSourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.TextContainsExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.TextPartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.WhereClauseContext;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLSelectStatement;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 
-public class TAAGQLQueryListener extends TAAGQLBaseListener {
+public class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private List<TAAGQLStatement> statements = new ArrayList<>();
+  private List<TAGQLStatement> statements = new ArrayList<>();
 
-  public List<TAAGQLStatement> getStatements() {
+  public List<TAGQLStatement> getStatements() {
     return statements;
   }
 
@@ -52,7 +52,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
 
   @Override
   public void exitSelectStmt(SelectStmtContext ctx) {
-    TAAGQLSelectStatement statement = new TAAGQLSelectStatement();
+    TAGQLSelectStatement statement = new TAGQLSelectStatement();
 
     handleSource(statement, ctx.source());
     handleWhereClause(statement, ctx.whereClause());
@@ -62,7 +62,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
     super.exitSelectStmt(ctx);
   }
 
-  private void handleSelectVariable(TAAGQLSelectStatement statement, SelectVariableContext selectVariable) {
+  private void handleSelectVariable(TAGQLSelectStatement statement, SelectVariableContext selectVariable) {
     PartContext part = selectVariable.part();
     if (part != null) {
       if (part instanceof TextPartContext) {
@@ -106,7 +106,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
     return a -> filterTag.equals(a.getTag());
   }
 
-  private void handleSource(TAAGQLSelectStatement statement, SourceContext source) {
+  private void handleSource(TAGQLSelectStatement statement, SourceContext source) {
     if (source != null) {
       if (source instanceof ParameterizedMarkupSourceContext) {
         ParameterizedMarkupSourceContext pmsc = (ParameterizedMarkupSourceContext) source;
@@ -124,7 +124,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
     }
   }
 
-  private void handleWhereClause(TAAGQLSelectStatement statement, WhereClauseContext whereClause) {
+  private void handleWhereClause(TAGQLSelectStatement statement, WhereClauseContext whereClause) {
     if (whereClause != null) {
       Predicate<TextRange> filter = handleExpression(whereClause.expr());
       if (filter != null) {

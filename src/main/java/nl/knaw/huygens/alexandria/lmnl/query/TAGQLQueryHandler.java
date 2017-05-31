@@ -1,36 +1,37 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser;
-import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLStatement;
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import java.util.List;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 
-public class TAAGQLQueryHandler {
+public class TAGQLQueryHandler {
 
   private Document document;
 
-  public TAAGQLQueryHandler(Document document) {
+  public TAGQLQueryHandler(Document document) {
     this.document = document;
   }
 
-  public TAAGQLResult execute(String statement) {
+  public TAGQLResult execute(String statement) {
     CharStream stream = CharStreams.fromString(statement);
-    TAAGQLLexer lexer = new TAAGQLLexer(stream);
+    TAGQLLexer lexer = new TAGQLLexer(stream);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
-    ParseTree parseTree = new TAAGQLParser(tokens).query();
+    ParseTree parseTree = new TAGQLParser(tokens).query();
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TAAGQLQueryListener listener = new TAAGQLQueryListener();
+    TAGQLQueryListener listener = new TAGQLQueryListener();
     parseTreeWalker.walk(listener, parseTree);
-    List<TAAGQLStatement> statements = listener.getStatements();
+    List<TAGQLStatement> statements = listener.getStatements();
 
-    TAAGQLResult result = new TAAGQLResult();
+    TAGQLResult result = new TAGQLResult();
     statements.stream()//
         .map(this::execute)//
         .forEach(result::addResult);
@@ -38,7 +39,7 @@ public class TAAGQLQueryHandler {
     return result;
   }
 
-  TAAGQLResult execute(TAAGQLStatement statement) {
+  TAGQLResult execute(TAGQLStatement statement) {
     return statement.getLimenProcessor()//
         .apply(document.value());
   }

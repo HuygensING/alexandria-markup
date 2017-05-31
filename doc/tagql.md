@@ -1,4 +1,4 @@
-# TAAGQL (Text As A Graph Query Language)
+# TAGQL (Text As Graph Query Language)
 
 
 ## Questions/Requirements
@@ -43,9 +43,9 @@
 Relevant functions from [PostGIS](http://postgis.net/docs/manual-2.3/reference.html):
 
 PostGIS is meant for querying over PostGIS Geometry types (2d/3d points, bounding boxes, etc.)
-We may be able to use some of the functions of this language for our TAAGQL.
+We may be able to use some of the functions of this language for our TAGQL.
 
-(description changed to reflect the use in TAAGQL)
+(description changed to reflect the use in TAGQL)
 
 #### Operators: (A & B are ranges)
 * && — Returns TRUE if A overlaps B.
@@ -81,7 +81,7 @@ With discontinued ranges, you would want a function to get the textnodes in betw
 
 #### sample queries from [Luminescent](https://www.balisage.net/Proceedings/vol13/print/Piez01/BalisageVol13-Piez01.html#LuminescentQueries)
 
-with suggested TAAGQL alternatives A & B
+with suggested TAGQL alternatives A & B
 
 > return the number of the page (in the 1831 edition) on which Volney is mentioned. (Functions named with the lm prefix are defined by Luminescent.)
 ```
