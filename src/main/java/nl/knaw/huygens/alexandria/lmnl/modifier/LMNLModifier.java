@@ -55,6 +55,7 @@ public class LMNLModifier {
           newTextRange.addTextNode(cursor.getCurrentTextNode());
           limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
           findEndingTextNode = false;
+
         } else {
           if (tailLength > 0) {
             // detach tail
@@ -143,14 +144,12 @@ public class LMNLModifier {
     if (!newTextRange.hasId()) {
       throw new RuntimeException("TextRange " + newTextRange.getTag() + " should have an id.");
     }
-    positions.forEach(
-
-        position -> {
-          LOG.info("position={}", position);
-          logTextNodes(limen.textNodeList);
-          logTextRanges(limen.textRangeList);
-          addTextRange(newTextRange, position);
-        });
+    positions.forEach(position -> {
+      LOG.info("position={}", position);
+      logTextNodes(limen.textNodeList);
+      logTextRanges(limen.textRangeList);
+      addTextRange(newTextRange, position);
+    });
 
     logTextNodes(limen.textNodeList);
     logTextRanges(limen.textRangeList);
@@ -159,30 +158,25 @@ public class LMNLModifier {
 
   private void logTextNodes(List<TextNode> list) {
     StringBuilder textnodes = new StringBuilder();
-    list.forEach(
-
-        tn -> {
-          if (tn.getPreviousTextNode() != null) {
-            textnodes.append("\"").append(tn.getPreviousTextNode().getContent()).append("\" -> ");
-          }
-          textnodes.append("[").append(tn.getContent()).append("]");
-          if (tn.getNextTextNode() != null) {
-            textnodes.append(" -> \"").append(tn.getNextTextNode().getContent()).append("\"");
-          }
-          textnodes.append("\n");
-        });
+    list.forEach(tn -> {
+      if (tn.getPreviousTextNode() != null) {
+        textnodes.append("\"").append(tn.getPreviousTextNode().getContent()).append("\" -> ");
+      }
+      textnodes.append("[").append(tn.getContent()).append("]");
+      if (tn.getNextTextNode() != null) {
+        textnodes.append(" -> \"").append(tn.getNextTextNode().getContent()).append("\"");
+      }
+      textnodes.append("\n");
+    });
     LOG.info("\nTextNodes:\n{}", textnodes);
-
   }
 
   private void logTextRanges(List<TextRange> list) {
     StringBuilder textranges = new StringBuilder();
-    list.forEach(
-
-        tr -> {
-          textranges.append("[").append(tr.getTag()).append("}\n");
-          tr.textNodes.forEach(tn -> textranges.append("  \"").append(tn.getContent()).append("\"\n"));
-        });
+    list.forEach(tr -> {
+      textranges.append("[").append(tr.getTag()).append("}\n");
+      tr.textNodes.forEach(tn -> textranges.append("  \"").append(tn.getContent()).append("\"\n"));
+    });
     LOG.info("\nTextRanges:\n{}", textranges);
   }
 

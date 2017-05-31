@@ -22,13 +22,13 @@ public class TAAGQLQueryHandler {
 
   public TAAGQLResult execute(String statement) {
     CharStream stream = CharStreams.fromString(statement);
-    TAAGQLLexer TAAGQLLexer = new TAAGQLLexer(stream);
-    CommonTokenStream tokens = new CommonTokenStream(TAAGQLLexer);
+    TAAGQLLexer lexer = new TAAGQLLexer(stream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
     ParseTree parseTree = new TAAGQLParser(tokens).query();
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TAAGQLQueryListener TAAGQLQueryListener = new TAAGQLQueryListener();
-    parseTreeWalker.walk(TAAGQLQueryListener, parseTree);
-    List<TAAGQLStatement> statements = TAAGQLQueryListener.getStatements();
+    TAAGQLQueryListener listener = new TAAGQLQueryListener();
+    parseTreeWalker.walk(listener, parseTree);
+    List<TAAGQLStatement> statements = listener.getStatements();
 
     TAAGQLResult result = new TAAGQLResult();
     statements.stream()//

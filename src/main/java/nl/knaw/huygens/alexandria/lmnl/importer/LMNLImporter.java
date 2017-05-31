@@ -48,7 +48,7 @@ public class LMNLImporter {
     void pushOpenTextRange(String rangeName) {
       // LOG.info("currentLimenContext().openTextRangeDeque={}", openTextRangeDeque.stream().map(TextRange::getTag).collect(Collectors.toList()));
       TextRange textRange = openTextRangeDeque.stream()//
-          .filter(tr -> tr.getTag().equals(rangeName))//
+          .filter(tr -> tr.getExtendedTag().equals(rangeName))//
           .findFirst()//
           .get();
       if (textRange.textNodes.isEmpty()) {
@@ -384,7 +384,7 @@ public class LMNLImporter {
     limen.textRangeList.stream()//
         .filter(TextRange::hasId)//
         .forEach(textRange -> {
-          String tag = textRange.getTag();
+          String tag = textRange.getExtendedTag();
           if (textRangesToJoin.containsKey(tag)) {
             TextRange originalTextRange = textRangesToJoin.get(tag);
             originalTextRange.joinWith(textRange);

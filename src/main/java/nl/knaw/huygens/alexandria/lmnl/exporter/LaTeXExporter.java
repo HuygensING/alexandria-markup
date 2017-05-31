@@ -1,17 +1,33 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import java.awt.Color;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
@@ -57,7 +73,7 @@ public class LaTeXExporter {
         if (i < parts.length - 1) {
           part += "\\n";
         }
-        colorboxes.add("\\TextNode{" + depth + "}{" + part + "}");
+        colorboxes.add("\\TextNode{" + depth + "}{" + part.replaceAll("&", "\\\\&") + "}");
       }
       latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\\\\n")));
     }
@@ -106,9 +122,7 @@ public class LaTeXExporter {
   }
 
   private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
-    String content = tn.getContent()//
-        .replaceAll(" ", "\\\\s ")//
-        .replaceAll("\n", "\\\\n ");
+    String content = escapedContent(tn);
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
@@ -154,9 +168,7 @@ public class LaTeXExporter {
           row.add(" ");
         }
       }
-      String content = allTextNodes.get(i).getContent()//
-          .replaceAll(" ", "\\\\s ")//
-          .replaceAll("\n", "\\\\n ");
+      String content = escapedContent(allTextNodes.get(i));
       row.add(content);
       latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
     }
@@ -228,10 +240,10 @@ public class LaTeXExporter {
     if (limen != null) {
       Set<TextRange> openTextRanges = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-//      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
+      // Map<TextNode, Integer> textNodeIndices = new HashMap<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         int i = textNodeCounter.getAndIncrement();
-//        textNodeIndices.put(tn, i);
+        // textNodeIndices.put(tn, i);
         Set<TextRange> textRanges = limen.getTextRanges(tn);
 
         List<TextRange> toClose = new ArrayList<>();
@@ -274,13 +286,17 @@ public class LaTeXExporter {
   // }
 
   private void addGradedTextNode(StringBuilder latexBuilder, TextNode tn, int i, String fillColor, int size) {
-    String content = tn.getContent()//
-        .replaceAll(" ", "\\\\s ")//
-        .replaceAll("\n", "\\\\n ")//
-    ;
+    String content = escapedContent(tn);
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
+  }
+
+  private String escapedContent(TextNode tn) {
+    return tn.getContent()//
+        .replaceAll(" ", "\\\\s ")//
+        .replaceAll("&", "\\\\& ")//
+        .replaceAll("\n", "\\\\n ");
   }
 
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {

@@ -1,7 +1,11 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -9,12 +13,35 @@ import java.util.List;
 public class TextRange {
   private final Limen owner;
   private final String tag;
+  private String id = ""; // LMNL, should be unique
+  private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
+  private Set<TextRange> parents = new HashSet<>();
   public final List<TextNode> textNodes;
 
   public TextRange(Limen owner, String tag) {
     this.owner = owner;
-    this.tag = tag == null ? "" : tag;
+    if (tag == null) {
+      this.tag = "";
+
+    } else if (tag.contains("~")) {
+      String[] parts = tag.split("~");
+      this.tag = parts[0];
+      this.suffix = parts[1];
+
+    } else if (tag.contains("=")) {
+      String[] parts = tag.split("=");
+      this.tag = parts[0];
+      this.id = parts[1];
+
+    } else if (tag.contains("@")) {
+      String[] parts = tag.split("@");
+      this.tag = parts[0];
+      this.id = parts[1];
+
+    } else {
+      this.tag = tag;
+    }
     this.annotations = new ArrayList<>();
     this.textNodes = new ArrayList<>();
   }
@@ -32,6 +59,24 @@ public class TextRange {
 
   public String getTag() {
     return tag;
+  }
+
+  public String getExtendedTag() {
+    if (StringUtils.isNotEmpty(suffix)) {
+      return tag + "~" + suffix;
+    }
+    if (StringUtils.isNotEmpty(id)) {
+      return tag + "=" + id;
+    }
+    return tag;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getSuffix() {
+    return suffix;
   }
 
   public TextRange setFirstAndLastTextNode(TextNode firstTextNode, TextNode lastTextNode) {
@@ -63,7 +108,11 @@ public class TextRange {
   }
 
   public boolean hasId() {
-    return tag.contains("=");
+    return StringUtils.isNotEmpty(id);
+  }
+
+  public boolean hasSuffix() {
+    return StringUtils.isNotEmpty(suffix);
   }
 
   public void joinWith(TextRange textRange) {
@@ -88,6 +137,18 @@ public class TextRange {
       expectedNext = textNode.getNextTextNode();
     }
     return isContinuous;
+  }
+
+  public void addParent(TextRange parent) {
+    parents.add(parent);
+  }
+
+  public void removeParent(TextRange parent) {
+    parents.remove(parent);
+  }
+
+  public Set<TextRange> getParents() {
+    return parents;
   }
 
 }

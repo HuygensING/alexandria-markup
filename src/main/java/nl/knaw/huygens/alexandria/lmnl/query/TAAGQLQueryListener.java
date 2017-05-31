@@ -1,23 +1,39 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLBaseListener;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.*;
-import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLSelectStatement;
-import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLStatement;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLBaseListener;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.AnnotationValuePartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.CombiningExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.EqualityComparisonExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ExprContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ExtendedIdentifierContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.JoiningExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.NamePartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.ParameterizedMarkupSourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.PartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SelectStmtContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SelectVariableContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SimpleMarkupSourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.SourceContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.TextContainsExpressionContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.TextPartContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAAGQLParser.WhereClauseContext;
+import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLSelectStatement;
+import nl.knaw.huygens.alexandria.lmnl.taagql.TAAGQLStatement;
 
 public class TAAGQLQueryListener extends TAAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
@@ -30,8 +46,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
 
   public String toText(TextRange textRange) {
     StringBuilder textBuilder = new StringBuilder();
-    textRange.textNodes.forEach(
-        textNode -> textBuilder.append(textNode.getContent()));
+    textRange.textNodes.forEach(textNode -> textBuilder.append(textNode.getContent()));
     return textBuilder.toString();
   }
 
@@ -53,7 +68,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
       if (part instanceof TextPartContext) {
         statement.setTextRangeMapper(this::toText);
       } else if (part instanceof NamePartContext) {
-        statement.setTextRangeMapper(TextRange::getTag);
+        statement.setTextRangeMapper(TextRange::getExtendedTag);
       } else if (part instanceof AnnotationValuePartContext) {
         String annotationIdentifier = stringValue(((AnnotationValuePartContext) part).annotationIdentifier());
         statement.setTextRangeMapper(toAnnotationTextMapper(annotationIdentifier));
@@ -127,7 +142,7 @@ public class TAAGQLQueryListener extends TAAGQLBaseListener {
       ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
       String value = stringValue(ecec.literalValue());
       if (extendedIdentifier.part() instanceof NamePartContext) {
-        filter = tr -> tr.getTag().equals(value);
+        filter = tr -> tr.getExtendedTag().equals(value);
       }
 
     } else if (expr instanceof JoiningExpressionContext) {
