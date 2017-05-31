@@ -5,7 +5,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,8 +168,4 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     return textRange;
   }
 
-  @Override
-  public void exitEveryRule(ParserRuleContext ctx) {
-    LOG.info("rule={}, element={}", ctx, ctx.getText());
-  }
 }
