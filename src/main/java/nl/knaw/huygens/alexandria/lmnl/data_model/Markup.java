@@ -1,11 +1,10 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -16,8 +15,9 @@ public class Markup {
   private String id = ""; // LMNL, should be unique
   private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
-  private Set<Markup> parents = new HashSet<>();
   public final List<TextNode> textNodes;
+  private Markup dominatedMarkup; // markup that's dominated by this markup
+  private Markup dominatingMarkup; // markup that dominates this markup
 
   public Markup(Limen owner, String tag) {
     this.owner = owner;
@@ -139,16 +139,26 @@ public class Markup {
     return isContinuous;
   }
 
-  public void addParent(Markup parent) {
-    parents.add(parent);
+  public Optional<Markup> getDominatedMarkup() {
+    return Optional.ofNullable(dominatedMarkup);
   }
 
-  public void removeParent(Markup parent) {
-    parents.remove(parent);
+  public void setDominatedMarkup(Markup dominatedMarkup) {
+    this.dominatedMarkup = dominatedMarkup;
+    if (!dominatedMarkup.getDominatingMarkup().isPresent()) {
+      dominatedMarkup.setDominatingMarkup(this);
+    }
   }
 
-  public Set<Markup> getParents() {
-    return parents;
+  public Optional<Markup> getDominatingMarkup() {
+    return Optional.ofNullable(dominatingMarkup);
+  }
+
+  public void setDominatingMarkup(Markup dominatingMarkup) {
+    this.dominatingMarkup = dominatingMarkup;
+    if (!dominatingMarkup.getDominatedMarkup().isPresent()) {
+      dominatingMarkup.setDominatedMarkup(this);
+    }
   }
 
 }

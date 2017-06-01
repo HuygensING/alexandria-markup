@@ -9,10 +9,7 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +17,10 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 
 public class TexMECSImporterTest {
   final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -132,33 +128,42 @@ public class TexMECSImporterTest {
     assertThat(document.value()).isNotNull();
   }
 
+  @Test
+  public void testDominance() {
+    String texMECS = "<l|This is <i|<b|very|b>|i> important|l>";
+    Document document = testTexMECS(texMECS, 10, "[l}This is [i}[b}very{b]{i] important{l]");
+    assertThat(document.value()).isNotNull();
+  }
+
   private Document testTexMECS(String texMECS, int expectedChunkCount, String expectedLMNL) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
-    CharStream antlrInputStream = CharStreams.fromString(texMECS);
-    TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    TexMECSParser parser = new TexMECSParser(tokens);
-    parser.setBuildParseTree(true);
-    ParseTree parseTree = parser.document();
-    ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TexMECSListener listener = new TexMECSListener();
-    parseTreeWalker.walk(listener, parseTree);
-    LOG.info("parseTree={}", parseTree.toStringTree(parser));
-    assertThat(parseTree).isNotNull();
-    assertThat(parser.getNumberOfSyntaxErrors())//
-        .withFailMessage("%d Unexpected syntax error(s)", parser.getNumberOfSyntaxErrors())//
-        .isEqualTo(0);
-    Document doc = listener.getDocument();
+    TexMECSImporter importer = new TexMECSImporter();
+    Document doc = importer.importTexMECS(texMECS);
+    // CharStream antlrInputStream = CharStreams.fromString(texMECS);
+    // TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
+    // CommonTokenStream tokens = new CommonTokenStream(lexer);
+    // TexMECSParser parser = new TexMECSParser(tokens);
+    // parser.setBuildParseTree(true);
+    // ParseTree parseTree = parser.document();
+    // ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+    // TexMECSListener listener = new TexMECSListener();
+    // parseTreeWalker.walk(listener, parseTree);
+    // LOG.info("parseTree={}", parseTree.toStringTree(parser));
+    // assertThat(parseTree).isNotNull();
+    // assertThat(parser.getNumberOfSyntaxErrors())//
+    // .withFailMessage("%d Unexpected syntax error(s)", parser.getNumberOfSyntaxErrors())//
+    // .isEqualTo(0);
+    // Document doc = listener.getDocument();
     assertThat(doc.value()).isNotNull();
     LMNLExporter ex = new LMNLExporter();
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(expectedLMNL);
 
-    assertThat(parseTree.getChildCount()).isEqualTo(expectedChunkCount);
-    assertThat(parseTree.getChild(0)).isNotNull();
+    // assertThat(parseTree.getChildCount()).isEqualTo(expectedChunkCount);
+    // assertThat(parseTree.getChild(0)).isNotNull();
     return doc;
   }
 

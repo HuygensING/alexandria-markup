@@ -1,8 +1,9 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -11,8 +12,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 
 public class TexMECSImporter {
   final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -46,7 +50,21 @@ public class TexMECSImporter {
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TexMECSListener listener = new TexMECSListener();
     parseTreeWalker.walk(listener, parseTree);
-    return listener.getDocument();
+    Document document = listener.getDocument();
+    handleMarkupDominance(document.value());
+    return document;
+  }
+
+  private void handleMarkupDominance(Limen limen) {
+    List<Markup> markupList = limen.markupList;
+    for (int i = 0; i < markupList.size() - 1; i++) {
+      Markup first = markupList.get(i);
+      Markup second = markupList.get(i + 1);
+      if (first.textNodes.equals(second.textNodes)) {
+        LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
+        first.setDominatedMarkup(second);
+      }
+    }
   }
 
 }
