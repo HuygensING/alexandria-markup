@@ -5,31 +5,31 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  */
 public class IndexPoint {
   final int textNodeIndex;
-  final int textRangeIndex;
+  final int markupIndex;
 
-  public IndexPoint(int textNodeIndex, int textRangeIndex) {
+  public IndexPoint(int textNodeIndex, int markupIndex) {
     this.textNodeIndex = textNodeIndex;
-    this.textRangeIndex = textRangeIndex;
+    this.markupIndex = markupIndex;
   }
 
   public int getTextNodeIndex() {
     return textNodeIndex;
   }
 
-  public int getTextRangeIndex() {
-    return textRangeIndex;
+  public int getMarkupIndex() {
+    return markupIndex;
   }
 
   @Override
   public String toString() {
-    return "(" + textNodeIndex + "," + textRangeIndex + ")";
+    return "(" + textNodeIndex + "," + markupIndex + ")";
   }
 
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof IndexPoint) {
       IndexPoint other = (IndexPoint) obj;
-      return (other.textRangeIndex == textRangeIndex) && (other.textNodeIndex == textNodeIndex);
+      return (other.markupIndex == markupIndex) && (other.textNodeIndex == textNodeIndex);
     }
     return false;
   }

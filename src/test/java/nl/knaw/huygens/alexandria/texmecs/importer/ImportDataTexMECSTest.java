@@ -97,7 +97,7 @@ public class ImportDataTexMECSTest {
     LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
 
-    String coloredText = exporter.exportTextRangeOverlap();
+    String coloredText = exporter.exportMarkupOverlap();
     assertThat(coloredText).isNotBlank();
     FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 

@@ -20,7 +20,7 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 
 /**
@@ -31,60 +31,60 @@ public class LMNLImporter {
 
   static class LimenContext {
     private Limen limen;
-    private final Deque<TextRange> openTextRangeDeque = new ArrayDeque<>();
-    private final Stack<TextRange> openTextRangeStack = new Stack<>();
+    private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
+    private final Stack<Markup> openMarkupStack = new Stack<>();
     private final Stack<Annotation> annotationStack = new Stack<>();
 
     LimenContext(Limen limen) {
       this.limen = limen;
     }
 
-    void openTextRange(TextRange textRange) {
-      openTextRangeDeque.push(textRange);
-      openTextRangeStack.push(textRange);
-      limen.addTextRange(textRange);
+    void openMarkup(Markup markup) {
+      openMarkupDeque.push(markup);
+      openMarkupStack.push(markup);
+      limen.addMarkup(markup);
     }
 
-    void pushOpenTextRange(String rangeName) {
-      // LOG.info("currentLimenContext().openTextRangeDeque={}", openTextRangeDeque.stream().map(TextRange::getTag).collect(Collectors.toList()));
-      TextRange textRange = openTextRangeDeque.stream()//
+    void pushOpenMarkup(String rangeName) {
+      // LOG.info("currentLimenContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
+      Markup markup = openMarkupDeque.stream()//
           .filter(tr -> tr.getExtendedTag().equals(rangeName))//
           .findFirst()//
           .get();
-      if (textRange.textNodes.isEmpty()) {
-        // every textRange should have at least one textNode
+      if (markup.textNodes.isEmpty()) {
+        // every markup should have at least one textNode
         addTextNode(new TextNode(""));
-        closeTextRange();
+        closeMarkup();
       }
-      openTextRangeStack.push(textRange);
+      openMarkupStack.push(markup);
     }
 
-    void popOpenTextRange() {
-      openTextRangeStack.pop();
+    void popOpenMarkup() {
+      openMarkupStack.pop();
     }
 
-    void closeTextRange() {
-      if (!openTextRangeStack.isEmpty()) {
-        TextRange textrange = openTextRangeStack.pop();
-        openTextRangeDeque.remove(textrange);
+    void closeMarkup() {
+      if (!openMarkupStack.isEmpty()) {
+        Markup markup = openMarkupStack.pop();
+        openMarkupDeque.remove(markup);
       }
     }
 
     void addTextNode(TextNode textNode) {
-      openTextRangeDeque.descendingIterator()//
+      openMarkupDeque.descendingIterator()//
           .forEachRemaining(tr -> tr.addTextNode(textNode));
       limen.addTextNode(textNode);
     }
 
-    private TextRange currentTextRange() {
-      return openTextRangeDeque.isEmpty() ? null : openTextRangeStack.peek();
+    private Markup currentMarkup() {
+      return openMarkupDeque.isEmpty() ? null : openMarkupStack.peek();
     }
 
     void openAnnotation(Annotation annotation) {
       if (annotationStack.isEmpty()) {
-        TextRange textRange = currentTextRange();
-        if (textRange != null) {
-          textRange.addAnnotation(annotation);
+        Markup markup = currentMarkup();
+        if (markup != null) {
+          markup.addAnnotation(annotation);
         }
       } else {
         annotationStack.peek().addAnnotation(annotation);
@@ -133,24 +133,24 @@ public class LMNLImporter {
       return limenContextStack.pop();
     }
 
-    TextRange newTextRange(String tagName) {
-      return new TextRange(currentLimenContext().limen, tagName);
+    Markup newMarkup(String tagName) {
+      return new Markup(currentLimenContext().limen, tagName);
     }
 
-    void openTextRange(TextRange textRange) {
-      currentLimenContext().openTextRange(textRange);
+    void openMarkup(Markup markup) {
+      currentLimenContext().openMarkup(markup);
     }
 
-    void pushOpenTextRange(String rangeName) {
-      currentLimenContext().pushOpenTextRange(rangeName);
+    void pushOpenMarkup(String rangeName) {
+      currentLimenContext().pushOpenMarkup(rangeName);
     }
 
-    void popOpenTextRange() {
-      currentLimenContext().popOpenTextRange();
+    void popOpenMarkup() {
+      currentLimenContext().popOpenMarkup();
     }
 
-    void closeTextRange() {
-      currentLimenContext().closeTextRange();
+    void closeMarkup() {
+      currentLimenContext().closeMarkup();
     }
 
     void addTextNode(TextNode textNode) {
@@ -244,20 +244,20 @@ public class LMNLImporter {
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
       case LMNLLexer.Name_Open_Range:
-        TextRange textRange = context.newTextRange(token.getText());
-        context.openTextRange(textRange);
+        Markup markup = context.newMarkup(token.getText());
+        context.openMarkup(markup);
         break;
       case LMNLLexer.BEGIN_OPEN_ANNO:
         handleAnnotation(context);
         break;
       case LMNLLexer.END_OPEN_RANGE:
-        context.popOpenTextRange();
+        context.popOpenMarkup();
         goOn = false;
         break;
       case LMNLLexer.END_ANONYMOUS_RANGE:
         TextNode textNode = new TextNode("");
         context.addTextNode(textNode);
-        context.closeTextRange();
+        context.closeMarkup();
         goOn = false;
         break;
 
@@ -344,13 +344,13 @@ public class LMNLImporter {
       switch (token.getType()) {
       case LMNLLexer.Name_Close_Range:
         String rangeName = token.getText();
-        context.pushOpenTextRange(rangeName);
+        context.pushOpenMarkup(rangeName);
         break;
       case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
         handleAnnotation(context);
         break;
       case LMNLLexer.END_CLOSE_RANGE:
-        context.closeTextRange();
+        context.closeMarkup();
         goOn = false;
         break;
 
@@ -379,24 +379,24 @@ public class LMNLImporter {
   }
 
   public static void joinDiscontinuedRanges(Limen limen) {
-    Map<String, TextRange> textRangesToJoin = new HashMap<>();
-    List<TextRange> textRangesToRemove = new ArrayList<>();
-    limen.textRangeList.stream()//
-        .filter(TextRange::hasId)//
-        .forEach(textRange -> {
-          String tag = textRange.getExtendedTag();
-          if (textRangesToJoin.containsKey(tag)) {
-            TextRange originalTextRange = textRangesToJoin.get(tag);
-            originalTextRange.joinWith(textRange);
-            textRangesToRemove.add(textRange);
+    Map<String, Markup> markupsToJoin = new HashMap<>();
+    List<Markup> markupsToRemove = new ArrayList<>();
+    limen.markupList.stream()//
+        .filter(Markup::hasId)//
+        .forEach(markup -> {
+          String tag = markup.getExtendedTag();
+          if (markupsToJoin.containsKey(tag)) {
+            Markup originalMarkup = markupsToJoin.get(tag);
+            originalMarkup.joinWith(markup);
+            markupsToRemove.add(markup);
           } else {
-            textRangesToJoin.put(tag, textRange);
+            markupsToJoin.put(tag, markup);
           }
         });
 
-    limen.textRangeList.removeAll(textRangesToRemove);
-    limen.textRangeList.stream()//
-        .map(TextRange::getAnnotations)//
+    limen.markupList.removeAll(markupsToRemove);
+    limen.markupList.stream()//
+        .map(Markup::getAnnotations)//
         .flatMap(List::stream)//
         .map(Annotation::value)//
         .forEach(LMNLImporter::joinDiscontinuedRanges);

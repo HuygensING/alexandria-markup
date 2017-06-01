@@ -13,7 +13,7 @@ public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
   private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
-  private Set<TextRange> parents = new HashSet<>();
+  private Set<Markup> parents = new HashSet<>();
 
   public TextNode(String content) {
     this.content = content;
@@ -52,15 +52,15 @@ public class TextNode {
 
   }
 
-  public void addParent(TextRange parent) {
+  public void addParent(Markup parent) {
     parents.add(parent);
   }
 
-  public void removeParent(TextRange parent) {
+  public void removeParent(Markup parent) {
     parents.remove(parent);
   }
 
-  public Set<TextRange> getParents() {
+  public Set<Markup> getParents() {
     return parents;
   }
 

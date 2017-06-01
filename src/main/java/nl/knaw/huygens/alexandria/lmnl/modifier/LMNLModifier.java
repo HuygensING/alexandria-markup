@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 
 public class LMNLModifier {
 
@@ -20,26 +20,26 @@ public class LMNLModifier {
     this.limen = limen;
   }
 
-  public void addTextRange(TextRange newTextRange, Position position) {
+  public void addMarkup(Markup newMarkup, Position position) {
     // logTextNodes(limen.textNodeList);
-    // logTextRanges(limen.textRangeList);
+    // logMarkups(limen.markupList);
     TextNodeCursor cursor = new TextNodeCursor(limen);
     int startOffset = position.getOffset();
     int endOffset = position.getOffset() + position.getLength();
     // get to starting TextNode
     // logTextNodes(limen.textNodeList);
-    boolean findEndingTextNode = handleStartingTextNode(newTextRange, cursor, startOffset);
-    // logTextRanges(limen.textRangeList);
+    boolean findEndingTextNode = handleStartingTextNode(newMarkup, cursor, startOffset);
+    // logMarkups(limen.markupList);
     // logTextNodes(limen.textNodeList);
     if (findEndingTextNode) {
-      handleEndingTextNode(newTextRange, cursor, endOffset);
+      handleEndingTextNode(newMarkup, cursor, endOffset);
     }
     // logTextNodes(limen.textNodeList);
-    // limen.textRangeList.add(newTextRange);
-    // logTextRanges(limen.textRangeList);
+    // limen.markupList.add(newMarkup);
+    // logMarkups(limen.markupList);
   }
 
-  private boolean handleStartingTextNode(TextRange newTextRange, TextNodeCursor cursor, int startOffset) {
+  private boolean handleStartingTextNode(Markup newMarkup, TextNodeCursor cursor, int startOffset) {
     boolean findStartingTextNode = true;
     boolean findEndingTextNode = true;
     while (findStartingTextNode) {
@@ -47,13 +47,13 @@ public class LMNLModifier {
       int currentTextNodeLength = cursor.getCurrentTextLength();
       int offsetAtEndOfCurrentTextNode = cursor.getOffsetAtEndOfCurrentTextNode();
       if (startOffset < offsetAtEndOfCurrentTextNode) {
-        // newTextRange starts in this TextNode
+        // newMarkup starts in this TextNode
         int tailLength = Math.min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset);
         int headLength = currentTextNodeLength - tailLength;
         if (headLength == 0) {
-          // newTextRange exactly covers current TextNode
-          newTextRange.addTextNode(cursor.getCurrentTextNode());
-          limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
+          // newMarkup exactly covers current TextNode
+          newMarkup.addTextNode(cursor.getCurrentTextNode());
+          limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
           findEndingTextNode = false;
 
         } else {
@@ -70,17 +70,17 @@ public class LMNLModifier {
               nextTextNode.setPreviousTextNode(newTailNode);
             }
             cursor.getCurrentTextNode().setNextTextNode(newTailNode);
-            limen.getTextRanges(cursor.getCurrentTextNode()).forEach(tr -> {
+            limen.getMarkups(cursor.getCurrentTextNode()).forEach(tr -> {
               tr.addTextNode(newTailNode);
               limen.associateTextWithRange(newTailNode, tr);
             });
-            newTextRange.addTextNode(newTailNode);
-            limen.associateTextWithRange(newTailNode, newTextRange);
+            newMarkup.addTextNode(newTailNode);
+            limen.associateTextWithRange(newTailNode, newMarkup);
             limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
 
           } else {
-            // newTextRange.addTextNode(cursor.getCurrentTextNode());
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
+            // newMarkup.addTextNode(cursor.getCurrentTextNode());
+            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
             throw new RuntimeException("tail=empty!");
           }
         }
@@ -94,18 +94,18 @@ public class LMNLModifier {
     return findEndingTextNode;
   }
 
-  private void handleEndingTextNode(TextRange newTextRange, TextNodeCursor cursor, int endOffset) {
+  private void handleEndingTextNode(Markup newMarkup, TextNodeCursor cursor, int endOffset) {
     boolean findEndingTextNode = true;
     while (findEndingTextNode) {
       int offsetAtEndOfCurrentTextNode = cursor.getOffsetAtEndOfCurrentTextNode();
       if (offsetAtEndOfCurrentTextNode < endOffset) {
-        // this is not the TextNode where newTextRange ends, but it is part of newTextRange
-        limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
+        // this is not the TextNode where newMarkup ends, but it is part of newMarkup
+        limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
         findEndingTextNode = cursor.canAdvance();
         cursor.advance();
 
       } else {
-        // this is the TextNode where newTextRange ends
+        // this is the TextNode where newMarkup ends
         int tailLength = offsetAtEndOfCurrentTextNode - endOffset;
         int headLength = cursor.getCurrentTextLength() - tailLength;
 
@@ -120,9 +120,9 @@ public class LMNLModifier {
             newTailNode.setNextTextNode(nextTextNode);
             newTailNode.setPreviousTextNode(cursor.getCurrentTextNode());
             cursor.getCurrentTextNode().setNextTextNode(newTailNode);
-            limen.getTextRanges(cursor.getCurrentTextNode())//
+            limen.getMarkups(cursor.getCurrentTextNode())//
                 .stream()//
-                .filter(tr -> !newTextRange.equals(tr))//
+                .filter(tr -> !newMarkup.equals(tr))//
                 .forEach(tr -> {
                   limen.associateTextWithRange(newTailNode, tr);
                   tr.addTextNode(newTailNode);
@@ -130,8 +130,8 @@ public class LMNLModifier {
             limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
 
           } else {
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newTextRange);
-            // newTextRange.addTextNode(cursor.getCurrentTextNode());
+            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
+            // newMarkup.addTextNode(cursor.getCurrentTextNode());
             throw new RuntimeException("head=empty!");
           }
         }
@@ -140,19 +140,19 @@ public class LMNLModifier {
     }
   }
 
-  public void addTextRange(TextRange newTextRange, Collection<Position> positions) {
-    if (!newTextRange.hasId()) {
-      throw new RuntimeException("TextRange " + newTextRange.getTag() + " should have an id.");
+  public void addMarkup(Markup newMarkup, Collection<Position> positions) {
+    if (!newMarkup.hasId()) {
+      throw new RuntimeException("Markup " + newMarkup.getTag() + " should have an id.");
     }
     positions.forEach(position -> {
       LOG.info("position={}", position);
       logTextNodes(limen.textNodeList);
-      logTextRanges(limen.textRangeList);
-      addTextRange(newTextRange, position);
+      logMarkups(limen.markupList);
+      addMarkup(newMarkup, position);
     });
 
     logTextNodes(limen.textNodeList);
-    logTextRanges(limen.textRangeList);
+    logMarkups(limen.markupList);
     // LMNLImporter.joinDiscontinuedRanges(limen);
   }
 
@@ -171,13 +171,13 @@ public class LMNLModifier {
     LOG.info("\nTextNodes:\n{}", textnodes);
   }
 
-  private void logTextRanges(List<TextRange> list) {
-    StringBuilder textranges = new StringBuilder();
+  private void logMarkups(List<Markup> list) {
+    StringBuilder markups = new StringBuilder();
     list.forEach(tr -> {
-      textranges.append("[").append(tr.getTag()).append("}\n");
-      tr.textNodes.forEach(tn -> textranges.append("  \"").append(tn.getContent()).append("\"\n"));
+      markups.append("[").append(tr.getTag()).append("}\n");
+      tr.textNodes.forEach(tn -> markups.append("  \"").append(tn.getContent()).append("\"\n"));
     });
-    LOG.info("\nTextRanges:\n{}", textranges);
+    LOG.info("\nMarkups:\n{}", markups);
   }
 
   class TextNodeCursor {

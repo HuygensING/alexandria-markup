@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 
@@ -25,12 +25,12 @@ public class LMNLModifierTest {
     LMNLImporter importer = new LMNLImporter();
     Document document = importer.importLMNL(LMNL);
     LMNLModifier modifier = new LMNLModifier(document.value());
-    TextRange countryRange = new TextRange(document.value(), "country");
+    Markup countryRange = new Markup(document.value(), "country");
 
     Position spainPosition = calculatePosition(content, "Spain");
     assertThat(spainPosition.getOffset()).isEqualTo(12);
     assertThat(spainPosition.getLength()).isEqualTo(5);
-    modifier.addTextRange(countryRange, spainPosition);
+    modifier.addMarkup(countryRange, spainPosition);
 
     LMNLExporter exporter = new LMNLExporter();
     String modifiedLMNL = exporter.toLMNL(document);
@@ -43,10 +43,10 @@ public class LMNLModifierTest {
     positions.add(calculatePosition(content, "rain"));
     positions.add(calculatePosition(content, "Spain"));
     positions.add(calculatePosition(content, "plain"));
-    TextRange rhymeRange = new TextRange(document.value(), "rhyme=r1");
+    Markup rhymeRange = new Markup(document.value(), "rhyme=r1");
     rhymeRange.addAnnotation(new Annotation("suffix", "ain"));
 
-    modifier.addTextRange(rhymeRange, positions);
+    modifier.addMarkup(rhymeRange, positions);
     modifiedLMNL = exporter.toLMNL(document);
     LOG.info("document.value().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);

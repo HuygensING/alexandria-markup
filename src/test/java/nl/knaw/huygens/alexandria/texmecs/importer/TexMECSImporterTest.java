@@ -21,7 +21,7 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
@@ -41,9 +41,9 @@ public class TexMECSImporterTest {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
     Document document = testTexMECS(texMECS, 10, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
-    TextRange textRange0 = document.value().textRangeList.get(0);
-    assertThat(textRange0.getTag()).isEqualTo("s");
-    Annotation annotation = textRange0.getAnnotations().get(0);
+    Markup markup0 = document.value().markupList.get(0);
+    assertThat(markup0.getTag()).isEqualTo("s");
+    Annotation annotation = markup0.getAnnotations().get(0);
     assertThat(annotation.getTag()).isEqualTo("type");
     List<TextNode> textNodeList = annotation.value().textNodeList;
     assertThat(textNodeList).hasSize(1);
@@ -55,9 +55,9 @@ public class TexMECSImporterTest {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
     Document document = testTexMECS(texMECS, 10, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
     assertThat(document.value()).isNotNull();
-    TextRange textRange0 = document.value().textRangeList.get(0);
-    assertThat(textRange0.getTag()).isEqualTo("s");
-    assertThat(textRange0.getSuffix()).isEqualTo("0");
+    Markup markup0 = document.value().markupList.get(0);
+    assertThat(markup0.getTag()).isEqualTo("s");
+    assertThat(markup0.getSuffix()).isEqualTo("0");
   }
 
   @Test
@@ -73,11 +73,11 @@ public class TexMECSImporterTest {
     Document document = testTexMECS(texMECS, 14, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
     Limen limen = document.value();
     assertThat(limen).isNotNull();
-    List<TextRange> textRangeList = limen.textRangeList;
-    assertThat(textRangeList).hasSize(3); // s, a, b
-    TextRange textRange = textRangeList.get(2);
-    assertThat(textRange.getTag()).isEqualTo("b");
-    List<TextNode> textNodes = textRange.textNodes;
+    List<Markup> markupList = limen.markupList;
+    assertThat(markupList).hasSize(3); // s, a, b
+    Markup markup = markupList.get(2);
+    assertThat(markup.getTag()).isEqualTo("b");
+    List<TextNode> textNodes = markup.textNodes;
     assertThat(textNodes).hasSize(3);
     List<String> textNodeContents = textNodes.stream().map(TextNode::getContent).collect(Collectors.toList());
     assertThat(textNodeContents).containsExactly("loves", " Mary", "very much");

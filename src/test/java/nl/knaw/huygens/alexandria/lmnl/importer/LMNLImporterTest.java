@@ -1,13 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,15 +11,28 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
   final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
 
   @Test
-  public void testTextRangeAnnotation() {
+  public void testMarkupAnnotation() {
     String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
     Document actual = new LMNLImporter().importLMNL(input);
 
@@ -36,13 +43,13 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     // - with one annotation on it.
     Document expected = new Document();
     Limen limen = expected.value();
-    TextRange r1 = new TextRange(limen, "l");
+    Markup r1 = new Markup(limen, "l");
     Annotation a1 = simpleAnnotation("n", "144");
     r1.addAnnotation(a1);
     TextNode t1 = new TextNode("He manages to keep the upper hand");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     assertTrue(compareDocuments(expected, actual));
@@ -73,19 +80,19 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document actual = importer.importLMNL(input);
     // Limen value = actual.value();
 
-    // TextRange textRange = new TextRange(value, "excerpt");
-    // assertThat(value.textRangeList).hasSize(7);
-    // List<TextRange> textRangeList = value.textRangeList;
+    // Markup markup = new Markup(value, "excerpt");
+    // assertThat(value.markupList).hasSize(7);
+    // List<Markup> markupList = value.markupList;
     //
-    // textRangeList.stream().map(TextRange::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
-    // TextRange textRange1 = textRangeList.get(0);
-    // assertThat(textRange1.getTag()).isEqualTo("excerpt");
+    // markupList.stream().map(Markup::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
+    // Markup markup1 = markupList.get(0);
+    // assertThat(markup1.getTag()).isEqualTo("excerpt");
     //
-    // TextRange textRange2 = textRangeList.get(1);
-    // assertThat(textRange2.getTag()).isEqualTo("s");
+    // Markup markup2 = markupList.get(1);
+    // assertThat(markup2.getTag()).isEqualTo("s");
     //
-    // TextRange textRange3 = textRangeList.get(2);
-    // assertThat(textRange3.getTag()).isEqualTo("l");
+    // Markup markup3 = markupList.get(2);
+    // assertThat(markup3.getTag()).isEqualTo("l");
 
     Document expected = new Document();
     Limen limen = expected.value();
@@ -111,17 +118,17 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Annotation n144 = simpleAnnotation("n", "144");
     Annotation n145 = simpleAnnotation("n", "145");
     Annotation n146 = simpleAnnotation("n", "146");
-    TextRange excerpt = new TextRange(limen, "excerpt").addAnnotation(source).addAnnotation(author).setFirstAndLastTextNode(tn00, tn10);
+    Markup excerpt = new Markup(limen, "excerpt").addAnnotation(source).addAnnotation(author).setFirstAndLastTextNode(tn00, tn10);
     // 3 sentences
-    TextRange s1 = new TextRange(limen, "s").setFirstAndLastTextNode(tn01, tn03);
-    TextRange s2 = new TextRange(limen, "s").setOnlyTextNode(tn05);
-    TextRange s3 = new TextRange(limen, "s").setFirstAndLastTextNode(tn07, tn09);
+    Markup s1 = new Markup(limen, "s").setFirstAndLastTextNode(tn01, tn03);
+    Markup s2 = new Markup(limen, "s").setOnlyTextNode(tn05);
+    Markup s3 = new Markup(limen, "s").setFirstAndLastTextNode(tn07, tn09);
     // 3 lines
-    TextRange l1 = new TextRange(limen, "l").setOnlyTextNode(tn01).addAnnotation(n144);
-    TextRange l2 = new TextRange(limen, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
-    TextRange l3 = new TextRange(limen, "l").setOnlyTextNode(tn09).addAnnotation(n146);
+    Markup l1 = new Markup(limen, "l").setOnlyTextNode(tn01).addAnnotation(n144);
+    Markup l2 = new Markup(limen, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+    Markup l3 = new Markup(limen, "l").setOnlyTextNode(tn09).addAnnotation(n146);
 
-    limen.setFirstAndLastTextNode(tn00, tn10).addTextRange(excerpt).addTextRange(s1).addTextRange(l1).addTextRange(l2).addTextRange(s2).addTextRange(s3).addTextRange(l3);
+    limen.setFirstAndLastTextNode(tn00, tn10).addMarkup(excerpt).addMarkup(s1).addMarkup(l1).addMarkup(l2).addMarkup(s2).addMarkup(s3).addMarkup(l3);
 
     assertActualMatchesExpected(actual, expected);
 
@@ -141,9 +148,9 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     logLMNL(actual);
 
     Limen actualLimen = actual.value();
-    List<TextRange> actualTextRangeList = actualLimen.textRangeList;
+    List<Markup> actualMarkupList = actualLimen.markupList;
 
-    TextRange excerpt = actualTextRangeList.get(0);
+    Markup excerpt = actualMarkupList.get(0);
     assertThat(excerpt.getTag()).isEqualTo("excerpt");
 
     List<Annotation> annotations = excerpt.getAnnotations();
@@ -158,11 +165,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     String expectedSourceLMNL = lmnlExporter.toLMNL(source).toString();
     assertThat(actualSourceLMNL).isEqualTo(expectedSourceLMNL);
 
-    TextRange q1 = actualTextRangeList.get(2);
+    Markup q1 = actualMarkupList.get(2);
     assertThat(q1.getTag()).isEqualTo("q"); // first q
     assertThat(q1.textNodes).hasSize(2); // has 2 textnodes
 
-    TextRange q2 = actualTextRangeList.get(3);
+    Markup q2 = actualMarkupList.get(3);
     assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
     assertThat(q2.textNodes).hasSize(1); // has 1 textnode
 
@@ -184,7 +191,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     assertThat(actual.value().hasTextNodes()).isTrue();
     String lmnl = lmnlExporter.toLMNL(actual);
     assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
-    assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous textrange
+    assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous markup
     // compareLMNL(pathname, actual);
 
     logKdTree(actual);
@@ -199,9 +206,9 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     String input = "'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'";
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("textNodes={}", actual.value().textNodeList);
-    LOG.info("textRanges={}", actual.value().textRangeList);
+    LOG.info("markups={}", actual.value().markupList);
     assertThat(actual.value().hasTextNodes()).isTrue();
-    assertThat(actual.value().textRangeList).hasSize(1);
+    assertThat(actual.value().markupList).hasSize(1);
 
     String lmnl = lmnlExporter.toLMNL(actual);
     LOG.info("lmnl={}", lmnl);
@@ -227,25 +234,25 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextRange r1 = new TextRange(limen, "lmnl");
+    Markup r1 = new Markup(limen, "lmnl");
     // Annotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
     Annotation a1 = simpleAnnotation("a");
     Limen annotationLimen = a1.value();
     TextNode at1 = new TextNode("This is the ");
     TextNode at2 = new TextNode("annotation");
-    TextRange ar1 = new TextRange(annotationLimen, "type").addTextNode(at2);
+    Markup ar1 = new Markup(annotationLimen, "type").addTextNode(at2);
     TextNode at3 = new TextNode(" text");
     annotationLimen//
         .addTextNode(at1)//
         .addTextNode(at2)//
         .addTextNode(at3)//
-        .addTextRange(ar1);
+        .addMarkup(ar1);
     r1.addAnnotation(a1);
 
     TextNode t1 = new TextNode("This is the main text");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -269,22 +276,22 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextRange r1 = new TextRange(limen, "range1");
+    Markup r1 = new Markup(limen, "range1");
     Annotation a1 = simpleAnnotation("annotation1");
     Limen annotationLimen = a1.value();
     TextNode at1 = new TextNode("");
-    TextRange ar11 = new TextRange(annotationLimen, "ra11").addTextNode(at1);
-    TextRange ar12 = new TextRange(annotationLimen, "ra12").addTextNode(at1);
+    Markup ar11 = new Markup(annotationLimen, "ra11").addTextNode(at1);
+    Markup ar12 = new Markup(annotationLimen, "ra12").addTextNode(at1);
     annotationLimen//
         .addTextNode(at1)//
-        .addTextRange(ar11)//
-        .addTextRange(ar12);
+        .addMarkup(ar11)//
+        .addMarkup(ar12);
     r1.addAnnotation(a1);
 
     TextNode t1 = new TextNode("");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -300,14 +307,14 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextRange r1 = new TextRange(limen, "range1");
+    Markup r1 = new Markup(limen, "range1");
     Annotation a1 = simpleAnnotation("", "annotation text");
     r1.addAnnotation(a1);
 
     TextNode t1 = new TextNode("bla");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -323,11 +330,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextRange r1 = new TextRange(limen, "r");
+    Markup r1 = new Markup(limen, "r");
     TextNode t1 = new TextNode("Splitting the .");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -342,11 +349,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextRange r1 = new TextRange(limen, "empty");
+    Markup r1 = new Markup(limen, "empty");
     TextNode t1 = new TextNode("");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -364,11 +371,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     // - with one range on it
     Document expected = new Document();
     Limen limen = expected.value();
-    TextRange r1 = new TextRange(limen, "foo");
+    Markup r1 = new Markup(limen, "foo");
     TextNode t1 = new TextNode("FOOBAR");
     r1.setOnlyTextNode(t1);
     limen.setOnlyTextNode(t1);
-    limen.addTextRange(r1);
+    limen.addMarkup(r1);
 
     logLMNL(actual);
     compareLMNL(expected, actual);
@@ -400,11 +407,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
   private void assertActualMatchesExpected(Document actual, Document expected) {
     Limen actualLimen = actual.value();
-    List<TextRange> actualTextRangeList = actualLimen.textRangeList;
+    List<Markup> actualMarkupList = actualLimen.markupList;
     List<TextNode> actualTextNodeList = actualLimen.textNodeList;
 
     Limen expectedLimen = expected.value();
-    List<TextRange> expectedTextRangeList = expectedLimen.textRangeList;
+    List<Markup> expectedMarkupList = expectedLimen.markupList;
     List<TextNode> expectedTextNodeList = expectedLimen.textNodeList;
 
     assertThat(actualTextNodeList).hasSize(expectedTextNodeList.size());
@@ -414,13 +421,13 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
       assertThat(actualTextNode).isEqualToComparingFieldByFieldRecursively(expectedTextNode);
     }
 
-    assertThat(actualTextRangeList).hasSize(expectedTextRangeList.size());
-    for (int i = 0; i < expectedTextRangeList.size(); i++) {
-      TextRange actualTextRange = actualTextRangeList.get(i);
-      TextRange expectedTextRange = expectedTextRangeList.get(i);
-      assertThat(actualTextRange.getTag()).isEqualTo(expectedTextRange.getTag());
-      Comparator<TextRange> textRangeComparator = Comparator.comparing(TextRange::getTag);
-      assertThat(actualTextRange).usingComparator(textRangeComparator).isEqualTo(expectedTextRange);
+    assertThat(actualMarkupList).hasSize(expectedMarkupList.size());
+    for (int i = 0; i < expectedMarkupList.size(); i++) {
+      Markup actualMarkup = actualMarkupList.get(i);
+      Markup expectedMarkup = expectedMarkupList.get(i);
+      assertThat(actualMarkup.getTag()).isEqualTo(expectedMarkup.getTag());
+      Comparator<Markup> markupComparator = Comparator.comparing(Markup::getTag);
+      assertThat(actualMarkup).usingComparator(markupComparator).isEqualTo(expectedMarkup);
     }
 
     String actualLMNL = lmnlExporter.toLMNL(actual);

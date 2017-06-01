@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -37,40 +37,40 @@ public class LMNLExporter {
 
   private void appendLimen(StringBuilder lmnlBuilder, Limen limen) {
     if (limen != null) {
-      Deque<TextRange> openTextRanges = new ArrayDeque<>();
+      Deque<Markup> openMarkups = new ArrayDeque<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
-        Set<TextRange> textRanges = limen.getTextRanges(tn);
+        Set<Markup> markups = limen.getMarkups(tn);
 
-        List<TextRange> toClose = new ArrayList<>();
-        toClose.addAll(openTextRanges);
-        toClose.removeAll(textRanges);
+        List<Markup> toClose = new ArrayList<>();
+        toClose.addAll(openMarkups);
+        toClose.removeAll(markups);
         Collections.reverse(toClose);
         toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
 
-        List<TextRange> toOpen = new ArrayList<>();
-        toOpen.addAll(textRanges);
-        toOpen.removeAll(openTextRanges);
+        List<Markup> toOpen = new ArrayList<>();
+        toOpen.addAll(markups);
+        toOpen.removeAll(openMarkups);
         toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
 
-        openTextRanges.removeAll(toClose);
-        openTextRanges.addAll(toOpen);
+        openMarkups.removeAll(toClose);
+        openMarkups.addAll(toOpen);
         lmnlBuilder.append(tn.getContent());
       });
-      openTextRanges.descendingIterator()//
+      openMarkups.descendingIterator()//
           .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
     }
   }
 
-  private StringBuilder toCloseTag(TextRange textRange) {
-    return textRange.isAnonymous()//
+  private StringBuilder toCloseTag(Markup markup) {
+    return markup.isAnonymous()//
         ? new StringBuilder()//
-        : new StringBuilder("{").append(textRange.getExtendedTag()).append("]");
+        : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(TextRange textRange) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(textRange.getExtendedTag());
-    textRange.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-    return textRange.isAnonymous()//
+  private StringBuilder toOpenTag(Markup markup) {
+    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+    markup.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+    return markup.isAnonymous()//
         ? tagBuilder.append("]")//
         : tagBuilder.append("}");
   }

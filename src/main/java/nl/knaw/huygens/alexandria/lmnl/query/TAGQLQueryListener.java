@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLBaseListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.AnnotationValuePartContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.CombiningExpressionContext;
@@ -44,9 +44,9 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
     return statements;
   }
 
-  public String toText(TextRange textRange) {
+  public String toText(Markup markup) {
     StringBuilder textBuilder = new StringBuilder();
-    textRange.textNodes.forEach(textNode -> textBuilder.append(textNode.getContent()));
+    markup.textNodes.forEach(textNode -> textBuilder.append(textNode.getContent()));
     return textBuilder.toString();
   }
 
@@ -66,21 +66,21 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
     PartContext part = selectVariable.part();
     if (part != null) {
       if (part instanceof TextPartContext) {
-        statement.setTextRangeMapper(this::toText);
+        statement.setMarkupMapper(this::toText);
       } else if (part instanceof NamePartContext) {
-        statement.setTextRangeMapper(TextRange::getExtendedTag);
+        statement.setMarkupMapper(Markup::getExtendedTag);
       } else if (part instanceof AnnotationValuePartContext) {
         String annotationIdentifier = stringValue(((AnnotationValuePartContext) part).annotationIdentifier());
-        statement.setTextRangeMapper(toAnnotationTextMapper(annotationIdentifier));
+        statement.setMarkupMapper(toAnnotationTextMapper(annotationIdentifier));
       } else {
         unhandled("selectVariable", selectVariable.getText());
       }
     }
   }
 
-  private Function<? super TextRange, ? super Object> toAnnotationTextMapper(String annotationIdentifier) {
+  private Function<? super Markup, ? super Object> toAnnotationTextMapper(String annotationIdentifier) {
     List<String> annotationTags = Arrays.asList(annotationIdentifier.split(":"));
-    return (TextRange tr) -> {
+    return (Markup tr) -> {
       List<String> annotationTexts = new ArrayList<>();
       int depth = 0;
       List<Annotation> annotationsToFilter = tr.getAnnotations();
@@ -110,8 +110,8 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
     if (source != null) {
       if (source instanceof ParameterizedMarkupSourceContext) {
         ParameterizedMarkupSourceContext pmsc = (ParameterizedMarkupSourceContext) source;
-        String textRangeName = stringValue(pmsc.markupName());
-        statement.setTextRangeFilter(tr -> tr.getTag().equals(textRangeName));
+        String markupName = stringValue(pmsc.markupName());
+        statement.setMarkupFilter(tr -> tr.getTag().equals(markupName));
         if (pmsc.indexValue() != null) {
           int index = toInteger(pmsc.indexValue());
           statement.setIndex(index);
@@ -126,17 +126,17 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
 
   private void handleWhereClause(TAGQLSelectStatement statement, WhereClauseContext whereClause) {
     if (whereClause != null) {
-      Predicate<TextRange> filter = handleExpression(whereClause.expr());
+      Predicate<Markup> filter = handleExpression(whereClause.expr());
       if (filter != null) {
-        statement.setTextRangeFilter(filter);
+        statement.setMarkupFilter(filter);
       } else {
         unhandled("whereClause", whereClause.getText());
       }
     }
   }
 
-  private Predicate<TextRange> handleExpression(ExprContext expr) {
-    Predicate<TextRange> filter = null;
+  private Predicate<Markup> handleExpression(ExprContext expr) {
+    Predicate<Markup> filter = null;
     if (expr instanceof EqualityComparisonExpressionContext) {
       EqualityComparisonExpressionContext ecec = (EqualityComparisonExpressionContext) expr;
       ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
@@ -147,14 +147,14 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
 
     } else if (expr instanceof JoiningExpressionContext) {
       JoiningExpressionContext jec = (JoiningExpressionContext) expr;
-      Predicate<TextRange> predicate0 = handleExpression(jec.expr(0));
-      Predicate<TextRange> predicate1 = handleExpression(jec.expr(1));
+      Predicate<Markup> predicate0 = handleExpression(jec.expr(0));
+      Predicate<Markup> predicate1 = handleExpression(jec.expr(1));
       filter = predicate0.and(predicate1);
 
     } else if (expr instanceof CombiningExpressionContext) {
       CombiningExpressionContext context = (CombiningExpressionContext) expr;
-      Predicate<TextRange> predicate0 = handleExpression(context.expr(0));
-      Predicate<TextRange> predicate1 = handleExpression(context.expr(1));
+      Predicate<Markup> predicate0 = handleExpression(context.expr(0));
+      Predicate<Markup> predicate1 = handleExpression(context.expr(1));
       filter = predicate0.or(predicate1);
 
     } else if (expr instanceof TextContainsExpressionContext) {

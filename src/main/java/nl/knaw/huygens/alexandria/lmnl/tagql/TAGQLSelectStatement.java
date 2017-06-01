@@ -7,33 +7,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.query.TAGQLResult;
 
 public class TAGQLSelectStatement implements TAGQLStatement {
 
   private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  Predicate<? super TextRange> textRangeFilter = tr -> true;
-  Function<? super TextRange, ? super Object> textRangeMapper = a -> a;
+  Predicate<? super Markup> markupFilter = tr -> true;
+  Function<? super Markup, ? super Object> markupMapper = a -> a;
 
   private Integer index = null;
 
-  public void setTextRangeFilter(Predicate<? super TextRange> textRangeFilter) {
-    this.textRangeFilter = textRangeFilter;
+  public void setMarkupFilter(Predicate<? super Markup> markupFilter) {
+    this.markupFilter = markupFilter;
   }
 
-  public void setTextRangeMapper(Function<? super TextRange, ? super Object> textRangeMapper) {
-    this.textRangeMapper = textRangeMapper;
+  public void setMarkupMapper(Function<? super Markup, ? super Object> markupMapper) {
+    this.markupMapper = markupMapper;
   }
 
   @Override
   public Function<Limen, TAGQLResult> getLimenProcessor() {
     return (Limen limen) -> {
       TAGQLResult result = new TAGQLResult();
-      limen.textRangeList.stream()//
-          .filter(textRangeFilter)//
-          .map(textRangeMapper)//
+      limen.markupList.stream()//
+          .filter(markupFilter)//
+          .map(markupMapper)//
           // .map(this::logger)//
           .forEach(result::addValue);
       if (index != null) {

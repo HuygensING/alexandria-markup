@@ -10,16 +10,16 @@ import java.util.Set;
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
-public class TextRange {
+public class Markup {
   private final Limen owner;
   private final String tag;
   private String id = ""; // LMNL, should be unique
   private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
-  private Set<TextRange> parents = new HashSet<>();
+  private Set<Markup> parents = new HashSet<>();
   public final List<TextNode> textNodes;
 
-  public TextRange(Limen owner, String tag) {
+  public Markup(Limen owner, String tag) {
     this.owner = owner;
     if (tag == null) {
       this.tag = "";
@@ -46,13 +46,13 @@ public class TextRange {
     this.textNodes = new ArrayList<>();
   }
 
-  public TextRange addTextNode(TextNode node) {
+  public Markup addTextNode(TextNode node) {
     this.textNodes.add(node);
     this.owner.associateTextWithRange(node, this);
     return this;
   }
 
-  public TextRange addAnnotation(Annotation annotation) {
+  public Markup addAnnotation(Annotation annotation) {
     this.annotations.add(annotation);
     return this;
   }
@@ -79,7 +79,7 @@ public class TextRange {
     return suffix;
   }
 
-  public TextRange setFirstAndLastTextNode(TextNode firstTextNode, TextNode lastTextNode) {
+  public Markup setFirstAndLastTextNode(TextNode firstTextNode, TextNode lastTextNode) {
     this.textNodes.clear();
     addTextNode(firstTextNode);
     if (firstTextNode != lastTextNode) {
@@ -93,7 +93,7 @@ public class TextRange {
     return this;
   }
 
-  public TextRange setOnlyTextNode(TextNode textNode) {
+  public Markup setOnlyTextNode(TextNode textNode) {
     this.textNodes.clear();
     addTextNode(textNode);
     return this;
@@ -115,13 +115,13 @@ public class TextRange {
     return StringUtils.isNotEmpty(suffix);
   }
 
-  public void joinWith(TextRange textRange) {
-    this.textNodes.addAll(textRange.textNodes);
-    textRange.textNodes.forEach(tn -> {
-      owner.disAssociateTextWithRange(tn, textRange);
+  public void joinWith(Markup markup) {
+    this.textNodes.addAll(markup.textNodes);
+    markup.textNodes.forEach(tn -> {
+      owner.disAssociateTextWithRange(tn, markup);
       owner.associateTextWithRange(tn, this);
     });
-    this.annotations.addAll(textRange.getAnnotations());
+    this.annotations.addAll(markup.getAnnotations());
   }
 
   public boolean isContinuous() {
@@ -139,15 +139,15 @@ public class TextRange {
     return isContinuous;
   }
 
-  public void addParent(TextRange parent) {
+  public void addParent(Markup parent) {
     parents.add(parent);
   }
 
-  public void removeParent(TextRange parent) {
+  public void removeParent(Markup parent) {
     parents.remove(parent);
   }
 
-  public Set<TextRange> getParents() {
+  public Set<Markup> getParents() {
     return parents;
   }
 

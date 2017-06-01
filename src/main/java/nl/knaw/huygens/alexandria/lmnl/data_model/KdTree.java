@@ -40,22 +40,22 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     }
   };
 
-  private static final Comparator<IndexPoint> TEXTRANGE_INDEX_COMPARATOR = new Comparator<IndexPoint>() {
+  private static final Comparator<IndexPoint> MARKUP_INDEX_COMPARATOR = new Comparator<IndexPoint>() {
     /**
      * {@inheritDoc}
      */
     @Override
     public int compare(IndexPoint o1, IndexPoint o2) {
-      if (o1.getTextRangeIndex() < o2.getTextRangeIndex())
+      if (o1.getMarkupIndex() < o2.getMarkupIndex())
         return -1;
-      if (o1.getTextRangeIndex() > o2.getTextRangeIndex())
+      if (o1.getMarkupIndex() > o2.getMarkupIndex())
         return 1;
       return 0;
     }
   };
 
   private static final int TEXTNODE_AXIS = 0;
-  private static final int TEXTRANGE_AXIS = 1;
+  private static final int MARKUP_AXIS = 1;
 
   /**
    * Default constructor.
@@ -103,8 +103,8 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
       case TEXTNODE_AXIS:
         list.sort(TEXTNODE_INDEX_COMPARATOR);
         break;
-      case TEXTRANGE_AXIS:
-        list.sort(TEXTRANGE_INDEX_COMPARATOR);
+      case MARKUP_AXIS:
+        list.sort(MARKUP_INDEX_COMPARATOR);
         break;
     }
 
@@ -391,9 +391,9 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // if (axis == TEXTNODE_AXIS) {
   // nodePoint = node.id.getTextNodeIndex();
   // valuePlusDistance = value.getTextNodeIndex() - lastDistance;
-  // } else if (axis == TEXTRANGE_AXIS) {
-  // nodePoint = node.id.getTextRangeIndex();
-  // valuePlusDistance = value.getTextRangeIndex() - lastDistance;
+  // } else if (axis == MARKUP_AXIS) {
+  // nodePoint = node.id.getMarkupIndex();
+  // valuePlusDistance = value.getMarkupIndex() - lastDistance;
   //// } else {
   //// nodePoint = node.id.z;
   //// valuePlusDistance = value.z - lastDistance;
@@ -412,9 +412,9 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // if (axis == TEXTNODE_AXIS) {
   // nodePoint = node.id.getTextNodeIndex();
   // valuePlusDistance = value.getTextNodeIndex() + lastDistance;
-  // } else if (axis == TEXTRANGE_AXIS) {
-  // nodePoint = node.id.getTextRangeIndex();
-  // valuePlusDistance = value.getTextRangeIndex() + lastDistance;
+  // } else if (axis == MARKUP_AXIS) {
+  // nodePoint = node.id.getMarkupIndex();
+  // valuePlusDistance = value.getMarkupIndex() + lastDistance;
   //// } else {
   //// nodePoint = node.id.z;
   //// valuePlusDistance = value.z + lastDistance;
@@ -500,11 +500,11 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   public List<IndexPoint> indexpointsForTextNode(int textNodeIndex) {
     List<IndexPoint> list = new ArrayList<>();
     KdNode node = root;
-    addTextRangeIndexPointsToList(list, node, textNodeIndex);
+    addMarkupIndexPointsToList(list, node, textNodeIndex);
     return list;
   }
 
-  private void addTextRangeIndexPointsToList(List<IndexPoint> list, KdNode node, int textNodeIndex) {
+  private void addMarkupIndexPointsToList(List<IndexPoint> list, KdNode node, int textNodeIndex) {
     if (node == null) {
       return;
     }
@@ -515,54 +515,54 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     if (node.depth == TEXTNODE_AXIS) {
       int currentTextNodeIndex = ip.getTextNodeIndex();
       if (textNodeIndex < currentTextNodeIndex) {
-        addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
+        addMarkupIndexPointsToList(list, node.getLesser(), textNodeIndex);
 
       } else if (textNodeIndex == currentTextNodeIndex) {
-        addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
-        addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+        addMarkupIndexPointsToList(list, node.getLesser(), textNodeIndex);
+        addMarkupIndexPointsToList(list, node.getGreater(), textNodeIndex);
 
       } else {
-        addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+        addMarkupIndexPointsToList(list, node.getGreater(), textNodeIndex);
       }
 
     } else {
-      addTextRangeIndexPointsToList(list, node.getLesser(), textNodeIndex);
-      addTextRangeIndexPointsToList(list, node.getGreater(), textNodeIndex);
+      addMarkupIndexPointsToList(list, node.getLesser(), textNodeIndex);
+      addMarkupIndexPointsToList(list, node.getGreater(), textNodeIndex);
     }
 
   }
 
-  public List<IndexPoint> indexpointsForTextRange(int textRangeIndex) {
+  public List<IndexPoint> indexpointsForMarkup(int markupIndex) {
     List<IndexPoint> list = new ArrayList<>();
     KdNode node = root;
-    addTextNodeIndexPointsToList(list, node, textRangeIndex);
+    addTextNodeIndexPointsToList(list, node, markupIndex);
     return list;
   }
 
-  private void addTextNodeIndexPointsToList(List<IndexPoint> list, KdNode node, int textRangeIndex) {
+  private void addTextNodeIndexPointsToList(List<IndexPoint> list, KdNode node, int markupIndex) {
     if (node == null) {
       return;
     }
     IndexPoint ip = node.id;
-    if (ip.getTextRangeIndex() == textRangeIndex) {
+    if (ip.getMarkupIndex() == markupIndex) {
       list.add(ip);
     }
-    if (node.depth == TEXTRANGE_AXIS) {
-      int currentTextRangeIndex = ip.getTextRangeIndex();
-      if (textRangeIndex < currentTextRangeIndex) {
-        addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
+    if (node.depth == MARKUP_AXIS) {
+      int currentMarkupIndex = ip.getMarkupIndex();
+      if (markupIndex < currentMarkupIndex) {
+        addTextNodeIndexPointsToList(list, node.getLesser(), markupIndex);
 
-      } else if (textRangeIndex == currentTextRangeIndex) {
-        addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
-        addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+      } else if (markupIndex == currentMarkupIndex) {
+        addTextNodeIndexPointsToList(list, node.getLesser(), markupIndex);
+        addTextNodeIndexPointsToList(list, node.getGreater(), markupIndex);
 
       } else {
-        addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+        addTextNodeIndexPointsToList(list, node.getGreater(), markupIndex);
       }
 
     } else {
-      addTextNodeIndexPointsToList(list, node.getLesser(), textRangeIndex);
-      addTextNodeIndexPointsToList(list, node.getGreater(), textRangeIndex);
+      addTextNodeIndexPointsToList(list, node.getLesser(), markupIndex);
+      addTextNodeIndexPointsToList(list, node.getGreater(), markupIndex);
     }
 
   }
@@ -593,8 +593,8 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
       int axis = depth % k;
       if (axis == TEXTNODE_AXIS)
         return TEXTNODE_INDEX_COMPARATOR.compare(o1, o2);
-      // if (axis == TEXTRANGE_AXIS)
-      return TEXTRANGE_INDEX_COMPARATOR.compare(o1, o2);
+      // if (axis == MARKUP_AXIS)
+      return MARKUP_INDEX_COMPARATOR.compare(o1, o2);
       // return Z_COMPARATOR.compare(o1, o2);
     }
 

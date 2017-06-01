@@ -10,7 +10,7 @@
     \pagenumbering{gobble}% Remove page numbers (and reset to 1)
     \begin{tikzpicture}[
        textnode/.style={rectangle,draw=black!50,thick,rounded corners},
-       textrange/.style={rectangle,draw=blue!50,thick},
+       markup/.style={rectangle,draw=blue!50,thick},
        document/.style={circle,draw=black!50,thick}
      ]
     \node[document] (doc) {document};
