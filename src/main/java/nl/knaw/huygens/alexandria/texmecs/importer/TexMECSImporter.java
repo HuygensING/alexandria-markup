@@ -61,7 +61,7 @@ public class TexMECSImporter {
       Markup first = markupList.get(i);
       Markup second = markupList.get(i + 1);
       if (first.textNodes.equals(second.textNodes)) {
-        LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
+        // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
         first.setDominatedMarkup(second);
       }
     }

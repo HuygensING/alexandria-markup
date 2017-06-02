@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.AttsContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EidContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagContext;
@@ -155,14 +155,17 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private Markup removeFromMarkupStack(String extendedTag, Deque<Markup> markupStack) {
+  private Markup removeFromMarkupStack(String tag, Deque<Markup> markupStack) {
     Iterator<Markup> descendingIterator = markupStack.descendingIterator();
     Markup markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
-      if (markup.getExtendedTag().equals(extendedTag)) {
+      if (markup.getTag().equals(tag)) {
         break;
       }
+    }
+    if (markup == null) {
+      throw new RuntimeException("Closing tag " + tag + " found, which has no corresponding earlier opening tag.");
     }
     markupStack.remove(markup);
     return markup;
