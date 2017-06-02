@@ -179,12 +179,34 @@ public class TexMECSImporterTest {
 
   @Test
   public void testSyntaxErrorSuspendWithoutResume() {
+    String texMECS = "<tag|Lorem ipsum|-tag> dolores rosetta|tag>";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("Closing tag |tag> found, which has no corresponding earlier opening tag.");
+    }
+  }
+
+  @Test
+  public void testSyntaxErrorResumeWithoutSuspend() {
     String texMECS = "<tag|Lorem ipsum <+tag|dolores rosetta|tag>";
     try {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
       assertThat(se.getMessage()).isEqualTo("Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
+    }
+  }
+
+  @Test
+  public void testDuplicateIdError() {
+    String texMECS = "<tag@t1|Lorem ipsum <b@t1|Dolores|b> dulcetto.|tag>";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("id 't1' was aleady used in markup <tag@t1|.");
     }
   }
 

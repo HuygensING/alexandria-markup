@@ -39,6 +39,7 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   private Deque<Markup> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
   private HashMap<String, Markup> identifiedMarkups = new HashMap<>();
+  private HashMap<String, String> idsInUse = new HashMap<>();
 
   public TexMECSListener() {
   }
@@ -85,6 +86,7 @@ public class TexMECSListener extends TexMECSParserBaseListener {
 
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     Markup markup = addMarkup(ctx.eid(), ctx.atts());
+
     linkTextToMarkup(tn, markup);
   }
 
@@ -119,6 +121,7 @@ public class TexMECSListener extends TexMECSParserBaseListener {
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
       });
+
     } else {
       throw new TexMECSSyntaxError("idref '" + idref + "' not found: No <" + extendedTag.replace("=", "@") + "| tag found that this virtual element refers to.");
     }
@@ -148,6 +151,11 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     limen.addMarkup(markup);
     if (markup.hasId()) {
       identifiedMarkups.put(extendedTag, markup);
+      String id = markup.getId();
+      if (idsInUse.containsKey(id)) {
+        throw new TexMECSSyntaxError("id '" + id + "' was aleady used in markup <" + idsInUse.get(id) + "|.");
+      }
+      idsInUse.put(id, extendedTag);
     }
     return markup;
   }
