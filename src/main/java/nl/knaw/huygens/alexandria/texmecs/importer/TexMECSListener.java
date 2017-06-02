@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.AttsContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EidContext;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagContext;
@@ -105,7 +107,9 @@ public class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitVirtualElement(VirtualElementContext ctx) {
-    String extendedTag = ctx.eid().gi().getText() + "=" + ctx.idref().getText();
+    String idref = ctx.idref().getText();
+    String gi = ctx.eid().gi().getText();
+    String extendedTag = gi + "=" + idref;
     if (identifiedMarkups.containsKey(extendedTag)) {
       Markup ref = identifiedMarkups.get(extendedTag);
       Markup markup = addMarkup(ref.getTag(), ctx.atts());
@@ -115,6 +119,21 @@ public class TexMECSListener extends TexMECSParserBaseListener {
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
       });
+    } else {
+      throw new TexMECSSyntaxError("idref '" + idref + "' not found: No <" + extendedTag.replace("=", "@") + "| tag found that this virtual element refers to.");
+    }
+
+  }
+
+  @Override
+  public void exitDocument(TexMECSParser.DocumentContext ctx) {
+    if (!openMarkup.isEmpty()) {
+      String openMarkupString = openMarkup.stream().map(TexMECSListener::startTag).collect(Collectors.joining(", "));
+      throw new TexMECSSyntaxError("Some markup was not closed: " + openMarkupString);
+    }
+    if (!suspendedMarkup.isEmpty()) {
+      String suspendedMarkupString = suspendedMarkup.stream().map(TexMECSListener::suspendTag).collect(Collectors.joining(", "));
+      throw new TexMECSSyntaxError("Some suspended markup was not resumed: " + suspendedMarkupString);
     }
   }
 
@@ -146,12 +165,18 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   private Markup removeFromOpenMarkup(GiContext gi) {
     String tag = gi.getText();
     Markup markup = removeFromMarkupStack(tag, openMarkup);
+    if (markup == null) {
+      throw new TexMECSSyntaxError("Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.");
+    }
     return markup;
   }
 
   private Markup removeFromSuspendedMarkup(ResumeTagContext ctx) {
     String tag = ctx.gi().getText();
     Markup markup = removeFromMarkupStack(tag, suspendedMarkup);
+    if (markup == null) {
+      throw new TexMECSSyntaxError("Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.");
+    }
     return markup;
   }
 
@@ -164,11 +189,18 @@ public class TexMECSListener extends TexMECSParserBaseListener {
         break;
       }
     }
-    if (markup == null) {
-      throw new RuntimeException("Closing tag " + tag + " found, which has no corresponding earlier opening tag.");
+    if (markup != null) {
+      markupStack.remove(markup);
     }
-    markupStack.remove(markup);
     return markup;
+  }
+
+  private static String suspendTag(Markup m) {
+    return "|-" + m.getTag() + ">";
+  }
+
+  private static String startTag(Markup m) {
+    return "<" + m.getExtendedTag() + "|";
   }
 
 }

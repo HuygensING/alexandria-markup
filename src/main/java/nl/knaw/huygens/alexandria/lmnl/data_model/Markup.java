@@ -163,7 +163,7 @@ public class Markup {
 
   @Override
   public String toString() {
-    return "[" + getExtendedTag() + "]";
+    return "<" + getExtendedTag() + ">";
   }
 
 }

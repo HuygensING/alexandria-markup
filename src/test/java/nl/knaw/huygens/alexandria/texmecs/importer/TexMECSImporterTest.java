@@ -1,6 +1,7 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -141,6 +142,50 @@ public class TexMECSImporterTest {
     assertThat(markupB.getExtendedTag()).isEqualTo("b");
     assertThat(markupI.getDominatedMarkup().get()).isEqualTo(markupB);
     assertThat(markupB.getDominatingMarkup().get()).isEqualTo(markupI);
+  }
+
+  @Test
+  public void testSyntaxError1() {
+    String texMECS = "<tag|opening, but not closing";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("Some markup was not closed: <tag|");
+    }
+  }
+
+  @Test
+  public void testSyntaxError2() {
+    String texMECS = "no opening tag|bla>";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("Closing tag |bla> found, which has no corresponding earlier opening tag.");
+    }
+  }
+
+  @Test
+  public void testSyntaxError3() {
+    String texMECS = "<^v^v12>";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("idref 'v12' not found: No <v@v12| tag found that this virtual element refers to.");
+    }
+  }
+
+  @Test
+  public void testSyntaxErrorSuspendWithoutResume() {
+    String texMECS = "<tag|Lorem ipsum <+tag|dolores rosetta|tag>";
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      assertThat(se.getMessage()).isEqualTo("Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
+    }
   }
 
   private Document testTexMECS(String texMECS, String expectedLMNL) {
