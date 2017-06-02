@@ -28,14 +28,14 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
-    Document document = testTexMECS(texMECS, 10, "[s}[a}John [b}loves{a] Mary{b]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithAttributes() {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
-    Document document = testTexMECS(texMECS, 10, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
+    Document document = testTexMECS(texMECS, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
     Markup markup0 = document.value().markupList.get(0);
     assertThat(markup0.getTag()).isEqualTo("s");
@@ -49,7 +49,7 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSuffix() {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
-    Document document = testTexMECS(texMECS, 10, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
+    Document document = testTexMECS(texMECS, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
     assertThat(document.value()).isNotNull();
     Markup markup0 = document.value().markupList.get(0);
     assertThat(markup0.getTag()).isEqualTo("s");
@@ -59,14 +59,14 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithSoleTag() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
-    Document document = testTexMECS(texMECS, 14, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
     Limen limen = document.value();
     assertThat(limen).isNotNull();
     List<Markup> markupList = limen.markupList;
@@ -82,88 +82,79 @@ public class TexMECSImporterTest {
   @Test
   public void testExample1WithComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithNestedComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithCData() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
-    Document document = testTexMECS(texMECS, 11, "[s}[a}John [b}loves{a] Mary{b]{s]");
+    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testSelfOverlappingElements() {
     String texMECS = "<e~1|Lorem <e~2|Ipsum |e~1>Dolor...|e~2>";
-    Document document = testTexMECS(texMECS, 8, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
+    Document document = testTexMECS(texMECS, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testTagSets() {
     String texMECS = "<|choice||<option|A|option><option|B|option>||choice|>";
-    Document document = testTexMECS(texMECS, 9, "[choice}[option}A{option][option}B{option]{choice]");
+    Document document = testTexMECS(texMECS, "[choice}[option}A{option][option}B{option]{choice]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testVirtualElement() {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
-    Document document = testTexMECS(texMECS, 9, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
+    Document document = testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testMultipleRoots() {
     String texMECS = "<a|A|a><a|A|a><a|A|a><a|A|a><a|A|a>";
-    Document document = testTexMECS(texMECS, 16, "[a}A{a][a}A{a][a}A{a][a}A{a][a}A{a]");
+    Document document = testTexMECS(texMECS, "[a}A{a][a}A{a][a}A{a][a}A{a][a}A{a]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testDominance() {
     String texMECS = "<l|This is <i|<b|very|b>|i> important|l>";
-    Document document = testTexMECS(texMECS, 10, "[l}This is [i}[b}very{b]{i] important{l]");
+    Document document = testTexMECS(texMECS, "[l}This is [i}[b}very{b]{i] important{l]");
     assertThat(document.value()).isNotNull();
+    List<Markup> markupList = document.value().markupList;
+    Markup markupI = markupList.get(1);
+    assertThat(markupI.getExtendedTag()).isEqualTo("i");
+
+    Markup markupB = markupList.get(2);
+    assertThat(markupB.getExtendedTag()).isEqualTo("b");
+    assertThat(markupI.getDominatedMarkup().get()).isEqualTo(markupB);
+    assertThat(markupB.getDominatingMarkup().get()).isEqualTo(markupI);
   }
 
-  private Document testTexMECS(String texMECS, int expectedChunkCount, String expectedLMNL) {
+  private Document testTexMECS(String texMECS, String expectedLMNL) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
     TexMECSImporter importer = new TexMECSImporter();
     Document doc = importer.importTexMECS(texMECS);
-    // CharStream antlrInputStream = CharStreams.fromString(texMECS);
-    // TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
-    // CommonTokenStream tokens = new CommonTokenStream(lexer);
-    // TexMECSParser parser = new TexMECSParser(tokens);
-    // parser.setBuildParseTree(true);
-    // ParseTree parseTree = parser.document();
-    // ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    // TexMECSListener listener = new TexMECSListener();
-    // parseTreeWalker.walk(listener, parseTree);
-    // LOG.info("parseTree={}", parseTree.toStringTree(parser));
-    // assertThat(parseTree).isNotNull();
-    // assertThat(parser.getNumberOfSyntaxErrors())//
-    // .withFailMessage("%d Unexpected syntax error(s)", parser.getNumberOfSyntaxErrors())//
-    // .isEqualTo(0);
-    // Document doc = listener.getDocument();
     assertThat(doc.value()).isNotNull();
     LMNLExporter ex = new LMNLExporter();
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(expectedLMNL);
 
-    // assertThat(parseTree.getChildCount()).isEqualTo(expectedChunkCount);
-    // assertThat(parseTree.getChild(0)).isNotNull();
     return doc;
   }
 
