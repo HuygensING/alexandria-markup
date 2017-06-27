@@ -1,19 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGQLQueryHandlerTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
@@ -24,16 +23,16 @@ public class TAGQLQueryHandlerTest {
         + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
         + "and of having nothing to do: once or twice she had peeped into the book her sister\n"//
         + "was reading, but it had no pictures or conversations in it, \n"//
-        + "[q=a}and what is the use of a book,{q=a]\n"//
+        + "[q [n}a{]}and what is the use of a book,{q]\n"//
         + "thought Alice\n"//
-        + "[q=a}without pictures or conversation?{q=a]\n"//
+        + "[q [n}a{]}without pictures or conversation?{q]\n"//
         + "{p]{excerpt]";
     Document alice = new LMNLImporter().importLMNL(lmnl);
 
     TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
     // String statement = "select m.text from markup m where m.name='q' and m.id='a'";
     // String statement = "select m.text from markup m where m.name='q=a'";
-    String statement = "select text from markup where name='q=a'";
+    String statement = "select text from markup where name='q'";
     TAGQLResult result = h.execute(statement);
     LOG.info("result={}", result);
     assertThat(result).isNotNull();
