@@ -48,9 +48,9 @@ public class NodeRangeIndexTest {
         "Alice was beginning to get very tired of sitting by her sister on the bank,\n" +
         "and of having nothing to do: once or twice she had peeped into the book her sister\n" +
         "was reading, but it had no pictures or conversations in it, \n" +
-        "[q=a}and what is the use of a book,{q=a]\n" +
+        "[q [n}a{]}and what is the use of a book,{q]\n" +
         "thought Alice\n" +
-        "[q=a}without pictures or conversation?{q=a]\n" +
+        "[q [n}a{]}without pictures or conversation?{q]\n" +
         "{p]{excerpt]";
     NodeRangeIndex index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a

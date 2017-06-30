@@ -1,10 +1,10 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -109,6 +109,12 @@ public class Markup {
 
   public boolean hasId() {
     return StringUtils.isNotEmpty(id);
+  }
+
+  public boolean hasN() {
+    return annotations.parallelStream()//
+        .map(Annotation::getTag) //
+        .anyMatch(t -> t.equals("n"));
   }
 
   public boolean hasSuffix() {
