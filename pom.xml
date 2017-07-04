@@ -6,6 +6,7 @@
   <artifactId>alexandria-markup</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
+  <inceptionYear>2016</inceptionYear>
 
   <properties>
     <!-- Encoding: everything UTF-8, please -->
@@ -24,7 +25,24 @@
     <logback.version>1.2.3</logback.version>
     <slf4j-api.version>1.8.0-alpha2</slf4j-api.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
+    <maven-license.version>1.8</maven-license.version>
+
+    <project.license.name>Apache License version 2.0</project.license.name>
+    <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
   </properties>
+
+  <organization>
+    <name>Huygens ING (KNAW)</name>
+    <url>http://www.huygens.knaw.nl</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>${project.license.name}</name>
+      <url>${project.license.url}</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
@@ -132,7 +150,7 @@
               <goal>report</goal>
             </goals>
             <configuration>
-              <!-- Sets the path to the file which contains the execution 
+              <!-- Sets the path to the file which contains the execution
                 data. -->
               <dataFile>target/jacoco.exec</dataFile>
               <!-- Sets the output directory for the code coverage report. -->
@@ -144,6 +162,31 @@
           <systemPropertyVariables>
             <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
           </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>${maven-license.version}</version>
+        <executions>
+          <execution>
+            <phase>deploy</phase>
+            <goals>
+              <goal>update-project-license</goal>
+              <goal>update-file-header</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <licenseName>apache_v2</licenseName>
+          <excludes>
+            <exclude>**/*.ftl</exclude>
+            <exclude>**/*.xml</exclude>
+          </excludes>
+          <sectionDelimiter>=======</sectionDelimiter>
+          <canUpdateCopyright>true</canUpdateCopyright>
+          <canUpdateDescription>true</canUpdateDescription>
         </configuration>
       </plugin>
     </plugins>
