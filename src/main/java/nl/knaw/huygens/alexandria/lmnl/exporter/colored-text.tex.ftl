@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{xcolor,latexsym}
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \definecolorseries{rangedepth}{hsb}{last}{yellow!25}{blue}
 \newcommand{\TextNode}[2]{\fcolorbox{black}{rangedepth!![#1]}{\strut #2}}
 \newcommand{\n}{\textbackslash n}

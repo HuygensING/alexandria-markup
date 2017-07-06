@@ -171,7 +171,7 @@
         <version>${maven-license.version}</version>
         <executions>
           <execution>
-            <phase>deploy</phase>
+            <phase>verify</phase>
             <goals>
               <goal>update-project-license</goal>
               <goal>update-file-header</goal>
@@ -188,6 +188,20 @@
           <canUpdateCopyright>true</canUpdateCopyright>
           <canUpdateDescription>true</canUpdateDescription>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.complykit</groupId>
+        <artifactId>license-check-maven-plugin</artifactId>
+        <version>0.5.3</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>os-check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 

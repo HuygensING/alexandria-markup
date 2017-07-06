@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{incgraph,tikz,latexsym}
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \usetikzlibrary{arrows,arrows.meta,decorations.pathmorphing,backgrounds,positioning,fit,graphs,shapes}
 \newcommand{\n}{\textbackslash n}
 \newcommand{\s}{\textvisiblespace}
