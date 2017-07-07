@@ -190,7 +190,7 @@
         </configuration>
       </plugin>
 
-      <plugin>
+<!--       <plugin>
         <groupId>org.complykit</groupId>
         <artifactId>license-check-maven-plugin</artifactId>
         <version>0.5.3</version>
@@ -202,7 +202,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin> -->
     </plugins>
 
     <extensions>
