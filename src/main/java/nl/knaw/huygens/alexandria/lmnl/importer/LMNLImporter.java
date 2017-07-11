@@ -1,5 +1,24 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
+import static java.util.stream.Collectors.joining;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.stream.Collectors;
+
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * alexandria-markup
@@ -19,21 +38,12 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * limitations under the License.
  * #L%
  */
-
-
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -62,7 +72,7 @@ public class LMNLImporter {
       Markup markup = openMarkupDeque.stream()//
           .filter(tr -> tr.getExtendedTag().equals(rangeName))//
           .findFirst()//
-          .get();
+          .orElseThrow(() -> new LMNLSyntaxError("Closing tag {" + rangeName + "] found without corresponding open tag."));
       if (markup.textNodes.isEmpty()) {
         // every markup should have at least one textNode
         addTextNode(new TextNode(""));
@@ -142,7 +152,14 @@ public class LMNLImporter {
     }
 
     LimenContext popLimenContext() {
-      return limenContextStack.pop();
+      LimenContext limenContext = limenContextStack.pop();
+      if (!limenContext.openMarkupDeque.isEmpty()) {
+        String openRanges = limenContext.openMarkupDeque.stream()//
+            .map(m -> "[" + m.getExtendedTag() + "}")//
+            .collect(Collectors.joining(", "));
+        throw new LMNLSyntaxError("Unclosed LMNL range(s): " + openRanges);
+      }
+      return limenContext;
     }
 
     Markup newMarkup(String tagName) {
@@ -183,12 +200,12 @@ public class LMNLImporter {
 
   }
 
-  public Document importLMNL(String input) {
+  public Document importLMNL(String input) throws LMNLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importLMNL(antlrInputStream);
   }
 
-  public Document importLMNL(InputStream input) {
+  public Document importLMNL(InputStream input) throws LMNLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importLMNL(antlrInputStream);
@@ -198,7 +215,7 @@ public class LMNLImporter {
     }
   }
 
-  private Document importLMNL(CharStream antlrInputStream) {
+  private Document importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
     LMNLLexer lexer = new LMNLLexer(antlrInputStream);
     ImporterContext context = new ImporterContext(lexer);
     Document document = new Document();
@@ -206,6 +223,7 @@ public class LMNLImporter {
     context.pushLimenContext(limen);
     handleDefaultMode(context);
     joinDiscontinuedRanges(document);
+    context.popLimenContext();
     return document;
   }
 
@@ -219,28 +237,28 @@ public class LMNLImporter {
         String modeName = context.getModeName();
         log(methodName, ruleName, modeName, token, context);
         switch (token.getType()) {
-          case LMNLLexer.BEGIN_OPEN_RANGE:
-            handleOpenRange(context);
-            break;
+        case LMNLLexer.BEGIN_OPEN_RANGE:
+          handleOpenRange(context);
+          break;
 
-          case LMNLLexer.BEGIN_CLOSE_RANGE:
-            handleCloseRange(context);
-            break;
+        case LMNLLexer.BEGIN_CLOSE_RANGE:
+          handleCloseRange(context);
+          break;
 
-          case LMNLLexer.TEXT:
-            TextNode textNode = new TextNode(token.getText());
-            context.addTextNode(textNode);
-            break;
+        case LMNLLexer.TEXT:
+          TextNode textNode = new TextNode(token.getText());
+          context.addTextNode(textNode);
+          break;
 
-          // case LMNLLexer.TagOpenStartChar:
-          // case LMNLLexer.TagOpenEndChar:
-          // case LMNLLexer.TagCloseStartChar:
-          // case LMNLLexer.TagCloseEndChar:
-          // break;
+        // case LMNLLexer.TagOpenStartChar:
+        // case LMNLLexer.TagOpenEndChar:
+        // case LMNLLexer.TagCloseStartChar:
+        // case LMNLLexer.TagCloseEndChar:
+        // break;
 
-          default:
-            handleUnexpectedToken(methodName, token, ruleName, modeName);
-            break;
+        default:
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
+          break;
         }
       }
     } while (token.getType() != Token.EOF);
@@ -255,33 +273,33 @@ public class LMNLImporter {
       String modeName = context.getModeName();
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
-        case LMNLLexer.Name_Open_Range:
-          Markup markup = context.newMarkup(token.getText());
-          context.openMarkup(markup);
-          break;
-        case LMNLLexer.BEGIN_OPEN_ANNO:
-          handleAnnotation(context);
-          break;
-        case LMNLLexer.END_OPEN_RANGE:
-          context.popOpenMarkup();
-          goOn = false;
-          break;
-        case LMNLLexer.END_ANONYMOUS_RANGE:
-          TextNode textNode = new TextNode("");
-          context.addTextNode(textNode);
-          context.closeMarkup();
-          goOn = false;
-          break;
+      case LMNLLexer.Name_Open_Range:
+        Markup markup = context.newMarkup(token.getText());
+        context.openMarkup(markup);
+        break;
+      case LMNLLexer.BEGIN_OPEN_ANNO:
+        handleAnnotation(context);
+        break;
+      case LMNLLexer.END_OPEN_RANGE:
+        context.popOpenMarkup();
+        goOn = false;
+        break;
+      case LMNLLexer.END_ANONYMOUS_RANGE:
+        TextNode textNode = new TextNode("");
+        context.addTextNode(textNode);
+        context.closeMarkup();
+        goOn = false;
+        break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+      // case LMNLLexer.TagOpenStartChar:
+      // case LMNLLexer.TagOpenEndChar:
+      // case LMNLLexer.TagCloseStartChar:
+      // case LMNLLexer.TagCloseEndChar:
+      // break;
 
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
+      default:
+        handleUnexpectedToken(methodName, token, ruleName, modeName);
+        break;
       }
       goOn = goOn && token.getType() != Token.EOF;
     }
@@ -298,48 +316,48 @@ public class LMNLImporter {
       String modeName = context.getModeName();
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
-        case LMNLLexer.Name_Open_Annotation:
-          annotation.setTag(token.getText());
-          break;
-        case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
-        case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
-          handleAnnotation(context);
-          break;
-        case LMNLLexer.END_OPEN_ANNO:
-          context.pushLimenContext(context.currentAnnotationLimen());
-          break;
+      case LMNLLexer.Name_Open_Annotation:
+        annotation.setTag(token.getText());
+        break;
+      case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
+      case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
+        handleAnnotation(context);
+        break;
+      case LMNLLexer.END_OPEN_ANNO:
+        context.pushLimenContext(context.currentAnnotationLimen());
+        break;
 
-        case LMNLLexer.ANNO_TEXT:
-          context.addTextNode(new TextNode(token.getText()));
-          break;
+      case LMNLLexer.ANNO_TEXT:
+        context.addTextNode(new TextNode(token.getText()));
+        break;
 
-        case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
-          handleOpenRange(context);
-          break;
+      case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
+        handleOpenRange(context);
+        break;
 
-        case LMNLLexer.BEGIN_ANNO_CLOSE_RANGE:
-          handleCloseRange(context);
-          break;
+      case LMNLLexer.BEGIN_ANNO_CLOSE_RANGE:
+        handleCloseRange(context);
+        break;
 
-        case LMNLLexer.BEGIN_CLOSE_ANNO:
-        case LMNLLexer.Name_Close_Annotation:
-          break;
-        case LMNLLexer.END_CLOSE_ANNO:
-          context.popLimenContext();
-        case LMNLLexer.END_EMPTY_ANNO:
-          context.closeAnnotation();
-          goOn = false;
-          break;
+      case LMNLLexer.BEGIN_CLOSE_ANNO:
+      case LMNLLexer.Name_Close_Annotation:
+        break;
+      case LMNLLexer.END_CLOSE_ANNO:
+        context.popLimenContext();
+      case LMNLLexer.END_EMPTY_ANNO:
+        context.closeAnnotation();
+        goOn = false;
+        break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+      // case LMNLLexer.TagOpenStartChar:
+      // case LMNLLexer.TagOpenEndChar:
+      // case LMNLLexer.TagCloseStartChar:
+      // case LMNLLexer.TagCloseEndChar:
+      // break;
 
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
+      default:
+        handleUnexpectedToken(methodName, token, ruleName, modeName);
+        break;
       }
       goOn = goOn && token.getType() != Token.EOF;
     }
@@ -354,27 +372,27 @@ public class LMNLImporter {
       String modeName = context.getModeName();
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
-        case LMNLLexer.Name_Close_Range:
-          String rangeName = token.getText();
-          context.pushOpenMarkup(rangeName);
-          break;
-        case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
-          handleAnnotation(context);
-          break;
-        case LMNLLexer.END_CLOSE_RANGE:
-          context.closeMarkup();
-          goOn = false;
-          break;
+      case LMNLLexer.Name_Close_Range:
+        String rangeName = token.getText();
+        context.pushOpenMarkup(rangeName);
+        break;
+      case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
+        handleAnnotation(context);
+        break;
+      case LMNLLexer.END_CLOSE_RANGE:
+        context.closeMarkup();
+        goOn = false;
+        break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+      // case LMNLLexer.TagOpenStartChar:
+      // case LMNLLexer.TagOpenEndChar:
+      // case LMNLLexer.TagCloseStartChar:
+      // case LMNLLexer.TagCloseEndChar:
+      // break;
 
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
+      default:
+        handleUnexpectedToken(methodName, token, ruleName, modeName);
+        break;
       }
       goOn = goOn && token.getType() != Token.EOF;
     }
@@ -397,10 +415,9 @@ public class LMNLImporter {
         .filter(Markup::hasN)//
         .forEach(markup -> {
           String tag = markup.getTag();
-          Annotation nAnnotation = markup.getAnnotations()
-              .parallelStream()
-              .filter(a -> a.getTag().equals("n"))
-              .findFirst()
+          Annotation nAnnotation = markup.getAnnotations().parallelStream()//
+              .filter(a -> a.getTag().equals("n"))//
+              .findFirst()//
               .get();
           String key = tag + "-" + annotationText(nAnnotation);
           if (markupsToJoin.containsKey(key)) {
@@ -422,10 +439,7 @@ public class LMNLImporter {
   }
 
   private static String annotationText(Annotation annotation) {
-    return annotation.value()
-        .textNodeList.stream()
-        .map(TextNode::getContent)
-        .collect(joining());
+    return annotation.value().textNodeList.stream().map(TextNode::getContent).collect(joining());
   }
 
   private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {

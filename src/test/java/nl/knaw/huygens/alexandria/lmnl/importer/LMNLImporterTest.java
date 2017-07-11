@@ -1,5 +1,22 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * alexandria-markup
@@ -20,33 +37,23 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
   final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
 
   @Test
-  public void testMarkupAnnotation() {
+  public void testMarkupAnnotation() throws LMNLSyntaxError {
     String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
     Document actual = new LMNLImporter().importLMNL(input);
 
@@ -79,7 +86,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testLexingComplex() {
+  public void testLexingComplex() throws LMNLSyntaxError {
     String input = "[excerpt\n"//
         + "  [source [date}1915{][title}The Housekeeper{]]\n"//
         + "  [author\n"//
@@ -153,7 +160,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testLMNL1kings12() throws IOException {
+  public void testLMNL1kings12() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/1kings12.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     Document actual = new LMNLImporter().importLMNL(input);
@@ -196,7 +203,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testLMNLOzymandias() throws IOException {
+  public void testLMNLOzymandias() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     Document actual = new LMNLImporter().importLMNL(input);
@@ -216,7 +223,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testDiscontinuousRanges() {
+  public void testDiscontinuousRanges() throws LMNLSyntaxError {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
     Document actual = new LMNLImporter().importLMNL(input);
     LOG.info("textNodes={}", actual.value().textNodeList);
@@ -234,7 +241,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testAnnotationTextWithRanges() {
+  public void testAnnotationTextWithRanges() throws LMNLSyntaxError {
     String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
     printTokens(input);
     Document actual = new LMNLImporter().importLMNL(input);
@@ -282,7 +289,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testAnnotationTextInAnnotationWithRanges() {
+  public void testAnnotationTextInAnnotationWithRanges() throws LMNLSyntaxError {
     String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
     printTokens(input);
     Document actual = new LMNLImporter().importLMNL(input);
@@ -313,7 +320,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testAnonymousAnnotationRangeOpener() {
+  public void testAnonymousAnnotationRangeOpener() throws LMNLSyntaxError {
     String input = "[range1 [}annotation text{]}bla{range1]";
     printTokens(input);
     Document actual = new LMNLImporter().importLMNL(input);
@@ -336,7 +343,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testAtomsAreIgnored() {
+  public void testAtomsAreIgnored() throws LMNLSyntaxError {
     String input = "[r}Splitting the {{Atom}}.{r]";
     printTokens(input);
     Document actual = new LMNLImporter().importLMNL(input);
@@ -355,7 +362,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testEmptyRange() {
+  public void testEmptyRange() throws LMNLSyntaxError {
     String input = "[empty}{empty]";
     printTokens(input);
     Document actual = new LMNLImporter().importLMNL(input);
@@ -375,7 +382,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testComments() {
+  public void testComments() throws LMNLSyntaxError {
     String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
     Document actual = new LMNLImporter().importLMNL(input);
 
@@ -393,6 +400,28 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
     logLMNL(actual);
     compareLMNL(expected, actual);
+  }
+
+  @Test
+  public void testUnclosedRangeThrowsSyntaxError() {
+    String input = "[tag} tag [v}is{v] not closed";
+    try {
+      Document actual = new LMNLImporter().importLMNL(input);
+      fail("no LMNLSyntaxError thrown");
+    } catch (LMNLSyntaxError e) {
+      assertThat(e).hasMessage("Unclosed LMNL range(s): [tag}");
+    }
+  }
+
+  @Test
+  public void testUnopenedRangeThrowsSyntaxError() {
+    String input = "text{lmnl]";
+    try {
+      Document actual = new LMNLImporter().importLMNL(input);
+      fail("no LMNLSyntaxError thrown");
+    } catch (LMNLSyntaxError e) {
+      assertThat(e).hasMessage("Closing tag {lmnl] found without corresponding open tag.");
+    }
   }
 
   private void compareLMNL(String pathname, Document actual) throws IOException {

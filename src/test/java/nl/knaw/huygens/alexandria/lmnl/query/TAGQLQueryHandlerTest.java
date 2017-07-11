@@ -1,5 +1,17 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * alexandria-markup
@@ -20,26 +32,15 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
-
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class TAGQLQueryHandlerTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void testTAGQLQuery1() {
+  public void testTAGQLQuery1() throws LMNLSyntaxError {
     String lmnl = "[excerpt}[p}\n"//
         + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
         + "and of having nothing to do: once or twice she had peeped into the book her sister\n"//
@@ -63,7 +64,7 @@ public class TAGQLQueryHandlerTest {
   }
 
   @Test
-  public void testTAGQLQuery2() {
+  public void testTAGQLQuery2() throws LMNLSyntaxError {
     String lmnl = "[text}\n"//
         + "[l}line 1{l]\n"//
         + "[l}line 2{l]\n"//
@@ -101,7 +102,7 @@ public class TAGQLQueryHandlerTest {
   }
 
   @Test
-  public void testTAGQLQuery3() {
+  public void testTAGQLQuery3() throws LMNLSyntaxError {
     String lmnl = "[excerpt [source [book}1 Kings{book] [chapter}12{chapter]]}\n"
         + "[verse}And he said unto them, [q}What counsel give ye that we may answer this people, who have spoken to me, saying, [q}Make the yoke which thy father did put upon us lighter?{q]{q]{verse]\n"
         + "[verse}And the young men that were grown up with him spake unto him, saying, [q}Thus shalt thou speak unto this people that spake unto thee, saying, [q=i}Thy father made our yoke heavy, but make thou it lighter unto us;{q=i] thus shalt thou say unto them, [q=j}My little finger shall be thicker than my father's loins.{verse]\n"
@@ -136,7 +137,7 @@ public class TAGQLQueryHandlerTest {
   }
 
   @Test
-  public void testLuminescentQuery1() throws IOException {
+  public void testLuminescentQuery1() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
     Document frankenstein = new LMNLImporter().importLMNL(lmnl);
 
@@ -154,7 +155,7 @@ public class TAGQLQueryHandlerTest {
   }
 
   // @Test
-  public void testLuminescentQuery2() throws IOException {
+  public void testLuminescentQuery2() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
     Document frankenstein = new LMNLImporter().importLMNL(lmnl);
 

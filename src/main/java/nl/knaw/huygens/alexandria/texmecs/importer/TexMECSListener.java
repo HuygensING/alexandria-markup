@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;

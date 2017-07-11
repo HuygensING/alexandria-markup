@@ -1,5 +1,16 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * alexandria-markup
@@ -20,53 +31,43 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class LaTexExporterTest {
   private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
 
   @Test
-  public void testLaTeXOutput1() {
+  public void testLaTeXOutput1() throws LMNLSyntaxError {
     String laTeX = laTeXFromLMNLString("[l [n}144{n]}He manages to keep the upper hand{l]");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
-  public void testLaTeXOutput2() throws IOException {
+  public void testLaTeXOutput2() throws IOException, LMNLSyntaxError {
     String laTeX = laTeXFromLMNLFile("data/lmnl/1kings12.lmnl");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
-  public void testLaTeXOutput3() throws IOException {
+  public void testLaTeXOutput3() throws IOException, LMNLSyntaxError {
     String laTeX = laTeXFromLMNLFile("data/lmnl/ozymandias-voices-wap.lmnl");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
-  public void testLaTeXOutputWithDiscontinuation() {
+  public void testLaTeXOutputWithDiscontinuation() throws LMNLSyntaxError {
     String laTeX = laTeXFromLMNLString("'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
 
   @Test
-  public void testLaTexOutputDataFiles() throws IOException {
+  public void testLaTexOutputDataFiles() throws IOException, LMNLSyntaxError {
     processLMNLFile("alice-excerpt");
     processLMNLFile("1kings12");
     processLMNLFile("ozymandias-voices-wap");
@@ -74,7 +75,7 @@ public class LaTexExporterTest {
     processLMNLFile("snark81");
   }
 
-  private void processLMNLFile(String basename) throws IOException {
+  private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     InputStream input = FileUtils.openInputStream(new File("data/lmnl/" + basename + ".lmnl"));
     Document document = new LMNLImporter().importLMNL(input);
     LaTeXExporter exporter = new LaTeXExporter(document);
@@ -105,12 +106,12 @@ public class LaTexExporterTest {
     FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
   }
 
-  private String laTeXFromLMNLString(String input) {
+  private String laTeXFromLMNLString(String input) throws LMNLSyntaxError {
     Document document = new LMNLImporter().importLMNL(input);
     return toLaTeX(document);
   }
 
-  private String laTeXFromLMNLFile(String pathname) throws IOException {
+  private String laTeXFromLMNLFile(String pathname) throws IOException, LMNLSyntaxError {
     InputStream input = FileUtils.openInputStream(new File(pathname));
     Document document = new LMNLImporter().importLMNL(input);
     return toLaTeX(document);

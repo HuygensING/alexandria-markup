@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -42,12 +41,12 @@ import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 public class TexMECSImporter {
   final Logger LOG = LoggerFactory.getLogger(getClass());
 
-  public Document importTexMECS(String input) {
+  public Document importTexMECS(String input) throws TexMECSSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTexMECS(antlrInputStream);
   }
 
-  public Document importTexMECS(InputStream input) {
+  public Document importTexMECS(InputStream input) throws TexMECSSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTexMECS(antlrInputStream);

@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -35,12 +34,13 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class LMNLModifierTest {
   static final Logger LOG = LoggerFactory.getLogger(LMNLModifierTest.class);
 
   @Test
-  public void testAddRange() {
+  public void testAddRange() throws LMNLSyntaxError {
     String content = "The rain in Spain falls mainly on the plain.";
     String LMNL = "[text}" + content + "{text]";
     LMNLImporter importer = new LMNLImporter();

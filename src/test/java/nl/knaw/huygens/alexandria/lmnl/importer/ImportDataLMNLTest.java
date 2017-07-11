@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -78,13 +77,13 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
-  public void testLMNLFile() throws IOException {
+  public void testLMNLFile() throws IOException, LMNLSyntaxError {
     LOG.info("testing data/lmnl/{}.lmnl", basename);
     processLMNLFile(basename);
     LOG.info("done testing data/lmnl/{}.lmnl", basename);
   }
 
-  private void processLMNLFile(String basename) throws IOException {
+  private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     InputStream input = getInputStream(basename);
     LOG.info("showTokens\n");
     printTokens(input);

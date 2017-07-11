@@ -1,5 +1,11 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Set;
+
+import org.junit.Test;
+
 /*
  * #%L
  * alexandria-markup
@@ -20,18 +26,13 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  * #L%
  */
 
-
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import org.junit.Test;
-
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class NodeRangeIndexTest {
 
   @Test
-  public void testRangesFromNodes() {
+  public void testRangesFromNodes() throws LMNLSyntaxError {
     String lmnl = "[excerpt\n"//
         + "  [source [date}1915{][title}The Housekeeper{]]\n"//
         + "  [author\n"//
@@ -48,7 +49,7 @@ public class NodeRangeIndexTest {
   }
 
   @Test
-  public void testNodesFromRanges() {
+  public void testNodesFromRanges() throws LMNLSyntaxError {
     String lmnl = "[excerpt\n"//
         + "  [source [date}1915{][title}The Housekeeper{]]\n"//
         + "  [author\n"//
@@ -64,15 +65,10 @@ public class NodeRangeIndexTest {
   }
 
   @Test
-  public void testIndexWithAlice() {
-    String lmnl = "[excerpt}[p}\n" +
-        "Alice was beginning to get very tired of sitting by her sister on the bank,\n" +
-        "and of having nothing to do: once or twice she had peeped into the book her sister\n" +
-        "was reading, but it had no pictures or conversations in it, \n" +
-        "[q [n}a{]}and what is the use of a book,{q]\n" +
-        "thought Alice\n" +
-        "[q [n}a{]}without pictures or conversation?{q]\n" +
-        "{p]{excerpt]";
+  public void testIndexWithAlice() throws LMNLSyntaxError {
+    String lmnl = "[excerpt}[p}\n" + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"
+        + "and of having nothing to do: once or twice she had peeped into the book her sister\n" + "was reading, but it had no pictures or conversations in it, \n"
+        + "[q [n}a{]}and what is the use of a book,{q]\n" + "thought Alice\n" + "[q [n}a{]}without pictures or conversation?{q]\n" + "{p]{excerpt]";
     NodeRangeIndex index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a
     assertThat(textNodeIndices).containsExactly(1, 3);
@@ -81,7 +77,7 @@ public class NodeRangeIndexTest {
     assertThat(rangeIndices).containsExactly(0, 1, 2); // excerpt,p,q=a
   }
 
-  private NodeRangeIndex index(String lmnl) {
+  private NodeRangeIndex index(String lmnl) throws LMNLSyntaxError {
     LMNLImporter importer = new LMNLImporter();
     Document document = importer.importLMNL(lmnl);
     return new NodeRangeIndex(document.value());
