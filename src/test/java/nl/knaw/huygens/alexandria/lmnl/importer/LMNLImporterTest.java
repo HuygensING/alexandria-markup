@@ -409,7 +409,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
       Document actual = new LMNLImporter().importLMNL(input);
       fail("no LMNLSyntaxError thrown");
     } catch (LMNLSyntaxError e) {
-      assertThat(e).hasMessage("Unclosed LMNL range(s): [tag}");
+      assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [tag}");
     }
   }
 
@@ -420,7 +420,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
       Document actual = new LMNLImporter().importLMNL(input);
       fail("no LMNLSyntaxError thrown");
     } catch (LMNLSyntaxError e) {
-      assertThat(e).hasMessage("Closing tag {lmnl] found without corresponding open tag.");
+      assertThat(e.getMessage()).contains("Closing tag {lmnl] found without corresponding open tag.");
     }
   }
 
@@ -432,7 +432,7 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
       Document actual = new LMNLImporter().importLMNL(input);
       fail("no LMNLSyntaxError thrown");
     } catch (LMNLSyntaxError e) {
-      assertThat(e).hasMessage("Unclosed LMNL range(s): [H}, [name}, [T}, [name}, [lizabeth}, [name=a}");
+      assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [H}, [name}, [T}, [name}, [lizabeth}, [name=a}");
     }
   }
 

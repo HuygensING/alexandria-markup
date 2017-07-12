@@ -75,4 +75,8 @@ public class ErrorListener implements ANTLRErrorListener {
     return errors;
   }
 
+  public boolean hasErrors() {
+    return !errors.isEmpty();
+  }
+
 }

@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.ErrorListener;
 /*
  * #%L
  * alexandria-markup
@@ -126,6 +127,7 @@ public class LMNLImporter {
   static class ImporterContext {
     private final Stack<LimenContext> limenContextStack = new Stack<>();
     private final LMNLLexer lexer;
+    private final List<String> errors = new ArrayList<>();
 
     ImporterContext(LMNLLexer lexer) {
       this.lexer = lexer;
@@ -157,7 +159,7 @@ public class LMNLImporter {
         String openRanges = limenContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + "}")//
             .collect(Collectors.joining(", "));
-        throw new LMNLSyntaxError("Unclosed LMNL range(s): " + openRanges);
+        errors.add("Unclosed LMNL range(s): " + openRanges);
       }
       return limenContext;
     }
@@ -198,6 +200,13 @@ public class LMNLImporter {
       currentLimenContext().closeAnnotation();
     }
 
+    List<String> getErrors() {
+      return errors;
+    }
+
+    boolean hasErrors() {
+      return !errors.isEmpty();
+    }
   }
 
   public Document importLMNL(String input) throws LMNLSyntaxError {
@@ -217,6 +226,9 @@ public class LMNLImporter {
 
   private Document importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
     LMNLLexer lexer = new LMNLLexer(antlrInputStream);
+    ErrorListener errorListener = new ErrorListener();
+    lexer.addErrorListener(errorListener);
+
     ImporterContext context = new ImporterContext(lexer);
     Document document = new Document();
     Limen limen = document.value();
@@ -224,6 +236,20 @@ public class LMNLImporter {
     handleDefaultMode(context);
     joinDiscontinuedRanges(document);
     context.popLimenContext();
+
+    String errorMsg = "";
+    if (context.hasErrors()) {
+      String errors = context.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg = "Parsing errors:\n" + errors;
+    }
+    if (errorListener.hasErrors()) {
+      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg += "\n\nTokenizing errors:\n" + errors;
+    }
+    if (!errorMsg.isEmpty()) {
+      throw new LMNLSyntaxError(errorMsg);
+    }
+
     return document;
   }
 
