@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria;
 
 /*
  * #%L
@@ -31,7 +31,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
-public class TexMECSErrorListener implements ANTLRErrorListener {
+public class ErrorListener implements ANTLRErrorListener {
   private List<String> errors = new ArrayList<>();
 
   @Override

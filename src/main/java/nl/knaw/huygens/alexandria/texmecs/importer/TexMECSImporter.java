@@ -33,6 +33,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
@@ -59,9 +60,10 @@ public class TexMECSImporter {
 
   private Document importTexMECS(CharStream antlrInputStream) {
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
-    TexMECSErrorListener errorListener = new TexMECSErrorListener();
+    ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
+
     TexMECSParser parser = new TexMECSParser(tokens);
     parser.addErrorListener(errorListener);
     parser.setBuildParseTree(true);
@@ -73,6 +75,7 @@ public class TexMECSImporter {
     parseTreeWalker.walk(listener, parseTree);
     Document document = listener.getDocument();
     handleMarkupDominance(document.value());
+
     String errorMsg = "";
     if (listener.hasErrors()) {
       String errors = listener.getErrors().stream().collect(Collectors.joining("\n"));
