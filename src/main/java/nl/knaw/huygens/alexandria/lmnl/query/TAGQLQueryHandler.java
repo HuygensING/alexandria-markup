@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
-
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
@@ -29,6 +28,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
@@ -44,19 +44,24 @@ public class TAGQLQueryHandler {
 
   public TAGQLResult execute(String statement) {
     CharStream stream = CharStreams.fromString(statement);
+    ErrorListener errorListener = new ErrorListener();
     TAGQLLexer lexer = new TAGQLLexer(stream);
+    lexer.addErrorListener(errorListener);
+
     CommonTokenStream tokens = new CommonTokenStream(lexer);
-    ParseTree parseTree = new TAGQLParser(tokens).query();
+    TAGQLParser tagqlParser = new TAGQLParser(tokens);
+    tagqlParser.addErrorListener(errorListener);
+    ParseTree parseTree = tagqlParser.query();
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TAGQLQueryListener listener = new TAGQLQueryListener();
     parseTreeWalker.walk(listener, parseTree);
     List<TAGQLStatement> statements = listener.getStatements();
 
-    TAGQLResult result = new TAGQLResult();
+    TAGQLResult result = new TAGQLResult(statement);
     statements.stream()//
         .map(this::execute)//
         .forEach(result::addResult);
-
+    result.getErrors().addAll(errorListener.getErrors());
     return result;
   }
 

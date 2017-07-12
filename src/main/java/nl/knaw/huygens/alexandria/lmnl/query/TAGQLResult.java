@@ -20,14 +20,23 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class TAGQLResult {
 
-  List<TAGQLResult> results = new ArrayList<>();
+  private final String query;
+  private final List<TAGQLResult> results = new ArrayList<>();
+  private final List<String> errors = new ArrayList<>();
+
+  public TAGQLResult(String query) {
+    this.query = query;
+  }
+
+  public TAGQLResult() {
+    this.query = "";
+  }
 
   private List<Object> values = new ArrayList<>();
 
@@ -40,6 +49,9 @@ public class TAGQLResult {
   }
 
   public List<Object> getValues() {
+    if (!isOk()) {
+      return new ArrayList<>();
+    }
     if (results.isEmpty()) {
       return values;
     }
@@ -50,4 +62,17 @@ public class TAGQLResult {
         .map(TAGQLResult::getValues)//
         .collect(Collectors.toList());
   }
+
+  public boolean isOk() {
+    return errors.isEmpty();
+  }
+
+  public List<String> getErrors() {
+    return errors;
+  }
+
+  public String getQuery() {
+    return query;
+  }
+
 }

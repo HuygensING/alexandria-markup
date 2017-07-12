@@ -171,4 +171,23 @@ public class TAGQLQueryHandlerTest {
     expected1.add(expectedEntry);
     assertThat(result1.getValues()).containsExactlyElementsOf(expected1);
   }
+
+  @Test
+  public void testTAGQLQueryWithSyntaxError() throws IOException, LMNLSyntaxError {
+    String lmnl = "[text}\n"//
+        + "[l}line 1{l]\n"//
+        + "[l}line 2{l]\n"//
+        + "[l}line 3{l]\n"//
+        + "{text]";
+    Document doc = new LMNLImporter().importLMNL(lmnl);
+
+    TAGQLQueryHandler h = new TAGQLQueryHandler(doc);
+
+    String statement1 = "select tekst from murkap";
+    TAGQLResult result1 = h.execute(statement1);
+    LOG.info("result1={}", result1);
+    assertThat(result1).isNotNull();
+    assertThat(result1.isOk()).isFalse();
+  }
+
 }

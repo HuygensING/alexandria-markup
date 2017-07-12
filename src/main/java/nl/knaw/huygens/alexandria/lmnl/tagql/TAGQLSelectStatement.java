@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.tagql;
  * #L%
  */
 
-
 import java.util.function.Function;
 import java.util.function.Predicate;
 
