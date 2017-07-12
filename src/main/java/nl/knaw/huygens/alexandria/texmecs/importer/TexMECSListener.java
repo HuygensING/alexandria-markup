@@ -21,9 +21,11 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   private boolean insideTagSet = false; // TODO: use this?
   private HashMap<String, Markup> identifiedMarkups = new HashMap<>();
   private HashMap<String, String> idsInUse = new HashMap<>();
+  private List<String> errors = new ArrayList<>();
 
   public TexMECSListener() {
   }
@@ -103,10 +106,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   public void exitSoleTag(SoleTagContext ctx) {
     TextNode tn = new TextNode("");
     limen.addTextNode(tn);
-
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     Markup markup = addMarkup(ctx.eid(), ctx.atts());
-
     linkTextToMarkup(tn, markup);
   }
 
@@ -118,13 +119,17 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   @Override
   public void exitSuspendTag(SuspendTagContext ctx) {
     Markup markup = removeFromOpenMarkup(ctx.gi());
-    suspendedMarkup.add(markup);
+    if (markup != null) {
+      suspendedMarkup.add(markup);
+    }
   }
 
   @Override
   public void exitResumeTag(ResumeTagContext ctx) {
     Markup markup = removeFromSuspendedMarkup(ctx);
-    openMarkup.add(markup);
+    if (markup != null) {
+      openMarkup.add(markup);
+    }
   }
 
   @Override
@@ -143,7 +148,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
       });
 
     } else {
-      throw new TexMECSSyntaxError("idref '" + idref + "' not found: No <" + extendedTag.replace("=", "@") + "| tag found that this virtual element refers to.");
+      String message = "idref '" + idref + "' not found: No <" + extendedTag.replace("=", "@") + "| tag found that this virtual element refers to.";
+      errors.add(message);
     }
 
   }
@@ -151,13 +157,27 @@ public class TexMECSListener extends TexMECSParserBaseListener {
   @Override
   public void exitDocument(TexMECSParser.DocumentContext ctx) {
     if (!openMarkup.isEmpty()) {
-      String openMarkupString = openMarkup.stream().map(TexMECSListener::startTag).collect(Collectors.joining(", "));
-      throw new TexMECSSyntaxError("Some markup was not closed: " + openMarkupString);
+      String openMarkupString = openMarkup.stream()//
+          .map(TexMECSListener::startTag)//
+          .collect(Collectors.joining(", "));
+      String message = "Some markup was not closed: " + openMarkupString;
+      errors.add(message);
     }
     if (!suspendedMarkup.isEmpty()) {
-      String suspendedMarkupString = suspendedMarkup.stream().map(TexMECSListener::suspendTag).collect(Collectors.joining(", "));
-      throw new TexMECSSyntaxError("Some suspended markup was not resumed: " + suspendedMarkupString);
+      String suspendedMarkupString = suspendedMarkup.stream()//
+          .map(TexMECSListener::suspendTag)//
+          .collect(Collectors.joining(", "));
+      String message = "Some suspended markup was not resumed: " + suspendedMarkupString;
+      errors.add(message);
     }
+  }
+
+  public boolean hasErrors() {
+    return !errors.isEmpty();
+  }
+
+  public List<String> getErrors() {
+    return errors;
   }
 
   private Markup addMarkup(EidContext eid, AttsContext atts) {
@@ -173,7 +193,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
       identifiedMarkups.put(extendedTag, markup);
       String id = markup.getId();
       if (idsInUse.containsKey(id)) {
-        throw new TexMECSSyntaxError("id '" + id + "' was aleady used in markup <" + idsInUse.get(id) + "|.");
+        String message = "id '" + id + "' was aleady used in markup <" + idsInUse.get(id) + "|.";
+        errors.add(message);
       }
       idsInUse.put(id, extendedTag);
     }
@@ -194,7 +215,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     String tag = gi.getText();
     Markup markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {
-      throw new TexMECSSyntaxError("Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.");
+      String message = "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
+      errors.add(message);
     }
     return markup;
   }
@@ -203,7 +225,8 @@ public class TexMECSListener extends TexMECSParserBaseListener {
     String tag = ctx.gi().getText();
     Markup markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
-      throw new TexMECSSyntaxError("Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.");
+      String message = "Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.";
+      errors.add(message);
     }
     return markup;
   }

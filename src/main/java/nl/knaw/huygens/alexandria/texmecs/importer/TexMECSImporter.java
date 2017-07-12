@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -58,20 +59,32 @@ public class TexMECSImporter {
 
   private Document importTexMECS(CharStream antlrInputStream) {
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
+    TexMECSErrorListener errorListener = new TexMECSErrorListener();
+    lexer.addErrorListener(errorListener);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     TexMECSParser parser = new TexMECSParser(tokens);
+    parser.addErrorListener(errorListener);
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
-    if (numberOfSyntaxErrors > 0) {
-      throw new RuntimeException(numberOfSyntaxErrors + " Syntax errors");
-    }
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TexMECSListener listener = new TexMECSListener();
     parseTreeWalker.walk(listener, parseTree);
     Document document = listener.getDocument();
     handleMarkupDominance(document.value());
+    String errorMsg = "";
+    if (listener.hasErrors()) {
+      String errors = listener.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg = "Parsing errors:\n" + errors;
+    }
+    if (numberOfSyntaxErrors > 0) {
+      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg += "\n\nTokenizing errors:\n" + errors;
+    }
+    if (!errorMsg.isEmpty()) {
+      throw new TexMECSSyntaxError(errorMsg);
+    }
     return document;
   }
 

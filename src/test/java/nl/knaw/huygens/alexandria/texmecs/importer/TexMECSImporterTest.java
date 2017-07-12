@@ -20,10 +20,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,7 +174,8 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("Some markup was not closed: <tag|");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("Some markup was not closed: <tag|");
     }
   }
 
@@ -183,7 +186,8 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("Closing tag |bla> found, which has no corresponding earlier opening tag.");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("Closing tag |bla> found, which has no corresponding earlier opening tag.");
     }
   }
 
@@ -194,7 +198,8 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("idref 'v12' not found: No <v@v12| tag found that this virtual element refers to.");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("idref 'v12' not found: No <v@v12| tag found that this virtual element refers to.");
     }
   }
 
@@ -205,7 +210,8 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("Closing tag |tag> found, which has no corresponding earlier opening tag.");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("Closing tag |tag> found, which has no corresponding earlier opening tag.");
     }
   }
 
@@ -216,7 +222,8 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
     }
   }
 
@@ -227,7 +234,21 @@ public class TexMECSImporterTest {
       Document document = testTexMECS(texMECS, "whatever");
       fail();
     } catch (TexMECSSyntaxError se) {
-      assertThat(se.getMessage()).isEqualTo("id 't1' was aleady used in markup <tag@t1|.");
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("id 't1' was aleady used in markup <tag@t1|.");
+    }
+  }
+
+  @Test
+  public void testSyntaxError4() throws IOException {
+    String pathname = "data/texmecs/acrostic-syntax-error.texmecs";
+    String texMECS = FileUtils.readFileToString(new File(pathname), Charsets.UTF_8);
+    try {
+      Document document = testTexMECS(texMECS, "whatever");
+      fail();
+    } catch (TexMECSSyntaxError se) {
+      LOG.warn(se.getMessage());
+      assertThat(se.getMessage()).contains("Parsing errors");
     }
   }
 

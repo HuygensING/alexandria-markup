@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -62,7 +61,7 @@ public class ImportDataTexMECSTest {
     }
 
     private boolean isTexMECS(String name) {
-      return name.endsWith(".texmecs");
+      return name.endsWith(".texmecs") && !name.contains("syntax-error");
     }
   };
 

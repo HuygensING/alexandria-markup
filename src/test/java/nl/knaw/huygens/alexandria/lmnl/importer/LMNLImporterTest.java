@@ -424,6 +424,18 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     }
   }
 
+  @Test
+  public void testAcrosticFileThrowsSyntaxError() throws IOException {
+    String pathname = "data/lmnl/acrostic-syntax-error.lmnl";
+    InputStream input = FileUtils.openInputStream(new File(pathname));
+    try {
+      Document actual = new LMNLImporter().importLMNL(input);
+      fail("no LMNLSyntaxError thrown");
+    } catch (LMNLSyntaxError e) {
+      assertThat(e).hasMessage("Unclosed LMNL range(s): [H}, [name}, [T}, [name}, [lizabeth}, [name=a}");
+    }
+  }
+
   private void compareLMNL(String pathname, Document actual) throws IOException {
     String inLMNL = FileUtils.readFileToString(new File(pathname), "UTF-8");
     String outLMNL = lmnlExporter.toLMNL(actual);
