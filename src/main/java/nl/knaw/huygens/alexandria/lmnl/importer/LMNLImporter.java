@@ -10,6 +10,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -57,9 +58,11 @@ public class LMNLImporter {
     private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<Markup> openMarkupStack = new Stack<>();
     private final Stack<Annotation> annotationStack = new Stack<>();
+    private ImporterContext importerContext;
 
-    LimenContext(Limen limen) {
+    LimenContext(Limen limen, ImporterContext importerContext) {
       this.limen = limen;
+      this.importerContext = importerContext;
     }
 
     void openMarkup(Markup markup) {
@@ -70,16 +73,20 @@ public class LMNLImporter {
 
     void pushOpenMarkup(String rangeName) {
       // LOG.info("currentLimenContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
-      Markup markup = openMarkupDeque.stream()//
+      Optional<Markup> findFirst = openMarkupDeque.stream()//
           .filter(tr -> tr.getExtendedTag().equals(rangeName))//
-          .findFirst()//
-          .orElseThrow(() -> new LMNLSyntaxError("Closing tag {" + rangeName + "] found without corresponding open tag."));
-      if (markup.textNodes.isEmpty()) {
-        // every markup should have at least one textNode
-        addTextNode(new TextNode(""));
-        closeMarkup();
+          .findFirst();
+      if (findFirst.isPresent()) {
+        Markup markup = findFirst.get();
+        if (markup.textNodes.isEmpty()) {
+          // every markup should have at least one textNode
+          addTextNode(new TextNode(""));
+          closeMarkup();
+        }
+        openMarkupStack.push(markup);
+      } else {
+        importerContext.errors.add("Closing tag {" + rangeName + "] found without corresponding open tag.");
       }
-      openMarkupStack.push(markup);
     }
 
     void popOpenMarkup() {
@@ -146,7 +153,7 @@ public class LMNLImporter {
     }
 
     void pushLimenContext(Limen limen) {
-      limenContextStack.push(new LimenContext(limen));
+      limenContextStack.push(new LimenContext(limen, this));
     }
 
     LimenContext currentLimenContext() {
@@ -427,7 +434,7 @@ public class LMNLImporter {
   private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
     String message = methodName + ": unexpected rule/token: token=" + token + ", ruleName=" + ruleName + ", mode=" + modeName;
     LOG.error(message);
-    throw new RuntimeException(message);
+    throw new LMNLSyntaxError(message);
   }
 
   private static void joinDiscontinuedRanges(Document document) {

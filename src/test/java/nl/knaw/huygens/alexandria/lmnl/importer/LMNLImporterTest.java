@@ -425,6 +425,18 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   }
 
   @Test
+  public void testSyntaxError() {
+    String input = "[a}bla{b]";
+    try {
+      Document actual = new LMNLImporter().importLMNL(input);
+      fail("no LMNLSyntaxError thrown");
+    } catch (LMNLSyntaxError e) {
+      assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [a}");
+      assertThat(e.getMessage()).contains("Closing tag {b] found without corresponding open tag.");
+    }
+  }
+
+  @Test
   public void testAcrosticFileThrowsSyntaxError() throws IOException {
     String pathname = "data/lmnl/acrostic-syntax-error.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
