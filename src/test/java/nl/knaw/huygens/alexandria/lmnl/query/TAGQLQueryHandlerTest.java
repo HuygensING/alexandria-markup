@@ -36,6 +36,8 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
+import javax.json.Json;
+
 public class TAGQLQueryHandlerTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
 
@@ -57,7 +59,7 @@ public class TAGQLQueryHandlerTest {
     String statement = "select text from markup where name='q'";
     TAGQLResult result = h.execute(statement);
     LOG.info("result={}", result);
-    assertThat(result).isNotNull();
+    assertQuerySucceeded(result);
     List<String> expected = new ArrayList<>();
     expected.add("and what is the use of a book,without pictures or conversation?");
     assertThat(result.getValues()).containsExactlyElementsOf(expected);
@@ -77,7 +79,7 @@ public class TAGQLQueryHandlerTest {
     String statement1 = "select text from markup('l')[0]";
     TAGQLResult result1 = h.execute(statement1);
     LOG.info("result1.values={}", result1.getValues());
-    assertThat(result1).isNotNull();
+    assertQuerySucceeded(result1);
     List<String> expected1 = new ArrayList<>();
     expected1.add("line 1");
     assertThat(result1.getValues()).containsExactlyElementsOf(expected1);
@@ -85,7 +87,7 @@ public class TAGQLQueryHandlerTest {
     String statement2 = "select text from markup('l')[2]";
     TAGQLResult result2 = h.execute(statement2);
     LOG.info("result2.values={}", result2.getValues());
-    assertThat(result2).isNotNull();
+    assertQuerySucceeded(result2);
     List<String> expected2 = new ArrayList<>();
     expected2.add("line 3");
     assertThat(result2.getValues()).containsExactlyElementsOf(expected2);
@@ -93,12 +95,17 @@ public class TAGQLQueryHandlerTest {
     String statement3 = "select text from markup('l')";
     TAGQLResult result3 = h.execute(statement3);
     LOG.info("result3.values={}", result3.getValues());
-    assertThat(result3).isNotNull();
+    assertQuerySucceeded(result3);
     List<String> expected3 = new ArrayList<>();
     expected3.add("line 1");
     expected3.add("line 2");
     expected3.add("line 3");
     assertThat(result3.getValues()).containsExactlyElementsOf(expected3);
+  }
+
+  private void assertQuerySucceeded(TAGQLResult result) {
+    assertThat(result).isNotNull();
+    assertThat(result.isOk()).isTrue();
   }
 
   @Test
@@ -115,7 +122,7 @@ public class TAGQLQueryHandlerTest {
     String statement1 = "select annotationText('source:chapter') from markup where name='excerpt'";
     TAGQLResult result1 = h.execute(statement1);
     LOG.info("result1={}", result1);
-    assertThat(result1).isNotNull();
+    assertQuerySucceeded(result1);
     List<List<String>> expected1 = new ArrayList<>();
     List<String> expectedEntry = new ArrayList<>();
     expectedEntry.add("12");
@@ -146,7 +153,7 @@ public class TAGQLQueryHandlerTest {
     String statement1 = "select annotationText('n') from markup where name='page' and text contains 'Volney'";
     TAGQLResult result1 = h.execute(statement1);
     LOG.info("result1={}", result1);
-    assertThat(result1).isNotNull();
+    assertQuerySucceeded(result1);
     List<List<String>> expected1 = new ArrayList<>();
     List<String> expectedEntry = new ArrayList<>();
     expectedEntry.add("102");
@@ -164,7 +171,7 @@ public class TAGQLQueryHandlerTest {
     String statement1 = "select distinct(annotationText('who')) from markup where name='said'";
     TAGQLResult result1 = h.execute(statement1);
     LOG.info("result1={}", result1);
-    assertThat(result1).isNotNull();
+    assertQuerySucceeded(result1);
     List<List<String>> expected1 = new ArrayList<>();
     List<String> expectedEntry = new ArrayList<>();
     expectedEntry.add("Creature");
@@ -186,7 +193,6 @@ public class TAGQLQueryHandlerTest {
     String statement1 = "select tekst from murkap";
     TAGQLResult result1 = h.execute(statement1);
     LOG.info("result1={}", result1);
-    assertThat(result1).isNotNull();
     assertThat(result1.isOk()).isFalse();
   }
 
