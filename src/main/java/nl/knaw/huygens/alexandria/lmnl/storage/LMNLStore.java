@@ -8,8 +8,8 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.persist.EntityStore;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.dto.AnnotationDTO;
-import nl.knaw.huygens.alexandria.lmnl.storage.dto.LimenDTO;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.AnnotationDAO;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.LimenDAO;
 
 public class LMNLStore {
 
@@ -54,16 +54,16 @@ public class LMNLStore {
     }
   }
 
-  public Long putLimen(LimenDTO limen) {
+  public Long putLimen(LimenDAO limen) {
     Long createdId = 0L;
     return createdId;
   }
 
-  public LimenDTO getLimen(Long limenId) {
+  public LimenDAO getLimen(Long limenId) {
     return null;
   }
 
-  public Long putAnnotation(AnnotationDTO annotation) {
+  public Long putAnnotation(AnnotationDAO annotation) {
     return 0L;
   }
 }

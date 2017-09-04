@@ -2,9 +2,8 @@ package nl.knaw.huygens.alexandria.lmnl.storage;
 
 import org.junit.Test;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.LMNLStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dto.LimenDTO;
-import nl.knaw.huygens.alexandria.lmnl.storage.dto.TextNodeDTO;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.LimenDAO;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TextNodeDAO;
 
 public class LMNLStoreTest {
 
@@ -12,14 +11,14 @@ public class LMNLStoreTest {
   public void testLMNLStore() {
     LMNLStore store = new LMNLStore("out", false);
     store.open();
-    LimenDTO limen = new LimenDTO();
-    TextNodeDTO textNode = new TextNodeDTO();
+    LimenDAO limen = new LimenDAO();
+    TextNodeDAO textNode = new TextNodeDAO();
     textNode.setText("something");
     Long limenId = store.putLimen(limen);
     store.close();
 
     store.open();
-    LimenDTO storedLimen = store.getLimen(limenId);
+    LimenDAO storedLimen = store.getLimen(limenId);
     store.close();
   }
 
