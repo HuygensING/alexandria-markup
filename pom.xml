@@ -13,6 +13,8 @@
     <encoding>UTF-8</encoding>
     <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
+    <project.license.name>Apache License version 2.0</project.license.name>
+    <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
     <java.version>1.8</java.version>
 
     <antlr.version>4.7</antlr.version>
@@ -22,18 +24,16 @@
     <commons-io.version>2.5</commons-io.version>
     <commons-lang3.version>3.5</commons-lang3.version>
     <freemarker.version>2.3.26-incubating</freemarker.version>
+    <guava.version>21.0</guava.version>
     <jacoco.version>0.7.9</jacoco.version>
     <junit.version>4.12</junit.version>
     <logback.version>1.2.3</logback.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
 
-    <wagon-ssh.version>2.7</wagon-ssh.version>
     <maven-compiler.version>3.5.1</maven-compiler.version>
     <maven-jar.version>2.6</maven-jar.version>
     <maven-license.version>1.8</maven-license.version>
-
-    <project.license.name>Apache License version 2.0</project.license.name>
-    <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
+    <wagon-ssh.version>2.7</wagon-ssh.version>
   </properties>
 
   <organization>
@@ -282,6 +282,11 @@
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
   </dependencies>
 
