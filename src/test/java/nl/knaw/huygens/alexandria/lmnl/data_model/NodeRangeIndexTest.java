@@ -74,7 +74,7 @@ public class NodeRangeIndexTest {
         + "{p]{excerpt]";
     NodeRangeIndex index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a
-    assertThat(textNodeIndices).containsExactly(3, 5);
+    assertThat(textNodeIndices).containsExactly(1, 3);
 
     Set<Integer> rangeIndices = index.getRanges(1); // indices of ranges that contain textnode 1
     assertThat(rangeIndices).containsExactly(0, 1, 2); // excerpt,p,q=a

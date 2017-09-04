@@ -111,13 +111,17 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Document expected = new Document();
     Limen limen = expected.value();
 
-    TextNode tn00 = new TextNode("He manages to keep the upper hand");
-    TextNode tn01 = new TextNode("On his own farm.").setPreviousTextNode(tn00);
-    TextNode tn02 = new TextNode(" ").setPreviousTextNode(tn01);
-    TextNode tn03 = new TextNode("He's boss.").setPreviousTextNode(tn02);
+    TextNode tn00 = new TextNode("\n");
+    TextNode tn01 = new TextNode("He manages to keep the upper hand").setPreviousTextNode(tn00);
+    TextNode tn02 = new TextNode("\n").setPreviousTextNode(tn01);
+    TextNode tn03 = new TextNode("On his own farm.").setPreviousTextNode(tn02);
     TextNode tn04 = new TextNode(" ").setPreviousTextNode(tn03);
-    TextNode tn05 = new TextNode("But as to hens:").setPreviousTextNode(tn04);
-    TextNode tn06 = new TextNode("We fence our flowers in and the hens range.").setPreviousTextNode(tn05);
+    TextNode tn05 = new TextNode("He's boss.").setPreviousTextNode(tn04);
+    TextNode tn06 = new TextNode(" ").setPreviousTextNode(tn05);
+    TextNode tn07 = new TextNode("But as to hens:").setPreviousTextNode(tn06);
+    TextNode tn08 = new TextNode("\n").setPreviousTextNode(tn07);
+    TextNode tn09 = new TextNode("We fence our flowers in and the hens range.").setPreviousTextNode(tn08);
+    TextNode tn10 = new TextNode("\n").setPreviousTextNode(tn09);
 
     Annotation date = simpleAnnotation("date", "1915");
     Annotation title = simpleAnnotation("title", "The Housekeeper");
@@ -128,27 +132,17 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
     Annotation n144 = simpleAnnotation("n", "144");
     Annotation n145 = simpleAnnotation("n", "145");
     Annotation n146 = simpleAnnotation("n", "146");
-    Markup excerpt = new Markup(limen, "excerpt")
-        .addAnnotation(source)
-        .addAnnotation(author)
-        .setFirstAndLastTextNode(tn00, tn06);
+    Markup excerpt = new Markup(limen, "excerpt").addAnnotation(source).addAnnotation(author).setFirstAndLastTextNode(tn00, tn10);
     // 3 sentences
-    Markup s1 = new Markup(limen, "s").setFirstAndLastTextNode(tn00, tn01);
-    Markup s2 = new Markup(limen, "s").setOnlyTextNode(tn03);
-    Markup s3 = new Markup(limen, "s").setFirstAndLastTextNode(tn05, tn06);
+    Markup s1 = new Markup(limen, "s").setFirstAndLastTextNode(tn01, tn03);
+    Markup s2 = new Markup(limen, "s").setOnlyTextNode(tn05);
+    Markup s3 = new Markup(limen, "s").setFirstAndLastTextNode(tn07, tn09);
     // 3 lines
-    Markup l1 = new Markup(limen, "l").setOnlyTextNode(tn00).addAnnotation(n144);
-    Markup l2 = new Markup(limen, "l").setFirstAndLastTextNode(tn01, tn05).addAnnotation(n145);
-    Markup l3 = new Markup(limen, "l").setOnlyTextNode(tn06).addAnnotation(n146);
+    Markup l1 = new Markup(limen, "l").setOnlyTextNode(tn01).addAnnotation(n144);
+    Markup l2 = new Markup(limen, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+    Markup l3 = new Markup(limen, "l").setOnlyTextNode(tn09).addAnnotation(n146);
 
-    limen.setFirstAndLastTextNode(tn00, tn06)
-        .addMarkup(excerpt)
-        .addMarkup(s1)
-        .addMarkup(l1)
-        .addMarkup(l2)
-        .addMarkup(s2)
-        .addMarkup(s3)
-        .addMarkup(l3);
+    limen.setFirstAndLastTextNode(tn00, tn10).addMarkup(excerpt).addMarkup(s1).addMarkup(l1).addMarkup(l2).addMarkup(s2).addMarkup(s3).addMarkup(l3);
 
     assertActualMatchesExpected(actual, expected);
 
