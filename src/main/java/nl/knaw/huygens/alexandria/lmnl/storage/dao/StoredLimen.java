@@ -18,7 +18,7 @@ public class StoredLimen {
   private List<Long> textNodeIds = new ArrayList<>();
 
   @SecondaryKey(relate = ONE_TO_MANY)
-  private List<Long> textRangeIds = new ArrayList<>();
+  private List<Long> markupIds = new ArrayList<>();
 
   public long getId() {
     return id;
@@ -32,11 +32,11 @@ public class StoredLimen {
     this.textNodeIds = textNodeIds;
   }
 
-  public List<Long> getTextRangeIds() {
-    return textRangeIds;
+  public List<Long> getMarkupIds() {
+    return markupIds;
   }
 
-  public void setTextRangeIds(List<Long> textRangeIds) {
-    this.textRangeIds = textRangeIds;
+  public void setMarkupIds(List<Long> markupIds) {
+    this.markupIds = markupIds;
   }
 }

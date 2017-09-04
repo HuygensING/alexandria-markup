@@ -7,7 +7,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
-public class StoredTextRange {
+public class StoredMarkup {
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private long id;
 
