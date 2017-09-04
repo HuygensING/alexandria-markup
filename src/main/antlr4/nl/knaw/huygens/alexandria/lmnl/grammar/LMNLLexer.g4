@@ -183,22 +183,18 @@ ANNO_TEXT  // match any 16 bit char other than { (start close tag) and [ (start 
 
 // ----------------- lots of repeated stuff --------------------------
 
-fragment
 TagOpenStartChar
   : '['
   ;
 
-fragment
 TagOpenEndChar
   : '}'
   ;
 
-fragment
 TagCloseStartChar
   : '{'
   ;
 
-fragment
 TagCloseEndChar
   : ']'
   ;
@@ -224,12 +220,12 @@ NameStartChar
 
 fragment
 DIGIT
-  :  [0-9]
+  : [0-9]
   ;
 
 fragment
 WS
-  :  [ \t\r\n]
+  : [ \t\r\n]
   ;
 
 //UNEXPECTED_CHAR // Throw unexpected token exception

@@ -1,5 +1,29 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+/*
+ * #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  * <p>
@@ -10,6 +34,7 @@ public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
   private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
+  private Set<Markup> parents = new HashSet<>();
 
   public TextNode(String content) {
     this.content = content;
@@ -43,13 +68,25 @@ public class TextNode {
     return nextTextNode;
   }
 
-  @Override
-  public String toString() {
-    return "\"" + content.replace("\n", "\\n") + "\"";
-  }
-
   public void setContent(String content) {
     this.content = content;
 
+  }
+
+  public void addParent(Markup parent) {
+    parents.add(parent);
+  }
+
+  public void removeParent(Markup parent) {
+    parents.remove(parent);
+  }
+
+  public Set<Markup> getParents() {
+    return parents;
+  }
+
+  @Override
+  public String toString() {
+    return "\"" + content.replace("\n", "\\n") + "\"";
   }
 }

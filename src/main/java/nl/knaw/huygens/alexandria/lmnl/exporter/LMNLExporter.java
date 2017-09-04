@@ -1,13 +1,40 @@
 package nl.knaw.huygens.alexandria.lmnl.exporter;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextRange;
+/*
+ * #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -25,56 +52,53 @@ public class LMNLExporter {
     StringBuilder lmnlBuilder = new StringBuilder();
     Limen limen = document.value();
     appendLimen(lmnlBuilder, limen);
-//        LOG.info("LMNL={}", lmnlBuilder);
+    // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
   private void appendLimen(StringBuilder lmnlBuilder, Limen limen) {
     if (limen != null) {
-      Set<TextRange> openTextRanges = new LinkedHashSet<>();
+      Deque<Markup> openMarkups = new ArrayDeque<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
-        Set<TextRange> textRanges = limen.getTextRanges(tn);
+        Set<Markup> markups = limen.getMarkups(tn);
 
-        List<TextRange> toClose = new ArrayList<>();
-        toClose.addAll(openTextRanges);
-        toClose.removeAll(textRanges);
+        List<Markup> toClose = new ArrayList<>();
+        toClose.addAll(openMarkups);
+        toClose.removeAll(markups);
         Collections.reverse(toClose);
         toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
 
-        List<TextRange> toOpen = new ArrayList<>();
-        toOpen.addAll(textRanges);
-        toOpen.removeAll(openTextRanges);
+        List<Markup> toOpen = new ArrayList<>();
+        toOpen.addAll(markups);
+        toOpen.removeAll(openMarkups);
         toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
 
-        openTextRanges.removeAll(toClose);
-        openTextRanges.addAll(toOpen);
+        openMarkups.removeAll(toClose);
+        openMarkups.addAll(toOpen);
         lmnlBuilder.append(tn.getContent());
       });
-      openTextRanges.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
+      openMarkups.descendingIterator()//
+          .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
     }
   }
 
-  private StringBuilder toCloseTag(TextRange textRange) {
-    return textRange.isAnonymous()
-            ? new StringBuilder()
-            : new StringBuilder("{").append(textRange.getTag()).append("]");
+  private StringBuilder toCloseTag(Markup markup) {
+    return markup.isAnonymous()//
+        ? new StringBuilder()//
+        : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(TextRange textRange) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(textRange.getTag());
-    textRange.getAnnotations().forEach(a ->
-            tagBuilder.append(" ").append(toLMNL(a))
-    );
-    return textRange.isAnonymous()
-            ? tagBuilder.append("]")
-            : tagBuilder.append("}");
+  private StringBuilder toOpenTag(Markup markup) {
+    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+    markup.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+    return markup.isAnonymous()//
+        ? tagBuilder.append("]")//
+        : tagBuilder.append("}");
   }
 
   public StringBuilder toLMNL(Annotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotations().forEach(a1 ->
-            annotationBuilder.append(" ").append(toLMNL(a1))
-    );
+    annotation.getAnnotations().forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
     Limen limen = annotation.value();
     if (limen.hasTextNodes()) {
       annotationBuilder.append("}");

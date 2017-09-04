@@ -1,5 +1,26 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+/*
+ * #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -18,13 +39,13 @@ import java.util.Set;
 public class Limen {
 
   public final List<TextNode> textNodeList;
-  public final List<TextRange> textRangeList;
-  private final Map<TextNode, Set<TextRange>> textNodeToTextRange;
+  public final List<Markup> markupList;
+  private final Map<TextNode, Set<Markup>> textNodeToMarkup;
 
   public Limen() {
     this.textNodeList = new ArrayList<>();
-    this.textRangeList = new ArrayList<>();
-    this.textNodeToTextRange = new LinkedHashMap<>();
+    this.markupList = new ArrayList<>();
+    this.textNodeToMarkup = new LinkedHashMap<>();
   }
 
   public Limen addTextNode(TextNode textNode) {
@@ -56,35 +77,35 @@ public class Limen {
     return this;
   }
 
-  public Limen addTextRange(TextRange textRange) {
-    this.textRangeList.add(textRange);
+  public Limen addMarkup(Markup markup) {
+    this.markupList.add(markup);
     return this;
   }
 
-  public void associateTextWithRange(TextNode node, TextRange textRange) {
-    textNodeToTextRange.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(textRange);
+  public void associateTextWithRange(TextNode node, Markup markup) {
+    textNodeToMarkup.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(markup);
   }
 
-  public void disAssociateTextWithRange(TextNode node, TextRange textRange) {
-    textNodeToTextRange.computeIfAbsent(node, f -> new LinkedHashSet<>()).remove(textRange);
+  public void disAssociateTextWithRange(TextNode node, Markup markup) {
+    textNodeToMarkup.computeIfAbsent(node, f -> new LinkedHashSet<>()).remove(markup);
   }
 
   public Iterator<TextNode> getTextNodeIterator() {
     return this.textNodeList.iterator();
   }
 
-  public Set<TextRange> getTextRanges(TextNode node) {
-    Set<TextRange> textRanges = textNodeToTextRange.get(node);
-    return textRanges == null ? new LinkedHashSet<>() : textRanges;
+  public Set<Markup> getMarkups(TextNode node) {
+    Set<Markup> markups = textNodeToMarkup.get(node);
+    return markups == null ? new LinkedHashSet<>() : markups;
   }
 
   public boolean hasTextNodes() {
     return !textNodeList.isEmpty();
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TextRange textRange) {
+  public boolean containsAtLeastHalfOfAllTextNodes(Markup markup) {
     int textNodeSize = textNodeList.size();
     return textNodeSize > 2 //
-        && textRange.textNodes.size() >= textNodeSize / 2d;
+        && markup.textNodes.size() >= textNodeSize / 2d;
   }
 }

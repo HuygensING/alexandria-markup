@@ -24,7 +24,7 @@
 		    align=center,
 		    text depth = 0pt
 		},
-		textRangeAxis/.style={
+		markupAxis/.style={
 			top color=white,
 		    bottom color=green!25,
 		    circle,
@@ -47,6 +47,6 @@
 ${body}
 		\end{tikzpicture}
 		\centering
-		\caption*{(a,b) = (TextNodeIndex, TextRangeIndex)}
+		\caption*{(a,b) = (TextNodeIndex, MarkupIndex)}
 	\end{figure}
 \end{document}

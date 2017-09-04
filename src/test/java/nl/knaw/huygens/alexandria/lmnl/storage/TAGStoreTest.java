@@ -8,8 +8,8 @@ import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredTextNode;
 
 public class TAGStoreTest {
 
-  @Test
-  public void testLMNLStore() {
+//  @Test
+  public void testTAGStore() {
     TAGStore store = new TAGStore("out", false);
     store.open();
     StoredLimen limen = new StoredLimen();
