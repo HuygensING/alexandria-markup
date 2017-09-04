@@ -4,22 +4,22 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.AnnotationDAO;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.LimenDAO;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TextNodeDAO;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TextRangeDAO;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredAnnotation;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredLimen;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredTextNode;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredTextRange;
 
 public class DataAccessor {
-  PrimaryIndex<Long, LimenDAO> limenById;
-  PrimaryIndex<Long, TextNodeDAO> textNodeById;
-  PrimaryIndex<Long, TextRangeDAO> textRangeById;
-  PrimaryIndex<Long, AnnotationDAO> annotationById;
+  PrimaryIndex<Long, StoredLimen> limenById;
+  PrimaryIndex<Long, StoredTextNode> textNodeById;
+  PrimaryIndex<Long, StoredTextRange> textRangeById;
+  PrimaryIndex<Long, StoredAnnotation> annotationById;
 
   public DataAccessor(EntityStore store) throws DatabaseException {
-    limenById = store.getPrimaryIndex(Long.class, LimenDAO.class);
-    textNodeById = store.getPrimaryIndex(Long.class, TextNodeDAO.class);
-    textRangeById = store.getPrimaryIndex(Long.class, TextRangeDAO.class);
-    annotationById = store.getPrimaryIndex(Long.class, AnnotationDAO.class);
+    limenById = store.getPrimaryIndex(Long.class, StoredLimen.class);
+    textNodeById = store.getPrimaryIndex(Long.class, StoredTextNode.class);
+    textRangeById = store.getPrimaryIndex(Long.class, StoredTextRange.class);
+    annotationById = store.getPrimaryIndex(Long.class, StoredAnnotation.class);
   }
 
 }

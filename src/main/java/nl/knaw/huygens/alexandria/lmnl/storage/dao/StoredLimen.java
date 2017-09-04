@@ -10,11 +10,11 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
-public class LimenDAO {
+public class StoredLimen {
   @PrimaryKey(sequence = "limen_pk_sequence")
   private long id;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TextNodeDAO.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = StoredTextNode.class)
   private List<Long> textNodeIds = new ArrayList<>();
 
   @SecondaryKey(relate = ONE_TO_MANY)

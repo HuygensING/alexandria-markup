@@ -4,7 +4,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
-public class TextNodeDAO {
+public class StoredTextNode {
   @PrimaryKey(sequence = "textnode_pk_sequence")
   private long id;
 
