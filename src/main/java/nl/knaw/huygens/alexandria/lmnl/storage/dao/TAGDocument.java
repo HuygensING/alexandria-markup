@@ -10,11 +10,12 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
-public class StoredLimen {
-  @PrimaryKey(sequence = "limen_pk_sequence")
+public class TAGDocument {
+  // previously: Limen
+  @PrimaryKey(sequence = "document_pk_sequence")
   private long id;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = StoredTextNode.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNode.class)
   private List<Long> textNodeIds = new ArrayList<>();
 
   @SecondaryKey(relate = ONE_TO_MANY)

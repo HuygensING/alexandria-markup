@@ -7,9 +7,10 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredAnnotation;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredLimen;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredTextNode;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,37 +75,42 @@ public class TAGStore {
     }
   }
 
-  public Long putLimen(StoredLimen limen) {
+  public Long putLimen(TAGDocument limen) {
     assertInTransaction();
     da.limenById.put(limen);
     return limen.getId();
   }
 
-  public StoredLimen getLimen(Long limenId) {
+  public TAGDocument getLimen(Long limenId) {
     assertInTransaction();
     return da.limenById.get(limenId);
   }
 
-  public Long putAnnotation(StoredAnnotation annotation) {
+  public Long putAnnotation(TAGAnnotation annotation) {
     assertInTransaction();
     da.annotationById.put(tx, annotation);
     return annotation.getId();
   }
 
-  public StoredAnnotation getAnnotation(Long annotationId) {
+  public TAGAnnotation getAnnotation(Long annotationId) {
     assertInTransaction();
     return da.annotationById.get(annotationId);
   }
 
-  public Long putTextNode(StoredTextNode textNode) {
+  public Long putTextNode(TAGTextNode textNode) {
     assertInTransaction();
     da.textNodeById.put(textNode);
     return textNode.getId();
   }
 
-  public StoredTextNode getTextNode(Long textNodeId) {
+  public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(textNodeId);
+  }
+
+  public TAGMarkup getMarkup(Long markupId) {
+    assertInTransaction();
+    return da.markupById.get(markupId);
   }
 
   public void runInTransaction(Runnable runner) {

@@ -4,7 +4,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
-public class StoredTextNode {
+public class TAGTextNode {
   @PrimaryKey(sequence = "textnode_pk_sequence")
   private long id;
 
@@ -12,6 +12,10 @@ public class StoredTextNode {
 
   private long prevTextNodeId;
   private long nextTextNodeId;
+
+  public TAGTextNode(String text) {
+    this.text = text;
+  }
 
   public long getId() {
     return id;
@@ -21,8 +25,9 @@ public class StoredTextNode {
     return text;
   }
 
-  public void setText(String text) {
+  public TAGTextNode setText(String text) {
     this.text = text;
+    return this;
   }
 
   public long getPrevTextNodeId() {

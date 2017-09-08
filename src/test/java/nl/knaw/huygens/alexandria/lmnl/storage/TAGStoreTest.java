@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.storage;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredLimen;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.StoredTextNode;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -15,12 +15,11 @@ public class TAGStoreTest {
     store.open();
 
     AtomicLong limenId = new AtomicLong();
-    StoredTextNode textNode = new StoredTextNode();
-    textNode.setText("something");
+    TAGTextNode textNode = new TAGTextNode("something");
     store.runInTransaction(() -> {
       Long textNodeId = store.putTextNode(textNode);
 
-      StoredLimen limen = new StoredLimen();
+      TAGDocument limen = new TAGDocument();
       limen.getTextNodeIds().add(textNode.getId());
       limenId.set(store.putLimen(limen));
     });
@@ -30,7 +29,7 @@ public class TAGStoreTest {
     store.open();
 
     store.runInTransaction(() -> {
-      StoredLimen storedLimen = store.getLimen(limenId.get());
+      TAGDocument storedLimen = store.getLimen(limenId.get());
       assertThat(storedLimen.getTextNodeIds()).contains(textNode.getId());
     });
 
