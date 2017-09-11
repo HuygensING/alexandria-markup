@@ -11,10 +11,16 @@ import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.AnnotationWrapper;
+import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.TextNodeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class TAGStore {
@@ -81,7 +87,7 @@ public class TAGStore {
     return limen.getId();
   }
 
-  public TAGDocument getLimen(Long limenId) {
+  public TAGDocument getDocument(Long limenId) {
     assertInTransaction();
     return da.limenById.get(limenId);
   }
@@ -220,5 +226,30 @@ public class TAGStore {
     Preconditions.checkState(getTransactionIsOpen(), "We're not in an open transaction!");
   }
 
+
+  public Set<TAGMarkup> getMarkupsForTextNode(TAGTextNode tn) {
+    // TODO
+    return new HashSet<>();
+  }
+
+  public DocumentWrapper createDocumentWrapper() {
+    TAGDocument document = new TAGDocument();
+    return new DocumentWrapper(this, document);
+  }
+
+  public TextNodeWrapper createTextNodeWrapper(String content) {
+    TAGTextNode textNode = new TAGTextNode(content);
+    return new TextNodeWrapper(this, textNode);
+  }
+
+  public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
+    TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
+    return new MarkupWrapper(this, markup);
+  }
+
+  public AnnotationWrapper createAnnotationWrapper(String tag) {
+    TAGAnnotation annotation = new TAGAnnotation(tag);
+    return new AnnotationWrapper(this, annotation);
+  }
 
 }

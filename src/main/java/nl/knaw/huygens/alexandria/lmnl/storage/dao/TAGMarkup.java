@@ -2,6 +2,8 @@ package nl.knaw.huygens.alexandria.lmnl.storage.dao;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
+import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -17,10 +19,17 @@ public class TAGMarkup {
   private String tag;
   private List<Long> annotationIds = new ArrayList<>();
   private List<Long> textNodeIds = new ArrayList<>();
-  private long limenIid;
+  private long documentId;
+  private boolean isAnonymous = true;
+  private boolean isContinuous = true;
 
-  public TAGMarkup(long limenIid, String tagName) {
-    this.limenIid = limenIid;
+  public TAGMarkup(long documentId, String tagName) {
+    this.documentId = documentId;
+    this.tag = tagName;
+  }
+
+  public TAGMarkup(TAGDocument document, String tagName) {
+    this.documentId = document.getId();
     this.tag = tagName;
   }
 
@@ -70,8 +79,9 @@ public class TAGMarkup {
     textNodeIds.add(textNode.getId());
   }
 
-  public void addAnnotation(TAGAnnotation annotation) {
+  public TAGMarkup addAnnotation(TAGAnnotation annotation) {
     annotationIds.add(annotation.getId());
+    return this;
   }
 
   public boolean hasN() {
@@ -84,5 +94,19 @@ public class TAGMarkup {
 
   public void joinWith(TAGMarkup markup) {
     // TODO
+  }
+
+  public boolean isAnonymous() {
+    // TODO
+    return isAnonymous;
+  }
+
+  public boolean isContinuous() {
+    // TODO
+    return isContinuous;
+  }
+
+  public Long getDocumentId() {
+    return documentId;
   }
 }

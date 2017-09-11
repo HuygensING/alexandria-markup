@@ -167,7 +167,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   }
 
   /**
-   * Adds value to the tree. Tree can contain multiple equal values.
+   * Adds getDocumentId to the tree. Tree can contain multiple equal values.
    *
    * @param value T to add to the tree.
    * @return True if successfully added to tree.
@@ -208,10 +208,10 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   }
 
   /**
-   * Does the tree contain the value.
+   * Does the tree contain the getDocumentId.
    *
    * @param value T to locate in the tree.
-   * @return True if tree contains value.
+   * @return True if tree contains getDocumentId.
    */
   public boolean contains(T value) {
     if (value == null || root == null)
@@ -252,10 +252,10 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   }
 
   /**
-   * Removes first occurrence of value in the tree.
+   * Removes first occurrence of getDocumentId in the tree.
    *
    * @param value T to remove from the tree.
-   * @return True if value was removed from the tree.
+   * @return True if getDocumentId was removed from the tree.
    */
   public boolean remove(T value) {
     if (value == null || root == null)
@@ -328,22 +328,22 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // *
   // * @param K Number of neighbors to retrieve. Can return more than K, if
   // * last nodes are equal distances.
-  // * @param value to find neighbors of.
+  // * @param getDocumentId to find neighbors of.
   // * @return Collection of T neighbors.
   // */
   // @SuppressWarnings("unchecked")
-  // public <T extends IndexPoint> Collection<T> nearestNeighbourSearch(int K, T value) {
-  // if (value == null || root == null)
+  // public <T extends IndexPoint> Collection<T> nearestNeighbourSearch(int K, T getDocumentId) {
+  // if (getDocumentId == null || root == null)
   // return Collections.EMPTY_LIST;
   //
   // // Map used for results
-  // TreeSet<KdNode> results = new TreeSet<KdNode>(new EuclideanComparator(value));
+  // TreeSet<KdNode> results = new TreeSet<KdNode>(new EuclideanComparator(getDocumentId));
   //
   // // Find the closest leaf node
   // KdNode prev = null;
   // KdNode node = root;
   // while (node != null) {
-  // if (KdNode.compareTo(node.depth, node.k, value, node.id) <= 0) {
+  // if (KdNode.compareTo(node.depth, node.k, getDocumentId, node.id) <= 0) {
   // // Lesser
   // prev = node;
   // node = node.lesser;
@@ -363,7 +363,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // node = leaf;
   // while (node != null) {
   // // Search node
-  // searchNode(value, node, K, results, examined);
+  // searchNode(getDocumentId, node, K, results, examined);
   // node = node.parent;
   // }
   // }
@@ -375,7 +375,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // return collection;
   // }
 
-  // private static final <T extends IndexPoint> void searchNode(T value, KdNode node, int K, TreeSet<KdNode> results, Set<KdNode> examined) {
+  // private static final <T extends IndexPoint> void searchNode(T getDocumentId, KdNode node, int K, TreeSet<KdNode> results, Set<KdNode> examined) {
   // examined.add(node);
   //
   // // Search node
@@ -383,9 +383,9 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // Double lastDistance = Double.MAX_VALUE;
   // if (results.size() > 0) {
   // lastNode = results.last();
-  //// lastDistance = lastNode.id.euclideanDistance(value);
+  //// lastDistance = lastNode.id.euclideanDistance(getDocumentId);
   // }
-  //// Double nodeDistance = node.id.euclideanDistance(value);
+  //// Double nodeDistance = node.id.euclideanDistance(getDocumentId);
   // if (nodeDistance.compareTo(lastDistance) < 0) {
   // if (results.size() == K && lastNode != null)
   // results.remove(lastNode);
@@ -396,7 +396,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // results.add(node);
   // }
   // lastNode = results.last();
-  //// lastDistance = lastNode.id.euclideanDistance(value);
+  //// lastDistance = lastNode.id.euclideanDistance(getDocumentId);
   //
   // int axis = node.depth % node.k;
   // KdNode lesser = node.lesser;
@@ -411,19 +411,19 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // double valuePlusDistance = Double.MIN_VALUE;
   // if (axis == TEXTNODE_AXIS) {
   // nodePoint = node.id.getTextNodeIndex();
-  // valuePlusDistance = value.getTextNodeIndex() - lastDistance;
+  // valuePlusDistance = getDocumentId.getTextNodeIndex() - lastDistance;
   // } else if (axis == MARKUP_AXIS) {
   // nodePoint = node.id.getMarkupIndex();
-  // valuePlusDistance = value.getMarkupIndex() - lastDistance;
+  // valuePlusDistance = getDocumentId.getMarkupIndex() - lastDistance;
   //// } else {
   //// nodePoint = node.id.z;
-  //// valuePlusDistance = value.z - lastDistance;
+  //// valuePlusDistance = getDocumentId.z - lastDistance;
   // }
   // boolean lineIntersectsCube = ((valuePlusDistance <= nodePoint) ? true : false);
   //
   // // Continue down lesser branch
   // if (lineIntersectsCube)
-  // searchNode(value, lesser, K, results, examined);
+  // searchNode(getDocumentId, lesser, K, results, examined);
   // }
   // if (greater != null && !examined.contains(greater)) {
   // examined.add(greater);
@@ -432,19 +432,19 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // double valuePlusDistance = Double.MIN_VALUE;
   // if (axis == TEXTNODE_AXIS) {
   // nodePoint = node.id.getTextNodeIndex();
-  // valuePlusDistance = value.getTextNodeIndex() + lastDistance;
+  // valuePlusDistance = getDocumentId.getTextNodeIndex() + lastDistance;
   // } else if (axis == MARKUP_AXIS) {
   // nodePoint = node.id.getMarkupIndex();
-  // valuePlusDistance = value.getMarkupIndex() + lastDistance;
+  // valuePlusDistance = getDocumentId.getMarkupIndex() + lastDistance;
   //// } else {
   //// nodePoint = node.id.z;
-  //// valuePlusDistance = value.z + lastDistance;
+  //// valuePlusDistance = getDocumentId.z + lastDistance;
   // }
   // boolean lineIntersectsCube = ((valuePlusDistance >= nodePoint) ? true : false);
   //
   // // Continue down greater branch
   // if (lineIntersectsCube)
-  // searchNode(value, greater, K, results, examined);
+  // searchNode(getDocumentId, greater, K, results, examined);
   // }
   // }
 

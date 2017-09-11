@@ -61,7 +61,7 @@ public class LMNLImporter {
     }
 
     void pushOpenMarkup(String rangeName) {
-      // LOG.info("currentLimenContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
+      // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
       Optional<Markup> findFirst = openMarkupDeque.stream()//
           .filter(tr -> tr.getExtendedTag().equals(rangeName))//
           .findFirst();

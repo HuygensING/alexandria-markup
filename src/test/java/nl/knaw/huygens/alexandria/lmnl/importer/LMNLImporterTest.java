@@ -92,11 +92,11 @@ public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
 
     LMNLImporter importer = new LMNLImporter();
     Document actual = importer.importLMNL(input);
-    // Limen value = actual.value();
+    // Limen getDocumentId = actual.getDocumentId();
 
-    // Markup markup = new Markup(value, "excerpt");
-    // assertThat(value.markupList).hasSize(7);
-    // List<Markup> markupList = value.markupList;
+    // Markup markup = new Markup(getDocumentId, "excerpt");
+    // assertThat(getDocumentId.markupList).hasSize(7);
+    // List<Markup> markupList = getDocumentId.markupList;
     //
     // markupList.stream().map(Markup::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
     // Markup markup1 = markupList.get(0);

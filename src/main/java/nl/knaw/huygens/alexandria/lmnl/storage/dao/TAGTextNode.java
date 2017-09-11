@@ -10,8 +10,8 @@ public class TAGTextNode {
 
   private String text;
 
-  private long prevTextNodeId;
-  private long nextTextNodeId;
+  private Long prevTextNodeId;
+  private Long nextTextNodeId;
 
   public TAGTextNode(String text) {
     this.text = text;
@@ -30,20 +30,22 @@ public class TAGTextNode {
     return this;
   }
 
-  public long getPrevTextNodeId() {
+  public Long getPrevTextNodeId() {
     return prevTextNodeId;
   }
 
-  public void setPrevTextNodeId(long prevId) {
+  public TAGTextNode setPrevTextNodeId(long prevId) {
     this.prevTextNodeId = prevId;
+    return this;
   }
 
-  public long getNextTextNodeId() {
+  public Long getNextTextNodeId() {
     return nextTextNodeId;
   }
 
-  public void setNextTextNodeId(long nextId) {
+  public TAGTextNode setNextTextNodeId(long nextId) {
     this.nextTextNodeId = nextId;
+    return this;
   }
 
 }

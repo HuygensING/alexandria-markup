@@ -14,14 +14,14 @@ public class TAGStoreTest {
     TAGStore store = new TAGStore("out", false);
     store.open();
 
-    AtomicLong limenId = new AtomicLong();
+    AtomicLong documentId = new AtomicLong();
     TAGTextNode textNode = new TAGTextNode("something");
     store.runInTransaction(() -> {
       Long textNodeId = store.putTextNode(textNode);
 
       TAGDocument limen = new TAGDocument();
       limen.getTextNodeIds().add(textNode.getId());
-      limenId.set(store.putLimen(limen));
+      documentId.set(store.putLimen(limen));
     });
 
     store.close();
@@ -29,8 +29,8 @@ public class TAGStoreTest {
     store.open();
 
     store.runInTransaction(() -> {
-      TAGDocument storedLimen = store.getLimen(limenId.get());
-      assertThat(storedLimen.getTextNodeIds()).contains(textNode.getId());
+      TAGDocument document = store.getDocument(documentId.get());
+      assertThat(document.getTextNodeIds()).contains(textNode.getId());
     });
 
     store.close();

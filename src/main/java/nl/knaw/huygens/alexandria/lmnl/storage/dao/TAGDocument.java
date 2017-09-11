@@ -18,7 +18,7 @@ public class TAGDocument {
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNode.class)
   private List<Long> textNodeIds = new ArrayList<>();
 
-  @SecondaryKey(relate = ONE_TO_MANY)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkup.class)
   private List<Long> markupIds = new ArrayList<>();
 
   public long getId() {
@@ -39,5 +39,14 @@ public class TAGDocument {
 
   public void setMarkupIds(List<Long> markupIds) {
     this.markupIds = markupIds;
+  }
+
+  public boolean hasTextNodes() {
+    return !getTextNodeIds().isEmpty();
+  }
+
+  public boolean containsAtLeastHalfOfAllTextNodes(Long aLong) {
+    // TODO
+    return false;
   }
 }
