@@ -21,16 +21,12 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex2;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter2;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter2;
 import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
@@ -39,10 +35,7 @@ import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.TextNodeWrapper;
 import org.apache.commons.io.FileUtils;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -57,7 +50,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
   private static Path tmpDir;
@@ -70,11 +67,13 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     tmpDir = Files.createTempDirectory("tmpDir");
     tmpDir.toFile().deleteOnExit();
     store = new TAGStore(tmpDir.toString(), false);
+    store.open();
     lmnlExporter = new LMNLExporter2(store).useShorthand();
   }
 
   @AfterClass
   public static void afterClass() {
+    store.close();
     tmpDir.toFile().delete();
   }
 
@@ -82,7 +81,7 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
   public void testMarkupAnnotation() throws LMNLSyntaxError {
     store.runInTransaction(() -> {
       String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
-      TAGDocument tagDocument = new LMNLImporter2().importLMNL(input);
+      TAGDocument tagDocument = new LMNLImporter2(store).importLMNL(input);
       DocumentWrapper actual = new DocumentWrapper(store, tagDocument);
 
       // Expectations:
@@ -200,17 +199,17 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
       source.addAnnotation(book);
       AnnotationWrapper chapter = simpleAnnotation("chapter", "12");
       source.addAnnotation(chapter);
-      String actualSourceLMNL = lmnlExporter.toLMNL(annotations.get(0)).toString();
-      String expectedSourceLMNL = lmnlExporter.toLMNL(source).toString();
+      String actualSourceLMNL = lmnlExporter.toLMNL(annotations.get(0).getAnnotation()).toString();
+      String expectedSourceLMNL = lmnlExporter.toLMNL(source.getAnnotation()).toString();
       assertThat(actualSourceLMNL).isEqualTo(expectedSourceLMNL);
 
-      TAGMarkup q1 = actualMarkupList.get(2);
+      MarkupWrapper q1 = actualMarkupList.get(2);
       assertThat(q1.getTag()).isEqualTo("q"); // first q
-      assertThat(q1.textNodes).hasSize(2); // has 2 textnodes
+      assertThat(q1.getTextNodes()).hasSize(2); // has 2 textnodes
 
-      TAGMarkup q2 = actualMarkupList.get(3);
+      MarkupWrapper q2 = actualMarkupList.get(3);
       assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
-      assertThat(q2.textNodes).hasSize(1); // has 1 textnode
+      assertThat(q2.getTextNodes()).hasSize(1); // has 1 textnode
 
       // compareLMNL(pathname, actual);
       logKdTree(actual);
@@ -226,11 +225,12 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     store.runInTransaction(() -> {
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
       LOG.info("document={}", actual);
       logLMNL(actual);
-      assertThat(actual.value().hasTextNodes()).isTrue();
-      String lmnl = lmnlExporter.toLMNL(actual);
+      assertThat(actual.hasTextNodes()).isTrue();
+      String lmnl = lmnlExporter.toLMNL(actual.getDocument());
       assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
       assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous markup
       // compareLMNL(pathname, actual);
@@ -245,19 +245,20 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testDiscontinuousRanges() throws LMNLSyntaxError {
+    String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
     store.runInTransaction(() -> {
-      String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
-      Document actual = new LMNLImporter().importLMNL(input);
-      LOG.info("textNodes={}", actual.value().textNodeList);
-      LOG.info("markups={}", actual.value().markupList);
-      assertThat(actual.value().hasTextNodes()).isTrue();
-      assertThat(actual.value().markupList).hasSize(1);
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
+      LOG.info("textNodes={}", actual.getTextNodes());
+      LOG.info("markups={}", actual.getMarkups());
+      assertThat(actual.hasTextNodes()).isTrue();
+      assertThat(actual.getMarkups()).hasSize(1);
 
-      String lmnl = lmnlExporter.toLMNL(actual);
+      String lmnl = lmnlExporter.toLMNL(actual.getDocument());
       LOG.info("lmnl={}", lmnl);
       assertThat(lmnl).isEqualTo(input);
 
-      LaTeXExporter latex = new LaTeXExporter(actual);
+      LaTeXExporter2 latex = new LaTeXExporter2(store, actualDocument);
       LOG.info("matrix=\n{}", latex.exportMatrix());
       LOG.info("kdtree=\n{}", latex.exportKdTree());
     });
@@ -268,7 +269,8 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     store.runInTransaction(() -> {
       String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
       printTokens(input);
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
 
       // Expectations:
       // We expect a Document
@@ -276,35 +278,33 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
       // - with one range on it
       // - with one annotation on it.
       // - that has one range on it.
-      Document expected = new Document();
-      TAGDocument document = expected.value();
-
-      TAGMarkup r1 = new TAGMarkup(document, "lmnl");
+      DocumentWrapper expected = store.createDocumentWrapper();
+      MarkupWrapper r1 = store.createMarkupWrapper(expected, "lmnl");
       // TAGAnnotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
       AnnotationWrapper a1 = simpleAnnotation("a");
-      TAGDocument annotationLimen = a1.value();
-      TAGTextNode at1 = new TAGTextNode("This is the ");
-      TAGTextNode at2 = new TAGTextNode("annotation");
-      TAGMarkup ar1 = new TAGMarkup(annotationLimen, "type").addTextNode(at2);
-      TAGTextNode at3 = new TAGTextNode(" text");
-      annotationLimen//
+      DocumentWrapper annotationDocument = a1.getDocument();
+      TextNodeWrapper at1 = store.createTextNodeWrapper("This is the ");
+      TextNodeWrapper at2 = store.createTextNodeWrapper("annotation");
+      MarkupWrapper ar1 = store.createMarkupWrapper(annotationDocument, "type").addTextNode(at2);
+      TextNodeWrapper at3 = store.createTextNodeWrapper(" text");
+      annotationDocument//
           .addTextNode(at1)//
           .addTextNode(at2)//
           .addTextNode(at3)//
           .addMarkup(ar1);
       r1.addAnnotation(a1);
 
-      TAGTextNode t1 = new TAGTextNode("This is the main text");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("This is the main text");
       r1.setOnlyTextNode(t1);
-      document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      expected.setOnlyTextNode(t1);
+      expected.addMarkup(r1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
       assertTrue(compareDocuments(expected, actual));
 
       logKdTree(actual);
-      NodeRangeIndex2 index = new NodeRangeIndex2(actual);
+      NodeRangeIndex2 index = new NodeRangeIndex2(store, actual.getDocument());
       List<IndexPoint> indexPoints = index.getIndexPoints();
       logKdTree(actual);
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
@@ -313,32 +313,33 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     });
   }
 
+
   @Test
   public void testAnnotationTextInAnnotationWithRanges() throws LMNLSyntaxError {
+    String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
+    printTokens(input);
     store.runInTransaction(() -> {
-      String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
-      printTokens(input);
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
 
-      Document expected = new Document();
-      TAGDocument document = expected.value();
+      DocumentWrapper expected = store.createDocumentWrapper();
 
-      TAGMarkup r1 = new TAGMarkup(document, "range1");
+      MarkupWrapper r1 = store.createMarkupWrapper(expected, "range1");
       AnnotationWrapper a1 = simpleAnnotation("annotation1");
-      TAGDocument annotationLimen = a1.value();
-      TAGTextNode at1 = new TAGTextNode("");
-      TAGMarkup ar11 = new TAGMarkup(annotationLimen, "ra11").addTextNode(at1);
-      TAGMarkup ar12 = new TAGMarkup(annotationLimen, "ra12").addTextNode(at1);
-      annotationLimen//
+      DocumentWrapper annotationDocument = a1.getDocument();
+      TextNodeWrapper at1 = store.createTextNodeWrapper("");
+      MarkupWrapper ar11 = store.createMarkupWrapper(annotationDocument, "ra11").addTextNode(at1);
+      MarkupWrapper ar12 = store.createMarkupWrapper(annotationDocument, "ra12").addTextNode(at1);
+      annotationDocument//
           .addTextNode(at1)//
           .addMarkup(ar11)//
           .addMarkup(ar12);
       r1.addAnnotation(a1);
 
-      TAGTextNode t1 = new TAGTextNode("");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("");
       r1.setOnlyTextNode(t1);
-      document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      expected.setOnlyTextNode(t1);
+      expected.addMarkup(r1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -348,22 +349,22 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testAnonymousAnnotationRangeOpener() throws LMNLSyntaxError {
+    String input = "[range1 [}annotation text{]}bla{range1]";
+    printTokens(input);
     store.runInTransaction(() -> {
-      String input = "[range1 [}annotation text{]}bla{range1]";
-      printTokens(input);
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
 
-      Document expected = new Document();
-      TAGDocument document = expected.value();
+      DocumentWrapper expected = store.createDocumentWrapper();
 
-      TAGMarkup r1 = new TAGMarkup(document, "range1");
+      MarkupWrapper r1 = store.createMarkupWrapper(expected, "range1");
       AnnotationWrapper a1 = simpleAnnotation("", "annotation text");
       r1.addAnnotation(a1);
 
-      TAGTextNode t1 = new TAGTextNode("bla");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("bla");
       r1.setOnlyTextNode(t1);
-      document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      expected.setOnlyTextNode(t1);
+      expected.addMarkup(r1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -376,16 +377,15 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     store.runInTransaction(() -> {
       String input = "[r}Splitting the {{Atom}}.{r]";
       printTokens(input);
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actual = new LMNLImporter2(store).importLMNL(input);
 
-      Document expected = new Document();
-      TAGDocument document = expected.value();
+      DocumentWrapper expected = store.createDocumentWrapper();
 
-      TAGMarkup r1 = new TAGMarkup(document, "r");
-      TAGTextNode t1 = new TAGTextNode("Splitting the .");
+      MarkupWrapper r1 = store.createMarkupWrapper(expected, "r");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("Splitting the .");
       r1.setOnlyTextNode(t1);
-      document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      expected.setOnlyTextNode(t1);
+      expected.addMarkup(r1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -394,22 +394,20 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testEmptyRange() throws LMNLSyntaxError {
+    String input = "[empty}{empty]";
+    printTokens(input);
     store.runInTransaction(() -> {
-      String input = "[empty}{empty]";
-      printTokens(input);
-      Document actual = new LMNLImporter().importLMNL(input);
-
-      Document expected = new Document();
-      TAGDocument document = expected.value();
-
-      TAGMarkup r1 = new TAGMarkup(document, "empty");
-      TAGTextNode t1 = new TAGTextNode("");
+      TAGDocument actualDocument = new LMNLImporter2(store).importLMNL(input);
+      DocumentWrapper actual = new DocumentWrapper(store, actualDocument);
+      DocumentWrapper expected = store.createDocumentWrapper();
+      MarkupWrapper r1 = store.createMarkupWrapper(expected, "empty");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("");
       r1.setOnlyTextNode(t1);
-      document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      expected.setOnlyTextNode(t1);
+      expected.addMarkup(r1);
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logLMNL(actualDocument);
+      compareLMNL(expected.getDocument(), actualDocument);
       assertTrue(compareDocuments(expected, actual));
     });
   }
@@ -418,21 +416,20 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
   public void testComments() throws LMNLSyntaxError {
     store.runInTransaction(() -> {
       String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
-      Document actual = new LMNLImporter().importLMNL(input);
+      TAGDocument actual = new LMNLImporter2(store).importLMNL(input);
 
       // Comments are ignored, so:
       // We expect a Document
       // - with one text node
       // - with one range on it
-      Document expected = new Document();
-      TAGDocument document = expected.value();
-      TAGMarkup r1 = new TAGMarkup(document, "foo");
-      TAGTextNode t1 = new TAGTextNode("FOOBAR");
+      DocumentWrapper document = store.createDocumentWrapper();
+      MarkupWrapper r1 = store.createMarkupWrapper(document, "foo");
+      TextNodeWrapper t1 = store.createTextNodeWrapper("FOOBAR");
       r1.setOnlyTextNode(t1);
       document.setOnlyTextNode(t1);
       document.addMarkup(r1);
       logLMNL(actual);
-      compareLMNL(expected, actual);
+      compareLMNL(document.getDocument(), actual);
     });
   }
 
@@ -490,13 +487,21 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
     });
   }
 
-  private void compareLMNL(String pathname, Document actual) throws IOException {
+  private void compareLMNL(String pathname, TAGDocument actual) throws IOException {
     String inLMNL = FileUtils.readFileToString(new File(pathname), "UTF-8");
     String outLMNL = lmnlExporter.toLMNL(actual);
     assertThat(outLMNL).isEqualTo(inLMNL);
   }
 
-  private void compareLMNL(Document expected, Document actual) {
+  private void compareLMNL(DocumentWrapper expected, DocumentWrapper actual) {
+    compareLMNL(expected.getDocument(), actual.getDocument());
+  }
+
+  private void compareLMNL(DocumentWrapper expected, TAGDocument actual) {
+    compareLMNL(expected.getDocument(), actual);
+  }
+
+  private void compareLMNL(TAGDocument expected, TAGDocument actual) {
     String expectedLMNL = lmnlExporter.toLMNL(expected);
     String actualLMNL = lmnlExporter.toLMNL(actual);
     assertThat(actualLMNL).isEqualTo(expectedLMNL);
@@ -563,7 +568,11 @@ public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
   }
 
   private void logLMNL(DocumentWrapper documentWrapper) {
-    LOG.info("LMNL=\n{}", lmnlExporter.toLMNL(documentWrapper.getDocument()));
+    logLMNL(documentWrapper.getDocument());
+  }
+
+  private void logLMNL(TAGDocument tagDocument) {
+    LOG.info("LMNL=\n{}", lmnlExporter.toLMNL(tagDocument));
   }
 
   private void logKdTree(DocumentWrapper documentWrapper) {

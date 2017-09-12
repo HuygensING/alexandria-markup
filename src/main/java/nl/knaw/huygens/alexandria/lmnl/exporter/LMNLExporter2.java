@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
+import com.google.common.base.Preconditions;
 import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
@@ -39,7 +40,8 @@ public class LMNLExporter2 {
   private TAGStore store;
 
   public LMNLExporter2(TAGStore store) {
-    store = store;
+    Preconditions.checkNotNull(store);
+    this.store = store;
   }
 
   public LMNLExporter2 useShorthand() {

@@ -2,14 +2,15 @@ package nl.knaw.huygens.alexandria.lmnl.storage.dao;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
 import com.sleepycat.persist.model.SecondaryKey;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
+import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
+
+@Entity(version = 1)
 public class TAGAnnotation {
   @PrimaryKey(sequence = "annotation_pk_sequence")
   private long id;
@@ -21,6 +22,9 @@ public class TAGAnnotation {
 
   @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocument.class)
   private long documentId;
+
+  public TAGAnnotation() {
+  }
 
   public TAGAnnotation(String tag) {
     this.tag = tag;

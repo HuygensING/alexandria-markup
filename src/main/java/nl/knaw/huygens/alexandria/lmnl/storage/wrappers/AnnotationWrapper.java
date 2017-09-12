@@ -11,6 +11,7 @@ public class AnnotationWrapper {
   public AnnotationWrapper(TAGStore store, TAGAnnotation annotation) {
     this.store = store;
     this.annotation = annotation;
+    update();
   }
 
   public DocumentWrapper getDocument() {
@@ -24,6 +25,15 @@ public class AnnotationWrapper {
 
   public AnnotationWrapper addAnnotation(AnnotationWrapper annotationWrapper) {
     annotation.getAnnotationIds().add(annotationWrapper.getId());
+    update();
     return this;
+  }
+
+  public TAGAnnotation getAnnotation() {
+    return annotation;
+  }
+
+  private void update(){
+    store.putAnnotation(annotation);
   }
 }

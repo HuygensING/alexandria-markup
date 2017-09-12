@@ -1,10 +1,8 @@
 package nl.knaw.huygens.alexandria.lmnl.storage.wrappers;
 
 import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 public class MarkupWrapper {
@@ -14,6 +12,7 @@ public class MarkupWrapper {
   public MarkupWrapper(TAGStore store, TAGMarkup markup) {
     this.store = store;
     this.markup = markup;
+    update();
   }
 
   public Long getId() {
@@ -29,11 +28,13 @@ public class MarkupWrapper {
     Long ownerId = markup.getDocumentId();
     new DocumentWrapper(store, store.getDocument(ownerId))//
         .associateTextWithRange(textNodeWrapper, this);
+    update();
     return this;
   }
 
   public MarkupWrapper setOnlyTextNode(TextNodeWrapper t1) {
     markup.getTextNodeIds().add(t1.getId());
+    update();
     return this;
   }
 
@@ -48,18 +49,29 @@ public class MarkupWrapper {
       }
       addTextNode(next);
     }
+    update();
     return this;
   }
 
   public MarkupWrapper addAnnotation(AnnotationWrapper annotation) {
     markup.getAnnotationIds().add(annotation.getId());
+    update();
     return this;
   }
-
 
   public Stream<AnnotationWrapper> getAnnotations() {
     return markup.getAnnotationIds().stream()//
         .map(store::getAnnotation)//
-        .map(annotation-> new AnnotationWrapper(store, annotation));
+        .map(annotation -> new AnnotationWrapper(store, annotation));
+  }
+
+  public Stream<TextNodeWrapper> getTextNodes() {
+    return markup.getTextNodeIds().stream()//
+        .map(store::getTextNode)//
+        .map(textNode -> new TextNodeWrapper(store, textNode));
+  }
+
+  private void update() {
+    store.putMarkup(markup);
   }
 }

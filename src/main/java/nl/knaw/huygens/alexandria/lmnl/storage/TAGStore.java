@@ -81,15 +81,15 @@ public class TAGStore {
     }
   }
 
-  public Long putLimen(TAGDocument limen) {
+  public Long putDocument(TAGDocument document) {
     assertInTransaction();
-    da.limenById.put(limen);
-    return limen.getId();
+    da.limenById.put(document);
+    return document.getId();
   }
 
-  public TAGDocument getDocument(Long limenId) {
+  public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
-    return da.limenById.get(limenId);
+    return da.limenById.get(documentId);
   }
 
   public Long putAnnotation(TAGAnnotation annotation) {
@@ -112,6 +112,12 @@ public class TAGStore {
   public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(textNodeId);
+  }
+
+  public Long putMarkup(TAGMarkup markup) {
+    assertInTransaction();
+    da.markupById.put(markup);
+    return markup.getId();
   }
 
   public TAGMarkup getMarkup(Long markupId) {
@@ -234,21 +240,25 @@ public class TAGStore {
 
   public DocumentWrapper createDocumentWrapper() {
     TAGDocument document = new TAGDocument();
+    putDocument(document);
     return new DocumentWrapper(this, document);
   }
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
     TAGTextNode textNode = new TAGTextNode(content);
+    putTextNode(textNode);
     return new TextNodeWrapper(this, textNode);
   }
 
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
     TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
+    putMarkup(markup);
     return new MarkupWrapper(this, markup);
   }
 
   public AnnotationWrapper createAnnotationWrapper(String tag) {
     TAGAnnotation annotation = new TAGAnnotation(tag);
+    putAnnotation(annotation);
     return new AnnotationWrapper(this, annotation);
   }
 

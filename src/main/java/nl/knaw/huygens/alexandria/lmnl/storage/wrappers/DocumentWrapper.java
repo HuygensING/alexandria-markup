@@ -17,6 +17,7 @@ public class DocumentWrapper {
   public DocumentWrapper(TAGStore store, TAGDocument document) {
     this.store = store;
     this.document = document;
+    update();
   }
 
   public TAGDocument getDocument() {
@@ -48,10 +49,12 @@ public class DocumentWrapper {
 
   public void setOnlyTextNode(TextNodeWrapper annotationText) {
     document.getTextNodeIds().add(annotationText.getId());
+    update();
   }
 
   public DocumentWrapper addMarkup(MarkupWrapper markup) {
     document.getMarkupIds().add(markup.getId());
+    update();
     return this;
   }
 
@@ -76,6 +79,7 @@ public class DocumentWrapper {
       }
       addTextNode(next);
     }
+    update();
     return this;
   }
 
@@ -88,6 +92,7 @@ public class DocumentWrapper {
       TextNodeWrapper previousTextNode = new TextNodeWrapper(store, prevTextNode);
       textNode.setPreviousTextNode(previousTextNode);
     }
+    update();
     return this;
   }
 
@@ -99,5 +104,8 @@ public class DocumentWrapper {
         .map(store::getTextNode);
   }
 
+  private void update() {
+    store.putDocument(document);
+  }
 
 }

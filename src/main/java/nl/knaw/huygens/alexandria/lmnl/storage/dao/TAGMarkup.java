@@ -2,14 +2,12 @@ package nl.knaw.huygens.alexandria.lmnl.storage.dao;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(version = 1)
 public class TAGMarkup {
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private long id;
@@ -22,6 +20,9 @@ public class TAGMarkup {
   private long documentId;
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
+
+  public TAGMarkup(){
+  }
 
   public TAGMarkup(long documentId, String tagName) {
     this.documentId = documentId;

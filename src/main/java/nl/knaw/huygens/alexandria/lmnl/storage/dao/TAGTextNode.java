@@ -3,7 +3,7 @@ package nl.knaw.huygens.alexandria.lmnl.storage.dao;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
+@Entity(version = 1)
 public class TAGTextNode {
   @PrimaryKey(sequence = "textnode_pk_sequence")
   private long id;
@@ -12,6 +12,8 @@ public class TAGTextNode {
 
   private Long prevTextNodeId;
   private Long nextTextNodeId;
+
+  public TAGTextNode() {}
 
   public TAGTextNode(String text) {
     this.text = text;

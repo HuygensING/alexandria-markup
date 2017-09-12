@@ -10,10 +10,15 @@ public class TextNodeWrapper {
   public TextNodeWrapper(TAGStore store, TAGTextNode textNode) {
     this.store = store;
     this.textNode = textNode;
+    update();
   }
 
   public Long getId() {
     return textNode.getId();
+  }
+
+  private TAGTextNode getTextNode() {
+    return textNode;
   }
 
   public TextNodeWrapper setPreviousTextNode(TextNodeWrapper textNodeWrapper) {
@@ -22,11 +27,13 @@ public class TextNodeWrapper {
     if (previousTextNode != null && previousTextNode.getNextTextNode() == null) {
       previousTextNode.setNextTextNode(this);
     }
+    update();
     return this;
   }
 
   private void setNextTextNode(TextNodeWrapper textNodeWrapper) {
     textNode.setNextTextNodeId(textNodeWrapper.getId());
+    update();
   }
 
   public TextNodeWrapper getNextTextNode() {
@@ -38,7 +45,7 @@ public class TextNodeWrapper {
     return new TextNodeWrapper(store, nextTextNode);
   }
 
-  private TAGTextNode getTextNode() {
-    return textNode;
+  private void update() {
+    store.putTextNode(textNode);
   }
 }

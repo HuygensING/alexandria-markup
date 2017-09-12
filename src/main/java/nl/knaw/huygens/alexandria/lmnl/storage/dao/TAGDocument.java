@@ -1,15 +1,15 @@
 package nl.knaw.huygens.alexandria.lmnl.storage.dao;
 
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 
-@Entity
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
+
+@Entity(version = 1)
 public class TAGDocument {
   // previously: Limen
   @PrimaryKey(sequence = "document_pk_sequence")

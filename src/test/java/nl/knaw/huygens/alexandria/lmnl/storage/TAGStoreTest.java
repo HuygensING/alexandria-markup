@@ -2,10 +2,11 @@ package nl.knaw.huygens.alexandria.lmnl.storage;
 
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGStoreTest {
 
@@ -21,7 +22,7 @@ public class TAGStoreTest {
 
       TAGDocument limen = new TAGDocument();
       limen.getTextNodeIds().add(textNode.getId());
-      documentId.set(store.putLimen(limen));
+      documentId.set(store.putDocument(limen));
     });
 
     store.close();
