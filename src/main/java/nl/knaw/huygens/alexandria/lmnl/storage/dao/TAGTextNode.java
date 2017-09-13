@@ -4,7 +4,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version = 1)
-public class TAGTextNode {
+public class TAGTextNode implements TAGObject {
   @PrimaryKey(sequence = "textnode_pk_sequence")
   private long id;
 
@@ -13,13 +13,14 @@ public class TAGTextNode {
   private Long prevTextNodeId;
   private Long nextTextNodeId;
 
-  public TAGTextNode() {}
+  public TAGTextNode() {
+  }
 
   public TAGTextNode(String text) {
     this.text = text;
   }
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
 

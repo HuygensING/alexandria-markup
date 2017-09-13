@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(version = 1)
-public class TAGMarkup {
+public class TAGMarkup implements TAGObject{
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private long id;
   private String lmnlId = ""; // LMNL, should be unique
@@ -34,7 +34,7 @@ public class TAGMarkup {
     this.tag = tagName;
   }
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
 

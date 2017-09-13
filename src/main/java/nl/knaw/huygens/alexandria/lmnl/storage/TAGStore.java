@@ -7,10 +7,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.lmnl.storage.dao.*;
 import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.MarkupWrapper;
@@ -81,32 +78,29 @@ public class TAGStore {
     }
   }
 
-  public Long putDocument(TAGDocument document) {
+  public Long persist(TAGObject tagObject) {
     assertInTransaction();
-    da.limenById.put(document);
-    return document.getId();
+    if (tagObject instanceof TAGDocument) {
+      da.documentById.put((TAGDocument) tagObject);
+
+    } else if (tagObject instanceof TAGTextNode) {
+      da.textNodeById.put((TAGTextNode) tagObject);
+
+    } else if (tagObject instanceof TAGMarkup) {
+      da.markupById.put((TAGMarkup) tagObject);
+
+    } else if (tagObject instanceof TAGAnnotation) {
+      da.annotationById.put(tx, (TAGAnnotation) tagObject);
+
+    } else {
+      throw new RuntimeException("unhandled class: " + tagObject.getClass());
+    }
+    return tagObject.getId();
   }
 
   public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
-    return da.limenById.get(documentId);
-  }
-
-  public Long putAnnotation(TAGAnnotation annotation) {
-    assertInTransaction();
-    da.annotationById.put(tx, annotation);
-    return annotation.getId();
-  }
-
-  public TAGAnnotation getAnnotation(Long annotationId) {
-    assertInTransaction();
-    return da.annotationById.get(annotationId);
-  }
-
-  public Long putTextNode(TAGTextNode textNode) {
-    assertInTransaction();
-    da.textNodeById.put(textNode);
-    return textNode.getId();
+    return da.documentById.get(documentId);
   }
 
   public TAGTextNode getTextNode(Long textNodeId) {
@@ -114,15 +108,14 @@ public class TAGStore {
     return da.textNodeById.get(textNodeId);
   }
 
-  public Long putMarkup(TAGMarkup markup) {
-    assertInTransaction();
-    da.markupById.put(markup);
-    return markup.getId();
-  }
-
   public TAGMarkup getMarkup(Long markupId) {
     assertInTransaction();
     return da.markupById.get(markupId);
+  }
+
+  public TAGAnnotation getAnnotation(Long annotationId) {
+    assertInTransaction();
+    return da.annotationById.get(annotationId);
   }
 
   public void runInTransaction(Runnable runner) {
@@ -240,25 +233,25 @@ public class TAGStore {
 
   public DocumentWrapper createDocumentWrapper() {
     TAGDocument document = new TAGDocument();
-    putDocument(document);
+    persist(document);
     return new DocumentWrapper(this, document);
   }
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
     TAGTextNode textNode = new TAGTextNode(content);
-    putTextNode(textNode);
+    persist(textNode);
     return new TextNodeWrapper(this, textNode);
   }
 
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
     TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
-    putMarkup(markup);
+    persist(markup);
     return new MarkupWrapper(this, markup);
   }
 
   public AnnotationWrapper createAnnotationWrapper(String tag) {
     TAGAnnotation annotation = new TAGAnnotation(tag);
-    putAnnotation(annotation);
+    persist(annotation);
     return new AnnotationWrapper(this, annotation);
   }
 

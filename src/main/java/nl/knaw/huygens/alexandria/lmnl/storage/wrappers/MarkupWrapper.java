@@ -72,6 +72,6 @@ public class MarkupWrapper {
   }
 
   private void update() {
-    store.putMarkup(markup);
+    store.persist(markup);
   }
 }

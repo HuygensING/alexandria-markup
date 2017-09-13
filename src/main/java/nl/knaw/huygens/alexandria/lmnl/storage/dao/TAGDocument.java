@@ -10,7 +10,7 @@ import java.util.List;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 1)
-public class TAGDocument {
+public class TAGDocument implements TAGObject{
   // previously: Limen
   @PrimaryKey(sequence = "document_pk_sequence")
   private long id;
@@ -21,7 +21,7 @@ public class TAGDocument {
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkup.class)
   private List<Long> markupIds = new ArrayList<>();
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
 

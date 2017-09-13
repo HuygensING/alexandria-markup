@@ -18,11 +18,11 @@ public class TAGStoreTest {
     AtomicLong documentId = new AtomicLong();
     TAGTextNode textNode = new TAGTextNode("something");
     store.runInTransaction(() -> {
-      Long textNodeId = store.putTextNode(textNode);
+      Long textNodeId = store.persist(textNode);
 
-      TAGDocument limen = new TAGDocument();
-      limen.getTextNodeIds().add(textNode.getId());
-      documentId.set(store.putDocument(limen));
+      TAGDocument document = new TAGDocument();
+      document.getTextNodeIds().add(textNode.getId());
+      documentId.set(store.persist(document));
     });
 
     store.close();

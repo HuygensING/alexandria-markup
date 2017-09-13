@@ -105,7 +105,7 @@ public class DocumentWrapper {
   }
 
   private void update() {
-    store.putDocument(document);
+    store.persist(document);
   }
 
 }

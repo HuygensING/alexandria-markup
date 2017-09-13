@@ -34,6 +34,6 @@ public class AnnotationWrapper {
   }
 
   private void update(){
-    store.putAnnotation(annotation);
+    store.persist(annotation);
   }
 }

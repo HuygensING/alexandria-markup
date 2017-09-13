@@ -10,13 +10,13 @@ import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
 
 public class DataAccessor {
-  PrimaryIndex<Long, TAGDocument> limenById;
+  PrimaryIndex<Long, TAGDocument> documentById;
   PrimaryIndex<Long, TAGTextNode> textNodeById;
   PrimaryIndex<Long, TAGMarkup> markupById;
   PrimaryIndex<Long, TAGAnnotation> annotationById;
 
   public DataAccessor(EntityStore store) throws DatabaseException {
-    limenById = store.getPrimaryIndex(Long.class, TAGDocument.class);
+    documentById = store.getPrimaryIndex(Long.class, TAGDocument.class);
     textNodeById = store.getPrimaryIndex(Long.class, TAGTextNode.class);
     markupById = store.getPrimaryIndex(Long.class, TAGMarkup.class);
     annotationById = store.getPrimaryIndex(Long.class, TAGAnnotation.class);

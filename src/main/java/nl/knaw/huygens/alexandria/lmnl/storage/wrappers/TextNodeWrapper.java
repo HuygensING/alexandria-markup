@@ -46,6 +46,6 @@ public class TextNodeWrapper {
   }
 
   private void update() {
-    store.putTextNode(textNode);
+    store.persist(textNode);
   }
 }
