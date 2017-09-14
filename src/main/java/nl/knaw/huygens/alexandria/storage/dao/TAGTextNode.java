@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.storage.dao;
+package nl.knaw.huygens.alexandria.storage.dao;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;

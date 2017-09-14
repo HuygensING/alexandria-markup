@@ -1,8 +1,8 @@
-package nl.knaw.huygens.alexandria.lmnl.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.wrappers;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dao.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
 
 public class AnnotationWrapper {
   private TAGStore store;

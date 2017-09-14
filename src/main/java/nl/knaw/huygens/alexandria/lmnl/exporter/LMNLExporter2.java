@@ -22,10 +22,10 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 
 import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dao.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

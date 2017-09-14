@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.storage;
+package nl.knaw.huygens.alexandria.storage;
 
 import com.google.common.base.Preconditions;
 import com.sleepycat.je.DatabaseException;
@@ -7,11 +7,11 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.*;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.dao.*;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

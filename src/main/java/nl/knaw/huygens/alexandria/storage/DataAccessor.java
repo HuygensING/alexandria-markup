@@ -1,13 +1,13 @@
-package nl.knaw.huygens.alexandria.lmnl.storage;
+package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dao.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
 
 public class DataAccessor {
   PrimaryIndex<Long, TAGDocument> documentById;

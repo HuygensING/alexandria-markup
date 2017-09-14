@@ -1,8 +1,8 @@
-package nl.knaw.huygens.alexandria.lmnl.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.wrappers;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Iterator;

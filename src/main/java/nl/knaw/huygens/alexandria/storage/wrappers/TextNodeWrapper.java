@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.lmnl.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.wrappers;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
 
 public class TextNodeWrapper {
   private TAGStore store;

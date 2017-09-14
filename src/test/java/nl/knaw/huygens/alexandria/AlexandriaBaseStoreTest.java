@@ -21,41 +21,20 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex2;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter2;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter2;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter2;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.lmnl.storage.wrappers.TextNodeWrapper;
-import org.apache.commons.io.FileUtils;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 

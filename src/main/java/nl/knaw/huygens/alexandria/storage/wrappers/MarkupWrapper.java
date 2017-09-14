@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.lmnl.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.wrappers;
 
-import nl.knaw.huygens.alexandria.lmnl.storage.TAGStore;
-import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
 
 import java.util.stream.Stream;
 
