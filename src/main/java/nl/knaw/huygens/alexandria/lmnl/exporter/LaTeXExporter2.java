@@ -23,9 +23,9 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex2;
+import nl.knaw.huygens.alexandria.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.data_model.KdTree;
+import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex2;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;

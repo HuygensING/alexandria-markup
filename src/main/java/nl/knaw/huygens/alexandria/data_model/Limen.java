@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.data_model;
+package nl.knaw.huygens.alexandria.data_model;
 
 /*
  * #%L

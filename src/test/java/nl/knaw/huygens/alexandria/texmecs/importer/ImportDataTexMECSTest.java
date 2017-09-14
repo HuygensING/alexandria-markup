@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
