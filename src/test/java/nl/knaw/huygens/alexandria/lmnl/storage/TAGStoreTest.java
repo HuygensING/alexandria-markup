@@ -1,18 +1,22 @@
 package nl.knaw.huygens.alexandria.lmnl.storage;
 
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter2;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGDocument;
 import nl.knaw.huygens.alexandria.lmnl.storage.dao.TAGTextNode;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class TAGStoreTest {
+public class TAGStoreTest extends AlexandriaBaseStoreTest{
 
   @Test
   public void testTAGStore() {
-    TAGStore store = new TAGStore("out", false);
     store.open();
 
     AtomicLong documentId = new AtomicLong();

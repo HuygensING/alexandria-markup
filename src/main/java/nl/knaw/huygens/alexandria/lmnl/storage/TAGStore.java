@@ -69,7 +69,7 @@ public class TAGStore {
       if (store != null) {
         store.close();
       }
-      if (bdbEnvironment != null) {
+      if (bdbEnvironment != null && !bdbEnvironment.isClosed()) {
         bdbEnvironment.cleanLog();
         bdbEnvironment.close();
       }
