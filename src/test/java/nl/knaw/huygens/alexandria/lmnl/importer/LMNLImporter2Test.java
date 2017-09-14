@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex2;
@@ -56,26 +57,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class LMNLImporter2Test extends AlexandriaLMNLBaseTest {
-  private static Path tmpDir;
+public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporter2Test.class);
-  static TAGStore store;
-  static LMNLExporter2 lmnlExporter;
-
-  @BeforeClass
-  public static void beforeClass() throws IOException {
-    tmpDir = Files.createTempDirectory("tmpDir");
-    tmpDir.toFile().deleteOnExit();
-    store = new TAGStore(tmpDir.toString(), false);
-    store.open();
-    lmnlExporter = new LMNLExporter2(store).useShorthand();
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    store.close();
-    tmpDir.toFile().delete();
-  }
 
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {

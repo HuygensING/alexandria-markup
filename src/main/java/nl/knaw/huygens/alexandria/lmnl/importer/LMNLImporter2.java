@@ -117,7 +117,7 @@ public class LMNLImporter2 {
     }
 
     TAGDocument currentAnnotationDocument() {
-      long value = annotationStack.peek().getDocumentId();
+      Long value = annotationStack.peek().getDocumentId();
       return tagStore.getDocument(value);
     }
 

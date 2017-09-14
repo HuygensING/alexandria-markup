@@ -38,10 +38,9 @@ import java.nio.file.Path;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
+  protected static TAGStore store;
+  protected static LMNLExporter2 lmnlExporter;
   private static Path tmpDir;
-  final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
-  public static TAGStore store;
-  static LMNLExporter2 lmnlExporter;
 
   @BeforeClass
   public static void beforeClass() throws IOException {

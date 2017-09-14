@@ -17,7 +17,7 @@ public class TAGAnnotation implements TAGObject {
   private String tag;
 
   @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocument.class)
-  private long documentId;
+  private Long documentId;
 
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotation.class)
   private final List<Long> annotationIds = new ArrayList<>();
@@ -58,7 +58,7 @@ public class TAGAnnotation implements TAGObject {
     this.documentId = documentId;
   }
 
-  public long getDocumentId() {
+  public Long getDocumentId() {
     return documentId;
   }
 
