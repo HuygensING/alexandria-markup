@@ -23,13 +23,14 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 import com.google.common.base.Preconditions;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -49,29 +50,26 @@ public class LMNLExporter2 {
     return this;
   }
 
-  public String toLMNL(TAGDocument document) {
+  public String toLMNL(DocumentWrapper document) {
     StringBuilder lmnlBuilder = new StringBuilder();
-    store.runInTransaction(() -> {
-      appendLimen(lmnlBuilder, document);
-    });
+    store.runInTransaction(() -> appendLimen(lmnlBuilder, document));
     // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
-  private void appendLimen(StringBuilder lmnlBuilder, TAGDocument document) {
+  private void appendLimen(StringBuilder lmnlBuilder, DocumentWrapper document) {
     if (document != null) {
-      Deque<TAGMarkup> openMarkups = new ArrayDeque<>();
-      document.getTextNodeIds().stream()//
-          .map(store::getTextNode).forEach(tn -> {
-        Set<TAGMarkup> markups = store.getMarkupsForTextNode(tn);
+      Deque<MarkupWrapper> openMarkups = new ArrayDeque<>();
+      document.getTextNodeStream().forEach(tn -> {
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<TAGMarkup> toClose = new ArrayList<>();
+        List<MarkupWrapper> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
         toClose.forEach(markup -> lmnlBuilder.append(toCloseTag(markup)));
 
-        List<TAGMarkup> toOpen = new ArrayList<>();
+        List<MarkupWrapper> toOpen = new ArrayList<>();
         toOpen.addAll(markups);
         toOpen.removeAll(openMarkups);
         toOpen.forEach(markup -> lmnlBuilder.append(toOpenTag(markup)));
@@ -85,25 +83,25 @@ public class LMNLExporter2 {
     }
   }
 
-  private StringBuilder toCloseTag(TAGMarkup markup) {
+  private StringBuilder toCloseTag(MarkupWrapper markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup) {
+  private StringBuilder toOpenTag(MarkupWrapper markup) {
     StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
-    markup.getAnnotationIds().stream().map(store::getAnnotation).forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
     return markup.isAnonymous()//
         ? tagBuilder.append("]")//
         : tagBuilder.append("}");
   }
 
-  public StringBuilder toLMNL(TAGAnnotation annotation) {
+  public StringBuilder toLMNL(AnnotationWrapper annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotationIds().stream().map(store::getAnnotation)
+    annotation.getAnnotationStream()
         .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
-    TAGDocument document = store.getDocument(annotation.getDocumentId());
+    DocumentWrapper document = annotation.getDocument();
     if (document.hasTextNodes()) {
       annotationBuilder.append("}");
       appendLimen(annotationBuilder, document);

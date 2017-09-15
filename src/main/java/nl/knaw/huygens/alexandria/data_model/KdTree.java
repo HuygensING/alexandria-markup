@@ -53,11 +53,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
      */
     @Override
     public int compare(IndexPoint o1, IndexPoint o2) {
-      if (o1.getTextNodeIndex() < o2.getTextNodeIndex())
-        return -1;
-      if (o1.getTextNodeIndex() > o2.getTextNodeIndex())
-        return 1;
-      return 0;
+      return Integer.compare(o1.getTextNodeIndex(), o2.getTextNodeIndex());
     }
   };
 
@@ -67,11 +63,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
      */
     @Override
     public int compare(IndexPoint o1, IndexPoint o2) {
-      if (o1.getMarkupIndex() < o2.getMarkupIndex())
-        return -1;
-      if (o1.getMarkupIndex() > o2.getMarkupIndex())
-        return 1;
-      return 0;
+      return Integer.compare(o1.getMarkupIndex(), o2.getMarkupIndex());
     }
   };
 

@@ -1,11 +1,11 @@
 package nl.knaw.huygens.alexandria.storage.wrappers;
 
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ public class DocumentWrapper {
   public DocumentWrapper(TAGStore store, TAGDocument document) {
     this.store = store;
     this.document = document;
-    update();
+//    update();
   }
 
   public TAGDocument getDocument() {
@@ -28,12 +28,12 @@ public class DocumentWrapper {
     return document.getId();
   }
 
-  public Stream<TextNodeWrapper> getTextNodes() {
+  public Stream<TextNodeWrapper> getTextNodeStream() {
     return getTagTextNodeStream()
         .map(tn -> new TextNodeWrapper(store, tn));
   }
 
-  public Stream<MarkupWrapper> getMarkups() {
+  public Stream<MarkupWrapper> getMarkupStream() {
     return document.getMarkupIds().stream()
         .map(store::getMarkup)//
         .map(m -> new MarkupWrapper(store, m));
@@ -43,8 +43,8 @@ public class DocumentWrapper {
     return !document.getTextNodeIds().isEmpty();
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(Long aLong) {
-    throw new NotImplementedException();
+  public boolean containsAtLeastHalfOfAllTextNodes(MarkupWrapper markupWrapper) {
+    return document.containsAtLeastHalfOfAllTextNodes(markupWrapper.getMarkup());
   }
 
   public void setOnlyTextNode(TextNodeWrapper annotationText) {
@@ -64,8 +64,10 @@ public class DocumentWrapper {
   }
 
   public void associateTextWithRange(TextNodeWrapper textNodeWrapper, MarkupWrapper markupWrapper) {
-    throw new NotImplementedException();
-//    document.textNodeToMarkup.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(markup);
+    document.getTextNodeIdToMarkupIds()
+        .computeIfAbsent(
+            textNodeWrapper.getId(),
+            f -> new LinkedHashSet<>()).add(markupWrapper.getId());
   }
 
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
@@ -106,6 +108,12 @@ public class DocumentWrapper {
 
   private void update() {
     store.persist(document);
+  }
+
+  public Stream<MarkupWrapper> getMarkupStreamForTextNode(TextNodeWrapper tn) {
+    return document.getMarkupIdsForTextNodeIds(tn.getId()).stream()//
+        .map(store::getMarkup)//
+        .map(m -> new MarkupWrapper(store, m));
   }
 
 }

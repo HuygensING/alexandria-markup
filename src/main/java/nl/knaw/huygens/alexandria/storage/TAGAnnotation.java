@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.dao;
+package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -12,7 +12,7 @@ import java.util.List;
 @Entity(version = 1)
 public class TAGAnnotation implements TAGObject {
   @PrimaryKey(sequence = "annotation_pk_sequence")
-  private long id;
+  private Long id;
 
   private String tag;
 
@@ -22,7 +22,7 @@ public class TAGAnnotation implements TAGObject {
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotation.class)
   private final List<Long> annotationIds = new ArrayList<>();
 
-  public TAGAnnotation() {
+  private TAGAnnotation() {
   }
 
   public TAGAnnotation(String tag) {

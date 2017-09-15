@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
 public class TextNodeWrapper {
   private TAGStore store;
@@ -15,6 +15,10 @@ public class TextNodeWrapper {
 
   public Long getId() {
     return textNode.getId();
+  }
+
+  public String getText(){
+    return  textNode.getText();
   }
 
   private TAGTextNode getTextNode() {

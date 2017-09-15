@@ -7,7 +7,6 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
-import nl.knaw.huygens.alexandria.storage.dao.*;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -16,8 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class TAGStore {
@@ -49,14 +47,6 @@ public class TAGStore {
       storeConfig.setTransactional(true);
       store = new EntityStore(bdbEnvironment, "TAGStore", storeConfig);
 
-//      String databaseName = "Limen";
-//      DatabaseConfig dbConfig = new DatabaseConfig();
-//      dbConfig.setAllowCreate(!readOnly);
-//      dbConfig.setTransactional(true);
-//
-//      DbEnv dbEnv = new DbEnv();
-//      File file = new File(dbDir);
-//      dbEnv.setup(file, false);
       da = new DataAccessor(store);
 
     } catch (DatabaseException dbe) {
@@ -98,26 +88,75 @@ public class TAGStore {
     return tagObject.getId();
   }
 
+  // Document
   public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
     return da.documentById.get(documentId);
   }
 
+  public DocumentWrapper createDocumentWrapper() {
+    TAGDocument document = new TAGDocument();
+    persist(document);
+    return new DocumentWrapper(this, document);
+  }
+
+  // TextNode
   public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(textNodeId);
   }
 
+  public TextNodeWrapper createTextNodeWrapper(String content) {
+    TAGTextNode textNode = new TAGTextNode(content);
+    persist(textNode);
+    return new TextNodeWrapper(this, textNode);
+  }
+
+  public TextNodeWrapper getTextNodeWrapper(Long textNodeId) {
+    return new TextNodeWrapper(this, getTextNode(textNodeId));
+  }
+
+  // Markup
   public TAGMarkup getMarkup(Long markupId) {
     assertInTransaction();
     return da.markupById.get(markupId);
   }
 
+  public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
+    TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
+    persist(markup);
+    return new MarkupWrapper(this, markup);
+  }
+
+  public MarkupWrapper getMarkupWrapper(Long markupId) {
+    return new MarkupWrapper(this, getMarkup(markupId));
+  }
+
+  // Annotation
   public TAGAnnotation getAnnotation(Long annotationId) {
     assertInTransaction();
     return da.annotationById.get(annotationId);
   }
 
+  public TAGAnnotation createAnnotation(String tag) {
+    TAGDocument document = new TAGDocument();
+    persist(document);
+    TAGAnnotation annotation = new TAGAnnotation(tag);
+    annotation.setDocumentId(document.getId());
+    persist(annotation);
+    return annotation;
+  }
+
+  public AnnotationWrapper createAnnotationWrapper(String tag) {
+    TAGAnnotation annotation = createAnnotation(tag);
+    return new AnnotationWrapper(this, annotation);
+  }
+
+  public AnnotationWrapper getAnnotationWrapper(Long annotationId) {
+    return new AnnotationWrapper(this, getAnnotation(annotationId));
+  }
+
+  // transaction
   public void runInTransaction(Runnable runner) {
     boolean startedInOpenTransaction = getTransactionIsOpen();
     if (!startedInOpenTransaction) {
@@ -173,6 +212,7 @@ public class TAGStore {
   private void startTransaction() {
     assertTransactionIsClosed();
     tx = bdbEnvironment.beginTransaction(null, null);
+    tx.setLockTimeout(1L, TimeUnit.MINUTES);
     setTransactionIsOpen(true);
   }
 
@@ -212,7 +252,6 @@ public class TAGStore {
     setTransactionIsOpen(false);
   }
 
-
   private void assertInTransaction() {
     Preconditions.checkState(getTransactionIsOpen(), "We should be in an open transaction at this point, use runInTransaction()!");
   }
@@ -223,36 +262,6 @@ public class TAGStore {
 
   private void assertTransactionIsOpen() {
     Preconditions.checkState(getTransactionIsOpen(), "We're not in an open transaction!");
-  }
-
-
-  public Set<TAGMarkup> getMarkupsForTextNode(TAGTextNode tn) {
-    // TODO
-    return new HashSet<>();
-  }
-
-  public DocumentWrapper createDocumentWrapper() {
-    TAGDocument document = new TAGDocument();
-    persist(document);
-    return new DocumentWrapper(this, document);
-  }
-
-  public TextNodeWrapper createTextNodeWrapper(String content) {
-    TAGTextNode textNode = new TAGTextNode(content);
-    persist(textNode);
-    return new TextNodeWrapper(this, textNode);
-  }
-
-  public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
-    TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
-    persist(markup);
-    return new MarkupWrapper(this, markup);
-  }
-
-  public AnnotationWrapper createAnnotationWrapper(String tag) {
-    TAGAnnotation annotation = new TAGAnnotation(tag);
-    persist(annotation);
-    return new AnnotationWrapper(this, annotation);
   }
 
 }

@@ -20,10 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-/**
- * Created by Ronald Haentjens Dekker on 29/12/16.
- */
-
 import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.data_model.*;

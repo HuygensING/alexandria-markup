@@ -24,13 +24,8 @@ package nl.knaw.huygens.alexandria;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter2;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;

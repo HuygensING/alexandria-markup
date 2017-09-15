@@ -23,8 +23,8 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.*;
+import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
@@ -214,12 +214,12 @@ public class LMNLImporter2 {
     }
   }
 
-  public TAGDocument importLMNL(String input) throws LMNLSyntaxError {
+  public DocumentWrapper importLMNL(String input) throws LMNLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importLMNL(antlrInputStream);
   }
 
-  public TAGDocument importLMNL(InputStream input) throws LMNLSyntaxError {
+  public DocumentWrapper importLMNL(InputStream input) throws LMNLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importLMNL(antlrInputStream);
@@ -229,13 +229,14 @@ public class LMNLImporter2 {
     }
   }
 
-  private TAGDocument importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
+  private DocumentWrapper importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
     LMNLLexer lexer = new LMNLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
 
     ImporterContext context = new ImporterContext(lexer);
-    TAGDocument document = new TAGDocument();
+    DocumentWrapper documentWrapper = tagStore.createDocumentWrapper();
+    TAGDocument document = documentWrapper.getDocument();
     update(document);
     context.pushDocumentContext(document);
     handleDefaultMode(context);
@@ -255,7 +256,7 @@ public class LMNLImporter2 {
       throw new LMNLSyntaxError(errorMsg);
     }
     update(document);
-    return document;
+    return documentWrapper;
   }
 
   private void handleDefaultMode(ImporterContext context) {
@@ -341,8 +342,7 @@ public class LMNLImporter2 {
 
   private void handleAnnotation(ImporterContext context) {
     String methodName = "handleAnnotation";
-    TAGAnnotation annotation = new TAGAnnotation("");
-    update(annotation);
+    TAGAnnotation annotation = tagStore.createAnnotation("");
     context.openAnnotation(annotation);
     boolean goOn = true;
     while (goOn) {
@@ -448,7 +448,7 @@ public class LMNLImporter2 {
   public static void joinDiscontinuedRanges(TAGDocument document) {
 //    Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
 //    List<TAGMarkup> markupsToRemove = new ArrayList<>();
-//    document.getMarkupIds().stream()//
+//    document.getMarkupIdsForTextNodeIds().stream()//
 //        .map(tagStore::getMarkup)//
 //        .filter(TAGMarkup::hasN)//
 //        .forEach(markup -> {
@@ -469,8 +469,8 @@ public class LMNLImporter2 {
 //          }
 //        });
 //
-//    document.getMarkupIds().removeAll(markupsToRemove);
-//    document.getMarkupIds().stream()//
+//    document.getMarkupIdsForTextNodeIds().removeAll(markupsToRemove);
+//    document.getMarkupIdsForTextNodeIds().stream()//
 //        .map(tagStore::getMarkup)//
 //        .map(TAGMarkup::getAnnotationIds)//
 //        .flatMap(List::stream)//

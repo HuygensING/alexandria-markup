@@ -1,8 +1,10 @@
 package nl.knaw.huygens.alexandria.storage.wrappers;
 
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
+
+import java.util.stream.Stream;
 
 public class AnnotationWrapper {
   private TAGStore store;
@@ -23,17 +25,27 @@ public class AnnotationWrapper {
     return annotation.getId();
   }
 
+  public String getTag() {
+    return annotation.getTag();
+  }
+
   public AnnotationWrapper addAnnotation(AnnotationWrapper annotationWrapper) {
     annotation.getAnnotationIds().add(annotationWrapper.getId());
     update();
     return this;
   }
 
+  public Stream<AnnotationWrapper> getAnnotationStream() {
+    return annotation.getAnnotationIds().stream()//
+        .map(store::getAnnotationWrapper);
+  }
+
   public TAGAnnotation getAnnotation() {
     return annotation;
   }
 
-  private void update(){
+  private void update() {
     store.persist(annotation);
   }
+
 }

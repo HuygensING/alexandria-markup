@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.dao;
+package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -10,9 +10,7 @@ import java.util.List;
 @Entity(version = 1)
 public class TAGMarkup implements TAGObject{
   @PrimaryKey(sequence = "textrange_pk_sequence")
-  private long id;
-  private String lmnlId = ""; // LMNL, should be unique
-  private String suffix = ""; // TexMECS, doesn't need to be unique
+  private Long id;
 
   private String tag;
   private List<Long> annotationIds = new ArrayList<>();
@@ -21,7 +19,7 @@ public class TAGMarkup implements TAGObject{
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
 
-  public TAGMarkup(){
+  private TAGMarkup(){
   }
 
   public TAGMarkup(long documentId, String tagName) {
@@ -67,9 +65,11 @@ public class TAGMarkup implements TAGObject{
   }
 
   public String getExtendedTag() {
+    String suffix = "";
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
+    String lmnlId = "";
     if (StringUtils.isNotEmpty(lmnlId)) {
       return tag + "=" + lmnlId;
     }
@@ -85,27 +85,27 @@ public class TAGMarkup implements TAGObject{
     return this;
   }
 
-  public boolean hasN() {
-    // TODO
-    return true;
-//    return annotations.parallelStream()//
-//        .map(Annotation::getTag) //
-//        .anyMatch(t -> t.equals("n"));
-  }
-
-  public void joinWith(TAGMarkup markup) {
-    // TODO
-  }
-
-  public boolean isAnonymous() {
-    // TODO
-    return isAnonymous;
-  }
-
-  public boolean isContinuous() {
-    // TODO
-    return isContinuous;
-  }
+//  public boolean hasN() {
+//    // TODO
+//    return true;
+////    return annotations.parallelStream()//
+////        .map(Annotation::getTag) //
+////        .anyMatch(t -> t.equals("n"));
+//  }
+//
+//  public void joinWith(TAGMarkup markup) {
+//    // TODO
+//  }
+//
+//  public boolean isAnonymous() {
+//    // TODO
+//    return isAnonymous;
+//  }
+//
+//  public boolean isContinuous() {
+//    // TODO
+//    return isContinuous;
+//  }
 
   public Long getDocumentId() {
     return documentId;

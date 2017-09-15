@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -242,7 +243,7 @@ public class TexMECSImporterTest {
   @Test
   public void testSyntaxError4() throws IOException {
     String pathname = "data/texmecs/acrostic-syntax-error.texmecs";
-    String texMECS = FileUtils.readFileToString(new File(pathname), Charsets.UTF_8);
+    String texMECS = FileUtils.readFileToString(new File(pathname), StandardCharsets.UTF_8);
     try {
       Document document = testTexMECS(texMECS, "whatever");
       fail();

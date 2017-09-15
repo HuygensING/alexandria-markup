@@ -23,8 +23,8 @@ package nl.knaw.huygens.alexandria.data_model;
 
 import static java.util.stream.Collectors.toSet;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +39,11 @@ public class NodeRangeIndex2 {
 
   private List<IndexPoint> indexPoints;
   private KdTree<IndexPoint> kdTree;
-  private TAGStore store;
-  private TAGDocument document;
+  private DocumentWrapper document;
   private Set<Integer> invertedMarkupsIndices = new HashSet<>();
 
-  public NodeRangeIndex2(TAGStore store, TAGDocument document) {
-    this.store = store;
+  public NodeRangeIndex2(TAGStore store, DocumentWrapper document) {
+    TAGStore store1 = store;
     this.document = document;
   }
 
@@ -52,28 +51,28 @@ public class NodeRangeIndex2 {
     if (indexPoints == null) {
       indexPoints = new ArrayList<>();
 
-      Map<Long, Integer> markupIndex = new HashMap<>(document.getMarkupIds().size());
-      for (int i = 0; i < document.getMarkupIds().size(); i++) {
-        markupIndex.put(document.getMarkupIds().get(i), i);
+      List<Long> markupIds = document.getDocument().getMarkupIds();
+      Map<Long, Integer> markupIndex = new HashMap<>(markupIds.size());
+      for (int i = 0; i < markupIds.size(); i++) {
+        markupIndex.put(markupIds.get(i), i);
       }
-      List<TAGMarkup> markupsToInvert = document.getMarkupIds().stream()//
+      List<MarkupWrapper> markupsToInvert = document.getMarkupStream()//
           .filter(document::containsAtLeastHalfOfAllTextNodes)//
-          .map(store::getMarkup)//
           .collect(Collectors.toList());
       invertedMarkupsIndices = markupsToInvert.stream()//
           .map(markupIndex::get)//
           .collect(Collectors.toSet());
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
-      document.getTextNodeIds().stream().map(store::getTextNode).forEach(tn -> {
+      document.getTextNodeStream().forEach(tn -> {
         LOG.debug("TextNode={}", tn);
         int i = textNodeIndex.getAndIncrement();
 
         // all the Markups associated with this TextNode
-        Set<TAGMarkup> markups = store.getMarkupsForTextNode(tn);
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(toSet());
 
         // all the Markups that should be inverted and are NOT associated with this TextNode
-        List<TAGMarkup> relevantInvertedMarkups = markupsToInvert.stream()//
+        List<MarkupWrapper> relevantInvertedMarkups = markupsToInvert.stream()//
             .filter(tr -> !markups.contains(tr))//
             .collect(Collectors.toList());
 
@@ -127,7 +126,7 @@ public class NodeRangeIndex2 {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, document.getDocument().getTextNodeIds().size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {
@@ -163,7 +162,7 @@ public class NodeRangeIndex2 {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, document.getDocument().getTextNodeIds().size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {

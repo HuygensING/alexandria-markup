@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.dao;
+package nl.knaw.huygens.alexandria.storage;
 
 public interface TAGObject {
   Long getId();

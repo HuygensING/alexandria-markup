@@ -1,8 +1,6 @@
 package nl.knaw.huygens.alexandria.storage;
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 

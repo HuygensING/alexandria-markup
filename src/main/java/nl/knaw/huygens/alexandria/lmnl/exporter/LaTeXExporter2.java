@@ -22,14 +22,14 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 
 import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.KdTree;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex2;
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dao.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.dao.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.dao.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LaTeXExporter2 {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter2.class);
@@ -47,28 +48,27 @@ public class LaTeXExporter2 {
       .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
   private List<IndexPoint> indexPoints;
   private static TAGStore store;
-  private TAGDocument document;
+  private DocumentWrapper document;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndex2 index;
 
-  public LaTeXExporter2(TAGStore store, TAGDocument document) {
+  public LaTeXExporter2(TAGStore store, DocumentWrapper document) {
     this.store = store;
     this.document = document;
   }
 
   public String exportMarkupOverlap() {
     Map<String, Object> map = new HashMap<>();
-    int maxMarkupsPerTextNode = document.getTextNodeIds().parallelStream()//
-        .map(store::getTextNode)//
-        .map(store::getMarkupsForTextNode)
-        .mapToInt(Set::size)//
+    long maxMarkupsPerTextNode = document.getTextNodeStream()
+        .map(document::getMarkupStreamForTextNode)
+        .mapToLong(Stream::count)//
         .max()//
-        .getAsInt();
+        .getAsLong();
     map.put("maxdepth", maxMarkupsPerTextNode);
     StringBuilder latexBuilder = new StringBuilder();
     if (document != null) {
-      document.getTextNodeIds().stream().map(store::getTextNode).forEach(tn -> {
-        int size = store.getMarkupsForTextNode(tn).size();
+      document.getTextNodeStream().forEach(tn -> {
+        int size = document.getDocument().getMarkupIds().size();
         addColoredTextNode(latexBuilder, tn, size);
       });
     }
@@ -76,7 +76,7 @@ public class LaTeXExporter2 {
     return FreeMarker.templateToString("colored-text.tex.ftl", map, this.getClass());
   }
 
-  private void addColoredTextNode(StringBuilder latexBuilder, TAGTextNode tn, int depth) {
+  private void addColoredTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int depth) {
     String content = tn.getText();
     if ("\n".equals(content)) {
       latexBuilder.append("\\TextNode{").append(depth).append("}{\\n}\\\\\n");
@@ -97,30 +97,30 @@ public class LaTeXExporter2 {
   public String exportDocument() {
     Map<String, Object> map = new HashMap<>();
     StringBuilder latexBuilder = new StringBuilder();
-    appendTAGDocument(latexBuilder, document);
+    appendDocument(latexBuilder, document);
     map.put("body", latexBuilder.toString());
     return FreeMarker.templateToString("document.tex.ftl", map, this.getClass());
   }
 
-  private void appendTAGDocument(StringBuilder latexBuilder, TAGDocument document) {
+  private void appendDocument(StringBuilder latexBuilder, DocumentWrapper document) {
     ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray", //
         "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (document != null) {
-      Set<TAGMarkup> openMarkups = new LinkedHashSet<>();
+      Set<MarkupWrapper> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      Map<TAGTextNode, Integer> textNodeIndices = new HashMap<>();
-      document.getTextNodeIds().stream().map(store::getTextNode).forEach(tn -> {
+      Map<TextNodeWrapper, Integer> textNodeIndices = new HashMap<>();
+      document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         textNodeIndices.put(tn, i);
-        Set<TAGMarkup> markups = store.getMarkupsForTextNode(tn);
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<TAGMarkup> toClose = new ArrayList<>();
+        List<MarkupWrapper> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<TAGMarkup> toOpen = new ArrayList<>();
+        List<MarkupWrapper> toOpen = new ArrayList<>();
         toOpen.addAll(markups);
         toOpen.removeAll(openMarkups);
 
@@ -136,7 +136,7 @@ public class LaTeXExporter2 {
     }
   }
 
-  private void addTextNode(StringBuilder latexBuilder, TAGTextNode tn, int i) {
+  private void addTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int i) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
@@ -145,13 +145,13 @@ public class LaTeXExporter2 {
 
   public String exportMatrix() {
     Map<String, Object> map = new HashMap<>();
-    String body = exportMatrix(document.getTextNodeIds().stream().map(store::getTextNode).collect(toList()), document.getMarkupIds().stream().map(store::getMarkup).collect(toList()), getIndexPoints(), getLongMarkupIndexes());
+    String body = exportMatrix(document.getTextNodeStream().collect(toList()), document.getMarkupStream().collect(toList()), getIndexPoints(), getLongMarkupIndexes());
     map.put("body", body);
     return FreeMarker.templateToString("matrix.tex.ftl", map, this.getClass());
   }
 
-  private String exportMatrix(List<TAGTextNode> allTextNodes, List<TAGMarkup> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
-    List<String> rangeLabels = allMarkups.stream().map(TAGMarkup::getTag).collect(toList());
+  private String exportMatrix(List<TextNodeWrapper> allTextNodes, List<MarkupWrapper> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
+    List<String> rangeLabels = allMarkups.stream().map(MarkupWrapper::getTag).collect(toList());
     List<String> rangeIndex = new ArrayList<>();
     rangeIndex.add("");
     for (int i = 0; i < rangeLabels.size(); i++) {
@@ -240,8 +240,10 @@ public class LaTeXExporter2 {
   private Set<Integer> getLongMarkupIndexes() {
     if (longMarkupIndexes == null) {
       longMarkupIndexes = new HashSet<>();
-      for (int i = 0; i < document.getMarkupIds().size(); i++) {
-        if (document.containsAtLeastHalfOfAllTextNodes(document.getMarkupIds().get(i))) {
+      for (int i = 0; i < document.getDocument().getMarkupIds().size(); i++) {
+        Long markupId = document.getDocument().getMarkupIds().get(i);
+        MarkupWrapper markup = store.getMarkupWrapper(markupId);
+        if (document.containsAtLeastHalfOfAllTextNodes(markup)) {
           longMarkupIndexes.add(i);
         }
       }
@@ -249,36 +251,35 @@ public class LaTeXExporter2 {
     return longMarkupIndexes;
   }
 
-  private void appendGradedTAGDocument(StringBuilder latexBuilder, TAGDocument document) {
-    int maxMarkupsPerTextNode = document.getTextNodeIds().parallelStream()
-        .map(store::getTextNode)//
-        .map(store::getMarkupsForTextNode)//
-        .mapToInt(Set::size)//
+  private void appendGradedTAGDocument(StringBuilder latexBuilder, DocumentWrapper document) {
+    long maxMarkupsPerTextNode = document.getTextNodeStream()
+        .map(document::getMarkupStreamForTextNode)//
+        .mapToLong(Stream::count)//
         .max()//
-        .getAsInt();
+        .getAsLong();
     latexBuilder.append("\n    % TextNodes\n");
     if (document != null) {
-      Set<TAGMarkup> openMarkups = new LinkedHashSet<>();
+      Set<MarkupWrapper> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      // Map<TAGTextNode, Integer> textNodeIndices = new HashMap<>();
-      document.getTextNodeIds().stream().map(store::getTextNode).forEach(tn -> {
+      // Map<TextNodeWrapper, Integer> textNodeIndices = new HashMap<>();
+      document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         // textNodeIndices.put(tn, i);
-        Set<TAGMarkup> markups = store.getMarkupsForTextNode(tn);
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<TAGMarkup> toClose = new ArrayList<>();
+        List<MarkupWrapper> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<TAGMarkup> toOpen = new ArrayList<>();
+        List<MarkupWrapper> toOpen = new ArrayList<>();
         toOpen.addAll(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
         openMarkups.addAll(toOpen);
 
-        int size = store.getMarkupsForTextNode(tn).size();
+        long size = document.getMarkupStreamForTextNode(tn).count();
         float gradient = size / (float) maxMarkupsPerTextNode;
 
         int r = 255 - Math.round(255 * gradient);
@@ -293,8 +294,8 @@ public class LaTeXExporter2 {
     }
   }
 
-  // private void drawMarkupsAsSets(StringBuilder latexBuilder, TAGDocument document, ColorPicker colorPicker, Map<TAGTextNode, Integer> textNodeIndices) {
-  // document.getMarkupIds().stream().map(store::getMarkup).forEach.forEach(tr -> {
+  // private void drawMarkupsAsSets(StringBuilder latexBuilder, DocumentWrapper document, ColorPicker colorPicker, Map<TextNodeWrapper, Integer> textNodeIndices) {
+  // document.getMarkupIdsForTextNodeIds().stream().map(store::getMarkup).forEach.forEach(tr -> {
   // String color = colorPicker.nextColor();
   // latexBuilder.append(" \\node[draw=").append(color).append(",shape=rectangle,fit=");
   // tr.textNodes.forEach(tn -> {
@@ -305,14 +306,14 @@ public class LaTeXExporter2 {
   // });
   // }
 
-  private void addGradedTextNode(StringBuilder latexBuilder, TAGTextNode tn, int i, String fillColor, int size) {
+  private void addGradedTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int i, String fillColor, long size) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
-  private String escapedContent(TAGTextNode tn) {
+  private String escapedContent(TextNodeWrapper tn) {
     return tn.getText()//
         .replaceAll(" ", "\\\\s ")//
         .replaceAll("&", "\\\\& ")//
@@ -328,36 +329,37 @@ public class LaTeXExporter2 {
     latexBuilder.append("};\n");
   }
 
-  private void markMarkups(StringBuilder latexBuilder, TAGDocument document, ColorPicker colorPicker, Map<TAGTextNode, Integer> textNodeIndices) {
+  private void markMarkups(StringBuilder latexBuilder, DocumentWrapper document, ColorPicker colorPicker, Map<TextNodeWrapper, Integer> textNodeIndices) {
     // AtomicInteger markupCounter = new AtomicInteger(0);
     latexBuilder.append("\n    % Markups");
-    Map<TAGMarkup, Integer> layerIndex = calculateLayerIndex(document.getMarkupIds().stream().map(store::getMarkup).collect(toList()), textNodeIndices);
-    document.getMarkupIds().stream().map(store::getMarkup).forEach(tr -> {
+    Map<MarkupWrapper, Integer> layerIndex = calculateLayerIndex(document.getMarkupStream().collect(toList()), textNodeIndices);
+    document.getMarkupStream().forEach(tr -> {
       int rangeLayerIndex = layerIndex.get(tr);
       float markupRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       if (tr.isContinuous()) {
-        TAGTextNode firstTextNode = store.getTextNode(tr.getTextNodeIds().get(0));
-        TAGTextNode lastTextNode = store.getTextNode(tr.getTextNodeIds().get(tr.getTextNodeIds().size() - 1));
+        List<Long> textNodeIds = tr.getMarkup().getTextNodeIds();
+        TextNodeWrapper firstTextNode = store.getTextNodeWrapper(textNodeIds.get(0));
+        TextNodeWrapper lastTextNode = store.getTextNodeWrapper(textNodeIds.get(textNodeIds.size() - 1));
         int first = textNodeIndices.get(firstTextNode);
         int last = textNodeIndices.get(lastTextNode);
 
         appendMarkup(latexBuilder, tr, String.valueOf(rangeLayerIndex), markupRow, color, first, last);
 
       } else {
-        Iterator<TAGTextNode> textNodeIterator = tr.getTextNodeIds().stream().map(store::getTextNode).iterator();
-        TAGTextNode firstTextNode = textNodeIterator.next();
-        TAGTextNode lastTextNode = firstTextNode;
+        Iterator<TextNodeWrapper> textNodeIterator = tr.getTextNodeStream().iterator();
+        TextNodeWrapper firstTextNode = textNodeIterator.next();
+        TextNodeWrapper lastTextNode = firstTextNode;
         boolean finished = false;
         int partNo = 0;
         while (!finished) {
-          TAGTextNode expectedNextNode = store.getTextNode(firstTextNode.getNextTextNodeId());
+          TextNodeWrapper expectedNextNode = firstTextNode.getNextTextNode();
           boolean goOn = textNodeIterator.hasNext();
           while (goOn) {
-            TAGTextNode nextTextNode = textNodeIterator.next();
+            TextNodeWrapper nextTextNode = textNodeIterator.next();
             if (nextTextNode.equals(expectedNextNode)) {
               lastTextNode = nextTextNode;
-              expectedNextNode = store.getTextNode(lastTextNode.getNextTextNodeId());
+              expectedNextNode = lastTextNode.getNextTextNode();
               goOn = textNodeIterator.hasNext();
 
             } else {
@@ -384,15 +386,15 @@ public class LaTeXExporter2 {
     });
   }
 
-  private void appendMarkupPart(StringBuilder latexBuilder, Map<TAGTextNode, Integer> textNodeIndices, TAGMarkup tr, int rangeLayerIndex, float markupRow, String color, TAGTextNode firstTextNode,
-                                TAGTextNode lastTextNode, int partNo) {
+  private void appendMarkupPart(StringBuilder latexBuilder, Map<TextNodeWrapper, Integer> textNodeIndices, MarkupWrapper tr, int rangeLayerIndex, float markupRow, String color, TextNodeWrapper firstTextNode,
+                                TextNodeWrapper lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
     String markupPartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;
     appendMarkup(latexBuilder, tr, markupPartNum, markupRow, color, first, last);
   }
 
-  private void appendMarkup(StringBuilder latexBuilder, TAGMarkup tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
+  private void appendMarkup(StringBuilder latexBuilder, MarkupWrapper tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
     latexBuilder.append("\n    \\node[label=below right:{$")//
         .append(tr.getTag())//
         .append("$}](tr")//
@@ -428,29 +430,29 @@ public class LaTeXExporter2 {
   }
 
   private static class MarkupLayer {
-    final Map<TAGTextNode, Integer> textNodeIndex;
+    final Map<TextNodeWrapper, Integer> textNodeIndex;
 
-    final List<TAGMarkup> markups = new ArrayList<>();
+    final List<MarkupWrapper> markups = new ArrayList<>();
     final Set<String> tags = new HashSet<>();
     int maxMarkupSize = 1; // the number of textnodes of the biggest markup
     int lastTextNodeUsed = 0;
 
-    MarkupLayer(Map<TAGTextNode, Integer> textNodeIndex) {
+    MarkupLayer(Map<TextNodeWrapper, Integer> textNodeIndex) {
       this.textNodeIndex = textNodeIndex;
     }
 
-    public void addMarkup(TAGMarkup markup) {
+    public void addMarkup(MarkupWrapper markup) {
       // LOG.info("markup={}", markup.getTag());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
-      int size = markup.getTextNodeIds().size();
+      int size = markup.getMarkup().getTextNodeIds().size();
       maxMarkupSize = Math.max(maxMarkupSize, size);
       int lastIndex = size - 1;
-      TAGTextNode lastTextNode = store.getTextNode(markup.getTextNodeIds().get(lastIndex));
+      TextNodeWrapper lastTextNode = store.getTextNodeWrapper(markup.getMarkup().getTextNodeIds().get(lastIndex));
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
-    public List<TAGMarkup> getMarkups() {
+    public List<MarkupWrapper> getMarkups() {
       return markups;
     }
 
@@ -466,12 +468,12 @@ public class LaTeXExporter2 {
       return maxMarkupSize;
     }
 
-    public boolean canAdd(TAGMarkup markup) {
+    public boolean canAdd(MarkupWrapper markup) {
       String nTag = normalize(markup.getTag());
       if (!tags.contains(nTag)) {
         return false;
       }
-      TAGTextNode firstTextNode = store.getTextNode(markup.getTextNodeIds().get(0));
+      TextNodeWrapper firstTextNode = store.getTextNodeWrapper(markup.getMarkup().getTextNodeIds().get(0));
       int firstTextNodeIndex = textNodeIndex.get(firstTextNode);
       return (firstTextNodeIndex > lastTextNodeUsed);
     }
@@ -481,7 +483,7 @@ public class LaTeXExporter2 {
     }
   }
 
-  private Map<TAGMarkup, Integer> calculateLayerIndex(List<TAGMarkup> markupList, Map<TAGTextNode, Integer> textNodeIndex) {
+  private Map<MarkupWrapper, Integer> calculateLayerIndex(List<MarkupWrapper> markupList, Map<TextNodeWrapper, Integer> textNodeIndex) {
     List<MarkupLayer> layers = new ArrayList<>();
     markupList.forEach(tr -> {
       Optional<MarkupLayer> oLayer = layers.stream().filter(layer -> layer.canAdd(tr)).findFirst();
@@ -496,7 +498,7 @@ public class LaTeXExporter2 {
     });
 
     AtomicInteger layerCounter = new AtomicInteger();
-    Map<TAGMarkup, Integer> index = new HashMap<>();
+    Map<MarkupWrapper, Integer> index = new HashMap<>();
     layers.stream().sorted(ON_MAX_RANGE_SIZE).forEach(layer -> {
       int i = layerCounter.getAndIncrement();
       layer.getMarkups().forEach(tr -> index.put(tr, i));

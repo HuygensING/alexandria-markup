@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.dao;
+package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -6,14 +6,14 @@ import com.sleepycat.persist.model.PrimaryKey;
 @Entity(version = 1)
 public class TAGTextNode implements TAGObject {
   @PrimaryKey(sequence = "textnode_pk_sequence")
-  private long id;
+  private Long id;
 
   private String text;
 
   private Long prevTextNodeId;
   private Long nextTextNodeId;
 
-  public TAGTextNode() {
+  private TAGTextNode() {
   }
 
   public TAGTextNode(String text) {
