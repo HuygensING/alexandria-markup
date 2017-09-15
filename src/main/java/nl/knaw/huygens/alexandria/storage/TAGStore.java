@@ -7,6 +7,9 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
+import com.sleepycat.persist.model.AnnotationModel;
+import com.sleepycat.persist.model.EntityModel;
+import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -42,9 +45,12 @@ public class TAGStore {
       envConfig.setTransactional(true);
       bdbEnvironment = new Environment(new File(dbDir), envConfig);
 
+      EntityModel model = new AnnotationModel();
+      model.registerClass(LinkedHashSetProxy.class);
       StoreConfig storeConfig = new StoreConfig();
       storeConfig.setAllowCreate(true);
       storeConfig.setTransactional(true);
+      storeConfig.setModel(model);
       store = new EntityStore(bdbEnvironment, "TAGStore", storeConfig);
 
       da = new DataAccessor(store);

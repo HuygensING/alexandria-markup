@@ -63,4 +63,12 @@ public class TAGDocument implements TAGObject {
     return markups == null ? new LinkedHashSet<>() : markups;
   }
 
+  public void addTextNode(TAGTextNode textNode) {
+    textNodeIds.add(textNode.getId());
+  }
+
+  public void associateTextWithMarkup(TAGTextNode textNode, TAGMarkup markup) {
+    textNodeIdToMarkupIds.computeIfAbsent(textNode.getId(), f -> new LinkedHashSet<>()).add(markup.getId());
+  }
+
 }

@@ -61,7 +61,7 @@ public class LMNLImporter2 {
       openMarkupDeque.push(markup);
       openMarkupStack.push(markup);
       document.getMarkupIds().add(markup.getId());
-   }
+    }
 
     void pushOpenMarkup(String rangeName) {
       // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
@@ -97,8 +97,11 @@ public class LMNLImporter2 {
 
     void addTextNode(TAGTextNode textNode) {
       openMarkupDeque.descendingIterator()//
-          .forEachRemaining(m -> m.addTextNode(textNode));
-      document.getTextNodeIds().add(textNode.getId());
+          .forEachRemaining(m -> {
+            m.addTextNode(textNode);
+            document.associateTextWithMarkup(textNode, m);
+          });
+      document.addTextNode(textNode);
     }
 
     private TAGMarkup currentMarkup() {

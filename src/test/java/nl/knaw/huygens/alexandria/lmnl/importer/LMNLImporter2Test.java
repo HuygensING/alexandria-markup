@@ -416,7 +416,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       String input = "text{lmnl]";
       try {
-        DocumentWrapper actual = new LMNLImporter2(store).importLMNL(input);
+        new LMNLImporter2(store).importLMNL(input);
         fail("no LMNLSyntaxError thrown");
       } catch (LMNLSyntaxError e) {
         assertThat(e.getMessage()).contains("Closing tag {lmnl] found without corresponding open tag.");
@@ -429,7 +429,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       String input = "[a}bla{b]";
       try {
-        DocumentWrapper actual = new LMNLImporter2(store).importLMNL(input);
+        new LMNLImporter2(store).importLMNL(input);
         fail("no LMNLSyntaxError thrown");
       } catch (LMNLSyntaxError e) {
         assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [a}");
@@ -444,7 +444,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     InputStream input = FileUtils.openInputStream(new File(pathname));
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper actual = new LMNLImporter2(store).importLMNL(input);
+        new LMNLImporter2(store).importLMNL(input);
         fail("no LMNLSyntaxError thrown");
       } catch (LMNLSyntaxError e) {
         assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [H}, [name}, [T}, [name}, [lizabeth}, [name=a}");
