@@ -74,6 +74,7 @@ public class LMNLImporter2 {
           // every markup should have at least one textNode
           TAGTextNode emptyTextNode = new TAGTextNode("");
           update(emptyTextNode);
+          addTextNode(emptyTextNode);
           closeMarkup();
         }
         openMarkupStack.push(markup);
