@@ -63,7 +63,7 @@ public class DocumentWrapper {
         .iterator();
   }
 
-  public void associateTextWithRange(TextNodeWrapper textNodeWrapper, MarkupWrapper markupWrapper) {
+  public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, MarkupWrapper markupWrapper) {
     document.getTextNodeIdToMarkupIds()
         .computeIfAbsent(
             textNodeWrapper.getId(),

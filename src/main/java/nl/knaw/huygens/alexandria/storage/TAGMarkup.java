@@ -85,28 +85,6 @@ public class TAGMarkup implements TAGObject{
     return this;
   }
 
-//  public boolean hasN() {
-//    // TODO
-//    return true;
-////    return annotations.parallelStream()//
-////        .map(Annotation::getTag) //
-////        .anyMatch(t -> t.equals("n"));
-//  }
-//
-//  public void joinWith(TAGMarkup markup) {
-//    // TODO
-//  }
-//
-//  public boolean isAnonymous() {
-//    // TODO
-//    return isAnonymous;
-//  }
-//
-//  public boolean isContinuous() {
-//    // TODO
-//    return isContinuous;
-//  }
-
   public Long getDocumentId() {
     return documentId;
   }

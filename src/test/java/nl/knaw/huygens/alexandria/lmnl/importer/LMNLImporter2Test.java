@@ -26,7 +26,6 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex2;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter2;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
@@ -247,7 +246,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       // - with one annotation on it.
       // - that has one range on it.
       DocumentWrapper expected = store.createDocumentWrapper();
-      MarkupWrapper r1 = store.createMarkupWrapper(expected, "lmnl");
+      MarkupWrapper m1 = store.createMarkupWrapper(expected, "lmnl");
       // TAGAnnotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
       AnnotationWrapper a1 = simpleAnnotation("a");
       DocumentWrapper annotationDocument = a1.getDocument();
@@ -260,12 +259,13 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
           .addTextNode(at2)//
           .addTextNode(at3)//
           .addMarkup(ar1);
-      r1.addAnnotation(a1);
+      m1.addAnnotation(a1);
 
       TextNodeWrapper t1 = store.createTextNodeWrapper("This is the main text");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
-      expected.addMarkup(r1);
+      expected.addMarkup(m1);
+      expected.associateTextNodeWithMarkup(t1,m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -291,7 +291,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
 
       DocumentWrapper expected = store.createDocumentWrapper();
 
-      MarkupWrapper r1 = store.createMarkupWrapper(expected, "range1");
+      MarkupWrapper m1 = store.createMarkupWrapper(expected, "range1");
       AnnotationWrapper a1 = simpleAnnotation("annotation1");
       DocumentWrapper annotationDocument = a1.getDocument();
       TextNodeWrapper at1 = store.createTextNodeWrapper("");
@@ -301,12 +301,13 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
           .addTextNode(at1)//
           .addMarkup(ar11)//
           .addMarkup(ar12);
-      r1.addAnnotation(a1);
+      m1.addAnnotation(a1);
 
       TextNodeWrapper t1 = store.createTextNodeWrapper("");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
-      expected.addMarkup(r1);
+      expected.addMarkup(m1);
+      expected.associateTextNodeWithMarkup(t1,m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -323,14 +324,15 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
 
       DocumentWrapper expected = store.createDocumentWrapper();
 
-      MarkupWrapper r1 = store.createMarkupWrapper(expected, "range1");
+      MarkupWrapper m1 = store.createMarkupWrapper(expected, "range1");
       AnnotationWrapper a1 = simpleAnnotation("", "annotation text");
-      r1.addAnnotation(a1);
+      m1.addAnnotation(a1);
 
       TextNodeWrapper t1 = store.createTextNodeWrapper("bla");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
-      expected.addMarkup(r1);
+      expected.addMarkup(m1);
+      expected.associateTextNodeWithMarkup(t1,m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -347,11 +349,12 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
 
       DocumentWrapper expected = store.createDocumentWrapper();
 
-      MarkupWrapper r1 = store.createMarkupWrapper(expected, "r");
+      MarkupWrapper m1 = store.createMarkupWrapper(expected, "r");
       TextNodeWrapper t1 = store.createTextNodeWrapper("Splitting the .");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
-      expected.addMarkup(r1);
+      expected.addMarkup(m1);
+      expected.associateTextNodeWithMarkup(t1,m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -365,11 +368,12 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       DocumentWrapper actual = new LMNLImporter2(store).importLMNL(input);
       DocumentWrapper expected = store.createDocumentWrapper();
-      MarkupWrapper r1 = store.createMarkupWrapper(expected, "empty");
+      MarkupWrapper m1 = store.createMarkupWrapper(expected, "empty");
       TextNodeWrapper t1 = store.createTextNodeWrapper("");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
-      expected.addMarkup(r1);
+      expected.addMarkup(m1);
+      expected.associateTextNodeWithMarkup(t1,m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -388,11 +392,12 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       // - with one text node
       // - with one range on it
       DocumentWrapper document = store.createDocumentWrapper();
-      MarkupWrapper r1 = store.createMarkupWrapper(document, "foo");
+      MarkupWrapper m1 = store.createMarkupWrapper(document, "foo");
       TextNodeWrapper t1 = store.createTextNodeWrapper("FOOBAR");
-      r1.setOnlyTextNode(t1);
+      m1.setOnlyTextNode(t1);
       document.setOnlyTextNode(t1);
-      document.addMarkup(r1);
+      document.associateTextNodeWithMarkup(t1,m1);
+      document.addMarkup(m1);
       logLMNL(actual);
       compareLMNL(document, actual);
     });

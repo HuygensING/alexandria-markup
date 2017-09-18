@@ -29,7 +29,7 @@ public class MarkupWrapper {
     markup.getTextNodeIds().add(textNodeWrapper.getId());
     Long ownerId = markup.getDocumentId();
     new DocumentWrapper(store, store.getDocument(ownerId))//
-        .associateTextWithRange(textNodeWrapper, this);
+        .associateTextNodeWithMarkup(textNodeWrapper, this);
     update();
     return this;
   }
