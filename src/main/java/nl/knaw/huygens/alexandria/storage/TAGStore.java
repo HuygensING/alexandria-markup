@@ -62,6 +62,9 @@ public class TAGStore {
 
   public void close() {
     try {
+      if (tx != null && tx.isValid()) {
+        tx.abort(); // close it or lose it
+      }
       if (store != null) {
         store.close();
       }

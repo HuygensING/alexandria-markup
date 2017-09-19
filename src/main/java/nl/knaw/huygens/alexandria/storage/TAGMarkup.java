@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(version = 1)
-public class TAGMarkup implements TAGObject{
+public class TAGMarkup implements TAGObject {
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private Long id;
 
@@ -19,7 +19,7 @@ public class TAGMarkup implements TAGObject{
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
 
-  private TAGMarkup(){
+  private TAGMarkup() {
   }
 
   public TAGMarkup(long documentId, String tagName) {
@@ -87,5 +87,16 @@ public class TAGMarkup implements TAGObject{
 
   public Long getDocumentId() {
     return documentId;
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof TAGMarkup//
+        && getId().equals(((TAGMarkup) other).getId());
   }
 }

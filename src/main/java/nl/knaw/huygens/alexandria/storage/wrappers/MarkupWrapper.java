@@ -106,4 +106,15 @@ public class MarkupWrapper {
   public String getExtendedTag() {
     return markup.getExtendedTag();
   }
+
+  @Override
+  public int hashCode() {
+    return markup.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof MarkupWrapper //
+        && markup.equals(((MarkupWrapper) other).getMarkup());
+  }
 }

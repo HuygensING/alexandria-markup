@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -59,28 +58,37 @@ public class LMNLExporter2 {
 
   private void appendLimen(StringBuilder lmnlBuilder, DocumentWrapper document) {
     if (document != null) {
-      Deque<MarkupWrapper> openMarkups = new ArrayDeque<>();
+      Deque<Long> openMarkupIds = new ArrayDeque<>();
+      Map<Long, StringBuilder> openTags = new HashMap<>();
+      Map<Long, StringBuilder> closeTags = new HashMap<>();
       document.getTextNodeStream().forEach(tn -> {
-        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
+        Set<Long> markupIds = new HashSet<>();
+        document.getMarkupStreamForTextNode(tn).forEach(mw -> {
+          Long id = mw.getId();
+          markupIds.add(id);
+          openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
+          closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+        });
 
-        List<MarkupWrapper> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
-        toClose.removeAll(markups);
+        List<Long> toClose = new ArrayList<>();
+        toClose.addAll(openMarkupIds);
+        toClose.removeAll(markupIds);
         Collections.reverse(toClose);
-        toClose.forEach(markup -> lmnlBuilder.append(toCloseTag(markup)));
+        toClose.forEach(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
 
-        List<MarkupWrapper> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
-        toOpen.removeAll(openMarkups);
-        toOpen.forEach(markup -> lmnlBuilder.append(toOpenTag(markup)));
+        List<Long> toOpen = new ArrayList<>();
+        toOpen.addAll(markupIds);
+        toOpen.removeAll(openMarkupIds);
+        toOpen.forEach(markupId -> lmnlBuilder.append(openTags.get(markupId)));
 
-        openMarkups.removeAll(toClose);
-        openMarkups.addAll(toOpen);
+        openMarkupIds.removeAll(toClose);
+        openMarkupIds.addAll(toOpen);
         lmnlBuilder.append(tn.getText());
       });
-      openMarkups.descendingIterator()//
-          .forEachRemaining(markup -> lmnlBuilder.append(toCloseTag(markup)));
+      openMarkupIds.descendingIterator()//
+          .forEachRemaining(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
     }
+
   }
 
   private StringBuilder toCloseTag(MarkupWrapper markup) {
