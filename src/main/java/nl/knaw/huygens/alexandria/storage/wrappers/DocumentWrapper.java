@@ -1,6 +1,7 @@
 package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
@@ -70,6 +71,20 @@ public class DocumentWrapper {
             f -> new LinkedHashSet<>()).add(markupWrapper.getId());
   }
 
+  public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
+    document.getTextNodeIdToMarkupIds()
+        .computeIfAbsent(
+            textNodeWrapper.getId(),
+            f -> new LinkedHashSet<>()).add(markup.getId());
+  }
+
+  public void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
+    document.getTextNodeIdToMarkupIds()
+        .computeIfAbsent(
+            node.getId(),
+            f -> new LinkedHashSet<>()).remove(markup.getId());
+  }
+
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
@@ -98,6 +113,20 @@ public class DocumentWrapper {
     return this;
   }
 
+  public Stream<MarkupWrapper> getMarkupStreamForTextNode(TextNodeWrapper tn) {
+    return document.getMarkupIdsForTextNodeIds(tn.getId()).stream()//
+        .map(store::getMarkup)//
+        .map(m -> new MarkupWrapper(store, m));
+  }
+
+  public void joinMarkup(TAGMarkup markup1, MarkupWrapper markup2) {
+    markup1.getTextNodeIds().addAll(markup2.getMarkup().getTextNodeIds());
+    markup2.getTextNodeStream().forEach(tn -> {
+      this.disAssociateTextNodeWithMarkup(tn, markup2);
+      this.associateTextNodeWithMarkup(tn, markup1);
+    });
+    markup1.getAnnotationIds().addAll(markup2.getMarkup().getAnnotationIds());
+  }
 
   /* private methods */
 
@@ -110,10 +139,5 @@ public class DocumentWrapper {
     store.persist(document);
   }
 
-  public Stream<MarkupWrapper> getMarkupStreamForTextNode(TextNodeWrapper tn) {
-    return document.getMarkupIdsForTextNodeIds(tn.getId()).stream()//
-        .map(store::getMarkup)//
-        .map(m -> new MarkupWrapper(store, m));
-  }
 
 }

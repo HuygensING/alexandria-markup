@@ -20,11 +20,13 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
@@ -34,7 +36,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class LMNLImporter2 {
   static final Logger LOG = LoggerFactory.getLogger(LMNLImporter2.class);
@@ -244,7 +249,7 @@ public class LMNLImporter2 {
     update(document);
     context.pushDocumentContext(document);
     handleDefaultMode(context);
-    joinDiscontinuedRanges(document);
+    joinDiscontinuedRanges(documentWrapper);
     context.popDocumentContext();
 
     String errorMsg = "";
@@ -449,47 +454,39 @@ public class LMNLImporter2 {
 //    joinDiscontinuedRanges(document.getDocumentId());
 //  }
 
-  public static void joinDiscontinuedRanges(TAGDocument document) {
-//    Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
-//    List<TAGMarkup> markupsToRemove = new ArrayList<>();
-//    document.getMarkupIdsForTextNodeIds().stream()//
-//        .map(tagStore::getMarkup)//
-//        .filter(TAGMarkup::hasN)//
-//        .forEach(markup -> {
-//          String tag = markup.getTag();
-//          TAGAnnotation nAnnotation = markup.getAnnotationIds().parallelStream()//
-//              .map(tagStore::getAnnotation)//
-//              .filter(a -> a.getTag().equals("n"))//
-//              .findFirst()//
-//              .get();
-//          String key = tag + "-" + annotationText(nAnnotation);
-//          if (markupsToJoin.containsKey(key)) {
-//            TAGMarkup originalMarkup = markupsToJoin.get(key);
-//            markup.getAnnotationIds().remove(nAnnotation);
-//            originalMarkup.joinWith(markup);
-//            markupsToRemove.add(markup);
-//          } else {
-//            markupsToJoin.put(key, markup);
-//          }
-//        });
-//
-//    document.getMarkupIdsForTextNodeIds().removeAll(markupsToRemove);
-//    document.getMarkupIdsForTextNodeIds().stream()//
-//        .map(tagStore::getMarkup)//
-//        .map(TAGMarkup::getAnnotationIds)//
-//        .flatMap(List::stream)//
-//        .map(tagStore::getAnnotation)//
-//        .map(TAGAnnotation::getDocumentId)//
-//        .map(tagStore::getDocument)//
-//        .forEach(LMNLImporter2::joinDiscontinuedRanges);
+  public static void joinDiscontinuedRanges(DocumentWrapper document) {
+    Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
+    List<TAGMarkup> markupsToRemove = new ArrayList<>();
+    document.getMarkupStream()//
+        .filter(MarkupWrapper::hasN)//
+        .forEach(markup -> {
+          String tag = markup.getTag();
+          AnnotationWrapper annotation = markup.getAnnotationStream()//
+              .filter(a -> a.getTag().equals("n"))//
+              .findFirst()//
+              .get();
+          String key = tag + "-" + annotationText(annotation);
+          if (markupsToJoin.containsKey(key)) {
+            TAGMarkup originalMarkup = markupsToJoin.get(key);
+            markup.getMarkup().getAnnotationIds().remove(annotation.getId());
+            document.joinMarkup(originalMarkup,markup);
+            markupsToRemove.add(markup.getMarkup());
+          } else {
+            markupsToJoin.put(key, markup.getMarkup());
+          }
+        });
+
+    document.getDocument().getMarkupIds().removeAll(markupsToRemove);
+    document.getMarkupStream()//
+        .map(MarkupWrapper::getAnnotationStream)//
+        .flatMap(Function.identity())//
+        .map(AnnotationWrapper::getDocument)//
+        .forEach(LMNLImporter2::joinDiscontinuedRanges);
   }
 
-  private static String annotationText(TAGAnnotation annotation) {
-    long value = annotation.getDocumentId();
-    TAGDocument document = tagStore.getDocument(value);
-    return document.getTextNodeIds().stream()//
-        .map(tagStore::getTextNode)//
-        .map(TAGTextNode::getText)//
+  private static String annotationText(AnnotationWrapper annotation) {
+    return annotation.getDocument().getTextNodeStream()//
+        .map(TextNodeWrapper::getText)//
         .collect(joining());
   }
 

@@ -117,4 +117,11 @@ public class MarkupWrapper {
     return other instanceof MarkupWrapper //
         && markup.equals(((MarkupWrapper) other).getMarkup());
   }
+
+  public boolean hasN() {
+    return getAnnotationStream()//
+        .map(AnnotationWrapper::getTag) //
+        .anyMatch(t -> t.equals("n"));
+  }
+
 }

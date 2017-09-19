@@ -99,4 +99,5 @@ public class TAGMarkup implements TAGObject {
     return other instanceof TAGMarkup//
         && getId().equals(((TAGMarkup) other).getId());
   }
+
 }

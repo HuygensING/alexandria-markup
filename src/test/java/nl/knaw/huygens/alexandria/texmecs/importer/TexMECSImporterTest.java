@@ -20,8 +20,16 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import nl.knaw.huygens.alexandria.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,22 +38,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.data_model.Annotation;
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.Markup;
-import nl.knaw.huygens.alexandria.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class TexMECSImporterTest {
   final Logger LOG = LoggerFactory.getLogger(getClass());
