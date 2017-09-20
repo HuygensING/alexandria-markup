@@ -1,10 +1,7 @@
 package nl.knaw.huygens.alexandria.storage;
 
 import com.google.common.base.Preconditions;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.je.Transaction;
+import com.sleepycat.je.*;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
@@ -80,13 +77,13 @@ public class TAGStore {
   public Long persist(TAGObject tagObject) {
     assertInTransaction();
     if (tagObject instanceof TAGDocument) {
-      da.documentById.put((TAGDocument) tagObject);
+      da.documentById.put(tx, (TAGDocument) tagObject);
 
     } else if (tagObject instanceof TAGTextNode) {
-      da.textNodeById.put((TAGTextNode) tagObject);
+      da.textNodeById.put(tx,(TAGTextNode) tagObject);
 
     } else if (tagObject instanceof TAGMarkup) {
-      da.markupById.put((TAGMarkup) tagObject);
+      da.markupById.put(tx, (TAGMarkup) tagObject);
 
     } else if (tagObject instanceof TAGAnnotation) {
       da.annotationById.put(tx, (TAGAnnotation) tagObject);
@@ -100,7 +97,7 @@ public class TAGStore {
   // Document
   public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
-    return da.documentById.get(documentId);
+    return da.documentById.get(tx,documentId,LockMode.READ_UNCOMMITTED_ALL);
   }
 
   public DocumentWrapper createDocumentWrapper() {
@@ -112,7 +109,7 @@ public class TAGStore {
   // TextNode
   public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
-    return da.textNodeById.get(textNodeId);
+    return da.textNodeById.get(tx,textNodeId,LockMode.READ_UNCOMMITTED_ALL);
   }
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
@@ -128,7 +125,7 @@ public class TAGStore {
   // Markup
   public TAGMarkup getMarkup(Long markupId) {
     assertInTransaction();
-    return da.markupById.get(markupId);
+    return da.markupById.get(tx, markupId, LockMode.READ_UNCOMMITTED_ALL);
   }
 
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
@@ -144,7 +141,7 @@ public class TAGStore {
   // Annotation
   public TAGAnnotation getAnnotation(Long annotationId) {
     assertInTransaction();
-    return da.annotationById.get(annotationId);
+    return da.annotationById.get(tx, annotationId, LockMode.READ_UNCOMMITTED_ALL);
   }
 
   public TAGAnnotation createAnnotation(String tag) {
@@ -178,7 +175,6 @@ public class TAGStore {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
       if (getTransactionIsOpen()) {
         rollbackTransaction();
       }
