@@ -167,6 +167,7 @@ public class LMNLImporter2 {
 
     DocumentContext popDocumentContext() {
       DocumentContext documentContext = documentContextStack.pop();
+      update(documentContext.document);
       if (!documentContext.openMarkupDeque.isEmpty()) {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + "}")//

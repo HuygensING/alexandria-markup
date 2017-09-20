@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 public class TAGStore {
   private static final Logger LOG = LoggerFactory.getLogger(TAGStore.class);
+  private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
 
   Environment bdbEnvironment = null;
   private String dbDir;
@@ -97,7 +98,7 @@ public class TAGStore {
   // Document
   public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
-    return da.documentById.get(tx,documentId,LockMode.READ_UNCOMMITTED_ALL);
+    return da.documentById.get(tx,documentId, LOCK_MODE);
   }
 
   public DocumentWrapper createDocumentWrapper() {
@@ -109,7 +110,7 @@ public class TAGStore {
   // TextNode
   public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
-    return da.textNodeById.get(tx,textNodeId,LockMode.READ_UNCOMMITTED_ALL);
+    return da.textNodeById.get(tx,textNodeId, LOCK_MODE);
   }
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
@@ -125,7 +126,7 @@ public class TAGStore {
   // Markup
   public TAGMarkup getMarkup(Long markupId) {
     assertInTransaction();
-    return da.markupById.get(tx, markupId, LockMode.READ_UNCOMMITTED_ALL);
+    return da.markupById.get(tx, markupId, LOCK_MODE);
   }
 
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
@@ -141,7 +142,7 @@ public class TAGStore {
   // Annotation
   public TAGAnnotation getAnnotation(Long annotationId) {
     assertInTransaction();
-    return da.annotationById.get(tx, annotationId, LockMode.READ_UNCOMMITTED_ALL);
+    return da.annotationById.get(tx, annotationId, LOCK_MODE);
   }
 
   public TAGAnnotation createAnnotation(String tag) {
