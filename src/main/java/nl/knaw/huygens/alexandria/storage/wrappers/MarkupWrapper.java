@@ -79,7 +79,7 @@ public class MarkupWrapper {
 
   public boolean isAnonymous() {
     return markup.getTextNodeIds().size() == 1//
-        && "".equals(getTextNodeStream().findFirst().map(TextNodeWrapper::getText));
+        && "".equals(getTextNodeStream().findFirst().map(TextNodeWrapper::getText).get());
   }
 
   public TAGMarkup getMarkup() {
@@ -100,7 +100,6 @@ public class MarkupWrapper {
       expectedNext = textNode.getNextTextNode();
     }
     return isContinuous;
-
   }
 
   public String getExtendedTag() {

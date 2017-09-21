@@ -83,9 +83,10 @@ public class NodeRangeIndex2 {
         markups.addAll(relevantInvertedMarkups);
 
         markups.stream()//
+            .map(MarkupWrapper::getId)//
             .sorted(Comparator.comparingInt(markupIndex::get))//
-            .forEach(tr -> {
-              int j = markupIndex.get(tr);
+            .forEach(markupId -> {
+              int j = markupIndex.get(markupId);
               IndexPoint point = new IndexPoint(i, j);
               indexPoints.add(point);
             });
