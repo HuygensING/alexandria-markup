@@ -18,9 +18,7 @@ public class LinkedHashSetProxy implements PersistentProxy<LinkedHashSet> {
     LinkedHashSet linkedHashSet = null;
     if (setList != null){
       linkedHashSet = new LinkedHashSet(setList.size());
-      for (Object aSetList : setList) {
-        linkedHashSet.add(aSetList);
-      }
+      linkedHashSet.addAll(setList);
     }
     return linkedHashSet;
   }

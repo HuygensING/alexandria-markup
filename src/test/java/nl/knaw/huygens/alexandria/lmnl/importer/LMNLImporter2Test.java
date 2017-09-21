@@ -544,12 +544,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     for (int i = 0; i < expectedTextNodeList.size(); i++) {
       TextNodeWrapper actualTextNode = actualTextNodeList.get(i);
       TextNodeWrapper expectedTextNode = expectedTextNodeList.get(i);
-      Comparator<TextNodeWrapper> textNodeWrapperComparator = new Comparator<TextNodeWrapper>() {
-        @Override
-        public int compare(TextNodeWrapper tnw1, TextNodeWrapper tnw2) {
-          return tnw1.getText().compareTo(tnw2.getText());
-        }
-      };
+      Comparator<TextNodeWrapper> textNodeWrapperComparator = Comparator.comparing(TextNodeWrapper::getText);
       assertThat(actualTextNode).usingComparator(textNodeWrapperComparator).isEqualTo(expectedTextNode);
     }
 
