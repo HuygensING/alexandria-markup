@@ -102,9 +102,9 @@ public class DocumentWrapper {
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
-    if (firstTextNode.getId() != lastTextNode.getId()) {
+    if (!firstTextNode.getId().equals(lastTextNode.getId())) {
       TextNodeWrapper next = firstTextNode.getNextTextNode();
-      while (next.getId() != lastTextNode.getId()) {
+      while (!next.getId().equals(lastTextNode.getId())) {
         addTextNode(next);
         next = next.getNextTextNode();
       }

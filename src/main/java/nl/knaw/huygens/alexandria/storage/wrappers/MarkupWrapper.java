@@ -43,9 +43,9 @@ public class MarkupWrapper {
   public MarkupWrapper setFirstAndLastTextNode(TextNodeWrapper first, TextNodeWrapper last) {
     markup.getTextNodeIds().clear();
     addTextNode(first);
-    if (first.getId() != last.getId()) {
+    if (!first.getId().equals(last.getId())) {
       TextNodeWrapper next = first.getNextTextNode();
-      while (next.getId() != last.getId()) {
+      while (!next.getId().equals(last.getId())) {
         addTextNode(next);
         next = next.getNextTextNode();
       }
