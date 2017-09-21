@@ -17,8 +17,8 @@ public class TextNodeWrapper {
     return textNode.getId();
   }
 
-  public String getText(){
-    return  textNode.getText();
+  public String getText() {
+    return textNode.getText();
   }
 
   private TAGTextNode getTextNode() {
@@ -51,5 +51,16 @@ public class TextNodeWrapper {
 
   private void update() {
     store.persist(textNode);
+  }
+
+  @Override
+  public int hashCode() {
+    return textNode.getId().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof TextNodeWrapper//
+        && ((TextNodeWrapper) other).getId().equals(getId());
   }
 }

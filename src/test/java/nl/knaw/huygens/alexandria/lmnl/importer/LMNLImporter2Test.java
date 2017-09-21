@@ -69,10 +69,11 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       r1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(r1);
+      expected.associateTextNodeWithMarkup(t1,r1);
 
       logLMNL(actual);
       assertTrue(compareDocuments(expected, actual));
-      assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+      assertActualMatchesExpected(actual,expected);
 
       logKdTree(actual);
       NodeRangeIndex2 index = new NodeRangeIndex2(store, actual);
@@ -98,7 +99,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
           + "{excerpt]";
 
       LMNLImporter2 importer = new LMNLImporter2(store);
-      DocumentWrapper actual= importer.importLMNL(input);
+      DocumentWrapper actual = importer.importLMNL(input);
 
       DocumentWrapper expected = store.createDocumentWrapper();
 
@@ -117,23 +118,69 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       AnnotationWrapper date = simpleAnnotation("date", "1915");
       AnnotationWrapper title = simpleAnnotation("title", "The Housekeeper");
       AnnotationWrapper source = simpleAnnotation("source").addAnnotation(date).addAnnotation(title);
+
       AnnotationWrapper name = simpleAnnotation("name", "Robert Frost");
       AnnotationWrapper dates = simpleAnnotation("dates", "1874-1963");
       AnnotationWrapper author = simpleAnnotation("author").addAnnotation(name).addAnnotation(dates);
-      AnnotationWrapper n144 = simpleAnnotation("n", "144");
-      AnnotationWrapper n145 = simpleAnnotation("n", "145");
-      AnnotationWrapper n146 = simpleAnnotation("n", "146");
-      MarkupWrapper excerpt = store.createMarkupWrapper(expected, "excerpt").addAnnotation(source).addAnnotation(author).setFirstAndLastTextNode(tn00, tn10);
+
+      MarkupWrapper excerpt = store.createMarkupWrapper(expected, "excerpt")//
+          .addAnnotation(source)//
+          .addAnnotation(author)//
+          .setFirstAndLastTextNode(tn00, tn10);
       // 3 sentences
       MarkupWrapper s1 = store.createMarkupWrapper(expected, "s").setFirstAndLastTextNode(tn01, tn03);
       MarkupWrapper s2 = store.createMarkupWrapper(expected, "s").setOnlyTextNode(tn05);
       MarkupWrapper s3 = store.createMarkupWrapper(expected, "s").setFirstAndLastTextNode(tn07, tn09);
+
       // 3 lines
+      AnnotationWrapper n144 = simpleAnnotation("n", "144");
       MarkupWrapper l1 = store.createMarkupWrapper(expected, "l").setOnlyTextNode(tn01).addAnnotation(n144);
+
+      AnnotationWrapper n145 = simpleAnnotation("n", "145");
       MarkupWrapper l2 = store.createMarkupWrapper(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+
+      AnnotationWrapper n146 = simpleAnnotation("n", "146");
       MarkupWrapper l3 = store.createMarkupWrapper(expected, "l").setOnlyTextNode(tn09).addAnnotation(n146);
 
-      expected.setFirstAndLastTextNode(tn00, tn10).addMarkup(excerpt).addMarkup(s1).addMarkup(l1).addMarkup(l2).addMarkup(s2).addMarkup(s3).addMarkup(l3);
+      expected.setFirstAndLastTextNode(tn00, tn10)//
+          .addMarkup(excerpt)//
+          .addMarkup(s1)//
+          .addMarkup(l1)//
+          .addMarkup(l2)//
+          .addMarkup(s2)//
+          .addMarkup(s3)//
+          .addMarkup(l3);
+      expected.associateTextNodeWithMarkup(tn00,excerpt);
+      expected.associateTextNodeWithMarkup(tn01,excerpt);
+      expected.associateTextNodeWithMarkup(tn02,excerpt);
+      expected.associateTextNodeWithMarkup(tn03,excerpt);
+      expected.associateTextNodeWithMarkup(tn04,excerpt);
+      expected.associateTextNodeWithMarkup(tn05,excerpt);
+      expected.associateTextNodeWithMarkup(tn06,excerpt);
+      expected.associateTextNodeWithMarkup(tn07,excerpt);
+      expected.associateTextNodeWithMarkup(tn08,excerpt);
+      expected.associateTextNodeWithMarkup(tn09,excerpt);
+      expected.associateTextNodeWithMarkup(tn10,excerpt);
+
+      expected.associateTextNodeWithMarkup(tn01,s1);
+      expected.associateTextNodeWithMarkup(tn02,s1);
+      expected.associateTextNodeWithMarkup(tn03,s1);
+
+      expected.associateTextNodeWithMarkup(tn05,s2);
+
+      expected.associateTextNodeWithMarkup(tn07,s3);
+      expected.associateTextNodeWithMarkup(tn08,s3);
+      expected.associateTextNodeWithMarkup(tn09,s3);
+
+      expected.associateTextNodeWithMarkup(tn01,l1);
+
+      expected.associateTextNodeWithMarkup(tn03,l2);
+      expected.associateTextNodeWithMarkup(tn04,l2);
+      expected.associateTextNodeWithMarkup(tn05,l2);
+      expected.associateTextNodeWithMarkup(tn06,l2);
+      expected.associateTextNodeWithMarkup(tn07,l2);
+
+      expected.associateTextNodeWithMarkup(tn09,l3);
 
       assertActualMatchesExpected(actual, expected);
 
@@ -217,14 +264,16 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
     store.runInTransaction(() -> {
       DocumentWrapper actual = new LMNLImporter2(store).importLMNL(input);
+
+      String lmnl = lmnlExporter.toLMNL(actual);
+      LOG.info("lmnl={}", lmnl);
+      assertThat(lmnl).isEqualTo(input);
+
       LOG.info("textNodes={}", actual.getTextNodeStream());
       LOG.info("markups={}", actual.getMarkupStream());
       assertThat(actual.hasTextNodes()).isTrue();
       assertThat(actual.getMarkupStream()).hasSize(1);
 
-      String lmnl = lmnlExporter.toLMNL(actual);
-      LOG.info("lmnl={}", lmnl);
-      assertThat(lmnl).isEqualTo(input);
 
       LaTeXExporter2 latex = new LaTeXExporter2(store, actual);
       LOG.info("matrix=\n{}", latex.exportMatrix());
@@ -247,25 +296,26 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       // - that has one range on it.
       DocumentWrapper expected = store.createDocumentWrapper();
       MarkupWrapper m1 = store.createMarkupWrapper(expected, "lmnl");
-      // TAGAnnotation a1 = simpleAnnotation("a", "This is the [type}annotation{type] text");
       AnnotationWrapper a1 = simpleAnnotation("a");
       DocumentWrapper annotationDocument = a1.getDocument();
       TextNodeWrapper at1 = store.createTextNodeWrapper("This is the ");
       TextNodeWrapper at2 = store.createTextNodeWrapper("annotation");
-      MarkupWrapper ar1 = store.createMarkupWrapper(annotationDocument, "type").addTextNode(at2);
+      MarkupWrapper am1 = store.createMarkupWrapper(annotationDocument, "type").addTextNode(at2);
       TextNodeWrapper at3 = store.createTextNodeWrapper(" text");
       annotationDocument//
           .addTextNode(at1)//
           .addTextNode(at2)//
           .addTextNode(at3)//
-          .addMarkup(ar1);
+          .addMarkup(am1);
+      annotationDocument.associateTextNodeWithMarkup(at2, am1);
       m1.addAnnotation(a1);
 
       TextNodeWrapper t1 = store.createTextNodeWrapper("This is the main text");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1,m1);
+      expected.associateTextNodeWithMarkup(t1, m1);
+
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -302,12 +352,14 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
           .addMarkup(ar11)//
           .addMarkup(ar12);
       m1.addAnnotation(a1);
+      annotationDocument.associateTextNodeWithMarkup(at1, ar11);
+      annotationDocument.associateTextNodeWithMarkup(at1, ar12);
 
       TextNodeWrapper t1 = store.createTextNodeWrapper("");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1,m1);
+      expected.associateTextNodeWithMarkup(t1, m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -332,7 +384,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1,m1);
+      expected.associateTextNodeWithMarkup(t1, m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -354,7 +406,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1,m1);
+      expected.associateTextNodeWithMarkup(t1, m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -373,7 +425,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1,m1);
+      expected.associateTextNodeWithMarkup(t1, m1);
 
       logLMNL(actual);
       compareLMNL(expected, actual);
@@ -396,7 +448,7 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
       TextNodeWrapper t1 = store.createTextNodeWrapper("FOOBAR");
       m1.setOnlyTextNode(t1);
       document.setOnlyTextNode(t1);
-      document.associateTextNodeWithMarkup(t1,m1);
+      document.associateTextNodeWithMarkup(t1, m1);
       document.addMarkup(m1);
       logLMNL(actual);
       compareLMNL(document, actual);
@@ -492,7 +544,13 @@ public class LMNLImporter2Test extends AlexandriaBaseStoreTest {
     for (int i = 0; i < expectedTextNodeList.size(); i++) {
       TextNodeWrapper actualTextNode = actualTextNodeList.get(i);
       TextNodeWrapper expectedTextNode = expectedTextNodeList.get(i);
-      assertThat(actualTextNode).isEqualToComparingFieldByFieldRecursively(expectedTextNode);
+      Comparator<TextNodeWrapper> textNodeWrapperComparator = new Comparator<TextNodeWrapper>() {
+        @Override
+        public int compare(TextNodeWrapper tnw1, TextNodeWrapper tnw2) {
+          return tnw1.getText().compareTo(tnw2.getText());
+        }
+      };
+      assertThat(actualTextNode).usingComparator(textNodeWrapperComparator).isEqualTo(expectedTextNode);
     }
 
     assertThat(actualMarkupList).hasSize(expectedMarkupList.size());

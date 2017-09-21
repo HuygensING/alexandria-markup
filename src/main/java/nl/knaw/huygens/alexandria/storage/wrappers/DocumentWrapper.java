@@ -53,8 +53,18 @@ public class DocumentWrapper {
     update();
   }
 
+  public DocumentWrapper addMarkup(TAGMarkup markup) {
+    Long id = markup.getId();
+    return addMarkupId(id);
+  }
+
   public DocumentWrapper addMarkup(MarkupWrapper markup) {
-    document.getMarkupIds().add(markup.getId());
+    Long id = markup.getId();
+    return addMarkupId(id);
+  }
+
+  private DocumentWrapper addMarkupId(Long id) {
+    document.getMarkupIds().add(id);
     update();
     return this;
   }
@@ -65,17 +75,20 @@ public class DocumentWrapper {
   }
 
   public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, MarkupWrapper markupWrapper) {
-    document.getTextNodeIdToMarkupIds()
-        .computeIfAbsent(
-            textNodeWrapper.getId(),
-            f -> new LinkedHashSet<>()).add(markupWrapper.getId());
+    associateTextNodeWithMarkup(textNodeWrapper, markupWrapper.getId());
+    update();
   }
 
   public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
+    associateTextNodeWithMarkup(textNodeWrapper, markup.getId());
+  }
+
+  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, Long id) {
     document.getTextNodeIdToMarkupIds()
         .computeIfAbsent(
             textNodeWrapper.getId(),
-            f -> new LinkedHashSet<>()).add(markup.getId());
+            f -> new LinkedHashSet<>()).add(id);
+    update();
   }
 
   public void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
@@ -83,14 +96,15 @@ public class DocumentWrapper {
         .computeIfAbsent(
             node.getId(),
             f -> new LinkedHashSet<>()).remove(markup.getId());
+    update();
   }
 
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
-    if (firstTextNode != lastTextNode) {
+    if (firstTextNode.getId() != lastTextNode.getId()) {
       TextNodeWrapper next = firstTextNode.getNextTextNode();
-      while (next != lastTextNode) {
+      while (next.getId() != lastTextNode.getId()) {
         addTextNode(next);
         next = next.getNextTextNode();
       }

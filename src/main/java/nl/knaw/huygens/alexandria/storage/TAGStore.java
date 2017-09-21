@@ -132,6 +132,7 @@ public class TAGStore {
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
     TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
     persist(markup);
+//    document.addMarkup(markup);
     return new MarkupWrapper(this, markup);
   }
 

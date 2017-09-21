@@ -457,7 +457,7 @@ public class LMNLImporter2 {
 
   public static void joinDiscontinuedRanges(DocumentWrapper document) {
     Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
-    List<TAGMarkup> markupsToRemove = new ArrayList<>();
+    List<Long> markupIdsToRemove = new ArrayList<>();
     document.getMarkupStream()//
         .filter(MarkupWrapper::hasN)//
         .forEach(markup -> {
@@ -471,13 +471,13 @@ public class LMNLImporter2 {
             TAGMarkup originalMarkup = markupsToJoin.get(key);
             markup.getMarkup().getAnnotationIds().remove(annotation.getId());
             document.joinMarkup(originalMarkup,markup);
-            markupsToRemove.add(markup.getMarkup());
+            markupIdsToRemove.add(markup.getId());
           } else {
             markupsToJoin.put(key, markup.getMarkup());
           }
         });
 
-    document.getDocument().getMarkupIds().removeAll(markupsToRemove);
+    document.getDocument().getMarkupIds().removeAll(markupIdsToRemove);
     document.getMarkupStream()//
         .map(MarkupWrapper::getAnnotationStream)//
         .flatMap(Function.identity())//

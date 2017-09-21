@@ -34,18 +34,18 @@ public class MarkupWrapper {
     return this;
   }
 
-  public MarkupWrapper setOnlyTextNode(TextNodeWrapper t1) {
-    markup.getTextNodeIds().add(t1.getId());
-    update();
+  public MarkupWrapper setOnlyTextNode(TextNodeWrapper textNodeWrapper) {
+    markup.getTextNodeIds().clear();
+    addTextNode(textNodeWrapper);
     return this;
   }
 
   public MarkupWrapper setFirstAndLastTextNode(TextNodeWrapper first, TextNodeWrapper last) {
     markup.getTextNodeIds().clear();
     addTextNode(first);
-    if (first != last) {
+    if (first.getId() != last.getId()) {
       TextNodeWrapper next = first.getNextTextNode();
-      while (next != last) {
+      while (next.getId() != last.getId()) {
         addTextNode(next);
         next = next.getNextTextNode();
       }
@@ -120,7 +120,7 @@ public class MarkupWrapper {
   public boolean hasN() {
     return getAnnotationStream()//
         .map(AnnotationWrapper::getTag) //
-        .anyMatch(t -> t.equals("n"));
+        .anyMatch("n"::equals);
   }
 
 }
