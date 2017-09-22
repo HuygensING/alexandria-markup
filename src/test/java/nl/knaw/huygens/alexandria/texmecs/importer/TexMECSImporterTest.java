@@ -230,7 +230,7 @@ public class TexMECSImporterTest {
       fail();
     } catch (TexMECSSyntaxError se) {
       LOG.warn(se.getMessage());
-      assertThat(se.getMessage()).contains("id 't1' was aleady used in markup <tag@t1|.");
+      assertThat(se.getMessage()).contains("id 't1' was already used in markup <tag@t1|.");
     }
   }
 

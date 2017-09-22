@@ -1,9 +1,11 @@
 package nl.knaw.huygens.alexandria.storage.wrappers;
 
+import nl.knaw.huygens.alexandria.data_model.Markup;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -123,4 +125,42 @@ public class MarkupWrapper {
         .anyMatch("n"::equals);
   }
 
+  public String getSuffix() {
+    return markup.getSuffix();
+  }
+
+  public Optional<MarkupWrapper> getDominatedMarkup() {
+    return markup.getDominatedMarkupId()
+        .map(store::getMarkup)
+        .map(m -> new MarkupWrapper(store, m));
+  }
+
+  public void setDominatedMarkup(MarkupWrapper dominatedMarkup) {
+    markup.setDominatedMarkupId(dominatedMarkup.getId());
+    if (!dominatedMarkup.getMarkup().getDominatingMarkupId().isPresent()) {
+      dominatedMarkup.setDominatingMarkup(this);
+    }
+  }
+
+  public Optional<MarkupWrapper> getDominatingMarkup() {
+    return markup.getDominatingMarkupId()
+        .map(store::getMarkup)
+        .map(m -> new MarkupWrapper(store, m));
+
+  }
+
+  public void setDominatingMarkup(MarkupWrapper dominatingMarkup) {
+    markup.setDominatingMarkupId(dominatingMarkup.getId());
+    if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
+      dominatingMarkup.setDominatedMarkup(this);
+    }
+  }
+
+  public boolean hasMarkupId() {
+    return markup.getMarkupId() != null;
+  }
+
+  public String getMarkupId() {
+    return markup.getMarkupId();
+  }
 }

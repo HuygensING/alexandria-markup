@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity(version = 1)
 public class TAGMarkup implements TAGObject {
@@ -13,11 +14,15 @@ public class TAGMarkup implements TAGObject {
   private Long id;
 
   private String tag;
+  private String markupId;
   private List<Long> annotationIds = new ArrayList<>();
   private List<Long> textNodeIds = new ArrayList<>();
   private long documentId;
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
+  private String suffix;
+  private Long dominatedMarkupId;
+  private Long dominatingMarkupId;
 
   private TAGMarkup() {
   }
@@ -100,4 +105,36 @@ public class TAGMarkup implements TAGObject {
         && getId().equals(((TAGMarkup) other).getId());
   }
 
+  public String getSuffix() {
+    return suffix;
+  }
+
+  public void setSuffix(String suffix) {
+    this.suffix = suffix;
+  }
+
+  public Optional<Long> getDominatedMarkupId() {
+    return Optional.ofNullable(dominatedMarkupId);
+  }
+
+  public void setDominatedMarkupId(Long dominatedMarkupId) {
+    this.dominatedMarkupId = dominatedMarkupId;
+  }
+
+  public Optional<Long> getDominatingMarkupId() {
+    return Optional.ofNullable(dominatingMarkupId);
+  }
+
+  public void setDominatingMarkupId(Long dominatingMarkupId) {
+    this.dominatingMarkupId = dominatingMarkupId;
+  }
+
+
+  public String getMarkupId() {
+    return markupId;
+  }
+
+  public void setMarkupId(String markupId) {
+    this.markupId = markupId;
+  }
 }

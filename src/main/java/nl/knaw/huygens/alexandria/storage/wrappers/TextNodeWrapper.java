@@ -63,4 +63,5 @@ public class TextNodeWrapper {
     return other instanceof TextNodeWrapper//
         && ((TextNodeWrapper) other).getId().equals(getId());
   }
+
 }

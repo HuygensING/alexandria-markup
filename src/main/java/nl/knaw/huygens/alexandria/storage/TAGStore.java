@@ -81,7 +81,7 @@ public class TAGStore {
       da.documentById.put(tx, (TAGDocument) tagObject);
 
     } else if (tagObject instanceof TAGTextNode) {
-      da.textNodeById.put(tx,(TAGTextNode) tagObject);
+      da.textNodeById.put(tx, (TAGTextNode) tagObject);
 
     } else if (tagObject instanceof TAGMarkup) {
       da.markupById.put(tx, (TAGMarkup) tagObject);
@@ -98,7 +98,7 @@ public class TAGStore {
   // Document
   public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
-    return da.documentById.get(tx,documentId, LOCK_MODE);
+    return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
   public DocumentWrapper createDocumentWrapper() {
@@ -110,7 +110,7 @@ public class TAGStore {
   // TextNode
   public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
-    return da.textNodeById.get(tx,textNodeId, LOCK_MODE);
+    return da.textNodeById.get(tx, textNodeId, LOCK_MODE);
   }
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
@@ -130,7 +130,34 @@ public class TAGStore {
   }
 
   public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
-    TAGMarkup markup = new TAGMarkup(document.getId(), tagName);
+    String tag;
+    String suffix = null;
+    String id = null;
+    if (tagName == null) {
+      tag = "";
+
+    } else if (tagName.contains("~")) {
+      String[] parts = tagName.split("~");
+      tag = parts[0];
+      suffix = parts[1];
+
+    } else if (tagName.contains("=")) {
+      String[] parts = tagName.split("=");
+      tag = parts[0];
+      id = parts[1];
+
+    } else if (tagName.contains("@")) {
+      String[] parts = tagName.split("@");
+      tag = parts[0];
+      id = parts[1];
+
+    } else {
+      tag = tagName;
+    }
+
+    TAGMarkup markup = new TAGMarkup(document.getId(), tag);
+    markup.setMarkupId(id);
+    markup.setSuffix(suffix);
     persist(markup);
 //    document.addMarkup(markup);
     return new MarkupWrapper(this, markup);
@@ -158,6 +185,13 @@ public class TAGStore {
   public AnnotationWrapper createAnnotationWrapper(String tag) {
     TAGAnnotation annotation = createAnnotation(tag);
     return new AnnotationWrapper(this, annotation);
+  }
+
+  public AnnotationWrapper createAnnotationWrapper(String tag, String value) {
+    AnnotationWrapper annotationWrapper = createAnnotationWrapper(tag);
+    TextNodeWrapper textNodeWrapper = createTextNodeWrapper(value);
+    annotationWrapper.getDocument().addTextNode(textNodeWrapper);
+    return annotationWrapper;
   }
 
   public AnnotationWrapper getAnnotationWrapper(Long annotationId) {
