@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class LMNLModifierTest {
@@ -43,7 +43,7 @@ public class LMNLModifierTest {
   public void testAddRange() throws LMNLSyntaxError {
     String content = "The rain in Spain falls mainly on the plain.";
     String LMNL = "[text}" + content + "{text]";
-    LMNLImporter importer = new LMNLImporter();
+    LMNLImporterInMemory importer = new LMNLImporterInMemory();
     Document document = importer.importLMNL(LMNL);
     LMNLModifier modifier = new LMNLModifier(document.value());
     Markup countryRange = new Markup(document.value(), "country");
@@ -53,7 +53,7 @@ public class LMNLModifierTest {
     assertThat(spainPosition.getLength()).isEqualTo(5);
     modifier.addMarkup(countryRange, spainPosition);
 
-    LMNLExporter exporter = new LMNLExporter();
+    LMNLExporterInMemory exporter = new LMNLExporterInMemory();
     String modifiedLMNL = exporter.toLMNL(document);
     LOG.info("document.getDocumentId().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);

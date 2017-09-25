@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
@@ -91,7 +91,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
     input = getInputStream(basename);
     LOG.info("testing data/lmnl/{}.lmnl", basename);
     LOG.info("importLMNL\n");
-    Document document = new LMNLImporter().importLMNL(input);
+    Document document = new LMNLImporterInMemory().importLMNL(input);
 
     generateLaTeX(basename, document);
   }
@@ -101,7 +101,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
   }
 
   private void generateLaTeX(String basename, Document document) throws IOException {
-    LaTeXExporter exporter = new LaTeXExporter(document);
+    LaTeXExporterInMemory exporter = new LaTeXExporterInMemory(document);
     String outDir = "out/";
 
     String laTeX = exporter.exportDocument();

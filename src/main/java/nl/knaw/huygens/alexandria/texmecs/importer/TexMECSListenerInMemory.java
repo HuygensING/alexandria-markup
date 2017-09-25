@@ -20,60 +20,74 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.*;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.AttsContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EidContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagSetContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.GiContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.ResumeTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SoleTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagSetContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SuspendTagContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.TextContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.VirtualElementContext;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
 
-public class TexMECSListener2 extends TexMECSParserBaseListener {
+public class TexMECSListenerInMemory extends TexMECSParserBaseListener {
 
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private DocumentWrapper document;
-  private Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
-  private Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
+  private Document document = new Document();
+  private Limen limen = document.value();
+  private Deque<Markup> openMarkup = new ArrayDeque<>();
+  private Deque<Markup> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
-  private HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
+  private HashMap<String, Markup> identifiedMarkups = new HashMap<>();
   private HashMap<String, String> idsInUse = new HashMap<>();
   private List<String> errors = new ArrayList<>();
-  private TAGStore store;
 
-  public TexMECSListener2(TAGStore store) {
-    this.store = store;
-    document = store.createDocumentWrapper();
+  public TexMECSListenerInMemory() {
   }
 
-  public DocumentWrapper getDocument() {
+  public Document getDocument() {
     return document;
   }
 
   @Override
-  public void exitStartTag(StartTagContext ctx) {
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
-    openMarkup.add(markup);
-  }
-
-  @Override
   public void exitStartTagSet(StartTagSetContext ctx) {
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
+    Markup markup = addMarkup(ctx.eid(), ctx.atts());
     openMarkup.add(markup);
     insideTagSet = true;
   }
 
+  @Override
+  public void exitStartTag(StartTagContext ctx) {
+    Markup markup = addMarkup(ctx.eid(), ctx.atts());
+    openMarkup.add(markup);
+  }
 
   @Override
   public void exitText(TextContext ctx) {
-    TextNodeWrapper tn = store.createTextNodeWrapper(ctx.getText());
-    document.addTextNode(tn);
+    TextNode tn = new TextNode(ctx.getText());
+    limen.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
   }
 
@@ -90,21 +104,21 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
 
   @Override
   public void exitSoleTag(SoleTagContext ctx) {
-    TextNodeWrapper tn = store.createTextNodeWrapper("");
-    document.addTextNode(tn);
+    TextNode tn = new TextNode("");
+    limen.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
+    Markup markup = addMarkup(ctx.eid(), ctx.atts());
     linkTextToMarkup(tn, markup);
   }
 
-  private void linkTextToMarkup(TextNodeWrapper tn, MarkupWrapper markup) {
-    document.associateTextNodeWithMarkup(tn, markup);
+  private void linkTextToMarkup(TextNode tn, Markup markup) {
+    limen.associateTextWithRange(tn, markup);
     markup.addTextNode(tn);
   }
 
   @Override
   public void exitSuspendTag(SuspendTagContext ctx) {
-    MarkupWrapper markup = removeFromOpenMarkup(ctx.gi());
+    Markup markup = removeFromOpenMarkup(ctx.gi());
     if (markup != null) {
       suspendedMarkup.add(markup);
     }
@@ -112,7 +126,7 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
 
   @Override
   public void exitResumeTag(ResumeTagContext ctx) {
-    MarkupWrapper markup = removeFromSuspendedMarkup(ctx);
+    Markup markup = removeFromSuspendedMarkup(ctx);
     if (markup != null) {
       openMarkup.add(markup);
     }
@@ -124,11 +138,11 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     String gi = ctx.eid().gi().getText();
     String extendedTag = gi + "=" + idref;
     if (identifiedMarkups.containsKey(extendedTag)) {
-      MarkupWrapper ref = identifiedMarkups.get(extendedTag);
-      MarkupWrapper markup = addMarkup(ref.getTag(), ctx.atts());
-      ref.getTextNodeStream().forEach(tn -> {
-        TextNodeWrapper copy = store.createTextNodeWrapper(tn.getText());
-        document.addTextNode(copy);
+      Markup ref = identifiedMarkups.get(extendedTag);
+      Markup markup = addMarkup(ref.getTag(), ctx.atts());
+      ref.textNodes.forEach(tn -> {
+        TextNode copy = new TextNode(tn.getContent());
+        limen.addTextNode(copy);
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
       });
@@ -144,14 +158,14 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
   public void exitDocument(TexMECSParser.DocumentContext ctx) {
     if (!openMarkup.isEmpty()) {
       String openMarkupString = openMarkup.stream()//
-          .map(TexMECSListener2::startTag)//
+          .map(TexMECSListenerInMemory::startTag)//
           .collect(Collectors.joining(", "));
       String message = "Some markup was not closed: " + openMarkupString;
       errors.add(message);
     }
     if (!suspendedMarkup.isEmpty()) {
       String suspendedMarkupString = suspendedMarkup.stream()//
-          .map(TexMECSListener2::suspendTag)//
+          .map(TexMECSListenerInMemory::suspendTag)//
           .collect(Collectors.joining(", "));
       String message = "Some suspended markup was not resumed: " + suspendedMarkupString;
       errors.add(message);
@@ -166,18 +180,18 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     return errors;
   }
 
-  private MarkupWrapper addMarkup(EidContext eid, AttsContext atts) {
+  private Markup addMarkup(EidContext eid, AttsContext atts) {
     String extendedTag = eid.getText();
     return addMarkup(extendedTag, atts);
   }
 
-  private MarkupWrapper addMarkup(String extendedTag, AttsContext atts) {
-    MarkupWrapper markup = store.createMarkupWrapper(document, extendedTag);
+  private Markup addMarkup(String extendedTag, AttsContext atts) {
+    Markup markup = new Markup(limen, extendedTag);
     addAttributes(atts, markup);
-    document.addMarkup(markup);
-    if (markup.hasMarkupId()) {
+    limen.addMarkup(markup);
+    if (markup.hasId()) {
       identifiedMarkups.put(extendedTag, markup);
-      String id = markup.getMarkupId();
+      String id = markup.getId();
       if (idsInUse.containsKey(id)) {
         String message = "id '" + id + "' was already used in markup <" + idsInUse.get(id) + "|.";
         errors.add(message);
@@ -187,19 +201,19 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private void addAttributes(AttsContext attsContext, MarkupWrapper markup) {
+  private void addAttributes(AttsContext attsContext, Markup markup) {
     attsContext.avs().forEach(avs -> {
       String attrName = avs.NAME_O().getText();
       String quotedAttrValue = avs.STRING().getText();
       String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      AnnotationWrapper annotation = store.createAnnotationWrapper(attrName, attrValue);
+      Annotation annotation = new Annotation(attrName, attrValue);
       markup.addAnnotation(annotation);
     });
   }
 
-  private MarkupWrapper removeFromOpenMarkup(GiContext gi) {
+  private Markup removeFromOpenMarkup(GiContext gi) {
     String tag = gi.getText();
-    MarkupWrapper markup = removeFromMarkupStack(tag, openMarkup);
+    Markup markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {
       String message = "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
       errors.add(message);
@@ -207,9 +221,9 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private MarkupWrapper removeFromSuspendedMarkup(ResumeTagContext ctx) {
+  private Markup removeFromSuspendedMarkup(ResumeTagContext ctx) {
     String tag = ctx.gi().getText();
-    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
+    Markup markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
       String message = "Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.";
       errors.add(message);
@@ -217,9 +231,9 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private MarkupWrapper removeFromMarkupStack(String tag, Deque<MarkupWrapper> markupStack) {
-    Iterator<MarkupWrapper> descendingIterator = markupStack.descendingIterator();
-    MarkupWrapper markup = null;
+  private Markup removeFromMarkupStack(String tag, Deque<Markup> markupStack) {
+    Iterator<Markup> descendingIterator = markupStack.descendingIterator();
+    Markup markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
       if (markup.getTag().equals(tag)) {
@@ -232,11 +246,11 @@ public class TexMECSListener2 extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private static String suspendTag(MarkupWrapper m) {
+  private static String suspendTag(Markup m) {
     return "|-" + m.getTag() + ">";
   }
 
-  private static String startTag(MarkupWrapper m) {
+  private static String startTag(Markup m) {
     return "<" + m.getExtendedTag() + "|";
   }
 

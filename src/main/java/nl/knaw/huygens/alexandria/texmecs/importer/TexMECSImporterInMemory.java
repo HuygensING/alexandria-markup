@@ -20,13 +20,11 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,25 +33,22 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
 
-public class TexMECSImporter2 {
+public class TexMECSImporterInMemory {
   final Logger LOG = LoggerFactory.getLogger(getClass());
-  private TAGStore store;
 
-  public TexMECSImporter2(TAGStore store) {
-    this.store = store;
-  }
-
-  public DocumentWrapper importTexMECS(String input) throws TexMECSSyntaxError {
+  public Document importTexMECS(String input) throws TexMECSSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTexMECS(antlrInputStream);
   }
 
-  public DocumentWrapper importTexMECS(InputStream input) throws TexMECSSyntaxError {
+  public Document importTexMECS(InputStream input) throws TexMECSSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTexMECS(antlrInputStream);
@@ -63,7 +58,7 @@ public class TexMECSImporter2 {
     }
   }
 
-  private DocumentWrapper importTexMECS(CharStream antlrInputStream) {
+  private Document importTexMECS(CharStream antlrInputStream) {
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
@@ -76,10 +71,10 @@ public class TexMECSImporter2 {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TexMECSListener2 listener = new TexMECSListener2(store);
+    TexMECSListenerInMemory listener = new TexMECSListenerInMemory();
     parseTreeWalker.walk(listener, parseTree);
-    DocumentWrapper document = listener.getDocument();
-    handleMarkupDominance(document);
+    Document document = listener.getDocument();
+    handleMarkupDominance(document.value());
 
     String errorMsg = "";
     if (listener.hasErrors()) {
@@ -96,12 +91,12 @@ public class TexMECSImporter2 {
     return document;
   }
 
-  private void handleMarkupDominance(DocumentWrapper document) {
-    List<MarkupWrapper> markupList = document.getMarkupStream().collect(Collectors.toList());
+  private void handleMarkupDominance(Limen limen) {
+    List<Markup> markupList = limen.markupList;
     for (int i = 0; i < markupList.size() - 1; i++) {
-      MarkupWrapper first = markupList.get(i);
-      MarkupWrapper second = markupList.get(i + 1);
-      if (first.getMarkup().getTextNodeIds().equals(second.getMarkup().getTextNodeIds())) {
+      Markup first = markupList.get(i);
+      Markup second = markupList.get(i + 1);
+      if (first.textNodes.equals(second.textNodes)) {
         // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
         first.setDominatedMarkup(second);
       }

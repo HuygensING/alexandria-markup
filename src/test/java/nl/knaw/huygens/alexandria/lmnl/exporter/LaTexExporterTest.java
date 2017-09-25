@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 
 import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class LaTexExporterTest {
@@ -77,8 +77,8 @@ public class LaTexExporterTest {
 
   private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     InputStream input = FileUtils.openInputStream(new File("data/lmnl/" + basename + ".lmnl"));
-    Document document = new LMNLImporter().importLMNL(input);
-    LaTeXExporter exporter = new LaTeXExporter(document);
+    Document document = new LMNLImporterInMemory().importLMNL(input);
+    LaTeXExporterInMemory exporter = new LaTeXExporterInMemory(document);
     String outDir = "out/";
 
     String laTeX = exporter.exportDocument();
@@ -107,18 +107,18 @@ public class LaTexExporterTest {
   }
 
   private String laTeXFromLMNLString(String input) throws LMNLSyntaxError {
-    Document document = new LMNLImporter().importLMNL(input);
+    Document document = new LMNLImporterInMemory().importLMNL(input);
     return toLaTeX(document);
   }
 
   private String laTeXFromLMNLFile(String pathname) throws IOException, LMNLSyntaxError {
     InputStream input = FileUtils.openInputStream(new File(pathname));
-    Document document = new LMNLImporter().importLMNL(input);
+    Document document = new LMNLImporterInMemory().importLMNL(input);
     return toLaTeX(document);
   }
 
   private String toLaTeX(Document document) {
-    LaTeXExporter exporter = new LaTeXExporter(document);
+    LaTeXExporterInMemory exporter = new LaTeXExporterInMemory(document);
     return exporter.exportDocument();
   }
 

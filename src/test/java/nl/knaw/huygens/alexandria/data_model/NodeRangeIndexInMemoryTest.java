@@ -20,14 +20,14 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.Set;
 
-public class NodeRangeIndexTest {
+public class NodeRangeIndexInMemoryTest {
 
   @Test
   public void testRangesFromNodes() throws LMNLSyntaxError {
@@ -40,7 +40,7 @@ public class NodeRangeIndexTest {
         + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
         + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
         + "{excerpt]";
-    NodeRangeIndex index = index(lmnl);
+    NodeRangeIndexInMemory index = index(lmnl);
     // textnode 1= "He manages to keep the upper hand"
     Set<Integer> rangeIndices = index.getRanges(1); // indices of ranges that contain textnode 1
     assertThat(rangeIndices).containsExactly(1, 2); // excerpt,s,l
@@ -57,7 +57,7 @@ public class NodeRangeIndexTest {
         + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
         + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
         + "{excerpt]";
-    NodeRangeIndex index = index(lmnl);
+    NodeRangeIndexInMemory index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(0); // indices of textnodes contained in range 0: excerpt
     assertThat(textNodeIndices).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
   }
@@ -72,7 +72,7 @@ public class NodeRangeIndexTest {
         + "thought Alice\n"//
         + "[q [n}a{]}without pictures or conversation?{q]\n"//
         + "{p]{excerpt]";
-    NodeRangeIndex index = index(lmnl);
+    NodeRangeIndexInMemory index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a
     assertThat(textNodeIndices).containsExactly(1, 3);
 
@@ -80,10 +80,10 @@ public class NodeRangeIndexTest {
     assertThat(rangeIndices).containsExactly(0, 1, 2); // excerpt,p,q=a
   }
 
-  private NodeRangeIndex index(String lmnl) throws LMNLSyntaxError {
-    LMNLImporter importer = new LMNLImporter();
+  private NodeRangeIndexInMemory index(String lmnl) throws LMNLSyntaxError {
+    LMNLImporterInMemory importer = new LMNLImporterInMemory();
     Document document = importer.importLMNL(lmnl);
-    return new NodeRangeIndex(document.value());
+    return new NodeRangeIndexInMemory(document.value());
   }
 
 }

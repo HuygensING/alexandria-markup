@@ -22,57 +22,59 @@ package nl.knaw.huygens.alexandria.data_model;
 
 
 import static java.util.stream.Collectors.toSet;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-public class NodeRangeIndex2 {
-  final Logger LOG = LoggerFactory.getLogger(NodeRangeIndex2.class);
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class NodeRangeIndexInMemory {
+  final Logger LOG = LoggerFactory.getLogger(NodeRangeIndexInMemory.class);
 
   private List<IndexPoint> indexPoints;
   private KdTree<IndexPoint> kdTree;
-  private DocumentWrapper document;
+  private Limen limen;
   private Set<Integer> invertedMarkupsIndices = new HashSet<>();
 
-  public NodeRangeIndex2(TAGStore store, DocumentWrapper document) {
-    TAGStore store1 = store;
-    this.document = document;
+  public NodeRangeIndexInMemory(Limen limen) {
+    this.limen = limen;
   }
 
   public List<IndexPoint> getIndexPoints() {
     if (indexPoints == null) {
       indexPoints = new ArrayList<>();
 
-      List<Long> markupIds = document.getDocument().getMarkupIds();
-      Map<Long, Integer> markupIndex = new HashMap<>(markupIds.size());
-      for (int i = 0; i < markupIds.size(); i++) {
-        markupIndex.put(markupIds.get(i), i);
+      Map<Markup, Integer> markupIndex = new HashMap<>(limen.markupList.size());
+      for (int i = 0; i < limen.markupList.size(); i++) {
+        markupIndex.put(limen.markupList.get(i), i);
       }
-      List<MarkupWrapper> markupsToInvert = document.getMarkupStream()//
-          .filter(document::containsAtLeastHalfOfAllTextNodes)//
+      List<Markup> markupsToInvert = limen.markupList.stream()//
+          .filter(limen::containsAtLeastHalfOfAllTextNodes)//
           .collect(Collectors.toList());
       invertedMarkupsIndices = markupsToInvert.stream()//
           .map(markupIndex::get)//
           .collect(Collectors.toSet());
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
-      document.getTextNodeStream().forEach(tn -> {
+      limen.textNodeList.forEach(tn -> {
         LOG.debug("TextNode={}", tn);
         int i = textNodeIndex.getAndIncrement();
 
         // all the Markups associated with this TextNode
-        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(toSet());
+        Set<Markup> markups = limen.getMarkups(tn);
 
         // all the Markups that should be inverted and are NOT associated with this TextNode
-        List<MarkupWrapper> relevantInvertedMarkups = markupsToInvert.stream()//
+        List<Markup> relevantInvertedMarkups = markupsToInvert.stream()//
             .filter(tr -> !markups.contains(tr))//
             .collect(Collectors.toList());
 
@@ -83,10 +85,9 @@ public class NodeRangeIndex2 {
         markups.addAll(relevantInvertedMarkups);
 
         markups.stream()//
-            .map(MarkupWrapper::getId)//
             .sorted(Comparator.comparingInt(markupIndex::get))//
-            .forEach(markupId -> {
-              int j = markupIndex.get(markupId);
+            .forEach(tr -> {
+              int j = markupIndex.get(tr);
               IndexPoint point = new IndexPoint(i, j);
               indexPoints.add(point);
             });
@@ -127,7 +128,7 @@ public class NodeRangeIndex2 {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getDocument().getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, limen.textNodeList.size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {
@@ -163,7 +164,7 @@ public class NodeRangeIndex2 {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getDocument().getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, limen.textNodeList.size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {

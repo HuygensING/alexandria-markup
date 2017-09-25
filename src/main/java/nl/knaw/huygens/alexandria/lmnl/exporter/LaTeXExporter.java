@@ -21,60 +21,54 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.awt.Color;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.alexandria.data_model.IndexPoint;
+import nl.knaw.huygens.alexandria.data_model.KdTree;
+import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.data_model.KdTree;
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.Markup;
-import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.data_model.TextNode;
+import java.awt.*;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
   public static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
       .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
   private List<IndexPoint> indexPoints;
-  private Limen limen;
+  private static TAGStore store;
+  private DocumentWrapper document;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndex index;
 
-  public LaTeXExporter(Document document) {
-    this.limen = document.value();
+  public LaTeXExporter(TAGStore store, DocumentWrapper document) {
+    this.store = store;
+    this.document = document;
   }
 
   public String exportMarkupOverlap() {
     Map<String, Object> map = new HashMap<>();
-    int maxMarkupsPerTextNode = limen.textNodeList.parallelStream()//
-        .map(limen::getMarkups)//
-        .mapToInt(Set::size)//
+    long maxMarkupsPerTextNode = document.getTextNodeStream()
+        .map(document::getMarkupStreamForTextNode)
+        .mapToLong(Stream::count)//
         .max()//
-        .getAsInt();
+        .getAsLong();
     map.put("maxdepth", maxMarkupsPerTextNode);
     StringBuilder latexBuilder = new StringBuilder();
-    if (limen != null) {
-      limen.getTextNodeIterator().forEachRemaining(tn -> {
-        int size = limen.getMarkups(tn).size();
+    if (document != null) {
+      document.getTextNodeStream().forEach(tn -> {
+        int size = document.getDocument().getMarkupIds().size();
         addColoredTextNode(latexBuilder, tn, size);
       });
     }
@@ -82,8 +76,8 @@ public class LaTeXExporter {
     return FreeMarker.templateToString("colored-text.tex.ftl", map, this.getClass());
   }
 
-  private void addColoredTextNode(StringBuilder latexBuilder, TextNode tn, int depth) {
-    String content = tn.getContent();
+  private void addColoredTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int depth) {
+    String content = tn.getText();
     if ("\n".equals(content)) {
       latexBuilder.append("\\TextNode{").append(depth).append("}{\\n}\\\\\n");
     } else {
@@ -103,30 +97,30 @@ public class LaTeXExporter {
   public String exportDocument() {
     Map<String, Object> map = new HashMap<>();
     StringBuilder latexBuilder = new StringBuilder();
-    appendLimen(latexBuilder, limen);
+    appendDocument(latexBuilder, document);
     map.put("body", latexBuilder.toString());
     return FreeMarker.templateToString("document.tex.ftl", map, this.getClass());
   }
 
-  private void appendLimen(StringBuilder latexBuilder, Limen limen) {
+  private void appendDocument(StringBuilder latexBuilder, DocumentWrapper document) {
     ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray", //
         "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
-    if (limen != null) {
-      Set<Markup> openMarkups = new LinkedHashSet<>();
+    if (document != null) {
+      Set<MarkupWrapper> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      Map<TextNode, Integer> textNodeIndices = new HashMap<>();
-      limen.getTextNodeIterator().forEachRemaining(tn -> {
+      Map<TextNodeWrapper, Integer> textNodeIndices = new HashMap<>();
+      document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         textNodeIndices.put(tn, i);
-        Set<Markup> markups = limen.getMarkups(tn);
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<Markup> toClose = new ArrayList<>();
+        List<MarkupWrapper> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
+        List<MarkupWrapper> toOpen = new ArrayList<>();
         toOpen.addAll(markups);
         toOpen.removeAll(openMarkups);
 
@@ -137,12 +131,12 @@ public class LaTeXExporter {
       });
 
       connectTextNodes(latexBuilder, textNodeCounter);
-      markMarkups(latexBuilder, limen, colorPicker, textNodeIndices);
-      // drawMarkupsAsSets(latexBuilder, limen, colorPicker, textNodeIndices);
+      markMarkups(latexBuilder, document, colorPicker, textNodeIndices);
+      // drawMarkupsAsSets(latexBuilder, document, colorPicker, textNodeIndices);
     }
   }
 
-  private void addTextNode(StringBuilder latexBuilder, TextNode tn, int i) {
+  private void addTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int i) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
@@ -151,13 +145,13 @@ public class LaTeXExporter {
 
   public String exportMatrix() {
     Map<String, Object> map = new HashMap<>();
-    String body = exportMatrix(limen.textNodeList, limen.markupList, getIndexPoints(), getLongMarkupIndexes());
+    String body = exportMatrix(document.getTextNodeStream().collect(toList()), document.getMarkupStream().collect(toList()), getIndexPoints(), getLongMarkupIndexes());
     map.put("body", body);
     return FreeMarker.templateToString("matrix.tex.ftl", map, this.getClass());
   }
 
-  private String exportMatrix(List<TextNode> allTextNodes, List<Markup> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
-    List<String> rangeLabels = allMarkups.stream().map(Markup::getTag).collect(Collectors.toList());
+  private String exportMatrix(List<TextNodeWrapper> allTextNodes, List<MarkupWrapper> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
+    List<String> rangeLabels = allMarkups.stream().map(MarkupWrapper::getTag).collect(toList());
     List<String> rangeIndex = new ArrayList<>();
     rangeIndex.add("");
     for (int i = 0; i < rangeLabels.size(); i++) {
@@ -170,7 +164,7 @@ public class LaTeXExporter {
         .append("\\begin{tabular}{").append(tabularContent).append("}\n")//
         .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
         .append("\\hline\n")//
-    ;
+        ;
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
     IndexPoint indexPoint = pointIterator.next();
@@ -224,7 +218,7 @@ public class LaTeXExporter {
   public String exportGradient() {
     Map<String, Object> map = new HashMap<>();
     StringBuilder latexBuilder = new StringBuilder();
-    appendGradedLimen(latexBuilder, limen);
+    appendGradedTAGDocument(latexBuilder, document);
     map.put("body", latexBuilder.toString());
     return FreeMarker.templateToString("gradient.tex.ftl", map, this.getClass());
   }
@@ -238,7 +232,7 @@ public class LaTeXExporter {
 
   private NodeRangeIndex getIndex() {
     if (index == null) {
-      index = new NodeRangeIndex(limen);
+      index = new NodeRangeIndex(store, document);
     }
     return index;
   }
@@ -246,8 +240,10 @@ public class LaTeXExporter {
   private Set<Integer> getLongMarkupIndexes() {
     if (longMarkupIndexes == null) {
       longMarkupIndexes = new HashSet<>();
-      for (int i = 0; i < limen.markupList.size(); i++) {
-        if (limen.containsAtLeastHalfOfAllTextNodes(limen.markupList.get(i))) {
+      for (int i = 0; i < document.getDocument().getMarkupIds().size(); i++) {
+        Long markupId = document.getDocument().getMarkupIds().get(i);
+        MarkupWrapper markup = store.getMarkupWrapper(markupId);
+        if (document.containsAtLeastHalfOfAllTextNodes(markup)) {
           longMarkupIndexes.add(i);
         }
       }
@@ -255,31 +251,35 @@ public class LaTeXExporter {
     return longMarkupIndexes;
   }
 
-  private void appendGradedLimen(StringBuilder latexBuilder, Limen limen) {
-    int maxMarkupsPerTextNode = limen.textNodeList.parallelStream().map(limen::getMarkups).mapToInt(Set::size).max().getAsInt();
+  private void appendGradedTAGDocument(StringBuilder latexBuilder, DocumentWrapper document) {
+    long maxMarkupsPerTextNode = document.getTextNodeStream()
+        .map(document::getMarkupStreamForTextNode)//
+        .mapToLong(Stream::count)//
+        .max()//
+        .getAsLong();
     latexBuilder.append("\n    % TextNodes\n");
-    if (limen != null) {
-      Set<Markup> openMarkups = new LinkedHashSet<>();
+    if (document != null) {
+      Set<MarkupWrapper> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      // Map<TextNode, Integer> textNodeIndices = new HashMap<>();
-      limen.getTextNodeIterator().forEachRemaining(tn -> {
+      // Map<TextNodeWrapper, Integer> textNodeIndices = new HashMap<>();
+      document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         // textNodeIndices.put(tn, i);
-        Set<Markup> markups = limen.getMarkups(tn);
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<Markup> toClose = new ArrayList<>();
+        List<MarkupWrapper> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
+        List<MarkupWrapper> toOpen = new ArrayList<>();
         toOpen.addAll(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
         openMarkups.addAll(toOpen);
 
-        int size = limen.getMarkups(tn).size();
+        long size = document.getMarkupStreamForTextNode(tn).count();
         float gradient = size / (float) maxMarkupsPerTextNode;
 
         int r = 255 - Math.round(255 * gradient);
@@ -294,8 +294,8 @@ public class LaTeXExporter {
     }
   }
 
-  // private void drawMarkupsAsSets(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
-  // limen.markupList.forEach(tr -> {
+  // private void drawMarkupsAsSets(StringBuilder latexBuilder, DocumentWrapper document, ColorPicker colorPicker, Map<TextNodeWrapper, Integer> textNodeIndices) {
+  // document.getMarkupIdsForTextNodeIds().stream().map(store::getMarkup).forEach.forEach(tr -> {
   // String color = colorPicker.nextColor();
   // latexBuilder.append(" \\node[draw=").append(color).append(",shape=rectangle,fit=");
   // tr.textNodes.forEach(tn -> {
@@ -306,15 +306,15 @@ public class LaTeXExporter {
   // });
   // }
 
-  private void addGradedTextNode(StringBuilder latexBuilder, TextNode tn, int i, String fillColor, int size) {
+  private void addGradedTextNode(StringBuilder latexBuilder, TextNodeWrapper tn, int i, String fillColor, long size) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
-  private String escapedContent(TextNode tn) {
-    return tn.getContent()//
+  private String escapedContent(TextNodeWrapper tn) {
+    return tn.getText()//
         .replaceAll(" ", "\\\\s ")//
         .replaceAll("&", "\\\\& ")//
         .replaceAll("\n", "\\\\n ");
@@ -329,33 +329,34 @@ public class LaTeXExporter {
     latexBuilder.append("};\n");
   }
 
-  private void markMarkups(StringBuilder latexBuilder, Limen limen, ColorPicker colorPicker, Map<TextNode, Integer> textNodeIndices) {
+  private void markMarkups(StringBuilder latexBuilder, DocumentWrapper document, ColorPicker colorPicker, Map<TextNodeWrapper, Integer> textNodeIndices) {
     // AtomicInteger markupCounter = new AtomicInteger(0);
     latexBuilder.append("\n    % Markups");
-    Map<Markup, Integer> layerIndex = calculateLayerIndex(limen.markupList, textNodeIndices);
-    limen.markupList.forEach(tr -> {
+    Map<MarkupWrapper, Integer> layerIndex = calculateLayerIndex(document.getMarkupStream().collect(toList()), textNodeIndices);
+    document.getMarkupStream().forEach(tr -> {
       int rangeLayerIndex = layerIndex.get(tr);
       float markupRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       if (tr.isContinuous()) {
-        TextNode firstTextNode = tr.textNodes.get(0);
-        TextNode lastTextNode = tr.textNodes.get(tr.textNodes.size() - 1);
+        List<Long> textNodeIds = tr.getMarkup().getTextNodeIds();
+        TextNodeWrapper firstTextNode = store.getTextNodeWrapper(textNodeIds.get(0));
+        TextNodeWrapper lastTextNode = store.getTextNodeWrapper(textNodeIds.get(textNodeIds.size() - 1));
         int first = textNodeIndices.get(firstTextNode);
         int last = textNodeIndices.get(lastTextNode);
 
         appendMarkup(latexBuilder, tr, String.valueOf(rangeLayerIndex), markupRow, color, first, last);
 
       } else {
-        Iterator<TextNode> textNodeIterator = tr.textNodes.iterator();
-        TextNode firstTextNode = textNodeIterator.next();
-        TextNode lastTextNode = firstTextNode;
+        Iterator<TextNodeWrapper> textNodeIterator = tr.getTextNodeStream().iterator();
+        TextNodeWrapper firstTextNode = textNodeIterator.next();
+        TextNodeWrapper lastTextNode = firstTextNode;
         boolean finished = false;
         int partNo = 0;
         while (!finished) {
-          TextNode expectedNextNode = firstTextNode.getNextTextNode();
+          TextNodeWrapper expectedNextNode = firstTextNode.getNextTextNode();
           boolean goOn = textNodeIterator.hasNext();
           while (goOn) {
-            TextNode nextTextNode = textNodeIterator.next();
+            TextNodeWrapper nextTextNode = textNodeIterator.next();
             if (nextTextNode.equals(expectedNextNode)) {
               lastTextNode = nextTextNode;
               expectedNextNode = lastTextNode.getNextTextNode();
@@ -385,15 +386,15 @@ public class LaTeXExporter {
     });
   }
 
-  private void appendMarkupPart(StringBuilder latexBuilder, Map<TextNode, Integer> textNodeIndices, Markup tr, int rangeLayerIndex, float markupRow, String color, TextNode firstTextNode,
-      TextNode lastTextNode, int partNo) {
+  private void appendMarkupPart(StringBuilder latexBuilder, Map<TextNodeWrapper, Integer> textNodeIndices, MarkupWrapper tr, int rangeLayerIndex, float markupRow, String color, TextNodeWrapper firstTextNode,
+                                TextNodeWrapper lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
     String markupPartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;
     appendMarkup(latexBuilder, tr, markupPartNum, markupRow, color, first, last);
   }
 
-  private void appendMarkup(StringBuilder latexBuilder, Markup tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
+  private void appendMarkup(StringBuilder latexBuilder, MarkupWrapper tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
     latexBuilder.append("\n    \\node[label=below right:{$")//
         .append(tr.getTag())//
         .append("$}](tr")//
@@ -429,29 +430,29 @@ public class LaTeXExporter {
   }
 
   private static class MarkupLayer {
-    final Map<TextNode, Integer> textNodeIndex;
+    final Map<TextNodeWrapper, Integer> textNodeIndex;
 
-    final List<Markup> markups = new ArrayList<>();
+    final List<MarkupWrapper> markups = new ArrayList<>();
     final Set<String> tags = new HashSet<>();
     int maxMarkupSize = 1; // the number of textnodes of the biggest markup
     int lastTextNodeUsed = 0;
 
-    MarkupLayer(Map<TextNode, Integer> textNodeIndex) {
+    MarkupLayer(Map<TextNodeWrapper, Integer> textNodeIndex) {
       this.textNodeIndex = textNodeIndex;
     }
 
-    public void addMarkup(Markup markup) {
+    public void addMarkup(MarkupWrapper markup) {
       // LOG.info("markup={}", markup.getTag());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
-      int size = markup.textNodes.size();
+      int size = markup.getMarkup().getTextNodeIds().size();
       maxMarkupSize = Math.max(maxMarkupSize, size);
       int lastIndex = size - 1;
-      TextNode lastTextNode = markup.textNodes.get(lastIndex);
+      TextNodeWrapper lastTextNode = store.getTextNodeWrapper(markup.getMarkup().getTextNodeIds().get(lastIndex));
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
-    public List<Markup> getMarkups() {
+    public List<MarkupWrapper> getMarkups() {
       return markups;
     }
 
@@ -467,12 +468,12 @@ public class LaTeXExporter {
       return maxMarkupSize;
     }
 
-    public boolean canAdd(Markup markup) {
+    public boolean canAdd(MarkupWrapper markup) {
       String nTag = normalize(markup.getTag());
       if (!tags.contains(nTag)) {
         return false;
       }
-      TextNode firstTextNode = markup.textNodes.get(0);
+      TextNodeWrapper firstTextNode = store.getTextNodeWrapper(markup.getMarkup().getTextNodeIds().get(0));
       int firstTextNodeIndex = textNodeIndex.get(firstTextNode);
       return (firstTextNodeIndex > lastTextNodeUsed);
     }
@@ -482,7 +483,7 @@ public class LaTeXExporter {
     }
   }
 
-  private Map<Markup, Integer> calculateLayerIndex(List<Markup> markupList, Map<TextNode, Integer> textNodeIndex) {
+  private Map<MarkupWrapper, Integer> calculateLayerIndex(List<MarkupWrapper> markupList, Map<TextNodeWrapper, Integer> textNodeIndex) {
     List<MarkupLayer> layers = new ArrayList<>();
     markupList.forEach(tr -> {
       Optional<MarkupLayer> oLayer = layers.stream().filter(layer -> layer.canAdd(tr)).findFirst();
@@ -497,7 +498,7 @@ public class LaTeXExporter {
     });
 
     AtomicInteger layerCounter = new AtomicInteger();
-    Map<Markup, Integer> index = new HashMap<>();
+    Map<MarkupWrapper, Integer> index = new HashMap<>();
     layers.stream().sorted(ON_MAX_RANGE_SIZE).forEach(layer -> {
       int i = layerCounter.getAndIncrement();
       layer.getMarkups().forEach(tr -> index.put(tr, i));

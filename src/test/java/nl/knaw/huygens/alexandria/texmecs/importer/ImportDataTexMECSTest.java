@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
 @RunWith(Parameterized.class)
@@ -94,7 +94,7 @@ public class ImportDataTexMECSTest {
     input = getInputStream(basename);
     LOG.info("testing data/texmecs/{}.texmecs", basename);
     LOG.info("importTexMECS\n");
-    Document document = new TexMECSImporter().importTexMECS(input);
+    Document document = new TexMECSImporterInMemory().importTexMECS(input);
 
     generateLaTeX(basename, document);
   }
@@ -104,7 +104,7 @@ public class ImportDataTexMECSTest {
   }
 
   private void generateLaTeX(String basename, Document document) throws IOException {
-    LaTeXExporter exporter = new LaTeXExporter(document);
+    LaTeXExporterInMemory exporter = new LaTeXExporterInMemory(document);
     String outDir = "out/";
 
     String laTeX = exporter.exportDocument();
