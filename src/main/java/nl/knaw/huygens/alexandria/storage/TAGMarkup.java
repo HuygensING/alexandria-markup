@@ -70,13 +70,11 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
-    String suffix = "";
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
-    String lmnlId = "";
-    if (StringUtils.isNotEmpty(lmnlId)) {
-      return tag + "=" + lmnlId;
+    if (StringUtils.isNotEmpty(markupId)) {
+      return tag + "=" + markupId;
     }
     return tag;
   }

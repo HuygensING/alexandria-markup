@@ -140,6 +140,7 @@ public class MarkupWrapper {
     if (!dominatedMarkup.getMarkup().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
     }
+    update();
   }
 
   public Optional<MarkupWrapper> getDominatingMarkup() {
@@ -154,6 +155,7 @@ public class MarkupWrapper {
     if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
     }
+    update();
   }
 
   public boolean hasMarkupId() {
