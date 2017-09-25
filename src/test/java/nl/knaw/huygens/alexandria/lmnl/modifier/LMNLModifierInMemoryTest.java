@@ -36,8 +36,8 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
-public class LMNLModifierTest {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLModifierTest.class);
+public class LMNLModifierInMemoryTest {
+  static final Logger LOG = LoggerFactory.getLogger(LMNLModifierInMemoryTest.class);
 
   @Test
   public void testAddRange() throws LMNLSyntaxError {

@@ -36,7 +36,7 @@ import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
-public class TAGQLQueryHandlerTest {
+public class TAGQLQueryHandlerInMemoryTest {
   Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test

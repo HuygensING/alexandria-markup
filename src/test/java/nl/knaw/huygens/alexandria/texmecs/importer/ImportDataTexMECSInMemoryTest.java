@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.importer;
+package nl.knaw.huygens.alexandria.texmecs.importer;
 
 /*
  * #%L
@@ -28,6 +28,9 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.junit.Test;
@@ -37,67 +40,67 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
 @RunWith(Parameterized.class)
-public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
-  private static Logger LOG = LoggerFactory.getLogger(ImportDataLMNLTest.class);
+public class ImportDataTexMECSInMemoryTest {
+  private static Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSInMemoryTest.class);
 
   private String basename;
-  public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
+  public static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
-      return isLMNL(file.getName());
+      return isTexMECS(file.getName());
     }
 
     @Override
     public boolean accept(File dir, String name) {
-      return isLMNL(name);
+      return isTexMECS(name);
     }
 
-    private boolean isLMNL(String name) {
-      return name.endsWith(".lmnl") && name.startsWith("f");
+    private boolean isTexMECS(String name) {
+      return name.endsWith(".texmecs") && !name.contains("syntax-error");
     }
   };
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null)//
+    return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)//
         .stream()//
         .map(File::getName)//
-        .map(n -> n.replace(".lmnl", ""))//
+        .map(n -> n.replace(".texmecs", ""))//
         .map(b -> new String[] { b })//
         .collect(Collectors.toList());
   }
 
-  public ImportDataLMNLTest(String basename) {
+  public ImportDataTexMECSInMemoryTest(String basename) {
     this.basename = basename;
   }
 
   @Test
-  public void testLMNLFile() throws IOException, LMNLSyntaxError {
-    LOG.info("testing data/lmnl/{}.lmnl", basename);
-    processLMNLFile(basename);
-    LOG.info("done testing data/lmnl/{}.lmnl", basename);
+  public void testTexMECSFile() throws IOException {
+    LOG.info("testing data/texmecs/{}.texmecs", basename);
+    processTexMECSFile(basename);
+    LOG.info("done testing data/texmecs/{}.texmecs", basename);
   }
 
-  private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
+  private void processTexMECSFile(String basename) throws IOException {
     InputStream input = getInputStream(basename);
     LOG.info("showTokens\n");
     printTokens(input);
 
     input = getInputStream(basename);
-    LOG.info("testing data/lmnl/{}.lmnl", basename);
-    LOG.info("importLMNL\n");
-    Document document = new LMNLImporterInMemory().importLMNL(input);
+    LOG.info("testing data/texmecs/{}.texmecs", basename);
+    LOG.info("importTexMECS\n");
+    Document document = new TexMECSImporterInMemory().importTexMECS(input);
 
     generateLaTeX(basename, document);
   }
 
   private InputStream getInputStream(String basename) throws IOException {
-    return FileUtils.openInputStream(new File("data/lmnl/" + basename + ".lmnl"));
+    return FileUtils.openInputStream(new File("data/texmecs/" + basename + ".texmecs"));
   }
 
   private void generateLaTeX(String basename, Document document) throws IOException {
@@ -106,12 +109,12 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
     String laTeX = exporter.exportDocument();
     assertThat(laTeX).isNotBlank();
-    // LOG.info("document=\n{}", laTeX);
+    LOG.info("document=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + ".tex"), laTeX, "UTF-8");
 
     String overlap = exporter.exportGradient();
     assertThat(overlap).isNotBlank();
-    // LOG.info("overlap=\n{}", overlap);
+    LOG.info("overlap=\n{}", overlap);
     FileUtils.writeStringToFile(new File(outDir + basename + "-gradient.tex"), overlap, "UTF-8");
 
     String coloredText = exporter.exportMarkupOverlap();
@@ -120,13 +123,35 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
-    // LOG.info("matrix=\n{}", laTeX);
+    LOG.info("matrix=\n{}", laTeX);
     FileUtils.writeStringToFile(new File(outDir + basename + "-matrix.tex"), matrix, "UTF-8");
 
     String kdTree = exporter.exportKdTree();
     assertThat(kdTree).isNotBlank();
-    // LOG.info("k-d tree=\n{}", kdTree);
+    LOG.info("k-d tree=\n{}", kdTree);
     FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
+  }
+
+  protected void printTokens(String input) {
+    System.out.println("TexMECS:");
+    System.out.println(input);
+    System.out.println("Tokens:");
+    printTokens(CharStreams.fromString(input));
+  }
+
+  protected void printTokens(InputStream input) throws IOException {
+    printTokens(CharStreams.fromStream(input));
+  }
+
+  private void printTokens(CharStream inputStream) {
+    TexMECSLexer lexer = new TexMECSLexer(inputStream);
+    Token token;
+    do {
+      token = lexer.nextToken();
+      if (token.getType() != Token.EOF) {
+        System.out.println(token + ": " + lexer.getRuleNames()[token.getType() - 1] + ": " + lexer.getModeNames()[lexer._mode]);
+      }
+    } while (token.getType() != Token.EOF);
   }
 
 }
