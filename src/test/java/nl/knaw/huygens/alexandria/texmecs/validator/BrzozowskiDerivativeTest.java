@@ -23,19 +23,19 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.texmecs.importer.TexMECSListener;
 import nl.knaw.huygens.alexandria.texmecs.importer.TexMECSSyntaxError;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BrzozowskiDerivativeTest {
   final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -45,12 +45,9 @@ public class BrzozowskiDerivativeTest {
     // from http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
     String texMECS = "<book|<page no=\"1\"|\n" +//
         "  <title|Genesis|title>\n" +//
-        "  ...\n" +//
         "  <section|\n" +//
         "    <heading|The flood and the tower of Babel|heading>\n" +//
-        "    ...\n" +//
         "    <chapter no=\"7\"|\n" +//
-        "      ...\n" +//
         "      <para|...<s|<verse no=\"23\"|God wiped out every living thing\n" +//
         "      that existed on earth, <index~1 ref=\"i0037\"|man and\n" +//
         "      <index~2 ref=\"i0038\"|beast|index~1>, reptile|page> \n" +//
@@ -63,11 +60,8 @@ public class BrzozowskiDerivativeTest {
         "      the wild animals and the cattle with him in the ark, and\n" +//
         "      he made a wind pass over the earth, and the waters began to\n" +//
         "      subside.|verse>|s>...|para>\n" +//
-        "      ...\n" +//
         "    |chapter>\n" +//
-        "    ...\n" +//
         "  |section>\n" +//
-        "  ...\n" +//
         "|page>|book>";
 
     String creole = "start = book\n" +//
@@ -83,6 +77,18 @@ public class BrzozowskiDerivativeTest {
         "s = range s { indexedText }\n" +//
         "indexedText = concurOneOrMore { mixed { index* } }\n" +//
         "index = range index { attribute ref { text }, text }";
+    TexMECSSchema schema = new TexMECSSchema(creole);
+    TexMECSValidator validator = ValidatorFactory.createTexMECSValidator(schema);
+    ValidationReport report = validate(validator, texMECS);
+    assertThat(report.isValidated()).isTrue();
+  }
+
+  @Test
+  public void testTexMECSValidation2() {
+    String texMECS = "<text|bla|text>";
+
+    String creole = "start = text\n" +//
+        "text = element text { text }";
     TexMECSSchema schema = new TexMECSSchema(creole);
     TexMECSValidator validator = ValidatorFactory.createTexMECSValidator(schema);
     ValidationReport report = validate(validator, texMECS);

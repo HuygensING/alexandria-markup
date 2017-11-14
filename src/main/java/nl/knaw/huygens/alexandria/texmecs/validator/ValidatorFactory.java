@@ -41,6 +41,6 @@ public class ValidatorFactory {
 
   public static TexMECSValidator createTexMECSValidator(TexMECSSchema schema){
     // TODO something based on the schema, obviously
-    return new BiblicalExampleValidator();
+    return new SimpleExampleValidator();
   }
 }
