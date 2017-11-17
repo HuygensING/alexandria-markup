@@ -107,11 +107,10 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
       List<Annotation> annotationsToFilter = tr.getAnnotations();
       while (depth < annotationTags.size() - 1) {
         String filterTag = annotationTags.get(depth);
-        List<Annotation> newList = annotationsToFilter.stream()//
+        annotationsToFilter = annotationsToFilter.stream()//
             .filter(hasTag(filterTag))//
             .flatMap(a -> a.annotations().stream())//
             .collect(Collectors.toList());
-        annotationsToFilter = newList;
         depth += 1;
       }
       String filterTag = annotationTags.get(depth);

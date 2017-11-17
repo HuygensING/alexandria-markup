@@ -20,8 +20,22 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.texmecs.validator.events.OpenTagEvent;
+import nl.knaw.huygens.alexandria.texmecs.validator.events.ValidationEvent;
+
 public class TexMECSSchema {
+  private String rootElement;
+
   public TexMECSSchema(String schemaText) {
     // TODO implement something
+    rootElement = "text";
+  }
+
+  public ValidationState getStartState() {
+    return new ValidationState(this);
+  }
+
+  public ValidationEvent getRootEvent() {
+    return new OpenTagEvent(rootElement);
   }
 }

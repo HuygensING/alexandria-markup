@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator;
+package nl.knaw.huygens.alexandria.texmecs.validator.events;
 
 /*
  * #%L
@@ -20,26 +20,5 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-public abstract class AbstractTexMECSValidator implements TexMECSValidator{
-  private ValidationReport report = new ValidationReport();
-  private List<String> errors = new ArrayList<>();
-
-  @Override
-  public ValidationReport getValidationReport() {
-    return report;
-  }
-  @Override
-  public boolean hasErrors() {
-    return !getErrors().isEmpty();
-  }
-
-  @Override
-  public Collection<String> getErrors() {
-    return errors;
-  }
-
+public interface ValidationEvent {
 }

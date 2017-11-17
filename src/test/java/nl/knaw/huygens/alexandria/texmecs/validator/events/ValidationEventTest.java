@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator;
+package nl.knaw.huygens.alexandria.texmecs.validator.events;
 
 /*
  * #%L
@@ -20,10 +20,16 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-public class ValidatorFactory {
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
-  public static TexMECSValidator createTexMECSValidator(TexMECSSchema schema){
-    // TODO something based on the schema, obviously
-    return new SimpleExampleValidator(schema.getStartState());
+public class ValidationEventTest {
+
+  @Test
+  public void testAnyTextEvent(){
+    ValidationEvent anyText = new AnyTextEvent();
+    ValidationEvent someText = new TextEvent("some");
+    assertThat(anyText.equals(someText)).isTrue();
+    assertThat(someText.equals(anyText)).isTrue();
   }
 }

@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator;
+package nl.knaw.huygens.alexandria.texmecs.validator.events;
 
 /*
  * #%L
@@ -20,10 +20,17 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-public class ValidatorFactory {
 
-  public static TexMECSValidator createTexMECSValidator(TexMECSSchema schema){
-    // TODO something based on the schema, obviously
-    return new SimpleExampleValidator(schema.getStartState());
+public class AnyTextEvent implements ValidationEvent {
+
+  @Override
+  public String toString() {
+    return "{anytext}";
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    return (obj instanceof AnyTextEvent) || (obj instanceof TextEvent);
+  }
+
 }

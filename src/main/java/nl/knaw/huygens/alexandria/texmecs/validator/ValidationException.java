@@ -20,10 +20,8 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-public class ValidatorFactory {
-
-  public static TexMECSValidator createTexMECSValidator(TexMECSSchema schema){
-    // TODO something based on the schema, obviously
-    return new SimpleExampleValidator(schema.getStartState());
+public class ValidationException extends RuntimeException {
+  public ValidationException(String message) {
+    super(message);
   }
 }
