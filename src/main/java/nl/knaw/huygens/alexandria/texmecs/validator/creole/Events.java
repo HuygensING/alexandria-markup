@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator;
+package nl.knaw.huygens.alexandria.texmecs.validator.creole;
 
 /*
  * #%L
@@ -20,23 +20,25 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.texmecs.validator.events.OpenTagEvent;
-import nl.knaw.huygens.alexandria.texmecs.validator.events.ValidationEvent;
+public class Events {
+  /*
+  data Event = StartTagEvent QName Id
+             | EndTagEvent QName Id
+             | TextEvent String Context
+   */
 
-public class TexMECSSchema {
-  private final String rootElement;
-
-  public TexMECSSchema(String schemaText) {
-    // TODO implement something
-    rootElement = "text";
+  public class StartTagEvent implements Event {
+    public StartTagEvent(Basics.QName qName, Basics.Id id) {
+    }
   }
 
-  public ValidationState getStartState() {
-    return new ValidationState(this);
+  public class EndTagEvent implements Event {
+    public EndTagEvent(Basics.QName qName, Basics.Id id) {
+    }
   }
-
-  public ValidationEvent getRootEvent() {
-    return new OpenTagEvent(rootElement);
+  public class TextEvent implements Event {
+    public TextEvent(String string, Basics.Context context) {
+    }
   }
 
 }

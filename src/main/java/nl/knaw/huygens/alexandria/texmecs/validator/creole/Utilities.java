@@ -1,0 +1,251 @@
+package nl.knaw.huygens.alexandria.texmecs.validator.creole;
+
+/*
+ * #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+//http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
+public class Utilities {
+  /*
+  The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
+   of events. Nullable is defined as follows for the various kinds of patterns:
+
+  nullable:: Pattern -> Bool
+
+  nullable Empty = True
+  nullable NotAllowed = False
+  nullable Text = True
+  nullable (Choice p1 p2) = nullable p1 || nullable p2
+  nullable (Interleave p1 p2) = nullable p1 && nullable p2
+  nullable (Group p1 p2) = nullable p1 && nullable p2
+  nullable (Concur p1 p2) = nullable p1 && nullable p2
+  nullable (Partition p) = nullable p
+  nullable (OneOrMore p) = nullable p
+  nullable (ConcurOneOrMore p) = nullable p
+  nullable (Range _ _) = False
+  nullable (EndRange _ _) = False
+  nullable (After _ _) = False
+  nullable (All p1 p2) = nullable p1 && nullable p2
+   */
+  public static Boolean nullable(Pattern pattern) {
+    if (pattern instanceof Patterns.Empty) {
+      return true;
+    }
+    if (pattern instanceof Patterns.NotAllowed) {
+      return false;
+    }
+    if (pattern instanceof Patterns.Text) {
+      return true;
+    }
+    if (pattern instanceof Patterns.Choice) {
+      Patterns.Choice choice = (Patterns.Choice) pattern;
+      return nullable(choice.getPattern1()) || nullable(choice.getPattern2());
+    }
+    if (pattern instanceof Patterns.Interleave) {
+      Patterns.Interleave interleave = (Patterns.Interleave) pattern;
+      return nullable(interleave.getPattern1()) && nullable(interleave.getPattern2());
+    }
+    if (pattern instanceof Patterns.Group) {
+      Patterns.Group group = (Patterns.Group) pattern;
+      return nullable(group.getPattern1()) && nullable(group.getPattern2());
+    }
+    if (pattern instanceof Patterns.Concur) {
+      Patterns.Concur concur = (Patterns.Concur) pattern;
+      return nullable(concur.getPattern1()) && nullable(concur.getPattern2());
+    }
+    if (pattern instanceof Patterns.Partition) {
+      return nullable(((Patterns.Partition) pattern).getPattern());
+    }
+    if (pattern instanceof Patterns.OneOrMore) {
+      return nullable(((Patterns.OneOrMore) pattern).getPattern());
+    }
+    if (pattern instanceof Patterns.ConcurOneOrMore) {
+      return nullable(((Patterns.ConcurOneOrMore) pattern).getPattern());
+    }
+    if (pattern instanceof Patterns.Range) {
+      return false;
+    }
+    if (pattern instanceof Patterns.EndRange) {
+      return false;
+    }
+    if (pattern instanceof Patterns.After) {
+      return false;
+    }
+    if (pattern instanceof Patterns.All) {
+      Patterns.All all = (Patterns.All) pattern;
+      return nullable(all.getPattern1()) && nullable(all.getPattern2());
+    }
+
+    throw unexpectedPattern(pattern);
+  }
+
+  /*
+  The second utility function is allowsText, which returns true if the pattern can match text.
+  This is important because whitespace-only text events are ignored if text isn't allowed by a pattern.
+
+  allowsText:: Pattern -> Bool
+  allowsText (Choice p1 p2) = allowsText p1 || allowsText p2
+  allowsText (Group p1 p2) =
+    if nullable p1 then (allowsText p1 || allowsText p2)
+                   else allowsText p1
+  allowsText (Interleave p1 p2) =
+    allowsText p1 || allowsText p2
+  allowsText (Concur p1 p2) = allowsText p1 && allowsText p2
+  allowsText (Partition p) = allowsText p
+  allowsText (OneOrMore p) = allowsText p
+  allowsText (ConcurOneOrMore p) = allowsText p
+  allowsText (After p1 p2) =
+    if nullable p1 then (allowsText p1 || allowsText p2)
+                   else allowsText p1
+  allowsText (All p1 p2) = allowsText p1 && allowsText p2
+  allowsText Text = True
+  allowsText _ = False
+   */
+
+  static final Map<Class, Function<Pattern, Boolean>> allowsTextMap = new HashMap<>();
+
+  static {
+    allowsTextMap.put(Patterns.Choice.class, pattern -> {
+      Patterns.Choice choice = (Patterns.Choice) pattern;
+      return orCombination(choice.getPattern1(), choice.getPattern2());
+    });
+
+    allowsTextMap.put(Patterns.Group.class, pattern -> {
+      Patterns.Group group = (Patterns.Group) pattern;
+      return nullable(group.getPattern1())//
+          ? (orCombination(group.getPattern1(), group.getPattern2()))//
+          : allowsText(group.getPattern1());
+    });
+
+    allowsTextMap.put(Patterns.Interleave.class, pattern -> {
+      Patterns.Interleave interleave = (Patterns.Interleave) pattern;
+      return orCombination(interleave.getPattern1(), interleave.getPattern2());
+    });
+
+    allowsTextMap.put(Patterns.Concur.class, pattern -> {
+      Patterns.Concur concur = (Patterns.Concur) pattern;
+      return andCombination(concur.getPattern1(), concur.getPattern2());
+    });
+
+    allowsTextMap.put(Patterns.Partition.class, pattern -> {
+      Patterns.Partition partition = (Patterns.Partition) pattern;
+      return allowsText(partition.getPattern());
+    });
+
+    allowsTextMap.put(Patterns.OneOrMore.class, pattern -> {
+      Patterns.OneOrMore oneOrMore = (Patterns.OneOrMore) pattern;
+      return allowsText(oneOrMore.getPattern());
+    });
+
+    allowsTextMap.put(Patterns.ConcurOneOrMore.class, pattern -> {
+      Patterns.ConcurOneOrMore concurOneOrMore = (Patterns.ConcurOneOrMore) pattern;
+      return allowsText(concurOneOrMore.getPattern());
+    });
+
+    allowsTextMap.put(Patterns.After.class, pattern -> {
+      Patterns.After group = (Patterns.After) pattern;
+      return nullable(group.getPattern1())//
+          ? (orCombination(group.getPattern1(), group.getPattern2()))//
+          : allowsText(group.getPattern1());
+    });
+
+    allowsTextMap.put(Patterns.All.class, pattern -> {
+      Patterns.All all = (Patterns.All) pattern;
+      return andCombination(all.getPattern1(), all.getPattern2());
+    });
+
+    allowsTextMap.put(Patterns.Text.class, pattern -> true);
+
+  }
+
+  public static Boolean allowsText(Pattern pattern) {
+    Function<Pattern, Boolean> function = allowsTextMap.get(pattern.getClass());
+    if (function == null) {
+      throw unexpectedPattern(pattern);
+    }
+    return function.apply(pattern);
+  }
+
+  /*
+  Finally, like Relax NG, Creole needs a method of testing whether a given qualified name matches a given name class:
+
+  contains :: NameClass -> QName -> Bool
+  contains AnyName _ = True
+  contains (AnyNameExcept nc) n = not (contains nc n)
+  contains (NsName ns1) (QName ns2 _) = (ns1 == ns2)
+  contains (NsNameExcept ns1 nc) (QName ns2 ln) =
+    ns1 == ns2 && not (contains nc (QName ns2 ln))
+  contains (Name ns1 ln1) (QName ns2 ln2) =
+    (ns1 == ns2) && (ln1 == ln2)
+  contains (NameClassChoice nc1 nc2) n =
+    (contains nc1 n) || (contains nc2 n)
+   */
+  public static Boolean contains(NameClass nameClass, Basics.QName qName) {
+    if (nameClass instanceof NameClasses.AnyName) {
+      return true;
+    }
+    if (nameClass instanceof NameClasses.AnyNameExcept) {
+      NameClasses.AnyNameExcept anyNameExcept = (NameClasses.AnyNameExcept) nameClass;
+      return !contains(anyNameExcept.getNameClassToExcept(), qName);
+    }
+    if (nameClass instanceof NameClasses.NsName) {
+      NameClasses.NsName nsName = (NameClasses.NsName) nameClass;
+      return nsName.getValue().equals(qName.getUri().getValue());
+    }
+    if (nameClass instanceof NameClasses.NsNameExcept) {
+      NameClasses.NsNameExcept nsNameExcept = (NameClasses.NsNameExcept) nameClass;
+      return nsNameExcept.getUri().equals(qName.getUri())
+          && !contains(nsNameExcept.getNameClass(), qName);
+    }
+    if (nameClass instanceof NameClasses.Name) {
+      NameClasses.Name name = (NameClasses.Name) nameClass;
+      return name.getUri().equals(qName.getUri())
+          && name.getLocalName().equals(qName.getLocalName());
+    }
+    if (nameClass instanceof NameClasses.NameClassChoice) {
+      NameClasses.NameClassChoice nameClassChoice = (NameClasses.NameClassChoice) nameClass;
+      return contains(nameClassChoice.getNameClass1(), qName)
+          || contains(nameClassChoice.getNameClass2(), qName);
+    }
+    return false;
+  }
+
+
+  /* private */
+
+  private static boolean andCombination(Pattern pattern1, Pattern pattern2) {
+    return allowsText(pattern1) && allowsText(pattern2);
+  }
+
+  private static boolean orCombination(Pattern pattern1, Pattern pattern2) {
+    return allowsText(pattern1) || allowsText(pattern2);
+  }
+
+  private static RuntimeException unexpectedPattern(Pattern pattern) {
+    return new RuntimeException("Unexpected Pattern: " + pattern);
+  }
+
+  private static RuntimeException unexpectedNameClass(NameClass nameClass) {
+    return new RuntimeException("Unexpected NameClass: " + nameClass);
+  }
+}
