@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator.creole;
+package nl.knaw.huygens.alexandria.creole;
 
 /*
  * #%L
@@ -23,31 +23,48 @@ package nl.knaw.huygens.alexandria.texmecs.validator.creole;
 import java.util.Map;
 
 public class Basics {
-  public class Uri extends StringWrapper {
+
+  public static QName qName(String uri, String localName) {
+    return new QName(uri(uri), localName(localName));
+  }
+
+  public static LocalName localName(String localName) {
+    return new LocalName(localName);
+  }
+
+  public static Uri uri(String uri) {
+    return new Uri(uri);
+  }
+
+  public static Id id(String id) {
+    return new Id(id);
+  }
+
+  static class Uri extends StringWrapper {
     public Uri(String uri) {
       super(uri);
     }
   }
 
-  public class LocalName extends StringWrapper {
+  public static class LocalName extends StringWrapper {
     public LocalName(String localName) {
       super(localName);
     }
   }
 
-  public class Id extends StringWrapper {
+  public static class Id extends StringWrapper {
     public Id(String id) {
       super(id);
     }
   }
 
-  public class Prefix extends StringWrapper {
+  public static class Prefix extends StringWrapper {
     public Prefix(String prefix) {
       super(prefix);
     }
   }
 
-  public class QName {
+  public static class QName {
     private final Uri uri;
     private final LocalName localName;
 
@@ -69,11 +86,11 @@ public class Basics {
    A Context represents the context of an XML element.
    It consists of a base URI and a mapping from prefixes to namespace URIs.
    */
-  public class Context {
+  public static class Context {
     private final Uri uri;
     private final Map<Prefix, Uri> nameSpaceURI4Prefix;
 
-    public Context(Uri uri, Map<Prefix,Uri> prefixUriMap){
+    public Context(Uri uri, Map<Prefix, Uri> prefixUriMap) {
       this.uri = uri;
       this.nameSpaceURI4Prefix = prefixUriMap;
     }

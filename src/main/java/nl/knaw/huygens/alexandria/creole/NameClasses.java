@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator.creole;
+package nl.knaw.huygens.alexandria.creole;
 
 /*
  * #%L
@@ -22,6 +22,8 @@ package nl.knaw.huygens.alexandria.texmecs.validator.creole;
 
 public class NameClasses {
 
+  public static final NameClass ANY_NAME = new AnyName();
+
   /*
   A NameClass represents a name class.
 
@@ -33,7 +35,7 @@ public class NameClasses {
                    | NameClassChoice NameClass NameClass
    */
 
-  public class AnyName implements NameClass {
+  public static class AnyName implements NameClass {
   }
 
   public class AnyNameExcept implements NameClass {

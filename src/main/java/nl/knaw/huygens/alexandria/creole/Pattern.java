@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator.creole;
+package nl.knaw.huygens.alexandria.creole;
 
 /*
  * #%L
@@ -20,5 +20,5 @@ package nl.knaw.huygens.alexandria.texmecs.validator.creole;
  * #L%
  */
 
-public interface NameClass {
+public interface Pattern {
 }

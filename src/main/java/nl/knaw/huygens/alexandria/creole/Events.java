@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.texmecs.validator.creole;
+package nl.knaw.huygens.alexandria.creole;
 
 /*
  * #%L
@@ -20,5 +20,25 @@ package nl.knaw.huygens.alexandria.texmecs.validator.creole;
  * #L%
  */
 
-public interface Pattern {
+public class Events {
+  /*
+  data Event = StartTagEvent QName Id
+             | EndTagEvent QName Id
+             | TextEvent String Context
+   */
+
+  public class StartTagEvent implements Event {
+    public StartTagEvent(Basics.QName qName, Basics.Id id) {
+    }
+  }
+
+  public class EndTagEvent implements Event {
+    public EndTagEvent(Basics.QName qName, Basics.Id id) {
+    }
+  }
+  public class TextEvent implements Event {
+    public TextEvent(String string, Basics.Context context) {
+    }
+  }
+
 }
