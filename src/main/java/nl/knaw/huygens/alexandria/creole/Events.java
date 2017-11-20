@@ -28,16 +28,56 @@ public class Events {
    */
 
   public class StartTagEvent implements Event {
+    private final Basics.QName qName;
+    private final Basics.Id id;
+
     public StartTagEvent(Basics.QName qName, Basics.Id id) {
+      this.qName = qName;
+      this.id = id;
+    }
+
+    public Basics.QName getQName() {
+      return qName;
+    }
+
+    public Basics.Id getId() {
+      return id;
     }
   }
 
   public class EndTagEvent implements Event {
+    private final Basics.QName qName;
+    private final Basics.Id id;
+
     public EndTagEvent(Basics.QName qName, Basics.Id id) {
+      this.qName = qName;
+      this.id = id;
+    }
+
+    public Basics.QName getQName() {
+      return qName;
+    }
+
+    public Basics.Id getId() {
+      return id;
     }
   }
+
   public class TextEvent implements Event {
-    public TextEvent(String string, Basics.Context context) {
+    private final String text;
+    private final Basics.Context context;
+
+    public TextEvent(String text, Basics.Context context) {
+      this.text = text;
+      this.context = context;
+    }
+
+    public String getText() {
+      return text;
+    }
+
+    public Basics.Context getContext() {
+      return context;
     }
   }
 

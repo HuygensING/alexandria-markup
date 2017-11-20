@@ -21,9 +21,21 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 public class Patterns {
-  public static final Pattern EMPTY = new Empty();
-  public static final Pattern NOT_ALLOWED = new NotAllowed();
-  public static final Pattern TEXT = new Text();
+  static final Pattern EMPTY = new Empty();
+  static final Pattern NOT_ALLOWED = new NotAllowed();
+  static final Pattern TEXT = new Text();
+
+  public static Pattern empty() {
+    return EMPTY;
+  }
+
+  public static Pattern notAllowed() {
+    return NOT_ALLOWED;
+  }
+
+  public static Pattern text() {
+    return TEXT;
+  }
 
   public static Pattern choice(Pattern p1, Pattern p2) {
     return new Choice(p1, p2);
