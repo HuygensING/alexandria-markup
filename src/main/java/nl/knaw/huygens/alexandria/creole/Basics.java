@@ -89,6 +89,12 @@ public class Basics {
     public LocalName getLocalName() {
       return localName;
     }
+
+    @Override
+    public String toString() {
+      String prefix = uri.isEmpty() ? "" : uri + ": ";
+      return prefix + localName;
+    }
   }
 
   /*
@@ -137,6 +143,11 @@ public class Basics {
     public boolean equals(Object obj) {
       return obj.getClass().equals(this.getClass())//
           && value.equals(((StringWrapper) obj).getValue());
+    }
+
+    @Override
+    public String toString() {
+      return value;
     }
   }
 

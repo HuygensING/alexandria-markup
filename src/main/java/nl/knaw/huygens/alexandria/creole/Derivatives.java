@@ -21,6 +21,8 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -29,6 +31,8 @@ import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
 import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 
 public class Derivatives {
+  static Logger LOG = LoggerFactory.getLogger(Derivatives.class);
+
   /*
     Derivatives
 
@@ -46,7 +50,15 @@ public class Derivatives {
 
     //  eventsDeriv p (h:t) = eventsDeriv (eventDeriv p h) t
     Event head = events.remove(0);
+    LOG.info("event: {}", head);
     Pattern headDeriv = eventsDeriv(pattern, head);
+    if (headDeriv.equals(Patterns.notAllowed())) {
+      // fail fast
+      LOG.error("Unexpected event: {}", head);
+      return Patterns.notAllowed();
+    }
+//    LOG.info("head derivation: {}", headDeriv);
+//    LOG.info("remaining events: {}", events.size());
     return eventsDeriv(headDeriv, events);
   }
 

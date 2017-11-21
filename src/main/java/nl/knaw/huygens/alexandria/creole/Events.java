@@ -51,6 +51,11 @@ public class Events {
     public Basics.Id getId() {
       return id;
     }
+
+    @Override
+    public String toString() {
+      return "[" + qName.getLocalName().getValue() + "}";
+    }
   }
 
   public static Event endTagEvent(Basics.QName qName) {
@@ -77,6 +82,15 @@ public class Events {
     public Basics.Id getId() {
       return id;
     }
+
+    @Override
+    public String toString() {
+      return "{" + qName.getLocalName().getValue() + "]";
+    }
+  }
+
+  public static Event textEvent(String text) {
+    return textEvent(text, Basics.context());
   }
 
   public static Event textEvent(String text, Basics.Context context) {
@@ -99,6 +113,12 @@ public class Events {
     public Basics.Context getContext() {
       return context;
     }
+
+    @Override
+    public String toString() {
+      return text;
+    }
+
   }
 
 }

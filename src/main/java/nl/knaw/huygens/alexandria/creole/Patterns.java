@@ -85,6 +85,12 @@ public class Patterns {
     return new All(p1, p2);
   }
 
+  // convenience method: element is a range in a partition
+  public static Pattern element(String localName, Pattern pattern) {
+    NameClass nameClass = NameClasses.name(localName);
+    return partition(range(nameClass, pattern));
+  }
+
   /*
   A Pattern represents a pattern after simplification.
 
@@ -188,6 +194,12 @@ public class Patterns {
 
     public Basics.Id getId() {
       return id;
+    }
+
+    @Override
+    public String toString() {
+      String postfix = id.isEmpty() ? "" : "~" + id;
+      return "{" + qName + postfix + "]";
     }
   }
 
