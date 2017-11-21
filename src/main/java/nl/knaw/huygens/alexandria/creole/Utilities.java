@@ -29,68 +29,66 @@ public class Utilities {
   /*
   The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
    of events. Nullable is defined as follows for the various kinds of patterns:
-
-  nullable:: Pattern -> Bool
-
-  nullable Empty = True
-  nullable NotAllowed = False
-  nullable Text = True
-  nullable (Choice p1 p2) = nullable p1 || nullable p2
-  nullable (Interleave p1 p2) = nullable p1 && nullable p2
-  nullable (Group p1 p2) = nullable p1 && nullable p2
-  nullable (Concur p1 p2) = nullable p1 && nullable p2
-  nullable (Partition p) = nullable p
-  nullable (OneOrMore p) = nullable p
-  nullable (ConcurOneOrMore p) = nullable p
-  nullable (Range _ _) = False
-  nullable (EndRange _ _) = False
-  nullable (After _ _) = False
-  nullable (All p1 p2) = nullable p1 && nullable p2
    */
+  //  nullable:: Pattern -> Bool
   public static Boolean nullable(Pattern pattern) {
+    //  nullable Empty = True
     if (pattern instanceof Patterns.Empty) {
       return true;
     }
+    //  nullable NotAllowed = False
     if (pattern instanceof Patterns.NotAllowed) {
       return false;
     }
+    //  nullable Text = True
     if (pattern instanceof Patterns.Text) {
       return true;
     }
+    //  nullable (Choice p1 p2) = nullable p1 || nullable p2
     if (pattern instanceof Patterns.Choice) {
       Patterns.Choice choice = (Patterns.Choice) pattern;
       return nullable(choice.getPattern1()) || nullable(choice.getPattern2());
     }
+    //  nullable (Interleave p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.Interleave) {
       Patterns.Interleave interleave = (Patterns.Interleave) pattern;
       return nullable(interleave.getPattern1()) && nullable(interleave.getPattern2());
     }
+    //  nullable (Group p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.Group) {
       Patterns.Group group = (Patterns.Group) pattern;
       return nullable(group.getPattern1()) && nullable(group.getPattern2());
     }
+    //  nullable (Concur p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.Concur) {
       Patterns.Concur concur = (Patterns.Concur) pattern;
       return nullable(concur.getPattern1()) && nullable(concur.getPattern2());
     }
+    //  nullable (Partition p) = nullable p
     if (pattern instanceof Patterns.Partition) {
       return nullable(((Patterns.Partition) pattern).getPattern());
     }
+    //  nullable (OneOrMore p) = nullable p
     if (pattern instanceof Patterns.OneOrMore) {
       return nullable(((Patterns.OneOrMore) pattern).getPattern());
     }
+    //  nullable (ConcurOneOrMore p) = nullable p
     if (pattern instanceof Patterns.ConcurOneOrMore) {
       return nullable(((Patterns.ConcurOneOrMore) pattern).getPattern());
     }
+    //  nullable (Range _ _) = False
     if (pattern instanceof Patterns.Range) {
       return false;
     }
+    //  nullable (EndRange _ _) = False
     if (pattern instanceof Patterns.EndRange) {
       return false;
     }
+    //  nullable (After _ _) = False
     if (pattern instanceof Patterns.After) {
       return false;
     }
+    //  nullable (All p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.All) {
       Patterns.All all = (Patterns.All) pattern;
       return nullable(all.getPattern1()) && nullable(all.getPattern2());

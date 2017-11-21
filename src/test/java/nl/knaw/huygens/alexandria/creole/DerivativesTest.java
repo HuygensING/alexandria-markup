@@ -21,11 +21,42 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 
 public class DerivativesTest {
+  Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void test() {
+  public void testEventsDerivation() {
+    // [text}tekst{text]
+    Basics.QName qName = Basics.qName("text");
+    Event startE = Events.startTagEvent(qName);
+    Basics.Context context = Basics.context();
+    Event textE = Events.textEvent("tekst", context);
+    Event endE = Events.endTagEvent(qName);
+    List<Event> events = new ArrayList<>();
+    events.addAll(asList(startE, textE, endE));
 
+    NameClass nameClass = NameClasses.name("text");
+    Pattern schemaPattern = Patterns.partition(//
+        Patterns.range(//
+            nameClass,//
+            Patterns.text()//
+        )//
+    );
+    Pattern pattern = Derivatives.eventsDeriv(schemaPattern, events);
+    LOG.info("derived pattern={}", pattern);
+    assertThat(pattern).isEqualTo(Patterns.empty());
+
+    Pattern pattern1 = Derivatives.eventsDeriv(schemaPattern, endE);
+    LOG.info("derived pattern={}", pattern1);
+    assertThat(pattern1).isEqualTo(Patterns.notAllowed());
   }
 }

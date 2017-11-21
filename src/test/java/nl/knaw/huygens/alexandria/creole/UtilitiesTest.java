@@ -20,8 +20,9 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UtilitiesTest extends CreoleTest {
 
@@ -194,8 +195,6 @@ public class UtilitiesTest extends CreoleTest {
 
   @Test
   public void testEndRangeIsNotNullable() {
-    Pattern p1 = NULLABLE_PATTERN;
-    NameClass nameClass = NameClasses.ANY_NAME;
     Basics.QName qName = Basics.qName("uri","localName");
     Pattern p = Patterns.endRange( qName, "id");
     assertThat(Utilities.nullable(p)).isFalse();

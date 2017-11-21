@@ -27,7 +27,15 @@ public class Events {
              | TextEvent String Context
    */
 
-  public class StartTagEvent implements Event {
+  public static Event startTagEvent(Basics.QName qName) {
+    return startTagEvent(qName, "");
+  }
+
+  public static Event startTagEvent(Basics.QName qName, String id) {
+    return new StartTagEvent(qName, Basics.id(id));
+  }
+
+  static class StartTagEvent implements Event {
     private final Basics.QName qName;
     private final Basics.Id id;
 
@@ -45,7 +53,15 @@ public class Events {
     }
   }
 
-  public class EndTagEvent implements Event {
+  public static Event endTagEvent(Basics.QName qName) {
+    return endTagEvent(qName, "");
+  }
+
+  public static Event endTagEvent(Basics.QName qName, String id) {
+    return new EndTagEvent(qName, Basics.id(id));
+  }
+
+  static class EndTagEvent implements Event {
     private final Basics.QName qName;
     private final Basics.Id id;
 
@@ -63,7 +79,11 @@ public class Events {
     }
   }
 
-  public class TextEvent implements Event {
+  public static Event textEvent(String text, Basics.Context context) {
+    return new TextEvent(text, context);
+  }
+
+  static class TextEvent implements Event {
     private final String text;
     private final Basics.Context context;
 

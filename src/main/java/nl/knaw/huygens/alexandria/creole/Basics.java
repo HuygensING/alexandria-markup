@@ -20,9 +20,14 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Basics {
+
+  public static QName qName(String localName) {
+    return qName("", localName);
+  }
 
   public static QName qName(String uri, String localName) {
     return new QName(uri(uri), localName(localName));
@@ -38,6 +43,10 @@ public class Basics {
 
   public static Id id(String id) {
     return new Id(id);
+  }
+
+  public static Context context() {
+    return new Context(uri(""), new HashMap<>());
   }
 
   static class Uri extends StringWrapper {

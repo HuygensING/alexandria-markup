@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.creole;
 
 public class NameClasses {
 
-  public static final NameClass ANY_NAME = new AnyName();
+  public static final AnyName ANY_NAME = new AnyName();
 
   /*
   A NameClass represents a name class.
@@ -35,10 +35,18 @@ public class NameClasses {
                    | NameClassChoice NameClass NameClass
    */
 
-  public static class AnyName implements NameClass {
+  public static AnyName anyName() {
+    return ANY_NAME;
   }
 
-  public class AnyNameExcept implements NameClass {
+  static class AnyName implements NameClass {
+  }
+
+  public static AnyNameExcept anyNameExcept(NameClass nameClassToExcept) {
+    return new AnyNameExcept(nameClassToExcept);
+  }
+
+  static class AnyNameExcept implements NameClass {
     private final NameClass nameClassToExcept;
 
     public AnyNameExcept(NameClass nameClassToExcept) {
@@ -50,7 +58,19 @@ public class NameClasses {
     }
   }
 
-  public class Name implements NameClass {
+  public static Name name(String localName) {
+    return name("", localName);
+  }
+
+  public static Name name(String uri, String localName) {
+    return name(Basics.uri(uri), Basics.localName(localName));
+  }
+
+  public static Name name(Basics.Uri uri, Basics.LocalName localName) {
+    return new Name(uri, localName);
+  }
+
+  static class Name implements NameClass {
     private final Basics.Uri uri;
     private final Basics.LocalName localName;
 
@@ -68,8 +88,15 @@ public class NameClasses {
     }
   }
 
+  public static NsNameExcept nsNameExcept(String uri, NameClass nameClass) {
+    return nsNameExcept(Basics.uri(uri), nameClass);
+  }
 
-  public class NsNameExcept implements NameClass {
+  public static NsNameExcept nsNameExcept(Basics.Uri uri, NameClass nameClass) {
+    return new NsNameExcept(uri, nameClass);
+  }
+
+  static class NsNameExcept implements NameClass {
     private final Basics.Uri uri;
     private final NameClass nameClass;
 
@@ -87,19 +114,31 @@ public class NameClasses {
     }
   }
 
-  public class NsName implements NameClass {
-    private final String uri;
+  public static NsName nsName(String uri) {
+    return nsName(Basics.uri(uri));
+  }
 
-    public NsName(String uri) {
+  public static NsName nsName(Basics.Uri uri) {
+    return new NsName(uri);
+  }
+
+  static class NsName implements NameClass {
+    private final Basics.Uri uri;
+
+    public NsName(Basics.Uri uri) {
       this.uri = uri;
     }
 
     public String getValue() {
-      return uri;
+      return uri.getValue();
     }
   }
 
-  public class NameClassChoice implements NameClass {
+  public static NameClassChoice nameClassChoice(NameClass nameClass1, NameClass nameClass2) {
+    return new NameClassChoice(nameClass1, nameClass2);
+  }
+
+  static class NameClassChoice implements NameClass {
     private final NameClass nameClass1;
     private final NameClass nameClass2;
 
