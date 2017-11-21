@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.creole;
 
 import org.junit.Test;
 
-public class EventsDerivativesTest {
+public class DerivativesTest {
 
   @Test
   public void test() {
