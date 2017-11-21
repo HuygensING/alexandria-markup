@@ -115,6 +115,10 @@ public class Basics {
       return value;
     }
 
+    public boolean isEmpty() {
+      return value.isEmpty();
+    }
+
     @Override
     public int hashCode() {
       return value.hashCode();
