@@ -49,14 +49,12 @@ public class ValidatorTest {
 
     Validator validator = Validator.ofPattern(schemaPattern);
     ValidationResult validationResult1 = validator.validate(validEvents);
-    assertThat(validationResult1).isSuccess();
-    assertThat(validationResult1).hasNoUnexpectedEvent();
+    assertThat(validationResult1).isSuccess().hasNoUnexpectedEvent();
 
     List<Event> invalidEvents = new ArrayList<>();
     invalidEvents.addAll(asList(textE, startE, startE, endE));
     ValidationResult validationResult = validator.validate(invalidEvents);
-    assertThat(validationResult).isFailure();
-    assertThat(validationResult).hasUnexpectedEvent(textE);
+    assertThat(validationResult).isFailure().hasUnexpectedEvent(textE);
   }
 
   @Test
@@ -83,7 +81,7 @@ public class ValidatorTest {
     List<Event> validEvents = new ArrayList<>();
     validEvents.addAll(asList(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE));
 
-    assertThat(validator.validate(validEvents)).isSuccess();
+    assertThat(validator.validate(validEvents)).isSuccess().hasNoUnexpectedEvent();
   }
 
 }
