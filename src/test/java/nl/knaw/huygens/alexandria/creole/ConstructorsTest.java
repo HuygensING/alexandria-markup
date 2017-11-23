@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.creole.Constructors.empty;
+import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -29,7 +31,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testChoice1() {
     //    choice p NotAllowed = p
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.notAllowed();
+    Pattern p2 = notAllowed();
     Pattern choice = Constructors.choice(p1, p2);
     assertThat(choice).isEqualTo(p1);
   }
@@ -37,7 +39,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testChoice2() {
     //    choice NotAllowed p = p
-    Pattern p1 = Patterns.notAllowed();
+    Pattern p1 = notAllowed();
     Pattern p2 = new TestPattern();
     Pattern choice = Constructors.choice(p1, p2);
     assertThat(choice).isEqualTo(p2);
@@ -46,8 +48,8 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testChoice3() {
     //    choice Empty Empty = Empty
-    Pattern p1 = Patterns.empty();
-    Pattern p2 = Patterns.empty();
+    Pattern p1 = empty();
+    Pattern p2 = empty();
     Pattern choice = Constructors.choice(p1, p2);
     assertThat(choice).isInstanceOf(Patterns.Empty.class);
   }
@@ -65,7 +67,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testGroup1() {
     //  group p NotAllowed = NotAllowed
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.notAllowed();
+    Pattern p2 = notAllowed();
     Pattern p = Constructors.group(p1, p2);
     assertThat(p).isEqualTo(p2);
   }
@@ -73,7 +75,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testGroup2() {
     //  group NotAllowed p = NotAllowed
-    Pattern p1 = Patterns.notAllowed();
+    Pattern p1 = notAllowed();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.group(p1, p2);
     assertThat(p).isEqualTo(p1);
@@ -83,7 +85,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testGroup3() {
     //  group p Empty = p
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.empty();
+    Pattern p2 = empty();
     Pattern p = Constructors.group(p1, p2);
     assertThat(p).isEqualTo(p1);
   }
@@ -91,7 +93,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testGroup4() {
     //  group Empty p = p
-    Pattern p1 = Patterns.empty();
+    Pattern p1 = empty();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.group(p1, p2);
     assertThat(p).isEqualTo(p2);
@@ -103,10 +105,10 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     assertThat(p1).isNotEqualTo(p2);
-    Pattern after = Patterns.after(p1, p2);
+    Pattern after = new Patterns.After(p1, p2);
     Pattern p3 = new TestPattern();
     Pattern p = Constructors.group(after, p3);
-    Pattern expected = Patterns.after(p1, Patterns.group(p2, p3));
+    Pattern expected = new Patterns.After(p1, new Patterns.Group(p2, p3));
     assertThat(p).isEqualTo(expected);
   }
 
@@ -116,9 +118,9 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     Pattern p3 = new TestPattern();
-    Pattern after = Patterns.after(p2, p3);
+    Pattern after = new Patterns.After(p2, p3);
     Pattern p = Constructors.group(p1, after);
-    Pattern expected = Patterns.after(p2, Patterns.group(p1, p3));
+    Pattern expected = new Patterns.After(p2, new Patterns.Group(p1, p3));
     assertThat(p).isEqualTo(expected);
   }
 
@@ -128,7 +130,7 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.group(p1, p2);
-    Pattern expected = Patterns.group(p1, p2);
+    Pattern expected = new Patterns.Group(p1, p2);
     assertThat(p).isEqualTo(expected);
   }
 
@@ -136,7 +138,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testInterleave1() {
     //  interleave p NotAllowed = NotAllowed
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.notAllowed();
+    Pattern p2 = notAllowed();
     Pattern p = Constructors.interleave(p1, p2);
     assertThat(p).isEqualTo(p2);
   }
@@ -144,7 +146,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testInterleave2() {
     //  interleave NotAllowed p = NotAllowed
-    Pattern p1 = Patterns.notAllowed();
+    Pattern p1 = notAllowed();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.interleave(p1, p2);
     assertThat(p).isEqualTo(p1);
@@ -154,7 +156,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testInterleave3() {
     //  interleave p Empty = p
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.empty();
+    Pattern p2 = empty();
     Pattern p = Constructors.interleave(p1, p2);
     assertThat(p).isEqualTo(p1);
   }
@@ -162,7 +164,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testInterleave4() {
     //  interleave Empty p = p
-    Pattern p1 = Patterns.empty();
+    Pattern p1 = empty();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.interleave(p1, p2);
     assertThat(p).isEqualTo(p2);
@@ -174,9 +176,9 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     Pattern p3 = new TestPattern();
-    Pattern after = Patterns.after(p1, p2);
+    Pattern after = new Patterns.After(p1, p2);
     Pattern p = Constructors.interleave(after, p3);
-    Pattern expected = Patterns.after(p1, Patterns.interleave(p2, p3));
+    Pattern expected = new Patterns.After(p1, new Patterns.Interleave(p2, p3));
     assertThat(p).isEqualTo(expected);
   }
 
@@ -186,9 +188,9 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     Pattern p3 = new TestPattern();
-    Pattern after = Patterns.after(p2, p3);
+    Pattern after = new Patterns.After(p2, p3);
     Pattern p = Constructors.interleave(p1, after);
-    Pattern expected = Patterns.after(p2, Patterns.interleave(p1, p3));
+    Pattern expected = new Patterns.After(p2, new Patterns.Interleave(p1, p3));
     assertThat(p).isEqualTo(expected);
   }
 
@@ -198,14 +200,14 @@ public class ConstructorsTest extends CreoleTest {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.interleave(p1, p2);
-    assertThat(p).isEqualTo(Patterns.interleave(p1,p2));
+    assertThat(p).isEqualTo(new Patterns.Interleave(p1, p2));
   }
 
   @Test
   public void testConcur1() {
     //  concur p NotAllowed = NotAllowed
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.notAllowed();
+    Pattern p2 = notAllowed();
     Pattern p = Constructors.concur(p1, p2);
     assertThat(p).isEqualTo(p2);
   }
@@ -213,7 +215,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testConcur2() {
     //  concur NotAllowed p = NotAllowed
-    Pattern p1 = Patterns.notAllowed();
+    Pattern p1 = notAllowed();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.concur(p1, p2);
     assertThat(p).isEqualTo(p1);
@@ -223,7 +225,7 @@ public class ConstructorsTest extends CreoleTest {
   public void testConcur3() {
     //  concur p Text = p
     Pattern p1 = new TestPattern();
-    Pattern p2 = Patterns.text();
+    Pattern p2 = new Patterns.Text();
     Pattern p = Constructors.concur(p1, p2);
     assertThat(p).isEqualTo(p1);
   }
@@ -231,7 +233,7 @@ public class ConstructorsTest extends CreoleTest {
   @Test
   public void testConcur4() {
     //  concur Text p = p
-    Pattern p1 = Patterns.text();
+    Pattern p1 = new Patterns.Text();
     Pattern p2 = new TestPattern();
     Pattern p = Constructors.concur(p1, p2);
     assertThat(p).isEqualTo(p2);
@@ -239,8 +241,6 @@ public class ConstructorsTest extends CreoleTest {
 
 
   //TODO: make more tests
-
-
 
 
 //  concur (After p1 p2) (After p3 p4) = after (all p1 p3) (concur p2 p4)

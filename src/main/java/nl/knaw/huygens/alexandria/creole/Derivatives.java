@@ -20,18 +20,17 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
+import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
-import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
-
-public class Derivatives {
-  static Logger LOG = LoggerFactory.getLogger(Derivatives.class);
+class Derivatives {
+  private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
 
   /*
     Derivatives
@@ -42,7 +41,7 @@ public class Derivatives {
     against the derivative of the first event.
   */
   // eventsDeriv :: Pattern -> [Event] -> Pattern
-  public static Pattern eventsDeriv(Pattern pattern, List<Event> events) {
+  static Pattern eventsDeriv(Pattern pattern, List<Event> events) {
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
       return pattern;
@@ -50,12 +49,12 @@ public class Derivatives {
 
     //  eventsDeriv p (h:t) = eventsDeriv (eventDeriv p h) t
     Event head = events.remove(0);
-    LOG.info("event: {}", head);
+    LOG.debug("{}: {}", head.getClass().getSimpleName(), head);
     Pattern headDeriv = eventsDeriv(pattern, head);
-    if (headDeriv.equals(Patterns.notAllowed())) {
+    if (headDeriv instanceof Patterns.NotAllowed) {
       // fail fast
-      LOG.error("Unexpected event: {}", head);
-      return Patterns.notAllowed();
+      LOG.error("Unexpected " + head.getClass().getSimpleName() + ": {}", head);
+      return notAllowed();
     }
 //    LOG.info("head derivation: {}", headDeriv);
 //    LOG.info("remaining events: {}", events.size());
@@ -67,7 +66,7 @@ public class Derivatives {
      Whitespace-only text nodes can be ignored if the pattern doesn't allow text.
     */
   //  eventDeriv :: Pattern -> Event -> Pattern
-  public static Pattern eventsDeriv(Pattern p, Event event) {
+  static Pattern eventsDeriv(Pattern p, Event event) {
     //  eventDeriv p (TextEvent s cx) =
     //    if (whitespace s && not allowsText p)
     //    then p
@@ -96,7 +95,7 @@ public class Derivatives {
       Basics.Id id = endTagEvent.getId();
       return endTagDeriv(p, qn, id);
     }
-    throw new RuntimeException("unexpected event: " + event);
+    throw new RuntimeException("unexpected " + event.getClass().getTypeName() + " event: " + event);
   }
 
   /*
@@ -167,7 +166,7 @@ public class Derivatives {
       Pattern p = oneOrMore.getPattern();
       return group(//
           textDeriv(cx, p, s),//
-          choice(Patterns.oneOrMore(p), Patterns.empty())//
+          choice(new Patterns.OneOrMore(p), empty())//
       );
     }
 
@@ -204,7 +203,7 @@ public class Derivatives {
       Pattern p = concurOneOrMore.getPattern();
       return choice(//
           textDeriv(cx, p, s),//
-          choice(Patterns.concurOneOrMore(p), Patterns.text())//
+          choice(new Patterns.ConcurOneOrMore(p), text())//
       );
     }
 
@@ -217,14 +216,14 @@ public class Derivatives {
       Pattern p = partition.getPattern();
       return after(//
           textDeriv(cx, p, s),//
-          Patterns.empty()//
+          empty()//
       );
     }
 
     //No other patterns can match a text event; the default is specified as
     //
     //textDeriv _ _ _ = NotAllowed
-    return Patterns.notAllowed();
+    return notAllowed();
   }
 
   // Start-tag Derivatives
@@ -243,8 +242,8 @@ public class Derivatives {
       NameClass nc = range.getNameClass();
       Pattern p = range.getPattern();
       return (contains(nc, qn))//
-          ? group(p, Patterns.endRange(qn, id))//
-          : Patterns.notAllowed();
+          ? group(p, endRange(qn, id))//
+          : notAllowed();
     }
 
     //    startTagDeriv (Choice p1 p2) qn id =
@@ -314,7 +313,7 @@ public class Derivatives {
       Pattern p = partition.getPattern();
       return after(//
           startTagDeriv(p, qn, id),//
-          Patterns.empty()//
+          empty()//
       );
     }
 
@@ -326,7 +325,7 @@ public class Derivatives {
       Pattern p = oneOrMore.getPattern();
       return group(//
           startTagDeriv(p, qn, id),//
-          choice(Patterns.oneOrMore(p), Patterns.empty())//
+          choice(new Patterns.OneOrMore(p), empty())//
       );
     }
 
@@ -338,7 +337,7 @@ public class Derivatives {
       Pattern p = concurOneOrMore.getPattern();
       return concur(//
           startTagDeriv(p, qn, id),//
-          choice(Patterns.concurOneOrMore(p), anyContent())//
+          choice(new Patterns.ConcurOneOrMore(p), anyContent())//
       );
     }
 
@@ -355,7 +354,7 @@ public class Derivatives {
     }
 
     //    startTagDeriv _ _ _ = NotAllowed
-    return Patterns.notAllowed();
+    return notAllowed();
   }
 
 
@@ -381,8 +380,8 @@ public class Derivatives {
       Basics.Uri ns2 = qn.getUri();
       Basics.LocalName ln2 = qn.getLocalName();
       return (id1.equals(id) || (id1.isEmpty() && id.isEmpty() && ns1.equals(ns2) && ln1.equals(ln2)))
-          ? Patterns.empty()//
-          : Patterns.notAllowed();
+          ? empty()//
+          : notAllowed();
     }
 
     //  endTagDeriv (Choice p1 p2) qn id =
@@ -452,7 +451,7 @@ public class Derivatives {
       Pattern p = partition.getPattern();
       return after(//
           endTagDeriv(p, qn, id),//
-          Patterns.empty()//
+          empty()//
       );
     }
 
@@ -464,7 +463,7 @@ public class Derivatives {
       Pattern p = oneOrMore.getPattern();
       return group(//
           endTagDeriv(p, qn, id),//
-          choice(Patterns.oneOrMore(p), Patterns.empty())//
+          choice(new Patterns.OneOrMore(p), empty())//
       );
     }
 
@@ -476,7 +475,7 @@ public class Derivatives {
       Pattern p = concurOneOrMore.getPattern();
       return concur(//
           endTagDeriv(p, qn, id),//
-          choice(Patterns.concurOneOrMore(p), anyContent())//
+          choice(new Patterns.ConcurOneOrMore(p), anyContent())//
       );
     }
 
@@ -493,7 +492,7 @@ public class Derivatives {
     }
 
     //  endTagDeriv _ _ _ = NotAllowed
-    return Patterns.notAllowed();
+    return notAllowed();
   }
 
   private static boolean whitespace(String text) {
@@ -501,8 +500,9 @@ public class Derivatives {
   }
 
   private static Pattern anyContent() {
+    LOG.warn("anyContent() called: implementation is iffy.");
     // TODO: not sure what Jeni means by anyContent, find out!
-    return Patterns.text();
+    return empty();
   }
 
 }

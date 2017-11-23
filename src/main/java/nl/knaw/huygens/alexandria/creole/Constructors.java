@@ -20,7 +20,8 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-public class Constructors {
+
+class Constructors {
 
   /*
   Constructors
@@ -30,7 +31,7 @@ public class Constructors {
    */
 
   //  choice :: Pattern -> Pattern -> Pattern
-  public static Pattern choice(Pattern pattern1, Pattern pattern2) {
+  static Pattern choice(Pattern pattern1, Pattern pattern2) {
     //  choice p NotAllowed = p
     if (pattern1 instanceof Patterns.NotAllowed) {
       return pattern2;
@@ -44,15 +45,15 @@ public class Constructors {
       return pattern1;
     }
     //  choice p1 p2 = Choice p1 p2
-    return Patterns.choice(pattern1, pattern2);
+    return new Patterns.Choice(pattern1, pattern2);
   }
 
   //  group :: Pattern -> Pattern -> Pattern
-  public static Pattern group(Pattern pattern1, Pattern pattern2) {
+  static Pattern group(Pattern pattern1, Pattern pattern2) {
     //  group p NotAllowed = NotAllowed
     //  group NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
-      return Patterns.notAllowed();
+      return notAllowed();
     }
     //  group p Empty = p
     if (pattern2 instanceof Patterns.Empty) {
@@ -73,15 +74,15 @@ public class Constructors {
       return after(after.getPattern1(), group(pattern1, after.getPattern2()));
     }
     //  group p1 p2 = Group p1 p2
-    return Patterns.group(pattern1, pattern2);
+    return new Patterns.Group(pattern1, pattern2);
   }
 
   //  interleave :: Pattern -> Pattern -> Pattern
-  public static Pattern interleave(Pattern pattern1, Pattern pattern2) {
+  static Pattern interleave(Pattern pattern1, Pattern pattern2) {
     //  interleave p NotAllowed = NotAllowed
     //  interleave NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
-      return Patterns.notAllowed();
+      return notAllowed();
     }
     //  interleave p Empty = p
     if (pattern2 instanceof Patterns.Empty) {
@@ -102,15 +103,15 @@ public class Constructors {
       return after(after.getPattern1(), interleave(pattern1, after.getPattern2()));
     }
     //  interleave p1 p2 = Interleave p1 p2
-    return Patterns.interleave(pattern1, pattern2);
+    return new Patterns.Interleave(pattern1, pattern2);
   }
 
   //  concur :: Pattern -> Pattern -> Pattern
-  public static Pattern concur(Pattern pattern1, Pattern pattern2) {
+  static Pattern concur(Pattern pattern1, Pattern pattern2) {
     //  concur p NotAllowed = NotAllowed
     //  concur NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
-      return Patterns.notAllowed();
+      return notAllowed();
     }
 
     //  concur p Text = p
@@ -151,11 +152,11 @@ public class Constructors {
     }
 
     //  concur p1 p2 = Concur p1 p2
-    return Patterns.concur(pattern1, pattern2);
+    return new Patterns.Concur(pattern1, pattern2);
   }
 
   //  partition :: Pattern -> Pattern
-  public static Pattern partition(Pattern pattern) {
+  private static Pattern partition(Pattern pattern) {
     //  partition NotAllowed = NotAllowed
     if (pattern instanceof Patterns.NotAllowed) {
       return pattern;
@@ -165,11 +166,11 @@ public class Constructors {
       return pattern;
     }
     //  partition p = Partition p
-    return Patterns.partition(pattern);
+    return new Patterns.Partition(pattern);
   }
 
   //  oneOrMore :: Pattern -> Pattern
-  public static Pattern oneOrMore(Pattern pattern) {
+  static Pattern oneOrMore(Pattern pattern) {
     //  oneOrMore NotAllowed = NotAllowed
     if (pattern instanceof Patterns.NotAllowed) {
       return pattern;
@@ -179,11 +180,11 @@ public class Constructors {
       return pattern;
     }
     //  oneOrMore p = OneOrMore p
-    return Patterns.oneOrMore(pattern);
+    return new Patterns.OneOrMore(pattern);
   }
 
   //  concurOneOrMore :: Pattern -> Pattern
-  public static Pattern concurOneOrMore(Pattern pattern) {
+  static Pattern concurOneOrMore(Pattern pattern) {
     //  concurOneOrMore NotAllowed = NotAllowed
     if (pattern instanceof Patterns.NotAllowed) {
       return pattern;
@@ -193,15 +194,15 @@ public class Constructors {
       return pattern;
     }
     //  concurOneOrMore p = ConcurOneOrMore p
-    return Patterns.concurOneOrMore(pattern);
+    return new Patterns.ConcurOneOrMore(pattern);
   }
 
   //  after :: Pattern -> Pattern -> Pattern
-  public static Pattern after(Pattern pattern1, Pattern pattern2) {
+  static Pattern after(Pattern pattern1, Pattern pattern2) {
     //  after p NotAllowed = NotAllowed
     //  after NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
-      return Patterns.notAllowed();
+      return notAllowed();
     }
 
     //  after Empty p = p
@@ -218,25 +219,25 @@ public class Constructors {
     }
 
     //  after p1 p2 = After p1 p2
-    return Patterns.after(pattern1, pattern2);
+    return new Patterns.After(pattern1, pattern2);
   }
 
   //  all :: Pattern -> Pattern -> Pattern
-  public static Pattern all(Pattern pattern1, Pattern pattern2) {
+  private static Pattern all(Pattern pattern1, Pattern pattern2) {
     //  all p NotAllowed = NotAllowed
     //  all NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
-      return Patterns.notAllowed();
+      return notAllowed();
     }
 
     //  all p Empty = if nullable p then Empty else NotAllowed
     if (pattern2 instanceof Patterns.Empty) {
-      return Utilities.nullable(pattern1) ? Patterns.empty() : Patterns.notAllowed();
+      return Utilities.nullable(pattern1) ? empty() : notAllowed();
     }
 
     //  all Empty p = if nullable p then Empty else NotAllowed
-    if (pattern2 instanceof Patterns.Empty) {
-      return Utilities.nullable(pattern2) ? Patterns.empty() : Patterns.notAllowed();
+    if (pattern1 instanceof Patterns.Empty) {
+      return Utilities.nullable(pattern2) ? empty() : notAllowed();
     }
 
     //  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)
@@ -251,6 +252,37 @@ public class Constructors {
     }
 
     //  all p1 p2 = All p1 p2
-    return Patterns.all(pattern1, pattern2);
+    return new Patterns.All(pattern1, pattern2);
   }
+
+  // convenience method: element is a range in a partition
+  static Pattern element(String localName, Pattern pattern) {
+    NameClass nameClass = NameClasses.name(localName);
+    return partition(range(nameClass, pattern));
+  }
+
+  static Pattern empty() {
+    return Patterns.EMPTY;
+  }
+
+  static Pattern notAllowed() {
+    return Patterns.NOT_ALLOWED;
+  }
+
+  static Pattern text() {
+    return Patterns.TEXT;
+  }
+
+  static Pattern range(NameClass nameClass, Pattern pattern) {
+    return new Patterns.Range(nameClass, pattern);
+  }
+
+  static Pattern endRange(Basics.QName qName, Basics.Id id) {
+    return new Patterns.EndRange(qName, id);
+  }
+
+  static Pattern endRange(Basics.QName qName, String id) {
+    return new Patterns.EndRange(qName, Basics.id(id));
+  }
+
 }

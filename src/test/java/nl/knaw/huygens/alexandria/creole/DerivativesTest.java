@@ -20,6 +20,11 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static java.util.Arrays.asList;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import static nl.knaw.huygens.alexandria.creole.Patterns.*;
-import static org.assertj.core.api.Java6Assertions.assertThat;
-
 public class DerivativesTest {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testEventsDerivation() {
@@ -51,6 +50,7 @@ public class DerivativesTest {
         "text",//
         text()//
     );
+
     Pattern pattern = Derivatives.eventsDeriv(schemaPattern, events);
     LOG.info("derived pattern={}", pattern);
     assertThat(pattern).isEqualTo(empty());
@@ -67,6 +67,7 @@ public class DerivativesTest {
 
     Pattern pattern = Derivatives.eventsDeriv(book, events);
     assertThat(pattern).isEqualTo(empty());
+    assertThat(pattern).isNullable();
   }
 
   private List<Event> createEvents() {
@@ -124,25 +125,25 @@ public class DerivativesTest {
     Event someText = Events.textEvent("some text");
 
     List<Event> events = new ArrayList<>();
-    events.addAll(asList(
-        openBook, openPage,
-        openTitle, titleText, closeTitle,
-        openSection,
-        openHeading, headingText, closeHeading,
-        openChapter,
-        openPara, openS, openVerse, someText,
-        openIndex1, someText,
-        openIndex2, someText, closeIndex1, someText, closePage,
-        openPage, someText, closeIndex2, someText,
-        closeS, closeVerse, closePara,
-        openPara, openVerse, openS, someText,
-        closeVerse, closeChapter,
-        openChapter, openVerse, someText,
-        closeVerse, closeS, closePara,
-        closeChapter,
-        closeSection,
-        closePage, closeBook,
-        closeBook // <- huh?
+    events.addAll(asList(//
+        openBook, openPage,//
+        openTitle, titleText, closeTitle,//
+        openSection,//
+        openHeading, headingText, closeHeading,//
+        openChapter,//
+        openPara, openS, openVerse, someText,//
+        openIndex1, someText,//
+        openIndex2, someText, closeIndex1, someText, closePage,//
+        openPage, someText, closeIndex2, someText,//
+        closeS, closeVerse, closePara,//
+        openPara, openVerse, openS, someText,//
+        closeVerse, closeChapter,//
+        openChapter, openVerse, someText,//
+        closeVerse, closeS, closePara,//
+        closeChapter,//
+        closeSection,//
+        closePage, closeBook//
+        ,closeBook // <- huh?
     ));
     return events;
   }
@@ -182,11 +183,12 @@ public class DerivativesTest {
     );
   }
 
-  Pattern zeroOrMore(Pattern pattern) {
+  private Pattern zeroOrMore(Pattern pattern) {
     return choice(empty(), oneOrMore(pattern));
   }
 
-  Pattern mixed(Pattern pattern) {
+  private Pattern mixed(Pattern pattern) {
+    LOG.warn("mixed() called: implementation is iffy");
     // Assumption, not sure if this is the right implementation of mixed
     return group(text(), group(pattern, text()));
   }

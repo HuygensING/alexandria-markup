@@ -20,76 +20,10 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-public class Patterns {
+class Patterns {
   static final Pattern EMPTY = new Empty();
   static final Pattern NOT_ALLOWED = new NotAllowed();
   static final Pattern TEXT = new Text();
-
-  public static Pattern empty() {
-    return EMPTY;
-  }
-
-  public static Pattern notAllowed() {
-    return NOT_ALLOWED;
-  }
-
-  public static Pattern text() {
-    return TEXT;
-  }
-
-  public static Pattern choice(Pattern p1, Pattern p2) {
-    return new Choice(p1, p2);
-  }
-
-  public static Pattern interleave(Pattern p1, Pattern p2) {
-    return new Interleave(p1, p2);
-  }
-
-  public static Pattern group(Pattern p1, Pattern p2) {
-    return new Group(p1, p2);
-  }
-
-  public static Pattern concur(Pattern p1, Pattern p2) {
-    return new Concur(p1, p2);
-  }
-
-  public static Pattern partition(Pattern p) {
-    return new Partition(p);
-  }
-
-  public static Pattern oneOrMore(Pattern p) {
-    return new OneOrMore(p);
-  }
-
-  public static Pattern concurOneOrMore(Pattern p) {
-    return new ConcurOneOrMore(p);
-  }
-
-  public static Pattern range(NameClass nameClass, Pattern pattern) {
-    return new Range(nameClass, pattern);
-  }
-
-  public static Pattern endRange(Basics.QName qName, Basics.Id id) {
-    return new EndRange(qName, id);
-  }
-
-  public static Pattern endRange(Basics.QName qName, String id) {
-    return new EndRange(qName, Basics.id(id));
-  }
-
-  public static Pattern after(Pattern pattern1, Pattern pattern2) {
-    return new After(pattern1, pattern2);
-  }
-
-  public static Pattern all(Pattern p1, Pattern p2) {
-    return new All(p1, p2);
-  }
-
-  // convenience method: element is a range in a partition
-  public static Pattern element(String localName, Pattern pattern) {
-    NameClass nameClass = NameClasses.name(localName);
-    return partition(range(nameClass, pattern));
-  }
 
   /*
   A Pattern represents a pattern after simplification.
@@ -170,7 +104,7 @@ public class Patterns {
       this.pattern = pattern;
     }
 
-    public NameClass getNameClass() {
+    NameClass getNameClass() {
       return nameClass;
     }
 
@@ -183,12 +117,12 @@ public class Patterns {
     private final Basics.QName qName;
     private final Basics.Id id;
 
-    public EndRange(Basics.QName qName, Basics.Id id) {
+    EndRange(Basics.QName qName, Basics.Id id) {
       this.qName = qName;
       this.id = id;
     }
 
-    public Basics.QName getQName() {
+    Basics.QName getQName() {
       return qName;
     }
 
@@ -239,11 +173,11 @@ public class Patterns {
       this.pattern2 = pattern2;
     }
 
-    public Pattern getPattern1() {
+    Pattern getPattern1() {
       return pattern1;
     }
 
-    public Pattern getPattern2() {
+    Pattern getPattern2() {
       return pattern2;
     }
 
