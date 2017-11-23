@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria;
+package nl.knaw.huygens.alexandria.creole;
 
 /*-
  * #%L
@@ -19,19 +19,26 @@ package nl.knaw.huygens.alexandria;
  * limitations under the License.
  * #L%
  */
+public class ValidationResult {
 
-import nl.knaw.huygens.alexandria.creole.Pattern;
-import nl.knaw.huygens.alexandria.creole.PatternAssert;
-import nl.knaw.huygens.alexandria.creole.ValidationResult;
-import nl.knaw.huygens.alexandria.creole.ValidationResultAssert;
-import org.assertj.core.api.Assertions;
+  private Event unexpectedEvent;
+  private boolean success;
 
-public class AlexandriaAssertions extends Assertions {
-  public static PatternAssert assertThat(Pattern actual) {
-    return new PatternAssert(actual);
+  public ValidationResult setSuccess(boolean success){
+    this.success = success;
+    return this;
   }
 
-  public static ValidationResultAssert assertThat(ValidationResult actual) {
-    return new ValidationResultAssert(actual);
+  public ValidationResult setUnexpectedEvent(Event unexpectedEvent){
+    this.unexpectedEvent = unexpectedEvent;
+    return this;
+  }
+
+  public boolean isSuccess() {
+    return success;
+  }
+
+  public Event getUnexpectedEvent() {
+    return unexpectedEvent;
   }
 }

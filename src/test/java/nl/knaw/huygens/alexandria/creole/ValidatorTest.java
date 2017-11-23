@@ -19,11 +19,12 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
+
 import static java.util.Arrays.asList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Constructors.element;
-import static nl.knaw.huygens.alexandria.creole.Constructors.text;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -46,13 +47,43 @@ public class ValidatorTest {
         text()//
     );
 
-    Validator validator = Validator.ofSchema(schemaPattern);
-    assertThat(validator.validates(validEvents)).isTrue();
+    Validator validator = Validator.ofPattern(schemaPattern);
+    ValidationResult validationResult1 = validator.validate(validEvents);
+    assertThat(validationResult1).isSuccess();
+    assertThat(validationResult1).hasNoUnexpectedEvent();
 
     List<Event> invalidEvents = new ArrayList<>();
     invalidEvents.addAll(asList(textE, startE, startE, endE));
-    assertThat(validator.validates(invalidEvents)).isFalse();
+    ValidationResult validationResult = validator.validate(invalidEvents);
+    assertThat(validationResult).isFailure();
+    assertThat(validationResult).hasUnexpectedEvent(textE);
+  }
 
+  @Test
+  public void testValidator2() throws Exception {
+    Pattern schemaPattern = element(//
+        "text",//
+        interleave(//
+            text(),//
+            range(name("bold"), text())//
+        )//
+    );
+
+    Validator validator = Validator.ofPattern(schemaPattern);
+
+    // [text}Text[bold}Bold{bold]Text{text]
+    Basics.QName qName = qName("text");
+    Event startE = Events.startTagEvent(qName);
+    Basics.Context context = Basics.context();
+    Event textE = Events.textEvent("Text", context);
+    Event startBoldE = Events.startTagEvent(qName("bold"));
+    Event endBoldE = Events.endTagEvent(qName("bold"));
+    Event boldTextE = Events.textEvent("Bold", context);
+    Event endE = Events.endTagEvent(qName);
+    List<Event> validEvents = new ArrayList<>();
+    validEvents.addAll(asList(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE));
+
+    assertThat(validator.validate(validEvents)).isSuccess();
   }
 
 }

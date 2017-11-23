@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
+
 import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 
 import java.util.List;
@@ -27,16 +28,20 @@ public class Validator {
 
   private final Pattern schemaPattern;
 
-  private Validator(Pattern schemaPattern){
+  private Validator(Pattern schemaPattern) {
     this.schemaPattern = schemaPattern;
   }
 
-  public static Validator ofSchema(Pattern schemaPattern){
+  public static Validator ofPattern(Pattern schemaPattern) {
     return new Validator(schemaPattern);
   }
 
-  public boolean validates(List<Event> events){
-    Pattern pattern = Derivatives.eventsDeriv(schemaPattern, events);
-    return (nullable(pattern));
+  public ValidationResult validate(List<Event> events) {
+    ValidationErrorListener errorListener = new ValidationErrorListener();
+    Derivatives derivatives = new Derivatives(errorListener);
+    Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
+    return new ValidationResult()//
+        .setSuccess(nullable(pattern))//
+        .setUnexpectedEvent(errorListener.getUnexpectedEvent());
   }
 }

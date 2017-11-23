@@ -31,6 +31,11 @@ import java.util.List;
 
 class Derivatives {
   private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
+  private final ValidationErrorListener errorListener;
+
+  public Derivatives(ValidationErrorListener errorListener) {
+    this.errorListener = errorListener;
+  }
 
   /*
     Derivatives
@@ -41,7 +46,7 @@ class Derivatives {
     against the derivative of the first event.
   */
   // eventsDeriv :: Pattern -> [Event] -> Pattern
-  static Pattern eventsDeriv(Pattern pattern, List<Event> events) {
+  Pattern eventsDeriv(Pattern pattern, List<Event> events) {
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
       return pattern;
@@ -54,6 +59,7 @@ class Derivatives {
     if (headDeriv instanceof Patterns.NotAllowed) {
       // fail fast
       LOG.error("Unexpected " + head.getClass().getSimpleName() + ": {}", head);
+      errorListener.setUnexpectedEvent(head);
       return notAllowed();
     }
 //    LOG.info("head derivation: {}", headDeriv);
@@ -502,7 +508,7 @@ class Derivatives {
   private static Pattern anyContent() {
     LOG.warn("anyContent() called: implementation is iffy.");
     // TODO: not sure what Jeni means by anyContent, find out!
-    return empty();
+    return text();
   }
 
 }

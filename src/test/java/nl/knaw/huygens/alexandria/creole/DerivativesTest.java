@@ -51,7 +51,9 @@ public class DerivativesTest {
         text()//
     );
 
-    Pattern pattern = Derivatives.eventsDeriv(schemaPattern, events);
+    ValidationErrorListener errorListener = new ValidationErrorListener();
+    Derivatives derivatives = new Derivatives(errorListener);
+    Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
     LOG.info("derived pattern={}", pattern);
     assertThat(pattern).isEqualTo(empty());
 
@@ -65,7 +67,9 @@ public class DerivativesTest {
     Pattern book = createSchema();
     List<Event> events = createEvents();
 
-    Pattern pattern = Derivatives.eventsDeriv(book, events);
+    ValidationErrorListener errorListener = new ValidationErrorListener();
+    Derivatives derivatives = new Derivatives(errorListener);
+    Pattern pattern = derivatives.eventsDeriv(book, events);
     assertThat(pattern).isEqualTo(empty());
     assertThat(pattern).isNullable();
   }
