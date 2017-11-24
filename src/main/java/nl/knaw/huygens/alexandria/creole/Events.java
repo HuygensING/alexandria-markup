@@ -27,11 +27,11 @@ public class Events {
              | TextEvent String Context
    */
 
-  public static Event startTagEvent(Basics.QName qName) {
+  public static StartTagEvent startTagEvent(Basics.QName qName) {
     return startTagEvent(qName, "");
   }
 
-  public static Event startTagEvent(Basics.QName qName, String id) {
+  public static StartTagEvent startTagEvent(Basics.QName qName, String id) {
     return new StartTagEvent(qName, Basics.id(id));
   }
 
@@ -56,13 +56,26 @@ public class Events {
     public String toString() {
       return "[" + qName.getLocalName().getValue() + "}";
     }
+
+//    @Override
+//    public int hashCode() {
+//      return qName.hashCode() * id.hashCode();
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//      return (obj instanceof StartTagEvent)
+//          && (qName.equals(((StartTagEvent) obj).getQName())
+//          && (id.equals(((StartTagEvent) obj).getId()))
+//      );
+//    }
   }
 
-  public static Event endTagEvent(Basics.QName qName) {
+  public static EndTagEvent endTagEvent(Basics.QName qName) {
     return endTagEvent(qName, "");
   }
 
-  public static Event endTagEvent(Basics.QName qName, String id) {
+  public static EndTagEvent endTagEvent(Basics.QName qName, String id) {
     return new EndTagEvent(qName, Basics.id(id));
   }
 
@@ -87,13 +100,26 @@ public class Events {
     public String toString() {
       return "{" + qName.getLocalName().getValue() + "]";
     }
+
+//    @Override
+//    public int hashCode() {
+//      return qName.hashCode() * id.hashCode();
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//      return (obj instanceof EndTagEvent)
+//          && (qName.equals(((EndTagEvent) obj).getQName())
+//          && (id.equals(((EndTagEvent) obj).getId()))
+//      );
+//    }
   }
 
-  public static Event textEvent(String text) {
+  public static TextEvent textEvent(String text) {
     return textEvent(text, Basics.context());
   }
 
-  public static Event textEvent(String text, Basics.Context context) {
+  public static TextEvent textEvent(String text, Basics.Context context) {
     return new TextEvent(text, context);
   }
 
@@ -118,6 +144,19 @@ public class Events {
     public String toString() {
       return text;
     }
+
+//    @Override
+//    public int hashCode() {
+//      return text.hashCode() * context.hashCode();
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//      return (obj instanceof TextEvent)
+//          && (text.equals(((TextEvent) obj).getText())
+//          && (context.equals(((TextEvent) obj).getContext()))
+//      );
+//    }
 
   }
 

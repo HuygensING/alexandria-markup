@@ -21,10 +21,12 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ public class DerivativesTest extends CreoleTest {
   private static Derivatives derivatives;
 
   @BeforeClass
-  public static  void beforeClass(){
+  public static void beforeClass() {
     errorListener = new ValidationErrorListener();
     derivatives = new Derivatives(errorListener);
   }
@@ -75,8 +77,10 @@ public class DerivativesTest extends CreoleTest {
     List<Event> events = createEvents();
 
     Pattern pattern = derivatives.eventsDeriv(book, events);
-    assertThat(pattern).isNullable();
-    assertThat(pattern).isEqualTo(empty());
+    LOG.info("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
+    assertThat(pattern)//
+        .isNullable()//
+        .isEqualTo(empty());
   }
 
   private List<Event> createEvents() {
@@ -152,7 +156,7 @@ public class DerivativesTest extends CreoleTest {
         closeChapter,//
         closeSection,//
         closePage, closeBook//
-//        , closeBook // <- huh?
+        , closeBook // <- huh?
     ));
     return events;
   }

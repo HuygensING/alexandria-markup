@@ -20,8 +20,10 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
+import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -47,6 +49,7 @@ class Derivatives {
   */
   // eventsDeriv :: Pattern -> [Event] -> Pattern
   Pattern eventsDeriv(Pattern pattern, List<Event> events) {
+    LOG.debug("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
       return pattern;
@@ -56,6 +59,7 @@ class Derivatives {
     Event head = events.remove(0);
     LOG.debug("{}: {}", head.getClass().getSimpleName(), head);
     Pattern headDeriv = eventsDeriv(pattern, head);
+
     if (headDeriv instanceof Patterns.NotAllowed) {
       // fail fast
       LOG.error("Unexpected " + head.getClass().getSimpleName() + ": {}", head);

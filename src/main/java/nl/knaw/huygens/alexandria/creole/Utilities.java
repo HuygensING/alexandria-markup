@@ -20,8 +20,11 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
+
+import java.util.*;
 import java.util.function.Function;
 
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
@@ -228,6 +231,77 @@ public class Utilities {
     return false;
   }
 
+  public static Set<Event> expectedEvents(Pattern pattern) {
+    Set<Event> expectedEvents = new HashSet<>();
+    if (pattern instanceof Patterns.Text) {
+      expectedEvents.add(textEvent("*"));
+
+    } else if (pattern instanceof Patterns.Choice//
+        || pattern instanceof Patterns.Interleave//
+        || pattern instanceof Patterns.Group//
+        || pattern instanceof Patterns.Concur//
+        || pattern instanceof Patterns.After//
+        || pattern instanceof Patterns.All//
+        ) {
+      Patterns.PatternWithTwoPatternParameters p = (Patterns.PatternWithTwoPatternParameters) pattern;
+      expectedEvents.addAll(expectedEvents(p.getPattern1()));
+      expectedEvents.addAll(expectedEvents(p.getPattern2()));
+
+//    } else if (pattern instanceof Patterns.Group) {
+//      Patterns.Group p = (Patterns.Group) pattern;
+//      expectedEvents.addAll(expectedEvents(p.getPattern1()));
+
+    } else if (pattern instanceof Patterns.Partition
+        || pattern instanceof Patterns.OneOrMore//
+        || pattern instanceof Patterns.ConcurOneOrMore//
+        ) {
+      Patterns.PatternWithOnePatternParameter p = (Patterns.PatternWithOnePatternParameter) pattern;
+      expectedEvents.addAll(expectedEvents(p.getPattern()));
+
+    } else if (pattern instanceof Patterns.Range) {
+      Patterns.Range range = (Patterns.Range) pattern;
+      expectedEvents.addAll(expectedStartTagEvents(range.getNameClass()));
+
+    } else if (pattern instanceof Patterns.EndRange) {
+      Patterns.EndRange endRange = (Patterns.EndRange) pattern;
+      expectedEvents.add(new Events.EndTagEvent(endRange.getQName(), endRange.getId()));
+    }
+
+    return expectedEvents;
+  }
+
+
+  private static List<Events.StartTagEvent> expectedStartTagEvents(NameClass nameClass) {
+    List<Events.StartTagEvent> startTagEvents = new ArrayList<>();
+
+    if (nameClass instanceof NameClasses.AnyName) {
+      startTagEvents.add(startTagEvent(qName("*", "*")));
+
+    } else if (nameClass instanceof NameClasses.AnyNameExcept) {
+      NameClasses.AnyNameExcept anyNameExcept = (NameClasses.AnyNameExcept) nameClass;
+      NameClass nameClassToExcept = anyNameExcept.getNameClassToExcept();
+//      startTagEvents.add(startTagEvent(qName("*","*")));
+
+    } else if (nameClass instanceof NameClasses.Name) {
+      NameClasses.Name name = (NameClasses.Name) nameClass;
+      startTagEvents.add(startTagEvent(new Basics.QName(name.getUri(), name.getLocalName())));
+
+    } else if (nameClass instanceof NameClasses.NsName) {
+      NameClasses.NsName nsName = (NameClasses.NsName) nameClass;
+//      startTagEvents.add(startTagEvent(qName("*","*")));
+
+    } else if (nameClass instanceof NameClasses.NsNameExcept) {
+      NameClasses.NsNameExcept nsNameExcept = (NameClasses.NsNameExcept) nameClass;
+//      startTagEvents.add(startTagEvent(qName("*","*")));
+
+    } else if (nameClass instanceof NameClasses.NameClassChoice) {
+      NameClasses.NameClassChoice nameClassChoice = (NameClasses.NameClassChoice) nameClass;
+      startTagEvents.addAll(expectedStartTagEvents(nameClassChoice.getNameClass1()));
+      startTagEvents.addAll(expectedStartTagEvents(nameClassChoice.getNameClass2()));
+    }
+
+    return startTagEvents;
+  }
 
   /* private */
 

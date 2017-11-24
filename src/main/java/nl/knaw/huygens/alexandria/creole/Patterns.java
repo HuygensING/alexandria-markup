@@ -189,7 +189,7 @@ class Patterns {
 
   }
 
-  private static class PatternWithTwoPatternParameters {
+  static class PatternWithTwoPatternParameters {
     private final Pattern pattern1;
     private final Pattern pattern2;
 
