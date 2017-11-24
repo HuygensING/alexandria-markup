@@ -25,6 +25,7 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,16 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DerivativesTest {
+public class DerivativesTest extends CreoleTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
+  private static ValidationErrorListener errorListener;
+  private static Derivatives derivatives;
+
+  @BeforeClass
+  public static  void beforeClass(){
+    errorListener = new ValidationErrorListener();
+    derivatives = new Derivatives(errorListener);
+  }
 
   @Test
   public void testEventsDerivation() {
@@ -51,8 +60,6 @@ public class DerivativesTest {
         text()//
     );
 
-    ValidationErrorListener errorListener = new ValidationErrorListener();
-    Derivatives derivatives = new Derivatives(errorListener);
     Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
     LOG.info("derived pattern={}", pattern);
     assertThat(pattern).isEqualTo(empty());
@@ -67,11 +74,9 @@ public class DerivativesTest {
     Pattern book = createSchema();
     List<Event> events = createEvents();
 
-    ValidationErrorListener errorListener = new ValidationErrorListener();
-    Derivatives derivatives = new Derivatives(errorListener);
     Pattern pattern = derivatives.eventsDeriv(book, events);
-    assertThat(pattern).isEqualTo(empty());
     assertThat(pattern).isNullable();
+    assertThat(pattern).isEqualTo(empty());
   }
 
   private List<Event> createEvents() {

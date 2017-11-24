@@ -505,10 +505,5 @@ class Derivatives {
     return StringUtils.isBlank(text);
   }
 
-  private static Pattern anyContent() {
-    LOG.warn("anyContent() called: implementation is iffy.");
-    // TODO: not sure what Jeni means by anyContent, find out!
-    return text();
-  }
 
 }

@@ -420,7 +420,6 @@ public class ConstructorsTest extends CreoleTest {
     assertThat(all).isEqualTo(Patterns.EMPTY);
   }
 
-
   @Test
   public void testAll3b() {
     //  all p Empty = if nullable p then Empty else NotAllowed

@@ -1,0 +1,616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0085)https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki//index.php/Creole -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript" src="./Creole - LMNLWiki_files/analytics.js.download" charset="utf-8"></script>
+
+    <meta name="KEYWORDS" content="Creole">
+<meta name="robots" content="index,follow">
+    <title>Creole - LMNLWiki</title>
+    <style type="text/css" media="screen,projection">/*<![CDATA[*/ @import "/web/20090105232819cs_/http://www.lmnl.org/wiki/skins/monobook/main.css"; /*]]>*/</style>
+    <link rel="stylesheet" type="text/css" media="print" href="./Creole - LMNLWiki_files/commonPrint.css">
+    <!--[if lt IE 5.5000]><style type="text/css">@import "/wiki/skins/monobook/IE50Fixes.css";</style><![endif]-->
+    <!--[if IE 5.5000]><style type="text/css">@import "/wiki/skins/monobook/IE55Fixes.css";</style><![endif]-->
+    <!--[if gte IE 6]><style type="text/css">@import "/wiki/skins/monobook/IE60Fixes.css";</style><![endif]-->
+    <!--[if lt IE 7]><script type="text/javascript" src="/wiki/skins/common/IEFixes.js"></script>
+    <meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+    <script type="text/javascript" src="./Creole - LMNLWiki_files/index.php"></script><style type="text/css">:root #content > #right > .dose > .dosesingle,
+:root #content > #center > .dose > .dosesingle
+{display:none !important;}</style>    <script type="text/javascript" src="./Creole - LMNLWiki_files/wikibits.js.download"></script>
+    <style type="text/css">/*<![CDATA[*/
+@import "/web/20090105232819cs_/http://www.lmnl.org/wiki/index.php?title=MediaWiki:Monobook.css&action=raw&ctype=text/css&smaxage=18000";
+@import "/web/20090105232819cs_/http://www.lmnl.org/wiki/index.php?title=-&action=raw&gen=css&maxage=18000";
+/*]]>*/</style>              <style id="holderjs-style" type="text/css"></style></head>
+  <body class="ns-0 __plain_text_READY__"><div id="wm-ipp" lang="en" style="display: block; direction: ltr;" class="">
+    <div id="globalWrapper">
+      <div id="column-content">
+	<div id="content">
+	  <a name="top" id="top"></a>
+	  	  <h1 class="firstHeading">Creole</h1>
+	  <div id="bodyContent">
+	    <h3 id="siteSub">From LMNLWiki</h3>
+	    <div id="contentSub"></div>
+	    	    	    <!-- start content -->
+	    <p>Creole (Composable Regular Expressions for Overlapping Languages etc.) is a schema language that Jeni is developing for LMNL and other overlapping markup languages. It's based heavily on <a href="https://web.archive.org/web/20090105232819/http://www.relaxng.org/" class="external text" title="http://www.relaxng.org" rel="nofollow">RELAX NG</a>, with a few extensions that make it suitable for overlapping structures.
+</p>
+<dl><dd>As well as the items under discussion on the <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Talk:Creole" title="Talk:Creole">discussion page</a>, there's a page of <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Creole_Open_Issues" title="Creole Open Issues">open issues</a> to look at.
+</dd></dl>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1"><a href="#Aims_and_Scope"><span class="tocnumber">1</span> <span class="toctext">Aims and Scope</span></a></li>
+<li class="toclevel-1"><a href="#Syntax"><span class="tocnumber">2</span> <span class="toctext">Syntax</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Annotations"><span class="tocnumber">2.1</span> <span class="toctext">Annotations</span></a></li>
+<li class="toclevel-2"><a href="#Atoms"><span class="tocnumber">2.2</span> <span class="toctext">Atoms</span></a></li>
+<li class="toclevel-2"><a href="#Ranges"><span class="tocnumber">2.3</span> <span class="toctext">Ranges</span></a></li>
+<li class="toclevel-2"><a href="#Partitions"><span class="tocnumber">2.4</span> <span class="toctext">Partitions</span></a></li>
+<li class="toclevel-2"><a href="#Interleave_and_Concur"><span class="tocnumber">2.5</span> <span class="toctext">Interleave and Concur</span></a></li>
+<li class="toclevel-2"><a href="#Repeated_Concur"><span class="tocnumber">2.6</span> <span class="toctext">Repeated Concur</span></a></li>
+<li class="toclevel-2"><a href="#Extended_Example"><span class="tocnumber">2.7</span> <span class="toctext">Extended Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Implementation"><span class="tocnumber">3</span> <span class="toctext">Implementation</span></a></li>
+<li class="toclevel-1"><a href="#Background"><span class="tocnumber">4</span> <span class="toctext">Background</span></a></li>
+<li class="toclevel-1"><a href="#Publications"><span class="tocnumber">5</span> <span class="toctext">Publications</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<p><script type="text/javascript"> if (window.showTocToggle) { var tocShowText = "show"; var tocHideText = "hide"; showTocToggle(); } </script>
+</p>
+<a name="Aims_and_Scope"></a><h2>Aims and Scope</h2>
+<p>Creole has the following aims:
+</p>
+<dl><dt> Composable&nbsp;</dt><dd> The definition of overlap between ranges should be composable, rather than being done at a grammar level. Users should be able to define overlap within particular parts of a document rather than having to repeat the definition of an entire tree.
+</dd></dl>
+<dl><dt> Ranges, not tags&nbsp;</dt><dd> Users should be able to specify how ranges overlap each other without detailing where start and end tags can appear.
+</dd></dl>
+<dl><dt> RELAX NG extension&nbsp;</dt><dd> Creole should be an extension of RELAX NG, such that all RELAX NG grammars are Creole grammars.
+</dd></dl>
+<dl><dt> Language neutral&nbsp;</dt><dd> Creole should be applicable to many different kinds of markup languages, including LMNL, TexMecs, and plain old XML.
+</dd></dl>
+<p>It's important to note that Creole is <i>not</i> designed to be used to identify hierarchies that can be extracted from a document as XML structures.
+</p>
+<a name="Syntax"></a><h2>Syntax</h2>
+<p>Creole is RELAX NG with the following extensions:
+</p>
+<ol><li> It has <a href="#Annotations" title=""><code>&lt;annotation&gt;</code> patterns</a>. These match annotations, which can have annotations themselves and can have ranges in their content. The <code>&lt;attribute&gt;</code> pattern is a shorthand for an <code>&lt;annotation&gt;</code> pattern.
+</li><li> It has <a href="#Atoms" title=""><code>&lt;atom&gt;</code> patterns</a>. These match atoms, which have names and annotations but are treated as content (on a par with text) in LMNL.
+</li><li> It has <a href="#Ranges" title=""><code>&lt;range&gt;</code> patterns</a>. These match ranges, which can overlap other ranges. The <code>&lt;element&gt;</code> pattern is a shorthand for a <code>&lt;range&gt;</code> wrapped in a <code>&lt;partition&gt;</code>.
+</li><li> It has <a href="#Partitions" title=""><code>&lt;partition&gt;</code> patterns</a>. These indicate blocks of content that must be self-contained: ranges cannot start within them unless they also end within them, and vice versa.
+</li><li> It has <a href="#Interleave_and_Concur" title=""><code>&lt;interleave&gt;</code> and <code>&lt;concur&gt;</code> patterns</a>. The only difference between them is that any content (text or atoms) must match <i>both</i> subpatterns of a concur rather than matching <i>either</i> subpattern of an interleave.
+</li><li> It has <a href="#Repeated_Concur" title=""><code>&lt;concurOneOrMore&gt;</code> and <code>&lt;concurZeroOrMore&gt;</code> patterns</a>. These provide for self-overlap.
+</li></ol>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=3" title="Creole">edit</a>]</div><a name="Annotations"></a><h3>Annotations</h3>
+<p>In LMNL, annotations can have annotations themselves, and can have structured content, putting them on a par with elements. For example, you can do
+</p>
+<pre>[book [title}Beginning XSLT 2.0{]
+      [author [title}Dr{]}Jeni [surname}Tennison{surname]{]}
+  ...
+{book]
+</pre>
+<p>Annotation patterns match annotations, with the syntax
+</p>
+<pre>&lt;annotation name="<i>QName</i>"&gt; <i>pattern</i> &lt;/annotation&gt;
+
+</pre>
+<p>or
+</p>
+<pre>&lt;annotation&gt; <i>nameClass</i> <i>pattern</i> &lt;/annotation&gt;
+</pre>
+<p>Attribute patterns are still allowed in Creole. They are equivalent to an annotation pattern with the same <code>name</code> attribute or <i>nameClass</i> and <i>pattern</i>. If the attribute pattern doesn't have a subpattern, then the equivalent annotation pattern has the subpattern <code>&lt;text/&gt;</code>. Thus
+</p>
+<pre>&lt;attribute name="title" /&gt;
+</pre>
+<p>is equivalent to
+</p>
+<pre>&lt;annotation name="title"&gt;&lt;text /&gt;&lt;/annotation&gt;
+</pre>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=4" title="Creole">edit</a>]</div><a name="Atoms"></a><h3>Atoms</h3>
+<p>The basic building block of LMNL documents are <b>atoms</b>, which are pieces of content. Ranges range over sequences of atoms, and in fact text is considered simply a sequence of character atoms. Atoms have names and can have annotations. They are typically used in LMNL documents for media objects such as graphics which are part of the content of the page.
+</p>
+<dl><dd>Note: Atoms are usually represented as empty elements in XML-based markup languages.
+</dd></dl>
+<p>Creole adds an atom pattern to RELAX NG, which has the same syntax as the element pattern
+</p>
+<pre>&lt;atom name="<i>QName</i>"&gt; <i>pattern</i> &lt;/atom&gt;
+</pre>
+<p>or
+</p>
+<pre>&lt;atom&gt; <i>nameClass</i> <i>pattern</i> &lt;/atom&gt;
+</pre>
+<p>For example, the schema
+</p>
+<pre>&lt;define name="img-atom"&gt;
+  &lt;atom name="img"&gt;
+    &lt;annotation name="src"&gt;&lt;text /&gt;&lt;/annotation&gt;
+    &lt;annotation name="alt"&gt;&lt;ref name="inline" /&gt;&lt;/annotation&gt;
+    &lt;annotation name="desc"&gt;&lt;ref name="blocks" /&gt;&lt;/annotation&gt;
+  &lt;/atom&gt;
+&lt;/define&gt;
+</pre>
+<p>would be used for an atom such as
+</p>
+<pre>{{img [src}logo.jpg{]
+      [alt}[acronym}LMNL{acronym] logo{]
+      [desc}
+        [para}
+          The [acronym}LMNL{acronym] logo is a jester's hat...
+        {para]
+      {desc]}}
+</pre>
+<p>Because atoms only have annotations, the following paths are disallowed in simplified Creole.
+</p>
+<pre>atom//range
+atom//element
+atom//atom
+atom//text
+</pre>
+<p>Simplified Creole ensures that every <code>&lt;atom&gt;</code>, <code>&lt;annotation&gt;</code>, <code>&lt;element&gt;</code> and <code>&lt;range&gt;</code> element resides in its own <code>&lt;define&gt;</code> element, so would transform the above example to
+</p>
+<pre>&lt;define name="img-atom"&gt;
+  &lt;atom name="img"&gt;
+    &lt;ref name="img-src-annotation" /&gt;
+    &lt;ref name="img-alt-annotation" /&gt;
+    &lt;ref name="img-desc-annotation" /&gt;
+  &lt;/atom&gt;
+&lt;/define&gt;
+&lt;define name="img-src-annotation"&gt;
+  &lt;annotation name="src"&gt;&lt;text /&gt;&lt;/annotation&gt;
+&lt;/define&gt;
+&lt;define name="img-alt-annotation"&gt;
+  &lt;annotation name="alt"&gt;...&lt;/annotation&gt;
+&lt;/define&gt;
+&lt;define name="img-desc-annotation"&gt;
+  &lt;annotation name="desc"&gt;...&lt;/annotation&gt;
+&lt;/define&gt;
+</pre>
+<p>Thus the constraints on the content of the <code>&lt;atom&gt;</code> element are not broken.
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=5" title="Creole">edit</a>]</div><a name="Ranges"></a><h3>Ranges</h3>
+<p>Creole adds a range pattern to RELAX NG, which has exactly the same syntax as the element pattern
+</p>
+<pre>&lt;range name="<i>QName</i>"&gt; <i>pattern</i> &lt;/range&gt;
+</pre>
+<p>or
+</p>
+<pre>&lt;range&gt; <i>nameClass</i> <i>pattern</i> &lt;/range&gt;
+</pre>
+<p>A range can be overlapped (other ranges can start within it but not end within it, and vice versa). Element patterns are still allowed in Creole. They are equivalent to a range pattern with the same <code>name</code> attribute or <i>nameClass</i> and <i>pattern</i>, wrapped in a <code>&lt;partition&gt;</code> element. For example,
+</p>
+<pre>&lt;element name="foo"&gt; &lt;text /&gt; &lt;/element&gt;
+</pre>
+<p>is equivalent to
+</p>
+<pre>&lt;partition&gt; &lt;range name="foo"&gt; &lt;text /&gt; &lt;/range&gt; &lt;/partition&gt;
+</pre>
+<p>Ranges can only overlap with ranges that are part of another interleaving or overlapping subpattern; any ranges that are defined to be in the content of a range must be completely enclosed within that range. For example, the interleave pattern
+</p>
+<pre>&lt;interleave&gt;
+  &lt;range name="foo"&gt;
+    &lt;mixed&gt;&lt;range name="baz"&gt;&lt;text /&gt;&lt;/range&gt;&lt;/mixed&gt;
+  &lt;/range&gt;
+  &lt;range name="bar"&gt;&lt;text /&gt;&lt;/range&gt;
+&lt;/interleave&gt;
+</pre>
+<p>allows overlap such as
+</p>
+<pre>[foo}...[bar}...[baz}...{baz]...{foo]...{bar]
+[foo}...[baz}...[bar}...{baz]...{foo]...{bar]
+</pre>
+<p>but not
+</p>
+<pre>[foo}...[bar}...[baz}...{foo]...{baz]...{bar]
+</pre>
+<p>because the <code>[baz]</code> range is defined to be within the <code>[foo]</code> range, and therefore cannot overlap it. If <code>[baz]</code> were to be declared as an element rather than a range, then
+</p>
+<pre>[foo}...[baz}...[bar}...{baz]...{foo]...{bar]
+</pre>
+<p>would not be legal because the range <code>[bar]</code> starts within <code>[baz]</code> but does not finish within it.
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=6" title="Creole">edit</a>]</div><a name="Partitions"></a><h3>Partitions</h3>
+<p>The most common use of partitions is to indicate a range that cannot be overlapped, otherwise known as an element. Some of the time, whether you classify a start/end tag pair as an element or a range doesn't matter. For example,
+</p>
+<pre>[foo}...{foo]
+</pre>
+<p>will match both the patterns
+</p>
+<pre>&lt;element name="foo"&gt;&lt;text /&gt;&lt;/element&gt;
+</pre>
+<p>which is a shorthand for
+</p>
+<pre>&lt;partition&gt;&lt;range name="foo"&gt;&lt;text /&gt;&lt;/range&gt;&lt;/partition&gt;
+</pre>
+<p>and
+</p>
+<pre>&lt;range name="foo"&gt;&lt;text /&gt;&lt;/range&gt;
+</pre>
+<p>However, when you use interleave (or overlap), the difference becomes apparent. Take the interleave pattern, as applied to elements:
+</p>
+<pre>&lt;interleave&gt;
+  &lt;element name="foo"&gt;&lt;text /&gt;&lt;/element&gt;
+  &lt;element name="bar"&gt;&lt;text /&gt;&lt;/element&gt;
+&lt;/interleave&gt;
+</pre>
+<p>This pattern allows
+</p>
+<pre>[foo}...{foo][bar}...{bar]
+[bar}...{bar][foo}...{foo]
+</pre>
+<p>but not
+</p>
+<pre>[foo}...[bar}...{foo]...{bar]
+[foo}...[bar}...{bar]...{foo]
+[bar}...[foo}...{bar]...{foo]
+[bar}...[foo}...{foo]...{bar]
+
+</pre>
+<p>However, the interleave pattern when applied to ranges
+</p>
+<pre>&lt;interleave&gt;
+  &lt;range name="foo"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;range name="bar"&gt;&lt;text /&gt;&lt;/range&gt;
+&lt;/interleave&gt;
+</pre>
+<p>allows all of the above.
+</p><p>The <code>&lt;partition&gt;</code> element can hold any pattern. For example, you can use it to say that a particular group of ranges must be adjacent to each other.
+</p>
+<pre>&lt;interleave&gt;
+  &lt;partition&gt;
+    &lt;range name="foo"&gt;&lt;text /&gt;&lt;/range&gt;
+    &lt;range name="bar"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/partition&gt;
+  &lt;range name="baz"&gt;&lt;text /&gt;&lt;/range&gt;
+&lt;/interleave&gt;
+</pre>
+<p>allows
+</p>
+<pre>[foo}...{foo][bar}...{bar][baz}...{baz]
+</pre>
+<p>but not
+</p>
+<pre>[foo}...{foo][baz}...{baz][bar}...{bar]
+</pre>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=7" title="Creole">edit</a>]</div><a name="Interleave_and_Concur"></a><h3>Interleave and Concur</h3>
+<p>Creole adds an concur pattern to RELAX NG. The syntax is the same as interleave, group, choice and so on
+</p>
+<pre>&lt;concur&gt; <i>pattern</i>+ &lt;/concur&gt;
+</pre>
+<p>As you can see from the example in the <a href="#Ranges" title="">previous section</a>, interleave patterns actually allow ranges to overlap each other in any way. Sometimes, though, you want to constrain the overlap such that the same content (text and atoms) is completely covered by the ranges. For example, when marking up the Bible, every piece of text in the Bible should be within both a <code>[v]</code> (verse) range <i>and</i> a <code>[s]</code> (sentence) range, though <code>[v]</code> and <code>[s]</code> ranges can, of course, overlap. We want to allow
+</p>
+<pre>[v}[s}In the beginning of creation, when God made heaven and earth,{v] 
+[v}the earth was without form and void, with darkness over the face of 
+ the abyss, and a mighty wind that swept over the surface of the waters.{s]{v] 
+[v}[s}God said, "Let there be a light," and there was light;{v] 
+[v}and God saw that the light was good, and he separated the light from darkness.{s]{v] 
+[v}[s}He called the light day, and the darkness night. So evening came, and 
+ morning came, the first day.{s]{v]
+</pre>
+<p>but not allow
+</p>
+<pre>[s}In the beginning of creation, when God made heaven and earth, 
+ the earth was without form and void, with darkness over the face of 
+ the abyss, and a mighty wind that swept over the surface of the waters.{s] 
+[v}God said, "Let there be a light," and there was light;{v] 
+[v}and God saw that the light was good, and he separated the light from darkness.{v] 
+[v}[s}He called the light day, and the darkness night. So evening came, and 
+ morning came, the first day.{s]{v]
+</pre>
+<p>If we used an interleave pattern like
+</p>
+<pre>&lt;interleave&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="s"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/oneOrMore&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="v"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/oneOrMore&gt;
+&lt;/interleave&gt;
+</pre>
+<p>then both would be allowed. However, if we use a concur pattern like
+</p>
+<pre>&lt;concur&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="s"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/oneOrMore&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="v"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/oneOrMore&gt;
+&lt;/concur&gt;
+</pre>
+<p>then the second is invalid because text appears before the <code>[v]</code> range.
+</p><p>A more complicated overlap example is
+</p>
+<pre>[chapter}
+[section}
+ [para}[v}...{v][v}...{para]
+ [para}...{v][v}...{v]{para]
+ ... <i>more paras</i> ...
+{section]
+... <i>more sections</i> ...
+{chapter]
+</pre>
+<p>Here, there are two hierarchies in play — a chapter/verse hierarchy and a section/para hierarchy — and the text must be covered in both. So we would use:
+</p>
+<pre> &lt;concur&gt;
+   &lt;oneOrMore&gt;
+     &lt;range name="chapter"&gt;
+       &lt;oneOrMore&gt;
+         &lt;range name="v"&gt;&lt;text /&gt;&lt;/range&gt;
+       &lt;/oneOrMore&gt;
+     &lt;/range&gt;
+   &lt;/oneOrMore&gt;
+   &lt;oneOrMore&gt;
+     &lt;range name="section"&gt;
+       &lt;oneOrMore&gt;
+         &lt;range name="para"&gt;&lt;text /&gt;&lt;/range&gt;
+       &lt;oneOrMore&gt;
+     &lt;/range&gt;
+   &lt;/oneOrMore&gt;
+ &lt;/concur&gt;
+</pre>
+<p>Now let's introduce a heading for section:
+</p>
+<pre>[chapter}
+[section}[heading}The creation of the world{heading]
+ [para}[v}...{v][v}...{para]
+ [para}...{v][v}...{v]{para]
+ ... <i>more paras</i> ...
+{section]
+... <i>more sections</i> ...
+{chapter]
+</pre>
+<p>The heading is a self-contained range (it doesn't overlap anything), and we don't want the text that it contains to be included within a verse. When a partition is encountered, everything else is set aside until that partition is completed; the concur goes temporarily "out of scope", and the constraint that all text must appear in both parts of the concur is lifted. So the document is valid against the schema
+</p>
+<pre> &lt;concur&gt;
+   &lt;oneOrMore&gt;
+     &lt;range name="chapter"&gt;
+       &lt;oneOrMore&gt;
+         &lt;range name="v"&gt;&lt;text /&gt;&lt;/range&gt;
+       &lt;/oneOrMore&gt;
+     &lt;/range&gt;
+   &lt;/oneOrMore&gt;
+   &lt;oneOrMore&gt;
+     &lt;range name="section"&gt;
+       &lt;element name="heading"&gt;&lt;text /&gt;&lt;/element&gt;
+       &lt;oneOrMore&gt;
+         &lt;range name="para"&gt;&lt;text /&gt;&lt;/range&gt;
+       &lt;oneOrMore&gt;
+     &lt;/range&gt;
+   &lt;/oneOrMore&gt;
+ &lt;/concur&gt;
+</pre>
+<dl><dd>Note: Were we to extract a chapter/verse hierarchy from the document, we would want to ignore any text within headings.
+</dd></dl>
+<p>Usually a range will be in only one of the two branches of a <code>&lt;concur&gt;</code>, but in some cases low-level ranges belong to both branches. For example, consider the following poem which appears across pages 199 and 200 in a particular book:
+</p>
+<pre>[page [n}199{]}
+...
+[poem}
+  [title}[pl}Recueillement{pl]{title]
+  [stanza}
+    [sl}[pl}Sois sage, ô ma douleur, et tiens-toi plus {pl]
+                                        [pl}tranquille.{pl]{sl]
+    [sl}[pl}Tu réclamais le Soir; il descend; le voici:{pl]{sl]
+    [sl}[pl}Une atmosphère obscure enveloppe la ville,{pl]{sl]
+    [sl}[pl}Aux uns portant la paix, aux autres le souci.{pl]{sl]
+  {stanza]
+  [stanza}
+    [sl}[pl}Pendant que des mortels la multitude vile,{pl]{sl]
+    [sl}[pl}Sous le fouet du Plaisir, ce bourreau sans merci,{pl]{sl]
+    [sl}[pl}Va cueillir des remords dans la fête servile,{pl]{sl]
+    [sl}[pl}Ma douleur, donne moi la main; viens par ici,{pl]{sl]
+  {stanza]
+  [stanza}
+    [sl}[pl}Loin d'eux.{s] [s}Vois se pencher les défuntes {pl]
+                                                [pl}Années,{pl]{sl]
+    [sl}[pl}Sur les balcons du ciel, en robes surannées;{pl]{sl]
+    [sl}[pl}Surgir du fond des eaux le Regret souriant;{pl]{sl]
+  {stanza]{page]
+  [page [n}200{]}[stanza}
+    [sl}[pl}Le Soleil moribund s'endormir sous une arche,{pl]{sl]
+    [sl}[pl}Et, comme un long linceul traînant à l'Orient,{pl]{sl]
+    [sl}[pl}Entends, ma chère, entends la douce Nuit qui {pl]
+                                              [pl}marche.{pl]{sl]{s]
+  {stanza]
+{poem]
+...
+{page]
+</pre>
+<p>Here, the <code>[sl]</code> ranges indicate lines within a stanza, and the <code>[pl]</code> ranges indicate lines on the page. Some lines in the stanza appear over two lines in the page, but it's not possible for the stanza lines and the page lines to overlap. The pattern for this is:
+</p>
+<pre>&lt;concur&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="poem"&gt;
+      &lt;range name="title"&gt;
+        &lt;range name="pl"&gt;&lt;text /&gt;&lt;/range&gt;
+      &lt;/range&gt;
+      &lt;oneOrMore&gt;
+        &lt;range name="stanza"&gt;
+          &lt;oneOrMore&gt;
+            &lt;range name="sl"&gt;
+              &lt;oneOrMore&gt;
+                &lt;range name="pl"&gt;&lt;text /&gt;&lt;/range&gt;
+              &lt;/oneOrMore&gt;
+            &lt;/range&gt;
+          &lt;/oneOrMore&gt;
+        &lt;/range&gt;
+      &lt;/oneOrMore&gt;
+    &lt;/range&gt;
+  &lt;/oneOrMore&gt;
+  &lt;oneOrMore&gt;
+    &lt;range name="page"&gt;
+      &lt;attribute name="n" /&gt;
+      &lt;oneOrMore&gt;
+        &lt;range name="pl"&gt;&lt;text /&gt;&lt;/range&gt;
+      &lt;/oneOrMore&gt;
+    &lt;/range&gt;
+  &lt;/oneOrMore&gt;
+&lt;/concur&gt; 
+</pre>
+<p>When a <code>[pl]</code> range is encountered, it will match the range patterns for <code>[pl]</code> ranges within both <code>[sl]</code> and <code>[page]</code> ranges.
+</p><p>Like the interleave, group and choice patterns, concur is associative, and
+</p>
+<pre>&lt;concur&gt; <i>p1</i> <i>p2</i> <i>p3</i> &lt;/concur&gt;
+</pre>
+<p>is transformed to
+</p>
+<pre>&lt;concur&gt; &lt;concur&gt; <i>p1</i> <i>p2</i> &lt;/concur&gt; <i>p3</i> &lt;/concur&gt;
+</pre>
+<p>during simplification.
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=8" title="Creole">edit</a>]</div><a name="Repeated_Concur"></a><h3>Repeated Concur</h3>
+<p>Self-overlap is one of the harder problems to handle in overlapping markup languages. The problem comes where two ranges of the same name overlap each other, such as in
+</p>
+<pre>[phrase=a}Broadway [phrase=b}Hit{phrase=a] or Miss{phrase=b]
+</pre>
+<p>Creole introduces two new patterns — concurOneOrMore and concurZeroOrMore — to handle this situation. They have the same syntax as oneOrMore and zeroOrMore patterns in RELAX NG:
+</p>
+<pre>&lt;concurOneOrMore&gt; <i>pattern</i>+ &lt;/concurOneOrMore&gt;
+&lt;concurZeroOrMore&gt; <i>pattern</i>+ &lt;/concurZeroOrMore&gt;
+</pre>
+<p>The subpattern can be repeated one-or-more (or zero-or-more) times, and each repetition is concurrent with previous ones. The pattern for the <code>[phrase]</code> range in the above would be
+</p>
+<pre>&lt;concurOneOrMore&gt;
+  &lt;mixed&gt;
+    &lt;range name="phrase"&gt;&lt;text /&gt;&lt;/range&gt;
+  &lt;/mixed&gt;
+&lt;/concurOneOrMore&gt;
+</pre>
+<p>Another example is indicating paginations within a document. A document might have different page breaks in different editions, but all editions should cover the same text. The pattern for the pagination view would look something like
+</p>
+<pre>&lt;concurOneOrMore&gt;
+  &lt;range name="edition"&gt;
+    &lt;attribute name="id" /&gt;
+    &lt;oneOrMore&gt;
+      &lt;range name="page"&gt;
+        &lt;attribute name="n" /&gt;
+        ...
+      &lt;/range&gt;
+    &lt;/oneOrMore&gt;
+  &lt;/range&gt;
+&lt;/concurOneOrMore&gt;
+</pre>
+<p>As with <code>&lt;oneOrMore&gt;</code> and <code>&lt;zeroOrMore&gt;</code>, during simplification of the schema, the content of the <code>&lt;concurOneOrMore&gt;</code> or <code>&lt;concurZeroOrMore&gt;</code> element is wrapped in a <code>&lt;group&gt;</code>, and a <code>&lt;concurZeroOrMore&gt;</code> is transformed such that
+</p>
+<pre>&lt;concurZeroOrMore&gt; <i>p</i> &lt;/concurZeroOrMore&gt;
+</pre>
+<p>becomes
+</p>
+<pre>&lt;choice&gt; &lt;concurOneOrMore&gt; <i>p</i> &lt;/concurOneOrMore&gt; &lt;empty /&gt; &lt;/choice&gt;
+</pre>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=9" title="Creole">edit</a>]</div><a name="Extended_Example"></a><h3>Extended Example</h3>
+<p>Here is an example of Creole in use. The document is (in LMNL syntax):
+</p>
+<pre>[play [title}Peer Gynt{title]}
+  [act [n}1{]}
+    [scene [n}i{]}
+      [sp [who}Aase{]}[l} Peer, you're lying!{sp]
+      [sp [who}Peer{]}[stage}without stopping{stage] No, I'm not! {l]{sp]
+      [sp [who}Aase{]}[l} Well then, swear to me it's true! {l]{sp]
+      [sp [who}Peer{]}[l} Swear? Why should I? {sp]
+      [sp [who}Aase{]} See, you dare not! {l]
+                      [l} Every word of it's a lie! {l] {sp]
+      [!-- ... more dialogue ... --]
+    {scene]
+    [!-- ... more scenes ... --]
+  {act]
+  [!-- ... more acts ... --]
+{play] 
+</pre>
+<p>A Creole schema that validates this document is:
+</p>
+<pre>&lt;grammar xmlns="<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/schema/pattern" class="external free" title="http://www.lmnl.org/schema/pattern" rel="nofollow">http://www.lmnl.org/schema/pattern</a>"&gt;
+  &lt;start&gt;
+    &lt;ref name="play"/&gt;
+  &lt;/start&gt;
+  &lt;define name="play"&gt;
+    &lt;element name="play"&gt;
+      &lt;annotation name="title"&gt;&lt;text/&gt;&lt;/annotation&gt;
+      &lt;oneOrMore&gt;&lt;ref name="act"/&gt;&lt;/oneOrMore&gt;
+    &lt;/element&gt;
+  &lt;/define&gt;
+  &lt;define name="act"&gt;
+    &lt;element name="act"&gt;
+      &lt;annotation name="n"&gt;&lt;text/&gt;&lt;/annotation&gt;
+      &lt;oneOrMore&gt;&lt;ref name="scene"/&gt;&lt;/oneOrMore&gt;
+    &lt;/element&gt;
+  &lt;/define&gt;
+  &lt;define name="scene"&gt;
+    &lt;element name="scene"&gt;
+      &lt;annotation name="n"&gt;&lt;text/&gt;&lt;/annotation&gt;
+      &lt;interleave&gt;
+        &lt;zeroOrMore&gt;&lt;ref name="stage"/&gt;&lt;/zeroOrMore&gt;
+        &lt;concur&gt;
+          &lt;oneOrMore&gt;&lt;ref name="sp"/&gt;&lt;/oneOrMore&gt;
+          &lt;oneOrMore&gt;&lt;ref name="l"/&gt;&lt;/oneOrMore&gt;
+        &lt;/concur&gt;
+      &lt;/interleave&gt;
+    &lt;/element&gt;
+  &lt;/define&gt;
+  &lt;define name="sp"&gt;
+    &lt;range name="sp"&gt;
+      &lt;annotation name="who"&gt;&lt;text /&gt;&lt;/annotation&gt;
+      &lt;mixed&gt;
+        &lt;zeroOrMore&gt;&lt;ref name="stage"/&gt;&lt;/zeroOrMore&gt;
+      &lt;/mixed&gt;
+    &lt;/range&gt;
+  &lt;/define&gt;
+  &lt;define name="l"&gt;
+    &lt;range name="l"&gt;
+      &lt;mixed&gt;
+        &lt;zeroOrMore&gt;&lt;ref name="stage"/&gt;&lt;/zeroOrMore&gt;
+      &lt;/mixed&gt;
+    &lt;/range&gt;
+  &lt;/define&gt;
+  &lt;define name="stage"&gt;
+    &lt;element name="stage"&gt;&lt;text/&gt;&lt;/element&gt;
+  &lt;/define&gt;
+&lt;/grammar&gt;
+</pre>
+<p>The most pertinent part is the <code>scene</code> pattern:
+</p>
+<pre>  &lt;define name="scene"&gt;
+    &lt;element name="scene"&gt;
+      &lt;annotation name="n"&gt;&lt;text/&gt;&lt;/annotation&gt;
+      &lt;interleave&gt;
+        &lt;zeroOrMore&gt;&lt;ref name="stage"/&gt;&lt;/zeroOrMore&gt;
+        &lt;concur&gt;
+          &lt;oneOrMore&gt;&lt;ref name="sp"/&gt;&lt;/oneOrMore&gt;
+          &lt;oneOrMore&gt;&lt;ref name="l"/&gt;&lt;/oneOrMore&gt;
+        &lt;/concur&gt;
+      &lt;/interleave&gt;
+    &lt;/element&gt;
+  &lt;/define&gt;
+</pre>
+<p>This says that a <code>[scene]</code> range acts as an element (it can't have anything overlapping it). There are three kinds of ranges that can appear within a <code>[scene]</code>: <code>[stage]</code>, <code>[sp]</code> and <code>[l]</code>. <code>[sp]</code> and <code>[l]</code> ranges overlap each other, and <code>[stage]</code> ranges interleave these overlapped sections. Because the <code>[stage]</code> range is treated as an element, it can't itself be overlapped. Because the <code>[sp]</code> and <code>[l]</code> ranges are concurrent rather than being interleaved, they must cover the same content: any content that doesn't appear within a <code>[stage]</code> must appear in both a <code>[sp]</code> and a <code>[l]</code>.
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=10" title="Creole">edit</a>]</div><a name="Implementation"></a><h2>Implementation</h2>
+<p>Creole can be implemented using a similar <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Algorithm_for_Creole_Validation" title="Algorithm for Creole Validation">algorithm</a> to the <a href="https://web.archive.org/web/20090105232819/http://www.thaiopensource.com/relaxng/derivative.html" class="external text" title="http://www.thaiopensource.com/relaxng/derivative.html" rel="nofollow">algorithm for RELAX NG validation</a> supplied by James Clark. This section only describes the modifications to the algorithm described there.
+</p><p>A proof-of-concept implementation in XSLT 2.0 is available. The implementation involves the following stylesheets:
+</p>
+<dl><dt> <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Image:Parse-lmnl.xsl" title="Image:Parse-lmnl.xsl">parse-lmnl.xsl</a> (<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/0/0c/Parse-lmnl.xsl" class="internal" title="Parse-lmnl.xsl">download</a>)
+</dt><dd> parses a document in <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/LMNL_syntax" title="LMNL syntax">LMNL syntax</a> into a sequence of event elements
+</dd><dt> <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Image:Compile-creole.xsl" title="Image:Compile-creole.xsl">compile-creole.xsl</a> (<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/e/eb/Compile-creole.xsl" class="internal" title="Compile-creole.xsl">download</a>)
+</dt><dd> compiles a schema document into a sequence of <code>&lt;define&gt;</code> elements, one for each distinct pattern in the schema
+</dd><dt> <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Image:Creole-impl.xsl" title="Image:Creole-impl.xsl">creole-impl.xsl</a> (<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/d/d5/Creole-impl.xsl" class="internal" title="Creole-impl.xsl">download</a>)
+</dt><dd> validates a sequence of events against a compiled schema
+</dd><dt> <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php/Image:Validate-lmnl.xsl" title="Image:Validate-lmnl.xsl">validate-lmnl.xsl</a> (<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/8/86/Validate-lmnl.xsl" class="internal" title="Validate-lmnl.xsl">download</a>)
+</dt><dd> takes a LMNL document (which it parses) and a schema document (which it compiles) and validates
+</dd></dl>
+<p>Note that a sequence of events could be generated from any markup language, including XML, for validation against a Creole grammar.
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=11" title="Creole">edit</a>]</div><a name="Background"></a><h2>Background</h2>
+<p>Michael Sperberg McQueen's <a href="https://web.archive.org/web/20090105232819/http://www.idealliance.org/papers/extreme/proceedings/html/2006/SperbergMcQueen01/EML2006SperbergMcQueen01.html" class="external text" title="http://www.idealliance.org/papers/extreme/proceedings/html/2006/SperbergMcQueen01/EML2006SperbergMcQueen01.html" rel="nofollow">Extreme 2006 paper</a> on Rabbit/Duck grammars introduced a method of validating overlapping structures by defining two or more grammars that are each applied to the same document in parallel. Within a single grammar, an element can fall into one of four categories:
+</p>
+<ol><li> first-class elements are normal elements in the hierarchy
+</li><li> second-class elements are milestones within the hierarchy
+</li><li> third-class elements are transparent: their content is included but they are not
+</li><li> fourth-class elements are opaque: neither they nor their content appear
+</li></ol>
+<p>Michael described how to use Brzozowski derivatives to validate documents against such grammars. Brzozowski derivatives are a way of implementing (and formalising) regular expressions. The <a href="https://web.archive.org/web/20090105232819/http://www.thaiopensource.com/relaxng/derivative.html" class="external text" title="http://www.thaiopensource.com/relaxng/derivative.html" rel="nofollow">algorithm for RELAX NG</a> specified by James Clark similarly applies Brzozowski derivatives to RELAX NG. Brzozowski derivatives were originally applied to matching strings with normal regular expressions. The idea is that if you've got a regular expression and the first character from the string, you can then work out a new regular expression that will match the rest of the string. The new regular expression is called the derivative.
+</p><p>When you apply Brzozowski derivatives to validation of markup languages, the "characters" that you're looking at are actually events generated from parsing a document, and the "regular expression" is held in a schema, but the basic idea (and a lot of the fundamental algorithm) is the same.
+</p><p>One place where regular expressions for markup languages departs from regular expressions for strings is in the treatment of element content. When parsing XML and similar markup languages, if you match a start tag against an element pattern, you need to make sure that the next bunch of events satisfy the pattern you've got for the content of that element and are then followed by an end tag. The naive way of doing this is to add the content model and end tag patterns to the start of the derivative, but if you have an interleave pattern then this will permit events that should be matched against the content model of the element to be matched against the interleaved pattern instead. 
+</p><p>In James Clark's algorithm for RELAX NG, he introduces a special <b>after</b> pattern, which doesn't appear in RELAX NG itself, to deal with precisely this problem. In Michael's paper, for some reason he didn't, despite the fact that individual rabbit/duck grammars don't allow overlapping elements. This oversight prompted the line of research which has led to Creole...
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=12" title="Creole">edit</a>]</div><a name="Publications"></a><h2>Publications</h2>
+<ul><li> Tennison, J. (2007) <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/8/86/Creole.zip" class="internal" title="Creole.zip">Creole: Validating Overlapping Markup.</a> In <i>Proceedings of XTech 2007</i>, Paris, France.
+</li></ul>
+
+</body></html>

@@ -286,11 +286,32 @@ class Constructors {
   }
 
   static Pattern zeroOrMore(Pattern pattern) {
-    return choice(empty(), oneOrMore(pattern));
+    return choice(oneOrMore(pattern), empty());
+  }
+
+  static Pattern concurZeroOrMore(Pattern pattern) {
+    return choice(concurOneOrMore(pattern), empty());
   }
 
   static Pattern mixed(Pattern pattern) {
     return interleave(text(), pattern);
   }
+
+  static Pattern anyContent() {
+//    return interleave(text(), anyAtoms());
+    return text();
+  }
+
+//  static Pattern anyAtoms() {
+//    return choice(oneOrMoreAtoms(), empty());
+//  }
+//
+//  private static Pattern oneOrMoreAtoms() {
+//    return oneOrMore(anyAtom());
+//  }
+//
+//  private static Pattern anyAtom() {
+//    return atom(anyName(),anyAnnotations());
+//  }
 
 }

@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
+
 import org.assertj.core.api.AbstractAssert;
 
 public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
@@ -27,19 +28,53 @@ public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
     super(actual, PatternAssert.class);
   }
 
-  public boolean isNullable() {
-    return Utilities.nullable(actual);
+  public PatternAssert isNullable() {
+    isNotNull();
+
+    boolean actualNullable = Utilities.nullable(actual);
+    if (!actualNullable) {
+      String assertjErrorMessage = "\nExpecting nullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      failWithMessage(assertjErrorMessage, actual, true, false);
+    }
+
+    return myself;
   }
 
-  public boolean isNotNullable() {
-    return !Utilities.nullable(actual);
+  public PatternAssert isNotNullable() {
+    isNotNull();
+
+    boolean actualNotNullable = !Utilities.nullable(actual);
+    if (!actualNotNullable) {
+      String assertjErrorMessage = "\nExpecting nullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      failWithMessage(assertjErrorMessage, actual, false, true);
+    }
+
+    return myself;
   }
 
-  public boolean allowsText() {
-    return Utilities.allowsText(actual);
+  public PatternAssert allowsText() {
+    isNotNull();
+
+    boolean allowsText = Utilities.allowsText(actual);
+    if (!allowsText) {
+      String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      failWithMessage(assertjErrorMessage, actual, true, false);
+    }
+
+    return myself;
   }
 
-  public boolean doesNotAllowText() {
-    return !Utilities.allowsText(actual);
+  public PatternAssert doesNotAllowText() {
+    isNotNull();
+
+    boolean doesNotAllowText = !Utilities.allowsText(actual);
+    if (!doesNotAllowText) {
+      String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      failWithMessage(assertjErrorMessage, actual, false, true);
+    }
+
+    return myself;
   }
+
+
 }

@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import java.util.List;
+
 class Patterns {
   static final Pattern EMPTY = new Empty();
   static final Pattern NOT_ALLOWED = new NotAllowed();
@@ -108,7 +110,7 @@ class Patterns {
       return nameClass;
     }
 
-    public Pattern getPattern() {
+    Pattern getPattern() {
       return pattern;
     }
   }
@@ -149,7 +151,30 @@ class Patterns {
     }
   }
 
-  /* private classes */
+  static class Atom implements Pattern {
+    NameClass nc;
+    List<Annotation> annotations;
+  }
+
+  static class Annotation implements Pattern {
+    private final NameClass nameClass;
+    private NameClass nc;
+    private Pattern pattern;
+
+    Annotation(NameClass nameClass, Pattern pattern) {
+      this.nameClass = nameClass;
+      this.pattern = pattern;
+    }
+
+    NameClass getNameClass() {
+      return nc;
+    }
+
+    Pattern getPattern() {
+      return pattern;
+    }
+  }
+
 
   static class PatternWithOnePatternParameter {
     private final Pattern pattern;
