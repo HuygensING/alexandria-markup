@@ -20,8 +20,7 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.empty;
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -208,7 +207,7 @@ public class ConstructorsTest extends CreoleTest {
     //  concur p NotAllowed = NotAllowed
     Pattern p1 = new TestPattern();
     Pattern p2 = notAllowed();
-    Pattern p = Constructors.concur(p1, p2);
+    Pattern p = concur(p1, p2);
     assertThat(p).isEqualTo(p2);
   }
 
@@ -217,7 +216,7 @@ public class ConstructorsTest extends CreoleTest {
     //  concur NotAllowed p = NotAllowed
     Pattern p1 = notAllowed();
     Pattern p2 = new TestPattern();
-    Pattern p = Constructors.concur(p1, p2);
+    Pattern p = concur(p1, p2);
     assertThat(p).isEqualTo(p1);
   }
 
@@ -226,7 +225,7 @@ public class ConstructorsTest extends CreoleTest {
     //  concur p Text = p
     Pattern p1 = new TestPattern();
     Pattern p2 = new Patterns.Text();
-    Pattern p = Constructors.concur(p1, p2);
+    Pattern p = concur(p1, p2);
     assertThat(p).isEqualTo(p1);
   }
 
@@ -235,41 +234,238 @@ public class ConstructorsTest extends CreoleTest {
     //  concur Text p = p
     Pattern p1 = new Patterns.Text();
     Pattern p2 = new TestPattern();
-    Pattern p = Constructors.concur(p1, p2);
+    Pattern p = concur(p1, p2);
     assertThat(p).isEqualTo(p2);
   }
 
+  @Test
+  public void testConcur5() {
+    //  concur (After p1 p2) (After p3 p4) = after (all p1 p3) (concur p2 p4)
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p3 = new TestPattern();
+    Pattern p4 = new TestPattern();
+    Pattern after1 = new Patterns.After(p1, p2);
+    Pattern after2 = new Patterns.After(p3, p4);
+    Pattern p = concur(after1, after2);
+    Pattern expected = new Patterns.After(new Patterns.All(p1, p3), new Patterns.Concur(p2, p4));
+    assertThat(p).isEqualTo(expected);
+  }
 
-  //TODO: make more tests
+  @Test
+  public void testConcur6() {
+    //  concur (After p1 p2) p3 = after p1 (concur p2 p3)
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p3 = new TestPattern();
+    Pattern after = new Patterns.After(p1, p2);
+    Pattern p = concur(after, p3);
+    Pattern expected = new Patterns.After(p1, new Patterns.Concur(p2, p3));
+    assertThat(p).isEqualTo(expected);
+  }
+
+  @Test
+  public void testConcur7() {
+    //  concur p1 (After p2 p3) = after p2 (concur p1 p3)
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p3 = new TestPattern();
+    Pattern after = new Patterns.After(p2, p3);
+    Pattern p = concur(p1, after);
+    Pattern expected = new Patterns.After(p2, new Patterns.Concur(p1, p3));
+    assertThat(p).isEqualTo(expected);
+  }
+
+  @Test
+  public void testConcur8() {
+    //  concur p1 p2 = Concur p1 p2
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p = concur(p1, p2);
+    Pattern expected = new Patterns.Concur(p1, p2);
+    assertThat(p).isEqualTo(expected);
+  }
+
+  @Test
+  public void testPartition1() {
+    //  partition NotAllowed = NotAllowed
+    Pattern p = partition(notAllowed());
+    assertThat(p).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testPartition2() {
+    //  partition Empty = Empty
+    Pattern p = partition(empty());
+    assertThat(p).isEqualTo(Patterns.EMPTY);
+  }
+
+  @Test
+  public void testPartition3() {
+    //  partition p = Partition p
+    Pattern p = new TestPattern();
+    Pattern partition = partition(p);
+    assertThat(partition).isEqualToComparingFieldByField(new Patterns.Partition(p));
+  }
+
+  @Test
+  public void testOneOrMore1() {
+    //  oneOrMore NotAllowed = NotAllowed
+    Pattern p = oneOrMore(notAllowed());
+    assertThat(p).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testOneOrMore2() {
+    //  oneOrMore Empty = Empty
+    Pattern p = oneOrMore(empty());
+    assertThat(p).isEqualTo(Patterns.EMPTY);
+  }
+
+  @Test
+  public void testOneOrMore3() {
+    //  oneOrMore p = OneOrMore p
+    Pattern p = new TestPattern();
+    Pattern oneOrMore = oneOrMore(p);
+    assertThat(oneOrMore).isEqualToComparingFieldByField(new Patterns.OneOrMore(p));
+  }
+
+  @Test
+  public void testConcurOneOrMore1() {
+    //  concurOneOrMore NotAllowed = NotAllowed
+    Pattern p = concurOneOrMore(notAllowed());
+    assertThat(p).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testConcurOneOrMore2() {
+    //  concurOneOrMore Empty = Empty
+    Pattern p = concurOneOrMore(empty());
+    assertThat(p).isEqualTo(Patterns.EMPTY);
+  }
+
+  @Test
+  public void testConcurOneOrMore3() {
+    //  concurOneOrMore p = ConcurOneOrMore p
+    Pattern p = new TestPattern();
+    Pattern concurOneOrMore = concurOneOrMore(p);
+    assertThat(concurOneOrMore).isEqualToComparingFieldByField(new Patterns.ConcurOneOrMore(p));
+  }
+
+  @Test
+  public void testAfter1() {
+    //  after p NotAllowed = NotAllowed
+    Pattern p = new TestPattern();
+    Pattern after = after(p, notAllowed());
+    assertThat(after).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testAfter2() {
+    //  after NotAllowed p = NotAllowed
+    Pattern p = new TestPattern();
+    Pattern after = after(notAllowed(), p);
+    assertThat(after).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testAfter3() {
+    //  after Empty p = p
+    Pattern p = new TestPattern();
+    Pattern after = after(empty(), p);
+    assertThat(after).isEqualTo(p);
+  }
+
+  @Test
+  public void testAfter4() {
+    //  after (After p1 p2) p3 = after p1 (after p2 p3)
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p3 = new TestPattern();
+    Pattern after = new Patterns.After(p1, p2);
+    Pattern p = after(after, p3);
+    assertThat(p).isEqualTo(after(p1, after(p2, p3)));
+  }
+
+  @Test
+  public void testAfter5() {
+    //  after p1 p2 = After p1 p2
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p = after(p1, p2);
+    assertThat(p).isEqualTo(new Patterns.After(p1, p2));
+  }
+
+  @Test
+  public void testAll1() {
+    //  all p NotAllowed = NotAllowed
+    Pattern p = new TestPattern();
+    Pattern all = all(p, notAllowed());
+    assertThat(all).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testAll2() {
+    //  all NotAllowed p = NotAllowed
+    Pattern p = new TestPattern();
+    Pattern all = all(notAllowed(), p);
+    assertThat(all).isEqualTo(Patterns.NOT_ALLOWED);
+  }
+
+  @Test
+  public void testAll3a() {
+    //  all p Empty = if nullable p then Empty else NotAllowed
+    Pattern p = new NullablePattern();
+    Pattern all = all(p, empty());
+    assertThat(all).isEqualTo(Patterns.EMPTY);
+  }
 
 
-//  concur (After p1 p2) (After p3 p4) = after (all p1 p3) (concur p2 p4)
-//  concur (After p1 p2) p3 = after p1 (concur p2 p3)
-//  concur p1 (After p2 p3) = after p2 (concur p1 p3)
-//  concur p1 p2 = Concur p1 p2
+  @Test
+  public void testAll3b() {
+    //  all p Empty = if nullable p then Empty else NotAllowed
+    Pattern p = new NotNullablePattern();
+    Pattern all = all(p, empty());
+    assertThat(all).isEqualTo(Patterns.NOT_ALLOWED);
+  }
 
-//  partition NotAllowed = NotAllowed
-//  partition Empty = Empty
-//  partition p = Partition p
+  @Test
+  public void testAll4a() {
+    //  all Empty p  = if nullable p then Empty else NotAllowed
+    Pattern p = new NullablePattern();
+    Pattern all = all(empty(), p);
+    assertThat(all).isEqualTo(Patterns.EMPTY);
+  }
 
-//  oneOrMore NotAllowed = NotAllowed
-//  oneOrMore Empty = Empty
-//  oneOrMore p = OneOrMore p
 
-//  concurOneOrMore NotAllowed = NotAllowed
-//  concurOneOrMore Empty = Empty
-//  concurOneOrMore p = ConcurOneOrMore p
+  @Test
+  public void testAll4b() {
+    //  all Empty p = if nullable p then Empty else NotAllowed
+    Pattern p = new NotNullablePattern();
+    Pattern all = all(empty(), p);
+    assertThat(all).isEqualTo(Patterns.NOT_ALLOWED);
+  }
 
-//  after p NotAllowed = NotAllowed
-//  after NotAllowed p = NotAllowed
-//  after Empty p = p
-//  after (After p1 p2) p3 = after p1 (after p2 p3)
-//  after p1 p2 = After p1 p2
+  @Test
+  public void testAll5() {
+    //  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern p3 = new TestPattern();
+    Pattern p4 = new TestPattern();
+    Pattern after1 = new Patterns.After(p1, p2);
+    Pattern after2 = new Patterns.After(p3, p4);
+    Pattern all = all(after1, after2);
+    assertThat(all).isEqualTo(after(all(p1, p3), all(p2, p4)));
+  }
 
-//  all p NotAllowed = NotAllowed
-//  all NotAllowed p = NotAllowed
-//  all p Empty = if nullable p then Empty else NotAllowed
-//  all Empty p = if nullable p then Empty else NotAllowed
-//  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)
-//  all p1 p2 = All p1 p2
+  @Test
+  public void testAll6() {
+    //  all p1 p2 = All p1 p2
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern all = all(p1, p2);
+    assertThat(all).isEqualTo(new Patterns.All(p1, p2));
+  }
+
 }

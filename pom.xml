@@ -205,11 +205,11 @@
         <!--</executions>-->
         <!--<configuration>-->
           <!--<packages>-->
-            <!--<param>nl.knaw.huygens.alexandria.creole</param>-->
+            <!--<param>nl.knaw.huygens.alexandria.lmnl.data_model</param>-->
           <!--</packages>-->
-          <!--<classes>-->
-            <!--<param>nl.knaw.huygens.alexandria.creole.Pattern</param>-->
-          <!--</classes>-->
+          <!--&lt;!&ndash;<classes>&ndash;&gt;-->
+            <!--&lt;!&ndash;<param>nl.knaw.huygens.alexandria.creole.Pattern</param>&ndash;&gt;-->
+          <!--&lt;!&ndash;</classes>&ndash;&gt;-->
           <!--<targetDir>src/test/generated-assertions</targetDir>-->
           <!--<cleanTargetDir>true</cleanTargetDir>-->
         <!--</configuration>-->

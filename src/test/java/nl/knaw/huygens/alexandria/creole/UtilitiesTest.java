@@ -27,9 +27,6 @@ import org.junit.Test;
 
 public class UtilitiesTest extends CreoleTest {
 
-  private static final Pattern NULLABLE_PATTERN = Patterns.TEXT;
-  private static final Pattern NOT_NULLABLE_PATTERN = Patterns.NOT_ALLOWED;
-
   @Test
   public void testEmptyIsNullable() {
     Pattern p = Patterns.EMPTY;

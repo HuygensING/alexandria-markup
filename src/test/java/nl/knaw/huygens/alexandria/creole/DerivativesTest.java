@@ -147,7 +147,7 @@ public class DerivativesTest {
         closeChapter,//
         closeSection,//
         closePage, closeBook//
-        ,closeBook // <- huh?
+//        , closeBook // <- huh?
     ));
     return events;
   }
@@ -187,13 +187,4 @@ public class DerivativesTest {
     );
   }
 
-  private Pattern zeroOrMore(Pattern pattern) {
-    return choice(empty(), oneOrMore(pattern));
-  }
-
-  private Pattern mixed(Pattern pattern) {
-    LOG.warn("mixed() called: implementation is iffy");
-    // Assumption, not sure if this is the right implementation of mixed
-    return group(text(), group(pattern, text()));
-  }
 }

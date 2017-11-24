@@ -156,7 +156,7 @@ class Constructors {
   }
 
   //  partition :: Pattern -> Pattern
-  private static Pattern partition(Pattern pattern) {
+  static Pattern partition(Pattern pattern) {
     //  partition NotAllowed = NotAllowed
     if (pattern instanceof Patterns.NotAllowed) {
       return pattern;
@@ -223,7 +223,7 @@ class Constructors {
   }
 
   //  all :: Pattern -> Pattern -> Pattern
-  private static Pattern all(Pattern pattern1, Pattern pattern2) {
+  static Pattern all(Pattern pattern1, Pattern pattern2) {
     //  all p NotAllowed = NotAllowed
     //  all NotAllowed p = NotAllowed
     if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
@@ -283,6 +283,14 @@ class Constructors {
 
   static Pattern endRange(Basics.QName qName, String id) {
     return new Patterns.EndRange(qName, Basics.id(id));
+  }
+
+  static Pattern zeroOrMore(Pattern pattern) {
+    return choice(empty(), oneOrMore(pattern));
+  }
+
+  static Pattern mixed(Pattern pattern) {
+    return interleave(text(), pattern);
   }
 
 }

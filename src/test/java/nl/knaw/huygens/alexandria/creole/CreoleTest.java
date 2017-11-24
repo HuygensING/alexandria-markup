@@ -21,7 +21,19 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 public class CreoleTest {
+
   static class TestPattern implements Pattern {
   }
+
+  static final Pattern NULLABLE_PATTERN = new NullablePattern();
+
+  static class NullablePattern extends Patterns.Text {
+  }
+
+  static final Pattern NOT_NULLABLE_PATTERN = new NotNullablePattern();
+
+  static class NotNullablePattern extends Patterns.NotAllowed {
+  }
+
 
 }
