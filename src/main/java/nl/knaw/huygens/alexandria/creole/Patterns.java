@@ -46,64 +46,65 @@ class Patterns {
                | All Pattern Pattern
    */
 
-  static class Empty implements Pattern {
+  static class Empty extends AbstractPattern {
   }
 
-  static class NotAllowed implements Pattern {
+  static class NotAllowed extends AbstractPattern {
   }
 
-  static class Text implements Pattern {
+  static class Text extends AbstractPattern {
   }
 
-  static class Choice extends PatternWithTwoPatternParameters implements Pattern {
+  static class Choice extends PatternWithTwoPatternParameters {
     Choice(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class Interleave extends PatternWithTwoPatternParameters implements Pattern {
+  static class Interleave extends PatternWithTwoPatternParameters {
     Interleave(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class Group extends PatternWithTwoPatternParameters implements Pattern {
+  static class Group extends PatternWithTwoPatternParameters {
     Group(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class Concur extends PatternWithTwoPatternParameters implements Pattern {
+  static class Concur extends PatternWithTwoPatternParameters {
     Concur(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class Partition extends PatternWithOnePatternParameter implements Pattern {
+  static class Partition extends PatternWithOnePatternParameter {
     Partition(Pattern pattern) {
       super(pattern);
     }
   }
 
-  static class OneOrMore extends PatternWithOnePatternParameter implements Pattern {
+  static class OneOrMore extends PatternWithOnePatternParameter {
     OneOrMore(Pattern pattern) {
       super(pattern);
     }
   }
 
-  static class ConcurOneOrMore extends PatternWithOnePatternParameter implements Pattern {
+  static class ConcurOneOrMore extends PatternWithOnePatternParameter {
     ConcurOneOrMore(Pattern pattern) {
       super(pattern);
     }
   }
 
-  static class Range implements Pattern {
+  static class Range extends AbstractPattern {
     private final NameClass nameClass;
     private final Pattern pattern;
 
     public Range(NameClass nameClass, Pattern pattern) {
       this.nameClass = nameClass;
       this.pattern = pattern;
+      setHashcode(getClass().hashCode() * nameClass.hashCode() * pattern.hashCode());
     }
 
     NameClass getNameClass() {
@@ -115,13 +116,14 @@ class Patterns {
     }
   }
 
-  static class EndRange implements Pattern {
+  static class EndRange extends AbstractPattern {
     private final Basics.QName qName;
     private final Basics.Id id;
 
     EndRange(Basics.QName qName, Basics.Id id) {
       this.qName = qName;
       this.id = id;
+      setHashcode(getClass().hashCode() * qName.hashCode() * id.hashCode());
     }
 
     Basics.QName getQName() {
@@ -139,24 +141,24 @@ class Patterns {
     }
   }
 
-  static class After extends PatternWithTwoPatternParameters implements Pattern {
+  static class After extends PatternWithTwoPatternParameters {
     public After(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class All extends PatternWithTwoPatternParameters implements Pattern {
+  static class All extends PatternWithTwoPatternParameters {
     public All(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
 
-  static class Atom implements Pattern {
+  static class Atom extends AbstractPattern {
     NameClass nc;
     List<Annotation> annotations;
   }
 
-  static class Annotation implements Pattern {
+  static class Annotation extends AbstractPattern {
     private final NameClass nameClass;
     private NameClass nc;
     private Pattern pattern;
@@ -164,6 +166,7 @@ class Patterns {
     Annotation(NameClass nameClass, Pattern pattern) {
       this.nameClass = nameClass;
       this.pattern = pattern;
+      setHashcode(getClass().hashCode() * nameClass.hashCode() * pattern.hashCode());
     }
 
     NameClass getNameClass() {
@@ -176,11 +179,12 @@ class Patterns {
   }
 
 
-  static class PatternWithOnePatternParameter {
+  static class PatternWithOnePatternParameter extends AbstractPattern {
     private final Pattern pattern;
 
     PatternWithOnePatternParameter(Pattern pattern) {
       this.pattern = pattern;
+      setHashcode(getClass().hashCode() * pattern.hashCode());
     }
 
     public Pattern getPattern() {
@@ -189,13 +193,14 @@ class Patterns {
 
   }
 
-  static class PatternWithTwoPatternParameters {
+  static class PatternWithTwoPatternParameters extends AbstractPattern {
     private final Pattern pattern1;
     private final Pattern pattern2;
 
     PatternWithTwoPatternParameters(Pattern pattern1, Pattern pattern2) {
       this.pattern1 = pattern1;
       this.pattern2 = pattern2;
+      setHashcode(getClass().hashCode() * pattern1.hashCode() * pattern2.hashCode());
     }
 
     Pattern getPattern1() {
@@ -211,6 +216,19 @@ class Patterns {
       return obj.getClass().equals(this.getClass())
           && pattern1.equals(((PatternWithTwoPatternParameters) obj).getPattern1())
           && pattern2.equals(((PatternWithTwoPatternParameters) obj).getPattern2());
+    }
+  }
+
+  static class AbstractPattern implements Pattern {
+    int hashcode = getClass().hashCode();
+
+    public void setHashcode(int hashcode) {
+      this.hashcode = hashcode;
+    }
+
+    @Override
+    public int hashCode() {
+      return hashcode;
     }
   }
 

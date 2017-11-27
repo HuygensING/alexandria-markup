@@ -39,14 +39,14 @@ public class NameClasses {
     return ANY_NAME;
   }
 
-  static class AnyName implements NameClass {
+  static class AnyName extends AbstractNameClass {
   }
 
   public static AnyNameExcept anyNameExcept(NameClass nameClassToExcept) {
     return new AnyNameExcept(nameClassToExcept);
   }
 
-  static class AnyNameExcept implements NameClass {
+  static class AnyNameExcept extends AbstractNameClass {
     private final NameClass nameClassToExcept;
 
     public AnyNameExcept(NameClass nameClassToExcept) {
@@ -70,13 +70,14 @@ public class NameClasses {
     return new Name(uri, localName);
   }
 
-  static class Name implements NameClass {
+  static class Name extends AbstractNameClass {
     private final Basics.Uri uri;
     private final Basics.LocalName localName;
 
     public Name(Basics.Uri uri, Basics.LocalName localName) {
       this.uri = uri;
       this.localName = localName;
+      setHashCode(getClass().hashCode() * uri.hashCode() * localName.hashCode());
     }
 
     public Basics.Uri getUri() {
@@ -96,7 +97,7 @@ public class NameClasses {
     return new NsNameExcept(uri, nameClass);
   }
 
-  static class NsNameExcept implements NameClass {
+  static class NsNameExcept extends AbstractNameClass {
     private final Basics.Uri uri;
     private final NameClass nameClass;
 
@@ -122,7 +123,7 @@ public class NameClasses {
     return new NsName(uri);
   }
 
-  static class NsName implements NameClass {
+  static class NsName extends AbstractNameClass {
     private final Basics.Uri uri;
 
     public NsName(Basics.Uri uri) {
@@ -138,7 +139,7 @@ public class NameClasses {
     return new NameClassChoice(nameClass1, nameClass2);
   }
 
-  static class NameClassChoice implements NameClass {
+  static class NameClassChoice extends AbstractNameClass {
     private final NameClass nameClass1;
     private final NameClass nameClass2;
 
@@ -153,6 +154,23 @@ public class NameClasses {
 
     public NameClass getNameClass2() {
       return nameClass2;
+    }
+  }
+
+  static class AbstractNameClass implements NameClass {
+    int hashCode;
+
+    AbstractNameClass() {
+      hashCode = getClass().hashCode();
+    }
+
+    public void setHashCode(int hashCode) {
+      this.hashCode = hashCode;
+    }
+
+    @Override
+    public int hashCode() {
+      return hashCode;
     }
   }
 

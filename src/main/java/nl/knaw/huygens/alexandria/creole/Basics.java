@@ -121,9 +121,13 @@ public class Basics {
 
   private static class StringWrapper {
     private final String value;
+    int hashCode;
 
     StringWrapper(String value) {
       this.value = value;
+      int baseHashCode = getClass().hashCode();
+      int valueHashCode = value.hashCode();
+      hashCode = valueHashCode == 0 ? baseHashCode : baseHashCode * valueHashCode;
     }
 
     public String getValue() {
@@ -136,7 +140,7 @@ public class Basics {
 
     @Override
     public int hashCode() {
-      return value.hashCode();
+      return hashCode;
     }
 
     @Override

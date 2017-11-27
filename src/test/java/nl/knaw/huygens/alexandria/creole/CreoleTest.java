@@ -20,7 +20,10 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import org.assertj.core.api.SoftAssertions;
+
 public class CreoleTest {
+//  SoftAssertions softly = new SoftAssertions();
 
   static class TestPattern implements Pattern {
   }
