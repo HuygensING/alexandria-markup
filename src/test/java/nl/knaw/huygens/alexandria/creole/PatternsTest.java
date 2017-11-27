@@ -19,11 +19,14 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
+
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class PatternsTest extends CreoleTest {
 
@@ -68,12 +71,19 @@ public class PatternsTest extends CreoleTest {
     Pattern choice2 = new Patterns.Choice(p1, p2);
     assertThat(choice1).isEqualTo(choice2);
     assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode());
+  }
 
+  @Test
+  public void testHashCode6() {
     NameClass nc1 = name("name");
     NameClass nc2 = name("name");
     assertThat(nc1.hashCode()).isEqualTo(nc2.hashCode());
     assertThat(nc1).isEqualToComparingFieldByField(nc2);
     assertThat(nc1).isNotEqualTo(nc2);
+    Set<NameClass> ncSet = new HashSet<>();
+    ncSet.add(nc1);
+    ncSet.add(nc2);
+    assertThat(ncSet).hasSize(2);
   }
 
   class DummyPattern extends Patterns.AbstractPattern {

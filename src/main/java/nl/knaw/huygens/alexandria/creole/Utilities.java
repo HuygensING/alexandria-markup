@@ -247,9 +247,11 @@ public class Utilities {
       expectedEvents.addAll(expectedEvents(p.getPattern1()));
       expectedEvents.addAll(expectedEvents(p.getPattern2()));
 
-//    } else if (pattern instanceof Patterns.Group) {
-//      Patterns.Group p = (Patterns.Group) pattern;
-//      expectedEvents.addAll(expectedEvents(p.getPattern1()));
+    } else if (pattern instanceof Patterns.Group
+        || pattern instanceof Patterns.After//
+        ) {
+      Patterns.PatternWithTwoPatternParameters p = (Patterns.PatternWithTwoPatternParameters) pattern;
+      expectedEvents.addAll(expectedEvents(p.getPattern1()));
 
     } else if (pattern instanceof Patterns.Partition
         || pattern instanceof Patterns.OneOrMore//

@@ -222,7 +222,7 @@ class Patterns {
   static class AbstractPattern implements Pattern {
     int hashcode = getClass().hashCode();
 
-    public void setHashcode(int hashcode) {
+    void setHashcode(int hashcode) {
       this.hashcode = hashcode;
     }
 
