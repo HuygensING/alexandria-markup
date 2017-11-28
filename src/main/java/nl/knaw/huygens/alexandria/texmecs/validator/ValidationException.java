@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.texmecs.validator;
  * #L%
  */
 
-public class ValidationException extends RuntimeException {
+class ValidationException extends RuntimeException {
   public ValidationException(String message) {
     super(message);
   }

@@ -39,7 +39,7 @@ public class Events {
     private final Basics.QName qName;
     private final Basics.Id id;
 
-    public StartTagEvent(Basics.QName qName, Basics.Id id) {
+    StartTagEvent(Basics.QName qName, Basics.Id id) {
       this.qName = qName;
       this.id = id;
     }
@@ -127,7 +127,7 @@ public class Events {
     private final String text;
     private final Basics.Context context;
 
-    public TextEvent(String text, Basics.Context context) {
+    TextEvent(String text, Basics.Context context) {
       this.text = text;
       this.context = context;
     }

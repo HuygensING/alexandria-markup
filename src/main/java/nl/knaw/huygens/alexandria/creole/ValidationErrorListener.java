@@ -19,7 +19,7 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
-public class ValidationErrorListener {
+class ValidationErrorListener {
   private Event unexpectedEvent;
 
   public Event getUnexpectedEvent() {

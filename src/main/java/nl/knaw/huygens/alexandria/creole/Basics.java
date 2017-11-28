@@ -50,24 +50,24 @@ public class Basics {
   }
 
   static class Uri extends StringWrapper {
-    public Uri(String uri) {
+    Uri(String uri) {
       super(uri);
     }
   }
 
   public static class LocalName extends StringWrapper {
-    public LocalName(String localName) {
+    LocalName(String localName) {
       super(localName);
     }
   }
 
   public static class Id extends StringWrapper {
-    public Id(String id) {
+    Id(String id) {
       super(id);
     }
   }
 
-  public static class Prefix extends StringWrapper {
+  private static class Prefix extends StringWrapper {
     public Prefix(String prefix) {
       super(prefix);
     }
@@ -105,7 +105,7 @@ public class Basics {
     private final Uri uri;
     private final Map<Prefix, Uri> nameSpaceURI4Prefix;
 
-    public Context(Uri uri, Map<Prefix, Uri> prefixUriMap) {
+    Context(Uri uri, Map<Prefix, Uri> prefixUriMap) {
       this.uri = uri;
       this.nameSpaceURI4Prefix = prefixUriMap;
     }
@@ -121,7 +121,7 @@ public class Basics {
 
   private static class StringWrapper {
     private final String value;
-    int hashCode;
+    final int hashCode;
 
     StringWrapper(String value) {
       this.value = value;

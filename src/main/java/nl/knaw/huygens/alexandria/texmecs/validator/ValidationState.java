@@ -30,14 +30,13 @@ import java.util.List;
 public class ValidationState {
   public enum StateValue {valid, invalid, validating}
 
-  final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private TexMECSSchema schema;
   private StateValue value = StateValue.validating;
   private List<ValidationEvent> expectedEvents = new ArrayList<>();
 
   public ValidationState(TexMECSSchema texMECSSchema) {
-    schema = texMECSSchema;
+    TexMECSSchema schema = texMECSSchema;
     expectedEvents.add(schema.getRootEvent());
   }
 
@@ -45,7 +44,7 @@ public class ValidationState {
     return value;
   }
 
-  public void setExpectedEvents(List<ValidationEvent> expectedEvents) {
+  private void setExpectedEvents(List<ValidationEvent> expectedEvents) {
     this.expectedEvents = expectedEvents;
     LOG.info("expectedEvents = {}", expectedEvents);
   }

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -99,7 +100,7 @@ public class ValidatorTest {
 
     List<Event> events = new ArrayList<>();
     // ...
-    events.addAll(asList(someText));
+    events.addAll(Collections.singletonList(someText));
 
     assertValidationSucceeds(schema, events);
   }
@@ -117,7 +118,7 @@ public class ValidatorTest {
 
     List<Event> events = new ArrayList<>();
     // ...
-    events.addAll(asList(someText));
+    events.addAll(Collections.singletonList(someText));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, someText);
   }

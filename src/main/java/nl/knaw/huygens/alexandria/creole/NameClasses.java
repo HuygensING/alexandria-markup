@@ -49,7 +49,7 @@ public class NameClasses {
   static class AnyNameExcept extends AbstractNameClass {
     private final NameClass nameClassToExcept;
 
-    public AnyNameExcept(NameClass nameClassToExcept) {
+    AnyNameExcept(NameClass nameClassToExcept) {
       this.nameClassToExcept = nameClassToExcept;
     }
 
@@ -62,11 +62,11 @@ public class NameClasses {
     return name("", localName);
   }
 
-  public static Name name(String uri, String localName) {
+  private static Name name(String uri, String localName) {
     return name(Basics.uri(uri), Basics.localName(localName));
   }
 
-  public static Name name(Basics.Uri uri, Basics.LocalName localName) {
+  private static Name name(Basics.Uri uri, Basics.LocalName localName) {
     return new Name(uri, localName);
   }
 
@@ -74,7 +74,7 @@ public class NameClasses {
     private final Basics.Uri uri;
     private final Basics.LocalName localName;
 
-    public Name(Basics.Uri uri, Basics.LocalName localName) {
+    Name(Basics.Uri uri, Basics.LocalName localName) {
       this.uri = uri;
       this.localName = localName;
       setHashCode(getClass().hashCode() * uri.hashCode() * localName.hashCode());
@@ -93,7 +93,7 @@ public class NameClasses {
     return nsNameExcept(Basics.uri(uri), nameClass);
   }
 
-  public static NsNameExcept nsNameExcept(Basics.Uri uri, NameClass nameClass) {
+  private static NsNameExcept nsNameExcept(Basics.Uri uri, NameClass nameClass) {
     return new NsNameExcept(uri, nameClass);
   }
 
@@ -101,7 +101,7 @@ public class NameClasses {
     private final Basics.Uri uri;
     private final NameClass nameClass;
 
-    public NsNameExcept(Basics.Uri uri, NameClass nameClass) {
+    NsNameExcept(Basics.Uri uri, NameClass nameClass) {
       this.uri = uri;
       this.nameClass = nameClass;
     }
@@ -119,14 +119,14 @@ public class NameClasses {
     return nsName(Basics.uri(uri));
   }
 
-  public static NsName nsName(Basics.Uri uri) {
+  private static NsName nsName(Basics.Uri uri) {
     return new NsName(uri);
   }
 
   static class NsName extends AbstractNameClass {
     private final Basics.Uri uri;
 
-    public NsName(Basics.Uri uri) {
+    NsName(Basics.Uri uri) {
       this.uri = uri;
     }
 
@@ -143,7 +143,7 @@ public class NameClasses {
     private final NameClass nameClass1;
     private final NameClass nameClass2;
 
-    public NameClassChoice(NameClass nameClass1, NameClass nameClass2) {
+    NameClassChoice(NameClass nameClass1, NameClass nameClass2) {
       this.nameClass1 = nameClass1;
       this.nameClass2 = nameClass2;
     }
@@ -164,7 +164,7 @@ public class NameClasses {
       hashCode = getClass().hashCode();
     }
 
-    public void setHashCode(int hashCode) {
+    void setHashCode(int hashCode) {
       this.hashCode = hashCode;
     }
 

@@ -30,10 +30,10 @@ import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
 import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
-public class Utilities {
+class Utilities {
 
-  public static final String INDENT = "| ";
-  public static final String ELLLIPSIS = "...";
+  private static final String INDENT = "| ";
+  private static final String ELLIPSES = "...";
 
   /*
         The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
@@ -129,7 +129,7 @@ public class Utilities {
   allowsText _ = False
    */
 
-  static final Map<Class, Function<Pattern, Boolean>> allowsTextMap = new HashMap<>();
+  private static final Map<Class, Function<Pattern, Boolean>> allowsTextMap = new HashMap<>();
 
   static {
     allowsTextMap.put(Patterns.Choice.class, pattern -> {
@@ -336,7 +336,7 @@ public class Utilities {
             .append("\n")//
             .append(innerIndent);
       } else {
-        parameterBuilder.append(ELLLIPSIS);
+        parameterBuilder.append(ELLIPSES);
       }
 
     } else if (pattern instanceof Patterns.PatternWithTwoPatternParameters) {
@@ -349,7 +349,7 @@ public class Utilities {
             .append("\n")//
             .append(innerIndent);
       } else {
-        parameterBuilder.append(ELLLIPSIS);
+        parameterBuilder.append(ELLIPSES);
       }
 
     } else if (pattern instanceof Patterns.Range) {
@@ -361,7 +361,7 @@ public class Utilities {
             .append("\n")//
             .append(innerIndent);
       } else {
-        parameterBuilder.append(",").append(ELLLIPSIS);
+        parameterBuilder.append(",").append(ELLIPSES);
       }
 
     } else if (pattern instanceof Patterns.EndRange) {

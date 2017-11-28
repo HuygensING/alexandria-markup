@@ -20,17 +20,18 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+
 public class PatternsTest extends CreoleTest {
 
-  public static final Random RANDOM = new Random();
+  private static final Random RANDOM = new Random();
 
   @Test
   public void testHashCode1() {
