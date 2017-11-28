@@ -326,7 +326,7 @@ class Utilities {
   private static String parametersToString(Pattern pattern, int indent, int maxDepth) {
     StringBuilder parameterBuilder = new StringBuilder("(");
     String innerIndent = StringUtils.repeat(INDENT, indent);
-    boolean goDeeper = indent < maxDepth - 1;
+    boolean goDeeper = indent - 1 < maxDepth;
     int nextIndent = indent + 1;
     if (pattern instanceof Patterns.PatternWithOnePatternParameter) {
       if (goDeeper) {

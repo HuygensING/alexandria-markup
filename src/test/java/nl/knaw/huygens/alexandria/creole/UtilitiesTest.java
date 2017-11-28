@@ -261,7 +261,7 @@ public class UtilitiesTest extends CreoleTest {
   @Test
   public void testPatternTreeVisualisationForChoice() {
     Pattern choice = choice(text(), empty());
-    String emptyVisualisation = Utilities.patternTreeToDepth(choice, 10);
+    String emptyVisualisation = Utilities.patternTreeToDepth(choice, 15);
     assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
         "| Text(),\n" +
         "| Empty()\n" +

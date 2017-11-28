@@ -92,7 +92,7 @@ public class ValidatorTest {
 
   // test cases from Jeni's validate-lmnl.xsl
   @Test
-  public void testValidatePlainText() {
+  public void validatingPlainText() {
     // <text />
     Pattern schema = text();
 
@@ -106,7 +106,7 @@ public class ValidatorTest {
   }
 
   @Test
-  public void testValidatePlainTextAgainstElementPatternIIsInvalid() {
+  public void validatingPlainTextAgainstElementPatternIIsInvalid() {
     // <element name="foo">
     //   <text />
     // </element>
@@ -125,7 +125,7 @@ public class ValidatorTest {
 
 
   @Test
-  public void testValidateSingleRangeAgainstElementPattern() {
+  public void validatingSingleRangeAgainstElementPattern() {
     // <element name="foo">
     //   <text />
     // </element>
@@ -146,13 +146,13 @@ public class ValidatorTest {
   }
 
   @Test
-  public void testValidateSingleRangeAgainstElementPatternInvalidName() {
-    // <element name="foo">
+  public void validatingSingleRangeAgainstElementPatternInvalidName() {
+    // <element name="bar">
     //   <text />
     // </element>
     Pattern schema = element("bar",//
         text()//
-    );//
+    );
 
     Basics.QName foo = qName("foo");
     Event openFoo = Events.startTagEvent(foo);
@@ -167,7 +167,209 @@ public class ValidatorTest {
   }
 
   @Test
-  public void testValidateElementsAppearingInConcur() {
+  public void validatingSingleRangeAgainstElementPatternInvalidContent() {
+    // <element name="foo">
+    //   <empty />
+    // </element>
+    Pattern schema = element("foo",//
+        empty()//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, someText);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstRangePattern() {
+    // <range name="foo">
+    //   <text />
+    //  </range>
+    Pattern schema = range(name("foo"),//
+        text()//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstRangePatternInvalidName() {
+    // <range name="bar">
+    //   <text />
+    //  </range>
+    Pattern schema = range(name("bar"),//
+        text()//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, openFoo);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstRangePatternInvalidContent() {
+    // <range name="foo">
+    //   <empty />
+    //  </range>
+    Pattern schema = range(name("foo"),//
+        empty()//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, someText);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstChoicePattern() {
+    //<choice>
+    //  <element name="foo">
+    //    <text />
+    //  </element>
+    //  <range name="foo">
+    //    <text />
+    //  </range>
+    //</choice>
+    Pattern schema = choice(
+        element("foo",//
+            text()//
+        ),//
+        range(name("foo"),//
+            text()//
+        )//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstChoicePatternInvalidChoices() {
+    //<choice>
+    //  <element name="bar">
+    //    <text />
+    //  </element>
+    //  <range name="bar">
+    //    <text />
+    //  </range>
+    //</choice>
+    Pattern schema = choice(
+        element("bar",//
+            text()//
+        ),//
+        range(name("bar"),//
+            text()//
+        )//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]
+    events.addAll(asList(openFoo, someText, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, openFoo);
+  }
+
+  @Test
+  public void validatingRangeWithRangeContentAgainstRangePattern() {
+    //<range name="foo">
+    //  <range name="bar">
+    //    <text />
+    //  </range>
+    //</range>
+    Pattern schema = range(name("foo"),
+        range(name("bar"),
+            text()
+        )
+    );
+
+    Basics.QName foo = qName("foo");
+    Basics.QName bar = qName("bar");
+    Event openFoo = Events.startTagEvent(foo);
+    Event openBar = Events.startTagEvent(bar);
+    Event someText = Events.textEvent("...");
+    Event closeBar = Events.endTagEvent(bar);
+    Event closeFoo = Events.endTagEvent(foo);
+
+    List<Event> events = new ArrayList<>();
+    // [foo}[bar}...{bar]{foo]
+    events.addAll(asList(openFoo, openBar, someText, closeBar, closeFoo));
+
+    assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingElementWithElementContentAgainstRangePattern() {
+    //<element name="foo">
+    //  <element name="bar">
+    //    <text />
+    //  </element>
+    //</element>
+    Pattern schema = element("foo",
+        element("bar",
+            text()
+        )
+    );
+
+    Basics.QName foo = qName("foo");
+    Basics.QName bar = qName("bar");
+    Event openFoo = Events.startTagEvent(foo);
+    Event openBar = Events.startTagEvent(bar);
+    Event someText = Events.textEvent("...");
+    Event closeBar = Events.endTagEvent(bar);
+    Event closeFoo = Events.endTagEvent(foo);
+
+    List<Event> events = new ArrayList<>();
+    // [foo}[bar}...{bar]{foo]
+    events.addAll(asList(openFoo, openBar, someText, closeBar, closeFoo));
+
+    assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingElementsAppearingInConcur() {
     Pattern verse = range(name("v"), text());
     Pattern chapter = range(name("chapter"), oneOrMore(verse));
 

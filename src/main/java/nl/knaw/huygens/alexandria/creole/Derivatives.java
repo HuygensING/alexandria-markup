@@ -48,7 +48,7 @@ class Derivatives {
   // eventsDeriv :: Pattern -> [Event] -> Pattern
   Pattern eventsDeriv(Pattern pattern, List<Event> events) {
 //    LOG.debug("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
-    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 5));
+    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 10));
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
       return pattern;

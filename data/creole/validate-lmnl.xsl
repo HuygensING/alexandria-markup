@@ -78,6 +78,7 @@
     </test:param>
     <test:expect select="false()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against element pattern (invalid content)</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -90,6 +91,7 @@
     </test:param>
     <test:expect select="false()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against range pattern</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -102,6 +104,7 @@
     </test:param>
     <test:expect select="true()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against range pattern (invalid name)</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -114,6 +117,7 @@
     </test:param>
     <test:expect select="false()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against range pattern (invalid content)</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -126,6 +130,7 @@
     </test:param>
     <test:expect select="false()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against choice pattern</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -143,6 +148,7 @@
     </test:param>
     <test:expect select="true()" />
   </test:test>
+
   <test:test>
     <test:title>Single range against choice pattern (invalid choices)</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -160,6 +166,7 @@
     </test:param>
     <test:expect select="false()" />
   </test:test>
+
   <test:test>
     <test:title>Range with range content against range pattern</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -174,6 +181,7 @@
     </test:param>
     <test:expect select="true()" />
   </test:test>
+
   <test:test>
     <test:title>Element with element content against range pattern</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -188,6 +196,7 @@
     </test:param>
     <test:expect select="true()" />
   </test:test>
+
   <test:test>
     <test:title>Michael's favourite without annotations</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
@@ -207,6 +216,7 @@
     <test:param name="schema" select="/" href="play-no-annotations.crl" />
     <test:expect select="true()" />
   </test:test>
+
   <test:test>
     <test:title>Elements appearing in concur</test:title>
     <test:param name="lmnl" select="normalize-space(.)">
