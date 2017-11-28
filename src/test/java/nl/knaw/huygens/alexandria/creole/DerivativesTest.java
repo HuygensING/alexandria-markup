@@ -20,13 +20,6 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,6 +27,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 
 public class DerivativesTest extends CreoleTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -77,14 +78,6 @@ public class DerivativesTest extends CreoleTest {
     events2.addAll(asList(startE, openChapter, openPage, textE, closePage, closeChapter, endE));
     assertEventsAreValidForSchema(schemaPattern, events2);
 
-  }
-
-  private void assertEventsAreValidForSchema(Pattern schemaPattern, List<Event> events) {
-    Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
-    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
-    assertThat(pattern1)//
-        .isNullable()//
-        .isEqualTo(empty());
   }
 
   @Test
@@ -248,8 +241,8 @@ public class DerivativesTest extends CreoleTest {
   @Test
   public void testEventsDerivation3() {
     Pattern verse = range(name("verse"), text());
-//    Pattern chapter = range(name("chapter"), text());
-    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+    Pattern chapter = range(name("chapter"), text());
+//    Pattern chapter = range(name("chapter"), oneOrMore(verse));
 
     Pattern index = range(name("index"), text());
     Pattern indexedText = concurOneOrMore(mixed(zeroOrMore(index)));
@@ -347,4 +340,17 @@ public class DerivativesTest extends CreoleTest {
   }
 
 
+  private void assertEventsAreValidForSchema(Pattern schemaPattern, List<Event> events) {
+    Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
+    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
+    assertThat(pattern1)//
+        .isNullable()//
+        .isEqualTo(empty());
+  }
+
+  private void assertEventsAreInvalidForSchema(Pattern schemaPattern, List<Event> events) {
+    Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
+    assertThat(pattern1)//
+        .isNotNullable();
+  }
 }

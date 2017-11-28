@@ -46,13 +46,13 @@ class Patterns {
                | All Pattern Pattern
    */
 
-  static class Empty extends AbstractPattern {
+  static class Empty extends PatternWithoutParameters {
   }
 
-  static class NotAllowed extends AbstractPattern {
+  static class NotAllowed extends PatternWithoutParameters {
   }
 
-  static class Text extends AbstractPattern {
+  static class Text extends PatternWithoutParameters {
   }
 
   static class Choice extends PatternWithTwoPatternParameters {
@@ -190,6 +190,10 @@ class Patterns {
     public Pattern getPattern() {
       return pattern;
     }
+
+  }
+
+  static class PatternWithoutParameters extends AbstractPattern {
 
   }
 

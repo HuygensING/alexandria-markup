@@ -20,19 +20,25 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
 
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
+
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 public class Utilities {
+
+  public static final String INDENT = "| ";
+  public static final String ELLLIPSIS = "...";
+
   /*
-  The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
-   of events. Nullable is defined as follows for the various kinds of patterns:
-   */
+        The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
+         of events. Nullable is defined as follows for the various kinds of patterns:
+         */
   //  nullable:: Pattern -> Bool
   public static Boolean nullable(Pattern pattern) {
     //  nullable Empty = True
@@ -305,7 +311,77 @@ public class Utilities {
     return startTagEvents;
   }
 
+  public static String patternTreeToDepth(Pattern pattern, int maxDepth) {
+    return patternTreeToDepth(pattern, 0, maxDepth);
+  }
+
   /* private */
+
+  private static String patternTreeToDepth(Pattern pattern, int indent, int maxDepth) {
+    String patternName = pattern.getClass().getSimpleName();
+    String parameters = parametersToString(pattern, indent, maxDepth);
+    return StringUtils.repeat(INDENT, indent) + patternName + parameters;
+  }
+
+  private static String parametersToString(Pattern pattern, int indent, int maxDepth) {
+    StringBuilder parameterBuilder = new StringBuilder("(");
+    String innerIndent = StringUtils.repeat(INDENT, indent);
+    boolean goDeeper = indent < maxDepth - 1;
+    int nextIndent = indent + 1;
+    if (pattern instanceof Patterns.PatternWithOnePatternParameter) {
+      if (goDeeper) {
+        Patterns.PatternWithOnePatternParameter p = (Patterns.PatternWithOnePatternParameter) pattern;
+        parameterBuilder.append("\n")//
+            .append(patternTreeToDepth(p.getPattern(), nextIndent, maxDepth))//
+            .append("\n")//
+            .append(innerIndent);
+      } else {
+        parameterBuilder.append(ELLLIPSIS);
+      }
+
+    } else if (pattern instanceof Patterns.PatternWithTwoPatternParameters) {
+      if (goDeeper) {
+        Patterns.PatternWithTwoPatternParameters p = (Patterns.PatternWithTwoPatternParameters) pattern;
+        parameterBuilder.append("\n")//
+            .append(patternTreeToDepth(p.getPattern1(), nextIndent, maxDepth))//
+            .append(",\n")//
+            .append(patternTreeToDepth(p.getPattern2(), nextIndent, maxDepth))//
+            .append("\n")//
+            .append(innerIndent);
+      } else {
+        parameterBuilder.append(ELLLIPSIS);
+      }
+
+    } else if (pattern instanceof Patterns.Range) {
+      Patterns.Range p = (Patterns.Range) pattern;
+      parameterBuilder.append(nameClassVisualization(p.getNameClass()));
+      if (goDeeper) {
+        parameterBuilder.append(",\n")//
+            .append(patternTreeToDepth(p.getPattern(), nextIndent, maxDepth))//
+            .append("\n")//
+            .append(innerIndent);
+      } else {
+        parameterBuilder.append(",").append(ELLLIPSIS);
+      }
+
+    } else if (pattern instanceof Patterns.EndRange) {
+      Patterns.EndRange p = (Patterns.EndRange) pattern;
+      parameterBuilder.append("\"").append(p.getQName().toString()).append("\"");
+      parameterBuilder.append(",");
+      parameterBuilder.append("\"").append(p.getId().toString()).append("\"");
+    }
+    parameterBuilder.append(")");
+
+    return parameterBuilder.toString();
+  }
+
+  private static String nameClassVisualization(NameClass nameClass) {
+    if (nameClass instanceof NameClasses.Name) {
+      NameClasses.Name name = (NameClasses.Name) nameClass;
+      return "\"" + name.getLocalName().getValue() + "\"";
+    }
+    return nameClass.getClass().getSimpleName();
+  }
 
   private static boolean andCombination(Pattern pattern1, Pattern pattern2) {
     return allowsText(pattern1) && allowsText(pattern2);

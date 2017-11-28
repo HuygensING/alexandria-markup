@@ -20,9 +20,11 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import org.junit.Test;
+
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.id;
-import org.junit.Test;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 
 
 public class UtilitiesTest extends CreoleTest {
@@ -193,8 +195,8 @@ public class UtilitiesTest extends CreoleTest {
 
   @Test
   public void testEndRangeIsNotNullable() {
-    Basics.QName qName = Basics.qName("uri","localName");
-    Pattern p = new Patterns.EndRange( qName, id("id"));
+    Basics.QName qName = Basics.qName("uri", "localName");
+    Pattern p = new Patterns.EndRange(qName, id("id"));
     assertThat(p).isNotNullable();
   }
 
@@ -236,5 +238,44 @@ public class UtilitiesTest extends CreoleTest {
     Pattern p2 = NOT_NULLABLE_PATTERN;
     Pattern p = new Patterns.All(p1, p2);
     assertThat(p).isNotNullable();
+  }
+
+  @Test
+  public void testPatternTreeVisualisationForEmpty() {
+    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.EMPTY, 1);
+    assertThat(emptyVisualisation).isEqualTo("Empty()");
+  }
+
+  @Test
+  public void testPatternTreeVisualisationForNotAllowed() {
+    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.NOT_ALLOWED, 1);
+    assertThat(emptyVisualisation).isEqualTo("NotAllowed()");
+  }
+
+  @Test
+  public void testPatternTreeVisualisationForText() {
+    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.TEXT, 1);
+    assertThat(emptyVisualisation).isEqualTo("Text()");
+  }
+
+  @Test
+  public void testPatternTreeVisualisationForChoice() {
+    Pattern choice = choice(text(), empty());
+    String emptyVisualisation = Utilities.patternTreeToDepth(choice, 10);
+    assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
+        "| Text(),\n" +
+        "| Empty()\n" +
+        ")");
+  }
+
+  @Test
+  public void testPatternTreeVisualisationForElement() {
+    Pattern element = element("book", text());
+    String visualisation = Utilities.patternTreeToDepth(element, 10);
+    assertThat(visualisation).isEqualTo("Partition(\n" +//
+        "| Range(\"book\",\n" +//
+        "| | Text()\n" +//
+        "| )\n" +//
+        ")");
   }
 }
