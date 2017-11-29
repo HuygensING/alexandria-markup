@@ -201,11 +201,11 @@ public class UtilitiesTest extends CreoleTest {
   }
 
   @Test
-  public void testAfterIsNotNullable() {
+  public void testAfterNullability() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
     Pattern p = new Patterns.After(p1, p2);
-    assertThat(p).isNotNullable();
+    assertThat(p).isNullable();
   }
 
   @Test

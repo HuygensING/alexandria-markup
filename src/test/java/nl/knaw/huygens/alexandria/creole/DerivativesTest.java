@@ -240,9 +240,7 @@ public class DerivativesTest extends CreoleTest {
   private void assertEventsAreValidForSchema(Pattern schemaPattern, List<Event> events) {
     Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
     LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
-    assertThat(pattern1)//
-        .isNullable()//
-        .isEqualTo(empty());
+    assertThat(pattern1).isNullable();
   }
 
   private void assertEventsAreInvalidForSchema(Pattern schemaPattern, List<Event> events) {

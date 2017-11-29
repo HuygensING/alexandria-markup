@@ -108,6 +108,7 @@ class Derivatives {
     throw new RuntimeException("unexpected " + event.getClass().getTypeName() + " event: " + event);
   }
 
+
   /*
   Text Derivatives
 
@@ -376,7 +377,6 @@ class Derivatives {
     );
   }
 
-  //
   // startTagDeriv :: Pattern -> QName -> Id -> Pattern
   private static Pattern startTagDeriv(Pattern pattern, Basics.QName qn, Basics.Id id) {
     String simpleName = pattern.getClass().getSimpleName();
@@ -526,6 +526,5 @@ class Derivatives {
   private static boolean whitespace(String text) {
     return StringUtils.isBlank(text);
   }
-
 
 }

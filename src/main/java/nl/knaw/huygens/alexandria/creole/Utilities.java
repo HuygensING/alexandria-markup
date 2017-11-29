@@ -20,14 +20,13 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
-
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 class Utilities {
@@ -42,16 +41,15 @@ class Utilities {
   //  nullable:: Pattern -> Bool
   public static Boolean nullable(Pattern pattern) {
     //  nullable Empty = True
-    if (pattern instanceof Patterns.Empty) {
+    //  nullable Text = True
+    if (pattern instanceof Patterns.Empty
+        || pattern instanceof Patterns.Text) {
       return true;
     }
+
     //  nullable NotAllowed = False
     if (pattern instanceof Patterns.NotAllowed) {
       return false;
-    }
-    //  nullable Text = True
-    if (pattern instanceof Patterns.Text) {
-      return true;
     }
     //  nullable (Choice p1 p2) = nullable p1 || nullable p2
     if (pattern instanceof Patterns.Choice) {
@@ -95,7 +93,9 @@ class Utilities {
     }
     //  nullable (After _ _) = False
     if (pattern instanceof Patterns.After) {
-      return false;
+      Patterns.After after = (Patterns.After) pattern;
+      return nullable(after.getPattern1()) && nullable(after.getPattern2());
+//      return false;
     }
     //  nullable (All p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.All) {

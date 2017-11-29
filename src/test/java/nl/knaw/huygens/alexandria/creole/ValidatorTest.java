@@ -445,7 +445,7 @@ public class ValidatorTest {
             oneOrMore(para)//
         )//
     );
-    Pattern book = range(name("book"),//
+    Pattern book = element("book",//
         concur(//
             oneOrMore(page),//
             group(//
