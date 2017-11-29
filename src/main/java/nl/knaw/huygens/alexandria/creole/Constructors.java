@@ -158,11 +158,9 @@ class Constructors {
   //  partition :: Pattern -> Pattern
   static Pattern partition(Pattern pattern) {
     //  partition NotAllowed = NotAllowed
-    if (pattern instanceof Patterns.NotAllowed) {
-      return pattern;
-    }
     //  partition Empty = Empty
-    if (pattern instanceof Patterns.Empty) {
+    if (pattern instanceof Patterns.NotAllowed //
+        || pattern instanceof Patterns.Empty) {
       return pattern;
     }
     //  partition p = Partition p
@@ -172,11 +170,9 @@ class Constructors {
   //  oneOrMore :: Pattern -> Pattern
   static Pattern oneOrMore(Pattern pattern) {
     //  oneOrMore NotAllowed = NotAllowed
-    if (pattern instanceof Patterns.NotAllowed) {
-      return pattern;
-    }
     //  oneOrMore Empty = Empty
-    if (pattern instanceof Patterns.Empty) {
+    if (pattern instanceof Patterns.NotAllowed //
+        || pattern instanceof Patterns.Empty) {
       return pattern;
     }
     //  oneOrMore p = OneOrMore p
@@ -186,11 +182,9 @@ class Constructors {
   //  concurOneOrMore :: Pattern -> Pattern
   static Pattern concurOneOrMore(Pattern pattern) {
     //  concurOneOrMore NotAllowed = NotAllowed
-    if (pattern instanceof Patterns.NotAllowed) {
-      return pattern;
-    }
     //  concurOneOrMore Empty = Empty
-    if (pattern instanceof Patterns.Empty) {
+    if (pattern instanceof Patterns.NotAllowed //
+        || pattern instanceof Patterns.Empty) {
       return pattern;
     }
     //  concurOneOrMore p = ConcurOneOrMore p
@@ -201,7 +195,8 @@ class Constructors {
   static Pattern after(Pattern pattern1, Pattern pattern2) {
     //  after p NotAllowed = NotAllowed
     //  after NotAllowed p = NotAllowed
-    if (pattern1 instanceof Patterns.NotAllowed || pattern2 instanceof Patterns.NotAllowed) {
+    if (pattern1 instanceof Patterns.NotAllowed //
+        || pattern2 instanceof Patterns.NotAllowed) {
       return notAllowed();
     }
 

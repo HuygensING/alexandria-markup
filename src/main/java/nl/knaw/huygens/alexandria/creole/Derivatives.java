@@ -20,14 +20,15 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.Utilities.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
-
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.Utilities.*;
+import java.util.Map;
 
 class Derivatives {
   private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
@@ -235,137 +236,155 @@ class Derivatives {
     return notAllowed();
   }
 
+
   // Start-tag Derivatives
   //
   // Start tags are handled in a very generic way by all the patterns, except the Range pattern,
   // whose derivative is a group of the content pattern for the range followed by an EndRange pattern for the range.
   // Note that the EndRange pattern is created with the same qualified name and ID as the matched range.
+  private static final Map<String, TriFunction<? extends Pattern, Basics.QName, Basics.Id, ? extends Pattern>> startTagDerivFunctions//
+      = new HashMap<>();
+
+  static {
+    startTagDerivFunctions.put("Range",//
+        (range, qn, id) -> startTagDerivForRange((Patterns.Range) range, qn, id));
+    startTagDerivFunctions.put("Choice",//
+        (choice, qn, id) -> startTagDerivForChoice((Patterns.Choice) choice, qn, id));
+    startTagDerivFunctions.put("Group",//
+        (group, qn, id) -> startTagDerivForGroup((Patterns.Group) group, qn, id));
+    startTagDerivFunctions.put("Interleave",//
+        (interleave, qn, id) -> startTagDerivForInterleave((Patterns.Interleave) interleave, qn, id));
+    startTagDerivFunctions.put("Concur",//
+        (concur, qn, id) -> startTagDerivForConcur((Patterns.Concur) concur, qn, id));
+    startTagDerivFunctions.put("Partition",//
+        (partition, qn, id) -> startTagDerivForPartition((Patterns.Partition) partition, qn, id));
+    startTagDerivFunctions.put("OneOrMore",//
+        (oneOrMore, qn, id) -> startTagDerivForOneOrMore((Patterns.OneOrMore) oneOrMore, qn, id));
+    startTagDerivFunctions.put("ConcurOneOrMore",//
+        (concurOneOrMore, qn, id) -> startTagDerivForConcurOneOrMore((Patterns.ConcurOneOrMore) concurOneOrMore, qn, id));
+    startTagDerivFunctions.put("After",//
+        (after, qn, id) -> startTagDerivForAfter((Patterns.After) after, qn, id));
+  }
+
+  //    startTagDeriv (Range nc p) qn id =
+  //    if contains nc qn then group p (EndRange qn id)
+  //                    else NotAllowed
+  private static Pattern startTagDerivForRange(Patterns.Range range, Basics.QName qn, Basics.Id id) {
+    NameClass nc = range.getNameClass();
+    Pattern p = range.getPattern();
+    return (contains(nc, qn))//
+        ? group(p, endRange(qn, id))//
+        : notAllowed();
+  }
+
+  //    startTagDeriv (Choice p1 p2) qn id =
+  //        choice (startTagDeriv p1 qn id)
+  //    (startTagDeriv p2 qn id)
+  private static Pattern startTagDerivForChoice(Patterns.Choice choice, Basics.QName qn, Basics.Id id) {
+    Pattern p1 = choice.getPattern1();
+    Pattern p2 = choice.getPattern2();
+    return choice(//
+        startTagDeriv(p1, qn, id),//
+        startTagDeriv(p2, qn, id)//
+    );
+  }
+
+  // startTagDeriv (Group p1 p2) qn id =
+  //   let d = group (startTagDeriv p1 qn id) p2
+  //   in if nullable p1 then choice d (startTagDeriv p2 qn id)
+  //                     else d
+  private static Pattern startTagDerivForGroup(Patterns.Group group, Basics.QName qn, Basics.Id id) {
+    Pattern p1 = group.getPattern1();
+    Pattern p2 = group.getPattern2();
+    Pattern d = group(startTagDeriv(p1, qn, id), p2);
+    return nullable(p1)//
+        ? choice(d, startTagDeriv(p2, qn, id))//
+        : d;
+  }
+
+  // startTagDeriv (Interleave p1 p2) qn id =
+  //   choice (interleave (startTagDeriv p1 qn id) p2)
+  //          (interleave p1 (startTagDeriv p2 qn id))
+  private static Pattern startTagDerivForInterleave(Patterns.Interleave interleave, Basics.QName qn, Basics.Id id) {
+    Pattern p1 = interleave.getPattern1();
+    Pattern p2 = interleave.getPattern2();
+    return choice(//
+        interleave(startTagDeriv(p1, qn, id), p2),//
+        interleave(p1, startTagDeriv(p2, qn, id))//
+    );
+  }
+
+  // startTagDeriv (Concur p1 p2) qn id =
+  //   let d1 = startTagDeriv p1 qn id
+  //       d2 = startTagDeriv p2 qn id
+  //   in choice (choice (concur d1 p2) (concur p1 d2))
+  //             (concur d1 d2)
+  private static Pattern startTagDerivForConcur(Patterns.Concur concur, Basics.QName qn, Basics.Id id) {
+    Pattern p1 = concur.getPattern1();
+    Pattern p2 = concur.getPattern2();
+    Pattern d1 = startTagDeriv(p1, qn, id);
+    Pattern d2 = startTagDeriv(p2, qn, id);
+    return choice(//
+        choice(//
+            concur(d1, p2),//
+            concur(p1, d2)//
+        ),//
+        concur(d1, d2)//
+    );
+  }
+
+  // startTagDeriv (Partition p) qn id =
+  //   after (startTagDeriv p qn id) Empty
+  private static Pattern startTagDerivForPartition(Patterns.Partition partition, Basics.QName qn, Basics.Id id) {
+    Pattern p = partition.getPattern();
+    return after(//
+        startTagDeriv(p, qn, id),//
+        empty()//
+    );
+  }
+
+  // startTagDeriv (OneOrMore p) qn id =
+  //   group (startTagDeriv p qn id)
+  //         (choice (OneOrMore p) Empty)
+  private static Pattern startTagDerivForOneOrMore(Patterns.OneOrMore oneOrMore, Basics.QName qn, Basics.Id id) {
+    Pattern p = oneOrMore.getPattern();
+    return group(//
+        startTagDeriv(p, qn, id),//
+        choice(new Patterns.OneOrMore(p), empty())//
+    );
+  }
+
+  // startTagDeriv (ConcurOneOrMore p) qn id =
+  //   concur (startTagDeriv p qn id)
+  //          (choice (ConcurOneOrMore p) anyContent)
+  private static Pattern startTagDerivForConcurOneOrMore(Patterns.ConcurOneOrMore concurOneOrMore, Basics.QName qn, Basics.Id id) {
+    Pattern p = concurOneOrMore.getPattern();
+    return concur(//
+        startTagDeriv(p, qn, id),//
+        choice(new Patterns.ConcurOneOrMore(p), anyContent())//
+    );
+  }
+
+  // startTagDeriv (After p1 p2) qn id =
+  //   after (startTagDeriv p1 qn id) p2
+  private static Pattern startTagDerivForAfter(Patterns.After after, Basics.QName qn, Basics.Id id) {
+    Pattern p1 = after.getPattern1();
+    Pattern p2 = after.getPattern2();
+    return after(//
+        startTagDeriv(p1, qn, id),//
+        p2//
+    );
+  }
+
   //
   // startTagDeriv :: Pattern -> QName -> Id -> Pattern
   private static Pattern startTagDeriv(Pattern pattern, Basics.QName qn, Basics.Id id) {
-    //    startTagDeriv (Range nc p) qn id =
-    //    if contains nc qn then group p (EndRange qn id)
-    //                    else NotAllowed
-    if (pattern instanceof Patterns.Range) {
-      Patterns.Range range = (Patterns.Range) pattern;
-      NameClass nc = range.getNameClass();
-      Pattern p = range.getPattern();
-      return (contains(nc, qn))//
-          ? group(p, endRange(qn, id))//
-          : notAllowed();
-    }
-
-    //    startTagDeriv (Choice p1 p2) qn id =
-    //        choice (startTagDeriv p1 qn id)
-    //    (startTagDeriv p2 qn id)
-    if (pattern instanceof Patterns.Choice) {
-      Patterns.Choice choice = (Patterns.Choice) pattern;
-      Pattern p1 = choice.getPattern1();
-      Pattern p2 = choice.getPattern2();
-      return choice(//
-          startTagDeriv(p1, qn, id),//
-          startTagDeriv(p2, qn, id)//
-      );
-    }
-
-    //    startTagDeriv (Group p1 p2) qn id =
-    //        let d = group (startTagDeriv p1 qn id) p2
-    //    in if nullable p1 then choice d (startTagDeriv p2 qn id)
-    //                    else d
-    if (pattern instanceof Patterns.Group) {
-      Patterns.Group group = (Patterns.Group) pattern;
-      Pattern p1 = group.getPattern1();
-      Pattern p2 = group.getPattern2();
-      Pattern d = group(startTagDeriv(p1, qn, id), p2);
-      return nullable(p1)//
-          ? choice(d, startTagDeriv(p2, qn, id))//
-          : d;
-    }
-
-    //    startTagDeriv (Interleave p1 p2) qn id =
-    //        choice (interleave (startTagDeriv p1 qn id) p2)
-    //    (interleave p1 (startTagDeriv p2 qn id))
-    if (pattern instanceof Patterns.Interleave) {
-      Patterns.Interleave interleave = (Patterns.Interleave) pattern;
-      Pattern p1 = interleave.getPattern1();
-      Pattern p2 = interleave.getPattern2();
-      return choice(//
-          interleave(startTagDeriv(p1, qn, id), p2),//
-          interleave(p1, startTagDeriv(p2, qn, id))//
-      );
-    }
-
-    //    startTagDeriv (Concur p1 p2) qn id =
-    //        let d1 = startTagDeriv p1 qn id
-    //        d2 = startTagDeriv p2 qn id
-    //    in choice (choice (concur d1 p2) (concur p1 d2))
-    //    (concur d1 d2)
-    if (pattern instanceof Patterns.Concur) {
-      Patterns.Concur concur = (Patterns.Concur) pattern;
-      Pattern p1 = concur.getPattern1();
-      Pattern p2 = concur.getPattern2();
-      Pattern d1 = startTagDeriv(p1, qn, id);
-      Pattern d2 = startTagDeriv(p2, qn, id);
-      return choice(//
-          choice(//
-              concur(d1, p2),//
-              concur(p1, d2)//
-          ),//
-          concur(d1, d2)//
-      );
-    }
-
-    //    startTagDeriv (Partition p) qn id =
-    //        after (startTagDeriv p qn id) Empty
-    if (pattern instanceof Patterns.Partition) {
-      Patterns.Partition partition = (Patterns.Partition) pattern;
-      Pattern p = partition.getPattern();
-      return after(//
-          startTagDeriv(p, qn, id),//
-          empty()//
-      );
-    }
-
-    //    startTagDeriv (OneOrMore p) qn id =
-    //        group (startTagDeriv p qn id)
-    //    (choice (OneOrMore p) Empty)
-    if (pattern instanceof Patterns.OneOrMore) {
-      Patterns.OneOrMore oneOrMore = (Patterns.OneOrMore) pattern;
-      Pattern p = oneOrMore.getPattern();
-      return group(//
-          startTagDeriv(p, qn, id),//
-          choice(new Patterns.OneOrMore(p), empty())//
-      );
-    }
-
-    //    startTagDeriv (ConcurOneOrMore p) qn id =
-    //        concur (startTagDeriv p qn id)
-    //    (choice (ConcurOneOrMore p) anyContent)
-    if (pattern instanceof Patterns.ConcurOneOrMore) {
-      Patterns.ConcurOneOrMore concurOneOrMore = (Patterns.ConcurOneOrMore) pattern;
-      Pattern p = concurOneOrMore.getPattern();
-      return concur(//
-          startTagDeriv(p, qn, id),//
-          choice(new Patterns.ConcurOneOrMore(p), anyContent())//
-      );
-    }
-
-    //    startTagDeriv (After p1 p2) qn id =
-    //        after (startTagDeriv p1 qn id) p2
-    if (pattern instanceof Patterns.After) {
-      Patterns.After after = (Patterns.After) pattern;
-      Pattern p1 = after.getPattern1();
-      Pattern p2 = after.getPattern2();
-      return after(//
-          startTagDeriv(p1, qn, id),//
-          p2//
-      );
-    }
-
+    String simpleName = pattern.getClass().getSimpleName();
     //    startTagDeriv _ _ _ = NotAllowed
-    return notAllowed();
+    TriFunction<? extends Pattern, Basics.QName, Basics.Id, ? extends Pattern> function //
+        = startTagDerivFunctions.getOrDefault(simpleName, (a, b, c) -> notAllowed());
+    return function.apply(pattern, qn, id);
   }
-
 
   //  End Tags
   //

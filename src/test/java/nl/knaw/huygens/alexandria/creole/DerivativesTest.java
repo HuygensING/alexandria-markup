@@ -38,12 +38,11 @@ import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 
 public class DerivativesTest extends CreoleTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
-  private static ValidationErrorListener errorListener;
   private static Derivatives derivatives;
 
   @BeforeClass
   public static void beforeClass() {
-    errorListener = new ValidationErrorListener();
+    ValidationErrorListener errorListener = new ValidationErrorListener();
     derivatives = new Derivatives(errorListener);
   }
 
@@ -237,108 +236,6 @@ public class DerivativesTest extends CreoleTest {
         )//
     );
   }
-
-  @Test
-  public void testEventsDerivation3() {
-    Pattern verse = range(name("verse"), text());
-    Pattern chapter = range(name("chapter"), text());
-//    Pattern chapter = range(name("chapter"), oneOrMore(verse));
-
-    Pattern index = range(name("index"), text());
-    Pattern indexedText = concurOneOrMore(mixed(zeroOrMore(index)));
-    Pattern s = range(name("s"), indexedText);
-    Pattern page = range(name("page"), text()); // TODO: How to indicate when a range can't self-overlap?
-    Pattern title = element("title", text());
-    Pattern heading = element("heading", indexedText);
-    Pattern para = range(name("para"),//
-        concur(//
-//            text(),//
-            oneOrMore(verse),//
-            oneOrMore(s)
-        )//
-    );
-    Pattern section = range(name("section"),//
-        group(//
-            heading,//
-            oneOrMore(para)//
-        )//
-    );
-    Pattern book = element("book",//
-        concur(//
-            oneOrMore(page),//
-            group(//
-                title,//
-                concur(//
-                    oneOrMore(chapter),//
-                    oneOrMore(section)//
-                )//
-            )//
-        )//
-    );
-
-    Event openBook = Events.startTagEvent(qName("book"));
-    Event closeBook = Events.endTagEvent(qName("book"));
-
-    Event openPage = Events.startTagEvent(qName("page"));
-    Event closePage = Events.endTagEvent(qName("page"));
-
-    Event openTitle = Events.startTagEvent(qName("title"));
-    Event titleText = Events.textEvent("Genesis");
-    Event closeTitle = Events.endTagEvent(qName("title"));
-
-    Event openHeading = Events.startTagEvent(qName("heading"));
-    Event headingText = Events.textEvent("The flood and the tower of Babel");
-    Event closeHeading = Events.endTagEvent(qName("heading"));
-
-    Event openSection = Events.startTagEvent(qName("section"));
-    Event closeSection = Events.endTagEvent(qName("section"));
-
-    Event openChapter = Events.startTagEvent(qName("chapter"));
-    Event closeChapter = Events.endTagEvent(qName("chapter"));
-
-    Event openPara = Events.startTagEvent(qName("para"));
-    Event closePara = Events.endTagEvent(qName("para"));
-
-    Event openS = Events.startTagEvent(qName("s"));
-    Event closeS = Events.endTagEvent(qName("s"));
-
-    Event openVerse = Events.startTagEvent(qName("verse"));
-    Event closeVerse = Events.endTagEvent(qName("verse"));
-
-    Event openIndex1 = Events.startTagEvent(qName("index"), "1");
-    Event closeIndex1 = Events.endTagEvent(qName("index"), "1");
-    Event openIndex2 = Events.startTagEvent(qName("index"), "2");
-    Event closeIndex2 = Events.endTagEvent(qName("index"), "2");
-
-    Event someText = Events.textEvent("some text");
-
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(//
-        openBook, openPage,//
-        openTitle, titleText, closeTitle,//
-        openSection,//
-        openHeading, headingText, closeHeading,//
-        openChapter,//
-        openPara, openS,
-        openVerse,
-        someText,//
-        openIndex1, someText,//
-        openIndex2, someText, closeIndex1, someText, closePage,//
-        openPage, someText, closeIndex2, someText,//
-        closeS, closeVerse, closePara,//
-        openPara, openVerse, openS, someText,//
-        closeVerse, closeChapter,//
-        openChapter, openVerse, someText,//
-        closeVerse,
-        closeS, closePara,//
-        closeChapter,//
-        closeSection,//
-        closePage, closeBook//
-//        , closeBook // <- huh?
-    ));
-    assertEventsAreValidForSchema(book, events);
-  }
-
 
   private void assertEventsAreValidForSchema(Pattern schemaPattern, List<Event> events) {
     Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);

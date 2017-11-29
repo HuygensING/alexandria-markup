@@ -20,6 +20,11 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static java.util.Arrays.asList;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static java.util.Arrays.asList;
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 
 public class ValidatorTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -420,6 +419,164 @@ public class ValidatorTest {
     ));
     assertValidationSucceeds(schema, events);
   }
+
+  @Test
+  public void validateBibleText() {
+    Pattern verse = range(name("verse"), text());
+//    Pattern chapter = range(name("chapter"), text());
+    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+
+    Pattern index = range(name("index"), text());
+    Pattern indexedText = concurOneOrMore(mixed(zeroOrMore(index)));
+    Pattern s = range(name("s"), indexedText);
+    Pattern page = range(name("page"), text()); // TODO: How to indicate when a range can't self-overlap?
+    Pattern title = element("title", text());
+    Pattern heading = element("heading", indexedText);
+    Pattern para = range(name("para"),//
+        concur(//
+//            text(),//
+            oneOrMore(verse),//
+            oneOrMore(s)
+        )//
+    );
+    Pattern section = range(name("section"),//
+        group(//
+            heading,//
+            oneOrMore(para)//
+        )//
+    );
+    Pattern book = range(name("book"),//
+        concur(//
+            oneOrMore(page),//
+            group(//
+                title,//
+                concur(//
+                    oneOrMore(chapter),//
+                    oneOrMore(section)//
+                )//
+            )//
+        )//
+    );
+
+    Event openBook = Events.startTagEvent(qName("book"));
+    Event closeBook = Events.endTagEvent(qName("book"));
+
+    Event openPage = Events.startTagEvent(qName("page"));
+    Event closePage = Events.endTagEvent(qName("page"));
+
+    Event openTitle = Events.startTagEvent(qName("title"));
+    Event titleText = Events.textEvent("Genesis");
+    Event closeTitle = Events.endTagEvent(qName("title"));
+
+    Event openHeading = Events.startTagEvent(qName("heading"));
+    Event headingText = Events.textEvent("The flood and the tower of Babel");
+    Event closeHeading = Events.endTagEvent(qName("heading"));
+
+    Event openSection = Events.startTagEvent(qName("section"));
+    Event closeSection = Events.endTagEvent(qName("section"));
+
+    Event openChapter = Events.startTagEvent(qName("chapter"));
+    Event closeChapter = Events.endTagEvent(qName("chapter"));
+
+    Event openPara = Events.startTagEvent(qName("para"));
+    Event closePara = Events.endTagEvent(qName("para"));
+
+    Event openS = Events.startTagEvent(qName("s"));
+    Event closeS = Events.endTagEvent(qName("s"));
+
+    Event openVerse = Events.startTagEvent(qName("verse"));
+    Event closeVerse = Events.endTagEvent(qName("verse"));
+
+    Event openIndex1 = Events.startTagEvent(qName("index"), "1");
+    Event closeIndex1 = Events.endTagEvent(qName("index"), "1");
+    Event openIndex2 = Events.startTagEvent(qName("index"), "2");
+    Event closeIndex2 = Events.endTagEvent(qName("index"), "2");
+
+    Event someText = Events.textEvent("some text");
+
+    List<Event> events = new ArrayList<>();
+    events.addAll(asList(//
+        openBook, openPage,//
+        openTitle, titleText, closeTitle,//
+        openSection,//
+        openHeading, headingText, closeHeading,//
+        openChapter,//
+        openPara, openS,
+        openVerse,
+        someText,//
+        openIndex1, someText,//
+        openIndex2, someText, closeIndex1, someText, closePage,//
+        openPage, someText, closeIndex2, someText,//
+        closeS, closeVerse, closePara,//
+        openPara, openVerse, openS, someText,//
+        closeVerse, closeChapter,//
+        openChapter, openVerse, someText,//
+        closeVerse,
+        closeS, closePara,//
+        closeChapter,//
+        closeSection,//
+        closePage, closeBook//
+//        , closeBook // <- huh?
+    ));
+    assertValidationSucceeds(book, events);
+  }
+
+  @Test
+  public void validateBibleText2() {
+    Pattern s = range(name("s"), text());
+    Pattern verse = range(name("verse"), text());
+    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+    Pattern para = range(name("para"),//
+        concur(//
+            oneOrMore(verse),//
+            oneOrMore(s)
+        )//
+    );
+    Pattern book = range(name("book"),//
+        concur(//
+            oneOrMore(chapter),//
+            oneOrMore(para)//
+        )//
+    );
+
+    Event openBook = Events.startTagEvent(qName("book"));
+    Event closeBook = Events.endTagEvent(qName("book"));
+
+    Event openChapter = Events.startTagEvent(qName("chapter"));
+    Event closeChapter = Events.endTagEvent(qName("chapter"));
+
+    Event openPara = Events.startTagEvent(qName("para"));
+    Event closePara = Events.endTagEvent(qName("para"));
+
+    Event openS = Events.startTagEvent(qName("s"));
+    Event closeS = Events.endTagEvent(qName("s"));
+
+    Event openVerse = Events.startTagEvent(qName("verse"));
+    Event closeVerse = Events.endTagEvent(qName("verse"));
+
+
+    Event someText = Events.textEvent("some text");
+
+    List<Event> events = new ArrayList<>();
+    // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
+    events.addAll(asList(//
+        openBook,
+        openChapter,
+        openPara,
+        openVerse,
+        openS,
+        someText,
+        closeVerse,
+        closeS,
+        closeChapter,
+        closePara,
+        closeBook//
+//        , closeBook // <- huh?
+    ));
+    assertValidationSucceeds(book, events);
+  }
+
+  /* private methods*/
 
   private ValidationResult validate(Pattern schema, List<Event> events) {
     LOG.info("schema=\n{}", Utilities.patternTreeToDepth(schema, 2));
