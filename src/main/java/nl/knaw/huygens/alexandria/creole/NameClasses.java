@@ -87,6 +87,11 @@ public class NameClasses {
     public Basics.LocalName getLocalName() {
       return localName;
     }
+
+    @Override
+    public String toString() {
+      return localName.getValue();
+    }
   }
 
   public static NsNameExcept nsNameExcept(String uri, NameClass nameClass) {

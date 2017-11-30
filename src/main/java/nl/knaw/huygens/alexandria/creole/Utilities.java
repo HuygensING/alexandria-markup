@@ -31,7 +31,8 @@ import java.util.function.Function;
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 class Utilities {
 
-  private static final String INDENT = "| ";
+  private static final String INDENT = "  ";
+//  private static final String INDENT = "| ";
   private static final String ELLIPSES = "...";
 
   /*
@@ -94,8 +95,8 @@ class Utilities {
     //  nullable (After _ _) = False
     if (pattern instanceof Patterns.After) {
       Patterns.After after = (Patterns.After) pattern;
-      return nullable(after.getPattern1()) && nullable(after.getPattern2());
-//      return false;
+//      return nullable(after.getPattern1()) && nullable(after.getPattern2());
+      return false;
     }
     //  nullable (All p1 p2) = nullable p1 && nullable p2
     if (pattern instanceof Patterns.All) {
@@ -278,7 +279,6 @@ class Utilities {
     return expectedEvents;
   }
 
-
   private static List<Events.StartTagEvent> expectedStartTagEvents(NameClass nameClass) {
     List<Events.StartTagEvent> startTagEvents = new ArrayList<>();
 
@@ -313,6 +313,33 @@ class Utilities {
 
   public static String patternTreeToDepth(Pattern pattern, int maxDepth) {
     return patternTreeToDepth(pattern, 0, maxDepth);
+  }
+
+  public static List<Pattern> leafPatterns(Pattern pattern) {
+    List<Pattern> leafPatterns = new ArrayList<>();
+    if (pattern instanceof Patterns.PatternWithoutParameters
+        || pattern instanceof Patterns.EndRange) {
+      leafPatterns.add(pattern);
+      return leafPatterns;
+    }
+    if (pattern instanceof Patterns.Range) {
+      Patterns.Range range = (Patterns.Range) pattern;
+      leafPatterns.add(range);
+      leafPatterns.addAll(leafPatterns(range.getPattern()));
+      return leafPatterns;
+    }
+    if (pattern instanceof Patterns.PatternWithOnePatternParameter) {
+      Patterns.PatternWithOnePatternParameter pattern1 = (Patterns.PatternWithOnePatternParameter) pattern;
+      leafPatterns.addAll(leafPatterns(pattern1.getPattern()));
+      return leafPatterns;
+    }
+    if (pattern instanceof Patterns.PatternWithTwoPatternParameters) {
+      Patterns.PatternWithTwoPatternParameters pattern1 = (Patterns.PatternWithTwoPatternParameters) pattern;
+      leafPatterns.addAll(leafPatterns(pattern1.getPattern1()));
+      leafPatterns.addAll(leafPatterns(pattern1.getPattern2()));
+      return leafPatterns;
+    }
+    throw new RuntimeException("unexpected pattern: " + pattern);
   }
 
   /* private */

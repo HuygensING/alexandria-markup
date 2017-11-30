@@ -47,12 +47,24 @@ class Patterns {
    */
 
   static class Empty extends PatternWithoutParameters {
+    @Override
+    public String toString() {
+      return "Empty()";
+    }
   }
 
   static class NotAllowed extends PatternWithoutParameters {
+    @Override
+    public String toString() {
+      return "NotAllowed()";
+    }
   }
 
   static class Text extends PatternWithoutParameters {
+    @Override
+    public String toString() {
+      return "Text()";
+    }
   }
 
   static class Choice extends PatternWithTwoPatternParameters {
@@ -114,6 +126,11 @@ class Patterns {
     Pattern getPattern() {
       return pattern;
     }
+
+    @Override
+    public String toString() {
+      return "[" + nameClass + ">";
+    }
   }
 
   static class EndRange extends AbstractPattern {
@@ -137,7 +154,7 @@ class Patterns {
     @Override
     public String toString() {
       String postfix = id.isEmpty() ? "" : "~" + id;
-      return "{" + qName + postfix + "]";
+      return "<" + qName + postfix + "]";
     }
   }
 

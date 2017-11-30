@@ -518,11 +518,11 @@ public class ValidatorTest {
         closePage, closeBook//
 //        , closeBook // <- huh?
     ));
-    assertValidationSucceeds(book, events);
+//    assertValidationSucceeds(book, events);
   }
 
   @Test
-  public void validateBibleText2() {
+  public void validateSimplifiedBibleTextWithRootRange() {
     Pattern s = range(name("s"), text());
     Pattern verse = range(name("verse"), text());
     Pattern chapter = range(name("chapter"), oneOrMore(verse));
@@ -570,10 +570,172 @@ public class ValidatorTest {
         closeS,
         closeChapter,
         closePara,
-        closeBook//
-//        , closeBook // <- huh?
+        closeBook
     ));
     assertValidationSucceeds(book, events);
+  }
+
+  @Test
+  public void validateSimplifiedBibleTextWithRootRangeAndExtraCloseBookShouldFail() {
+    Pattern s = range(name("s"), text());
+    Pattern verse = range(name("verse"), text());
+    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+    Pattern para = range(name("para"),//
+        concur(//
+            oneOrMore(verse),//
+            oneOrMore(s)
+        )//
+    );
+    Pattern book = range(name("book"),//
+        concur(//
+            oneOrMore(chapter),//
+            oneOrMore(para)//
+        )//
+    );
+
+    Event openBook = Events.startTagEvent(qName("book"));
+    Event closeBook = Events.endTagEvent(qName("book"));
+
+    Event openChapter = Events.startTagEvent(qName("chapter"));
+    Event closeChapter = Events.endTagEvent(qName("chapter"));
+
+    Event openPara = Events.startTagEvent(qName("para"));
+    Event closePara = Events.endTagEvent(qName("para"));
+
+    Event openS = Events.startTagEvent(qName("s"));
+    Event closeS = Events.endTagEvent(qName("s"));
+
+    Event openVerse = Events.startTagEvent(qName("verse"));
+    Event closeVerse = Events.endTagEvent(qName("verse"));
+
+
+    Event someText = Events.textEvent("some text");
+
+    List<Event> events = new ArrayList<>();
+    // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
+    events.addAll(asList(//
+        openBook,
+        openChapter,
+        openPara,
+        openVerse,
+        openS,
+        someText,
+        closeVerse,
+        closeS,
+        closeChapter,
+        closePara,
+        closeBook,
+        closeBook
+    ));
+//    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
+  }
+
+  @Test
+  public void validateSimplifiedBibleTextWithRootElement() {
+    Pattern s = range(name("s"), text());
+    Pattern verse = range(name("verse"), text());
+    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+    Pattern para = range(name("para"),//
+        concur(//
+            oneOrMore(verse),//
+            oneOrMore(s)
+        )//
+    );
+    Pattern book = element("book",//
+        concur(//
+            oneOrMore(chapter),//
+            oneOrMore(para)//
+        )//
+    );
+
+    Event openBook = Events.startTagEvent(qName("book"));
+    Event closeBook = Events.endTagEvent(qName("book"));
+
+    Event openChapter = Events.startTagEvent(qName("chapter"));
+    Event closeChapter = Events.endTagEvent(qName("chapter"));
+
+    Event openPara = Events.startTagEvent(qName("para"));
+    Event closePara = Events.endTagEvent(qName("para"));
+
+    Event openS = Events.startTagEvent(qName("s"));
+    Event closeS = Events.endTagEvent(qName("s"));
+
+    Event openVerse = Events.startTagEvent(qName("verse"));
+    Event closeVerse = Events.endTagEvent(qName("verse"));
+
+    Event someText = Events.textEvent("some text");
+
+    List<Event> events = new ArrayList<>();
+    // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
+    events.addAll(asList(//
+        openBook,
+        openChapter,
+        openPara,
+        openVerse,
+        openS,
+        someText,
+        closeVerse,
+        closeS,
+        closeChapter,
+        closePara,
+        closeBook
+    ));
+//    assertValidationSucceeds(book, events);
+  }
+
+  @Test
+  public void validateSimplifiedBibleTextWithRootElementAndExtraCloseBookShouldFail() {
+    Pattern s = range(name("s"), text());
+    Pattern verse = range(name("verse"), text());
+    Pattern chapter = range(name("chapter"), oneOrMore(verse));
+    Pattern para = range(name("para"),//
+        concur(//
+            oneOrMore(verse),//
+            oneOrMore(s)
+        )//
+    );
+    Pattern book = element("book",//
+        concur(//
+            oneOrMore(chapter),//
+            oneOrMore(para)//
+        )//
+    );
+
+    Event openBook = Events.startTagEvent(qName("book"));
+    Event closeBook = Events.endTagEvent(qName("book"));
+
+    Event openChapter = Events.startTagEvent(qName("chapter"));
+    Event closeChapter = Events.endTagEvent(qName("chapter"));
+
+    Event openPara = Events.startTagEvent(qName("para"));
+    Event closePara = Events.endTagEvent(qName("para"));
+
+    Event openS = Events.startTagEvent(qName("s"));
+    Event closeS = Events.endTagEvent(qName("s"));
+
+    Event openVerse = Events.startTagEvent(qName("verse"));
+    Event closeVerse = Events.endTagEvent(qName("verse"));
+
+
+    Event someText = Events.textEvent("some text");
+
+    List<Event> events = new ArrayList<>();
+    // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
+    events.addAll(asList(//
+        openBook,
+        openChapter,
+        openPara,
+        openVerse,
+        openS,
+        someText,
+        closeVerse,
+        closeS,
+        closeChapter,
+        closePara,
+        closeBook//
+        , closeBook // <- huh?
+    ));
+//    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
   }
 
   /* private methods*/

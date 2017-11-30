@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.Utilities.*;
 import org.apache.commons.lang3.StringUtils;
@@ -49,9 +50,11 @@ class Derivatives {
   // eventsDeriv :: Pattern -> [Event] -> Pattern
   Pattern eventsDeriv(Pattern pattern, List<Event> events) {
 //    LOG.debug("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
-    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 10));
+//    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 10));
+    LOG.debug("leafpatterns:\n{}", leafPatterns(pattern).stream().map(Pattern::toString).distinct().collect(toList()));
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
+      LOG.debug("\n{}", Utilities.patternTreeToDepth(pattern, 20));
       return pattern;
     }
 
@@ -59,6 +62,7 @@ class Derivatives {
     Event head = events.remove(0);
     LOG.debug("{}: {}", head.getClass().getSimpleName(), head);
     Pattern headDeriv = eventsDeriv(pattern, head);
+//    LOG.debug("\n{}", Utilities.patternTreeToDepth(headDeriv, 20));
 
     if (headDeriv instanceof Patterns.NotAllowed) {
       // fail fast
@@ -66,8 +70,6 @@ class Derivatives {
       errorListener.setUnexpectedEvent(head);
       return notAllowed();
     }
-//    LOG.info("head derivation: {}", headDeriv);
-//    LOG.info("remaining events: {}", events.size());
     return eventsDeriv(headDeriv, events);
   }
 
@@ -243,7 +245,7 @@ class Derivatives {
   // Start tags are handled in a very generic way by all the patterns, except the Range pattern,
   // whose derivative is a group of the content pattern for the range followed by an EndRange pattern for the range.
   // Note that the EndRange pattern is created with the same qualified name and ID as the matched range.
-  private static final Map<String, TriFunction<? extends Pattern, Basics.QName, Basics.Id, ? extends Pattern>> startTagDerivFunctions//
+  private static final Map<String, TriFunction<Pattern, Basics.QName, Basics.Id, ? extends Pattern>> startTagDerivFunctions//
       = new HashMap<>();
 
   static {
@@ -381,7 +383,7 @@ class Derivatives {
   private static Pattern startTagDeriv(Pattern pattern, Basics.QName qn, Basics.Id id) {
     String simpleName = pattern.getClass().getSimpleName();
     //    startTagDeriv _ _ _ = NotAllowed
-    TriFunction<? extends Pattern, Basics.QName, Basics.Id, ? extends Pattern> function //
+    TriFunction<Pattern, Basics.QName, Basics.Id, ? extends Pattern> function //
         = startTagDerivFunctions.getOrDefault(simpleName, (a, b, c) -> notAllowed());
     return function.apply(pattern, qn, id);
   }
@@ -452,11 +454,11 @@ class Derivatives {
       );
     }
 
-    //  endTagDeriv (Concur p1 p2) qn id =
-    //  let d1 = endTagDeriv p1 qn id
-    //      d2 = endTagDeriv p2 qn id
-    //  in choice (choice (concur d1 p2) (concur p1 d2))
-    //      (concur d1 d2)
+    // endTagDeriv (Concur p1 p2) qn id =
+    //   let d1 = endTagDeriv p1 qn id
+    //       d2 = endTagDeriv p2 qn id
+    //   in choice (choice (concur d1 p2) (concur p1 d2))
+    //       (concur d1 d2)
     if (pattern instanceof Patterns.Concur) {
       Patterns.Concur concur = (Patterns.Concur) pattern;
       Pattern p1 = concur.getPattern1();
@@ -472,8 +474,8 @@ class Derivatives {
       );
     }
 
-    //  endTagDeriv (Partition p) qn id =
-    //  after (endTagDeriv p qn id) Empty
+    // endTagDeriv (Partition p) qn id =
+    //   after (endTagDeriv p qn id) Empty
     if (pattern instanceof Patterns.Partition) {
       Patterns.Partition partition = (Patterns.Partition) pattern;
       Pattern p = partition.getPattern();
@@ -483,9 +485,9 @@ class Derivatives {
       );
     }
 
-    //  endTagDeriv (OneOrMore p) qn id =
-    //  group (endTagDeriv p qn id)
-    //        (choice (OneOrMore p) Empty)
+    // endTagDeriv (OneOrMore p) qn id =
+    //   group (endTagDeriv p qn id)
+    //         (choice (OneOrMore p) Empty)
     if (pattern instanceof Patterns.OneOrMore) {
       Patterns.OneOrMore oneOrMore = (Patterns.OneOrMore) pattern;
       Pattern p = oneOrMore.getPattern();
@@ -495,9 +497,9 @@ class Derivatives {
       );
     }
 
-    //  endTagDeriv (ConcurOneOrMore p) qn id =
-    //  concur (endTagDeriv p qn id)
-    //         (choice (ConcurOneOrMore p) anyContent)
+    // endTagDeriv (ConcurOneOrMore p) qn id =
+    //   concur (endTagDeriv p qn id)
+    //          (choice (ConcurOneOrMore p) anyContent)
     if (pattern instanceof Patterns.ConcurOneOrMore) {
       Patterns.ConcurOneOrMore concurOneOrMore = (Patterns.ConcurOneOrMore) pattern;
       Pattern p = concurOneOrMore.getPattern();
@@ -507,8 +509,8 @@ class Derivatives {
       );
     }
 
-    //  endTagDeriv (After p1 p2) qn id =
-    //  after (endTagDeriv p1 qn id) p2
+    // endTagDeriv (After p1 p2) qn id =
+    //   after (endTagDeriv p1 qn id) p2
     if (pattern instanceof Patterns.After) {
       Patterns.After after = (Patterns.After) pattern;
       Pattern p1 = after.getPattern1();

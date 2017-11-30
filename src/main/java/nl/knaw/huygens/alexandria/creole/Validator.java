@@ -21,10 +21,13 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Validator {
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   private final Pattern schemaPattern;
 
@@ -40,6 +43,7 @@ public class Validator {
     ValidationErrorListener errorListener = new ValidationErrorListener();
     Derivatives derivatives = new Derivatives(errorListener);
     Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
+    LOG.debug("end pattern = {}", pattern);
     return new ValidationResult()//
         .setSuccess(nullable(pattern))//
         .setUnexpectedEvent(errorListener.getUnexpectedEvent());

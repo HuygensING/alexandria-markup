@@ -205,7 +205,7 @@ public class UtilitiesTest extends CreoleTest {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
     Pattern p = new Patterns.After(p1, p2);
-    assertThat(p).isNullable();
+    assertThat(p).isNotNullable();
   }
 
   @Test
