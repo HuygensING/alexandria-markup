@@ -31,8 +31,8 @@ import java.util.function.Function;
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 class Utilities {
 
-  private static final String INDENT = "  ";
-//  private static final String INDENT = "| ";
+//  private static final String INDENT = "  ";
+  private static final String INDENT = "| ";
   private static final String ELLIPSES = "...";
 
   /*

@@ -20,9 +20,9 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.Utilities.*;
+import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
+import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ class Derivatives {
   Pattern eventsDeriv(Pattern pattern, List<Event> events) {
 //    LOG.debug("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
 //    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 10));
-    LOG.debug("leafpatterns:\n{}", leafPatterns(pattern).stream().map(Pattern::toString).distinct().collect(toList()));
+//    LOG.debug("leafpatterns:\n{}", leafPatterns(pattern).stream().map(Pattern::toString).distinct().collect(toList()));
     // eventsDeriv p [] = p
     if (events.isEmpty()) {
       LOG.debug("\n{}", Utilities.patternTreeToDepth(pattern, 20));

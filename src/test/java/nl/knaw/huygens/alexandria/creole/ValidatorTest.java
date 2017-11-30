@@ -122,7 +122,6 @@ public class ValidatorTest {
     assertValidationFailsWithUnexpectedEvent(schema, events, someText);
   }
 
-
   @Test
   public void validatingSingleRangeAgainstElementPattern() {
     // <element name="foo">
@@ -142,6 +141,27 @@ public class ValidatorTest {
     events.addAll(asList(openFoo, someText, closeFoo));
 
     assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstElementPatternWithInvalidExtraCloseFoo() {
+    // <element name="foo">
+    //   <text />
+    // </element>
+    Pattern schema = element("foo",//
+        text()//
+    );//
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]{foo]
+    events.addAll(asList(openFoo, someText, closeFoo, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo);
   }
 
   @Test
@@ -205,6 +225,27 @@ public class ValidatorTest {
     events.addAll(asList(openFoo, someText, closeFoo));
 
     assertValidationSucceeds(schema, events);
+  }
+
+  @Test
+  public void validatingSingleRangeAgainstRangePatternInvalidExtraCloseEvent() {
+    // <range name="foo">
+    //   <text />
+    //  </range>
+    Pattern schema = range(name("foo"),//
+        text()//
+    );
+
+    Basics.QName foo = qName("foo");
+    Event openFoo = Events.startTagEvent(foo);
+    Event closeFoo = Events.endTagEvent(foo);
+    Event someText = Events.textEvent("...");
+
+    List<Event> events = new ArrayList<>();
+    // [foo}...{foo]{foo]
+    events.addAll(asList(openFoo, someText, closeFoo, closeFoo));
+
+    assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo);
   }
 
   @Test
