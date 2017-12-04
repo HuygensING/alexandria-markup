@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*
- * #%L
+    /*
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,7 +18,7 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
@@ -31,7 +31,7 @@ import java.util.function.Function;
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 class Utilities {
 
-//  private static final String INDENT = "  ";
+  //  private static final String INDENT = "  ";
   private static final String INDENT = "| ";
   private static final String ELLIPSES = "...";
 
@@ -102,6 +102,10 @@ class Utilities {
     if (pattern instanceof Patterns.All) {
       Patterns.All all = (Patterns.All) pattern;
       return nullable(all.getPattern1()) && nullable(all.getPattern2());
+    }
+
+    if (pattern instanceof Patterns.Atom || pattern instanceof Patterns.Annotation) {
+      return false;
     }
 
     throw unexpectedPattern(pattern);
@@ -183,6 +187,11 @@ class Utilities {
     });
 
     allowsTextMap.put(Patterns.Text.class, pattern -> true);
+
+    allowsTextMap.put(Patterns.Range.class, pattern -> false);
+    allowsTextMap.put(Patterns.EndRange.class, pattern -> false);
+    allowsTextMap.put(Patterns.Annotation.class, pattern -> false);
+    allowsTextMap.put(Patterns.Empty.class, pattern -> false);
 
   }
 
@@ -419,10 +428,10 @@ class Utilities {
   }
 
   private static RuntimeException unexpectedPattern(Pattern pattern) {
-    return new RuntimeException("Unexpected Pattern: " + pattern);
+    return new RuntimeException("Unexpected " + pattern.getClass().getSimpleName() + " Pattern: " + pattern);
   }
 
   private static RuntimeException unexpectedNameClass(NameClass nameClass) {
-    return new RuntimeException("Unexpected NameClass: " + nameClass);
+    return new RuntimeException("Unexpected " + nameClass.getClass().getSimpleName() + " NameClass: " + nameClass);
   }
 }

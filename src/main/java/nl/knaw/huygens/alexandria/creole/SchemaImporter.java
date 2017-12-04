@@ -100,7 +100,7 @@ public class SchemaImporter {
     Pattern pattern = children.size() == 1
         ? toPattern(children.get(0))
         : toGroup(children);
-    return annotation(name,pattern);
+    return annotation(name, pattern);
   }
 
   private static Pattern handleAttribute(Element element) {
@@ -121,7 +121,6 @@ public class SchemaImporter {
 
   private static Pattern handleConcur(Element element) {
     List<Element> children = getChildElements(element);
-    LOG.debug("concur children = {}", children);
 //    List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
@@ -286,7 +285,19 @@ public class SchemaImporter {
 
   private static NameClass handleAnyName(Element element) {
     List<Element> children = getChildElements(element);
-    return anyName();
+    if (hasExcept(children)) {
+      Element except = children.get(0);
+      List<Element> exceptChildren = getChildElements(except);
+      Preconditions.checkState(exceptChildren.size() == 1);
+      NameClass nc = toNameClass(exceptChildren.get(0));
+      return anyNameExcept(nc);
+    } else {
+      return anyName();
+    }
+  }
+
+  private static boolean hasExcept(List<Element> children) {
+    return children.size() == 1 && children.get(0).getName().equals("except");
   }
 
   private static NameClass handleName(Element element) {
@@ -297,7 +308,17 @@ public class SchemaImporter {
   }
 
   private static NameClass handleNsName(Element element) {
-    return nsName("");
+    String uri = element.getAttribute("uri");
+    List<Element> children = getChildElements(element);
+    if (hasExcept(children)) {
+      Element except = children.get(0);
+      List<Element> exceptChildren = getChildElements(except);
+      Preconditions.checkState(exceptChildren.size() == 1);
+      NameClass nc = toNameClass(exceptChildren.get(0));
+      return nsNameExcept(uri, nc);
+    } else {
+      return nsName(uri);
+    }
   }
 
   private static NameClass handleNameClassChoice(Element element) {

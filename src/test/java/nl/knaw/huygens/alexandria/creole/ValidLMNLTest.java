@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,8 +18,10 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter2;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -32,59 +34,67 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
-public class ImportCreoleSchemasTest extends CreoleTest {
+public class ValidLMNLTest extends CreoleTest {
   public static final String ROOTDIR = "src/test/resources/";
-  private static Logger LOG = LoggerFactory.getLogger(ImportCreoleSchemasTest.class);
+  public static final String LMNL_DIR = ROOTDIR + "valid/";
+  private static Logger LOG = LoggerFactory.getLogger(ValidLMNLTest.class);
+
   private String basename;
 
-  public static final IOFileFilter CREOLE_FILE_FILTER = new IOFileFilter() {
+  public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
-      return isCreoleXML(file.getName());
+      return isLMNL(file.getName());
     }
 
     @Override
     public boolean accept(File dir, String name) {
-      return isCreoleXML(name);
+      return isLMNL(name);
     }
 
-    private boolean isCreoleXML(String name) {
-      return name.endsWith(".creole");
+    private boolean isLMNL(String name) {
+      return name.endsWith(".lmnl");
     }
   };
 
   @Parameterized.Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File(ROOTDIR), CREOLE_FILE_FILTER, null)//
+    return FileUtils.listFiles(new File(LMNL_DIR), LMNL_FILE_FILTER, null)//
         .stream()//
         .map(File::getName)//
-        .map(n -> n.replace(".creole", ""))//
+        .map(n -> n.replace(".lmnl", ""))//
         .map(b -> new String[]{b})//
         .collect(Collectors.toList());
   }
 
-  public ImportCreoleSchemasTest(String basename) {
+  public ValidLMNLTest(String basename) {
     this.basename = basename;
   }
 
   @Test
   public void testCreoleFile() throws IOException, LMNLSyntaxError {
-    LOG.info("testing {}.creole", basename);
-    processCreoleFile(basename);
-    LOG.info("done testing {}.creole", basename);
+    LOG.info("validating {}.lmnl against {}.creole", basename, basename);
+    validateLMNL(basename);
+    LOG.info("done validating {}.lmnl against {}.creole", basename, basename);
   }
 
-  private void processCreoleFile(String basename) throws IOException {
+  private void validateLMNL(String basename) throws IOException {
     String xml = FileUtils.readFileToString(new File(ROOTDIR + basename + ".creole"), "UTF-8");
     assertThat(xml).isNotEmpty();
     LOG.info("testing {}.creole", basename);
     LOG.info("{}", xml);
     Pattern schema = SchemaImporter.fromXML(xml);
     assertThat(schema).isNotNull();
-  }
 
+    String lmnl = FileUtils.readFileToString(new File(LMNL_DIR + basename + ".lmnl"), "UTF-8");
+    List<Event> events = new LMNLImporter2().importLMNL(lmnl);
+    Validator validator = Validator.ofPattern(schema);
+    ValidationResult result = validator.validate(events);
+    assertThat(result).isSuccess();
+  }
 
 }
