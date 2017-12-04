@@ -26,6 +26,7 @@
     <junit.version>4.12</junit.version>
     <logback.version>1.2.3</logback.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
+    <visitei.version>0.6.2</visitei.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
     <maven-license.version>1.14</maven-license.version>
 
@@ -240,6 +241,12 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>nl.knaw.huygens</groupId>
+      <artifactId>visitei</artifactId>
+      <version>${visitei.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
