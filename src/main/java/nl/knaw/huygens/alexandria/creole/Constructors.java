@@ -288,6 +288,10 @@ class Constructors {
     return choice(concurOneOrMore(pattern), empty());
   }
 
+  static Pattern optional(Pattern pattern) {
+    return choice(pattern, empty());
+  }
+
   static Pattern mixed(Pattern pattern) {
     return interleave(text(), pattern);
   }

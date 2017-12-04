@@ -64,6 +64,7 @@ public class SchemaImporter {
     elementHandlers.put("interleave", SchemaImporter::handleInterleave);
     elementHandlers.put("mixed", SchemaImporter::handleMixed);
     elementHandlers.put("oneOrMore", SchemaImporter::handleOneOrMore);
+    elementHandlers.put("optional", SchemaImporter::handleOptional);
     elementHandlers.put("partition", SchemaImporter::handlePartition);
     elementHandlers.put("range", SchemaImporter::handleRange);
     elementHandlers.put("text", SchemaImporter::handleText);
@@ -150,6 +151,13 @@ public class SchemaImporter {
     Preconditions.checkState(children.size() == 1);
     Pattern pattern = toPattern(children.get(0));
     return oneOrMore(pattern);
+  }
+
+  private static Pattern handleOptional(Element element) {
+    List<Element> children = getChildElements(element);
+    Preconditions.checkState(children.size() == 1);
+    Pattern pattern = toPattern(children.get(0));
+    return optional(pattern);
   }
 
   private static Pattern handlePartition(Element element) {
