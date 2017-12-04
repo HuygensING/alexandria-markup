@@ -1,0 +1,5 @@
+<start>
+<range name="foo">
+  <text/>
+</range>
+</start>

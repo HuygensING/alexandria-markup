@@ -1,0 +1,24 @@
+<start>
+<concur>
+   <oneOrMore>
+     <range name="chapter">
+       <interleave>
+         <zeroOrMore>
+           <element name="heading"><text/></element>
+         </zeroOrMore>
+         <oneOrMore>
+           <range name="v"><text/></range>
+         </oneOrMore>
+       </interleave>
+     </range>
+   </oneOrMore>
+   <oneOrMore>
+     <range name="section">
+       <element name="heading"><text/></element>
+       <oneOrMore>
+         <range name="para"><text/></range>
+       </oneOrMore>
+     </range>
+   </oneOrMore>
+ </concur>
+</start>

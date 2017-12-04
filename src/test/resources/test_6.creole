@@ -1,0 +1,5 @@
+<start>
+<range name="bar">
+  <text/>
+</range>
+</start>

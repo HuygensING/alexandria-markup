@@ -1,0 +1,9 @@
+<start>
+<element name="para">
+   <concurZeroOrMore>
+     <mixed>
+       <range name="phrase"><text/></range>
+     </mixed>
+   </concurZeroOrMore>
+ </element>
+</start>

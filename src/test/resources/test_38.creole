@@ -1,0 +1,10 @@
+<start>
+<range>
+  <anyName>
+    <except>
+      <name>bar</name>
+    </except>
+  </anyName>
+  <text/>
+</range>
+</start>

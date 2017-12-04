@@ -1,0 +1,12 @@
+[play [title}Peer Gynt{title]}
+  [act [n}1{]}
+    [scene [n}i{]}
+      [sp [who}Aase{]}[l} Peer, you're lying!{sp]
+      [sp [who}Peer{]}[stage}without stopping{stage] No, I'm not! {l]{sp]
+      [sp [who}Aase{]}[l} Well then, swear to me it's true! {l]{sp]
+      [sp [who}Peer{]}[l} Swear? Why should I? {sp]
+      [sp [who}Aase{]} See, you dare not! {l]
+                      [l} Every word of it's a lie! {l] {sp]
+    {scene]
+  {act]
+{play]

@@ -1,0 +1,9 @@
+<start>
+<range>
+  <choice>
+    <name>foo</name>
+    <name>bar</name>
+  </choice>
+  <text/>
+</range>
+</start>

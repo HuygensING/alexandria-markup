@@ -1,0 +1,10 @@
+<start>
+<concur>
+  <oneOrMore>
+    <range name="s"><text/></range>
+  </oneOrMore>
+  <oneOrMore>
+    <range name="v"><text/></range>
+  </oneOrMore>
+</concur>
+</start>

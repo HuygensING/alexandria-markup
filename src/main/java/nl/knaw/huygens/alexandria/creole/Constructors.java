@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*
- * #%L
+    /*
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,8 +18,13 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
+
+import static nl.knaw.huygens.alexandria.creole.NameClasses.anyName;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+
+import java.util.ArrayList;
 
 class Constructors {
 
@@ -252,7 +257,7 @@ class Constructors {
 
   // convenience method: element is a range in a partition
   static Pattern element(String localName, Pattern pattern) {
-    NameClass nameClass = NameClasses.name(localName);
+    NameClass nameClass = name(localName);
     return partition(range(nameClass, pattern));
   }
 
@@ -297,20 +302,37 @@ class Constructors {
   }
 
   static Pattern anyContent() {
-//    return interleave(text(), anyAtoms());
-    return text();
+    return interleave(text(), anyAtoms());
+//    return text();
   }
 
-//  static Pattern anyAtoms() {
-//    return choice(oneOrMoreAtoms(), empty());
-//  }
-//
-//  private static Pattern oneOrMoreAtoms() {
-//    return oneOrMore(anyAtom());
-//  }
-//
-//  private static Pattern anyAtom() {
-//    return atom(anyName(),anyAnnotations());
+  static Pattern atom(String name) {
+    return new Patterns.Atom(name(name), new ArrayList<>());
+  }
+
+  static Pattern attribute(String name) {
+    return annotation(name, empty());
+  }
+
+  static Pattern annotation(String name, Pattern pattern) {
+    return new Patterns.Annotation(name(name), pattern);
+  }
+
+  static Pattern anyAtoms() {
+    return choice(oneOrMoreAtoms(), empty());
+  }
+
+  private static Pattern oneOrMoreAtoms() {
+    return oneOrMore(anyAtom());
+  }
+
+  private static Pattern anyAtom() {
+//    return atom(anyName(), anyAnnotations());
+    return new Patterns.Atom(anyName(), null);
+  }
+
+//  private static Pattern anyAnnotations() {
+//    return null;
 //  }
 
 }

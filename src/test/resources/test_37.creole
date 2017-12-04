@@ -1,0 +1,6 @@
+<start>
+<range>
+  <anyName/>
+  <text/>
+</range>
+</start>

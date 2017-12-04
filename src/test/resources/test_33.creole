@@ -1,0 +1,8 @@
+<start>
+<element name="foo">
+  <concur>
+    <element name="baz"><text/></element>
+    <attribute name="bar"/>
+  </concur>
+</element>
+</start>

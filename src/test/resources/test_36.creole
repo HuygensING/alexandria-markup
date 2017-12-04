@@ -1,0 +1,6 @@
+<start>
+<element name="foo">
+  <attribute name="bar"/>
+  <element name="baz"><text/></element>
+</element>
+</start>

@@ -1,0 +1,5 @@
+<start>
+<atom name="foo">
+  <annotation name="bar"><text/></annotation>
+</atom>
+</start>

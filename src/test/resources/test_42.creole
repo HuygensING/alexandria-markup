@@ -1,0 +1,5 @@
+<start>
+<range ns="http://www.example.com" name="bar">
+  <text/>
+</range>
+</start>

@@ -1,0 +1,5 @@
+<start>
+<element name="foo">
+  <empty/>
+</element>
+</start>

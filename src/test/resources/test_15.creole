@@ -1,0 +1,10 @@
+<start>
+<interleave>
+  <oneOrMore>
+    <range name="s"><text/></range>
+  </oneOrMore>
+  <oneOrMore>
+    <range name="v"><text/></range>
+  </oneOrMore>
+</interleave>
+</start>

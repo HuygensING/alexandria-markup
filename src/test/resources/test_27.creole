@@ -1,0 +1,9 @@
+<start>
+<interleave>
+  <partition>
+    <range name="foo"><text/></range>
+    <range name="bar"><text/></range>
+  </partition>
+  <range name="baz"><text/></range>
+</interleave>
+</start>

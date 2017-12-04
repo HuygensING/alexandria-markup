@@ -1,0 +1,6 @@
+[foo [select1}...{] 
+     [choice2}...{]}
+  [bar}...{bar]
+  [select1}...{select1]
+  [choice1}...{choice1]
+{foo]

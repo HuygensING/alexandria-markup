@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,13 +18,15 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
 import com.google.common.base.Preconditions;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.*;
 import nl.knaw.huygens.tei.Document;
 import nl.knaw.huygens.tei.Element;
+import nl.knaw.huygens.tei.Node;
+import nl.knaw.huygens.tei.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,32 +54,60 @@ public class SchemaImporter {
     return Patterns.EMPTY;
   }
 
-  static final Map<String, Function<Element, Pattern>> elementHandlers = new HashMap<>();
+  static final Map<String, Function<Element, Pattern>> elementToPattern = new HashMap<>();
 
   static {
-    elementHandlers.put("choice", SchemaImporter::handleChoice);
-    elementHandlers.put("concur", SchemaImporter::handleConcur);
-    elementHandlers.put("concurOneOrMore", SchemaImporter::handleConcurOneOrMore);
-    elementHandlers.put("element", SchemaImporter::handleElement);
-    elementHandlers.put("empty", SchemaImporter::handleEmpty);
-    elementHandlers.put("group", SchemaImporter::handleGroup);
-    elementHandlers.put("interleave", SchemaImporter::handleInterleave);
-    elementHandlers.put("mixed", SchemaImporter::handleMixed);
-    elementHandlers.put("oneOrMore", SchemaImporter::handleOneOrMore);
-    elementHandlers.put("optional", SchemaImporter::handleOptional);
-    elementHandlers.put("partition", SchemaImporter::handlePartition);
-    elementHandlers.put("range", SchemaImporter::handleRange);
-    elementHandlers.put("text", SchemaImporter::handleText);
-    elementHandlers.put("zeroOrMore", SchemaImporter::handleZeroOrMore);
+    elementToPattern.put("atom", SchemaImporter::handleAtom);
+    elementToPattern.put("annotation", SchemaImporter::handleAnnotation);
+    elementToPattern.put("attribute", SchemaImporter::handleAttribute);
+    elementToPattern.put("choice", SchemaImporter::handleChoice);
+    elementToPattern.put("concur", SchemaImporter::handleConcur);
+    elementToPattern.put("concurOneOrMore", SchemaImporter::handleConcurOneOrMore);
+    elementToPattern.put("concurZeroOrMore", SchemaImporter::handleConcurZeroOrMore);
+    elementToPattern.put("element", SchemaImporter::handleElement);
+    elementToPattern.put("empty", SchemaImporter::handleEmpty);
+    elementToPattern.put("group", SchemaImporter::handleGroup);
+    elementToPattern.put("interleave", SchemaImporter::handleInterleave);
+    elementToPattern.put("mixed", SchemaImporter::handleMixed);
+    elementToPattern.put("oneOrMore", SchemaImporter::handleOneOrMore);
+    elementToPattern.put("optional", SchemaImporter::handleOptional);
+    elementToPattern.put("partition", SchemaImporter::handlePartition);
+    elementToPattern.put("range", SchemaImporter::handleRange);
+    elementToPattern.put("text", SchemaImporter::handleText);
+    elementToPattern.put("zeroOrMore", SchemaImporter::handleZeroOrMore);
   }
 
   private static Pattern toPattern(Element element) {
     String elementName = element.getName();
-    Function<Element, Pattern> handler = elementHandlers.get(elementName);
+    Function<Element, Pattern> handler = elementToPattern.get(elementName);
     if (handler == null) {
       throw new RuntimeException("no elementHandler defined for Element " + elementName);
     }
     return handler.apply(element);
+  }
+
+  private static Pattern handleAtom(Element element) {
+    List<Element> children = getChildElements(element);
+    List<Element> attributes = removeAttributes(children);
+    String name = element.getAttribute("name");
+    return atom(name);
+  }
+
+  private static Pattern handleAnnotation(Element element) {
+    List<Element> children = getChildElements(element);
+    List<Element> attributes = removeAttributes(children);
+    String name = element.getAttribute("name");
+    Pattern pattern = children.size() == 1
+        ? toPattern(children.get(0))
+        : toGroup(children);
+    return annotation(name,pattern);
+  }
+
+  private static Pattern handleAttribute(Element element) {
+    List<Element> children = getChildElements(element);
+    List<Element> attributes = removeAttributes(children);
+    String name = element.getAttribute("name");
+    return attribute(name);
   }
 
   private static Pattern handleChoice(Element element) {
@@ -92,7 +122,7 @@ public class SchemaImporter {
   private static Pattern handleConcur(Element element) {
     List<Element> children = getChildElements(element);
     LOG.debug("concur children = {}", children);
-    List<Element> attributes = removeAttributes(children);
+//    List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
     Pattern pattern2 = groupWhenNeeded(children);
@@ -101,16 +131,25 @@ public class SchemaImporter {
 
   private static Pattern handleConcurOneOrMore(Element element) {
     List<Element> children = getChildElements(element);
+    List<Element> attributes = removeAttributes(children);
     Preconditions.checkState(children.size() == 1);
     Pattern pattern = toPattern(children.get(0));
     return concurOneOrMore(pattern);
   }
 
-  private static Pattern handleElement(Element element) {
-    String localName = element.getAttribute("name");
+  private static Pattern handleConcurZeroOrMore(Element element) {
     List<Element> children = getChildElements(element);
     Preconditions.checkState(children.size() == 1);
     Pattern pattern = toPattern(children.get(0));
+    return concurZeroOrMore(pattern);
+  }
+
+  private static Pattern handleElement(Element element) {
+    String localName = element.getAttribute("name");
+    List<Element> children = getChildElements(element);
+    Pattern pattern = children.size() == 1
+        ? toPattern(children.get(0))
+        : toGroup(children);
     return element(localName, pattern);
   }
 
@@ -131,7 +170,7 @@ public class SchemaImporter {
 
   private static Pattern handleInterleave(Element element) {
     List<Element> children = getChildElements(element);
-    List<Element> attributes = removeAttributes(children);
+//    List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
     Pattern pattern2 = groupWhenNeeded(children);
@@ -162,19 +201,26 @@ public class SchemaImporter {
 
   private static Pattern handlePartition(Element element) {
     List<Element> children = getChildElements(element);
-    Preconditions.checkState(children.size() == 1);
-    Pattern pattern = toPattern(children.get(0));
+    Pattern pattern = children.size() == 1
+        ? toPattern(children.get(0))
+        : toGroup(children);
     return partition(pattern);
   }
 
   private static Pattern handleRange(Element element) {
-    String localName = element.getAttribute("name");
     List<Element> children = getChildElements(element);
     List<Element> attributes = removeAttributes(children);
+    NameClass nameClass = null;
+    if (element.hasAttribute("name")) {
+      nameClass = name(element.getAttribute("name"));
+
+    } else {
+      nameClass = toNameClass(children.remove(0));
+    }
     Pattern childPattern = (children.size() == 1)//
         ? toPattern(children.get(0))//
         : toGroup(children);
-    return range(name(localName), childPattern);
+    return range(nameClass, childPattern);
   }
 
   private static Pattern handleZeroOrMore(Element element) {
@@ -193,6 +239,7 @@ public class SchemaImporter {
   private static List<Element> getChildElements(Element element) {
     return element.getNodes()//
         .stream()//
+        .filter(Element.class::isInstance)//
         .map(Element.class::cast)//
         .collect(Collectors.toList());
   }
@@ -218,5 +265,48 @@ public class SchemaImporter {
     }
     return pattern2;
   }
+
+  static final Map<String, Function<Element, NameClass>> elementToNameClass = new HashMap<>();
+
+  static {
+    elementToNameClass.put("anyName", SchemaImporter::handleAnyName);
+    elementToNameClass.put("name", SchemaImporter::handleName);
+    elementToNameClass.put("nsName", SchemaImporter::handleNsName);
+    elementToNameClass.put("choice", SchemaImporter::handleNameClassChoice);
+  }
+
+  private static NameClass toNameClass(Element element) {
+    String elementName = element.getName();
+    Function<Element, NameClass> handler = elementToNameClass.get(elementName);
+    if (handler == null) {
+      throw new RuntimeException("no elementHandler defined for Element " + elementName);
+    }
+    return handler.apply(element);
+  }
+
+  private static NameClass handleAnyName(Element element) {
+    List<Element> children = getChildElements(element);
+    return anyName();
+  }
+
+  private static NameClass handleName(Element element) {
+    List<Node> nodes = element.getNodes();
+    Preconditions.checkState(nodes.size() == 1);
+    Text nameNode = (Text) nodes.get(0);
+    return name(nameNode.getText());
+  }
+
+  private static NameClass handleNsName(Element element) {
+    return nsName("");
+  }
+
+  private static NameClass handleNameClassChoice(Element element) {
+    List<Element> children = getChildElements(element);
+    Preconditions.checkState(children.size() == 2);
+    NameClass nc1 = toNameClass(children.remove(0));
+    NameClass nc2 = toNameClass(children.remove(0));
+    return nameClassChoice(nc1, nc2);
+  }
+
 
 }

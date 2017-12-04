@@ -1,0 +1,47 @@
+<grammar xmlns="http://www.lmnl.org/schema/pattern">
+  <start>
+    <ref name="play"/>
+  </start>
+  <define name="play">
+    <element name="play">
+      <annotation name="title"><text/></annotation>
+      <oneOrMore><ref name="act"/></oneOrMore>
+    </element>
+  </define>
+  <define name="act">
+    <element name="act">
+      <annotation name="n"><text/></annotation>
+      <oneOrMore><ref name="scene"/></oneOrMore>
+    </element>
+  </define>
+  <define name="scene">
+    <element name="scene">
+      <annotation name="n"><text/></annotation>
+      <interleave>
+        <zeroOrMore><ref name="stage"/></zeroOrMore>
+        <concur>
+          <oneOrMore><ref name="sp"/></oneOrMore>
+          <oneOrMore><ref name="l"/></oneOrMore>
+        </concur>
+      </interleave>
+    </element>
+  </define>
+  <define name="sp">
+    <range name="sp">
+      <annotation name="who"><text /></annotation>
+      <mixed>
+        <zeroOrMore><ref name="stage"/></zeroOrMore>
+      </mixed>
+    </range>
+  </define>
+  <define name="l">
+    <range name="l">
+      <mixed>
+        <zeroOrMore><ref name="stage"/></zeroOrMore>
+      </mixed>
+    </range>
+  </define>
+  <define name="stage">
+    <element name="stage"><text/></element>
+  </define>
+</grammar>

@@ -1,0 +1,12 @@
+<start>
+<element name="para">
+   <concurZeroOrMore>
+     <mixed>
+       <choice>
+         <range name="b"><text/></range>
+         <range name="i"><text/></range>
+       </choice>
+     </mixed>
+   </concurZeroOrMore>
+ </element>
+</start>

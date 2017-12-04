@@ -111,7 +111,6 @@ public class DefinitionVisitor extends DelegatingVisitor<XmlContext> {
   }
 
   public static class DefineHandler extends DefaultElementHandler {
-
     @Override
     public Traversal enterElement(Element element, XmlContext context) {
       currentDefinition = element.getAttribute("name");

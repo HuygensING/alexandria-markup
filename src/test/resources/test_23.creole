@@ -1,0 +1,19 @@
+<start>
+<element name="chapter">
+   <concur>
+     <oneOrMore>
+       <range name="page">
+         <text/>
+       </range>
+     </oneOrMore>
+     <oneOrMore>
+       <range name="page">
+         <text/>
+       </range>
+     </oneOrMore>
+     <oneOrMore>
+       <range name="para"><text/></range>
+     </oneOrMore>
+   </concur>
+ </element>
+</start>

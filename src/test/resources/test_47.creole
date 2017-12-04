@@ -1,0 +1,9 @@
+<start>
+<atom name="foo">
+  <annotation name="bar">
+    <mixed>
+      <atom name="baz"/>
+    </mixed>
+  </annotation>
+</atom>
+</start>

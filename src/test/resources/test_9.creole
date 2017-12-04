@@ -1,0 +1,10 @@
+<start>
+<choice>
+  <element name="bar">
+    <text/>
+  </element>
+  <range name="bar">
+    <text/>
+  </range>
+</choice>
+</start>

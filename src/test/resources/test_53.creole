@@ -1,0 +1,11 @@
+<start>
+<concurOneOrMore>
+  <mixed>
+    <range name="foo">
+      <mixed>
+        <atom name="bar"/>
+      </mixed>
+    </range>
+  </mixed>
+</concurOneOrMore>
+</start>

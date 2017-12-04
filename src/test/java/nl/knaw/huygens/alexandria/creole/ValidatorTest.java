@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,17 +18,21 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
 import static java.util.Arrays.asList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import nl.knaw.huygens.tei.Document;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -778,6 +782,24 @@ public class ValidatorTest {
     ));
 //    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
   }
+
+//  @Test
+//  public void extractTests() throws IOException {
+//    String xml = FileUtils.readFileToString(new File("data/creole/validate-lmnl.xsl"), "UTF-8");
+//    Document doc = Document.createFromXml(xml, true);
+//    TestVisitor testVisitor = new TestVisitor();
+//    doc.accept(testVisitor);
+//    List<LMNLTest> tests = testVisitor.getTests();
+//    for (int i = 0; i < tests.size(); i++) {
+//      LMNLTest t = tests.get(i);
+//      String baseDir = "src/test/resources/";
+//      String dir = t.isValid() ? "valid" : "invalid";
+//      String lmnlFile = baseDir + dir + "/test_" + i + ".lmnl";
+//      FileUtils.writeStringToFile(new File(lmnlFile), t.getLMNL(), "UTF-8");
+//      String creoleFile = baseDir + "/test_" + i + ".creole";
+//      FileUtils.writeStringToFile(new File(creoleFile), t.getCreole(), "UTF-8");
+//    }
+//  }
 
   /* private methods*/
 

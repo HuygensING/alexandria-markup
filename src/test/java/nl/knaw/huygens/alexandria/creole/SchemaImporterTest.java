@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,13 +18,14 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
 import org.junit.Test;
 
-public class SchemaImporterTest {
+public class SchemaImporterTest extends CreoleTest {
 
   private static final Pattern BIBLICAL_EXAMPLE_SCHEMA_PATTERN = biblicalExampleSchemaPattern();
 

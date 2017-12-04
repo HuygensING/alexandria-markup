@@ -1,0 +1,18 @@
+<start>
+<concur>
+  <range name="foo">
+    <mixed>
+      <atom name="baz">
+        <attribute name="a"/>
+      </atom>
+    </mixed>
+  </range>
+  <range name="bar">
+    <mixed>
+      <atom>
+        <anyName/>
+      </atom>
+    </mixed>
+  </range>
+</concur>
+</start>

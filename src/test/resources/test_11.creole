@@ -1,0 +1,7 @@
+<start>
+<element name="foo">
+  <element name="bar">
+    <text/>
+  </element>
+</element>
+</start>

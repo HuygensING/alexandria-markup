@@ -1,0 +1,7 @@
+<start>
+<range name="foo">
+  <range name="bar">
+    <text/>
+  </range>
+</range>
+</start>

@@ -1,0 +1,10 @@
+[chapter}
+  [page=ed1n1}
+  [page=ed2n1}
+    [para}...{para]
+    [para}...{page=ed2n1][page=ed2n2}...{para]
+    [para}...{page=ed1n1][page=ed1n2}...{para]
+    [para}...{para]
+  {page=ed2n2]
+  {page=ed1n2]
+{chapter]

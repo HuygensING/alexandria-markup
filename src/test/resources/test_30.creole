@@ -1,0 +1,25 @@
+<start>
+<element name="foo">
+  <element name="bar"><text/></element>
+  <choice>
+    <group>
+      <annotation name="select1"><text/></annotation>
+      <element name="select2"><text/></element>
+    </group>
+    <group>
+      <element name="select1"><text/></element>
+      <annotation name="select2"><text/></annotation>
+    </group>
+  </choice>
+  <choice>
+    <group>
+      <annotation name="choice1"><text/></annotation>
+      <element name="choice2"><text/></element>
+    </group>
+    <group>
+      <element name="choice1"><text/></element>
+      <annotation name="choice2"><text/></annotation>
+    </group>
+  </choice>
+</element>
+</start>

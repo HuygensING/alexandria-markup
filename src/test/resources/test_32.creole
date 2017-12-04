@@ -1,0 +1,8 @@
+<start>
+<element name="foo">
+  <interleave>
+    <element name="baz"><text/></element>
+    <attribute name="bar"/>
+  </interleave>
+</element>
+</start>
