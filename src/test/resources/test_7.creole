@@ -1,3 +1,4 @@
+<!-- Single range against range pattern (invalid content) -->
 <start>
 <range name="foo">
   <empty/>

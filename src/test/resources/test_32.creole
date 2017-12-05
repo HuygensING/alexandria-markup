@@ -1,3 +1,4 @@
+<!-- Interleaving annotation and element -->
 <start>
 <element name="foo">
   <interleave>

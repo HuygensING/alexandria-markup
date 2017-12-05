@@ -1,24 +1,25 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
- * alexandria-markup
- * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+    /*-
+     * #%L
+     * alexandria-markup
+     * =======
+     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
+     */
+
 import nl.knaw.huygens.tei.*;
 import nl.knaw.huygens.tei.handlers.XmlTextHandler;
 
@@ -35,6 +36,7 @@ public class TestVisitor extends DelegatingVisitor<XmlContext> {
     setTextHandler(new XmlTextHandler());
     setDefaultElementHandler(new DefaultElementHandler());
     addElementHandler(new TestHandler(), "test:test");
+    addElementHandler(new TestTitleHandler(), "test:title");
     addElementHandler(new TestParamHandler(), "test:param");
     addElementHandler(new TestExpectHandler(), "test:expect");
   }
@@ -88,8 +90,8 @@ public class TestVisitor extends DelegatingVisitor<XmlContext> {
     @Override
     public Traversal leaveElement(Element element, XmlContext context) {
       String content = context.closeLayer().trim()//
-          .replaceAll("^      ", "")//
-          .replaceAll("\n      ", "\n")//
+          .replaceAll("^ {6}", "")//
+          .replaceAll("\n {6}", "\n")//
           .replaceAll("\n\n", "\n");
       String name = element.getAttribute("name");
       switch (name) {
@@ -97,10 +99,27 @@ public class TestVisitor extends DelegatingVisitor<XmlContext> {
           currentTest.setLMNL(content);
           break;
         case "schema":
-          currentTest.setCreole("<start>\n" + content + "\n</start>");
+          currentTest.setCreole("<!-- " + currentTest.getTitle() + " -->\n<start>\n" + content + "\n</start>");
           break;
         default:
           throw new RuntimeException("unexpected value for name: " + name);
+      }
+      return Traversal.NEXT;
+    }
+  }
+
+  public static class TestTitleHandler extends DefinitionVisitor.DefaultElementHandler {
+    @Override
+    public Traversal enterElement(Element element, XmlContext context) {
+      context.openLayer();
+      return Traversal.NEXT;
+    }
+
+    @Override
+    public Traversal leaveElement(Element element, XmlContext context) {
+      String content = context.closeLayer().trim();
+      if (currentTest != null) {
+        currentTest.setTitle(content);
       }
       return Traversal.NEXT;
     }

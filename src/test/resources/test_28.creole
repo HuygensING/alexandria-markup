@@ -1,3 +1,4 @@
+<!-- Mixed up annotations: valid -->
 <start>
 <element name="foo">
   <element name="bar"><text/></element>

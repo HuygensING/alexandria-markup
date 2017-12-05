@@ -1,3 +1,4 @@
+<!-- ConcurOneOrMore and atoms: valid -->
 <start>
 <concurOneOrMore>
   <mixed>

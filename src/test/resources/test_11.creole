@@ -1,3 +1,4 @@
+<!-- Element with element content against range pattern -->
 <start>
 <element name="foo">
   <element name="bar">

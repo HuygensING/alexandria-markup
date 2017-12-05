@@ -1,3 +1,4 @@
+<!-- Mixed up annotations: invalid associated elements -->
 <start>
 <element name="foo">
   <element name="bar"><text/></element>

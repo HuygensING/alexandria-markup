@@ -1,3 +1,4 @@
+<!-- Self-concurring ranges (invalid) -->
 <start>
 <element name="chapter">
    <concur>

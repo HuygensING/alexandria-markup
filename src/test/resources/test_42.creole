@@ -1,3 +1,4 @@
+<!-- Matching namespace -->
 <start>
 <range ns="http://www.example.com" name="bar">
   <text/>

@@ -1,3 +1,4 @@
+<!-- Michael's favourite -->
 <grammar xmlns="http://www.lmnl.org/schema/pattern">
   <start>
     <ref name="play"/>

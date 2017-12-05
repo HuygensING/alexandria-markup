@@ -19,15 +19,18 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * limitations under the License.
  * #L%
  */
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.endTagEvent;
-import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
+
+import nl.knaw.huygens.alexandria.creole.Basics;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.Events;
 import org.junit.Test;
 
 import java.util.List;
+
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.endTagEvent;
+import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
 
 public class LMNLImporter2Test {
   final LMNLImporter2 importer = new LMNLImporter2();
@@ -56,6 +59,30 @@ public class LMNLImporter2Test {
 
     assertThat(events).hasSize(1);
     assertThat(text.equals(events.get(0)));
+  }
+
+  @Test
+  public void testImporter2c() {
+    String lmnl = "[page=ed1n1}bla[page=ed2n1}bla{page=ed2n1]bla{page=ed1n1]";
+    List<Event> events = importer.importLMNL(lmnl);
+
+    Basics.QName a = qName("page");
+    String id1 = "ed1n1";
+    String id2 = "ed2n1";
+    Event openRange1 = startTagEvent(a, id1);
+    Event openRange2 = startTagEvent(a, id2);
+    Event text = Events.textEvent("bla");
+    Event closeRange1 = startTagEvent(a, id1);
+    Event closeRange2 = startTagEvent(a, id2);
+
+    assertThat(events).hasSize(7);
+    assertThat(openRange1.equals(events.get(0)));
+    assertThat(text.equals(events.get(1)));
+    assertThat(openRange2.equals(events.get(2)));
+    assertThat(text.equals(events.get(3)));
+    assertThat(closeRange2.equals(events.get(4)));
+    assertThat(text.equals(events.get(5)));
+    assertThat(closeRange1.equals(events.get(6)));
   }
 
 }

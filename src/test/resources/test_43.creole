@@ -1,3 +1,4 @@
+<!-- Non-matching namespace (invalid) -->
 <start>
 <range ns="http://www.example.com/foo" name="bar">
   <text/>

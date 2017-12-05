@@ -23,6 +23,7 @@ class LMNLTest {
   private String lmnl;
   private String creole;
   private boolean valid;
+  private String title;
 
   public void setLMNL(String lmnl) {
     this.lmnl = lmnl;
@@ -46,5 +47,13 @@ class LMNLTest {
 
   public boolean isValid() {
     return valid;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
   }
 }

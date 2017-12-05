@@ -1,3 +1,4 @@
+<!-- Plain text against element pattern (invalid) -->
 <start>
 <element name="foo">
   <text/>

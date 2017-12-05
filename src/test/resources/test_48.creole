@@ -1,3 +1,4 @@
+<!-- Concur and atoms: valid example -->
 <start>
 <concur>
   <range name="foo">

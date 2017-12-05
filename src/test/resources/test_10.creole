@@ -1,3 +1,4 @@
+<!-- Range with range content against range pattern -->
 <start>
 <range name="foo">
   <range name="bar">

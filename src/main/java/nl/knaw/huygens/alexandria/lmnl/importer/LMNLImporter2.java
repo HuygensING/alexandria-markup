@@ -167,7 +167,7 @@ public class LMNLImporter2 {
     void openMarkup(Markup markup) {
       currentLimenContext().openMarkup(markup);
       Event startTagEvent = markup.hasId()//
-          ? Events.startTagEvent(qName(markup.getTag(), markup.getId()))//
+          ? Events.startTagEvent(qName(markup.getTag()), markup.getId())//
           : Events.startTagEvent(qName(markup.getTag()));
       eventList.add(startTagEvent);
     }
@@ -183,7 +183,7 @@ public class LMNLImporter2 {
     void closeMarkup() {
       Markup markup = currentLimenContext().currentMarkup();
       Event endTagEvent = markup.hasId()//
-          ? Events.endTagEvent(qName(markup.getTag(), markup.getId()))//
+          ? Events.endTagEvent(qName(markup.getTag()), markup.getId())//
           : Events.endTagEvent(qName(markup.getTag()));
       eventList.add(endTagEvent);
       currentLimenContext().closeMarkup();

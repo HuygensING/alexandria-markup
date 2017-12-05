@@ -1,3 +1,4 @@
+<!-- Interleaving partitions (invalid) -->
 <start>
 <interleave>
   <partition>

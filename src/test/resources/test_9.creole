@@ -1,3 +1,4 @@
+<!-- Single range against choice pattern (invalid choices) -->
 <start>
 <choice>
   <element name="bar">

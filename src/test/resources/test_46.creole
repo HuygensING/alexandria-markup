@@ -1,3 +1,4 @@
+<!-- Single atom with annotation -->
 <start>
 <atom name="foo">
   <annotation name="bar"><text/></annotation>

@@ -1,3 +1,4 @@
+<!-- Single range against element pattern (invalid content) -->
 <start>
 <element name="foo">
   <empty/>

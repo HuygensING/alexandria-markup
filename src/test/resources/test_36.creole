@@ -1,3 +1,4 @@
+<!-- Annotation in end tag declared before element -->
 <start>
 <element name="foo">
   <attribute name="bar"/>

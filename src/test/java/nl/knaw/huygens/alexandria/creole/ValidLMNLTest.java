@@ -87,11 +87,12 @@ public class ValidLMNLTest extends CreoleTest {
     String xml = FileUtils.readFileToString(new File(ROOTDIR + basename + ".creole"), "UTF-8");
     assertThat(xml).isNotEmpty();
     LOG.info("testing {}.creole", basename);
-    LOG.info("{}", xml);
+    LOG.info("creole=\n{}", xml);
     Pattern schema = SchemaImporter.fromXML(xml);
     assertThat(schema).isNotNull();
 
     String lmnl = FileUtils.readFileToString(new File(LMNL_DIR + basename + ".lmnl"), "UTF-8");
+    LOG.info("lmnl=\n{}", lmnl);
     List<Event> events = new LMNLImporter2().importLMNL(lmnl);
     Validator validator = Validator.ofPattern(schema);
     ValidationResult result = validator.validate(events);

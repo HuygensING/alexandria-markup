@@ -1,3 +1,4 @@
+<!-- Self-concurring ranges in mixed content -->
 <start>
 <element name="para">
    <concurZeroOrMore>

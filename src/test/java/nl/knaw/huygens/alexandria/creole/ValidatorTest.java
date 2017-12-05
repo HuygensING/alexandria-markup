@@ -768,8 +768,8 @@ public class ValidatorTest {
 //      LMNLTest t = tests.get(i);
 //      String baseDir = "src/test/resources/";
 //      String dir = t.isValid() ? "valid" : "invalid";
-//      String lmnlFile = baseDir + dir + "/test_" + i + ".lmnl";
-//      FileUtils.writeStringToFile(new File(lmnlFile), t.getLMNL(), "UTF-8");
+////      String lmnlFile = baseDir + dir + "/test_" + i + ".lmnl";
+////      FileUtils.writeStringToFile(new File(lmnlFile), t.getLMNL(), "UTF-8");
 //      String creoleFile = baseDir + "/test_" + i + ".creole";
 //      FileUtils.writeStringToFile(new File(creoleFile), t.getCreole(), "UTF-8");
 //    }

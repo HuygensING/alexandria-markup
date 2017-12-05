@@ -1,3 +1,4 @@
+<!-- Two concurring range sequences with same name -->
 <start>
 <element name="chapter">
    <concur>

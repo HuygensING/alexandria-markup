@@ -1,3 +1,4 @@
+<!-- choice of names (valid) -->
 <start>
 <range>
   <choice>

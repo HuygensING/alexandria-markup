@@ -1,3 +1,4 @@
+<!-- Plain text -->
 <start>
 <text/>
 </start>

@@ -1,3 +1,4 @@
+<!-- Annotation in end tag -->
 <start>
 <element name="foo">
   <element name="baz"><text/></element>

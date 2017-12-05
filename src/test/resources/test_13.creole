@@ -1,3 +1,4 @@
+<!-- Elements appearing in concur -->
 <start>
 <concur>
    <oneOrMore>

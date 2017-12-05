@@ -1,3 +1,4 @@
+<!-- Built-in entities -->
 <start>
 <text/>
 </start>

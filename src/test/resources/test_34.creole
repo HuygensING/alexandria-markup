@@ -1,3 +1,4 @@
+<!-- Grouping annotation and element -->
 <start>
 <element name="foo">
   <element name="baz"><text/></element>

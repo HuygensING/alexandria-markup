@@ -1,3 +1,4 @@
+<!-- concurring annotation and element -->
 <start>
 <element name="foo">
   <concur>
