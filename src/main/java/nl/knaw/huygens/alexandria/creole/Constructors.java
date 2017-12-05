@@ -317,6 +317,10 @@ class Constructors {
     return new Patterns.Annotation(name(name), pattern);
   }
 
+  static Pattern endAnnotation(String name) {
+    return new Patterns.EndAnnotation(name(name));
+  }
+
   static Pattern annotation(NameClass nameClass, Pattern pattern) {
     return new Patterns.Annotation(nameClass, pattern);
   }

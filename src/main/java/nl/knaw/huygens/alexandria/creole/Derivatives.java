@@ -20,9 +20,6 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
-import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +27,10 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
+import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 
 class Derivatives {
   private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
@@ -107,6 +108,14 @@ class Derivatives {
       Basics.Id id = endTagEvent.getId();
       return endTagDeriv(p, qn, id);
     }
+
+    if (event instanceof Events.EndTagEvent) {
+      Events.EndTagEvent endTagEvent = (Events.EndTagEvent) event;
+      Basics.QName qn = endTagEvent.getQName();
+      Basics.Id id = endTagEvent.getId();
+      return endTagDeriv(p, qn, id);
+    }
+
     throw new RuntimeException("unexpected " + event.getClass().getTypeName() + " event: " + event);
   }
 

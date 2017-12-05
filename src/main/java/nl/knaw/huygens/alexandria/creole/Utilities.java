@@ -217,6 +217,7 @@ class Utilities {
     (ns1 == ns2) && (ln1 == ln2)
   contains (NameClassChoice nc1 nc2) n =
     (contains nc1 n) || (contains nc2 n)
+
    */
   public static Boolean contains(NameClass nameClass, Basics.QName qName) {
     if (nameClass instanceof NameClasses.AnyName) {

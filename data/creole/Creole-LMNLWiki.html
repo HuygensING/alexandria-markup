@@ -612,5 +612,59 @@ atom//text
 <div class="editsection" style="float:right;margin-left:5px;">[<a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/index.php?title=Creole&amp;action=edit&amp;section=12" title="Creole">edit</a>]</div><a name="Publications"></a><h2>Publications</h2>
 <ul><li> Tennison, J. (2007) <a href="https://web.archive.org/web/20090105232819/http://www.lmnl.org/wiki/images/8/86/Creole.zip" class="internal" title="Creole.zip">Creole: Validating Overlapping Markup.</a> In <i>Proceedings of XTech 2007</i>, Paris, France.
 </li></ul>
+          <pre>
+          Algorithm for Creole Validation
 
+          From LMNLWiki
+
+          A Creole validator is provided with a sequence of events and a pattern. To validate the events against the pattern, the validator takes the first event and calculates a derivative: a new pattern that should be applied to the remainder of the events. It continues doing this until it runs out of events. At that point, if the remaining pattern is nullable (matches an empty sequence) then the validation has succeeded, otherwise it has failed and the document is invalid.
+
+          James Clark's algorithm for RELAX NG defines how to calculate a derivative for each combination of XML event and RELAX NG pattern, as well as some supporting functions. The algorithm for Creole is basically the same, but has to deal with overlapping content and a few more patterns. Only the modifications (shown in bold where applicable) are specified here.
+
+          Note: This algorithm does not (yet) handle the fact that in some languages, such as XML, attributes/annotations are essentially unordered, whereas in others, such as LMNL, they are ordered (though you can use interleave to specify that the order doesn't matter). One possibility is to introduce start-attribute and end-attribute events for unordered annotations.
+          Contents
+
+          1 Datatypes
+          2 Events
+          3 Patterns
+          4 Utility Functions
+          5 Constructors
+          6 Derivatives
+          6.1 Text Derivatives
+          6.2 Start Tags
+          6.3 End Tags
+          6.4 Start Annotations
+          6.5 End Annotations
+          6.6 Start Atoms
+          6.7 End Atoms
+          7 Optimizations
+          [edit]
+          Datatypes
+
+          The only datatype we have to add is an Id. Ids are required to make sure that the correct end tag matches a given start tag, in the case of self-overlapping ranges.
+
+          type Id = String
+          [edit]
+          Events
+
+          Rather than a hierarchy of nodes, a document is considered as a stream of events. The important events to generate from a document are
+
+          data Event = StartTagEvent QName Id
+          | EndTagEvent QName Id
+          | StartAnnotationEvent QName
+          | EndAnnotationEvent QName
+          | TextEvent String Context
+          | StartAtomEvent QName
+          | EndAtomEvent QName
+          [edit]
+          Patterns
+
+          A Pattern represents a pattern after simplification. Creole adds eight new patterns – Concur, ConcurOneOrMore, Partition, All, Atom, EndRange, EndAnnotation and EndAtom – and replaces Attribute with Annotation and Element with Range.
+
+          data Pattern = Empty
+          | NotAllowed
+          | Text
+          | Choice Pattern Pattern
+          | Interleave Pattern Pattern
+              | Gro</pre>
 </body></html>

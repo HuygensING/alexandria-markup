@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,10 @@ public class Events {
   data Event = StartTagEvent QName Id
              | EndTagEvent QName Id
              | TextEvent String Context
+             | StartAnnotationEvent QName
+             | EndAnnotationEvent QName
+             | StartAtomEvent QName
+             | EndAtomEvent QName
    */
 
   public static StartTagEvent startTagEvent(Basics.QName qName) {
@@ -160,4 +164,45 @@ public class Events {
 
   }
 
+  public static StartAnnotationEvent startAnnotationEvent(Basics.QName qName) {
+    return new StartAnnotationEvent(qName);
+  }
+
+  static class StartAnnotationEvent implements Event {
+    private final Basics.QName qName;
+
+    StartAnnotationEvent(Basics.QName qName) {
+      this.qName = qName;
+    }
+
+    public Basics.QName getQName() {
+      return qName;
+    }
+
+    @Override
+    public String toString() {
+      return "(" + qName.getLocalName().getValue() + ">";
+    }
+  }
+
+  public static EndAnnotationEvent endAnnotationEvent(Basics.QName qName) {
+    return new EndAnnotationEvent(qName);
+  }
+
+  static class EndAnnotationEvent implements Event {
+    private final Basics.QName qName;
+
+    EndAnnotationEvent(Basics.QName qName) {
+      this.qName = qName;
+    }
+
+    public Basics.QName getQName() {
+      return qName;
+    }
+
+    @Override
+    public String toString() {
+      return "<" + qName.getLocalName().getValue() + ")";
+    }
+  }
 }
