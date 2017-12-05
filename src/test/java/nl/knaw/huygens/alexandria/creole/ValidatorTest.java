@@ -20,36 +20,32 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import nl.knaw.huygens.tei.Document;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class ValidatorTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void testValidator() throws Exception {
+  public void testValidator() {
     // [text}tekst{text]
     Basics.QName qName = qName("text");
     Event startE = Events.startTagEvent(qName);
     Basics.Context context = Basics.context();
     Event textE = Events.textEvent("tekst", context);
     Event endE = Events.endTagEvent(qName);
-    List<Event> validEvents = new ArrayList<>();
-    validEvents.addAll(asList(startE, textE, endE));
+    List<Event> validEvents = new ArrayList<>(asList(startE, textE, endE));
 
     Pattern schemaPattern = element(//
         "text",//
@@ -60,14 +56,13 @@ public class ValidatorTest {
     ValidationResult validationResult1 = validator.validate(validEvents);
     assertThat(validationResult1).isSuccess().hasNoUnexpectedEvent();
 
-    List<Event> invalidEvents = new ArrayList<>();
-    invalidEvents.addAll(asList(textE, startE, startE, endE));
+    List<Event> invalidEvents = new ArrayList<>(asList(textE, startE, startE, endE));
     ValidationResult validationResult = validator.validate(invalidEvents);
     assertThat(validationResult).isFailure().hasUnexpectedEvent(textE);
   }
 
   @Test
-  public void testValidator2() throws Exception {
+  public void testValidator2() {
     Pattern schemaPattern = element(//
         "text",//
         interleave(//
@@ -87,8 +82,7 @@ public class ValidatorTest {
     Event endBoldE = Events.endTagEvent(qName("bold"));
     Event boldTextE = Events.textEvent("Bold", context);
     Event endE = Events.endTagEvent(qName);
-    List<Event> validEvents = new ArrayList<>();
-    validEvents.addAll(asList(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE));
+    List<Event> validEvents = new ArrayList<>(asList(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE));
 
     assertThat(validator.validate(validEvents)).isSuccess().hasNoUnexpectedEvent();
   }
@@ -101,9 +95,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // ...
-    events.addAll(Collections.singletonList(someText));
+    List<Event> events = new ArrayList<>(Collections.singletonList(someText));
 
     assertValidationSucceeds(schema, events);
   }
@@ -119,9 +112,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // ...
-    events.addAll(Collections.singletonList(someText));
+    List<Event> events = new ArrayList<>(Collections.singletonList(someText));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, someText);
   }
@@ -140,9 +132,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationSucceeds(schema, events);
   }
@@ -161,9 +152,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]{foo]
-    events.addAll(asList(openFoo, someText, closeFoo, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo);
   }
@@ -182,9 +172,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, openFoo);
   }
@@ -203,9 +192,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, someText);
   }
@@ -224,9 +212,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationSucceeds(schema, events);
   }
@@ -245,9 +232,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]{foo]
-    events.addAll(asList(openFoo, someText, closeFoo, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo);
   }
@@ -266,9 +252,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, openFoo);
   }
@@ -287,9 +272,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, someText);
   }
@@ -318,9 +302,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationSucceeds(schema, events);
   }
@@ -349,9 +332,8 @@ public class ValidatorTest {
     Event closeFoo = Events.endTagEvent(foo);
     Event someText = Events.textEvent("...");
 
-    List<Event> events = new ArrayList<>();
     // [foo}...{foo]
-    events.addAll(asList(openFoo, someText, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, someText, closeFoo));
 
     assertValidationFailsWithUnexpectedEvent(schema, events, openFoo);
   }
@@ -377,9 +359,8 @@ public class ValidatorTest {
     Event closeBar = Events.endTagEvent(bar);
     Event closeFoo = Events.endTagEvent(foo);
 
-    List<Event> events = new ArrayList<>();
     // [foo}[bar}...{bar]{foo]
-    events.addAll(asList(openFoo, openBar, someText, closeBar, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, openBar, someText, closeBar, closeFoo));
 
     assertValidationSucceeds(schema, events);
   }
@@ -405,9 +386,8 @@ public class ValidatorTest {
     Event closeBar = Events.endTagEvent(bar);
     Event closeFoo = Events.endTagEvent(foo);
 
-    List<Event> events = new ArrayList<>();
     // [foo}[bar}...{bar]{foo]
-    events.addAll(asList(openFoo, openBar, someText, closeBar, closeFoo));
+    List<Event> events = new ArrayList<>(asList(openFoo, openBar, someText, closeBar, closeFoo));
 
     assertValidationSucceeds(schema, events);
   }
@@ -453,8 +433,7 @@ public class ValidatorTest {
     // [para}...{v][v}...{v]{para]
     // {section]
     // {chapter]
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openChapter,
         openSection, openHeading, someText, closeHeading,
         openPara, openV, someText, closeV, openV, someText, closePara,
@@ -539,8 +518,7 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook, openPage,//
         openTitle, titleText, closeTitle,//
         openSection,//
@@ -602,9 +580,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
     // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook,
         openChapter,
         openPara,
@@ -656,9 +633,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
     // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook,
         openChapter,
         openPara,
@@ -710,9 +686,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
     // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook,
         openChapter,
         openPara,
@@ -764,9 +739,8 @@ public class ValidatorTest {
 
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
     // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook,
         openChapter,
         openPara,

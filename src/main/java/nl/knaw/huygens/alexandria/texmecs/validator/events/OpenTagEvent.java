@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.texmecs.validator.events;
 
 
 public class OpenTagEvent implements ValidationEvent {
-  private String text;
+  private final String text;
 
   public OpenTagEvent(String text) {
     this.text = text;

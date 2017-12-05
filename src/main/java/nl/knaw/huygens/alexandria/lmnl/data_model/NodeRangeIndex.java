@@ -43,7 +43,7 @@ public class NodeRangeIndex {
 
   private List<IndexPoint> indexPoints;
   private KdTree<IndexPoint> kdTree;
-  private Limen limen;
+  private final Limen limen;
   private Set<Integer> invertedMarkupsIndices = new HashSet<>();
 
   public NodeRangeIndex(Limen limen) {
@@ -104,8 +104,7 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getRanges(int i) {
-    Set<Integer> rangeIndices = new HashSet<>();
-    rangeIndices.addAll(invertedMarkupsIndices);
+    Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
     getKdTree().indexpointsForTextNode(i)//
         .forEach(ip -> {
           int markupIndex = ip.getMarkupIndex();
@@ -139,8 +138,7 @@ public class NodeRangeIndex {
   }
 
   public Set<Integer> getRanges0(int i) {
-    Set<Integer> rangeIndices = new HashSet<>();
-    rangeIndices.addAll(invertedMarkupsIndices);
+    Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
     StreamSupport.stream(getKdTree().spliterator(), true)//
         .filter(ip -> ip.getTextNodeIndex() == i)//
         .forEach(ip -> {

@@ -36,7 +36,7 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class LaTexExporterTest {
-  private static Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LaTexExporterTest.class);
 
   @Test
   public void testLaTeXOutput1() throws LMNLSyntaxError {

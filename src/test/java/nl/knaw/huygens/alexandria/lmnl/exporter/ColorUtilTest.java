@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ColorUtilTest {
-  Logger LOG = LoggerFactory.getLogger(this.getClass());
+  final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   @Test
   public void testColorInterpolation() {

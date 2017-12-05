@@ -36,8 +36,7 @@ public class ValidationState {
   private List<ValidationEvent> expectedEvents = new ArrayList<>();
 
   public ValidationState(TexMECSSchema texMECSSchema) {
-    TexMECSSchema schema = texMECSSchema;
-    expectedEvents.add(schema.getRootEvent());
+    expectedEvents.add(texMECSSchema.getRootEvent());
   }
 
   public StateValue getValue() {

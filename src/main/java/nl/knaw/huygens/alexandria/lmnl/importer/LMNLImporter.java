@@ -1,51 +1,40 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import static java.util.stream.Collectors.joining;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.ErrorListener;
-/*
- * #%L
- * alexandria-markup
- * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
+
+    /*
+     * #%L
+     * alexandria-markup
+     * =======
+     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
+     */
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -54,11 +43,11 @@ public class LMNLImporter {
   static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   static class LimenContext {
-    private Limen limen;
+    private final Limen limen;
     private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<Markup> openMarkupStack = new Stack<>();
     private final Stack<Annotation> annotationStack = new Stack<>();
-    private ImporterContext importerContext;
+    private final ImporterContext importerContext;
 
     LimenContext(Limen limen, ImporterContext importerContext) {
       this.limen = limen;

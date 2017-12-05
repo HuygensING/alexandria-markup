@@ -46,9 +46,9 @@ import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
 @RunWith(Parameterized.class)
 public class ImportDataTexMECSTest {
-  private static Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSTest.class);
 
-  private String basename;
+  private final String basename;
   public static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {

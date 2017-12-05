@@ -47,7 +47,7 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 
 public class TexMECSImporterTest {
-  final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testExample1() {
@@ -267,7 +267,7 @@ public class TexMECSImporterTest {
     return doc;
   }
 
-  protected void printTokens(String input) {
+  private void printTokens(String input) {
     System.out.println("TexMECS:");
     System.out.println(input);
     System.out.println("Tokens:");

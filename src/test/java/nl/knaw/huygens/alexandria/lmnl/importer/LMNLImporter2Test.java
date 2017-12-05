@@ -25,13 +25,12 @@ import static nl.knaw.huygens.alexandria.creole.Events.endTagEvent;
 import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.Events;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import java.util.List;
 
 public class LMNLImporter2Test {
-  LMNLImporter2 importer = new LMNLImporter2();
+  final LMNLImporter2 importer = new LMNLImporter2();
 
   @Test
   public void testImporter2a() {

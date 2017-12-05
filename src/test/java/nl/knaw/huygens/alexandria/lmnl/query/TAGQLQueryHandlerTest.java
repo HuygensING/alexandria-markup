@@ -1,43 +1,42 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/*
- * #%L
- * alexandria-markup
- * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+    /*
+     * #%L
+     * alexandria-markup
+     * =======
+     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
+     */
 
 public class TAGQLQueryHandlerTest {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testTAGQLQuery1() throws LMNLSyntaxError {
@@ -178,7 +177,7 @@ public class TAGQLQueryHandlerTest {
   }
 
   @Test
-  public void testTAGQLQueryWithSyntaxError() throws IOException, LMNLSyntaxError {
+  public void testTAGQLQueryWithSyntaxError() throws LMNLSyntaxError {
     String lmnl = "[text}\n"//
         + "[l}line 1{l]\n"//
         + "[l}line 2{l]\n"//

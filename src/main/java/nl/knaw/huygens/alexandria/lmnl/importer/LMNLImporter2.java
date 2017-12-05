@@ -19,13 +19,9 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.Events;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
@@ -39,15 +35,18 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
+
 public class LMNLImporter2 {
   static final Logger LOG = LoggerFactory.getLogger(LMNLImporter2.class);
 
   static class LimenContext {
-    private Limen limen;
+    private final Limen limen;
     private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<Markup> openMarkupStack = new Stack<>();
     private final Stack<Annotation> annotationStack = new Stack<>();
-    private ImporterContext importerContext;
+    private final ImporterContext importerContext;
 
     LimenContext(Limen limen, ImporterContext importerContext) {
       this.limen = limen;
@@ -124,7 +123,7 @@ public class LMNLImporter2 {
     private final Stack<LimenContext> limenContextStack = new Stack<>();
     private final LMNLLexer lexer;
     private final List<String> errors = new ArrayList<>();
-    private List<Event> eventList = new ArrayList<>();
+    private final List<Event> eventList = new ArrayList<>();
 
     ImporterContext(LMNLLexer lexer) {
       this.lexer = lexer;

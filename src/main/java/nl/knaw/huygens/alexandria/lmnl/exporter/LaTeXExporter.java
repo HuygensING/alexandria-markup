@@ -21,41 +21,25 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.awt.Color;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.KdTree;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
+import java.awt.*;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
   public static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
       .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
   private List<IndexPoint> indexPoints;
-  private Limen limen;
+  private final Limen limen;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndex index;
 
@@ -121,13 +105,11 @@ public class LaTeXExporter {
         textNodeIndices.put(tn, i);
         Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<Markup> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<Markup> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -267,13 +249,11 @@ public class LaTeXExporter {
         // textNodeIndices.put(tn, i);
         Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<Markup> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<Markup> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);

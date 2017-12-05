@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter2;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import org.apache.commons.io.FileUtils;
@@ -37,15 +36,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+
 @RunWith(Parameterized.class)
 public class InvalidLMNLTest extends CreoleTest {
-  public static final String ROOTDIR = "src/test/resources/";
-  public static final String LMNL_DIR = ROOTDIR + "invalid/";
-  private static Logger LOG = LoggerFactory.getLogger(InvalidLMNLTest.class);
+  private static final String ROOTDIR = "src/test/resources/";
+  private static final String LMNL_DIR = ROOTDIR + "invalid/";
+  private static final Logger LOG = LoggerFactory.getLogger(InvalidLMNLTest.class);
 
-  private String basename;
+  private final String basename;
 
-  public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
+  private static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
       return isLMNL(file.getName());

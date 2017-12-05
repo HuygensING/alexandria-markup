@@ -30,8 +30,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class TexMECSBaseValidator implements TexMECSValidator {
-  private ValidationReport report = new ValidationReport();
-  private List<String> errors = new ArrayList<>();
+  private final ValidationReport report = new ValidationReport();
+  private final List<String> errors = new ArrayList<>();
 
   @Override
   public ValidationReport getValidationReport() {

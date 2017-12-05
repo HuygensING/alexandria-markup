@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.texmecs.validator.events;
 
 
 public class TextEvent implements ValidationEvent {
-  private String text;
+  private final String text;
 
   public TextEvent(String text) {
     this.text = text;

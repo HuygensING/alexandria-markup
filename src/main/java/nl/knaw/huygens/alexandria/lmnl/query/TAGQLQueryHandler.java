@@ -36,7 +36,7 @@ import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 
 public class TAGQLQueryHandler {
 
-  private Document document;
+  private final Document document;
 
   public TAGQLQueryHandler(Document document) {
     this.document = document;

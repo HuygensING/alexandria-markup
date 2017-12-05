@@ -33,9 +33,9 @@ public class DefinitionVisitor extends DelegatingVisitor<XmlContext> {
   private static final Logger LOG = LoggerFactory.getLogger(DefinitionVisitor.class);
 
   private static String start;
-  private static Map<String, String> definitionMap = new HashMap<>();
-  private static Map<String, Set<String>> requirements = new HashMap<>(); // the definitions referred to in this definition
-  private static Map<String, Set<String>> dependants = new HashMap<>(); // the definitions referring to this definition
+  private static final Map<String, String> definitionMap = new HashMap<>();
+  private static final Map<String, Set<String>> requirements = new HashMap<>(); // the definitions referred to in this definition
+  private static final Map<String, Set<String>> dependants = new HashMap<>(); // the definitions referring to this definition
 
   private static String currentDefinition;
 

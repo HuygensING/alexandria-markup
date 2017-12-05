@@ -62,14 +62,12 @@ public class LMNLExporter {
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<Markup> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
         toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<Markup> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
         toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
 

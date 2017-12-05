@@ -33,9 +33,9 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 
 public class LMNLModifier {
 
-  Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
+  final Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
 
-  private Limen limen;
+  private final Limen limen;
 
   public LMNLModifier(Limen limen) {
     this.limen = limen;

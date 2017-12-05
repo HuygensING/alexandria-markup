@@ -28,7 +28,7 @@ import nl.knaw.huygens.alexandria.texmecs.validator.events.TextEvent;
 import nl.knaw.huygens.alexandria.texmecs.validator.events.ValidationEvent;
 
 public class SimpleExampleValidator extends TexMECSBaseValidator {
-  private ValidationState validationState;
+  private final ValidationState validationState;
 
   SimpleExampleValidator(ValidationState initiaLState) {
     validationState = initiaLState;

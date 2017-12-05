@@ -171,8 +171,8 @@ class Patterns {
   }
 
   static class Atom extends AbstractPattern {
-    NameClass nc;
-    List<Annotation> annotations;
+    final NameClass nc;
+    final List<Annotation> annotations;
 
     Atom(NameClass nc, List<Annotation> annotations){
       this.nc = nc;

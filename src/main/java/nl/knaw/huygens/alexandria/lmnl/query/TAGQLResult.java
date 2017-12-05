@@ -38,7 +38,7 @@ public class TAGQLResult {
     this.query = "";
   }
 
-  private List<Object> values = new ArrayList<>();
+  private final List<Object> values = new ArrayList<>();
 
   public void addResult(TAGQLResult subresult) {
     results.add(subresult);

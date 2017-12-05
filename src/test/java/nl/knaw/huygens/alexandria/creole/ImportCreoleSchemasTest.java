@@ -19,7 +19,6 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -34,13 +33,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+
 @RunWith(Parameterized.class)
 public class ImportCreoleSchemasTest extends CreoleTest {
-  public static final String ROOTDIR = "src/test/resources/";
-  private static Logger LOG = LoggerFactory.getLogger(ImportCreoleSchemasTest.class);
-  private String basename;
+  private static final String ROOTDIR = "src/test/resources/";
+  private static final Logger LOG = LoggerFactory.getLogger(ImportCreoleSchemasTest.class);
+  private final String basename;
 
-  public static final IOFileFilter CREOLE_FILE_FILTER = new IOFileFilter() {
+  private static final IOFileFilter CREOLE_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
       return isCreoleXML(file.getName());

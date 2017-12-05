@@ -59,7 +59,7 @@ import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 public class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private List<TAGQLStatement> statements = new ArrayList<>();
+  private final List<TAGQLStatement> statements = new ArrayList<>();
 
   public List<TAGQLStatement> getStatements() {
     return statements;

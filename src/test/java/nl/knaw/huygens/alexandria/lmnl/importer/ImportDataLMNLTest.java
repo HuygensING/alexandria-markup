@@ -43,9 +43,9 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
-  private static Logger LOG = LoggerFactory.getLogger(ImportDataLMNLTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ImportDataLMNLTest.class);
 
-  private String basename;
+  private final String basename;
   public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {

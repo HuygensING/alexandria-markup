@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestVisitor extends DelegatingVisitor<XmlContext> {
-  private static List<LMNLTest> tests = new ArrayList<>();
+  private static final List<LMNLTest> tests = new ArrayList<>();
 
-  static LMNLTest currentTest;
+  private static LMNLTest currentTest;
 
   public TestVisitor() {
     super(new XmlContext());
@@ -43,7 +43,7 @@ public class TestVisitor extends DelegatingVisitor<XmlContext> {
     return tests;
   }
 
-  public static class DefaultElementHandler implements ElementHandler<XmlContext> {
+  static class DefaultElementHandler implements ElementHandler<XmlContext> {
     @Override
     public Traversal enterElement(Element element, XmlContext context) {
       if (element.hasChildren()) {

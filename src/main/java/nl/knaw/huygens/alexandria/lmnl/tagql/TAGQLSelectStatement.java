@@ -32,7 +32,7 @@ import nl.knaw.huygens.alexandria.lmnl.query.TAGQLResult;
 
 public class TAGQLSelectStatement implements TAGQLStatement {
 
-  private Logger LOG = LoggerFactory.getLogger(this.getClass());
+  private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   Predicate<? super Markup> markupFilter = tr -> true;
   Function<? super Markup, ? super Object> markupMapper = a -> a;

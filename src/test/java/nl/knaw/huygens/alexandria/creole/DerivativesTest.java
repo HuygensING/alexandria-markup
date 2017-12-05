@@ -69,12 +69,10 @@ public class DerivativesTest extends CreoleTest {
     Event openChapter = Events.startTagEvent(qName("chapter"));
     Event closeChapter = Events.endTagEvent(qName("chapter"));
 
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(startE, openPage, openChapter, textE, closePage, closeChapter, endE));
+    List<Event> events = new ArrayList<>(asList(startE, openPage, openChapter, textE, closePage, closeChapter, endE));
     assertEventsAreValidForSchema(schemaPattern, events);
 
-    List<Event> events2 = new ArrayList<>();
-    events2.addAll(asList(startE, openChapter, openPage, textE, closePage, closeChapter, endE));
+    List<Event> events2 = new ArrayList<>(asList(startE, openChapter, openPage, textE, closePage, closeChapter, endE));
     assertEventsAreValidForSchema(schemaPattern, events2);
 
   }
@@ -87,8 +85,7 @@ public class DerivativesTest extends CreoleTest {
     Basics.Context context = Basics.context();
     Event textE = Events.textEvent("tekst", context);
     Event endE = Events.endTagEvent(qName);
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(startE, textE, endE));
+    List<Event> events = new ArrayList<>(asList(startE, textE, endE));
 
     Pattern schemaPattern = element(//
         "text",//
@@ -165,8 +162,7 @@ public class DerivativesTest extends CreoleTest {
     Event headingText = Events.textEvent("The flood and the tower of Babel");
     Event someText = Events.textEvent("some text");
 
-    List<Event> events = new ArrayList<>();
-    events.addAll(asList(//
+    List<Event> events = new ArrayList<>(asList(//
         openBook, openPage,//
         openTitle, titleText, closeTitle,//
         openSection,//
