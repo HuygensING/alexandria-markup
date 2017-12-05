@@ -20,13 +20,14 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
+
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 class Utilities {
@@ -94,7 +95,7 @@ class Utilities {
     }
     //  nullable (After _ _) = False
     if (pattern instanceof Patterns.After) {
-      Patterns.After after = (Patterns.After) pattern;
+//      Patterns.After after = (Patterns.After) pattern;
 //      return nullable(after.getPattern1()) && nullable(after.getPattern2());
       return false;
     }
@@ -247,7 +248,7 @@ class Utilities {
     return false;
   }
 
-  public static Set<Event> expectedEvents(Pattern pattern) {
+  static Set<Event> expectedEvents(Pattern pattern) {
     Set<Event> expectedEvents = new HashSet<>();
     if (pattern instanceof Patterns.Text) {
       expectedEvents.add(textEvent("*"));
@@ -263,11 +264,11 @@ class Utilities {
       expectedEvents.addAll(expectedEvents(p.getPattern1()));
       expectedEvents.addAll(expectedEvents(p.getPattern2()));
 
-    } else if (pattern instanceof Patterns.Group
-        || pattern instanceof Patterns.After//
-        ) {
-      Patterns.PatternWithTwoPatternParameters p = (Patterns.PatternWithTwoPatternParameters) pattern;
-      expectedEvents.addAll(expectedEvents(p.getPattern1()));
+//    } else if (pattern instanceof Patterns.Group
+//        || pattern instanceof Patterns.After//
+//        ) {
+//      Patterns.PatternWithTwoPatternParameters p = (Patterns.PatternWithTwoPatternParameters) pattern;
+//      expectedEvents.addAll(expectedEvents(p.getPattern1()));
 
     } else if (pattern instanceof Patterns.Partition
         || pattern instanceof Patterns.OneOrMore//

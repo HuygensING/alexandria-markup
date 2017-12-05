@@ -213,11 +213,11 @@ public class LMNLImporter2 {
       return !errors.isEmpty();
     }
 
-    public List<Event> getEventList() {
+    List<Event> getEventList() {
       return eventList;
     }
 
-    public void addTextEvent(String text) {
+    void addTextEvent(String text) {
       eventList.add(textEvent(text));
     }
   }

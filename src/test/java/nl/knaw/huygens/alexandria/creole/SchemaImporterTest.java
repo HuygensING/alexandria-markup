@@ -2,28 +2,29 @@ package nl.knaw.huygens.alexandria.creole;
 
     /*-
      * #%L
- * alexandria-markup
- * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+     * alexandria-markup
+     * =======
+     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
      */
+
+import org.junit.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import org.junit.Test;
 
 public class SchemaImporterTest extends CreoleTest {
 
@@ -176,6 +177,78 @@ public class SchemaImporterTest extends CreoleTest {
 
     Pattern schema = SchemaImporter.fromCompactGrammar(compactGrammar);
 //    assertSchemaIsExpected(schema, BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
+  }
+
+  @Test
+  public void testInterleaveSimplification() {
+    String xml = "<start><interleave>" +//
+        "<range name=\"a\"><text/></range>" +//
+        "<range name=\"b\"><text/></range>" +//
+        "<range name=\"c\"><text/></range>" +//
+        "</interleave></start>";
+    Pattern schema = SchemaImporter.fromXML(xml);
+    Pattern expected = interleave(
+        range(name("a"), text()),
+        interleave(
+            range(name("b"), text()),
+            range(name("c"), text())
+        )
+    );
+    assertSchemaIsExpected(schema, expected);
+  }
+
+  @Test
+  public void testGroupSimplification() {
+    String xml = "<start><group>" +//
+        "<range name=\"a\"><text/></range>" +//
+        "<range name=\"b\"><text/></range>" +//
+        "<range name=\"c\"><text/></range>" +//
+        "</group></start>";
+    Pattern schema = SchemaImporter.fromXML(xml);
+    Pattern expected = group(
+        range(name("a"), text()),
+        group(
+            range(name("b"), text()),
+            range(name("c"), text())
+        )
+    );
+    assertSchemaIsExpected(schema, expected);
+  }
+
+  @Test
+  public void testChoiceSimplification() {
+    String xml = "<start><choice>" +//
+        "<range name=\"a\"><text/></range>" +//
+        "<range name=\"b\"><text/></range>" +//
+        "<range name=\"c\"><text/></range>" +//
+        "</choice></start>";
+    Pattern schema = SchemaImporter.fromXML(xml);
+    Pattern expected = choice(
+        range(name("a"), text()),
+        choice(
+            range(name("b"), text()),
+            range(name("c"), text())
+        )
+    );
+    assertSchemaIsExpected(schema, expected);
+  }
+
+  @Test
+  public void testConcurSimplification() {
+    String xml = "<start><concur>" +//
+        "<range name=\"a\"><text/></range>" +//
+        "<range name=\"b\"><text/></range>" +//
+        "<range name=\"c\"><text/></range>" +//
+        "</concur></start>";
+    Pattern schema = SchemaImporter.fromXML(xml);
+    Pattern expected = concur(
+        range(name("a"), text()),
+        concur(
+            range(name("b"), text()),
+            range(name("c"), text())
+        )
+    );
+    assertSchemaIsExpected(schema, expected);
   }
 
   private static Pattern biblicalExampleSchemaPattern() {

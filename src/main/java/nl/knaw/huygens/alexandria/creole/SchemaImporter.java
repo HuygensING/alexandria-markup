@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -123,7 +124,7 @@ public class SchemaImporter {
     List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
-    Pattern pattern2 = groupWhenNeeded(children);
+    Pattern pattern2 = simplifyAsNeeded(children, Constructors::choice);
     return choice(pattern1, pattern2);
   }
 
@@ -132,7 +133,7 @@ public class SchemaImporter {
 //    List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
-    Pattern pattern2 = groupWhenNeeded(children);
+    Pattern pattern2 = simplifyAsNeeded(children, Constructors::concur);
     return concur(pattern1, pattern2);
   }
 
@@ -156,7 +157,7 @@ public class SchemaImporter {
     List<Element> children = getChildElements(element);
     Pattern pattern = children.size() == 1
         ? toPattern(children.get(0))
-        : toGroup(children);
+        : simplifyAsNeeded(children, Constructors::group);
     return element(localName, pattern);
   }
 
@@ -171,7 +172,7 @@ public class SchemaImporter {
     List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
-    Pattern pattern2 = groupWhenNeeded(children);
+    Pattern pattern2 = simplifyAsNeeded(children, Constructors::group);
     return group(pattern1, pattern2);
   }
 
@@ -180,7 +181,7 @@ public class SchemaImporter {
 //    List<Element> attributes = removeAttributes(children);
 
     Pattern pattern1 = toPattern(children.remove(0));
-    Pattern pattern2 = groupWhenNeeded(children);
+    Pattern pattern2 = simplifyAsNeeded(children, Constructors::interleave);
     return interleave(pattern1, pattern2);
   }
 
@@ -188,7 +189,7 @@ public class SchemaImporter {
     List<Element> children = getChildElements(element);
     Pattern pattern = (children.size() == 1)//
         ? toPattern(children.get(0))//
-        : toGroup(children);
+        : simplifyAsNeeded(children, Constructors::group);
     return mixed(pattern);
   }
 
@@ -210,7 +211,7 @@ public class SchemaImporter {
     List<Element> children = getChildElements(element);
     Pattern pattern = children.size() == 1
         ? toPattern(children.get(0))
-        : toGroup(children);
+        : simplifyAsNeeded(children, Constructors::group);
     return partition(pattern);
   }
 
@@ -226,7 +227,7 @@ public class SchemaImporter {
     }
     Pattern childPattern = (children.size() == 1)//
         ? toPattern(children.get(0))//
-        : toGroup(children);
+        : simplifyAsNeeded(children, Constructors::group);
     return range(nameClass, childPattern);
   }
 
@@ -257,20 +258,15 @@ public class SchemaImporter {
     return attributes;
   }
 
-  private static Pattern toGroup(List<Element> children) {
-    Pattern pattern1 = toPattern(children.remove(0));
-    Pattern pattern2 = groupWhenNeeded(children);
-    return group(pattern1, pattern2);
-  }
-
-  private static Pattern groupWhenNeeded(List<Element> children) {
-    Pattern pattern2;
+  private static Pattern simplifyAsNeeded(List<Element> children, BiFunction<Pattern, Pattern, Pattern> patternConstructor) {
     if (children.size() == 1) {
-      pattern2 = toPattern(children.remove(0));
+      return toPattern(children.remove(0));
+
     } else {
-      pattern2 = toGroup(children);
+      Pattern pattern1 = toPattern(children.remove(0));
+      Pattern pattern2 = simplifyAsNeeded(children, patternConstructor);
+      return patternConstructor.apply(pattern1, pattern2);
     }
-    return pattern2;
   }
 
   private static final Map<String, Function<Element, NameClass>> elementToNameClass = new HashMap<>();
