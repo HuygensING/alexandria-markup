@@ -2,27 +2,25 @@ package nl.knaw.huygens.alexandria.creole;
 
     /*-
      * #%L
- * alexandria-markup
- * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+     * alexandria-markup
+     * =======
+     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
      */
 
 import com.google.common.base.Preconditions;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.*;
 import nl.knaw.huygens.tei.Document;
 import nl.knaw.huygens.tei.Element;
 import nl.knaw.huygens.tei.Node;
@@ -35,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import static nl.knaw.huygens.alexandria.creole.NameClasses.*;
 
 public class SchemaImporter {
   private static final Logger LOG = LoggerFactory.getLogger(SchemaImporter.class);
@@ -54,7 +55,7 @@ public class SchemaImporter {
     return Patterns.EMPTY;
   }
 
-  static final Map<String, Function<Element, Pattern>> elementToPattern = new HashMap<>();
+  private static final Map<String, Function<Element, Pattern>> elementToPattern = new HashMap<>();
 
   static {
     elementToPattern.put("atom", SchemaImporter::handleAtom);
@@ -96,11 +97,18 @@ public class SchemaImporter {
   private static Pattern handleAnnotation(Element element) {
     List<Element> children = getChildElements(element);
     List<Element> attributes = removeAttributes(children);
-    String name = element.getAttribute("name");
-    Pattern pattern = children.size() == 1
-        ? toPattern(children.get(0))
-        : toGroup(children);
-    return annotation(name, pattern);
+    if (element.hasAttribute("name")) {
+      String name = element.getAttribute("name");
+      Preconditions.checkState(children.size() == 1);
+      Pattern pattern = toPattern(children.get(0));
+      return annotation(name, pattern);
+
+    } else {
+      Preconditions.checkState(children.size() == 2);
+      NameClass nameClass = toNameClass(children.get(0));
+      Pattern pattern = toPattern(children.get(1));
+      return annotation(nameClass, pattern);
+    }
   }
 
   private static Pattern handleAttribute(Element element) {
@@ -265,7 +273,7 @@ public class SchemaImporter {
     return pattern2;
   }
 
-  static final Map<String, Function<Element, NameClass>> elementToNameClass = new HashMap<>();
+  private static final Map<String, Function<Element, NameClass>> elementToNameClass = new HashMap<>();
 
   static {
     elementToNameClass.put("anyName", SchemaImporter::handleAnyName);
