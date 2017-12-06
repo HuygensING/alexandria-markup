@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,10 +18,14 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.creole.Basics;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.Events;
+import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
@@ -35,11 +39,8 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
-
 public class LMNLImporter2 {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLImporter2.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter2.class);
 
   static class LimenContext {
     private final Limen limen;
@@ -166,10 +167,7 @@ public class LMNLImporter2 {
 
     void openMarkup(Markup markup) {
       currentLimenContext().openMarkup(markup);
-      Event startTagEvent = markup.hasId()//
-          ? Events.startTagEvent(qName(markup.getTag()), markup.getId())//
-          : Events.startTagEvent(qName(markup.getTag()));
-      eventList.add(startTagEvent);
+      addStartTagOpenEvent(markup);
     }
 
     void pushOpenMarkup(String rangeName) {
@@ -182,10 +180,7 @@ public class LMNLImporter2 {
 
     void closeMarkup() {
       Markup markup = currentLimenContext().currentMarkup();
-      Event endTagEvent = markup.hasId()//
-          ? Events.endTagEvent(qName(markup.getTag()), markup.getId())//
-          : Events.endTagEvent(qName(markup.getTag()));
-      eventList.add(endTagEvent);
+      addEndTagCloseEvent(markup);
       currentLimenContext().closeMarkup();
     }
 
@@ -202,6 +197,8 @@ public class LMNLImporter2 {
     }
 
     void closeAnnotation() {
+      Annotation annotation = currentLimenContext().annotationStack.peek();
+      addEndAnnotationCloseEvent(annotation.getTag());
       currentLimenContext().closeAnnotation();
     }
 
@@ -217,9 +214,64 @@ public class LMNLImporter2 {
       return eventList;
     }
 
+    private void addStartTagOpenEvent(Markup markup) {
+      Basics.QName qName = getQName(markup);
+      Basics.Id id = getId(markup);
+      eventList.add(new Events.StartTagOpenEvent(qName, id));
+    }
+
+    void addStartTagCloseEvent(Markup markup) {
+      Basics.QName qName = getQName(markup);
+      Basics.Id id = getId(markup);
+      eventList.add(new Events.StartTagCloseEvent(qName, id));
+    }
+
+    void addEndTagOpenEvent(Markup markup) {
+      Basics.QName qName = getQName(markup);
+      Basics.Id id = getId(markup);
+      eventList.add(new Events.EndTagOpenEvent(qName, id));
+    }
+
+    void addEndTagCloseEvent(Markup markup) {
+      Basics.QName qName = getQName(markup);
+      Basics.Id id = getId(markup);
+      eventList.add(new Events.EndTagCloseEvent(qName, id));
+    }
+
+    private Basics.Id getId(Markup markup) {
+      String idString = markup.hasId() ? markup.getId() : "";
+      return Basics.id(idString);
+    }
+
+    private Basics.QName getQName(Markup markup) {
+      return qName(markup.getTag());
+    }
+
     void addTextEvent(String text) {
       eventList.add(textEvent(text));
     }
+
+    void addStartAnnotationOpenEvent(String tag) {
+      Event startAnnotationOpenEvent = Events.startAnnotationOpenEvent(qName(tag));
+      eventList.add(startAnnotationOpenEvent);
+    }
+
+    void addStartAnnotationCloseEvent(String tag) {
+      Event startAnnotationCloseEvent = Events.startAnnotationCloseEvent(qName(tag));
+      eventList.add(startAnnotationCloseEvent);
+    }
+
+    void addEndAnnotationOpenEvent(String tag) {
+      Event endAnnotationOpenEvent = Events.endAnnotationOpenEvent(qName(tag));
+      eventList.add(endAnnotationOpenEvent);
+    }
+
+    void addEndAnnotationCloseEvent(String tag) {
+      Event endAnnotationCloseEvent = Events.endAnnotationCloseEvent(qName(tag));
+      eventList.add(endAnnotationCloseEvent);
+    }
+
+
   }
 
   public List<Event> importLMNL(String input) throws LMNLSyntaxError {
@@ -313,12 +365,16 @@ public class LMNLImporter2 {
           handleAnnotation(context);
           break;
         case LMNLLexer.END_OPEN_RANGE:
+          context.addStartTagCloseEvent(context.currentLimenContext().currentMarkup());
           context.popOpenMarkup();
           goOn = false;
           break;
         case LMNLLexer.END_ANONYMOUS_RANGE:
           TextNode textNode = new TextNode("");
           context.addTextNode(textNode);
+          Markup markup2 = context.currentLimenContext().currentMarkup();
+          context.addStartTagCloseEvent(markup2);
+          context.addEndTagOpenEvent(markup2);
           context.closeMarkup();
           goOn = false;
           break;
@@ -344,17 +400,23 @@ public class LMNLImporter2 {
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Annotation:
           annotation.setTag(token.getText());
+          context.addStartAnnotationOpenEvent(annotation.getTag());
           break;
         case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
         case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
+          if (annotation.getTag().isEmpty()) {
+            context.addStartAnnotationOpenEvent("");
+          }
           handleAnnotation(context);
           break;
         case LMNLLexer.END_OPEN_ANNO:
+          context.addStartAnnotationCloseEvent(annotation.getTag());
           context.pushLimenContext(context.currentAnnotationLimen());
           break;
 
         case LMNLLexer.ANNO_TEXT:
           context.addTextNode(new TextNode(token.getText()));
+          context.addTextEvent(token.getText());
           break;
 
         case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
@@ -367,6 +429,7 @@ public class LMNLImporter2 {
 
         case LMNLLexer.BEGIN_CLOSE_ANNO:
         case LMNLLexer.Name_Close_Annotation:
+          context.addEndAnnotationOpenEvent(annotation.getTag());
           break;
         case LMNLLexer.END_CLOSE_ANNO:
           context.popLimenContext();
@@ -395,6 +458,7 @@ public class LMNLImporter2 {
         case LMNLLexer.Name_Close_Range:
           String rangeName = token.getText();
           context.pushOpenMarkup(rangeName);
+          context.addEndTagOpenEvent(context.currentLimenContext().currentMarkup());
           break;
         case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
           handleAnnotation(context);

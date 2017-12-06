@@ -1,5 +1,25 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
+/*
+* #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ * 
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ * #L%
+*/
+
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
@@ -16,31 +36,11 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-    /*
-     * #%L
-     * alexandria-markup
-     * =======
-     * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
-     * =======
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *      http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     * #L%
-     */
-
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  */
 public class LMNLImporter {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   static class LimenContext {
     private final Limen limen;
@@ -430,7 +430,7 @@ public class LMNLImporter {
     joinDiscontinuedRanges(document.value());
   }
 
-  public static void joinDiscontinuedRanges(Limen limen) {
+  private static void joinDiscontinuedRanges(Limen limen) {
     Map<String, Markup> markupsToJoin = new HashMap<>();
     List<Markup> markupsToRemove = new ArrayList<>();
     limen.markupList.stream()//

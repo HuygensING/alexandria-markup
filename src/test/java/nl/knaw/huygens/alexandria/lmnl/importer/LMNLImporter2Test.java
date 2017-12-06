@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,36 +18,42 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
+import static java.util.Arrays.asList;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.creole.Basics;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.Events;
+import static nl.knaw.huygens.alexandria.creole.Events.*;
 import org.junit.Test;
 
 import java.util.List;
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
-import static nl.knaw.huygens.alexandria.creole.Events.endTagEvent;
-import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
-
 public class LMNLImporter2Test {
-  final LMNLImporter2 importer = new LMNLImporter2();
+  private final LMNLImporter2 importer = new LMNLImporter2();
 
   @Test
   public void testImporter2a() {
     String lmnl = "[range}text{range]";
-    List<Event> events = importer.importLMNL(lmnl);
 
-    Event openRange = startTagEvent(qName("range"));
+    Basics.QName qName = qName("range");
+    Event startRangeOpen = startTagOpenEvent(qName);
+    Event startRangeClose = startTagCloseEvent(qName);
     Event text = Events.textEvent("text");
-    Event closeRange = endTagEvent(qName("range"));
+    Event endRangeOpen = endTagOpenEvent(qName);
+    Event endRangeClose = endTagCloseEvent(qName);
 
-    assertThat(events).hasSize(3);
-    assertThat(openRange.equals(events.get(0)));
-    assertThat(text.equals(events.get(1)));
-    assertThat(closeRange.equals(events.get(2)));
+    List<Event> expectedEvents = asList(
+        startRangeOpen,
+        startRangeClose,
+        text,
+        endRangeOpen,
+        endRangeClose
+    );
+
+    assertEventsAreExpected(lmnl, expectedEvents);
   }
 
   @Test
@@ -64,25 +70,86 @@ public class LMNLImporter2Test {
   @Test
   public void testImporter2c() {
     String lmnl = "[page=ed1n1}bla[page=ed2n1}bla{page=ed2n1]bla{page=ed1n1]";
-    List<Event> events = importer.importLMNL(lmnl);
 
-    Basics.QName a = qName("page");
+    Basics.QName page = qName("page");
     String id1 = "ed1n1";
     String id2 = "ed2n1";
-    Event openRange1 = startTagEvent(a, id1);
-    Event openRange2 = startTagEvent(a, id2);
-    Event text = Events.textEvent("bla");
-    Event closeRange1 = startTagEvent(a, id1);
-    Event closeRange2 = startTagEvent(a, id2);
 
-    assertThat(events).hasSize(7);
-    assertThat(openRange1.equals(events.get(0)));
-    assertThat(text.equals(events.get(1)));
-    assertThat(openRange2.equals(events.get(2)));
-    assertThat(text.equals(events.get(3)));
-    assertThat(closeRange2.equals(events.get(4)));
-    assertThat(text.equals(events.get(5)));
-    assertThat(closeRange1.equals(events.get(6)));
+    List<Event> expectedEvents = asList(
+        startTagOpenEvent(page, id1),
+        startTagCloseEvent(page, id1),
+        textEvent("bla"),
+        startTagOpenEvent(page, id2),
+        startTagCloseEvent(page, id2),
+        textEvent("bla"),
+        endTagOpenEvent(page, id2),
+        endTagCloseEvent(page, id2),
+        textEvent("bla"),
+        endTagOpenEvent(page, id1),
+        endTagCloseEvent(page, id1)
+    );
+
+    assertEventsAreExpected(lmnl, expectedEvents);
   }
+
+  @Test
+  public void testParsingText() {
+    String lmnl = "test";
+    List<Event> events = importer.importLMNL(lmnl);
+
+    Event text = Events.textEvent("test");
+
+    assertThat(events).hasSize(1);
+    assertThat(text.equals(events.get(0)));
+  }
+
+  @Test
+  public void testParsingEmptyRange() {
+    String lmnl = "[test]";
+
+    String name = "test";
+    List<Event> expectedEvents = asList(
+        startTagOpenEvent(name),
+        startTagCloseEvent(name),
+        endTagOpenEvent(name),
+        endTagCloseEvent(name)
+    );
+
+    assertEventsAreExpected(lmnl, expectedEvents);
+  }
+
+  @Test
+  public void testSimpleAnnotationWithShortenedEndTag() {
+    String lmnl = "[foo [bar}...{]]";
+
+    String foo = "foo";
+    String bar = "bar";
+
+    List<Event> expectedEvents = asList(
+        startTagOpenEvent(foo),//
+        startAnnotationOpenEvent(bar),//
+        startAnnotationCloseEvent(bar),//
+        textEvent("..."),//
+        endAnnotationOpenEvent(bar),//
+        endAnnotationCloseEvent(bar),//
+        startTagCloseEvent(foo),//
+        endTagOpenEvent(foo),//
+        endTagCloseEvent(foo)
+    );
+
+    assertEventsAreExpected(lmnl, expectedEvents);
+  }
+
+  private void assertEventsAreExpected(String lmnl, List<Event> expectedEvents) {
+    List<Event> events = importer.importLMNL(lmnl);
+    assertThat(events).hasSameSizeAs(expectedEvents);
+    for (int i = 0; i < expectedEvents.size(); i++) {
+      Event event = events.get(i);
+      Event expectedEvent = expectedEvents.get(i);
+      assertThat(event).hasSameClassAs(expectedEvent);
+      assertThat(event).isEqualToComparingFieldByFieldRecursively(expectedEvent);
+    }
+  }
+
 
 }
