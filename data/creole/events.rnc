@@ -1,0 +1,54 @@
+default namespace ev = "http://www.lmnl.org/event"
+namespace syn = "http://www.lmnl.org/event/syntactic"
+datatypes xs = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = events
+
+events = element events { event* }
+
+event |= element start-tag-open         { prefix, ns, name, id, depth, common }
+event |= element start-tag-close        { prefix, ns, name, id, depth, common }
+event |= element end-tag-open           { prefix, ns, name, id, depth, common }
+event |= element end-tag-close          { prefix, ns, name, id, depth, common }
+event |= element start-annotation-open  { prefix, ns, name, depth, common }
+event |= element start-annotation-close { prefix, ns, name, depth, common }
+event |= element end-annotation-open    { prefix, ns, name, depth, common }
+event |= element end-annotation-close   { prefix, ns, name, depth, common }
+event |= element atom-open              { prefix, ns, name, depth, common }
+event |= element atom-close             { prefix, ns, name, depth, common }
+
+prefix = attribute prefix { xs:NCName }
+ns     = attribute ns     { xs:anyURI }
+name   = attribute name   { xs:NCName }
+id     = attribute id     { xs:NCName }
+depth  = attribute depth  { xs:integer }
+
+event |= element text { chars, ws, common }
+
+chars = attribute chars { xs:string }
+ws    = attribute ws    { 'true' | 'false' }
+
+event |= element syn:ns-decl             { prefix, ns, common }
+event |= element syn:entity-decl         { prefix, ns, name, content, common }
+event |= element syn:entities-decl-open  { href, depth, common }
+event |= element syn:entities-decl-close { href, depth, common }
+event |= element syn:entity-open         { prefix, ns, name, depth, common }
+event |= element syn:entity-close        { prefix, ns, name, depth, common }
+event |= element syn:comment             { content, common }
+
+href    = attribute href    { xs:anyURI }
+content = attribute content { xs:string }
+
+event |= element error { parsing, found, message, line, col }
+
+parsing = attribute parsing { xs:string }
+found   = attribute found   { xs:string }
+message = attribute message { xs:string }
+
+common &= hash
+common &= line
+common &= col
+
+hash = attribute hash { xs:string }
+line = attribute line { xs:integer }
+col  = attribute col  { xs:integer }
