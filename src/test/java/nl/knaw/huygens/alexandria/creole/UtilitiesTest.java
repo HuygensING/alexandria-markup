@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*
- * #%L
+    /*
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,16 +18,18 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.junit.Test;
+     */
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.id;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UtilitiesTest extends CreoleTest {
+  private static final Logger LOG = LoggerFactory.getLogger(UtilitiesTest.class);
 
   @Test
   public void testEmptyIsNullable() {
@@ -278,4 +280,20 @@ public class UtilitiesTest extends CreoleTest {
         "| )\n" +//
         ")");
   }
+
+  @Test
+  public void testFlip() {
+    Pattern p1 = new TestPattern();
+    Pattern p2 = new TestPattern();
+    Pattern pattern = group(p1, p2);
+
+    Pattern flipped = pattern.flip();
+    LOG.info("flipped = ", Utilities.patternTreeToDepth(flipped, 10));
+    assertThat(flipped.getClass()).isEqualTo(pattern.getClass());
+    Patterns.Group group = (Patterns.Group) pattern;
+    Patterns.Group flippedGroup = (Patterns.Group) flipped;
+    assertThat(flippedGroup.getPattern1()).isEqualTo(group.getPattern2());
+    assertThat(flippedGroup.getPattern2()).isEqualTo(group.getPattern1());
+  }
+
 }

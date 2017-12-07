@@ -20,5 +20,19 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
+import java.lang.reflect.Constructor;
+
 public interface Pattern {
+  default Pattern flip() {
+    Patterns.PatternWithTwoPatternParameters p0 = (Patterns.PatternWithTwoPatternParameters) this;
+    Pattern p1 = p0.getPattern1();
+    Pattern p2 = p0.getPattern2();
+    try {
+      Constructor<? extends Pattern> constructor = getClass()//
+          .getConstructor(new Class[]{Pattern.class, Pattern.class});
+      return constructor.newInstance(p2, p1);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

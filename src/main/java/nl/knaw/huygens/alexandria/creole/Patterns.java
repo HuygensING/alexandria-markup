@@ -84,7 +84,7 @@ class Patterns {
   }
 
   static class Group extends PatternWithTwoPatternParameters {
-    Group(Pattern pattern1, Pattern pattern2) {
+    public Group(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
   }
