@@ -28,6 +28,11 @@ class CreoleTest {
     public boolean isNullable() {
       return false;
     }
+
+    @Override
+    public boolean allowsText() {
+      return false;
+    }
   }
 
   static final Pattern NULLABLE_PATTERN = new NullablePattern();

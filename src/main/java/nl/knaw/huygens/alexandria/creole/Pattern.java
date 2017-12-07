@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-    /*
-     * #%L
+/*
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,11 +18,16 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
 
 import java.lang.reflect.Constructor;
 
 public interface Pattern {
+
+  boolean isNullable();
+
+  boolean allowsText();
+
   default Pattern flip() {
     if (!(this instanceof Patterns.PatternWithTwoPatternParameters)) {
       return this;
@@ -38,6 +43,4 @@ public interface Pattern {
       throw new RuntimeException(e);
     }
   }
-
-  boolean isNullable();
 }

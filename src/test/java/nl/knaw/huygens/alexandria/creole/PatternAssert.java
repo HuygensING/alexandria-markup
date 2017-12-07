@@ -55,7 +55,7 @@ public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
   public PatternAssert allowsText() {
     isNotNull();
 
-    boolean allowsText = Utilities.allowsText(actual);
+    boolean allowsText = actual.allowsText();
     if (!allowsText) {
       String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
       failWithMessage(assertjErrorMessage, actual, true, false);
@@ -67,7 +67,7 @@ public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
   public PatternAssert doesNotAllowText() {
     isNotNull();
 
-    boolean doesNotAllowText = !Utilities.allowsText(actual);
+    boolean doesNotAllowText = !actual.allowsText();
     if (!doesNotAllowText) {
       String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
       failWithMessage(assertjErrorMessage, actual, false, true);

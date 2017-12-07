@@ -23,7 +23,6 @@ package nl.knaw.huygens.alexandria.creole;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Events.startTagEvent;
@@ -35,98 +34,6 @@ class Utilities {
   //  private static final String INDENT = "  ";
   private static final String INDENT = "| ";
   private static final String ELLIPSES = "...";
-
-  /*
-  The second utility function is allowsText, which returns true if the pattern can match text.
-  This is important because whitespace-only text events are ignored if text isn't allowed by a pattern.
-
-  allowsText:: Pattern -> Bool
-  allowsText (Choice p1 p2) = allowsText p1 || allowsText p2
-  allowsText (Group p1 p2) =
-    if nullable p1 then (allowsText p1 || allowsText p2)
-                   else allowsText p1
-  allowsText (Interleave p1 p2) =
-    allowsText p1 || allowsText p2
-  allowsText (Concur p1 p2) = allowsText p1 && allowsText p2
-  allowsText (Partition p) = allowsText p
-  allowsText (OneOrMore p) = allowsText p
-  allowsText (ConcurOneOrMore p) = allowsText p
-  allowsText (After p1 p2) =
-    if nullable p1 then (allowsText p1 || allowsText p2)
-                   else allowsText p1
-  allowsText (All p1 p2) = allowsText p1 && allowsText p2
-  allowsText Text = True
-  allowsText _ = False
-   */
-
-  private static final Map<Class, Function<Pattern, Boolean>> allowsTextMap = new HashMap<>();
-
-  static {
-    allowsTextMap.put(Patterns.Choice.class, pattern -> {
-      Patterns.Choice choice = (Patterns.Choice) pattern;
-      return orCombination(choice.getPattern1(), choice.getPattern2());
-    });
-
-    allowsTextMap.put(Patterns.Group.class, pattern -> {
-      Patterns.Group group = (Patterns.Group) pattern;
-      return group.getPattern1().isNullable()//
-          ? (orCombination(group.getPattern1(), group.getPattern2()))//
-          : allowsText(group.getPattern1());
-    });
-
-    allowsTextMap.put(Patterns.Interleave.class, pattern -> {
-      Patterns.Interleave interleave = (Patterns.Interleave) pattern;
-      return orCombination(interleave.getPattern1(), interleave.getPattern2());
-    });
-
-    allowsTextMap.put(Patterns.Concur.class, pattern -> {
-      Patterns.Concur concur = (Patterns.Concur) pattern;
-      return andCombination(concur.getPattern1(), concur.getPattern2());
-    });
-
-    allowsTextMap.put(Patterns.Partition.class, pattern -> {
-      Patterns.Partition partition = (Patterns.Partition) pattern;
-      return allowsText(partition.getPattern());
-    });
-
-    allowsTextMap.put(Patterns.OneOrMore.class, pattern -> {
-      Patterns.OneOrMore oneOrMore = (Patterns.OneOrMore) pattern;
-      return allowsText(oneOrMore.getPattern());
-    });
-
-    allowsTextMap.put(Patterns.ConcurOneOrMore.class, pattern -> {
-      Patterns.ConcurOneOrMore concurOneOrMore = (Patterns.ConcurOneOrMore) pattern;
-      return allowsText(concurOneOrMore.getPattern());
-    });
-
-    allowsTextMap.put(Patterns.After.class, pattern -> {
-      Patterns.After group = (Patterns.After) pattern;
-      return group.getPattern1().isNullable()//
-          ? (orCombination(group.getPattern1(), group.getPattern2()))//
-          : allowsText(group.getPattern1());
-    });
-
-    allowsTextMap.put(Patterns.All.class, pattern -> {
-      Patterns.All all = (Patterns.All) pattern;
-      return andCombination(all.getPattern1(), all.getPattern2());
-    });
-
-    allowsTextMap.put(Patterns.Text.class, pattern -> true);
-
-    allowsTextMap.put(Patterns.Range.class, pattern -> false);
-    allowsTextMap.put(Patterns.EndRange.class, pattern -> false);
-    allowsTextMap.put(Patterns.Annotation.class, pattern -> false);
-    allowsTextMap.put(Patterns.Empty.class, pattern -> false);
-
-  }
-
-  public static Boolean allowsText(Pattern pattern) {
-    Function<Pattern, Boolean> function = allowsTextMap.get(pattern.getClass());
-    if (function == null) {
-      throw unexpectedPattern(pattern);
-    }
-    return function.apply(pattern);
-  }
 
   /*
   Finally, like Relax NG, Creole needs a method of testing whether a given qualified name matches a given name class:
@@ -250,7 +157,7 @@ class Utilities {
     return patternTreeToDepth(pattern, 0, maxDepth);
   }
 
-  public static List<Pattern> leafPatterns(Pattern pattern) {
+  private static List<Pattern> leafPatterns(Pattern pattern) {
     List<Pattern> leafPatterns = new ArrayList<>();
     if (pattern instanceof Patterns.PatternWithoutParameters
         || pattern instanceof Patterns.EndRange) {
@@ -343,14 +250,6 @@ class Utilities {
       return "\"" + name.getLocalName().getValue() + "\"";
     }
     return nameClass.getClass().getSimpleName();
-  }
-
-  private static boolean andCombination(Pattern pattern1, Pattern pattern2) {
-    return allowsText(pattern1) && allowsText(pattern2);
-  }
-
-  private static boolean orCombination(Pattern pattern1, Pattern pattern2) {
-    return allowsText(pattern1) || allowsText(pattern2);
   }
 
   private static RuntimeException unexpectedPattern(Pattern pattern) {

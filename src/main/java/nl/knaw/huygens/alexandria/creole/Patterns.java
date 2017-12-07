@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
+import com.google.common.base.Preconditions;
+
 import java.util.List;
 
 class Patterns {
@@ -57,8 +59,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return true;
+    void init() {
+      nullable = true;
+      allowsText = false;
     }
   }
 
@@ -69,8 +72,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
   }
 
@@ -81,8 +85,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return true;
+    void init() {
+      nullable = true;
+      allowsText = true;
     }
   }
 
@@ -92,8 +97,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return getPattern1().isNullable() || getPattern2().isNullable();
+    void init() {
+      nullable = pattern1.isNullable() || pattern2.isNullable();
+      allowsText = pattern1.allowsText() || pattern2.allowsText();
     }
   }
 
@@ -103,8 +109,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return getPattern1().isNullable() && getPattern2().isNullable();
+    void init() {
+      nullable = pattern1.isNullable() && pattern2.isNullable();
+      allowsText = pattern1.allowsText() || pattern2.allowsText();
     }
   }
 
@@ -114,8 +121,11 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return getPattern1().isNullable() && getPattern2().isNullable();
+    void init() {
+      nullable = pattern1.isNullable() && pattern2.isNullable();
+      allowsText = pattern1.isNullable()//
+          ? (pattern1.allowsText() || pattern2.allowsText())//
+          : pattern1.allowsText();
     }
   }
 
@@ -125,8 +135,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return getPattern1().isNullable() && getPattern2().isNullable();
+    void init() {
+      nullable = pattern1.isNullable() && pattern2.isNullable();
+      allowsText = pattern1.allowsText() && pattern2.allowsText();
     }
   }
 
@@ -134,32 +145,17 @@ class Patterns {
     Partition(Pattern pattern) {
       super(pattern);
     }
-
-    @Override
-    public boolean isNullable() {
-      return getPattern().isNullable();
-    }
   }
 
   static class OneOrMore extends PatternWithOnePatternParameter {
     OneOrMore(Pattern pattern) {
       super(pattern);
     }
-
-    @Override
-    public boolean isNullable() {
-      return getPattern().isNullable();
-    }
   }
 
   static class ConcurOneOrMore extends PatternWithOnePatternParameter {
     ConcurOneOrMore(Pattern pattern) {
       super(pattern);
-    }
-
-    @Override
-    public boolean isNullable() {
-      return getPattern().isNullable();
     }
   }
 
@@ -170,7 +166,7 @@ class Patterns {
     public Range(NameClass nameClass, Pattern pattern) {
       this.nameClass = nameClass;
       this.pattern = pattern;
-      setHashcode(getClass().hashCode() * nameClass.hashCode() * pattern.hashCode());
+      setHashcode(getClass().hashCode() + nameClass.hashCode() * pattern.hashCode());
     }
 
     NameClass getNameClass() {
@@ -182,8 +178,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
 
     @Override
@@ -199,7 +196,7 @@ class Patterns {
     EndRange(Basics.QName qName, Basics.Id id) {
       this.qName = qName;
       this.id = id;
-      setHashcode(getClass().hashCode() * qName.hashCode() * id.hashCode());
+      setHashcode(getClass().hashCode() + qName.hashCode() * id.hashCode());
     }
 
     Basics.QName getQName() {
@@ -211,8 +208,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
 
     @Override
@@ -228,8 +226,11 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = pattern1.isNullable()//
+          ? (pattern1.allowsText() || pattern2.allowsText())//
+          : pattern1.allowsText();
     }
   }
 
@@ -239,9 +240,13 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return getPattern1().isNullable() && getPattern2().isNullable();
+    void init() {
+      nullable = pattern1.isNullable() && pattern2.isNullable();
+      allowsText = pattern1.isNullable()//
+          ? (pattern1.allowsText() || pattern2.allowsText())//
+          : pattern1.allowsText();
     }
+
   }
 
   static class Atom extends AbstractPattern {
@@ -254,8 +259,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
   }
 
@@ -266,7 +272,7 @@ class Patterns {
     Annotation(NameClass nameClass, Pattern pattern) {
       this.nameClass = nameClass;
       this.pattern = pattern;
-      setHashcode(getClass().hashCode() * nameClass.hashCode() * pattern.hashCode());
+      setHashcode(getClass().hashCode() + nameClass.hashCode() * pattern.hashCode());
     }
 
     NameClass getNameClass() {
@@ -278,8 +284,9 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
   }
 
@@ -288,7 +295,7 @@ class Patterns {
 
     EndAnnotation(NameClass nameClass) {
       this.nameClass = nameClass;
-      setHashcode(getClass().hashCode() * nameClass.hashCode());
+      setHashcode(getClass().hashCode() + nameClass.hashCode());
     }
 
     NameClass getNameClass() {
@@ -296,15 +303,65 @@ class Patterns {
     }
 
     @Override
-    public boolean isNullable() {
-      return false;
+    void init() {
+      nullable = false;
+      allowsText = false;
     }
   }
 
+  /* abstract Pattern classes */
+
+  static abstract class AbstractPattern implements Pattern {
+    Boolean nullable;
+    Boolean allowsText;
+
+    abstract void init();
+
+    int hashcode = getClass().hashCode();
+
+    void setHashcode(int hashcode) {
+      Preconditions.checkState(hashcode != 0, "hashCode should not be 0!");
+      this.hashcode = hashcode;
+    }
+
+    @Override
+    public boolean isNullable() {
+      if (nullable == null) {
+        init();
+        if (nullable == null) {
+          throw new RuntimeException("nullable == null! Make sure nullable is initialized in the init() of " //
+              + getClass().getSimpleName());
+        }
+      }
+      return nullable;
+    }
+
+    @Override
+    public boolean allowsText() {
+      if (allowsText == null) {
+        init();
+        if (allowsText == null) {
+          throw new RuntimeException("allowsText == null! Make sure allowsText is initialized in the init() of " //
+              + getClass().getSimpleName());
+        }
+      }
+      return allowsText;
+    }
+
+    @Override
+    public int hashCode() {
+      return hashcode;
+    }
+  }
+
+  static abstract class PatternWithoutParameters extends AbstractPattern {
+  }
+
   static abstract class PatternWithOnePatternParameter extends AbstractPattern {
-    private final Pattern pattern;
+    final Pattern pattern;
 
     PatternWithOnePatternParameter(Pattern pattern) {
+      Preconditions.checkNotNull(pattern);
       this.pattern = pattern;
       setHashcode(getClass().hashCode() * pattern.hashCode());
     }
@@ -312,19 +369,24 @@ class Patterns {
     public Pattern getPattern() {
       return pattern;
     }
-  }
 
-  static abstract class PatternWithoutParameters extends AbstractPattern {
+    @Override
+    void init() {
+      nullable = pattern.isNullable();
+      allowsText = pattern.allowsText();
+    }
   }
 
   static abstract class PatternWithTwoPatternParameters extends AbstractPattern {
-    private final Pattern pattern1;
-    private final Pattern pattern2;
+    final Pattern pattern1;
+    final Pattern pattern2;
 
     PatternWithTwoPatternParameters(Pattern pattern1, Pattern pattern2) {
+      Preconditions.checkNotNull(pattern1);
+      Preconditions.checkNotNull(pattern2);
       this.pattern1 = pattern1;
       this.pattern2 = pattern2;
-      setHashcode(getClass().hashCode() * pattern1.hashCode() * pattern2.hashCode());
+      setHashcode(getClass().hashCode() + pattern1.hashCode() * pattern2.hashCode());
     }
 
     Pattern getPattern1() {
@@ -340,19 +402,6 @@ class Patterns {
       return obj.getClass().equals(this.getClass())
           && pattern1.equals(((PatternWithTwoPatternParameters) obj).getPattern1())
           && pattern2.equals(((PatternWithTwoPatternParameters) obj).getPattern2());
-    }
-  }
-
-  static abstract class AbstractPattern implements Pattern {
-    int hashcode = getClass().hashCode();
-
-    void setHashcode(int hashcode) {
-      this.hashcode = hashcode;
-    }
-
-    @Override
-    public int hashCode() {
-      return hashcode;
     }
   }
 

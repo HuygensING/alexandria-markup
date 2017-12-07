@@ -87,7 +87,7 @@ class Derivatives {
       Events.TextEvent textEvent = (Events.TextEvent) event;
       String s = textEvent.getText();
       Basics.Context cx = textEvent.getContext();
-      if (whitespace(s) && !Utilities.allowsText(p)) {
+      if (whitespace(s) && !p.allowsText()) {
         return p;
       } else {
         return textDeriv(cx, p, s);
