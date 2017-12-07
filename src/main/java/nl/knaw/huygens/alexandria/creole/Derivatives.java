@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
 
 class Derivatives {
   private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
@@ -283,7 +282,7 @@ class Derivatives {
   private static Pattern startTagDerivForRange(Patterns.Range range, Basics.QName qn, Basics.Id id) {
     NameClass nc = range.getNameClass();
     Pattern p = range.getPattern();
-    return (contains(nc, qn))//
+    return (nc.contains(qn))//
         ? group(p, endRange(qn, id))//
         : notAllowed();
   }

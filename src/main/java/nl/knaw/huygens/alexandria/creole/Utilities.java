@@ -35,51 +35,6 @@ class Utilities {
   private static final String INDENT = "| ";
   private static final String ELLIPSES = "...";
 
-  /*
-  Finally, like Relax NG, Creole needs a method of testing whether a given qualified name matches a given name class:
-
-  contains :: NameClass -> QName -> Bool
-  contains AnyName _ = True
-  contains (AnyNameExcept nc) n = not (contains nc n)
-  contains (NsName ns1) (QName ns2 _) = (ns1 == ns2)
-  contains (NsNameExcept ns1 nc) (QName ns2 ln) =
-    ns1 == ns2 && not (contains nc (QName ns2 ln))
-  contains (Name ns1 ln1) (QName ns2 ln2) =
-    (ns1 == ns2) && (ln1 == ln2)
-  contains (NameClassChoice nc1 nc2) n =
-    (contains nc1 n) || (contains nc2 n)
-
-   */
-  public static Boolean contains(NameClass nameClass, Basics.QName qName) {
-    if (nameClass instanceof NameClasses.AnyName) {
-      return true;
-    }
-    if (nameClass instanceof NameClasses.AnyNameExcept) {
-      NameClasses.AnyNameExcept anyNameExcept = (NameClasses.AnyNameExcept) nameClass;
-      return !contains(anyNameExcept.getNameClassToExcept(), qName);
-    }
-    if (nameClass instanceof NameClasses.NsName) {
-      NameClasses.NsName nsName = (NameClasses.NsName) nameClass;
-      return nsName.getValue().equals(qName.getUri().getValue());
-    }
-    if (nameClass instanceof NameClasses.NsNameExcept) {
-      NameClasses.NsNameExcept nsNameExcept = (NameClasses.NsNameExcept) nameClass;
-      return nsNameExcept.getUri().equals(qName.getUri())
-          && !contains(nsNameExcept.getNameClass(), qName);
-    }
-    if (nameClass instanceof NameClasses.Name) {
-      NameClasses.Name name = (NameClasses.Name) nameClass;
-      return name.getUri().equals(qName.getUri())
-          && name.getLocalName().equals(qName.getLocalName());
-    }
-    if (nameClass instanceof NameClasses.NameClassChoice) {
-      NameClasses.NameClassChoice nameClassChoice = (NameClasses.NameClassChoice) nameClass;
-      return contains(nameClassChoice.getNameClass1(), qName)
-          || contains(nameClassChoice.getNameClass2(), qName);
-    }
-    return false;
-  }
-
   static Set<Event> expectedEvents(Pattern pattern) {
     Set<Event> expectedEvents = new HashSet<>();
     if (pattern instanceof Patterns.Text) {

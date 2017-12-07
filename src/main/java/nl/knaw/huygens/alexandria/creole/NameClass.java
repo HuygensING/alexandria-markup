@@ -21,4 +21,5 @@ package nl.knaw.huygens.alexandria.creole;
  */
 
 public interface NameClass {
+  boolean contains(Basics.QName qName);
 }

@@ -40,6 +40,10 @@ public class NameClasses {
   }
 
   static class AnyName extends AbstractNameClass {
+    @Override
+    public boolean contains(Basics.QName qName) {
+      return true;
+    }
   }
 
   public static AnyNameExcept anyNameExcept(NameClass nameClassToExcept) {
@@ -55,6 +59,11 @@ public class NameClasses {
 
     public NameClass getNameClassToExcept() {
       return nameClassToExcept;
+    }
+
+    @Override
+    public boolean contains(Basics.QName qName) {
+      return !nameClassToExcept.contains(qName);
     }
   }
 
@@ -89,6 +98,12 @@ public class NameClasses {
     }
 
     @Override
+    public boolean contains(Basics.QName qName) {
+      return qName.getUri().equals(uri)
+          && qName.getLocalName().equals(localName);
+    }
+
+    @Override
     public String toString() {
       return localName.getValue();
     }
@@ -118,6 +133,12 @@ public class NameClasses {
     public NameClass getNameClass() {
       return nameClass;
     }
+
+    @Override
+    public boolean contains(Basics.QName qName) {
+      return uri.equals(qName.getUri())//
+          && !nameClass.contains(qName);
+    }
   }
 
   public static NsName nsName(String uri) {
@@ -137,6 +158,11 @@ public class NameClasses {
 
     public String getValue() {
       return uri.getValue();
+    }
+
+    @Override
+    public boolean contains(Basics.QName qName) {
+      return getValue().equals(qName.getUri().getValue());
     }
   }
 
@@ -160,9 +186,16 @@ public class NameClasses {
     public NameClass getNameClass2() {
       return nameClass2;
     }
+
+    @Override
+    public boolean contains(Basics.QName qName) {
+      return nameClass1.contains(qName) //
+          || nameClass2.contains(qName);
+    }
   }
 
-  static class AbstractNameClass implements NameClass {
+  /* abstract classes */
+  static abstract class AbstractNameClass implements NameClass {
     int hashCode;
 
     AbstractNameClass() {
