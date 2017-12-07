@@ -231,12 +231,12 @@ class Constructors {
 
     //  all p Empty = if nullable p then Empty else NotAllowed
     if (pattern2 instanceof Patterns.Empty) {
-      return Utilities.nullable(pattern1) ? empty() : notAllowed();
+      return pattern1.isNullable() ? empty() : notAllowed();
     }
 
     //  all Empty p = if nullable p then Empty else NotAllowed
     if (pattern1 instanceof Patterns.Empty) {
-      return Utilities.nullable(pattern2) ? empty() : notAllowed();
+      return pattern2.isNullable() ? empty() : notAllowed();
     }
 
     //  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)

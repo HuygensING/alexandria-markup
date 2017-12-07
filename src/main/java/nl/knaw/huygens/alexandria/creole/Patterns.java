@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*
-* #%L
+    /*
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,7 +18,7 @@ package nl.knaw.huygens.alexandria.creole;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  * #L%
-*/
+     */
 
 import java.util.List;
 
@@ -55,12 +55,22 @@ class Patterns {
     public String toString() {
       return "Empty()";
     }
+
+    @Override
+    public boolean isNullable() {
+      return true;
+    }
   }
 
   static class NotAllowed extends PatternWithoutParameters {
     @Override
     public String toString() {
       return "NotAllowed()";
+    }
+
+    @Override
+    public boolean isNullable() {
+      return false;
     }
   }
 
@@ -69,11 +79,21 @@ class Patterns {
     public String toString() {
       return "Text()";
     }
+
+    @Override
+    public boolean isNullable() {
+      return true;
+    }
   }
 
   static class Choice extends PatternWithTwoPatternParameters {
     Choice(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
+    }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern1().isNullable() || getPattern2().isNullable();
     }
   }
 
@@ -81,11 +101,21 @@ class Patterns {
     Interleave(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern1().isNullable() && getPattern2().isNullable();
+    }
   }
 
   static class Group extends PatternWithTwoPatternParameters {
     public Group(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
+    }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern1().isNullable() && getPattern2().isNullable();
     }
   }
 
@@ -93,11 +123,21 @@ class Patterns {
     Concur(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern1().isNullable() && getPattern2().isNullable();
+    }
   }
 
   static class Partition extends PatternWithOnePatternParameter {
     Partition(Pattern pattern) {
       super(pattern);
+    }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern().isNullable();
     }
   }
 
@@ -105,11 +145,21 @@ class Patterns {
     OneOrMore(Pattern pattern) {
       super(pattern);
     }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern().isNullable();
+    }
   }
 
   static class ConcurOneOrMore extends PatternWithOnePatternParameter {
     ConcurOneOrMore(Pattern pattern) {
       super(pattern);
+    }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern().isNullable();
     }
   }
 
@@ -129,6 +179,11 @@ class Patterns {
 
     Pattern getPattern() {
       return pattern;
+    }
+
+    @Override
+    public boolean isNullable() {
+      return false;
     }
 
     @Override
@@ -156,6 +211,11 @@ class Patterns {
     }
 
     @Override
+    public boolean isNullable() {
+      return false;
+    }
+
+    @Override
     public String toString() {
       String postfix = id.isEmpty() ? "" : "~" + id;
       return "<" + qName + postfix + "]";
@@ -166,11 +226,21 @@ class Patterns {
     public After(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
     }
+
+    @Override
+    public boolean isNullable() {
+      return false;
+    }
   }
 
   static class All extends PatternWithTwoPatternParameters {
     public All(Pattern pattern1, Pattern pattern2) {
       super(pattern1, pattern2);
+    }
+
+    @Override
+    public boolean isNullable() {
+      return getPattern1().isNullable() && getPattern2().isNullable();
     }
   }
 
@@ -181,6 +251,11 @@ class Patterns {
     Atom(NameClass nc, List<Annotation> annotations) {
       this.nc = nc;
       this.annotations = annotations;
+    }
+
+    @Override
+    public boolean isNullable() {
+      return false;
     }
   }
 
@@ -201,6 +276,11 @@ class Patterns {
     Pattern getPattern() {
       return pattern;
     }
+
+    @Override
+    public boolean isNullable() {
+      return false;
+    }
   }
 
   static class EndAnnotation extends AbstractPattern {
@@ -214,9 +294,14 @@ class Patterns {
     NameClass getNameClass() {
       return nameClass;
     }
+
+    @Override
+    public boolean isNullable() {
+      return false;
+    }
   }
 
-  static class PatternWithOnePatternParameter extends AbstractPattern {
+  static abstract class PatternWithOnePatternParameter extends AbstractPattern {
     private final Pattern pattern;
 
     PatternWithOnePatternParameter(Pattern pattern) {
@@ -227,14 +312,12 @@ class Patterns {
     public Pattern getPattern() {
       return pattern;
     }
-
   }
 
-  static class PatternWithoutParameters extends AbstractPattern {
-
+  static abstract class PatternWithoutParameters extends AbstractPattern {
   }
 
-  static class PatternWithTwoPatternParameters extends AbstractPattern {
+  static abstract class PatternWithTwoPatternParameters extends AbstractPattern {
     private final Pattern pattern1;
     private final Pattern pattern2;
 
@@ -260,7 +343,7 @@ class Patterns {
     }
   }
 
-  static class AbstractPattern implements Pattern {
+  static abstract class AbstractPattern implements Pattern {
     int hashcode = getClass().hashCode();
 
     void setHashcode(int hashcode) {

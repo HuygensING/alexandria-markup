@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class Validator {
     Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
     LOG.debug("end pattern = {}", pattern);
     return new ValidationResult()//
-        .setSuccess(nullable(pattern))//
+        .setSuccess(pattern.isNullable())//
         .setUnexpectedEvent(errorListener.getUnexpectedEvent());
   }
 }

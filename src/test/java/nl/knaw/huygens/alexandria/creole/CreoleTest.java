@@ -24,6 +24,10 @@ class CreoleTest {
 //  SoftAssertions softly = new SoftAssertions();
 
   static class TestPattern implements Pattern {
+    @Override
+    public boolean isNullable() {
+      return false;
+    }
   }
 
   static final Pattern NULLABLE_PATTERN = new NullablePattern();

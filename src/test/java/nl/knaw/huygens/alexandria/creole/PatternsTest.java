@@ -91,6 +91,11 @@ public class PatternsTest extends CreoleTest {
     DummyPattern() {
       setHashcode(RANDOM.nextInt());
     }
+
+    @Override
+    public boolean isNullable() {
+      return false;
+    }
   }
 
 }

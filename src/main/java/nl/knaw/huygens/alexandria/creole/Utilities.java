@@ -37,82 +37,6 @@ class Utilities {
   private static final String ELLIPSES = "...";
 
   /*
-        The most important utility function is nullable, which tests whether a given pattern can match an empty sequence
-         of events. Nullable is defined as follows for the various kinds of patterns:
-         */
-  //  nullable:: Pattern -> Bool
-  public static Boolean nullable(Pattern pattern) {
-    //  nullable Empty = True
-    //  nullable Text = True
-    if (pattern instanceof Patterns.Empty
-        || pattern instanceof Patterns.Text) {
-      return true;
-    }
-
-    //  nullable NotAllowed = False
-    if (pattern instanceof Patterns.NotAllowed) {
-      return false;
-    }
-    //  nullable (Choice p1 p2) = nullable p1 || nullable p2
-    if (pattern instanceof Patterns.Choice) {
-      Patterns.Choice choice = (Patterns.Choice) pattern;
-      return nullable(choice.getPattern1()) || nullable(choice.getPattern2());
-    }
-    //  nullable (Interleave p1 p2) = nullable p1 && nullable p2
-    if (pattern instanceof Patterns.Interleave) {
-      Patterns.Interleave interleave = (Patterns.Interleave) pattern;
-      return nullable(interleave.getPattern1()) && nullable(interleave.getPattern2());
-    }
-    //  nullable (Group p1 p2) = nullable p1 && nullable p2
-    if (pattern instanceof Patterns.Group) {
-      Patterns.Group group = (Patterns.Group) pattern;
-      return nullable(group.getPattern1()) && nullable(group.getPattern2());
-    }
-    //  nullable (Concur p1 p2) = nullable p1 && nullable p2
-    if (pattern instanceof Patterns.Concur) {
-      Patterns.Concur concur = (Patterns.Concur) pattern;
-      return nullable(concur.getPattern1()) && nullable(concur.getPattern2());
-    }
-    //  nullable (Partition p) = nullable p
-    if (pattern instanceof Patterns.Partition) {
-      return nullable(((Patterns.Partition) pattern).getPattern());
-    }
-    //  nullable (OneOrMore p) = nullable p
-    if (pattern instanceof Patterns.OneOrMore) {
-      return nullable(((Patterns.OneOrMore) pattern).getPattern());
-    }
-    //  nullable (ConcurOneOrMore p) = nullable p
-    if (pattern instanceof Patterns.ConcurOneOrMore) {
-      return nullable(((Patterns.ConcurOneOrMore) pattern).getPattern());
-    }
-    //  nullable (Range _ _) = False
-    if (pattern instanceof Patterns.Range) {
-      return false;
-    }
-    //  nullable (EndRange _ _) = False
-    if (pattern instanceof Patterns.EndRange) {
-      return false;
-    }
-    //  nullable (After _ _) = False
-    if (pattern instanceof Patterns.After) {
-//      Patterns.After after = (Patterns.After) pattern;
-//      return nullable(after.getPattern1()) && nullable(after.getPattern2());
-      return false;
-    }
-    //  nullable (All p1 p2) = nullable p1 && nullable p2
-    if (pattern instanceof Patterns.All) {
-      Patterns.All all = (Patterns.All) pattern;
-      return nullable(all.getPattern1()) && nullable(all.getPattern2());
-    }
-
-    if (pattern instanceof Patterns.Atom || pattern instanceof Patterns.Annotation) {
-      return false;
-    }
-
-    throw unexpectedPattern(pattern);
-  }
-
-  /*
   The second utility function is allowsText, which returns true if the pattern can match text.
   This is important because whitespace-only text events are ignored if text isn't allowed by a pattern.
 
@@ -145,7 +69,7 @@ class Utilities {
 
     allowsTextMap.put(Patterns.Group.class, pattern -> {
       Patterns.Group group = (Patterns.Group) pattern;
-      return nullable(group.getPattern1())//
+      return group.getPattern1().isNullable()//
           ? (orCombination(group.getPattern1(), group.getPattern2()))//
           : allowsText(group.getPattern1());
     });
@@ -177,7 +101,7 @@ class Utilities {
 
     allowsTextMap.put(Patterns.After.class, pattern -> {
       Patterns.After group = (Patterns.After) pattern;
-      return nullable(group.getPattern1())//
+      return group.getPattern1().isNullable()//
           ? (orCombination(group.getPattern1(), group.getPattern2()))//
           : allowsText(group.getPattern1());
     });

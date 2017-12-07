@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.texmecs.importer;
 
-/*
- * #%L
+    /*
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,33 +18,27 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TexMECSImporterTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -242,7 +236,7 @@ public class TexMECSImporterTest {
   @Test
   public void testSyntaxError4() throws IOException {
     String pathname = "data/texmecs/acrostic-syntax-error.texmecs";
-    String texMECS = FileUtils.readFileToString(new File(pathname), Charsets.UTF_8);
+    String texMECS = FileUtils.readFileToString(new File(pathname), StandardCharsets.UTF_8);
     try {
       Document document = testTexMECS(texMECS, "whatever");
       fail();

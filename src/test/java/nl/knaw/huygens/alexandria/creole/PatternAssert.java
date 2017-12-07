@@ -31,9 +31,9 @@ public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
   public PatternAssert isNullable() {
     isNotNull();
 
-    boolean actualNullable = Utilities.nullable(actual);
+    boolean actualNullable = actual.isNullable();
     if (!actualNullable) {
-      String assertjErrorMessage = "\nExpecting nullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      String assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
       failWithMessage(assertjErrorMessage, actual, true, false);
     }
 
@@ -43,9 +43,9 @@ public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
   public PatternAssert isNotNullable() {
     isNotNull();
 
-    boolean actualNotNullable = !Utilities.nullable(actual);
+    boolean actualNotNullable = !actual.isNullable();
     if (!actualNotNullable) {
-      String assertjErrorMessage = "\nExpecting nullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+      String assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
       failWithMessage(assertjErrorMessage, actual, false, true);
     }
 

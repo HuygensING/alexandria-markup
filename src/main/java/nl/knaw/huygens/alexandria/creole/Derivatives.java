@@ -30,7 +30,6 @@ import java.util.Map;
 
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.Utilities.contains;
-import static nl.knaw.huygens.alexandria.creole.Utilities.nullable;
 
 class Derivatives {
   private static final Logger LOG = LoggerFactory.getLogger(Derivatives.class);
@@ -164,7 +163,7 @@ class Derivatives {
       Pattern p1 = group.getPattern1();
       Pattern p2 = group.getPattern2();
       Pattern p = group(textDeriv(cx, p1, s), p2);
-      return (nullable(p1))//
+      return p1.isNullable()//
           ? choice(p, textDeriv(cx, p2, s))//
           : p;
     }
@@ -309,7 +308,7 @@ class Derivatives {
     Pattern p1 = group.getPattern1();
     Pattern p2 = group.getPattern2();
     Pattern d = group(startTagDeriv(p1, qn, id), p2);
-    return nullable(p1)//
+    return p1.isNullable()//
         ? choice(d, startTagDeriv(p2, qn, id))//
         : d;
   }
@@ -445,7 +444,7 @@ class Derivatives {
       Pattern p1 = group.getPattern1();
       Pattern p2 = group.getPattern2();
       Pattern p = group(endTagDeriv(p1, qn, id), p2);
-      return nullable(p1)//
+      return p1.isNullable()//
           ? choice(p, endTagDeriv(p2, qn, id))//
           : p;
     }
