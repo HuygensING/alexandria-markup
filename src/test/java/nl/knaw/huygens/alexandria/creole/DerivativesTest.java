@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import org.junit.BeforeClass;
+import nl.knaw.huygens.alexandria.creole.events.Events;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,22 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import static nl.knaw.huygens.alexandria.creole.Utilities.expectedEvents;
 
 public class DerivativesTest extends CreoleTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
-  private static Derivatives derivatives;
-
-  @BeforeClass
-  public static void beforeClass() {
-    ValidationErrorListener errorListener = new ValidationErrorListener();
-    derivatives = new Derivatives(errorListener);
-  }
 
   @Test
   public void testEventsDerivation() {
@@ -92,11 +83,11 @@ public class DerivativesTest extends CreoleTest {
         text()//
     );
 
-    Pattern pattern = derivatives.eventsDeriv(schemaPattern, events);
+    Pattern pattern = new Validator(schemaPattern).eventsDeriv(schemaPattern, events);
     LOG.info("derived pattern={}", pattern);
     assertThat(pattern).isEqualTo(empty());
 
-    Pattern pattern1 = Derivatives.eventsDeriv(schemaPattern, endE);
+    Pattern pattern1 = endE.eventDeriv(schemaPattern);
     LOG.info("derived pattern={}", pattern1);
     assertThat(pattern1).isEqualTo(notAllowed());
   }
@@ -234,13 +225,13 @@ public class DerivativesTest extends CreoleTest {
   }
 
   private void assertEventsAreValidForSchema(Pattern schemaPattern, List<Event> events) {
-    Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
-    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
+    Pattern pattern1 = new Validator(schemaPattern).eventsDeriv(schemaPattern, events);
+//    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
     assertThat(pattern1).isNullable();
   }
 
   private void assertEventsAreInvalidForSchema(Pattern schemaPattern, List<Event> events) {
-    Pattern pattern1 = derivatives.eventsDeriv(schemaPattern, events);
+    Pattern pattern1 = new Validator(schemaPattern).eventsDeriv(schemaPattern, events);
     assertThat(pattern1)//
         .isNotNullable();
   }

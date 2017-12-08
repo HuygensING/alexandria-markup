@@ -49,7 +49,7 @@ public class Basics {
     return new Context(uri(""), new HashMap<>());
   }
 
-  static class Uri extends StringWrapper {
+  public static class Uri extends StringWrapper {
     Uri(String uri) {
       super(uri);
     }

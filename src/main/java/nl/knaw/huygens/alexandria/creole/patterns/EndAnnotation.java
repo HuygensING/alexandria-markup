@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.patterns;
 
-    /*
-     * #%L
+/*-
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,24 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
+import nl.knaw.huygens.alexandria.creole.NameClass;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+public class EndAnnotation extends AbstractPattern {
+  private final NameClass nameClass;
 
-public interface Event {
-  default Pattern eventDeriv(Pattern p) {
-    return notAllowed();
+  public EndAnnotation(NameClass nameClass) {
+    this.nameClass = nameClass;
+    setHashcode(getClass().hashCode() + nameClass.hashCode());
+  }
+
+  NameClass getNameClass() {
+    return nameClass;
+  }
+
+  @Override
+  void init() {
+    nullable = false;
+    allowsText = false;
   }
 }

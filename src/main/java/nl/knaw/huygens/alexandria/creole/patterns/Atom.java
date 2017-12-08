@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.patterns;
 
-    /*
-     * #%L
+/*-
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,23 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
+import nl.knaw.huygens.alexandria.creole.NameClass;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+import java.util.List;
 
-public interface Event {
-  default Pattern eventDeriv(Pattern p) {
-    return notAllowed();
+public class Atom extends AbstractPattern {
+  final NameClass nc;
+  final List<Annotation> annotations;
+
+  public Atom(NameClass nc, List<Annotation> annotations) {
+    this.nc = nc;
+    this.annotations = annotations;
+  }
+
+  @Override
+  void init() {
+    nullable = false;
+    allowsText = false;
   }
 }

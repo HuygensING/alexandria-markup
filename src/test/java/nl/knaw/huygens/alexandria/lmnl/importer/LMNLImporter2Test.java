@@ -25,8 +25,8 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
-import nl.knaw.huygens.alexandria.creole.Events;
-import static nl.knaw.huygens.alexandria.creole.Events.*;
+import nl.knaw.huygens.alexandria.creole.events.Events;
+import static nl.knaw.huygens.alexandria.creole.events.Events.*;
 import org.junit.Test;
 
 import java.util.List;

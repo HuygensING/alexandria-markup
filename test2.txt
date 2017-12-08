@@ -92,7 +92,7 @@
 
 java.lang.AssertionError: 
 Expecting nullable of:
-  <nl.knaw.huygens.alexandria.creole.Patterns$After@0>
+  <nl.knaw.huygens.alexandria.creole.patterns.Patterns$After@0>
 to be:
   <true>
 but was:

@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.patterns;
 
     /*-
      * #%L
@@ -21,7 +21,10 @@ package nl.knaw.huygens.alexandria.creole;
      */
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import nl.knaw.huygens.alexandria.creole.CreoleTest;
+import nl.knaw.huygens.alexandria.creole.NameClass;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import nl.knaw.huygens.alexandria.creole.Pattern;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -57,8 +60,8 @@ public class PatternsTest extends CreoleTest {
   public void testHashCode4() {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
-    Pattern choice = new Patterns.Choice(p1, p2);
-    Pattern concur = new Patterns.Concur(p1, p2);
+    Pattern choice = new Choice(p1, p2);
+    Pattern concur = new Concur(p1, p2);
     assertThat(choice).isNotEqualTo(concur);
     assertThat(choice.hashCode()).isNotEqualTo(concur.hashCode());
   }
@@ -67,8 +70,8 @@ public class PatternsTest extends CreoleTest {
   public void testHashCode5() {
     Pattern p1 = new TestPattern();
     Pattern p2 = new TestPattern();
-    Pattern choice1 = new Patterns.Choice(p1, p2);
-    Pattern choice2 = new Patterns.Choice(p1, p2);
+    Pattern choice1 = new Choice(p1, p2);
+    Pattern choice2 = new Choice(p1, p2);
     assertThat(choice1).isEqualTo(choice2);
     assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode());
   }
@@ -86,7 +89,7 @@ public class PatternsTest extends CreoleTest {
     assertThat(ncSet).hasSize(2);
   }
 
-  class DummyPattern extends Patterns.AbstractPattern {
+  class DummyPattern extends AbstractPattern {
     DummyPattern() {
       setHashcode(RANDOM.nextInt());
     }

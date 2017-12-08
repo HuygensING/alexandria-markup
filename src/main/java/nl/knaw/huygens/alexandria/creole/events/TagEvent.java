@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.events;
 
-    /*
-     * #%L
+/*-
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,24 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
+import nl.knaw.huygens.alexandria.creole.Basics;
+import nl.knaw.huygens.alexandria.creole.Event;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+public abstract class TagEvent implements Event {
+  final Basics.QName qName;
+  final Basics.Id id;
 
-public interface Event {
-  default Pattern eventDeriv(Pattern p) {
-    return notAllowed();
+  TagEvent(Basics.QName qName, Basics.Id id) {
+    this.qName = qName;
+    this.id = id;
+  }
+
+  public Basics.QName getQName() {
+    return qName;
+  }
+
+  public Basics.Id getId() {
+    return id;
   }
 }

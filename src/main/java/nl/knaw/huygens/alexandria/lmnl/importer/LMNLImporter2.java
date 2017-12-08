@@ -24,8 +24,8 @@ import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
-import nl.knaw.huygens.alexandria.creole.Events;
-import static nl.knaw.huygens.alexandria.creole.Events.textEvent;
+import nl.knaw.huygens.alexandria.creole.events.*;
+import static nl.knaw.huygens.alexandria.creole.events.Events.textEvent;
 import nl.knaw.huygens.alexandria.lmnl.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
@@ -217,25 +217,25 @@ public class LMNLImporter2 {
     private void addStartTagOpenEvent(Markup markup) {
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
-      eventList.add(new Events.StartTagOpenEvent(qName, id));
+      eventList.add(new StartTagOpenEvent(qName, id));
     }
 
     void addStartTagCloseEvent(Markup markup) {
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
-      eventList.add(new Events.StartTagCloseEvent(qName, id));
+      eventList.add(new StartTagCloseEvent(qName, id));
     }
 
     void addEndTagOpenEvent(Markup markup) {
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
-      eventList.add(new Events.EndTagOpenEvent(qName, id));
+      eventList.add(new EndTagOpenEvent(qName, id));
     }
 
     void addEndTagCloseEvent(Markup markup) {
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
-      eventList.add(new Events.EndTagCloseEvent(qName, id));
+      eventList.add(new EndTagCloseEvent(qName, id));
     }
 
     private Basics.Id getId(Markup markup) {

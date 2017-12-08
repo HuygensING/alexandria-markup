@@ -20,10 +20,13 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-class CreoleTest {
+import nl.knaw.huygens.alexandria.creole.patterns.NotAllowed;
+import nl.knaw.huygens.alexandria.creole.patterns.Text;
+
+public class CreoleTest {
 //  SoftAssertions softly = new SoftAssertions();
 
-  static class TestPattern implements Pattern {
+  public static class TestPattern implements Pattern {
     @Override
     public boolean isNullable() {
       return false;
@@ -37,12 +40,12 @@ class CreoleTest {
 
   static final Pattern NULLABLE_PATTERN = new NullablePattern();
 
-  static class NullablePattern extends Patterns.Text {
+  static class NullablePattern extends Text {
   }
 
   static final Pattern NOT_NULLABLE_PATTERN = new NotNullablePattern();
 
-  static class NotNullablePattern extends Patterns.NotAllowed {
+  static class NotNullablePattern extends NotAllowed {
   }
 
 

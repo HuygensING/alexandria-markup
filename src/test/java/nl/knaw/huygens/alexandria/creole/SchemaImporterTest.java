@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
 */
 
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns;
 import org.junit.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;

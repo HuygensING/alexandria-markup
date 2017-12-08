@@ -24,6 +24,7 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter2;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -76,10 +77,11 @@ public class ValidLMNLTest extends CreoleTest {
     this.basename = basename;
   }
 
+  @Ignore
   @Test
   public void testCreoleFile() throws IOException, LMNLSyntaxError {
     LOG.info("validating {}.lmnl against {}.creole", basename, basename);
-//    validateLMNL(basename);
+    validateLMNL(basename);
     LOG.info("done validating {}.lmnl against {}.creole", basename, basename);
   }
 

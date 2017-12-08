@@ -79,7 +79,7 @@ public class InvalidLMNLTest extends CreoleTest {
   @Test
   public void testCreoleFile() throws IOException, LMNLSyntaxError {
     LOG.info("validating {}.lmnl against {}.creole", basename, basename);
-//    validateLMNL(basename);
+    validateLMNL(basename);
     LOG.info("done validating {}.lmnl against {}.creole", basename, basename);
   }
 

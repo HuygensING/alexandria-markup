@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.creole;
 import com.google.common.base.Preconditions;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.*;
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns;
 import nl.knaw.huygens.tei.Document;
 import nl.knaw.huygens.tei.Element;
 import nl.knaw.huygens.tei.Node;

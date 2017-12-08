@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.patterns;
 
-    /*
-     * #%L
+/*-
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,20 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
+import nl.knaw.huygens.alexandria.creole.Basics;
+import nl.knaw.huygens.alexandria.creole.Pattern;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+public class All extends PatternWithTwoPatternParameters {
+  public All(Pattern pattern1, Pattern pattern2) {
+    super(pattern1, pattern2);
+  }
 
-public interface Event {
-  default Pattern eventDeriv(Pattern p) {
-    return notAllowed();
+  @Override
+  void init() {
+    nullable = pattern1.isNullable() && pattern2.isNullable();
+    allowsText = pattern1.isNullable()//
+        ? (pattern1.allowsText() || pattern2.allowsText())//
+        : pattern1.allowsText();
   }
 }

@@ -1,6 +1,6 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,6 +19,8 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
+import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+import nl.knaw.huygens.alexandria.creole.patterns.PatternWithTwoPatternParameters;
 
 import java.lang.reflect.Constructor;
 
@@ -28,11 +30,35 @@ public interface Pattern {
 
   boolean allowsText();
 
+  default Pattern textDeriv(Basics.Context cx, String s) {
+    // No other patterns can match a text event; the default is specified as
+    // textDeriv _ _ _ = NotAllowed
+    return notAllowed();
+  }
+
+  default Pattern startTagDeriv(Basics.QName qName, Basics.Id id) {
+    // startTagDeriv _ _ _ = NotAllowed
+    return notAllowed();
+  }
+
+  default Pattern endTagDeriv(Basics.QName qName, Basics.Id id) {
+    // endTagDeriv _ _ _ = NotAllowed
+    return notAllowed();
+  }
+
+  default Pattern startAnnotationDeriv(Basics.QName qName) {
+    return notAllowed();
+  }
+
+  default Pattern endAnnotationDeriv(Basics.QName qName) {
+    return notAllowed();
+  }
+
   default Pattern flip() {
-    if (!(this instanceof Patterns.PatternWithTwoPatternParameters)) {
+    if (!(this instanceof PatternWithTwoPatternParameters)) {
       return this;
     }
-    Patterns.PatternWithTwoPatternParameters p0 = (Patterns.PatternWithTwoPatternParameters) this;
+    PatternWithTwoPatternParameters p0 = (PatternWithTwoPatternParameters) this;
     Pattern p1 = p0.getPattern1();
     Pattern p2 = p0.getPattern2();
     try {

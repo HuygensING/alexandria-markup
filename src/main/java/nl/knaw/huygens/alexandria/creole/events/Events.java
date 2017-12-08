@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.events;
 
     /*
      * #%L
@@ -20,7 +20,9 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
+import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import nl.knaw.huygens.alexandria.creole.Event;
 
 public class Events {
   /*
@@ -89,98 +91,12 @@ public class Events {
     return new EndTagCloseEvent(qName(name), Basics.id(""));
   }
 
-  static abstract class TagEvent implements Event {
-    private final Basics.QName qName;
-    private final Basics.Id id;
-
-    TagEvent(Basics.QName qName, Basics.Id id) {
-      this.qName = qName;
-      this.id = id;
-    }
-
-    public Basics.QName getQName() {
-      return qName;
-    }
-
-    public Basics.Id getId() {
-      return id;
-    }
-  }
-
-  @Deprecated
-  static class StartTagEvent extends TagEvent {
-    StartTagEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return "[" + getQName().getLocalName().getValue() + "}";
-    }
-  }
-
-  public static class StartTagOpenEvent extends TagEvent {
-    public StartTagOpenEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return "[" + getQName().getLocalName().getValue();
-    }
-  }
-
-  public static class StartTagCloseEvent extends TagEvent {
-    public StartTagCloseEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return getQName().getLocalName().getValue() + "}";
-    }
-  }
-
   public static EndTagEvent endTagEvent(Basics.QName qName) {
     return endTagEvent(qName, "");
   }
 
   public static EndTagEvent endTagEvent(Basics.QName qName, String id) {
     return new EndTagEvent(qName, Basics.id(id));
-  }
-
-  @Deprecated
-  static class EndTagEvent extends TagEvent {
-    public EndTagEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return "{" + getQName().getLocalName().getValue() + "]";
-    }
-  }
-
-  public static class EndTagOpenEvent extends TagEvent {
-    public EndTagOpenEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return "{" + getQName().getLocalName().getValue();
-    }
-  }
-
-  public static class EndTagCloseEvent extends TagEvent {
-    public EndTagCloseEvent(Basics.QName qName, Basics.Id id) {
-      super(qName, id);
-    }
-
-    @Override
-    public String toString() {
-      return getQName().getLocalName().getValue() + "]";
-    }
   }
 
   // TextEvent
@@ -191,43 +107,6 @@ public class Events {
 
   public static TextEvent textEvent(String text, Basics.Context context) {
     return new TextEvent(text, context);
-  }
-
-  static class TextEvent implements Event {
-    private final String text;
-    private final Basics.Context context;
-
-    TextEvent(String text, Basics.Context context) {
-      this.text = text;
-      this.context = context;
-    }
-
-    public String getText() {
-      return text;
-    }
-
-    public Basics.Context getContext() {
-      return context;
-    }
-
-    @Override
-    public String toString() {
-      return text;
-    }
-
-//    @Override
-//    public int hashCode() {
-//      return text.hashCode() * context.hashCode();
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//      return (obj instanceof TextEvent)
-//          && (text.equals(((TextEvent) obj).getText())
-//          && (context.equals(((TextEvent) obj).getContext()))
-//      );
-//    }
-
   }
 
   /* Annotation events */
@@ -264,59 +143,4 @@ public class Events {
     return new EndAnnotationCloseEvent(qName);
   }
 
-  static abstract class AnnotationEvent implements Event {
-    private final Basics.QName qName;
-
-    AnnotationEvent(Basics.QName qName) {
-      this.qName = qName;
-    }
-
-    Basics.QName getQName() {
-      return qName;
-    }
-  }
-
-  static class StartAnnotationOpenEvent extends AnnotationEvent {
-    StartAnnotationOpenEvent(Basics.QName qName) {
-      super(qName);
-    }
-
-    @Override
-    public String toString() {
-      return "(" + getQName().getLocalName().getValue();
-    }
-  }
-
-  static class StartAnnotationCloseEvent extends AnnotationEvent {
-    StartAnnotationCloseEvent(Basics.QName qName) {
-      super(qName);
-    }
-
-    @Override
-    public String toString() {
-      return getQName().getLocalName().getValue() + ">";
-    }
-  }
-
-  static class EndAnnotationOpenEvent extends AnnotationEvent {
-    EndAnnotationOpenEvent(Basics.QName qName) {
-      super(qName);
-    }
-
-    @Override
-    public String toString() {
-      return "<" + getQName().getLocalName().getValue();
-    }
-  }
-
-  static class EndAnnotationCloseEvent extends AnnotationEvent {
-    EndAnnotationCloseEvent(Basics.QName qName) {
-      super(qName);
-    }
-
-    @Override
-    public String toString() {
-      return getQName().getLocalName().getValue() + ")";
-    }
-  }
 }

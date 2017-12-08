@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
+import nl.knaw.huygens.alexandria.creole.events.Events;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -444,6 +446,7 @@ public class ValidatorTest {
     assertValidationSucceeds(schema, events);
   }
 
+  @Ignore
   @Test
   public void validateBibleText() {
     Pattern verse = range(name("verse"), text());
@@ -541,7 +544,7 @@ public class ValidatorTest {
         closePage, closeBook//
 //        , closeBook // <- huh?
     ));
-//    assertValidationSucceeds(book, events);
+    assertValidationSucceeds(book, events);
   }
 
   @Test
@@ -597,6 +600,7 @@ public class ValidatorTest {
     assertValidationSucceeds(book, events);
   }
 
+  @Ignore
   @Test
   public void validateSimplifiedBibleTextWithRootRangeAndExtraCloseBookShouldFail() {
     Pattern s = range(name("s"), text());
@@ -648,9 +652,10 @@ public class ValidatorTest {
         closeBook,
         closeBook
     ));
-//    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
+    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
   }
 
+  @Ignore
   @Test
   public void validateSimplifiedBibleTextWithRootElement() {
     Pattern s = range(name("s"), text());
@@ -700,9 +705,10 @@ public class ValidatorTest {
         closePara,
         closeBook
     ));
-//    assertValidationSucceeds(book, events);
+    assertValidationSucceeds(book, events);
   }
 
+  @Ignore
   @Test
   public void validateSimplifiedBibleTextWithRootElementAndExtraCloseBookShouldFail() {
     Pattern s = range(name("s"), text());
@@ -754,7 +760,7 @@ public class ValidatorTest {
         closeBook//
         , closeBook // <- huh?
     ));
-//    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
+    assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
   }
 
 //  @Test

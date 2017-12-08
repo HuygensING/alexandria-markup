@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.creole;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.id;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
+import nl.knaw.huygens.alexandria.creole.patterns.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testChoiceNullability1() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Choice(p1, p2);
+    Pattern p = new Choice(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -61,7 +62,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testChoiceNullability2() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Choice(p1, p2);
+    Pattern p = new Choice(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -69,7 +70,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testChoiceNullability3() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Choice(p1, p2);
+    Pattern p = new Choice(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -77,7 +78,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testChoiceNullability4() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Choice(p1, p2);
+    Pattern p = new Choice(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -85,7 +86,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testInterleaveNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Interleave(p1, p2);
+    Pattern p = new Interleave(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -93,7 +94,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testInterleaveNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Interleave(p1, p2);
+    Pattern p = new Interleave(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -101,7 +102,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testInterleaveNullability3() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Interleave(p1, p2);
+    Pattern p = new Interleave(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -109,7 +110,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testInterleaveNullability4() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Interleave(p1, p2);
+    Pattern p = new Interleave(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -117,7 +118,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testConcurNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Concur(p1, p2);
+    Pattern p = new Concur(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -125,7 +126,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testConcurNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Concur(p1, p2);
+    Pattern p = new Concur(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -133,7 +134,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testConcurNullability3() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Concur(p1, p2);
+    Pattern p = new Concur(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -141,49 +142,49 @@ public class UtilitiesTest extends CreoleTest {
   public void testConcurNullability4() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Concur(p1, p2);
+    Pattern p = new Concur(p1, p2);
     assertThat(p).isNotNullable();
   }
 
   @Test
   public void testPartitionNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.Partition(p1);
+    Pattern p = new Partition(p1);
     assertThat(p).isNullable();
   }
 
   @Test
   public void testPartitionNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.Partition(p1);
+    Pattern p = new Partition(p1);
     assertThat(p).isNotNullable();
   }
 
   @Test
   public void testOneOrMoreNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.OneOrMore(p1);
+    Pattern p = new OneOrMore(p1);
     assertThat(p).isNullable();
   }
 
   @Test
   public void testOneOrMoreNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.OneOrMore(p1);
+    Pattern p = new OneOrMore(p1);
     assertThat(p).isNotNullable();
   }
 
   @Test
   public void testConcurOneOrMoreNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.ConcurOneOrMore(p1);
+    Pattern p = new ConcurOneOrMore(p1);
     assertThat(p).isNullable();
   }
 
   @Test
   public void testConcurOneOrMoreNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.ConcurOneOrMore(p1);
+    Pattern p = new ConcurOneOrMore(p1);
     assertThat(p).isNotNullable();
   }
 
@@ -191,14 +192,14 @@ public class UtilitiesTest extends CreoleTest {
   public void testRangeIsNotNullable() {
     Pattern p1 = NULLABLE_PATTERN;
     NameClass nameClass = NameClasses.ANY_NAME;
-    Pattern p = new Patterns.Range(nameClass, p1);
+    Pattern p = new Range(nameClass, p1);
     assertThat(p).isNotNullable();
   }
 
   @Test
   public void testEndRangeIsNotNullable() {
     Basics.QName qName = Basics.qName("uri", "localName");
-    Pattern p = new Patterns.EndRange(qName, id("id"));
+    Pattern p = new EndRange(qName, id("id"));
     assertThat(p).isNotNullable();
   }
 
@@ -206,7 +207,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testAfterNullability() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.After(p1, p2);
+    Pattern p = new After(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -214,7 +215,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testAllNullability1() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.All(p1, p2);
+    Pattern p = new All(p1, p2);
     assertThat(p).isNullable();
   }
 
@@ -222,7 +223,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testAllNullability2() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.All(p1, p2);
+    Pattern p = new All(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -230,7 +231,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testAllNullability3() {
     Pattern p1 = NOT_NULLABLE_PATTERN;
     Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Patterns.All(p1, p2);
+    Pattern p = new All(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -238,7 +239,7 @@ public class UtilitiesTest extends CreoleTest {
   public void testAllNullability4() {
     Pattern p1 = NULLABLE_PATTERN;
     Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Patterns.All(p1, p2);
+    Pattern p = new All(p1, p2);
     assertThat(p).isNotNullable();
   }
 
@@ -290,8 +291,8 @@ public class UtilitiesTest extends CreoleTest {
     Pattern flipped = pattern.flip();
     LOG.info("flipped = ", Utilities.patternTreeToDepth(flipped, 10));
     assertThat(flipped.getClass()).isEqualTo(pattern.getClass());
-    Patterns.Group group = (Patterns.Group) pattern;
-    Patterns.Group flippedGroup = (Patterns.Group) flipped;
+    Group group = (Group) pattern;
+    Group flippedGroup = (Group) flipped;
     assertThat(flippedGroup.getPattern1()).isEqualTo(group.getPattern2());
     assertThat(flippedGroup.getPattern2()).isEqualTo(group.getPattern1());
   }

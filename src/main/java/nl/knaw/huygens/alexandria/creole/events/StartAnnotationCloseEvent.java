@@ -1,7 +1,7 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole.events;
 
-    /*
-     * #%L
+/*-
+ * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,17 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
+ */
+import nl.knaw.huygens.alexandria.creole.Basics;
+import nl.knaw.huygens.alexandria.creole.Pattern;
 
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+public class StartAnnotationCloseEvent extends AnnotationEvent {
+  StartAnnotationCloseEvent(Basics.QName qName) {
+    super(qName);
+  }
 
-public interface Event {
-  default Pattern eventDeriv(Pattern p) {
-    return notAllowed();
+  @Override
+  public String toString() {
+    return getQName().getLocalName().getValue() + ">";
   }
 }
