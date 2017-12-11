@@ -27,6 +27,7 @@ import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.events.Events;
 import static nl.knaw.huygens.alexandria.creole.events.Events.*;
+import static org.junit.Assert.fail;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -146,7 +147,7 @@ public class LMNLImporter2Test {
     // Text
     String lmnl = "test";
     List<Event> expectedEvents = asList(//
-      textEvent("test")//
+        textEvent("test")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -180,10 +181,10 @@ public class LMNLImporter2Test {
     // Empty range
     String lmnl = "[test]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("test"),//
-      startTagCloseEvent("test"),//
-      endTagOpenEvent("test"),//
-      endTagCloseEvent("test")//
+        startTagOpenEvent("test"),//
+        startTagCloseEvent("test"),//
+        endTagOpenEvent("test"),//
+        endTagCloseEvent("test")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -193,11 +194,11 @@ public class LMNLImporter2Test {
     // Simple range
     String lmnl = "[test}...{test]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("test"),//
-      startTagCloseEvent("test"),//
-      textEvent("..."),//
-      endTagOpenEvent("test"),//
-      endTagCloseEvent("test")//
+        startTagOpenEvent("test"),//
+        startTagCloseEvent("test"),//
+        textEvent("..."),//
+        endTagOpenEvent("test"),//
+        endTagCloseEvent("test")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -207,13 +208,13 @@ public class LMNLImporter2Test {
     // Simple range in text
     String lmnl = "...[test}...{test]...";
     List<Event> expectedEvents = asList(//
-      textEvent("..."),//
-      startTagOpenEvent("test"),//
-      startTagCloseEvent("test"),//
-      textEvent("..."),//
-      endTagOpenEvent("test"),//
-      endTagCloseEvent("test"),//
-      textEvent("...")//
+        textEvent("..."),//
+        startTagOpenEvent("test"),//
+        startTagCloseEvent("test"),//
+        textEvent("..."),//
+        endTagOpenEvent("test"),//
+        endTagCloseEvent("test"),//
+        textEvent("...")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -223,17 +224,17 @@ public class LMNLImporter2Test {
     // Non-overlapping ranges
     String lmnl = "[foo}...{foo]...[bar}...{bar]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startTagCloseEvent("foo"),//
-      textEvent("..."),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo"),//
-      textEvent("..."),//
-      startTagOpenEvent("bar"),//
-      startTagCloseEvent("bar"),//
-      textEvent("..."),//
-      endTagOpenEvent("bar"),//
-      endTagCloseEvent("bar")//
+        startTagOpenEvent("foo"),//
+        startTagCloseEvent("foo"),//
+        textEvent("..."),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo"),//
+        textEvent("..."),//
+        startTagOpenEvent("bar"),//
+        startTagCloseEvent("bar"),//
+        textEvent("..."),//
+        endTagOpenEvent("bar"),//
+        endTagCloseEvent("bar")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -243,17 +244,17 @@ public class LMNLImporter2Test {
     // Overlapping ranges
     String lmnl = "[foo}...[bar}...{foo]...{bar]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startTagCloseEvent("foo"),//
-      textEvent("..."),//
-      startTagOpenEvent("bar"),//
-      startTagCloseEvent("bar"),//
-      textEvent("..."),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo"),//
-      textEvent("..."),//
-      endTagOpenEvent("bar"),//
-      endTagCloseEvent("bar")//
+        startTagOpenEvent("foo"),//
+        startTagCloseEvent("foo"),//
+        textEvent("..."),//
+        startTagOpenEvent("bar"),//
+        startTagCloseEvent("bar"),//
+        textEvent("..."),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo"),//
+        textEvent("..."),//
+        endTagOpenEvent("bar"),//
+        endTagCloseEvent("bar")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -263,15 +264,15 @@ public class LMNLImporter2Test {
     // Identical ranges
     String lmnl = "[foo}[bar}...{bar]{foo]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startTagCloseEvent("foo"),//
-      startTagOpenEvent("bar"),//
-      startTagCloseEvent("bar"),//
-      textEvent("..."),//
-      endTagOpenEvent("bar"),//
-      endTagCloseEvent("bar"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startTagCloseEvent("foo"),//
+        startTagOpenEvent("bar"),//
+        startTagCloseEvent("bar"),//
+        textEvent("..."),//
+        endTagOpenEvent("bar"),//
+        endTagCloseEvent("bar"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -281,14 +282,14 @@ public class LMNLImporter2Test {
     // Simple annotation
     String lmnl = "[foo [bar]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -298,15 +299,15 @@ public class LMNLImporter2Test {
     // Text annotation
     String lmnl = "[foo [bar}...{bar]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -316,20 +317,20 @@ public class LMNLImporter2Test {
     // Annotation with internal range
     String lmnl = "[foo [bar}...[baz]...{bar]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      startTagOpenEvent("baz"),//
-      startTagCloseEvent("baz"),//
-      endTagOpenEvent("baz"),//
-      endTagCloseEvent("baz"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        startTagOpenEvent("baz"),//
+        startTagCloseEvent("baz"),//
+        endTagOpenEvent("baz"),//
+        endTagCloseEvent("baz"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -339,39 +340,43 @@ public class LMNLImporter2Test {
     // Two annotations
     String lmnl = "[foo [bar}...{bar] [baz}...{baz]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startAnnotationOpenEvent("baz"),//
-      startAnnotationCloseEvent("baz"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("baz"),//
-      endAnnotationCloseEvent("baz"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startAnnotationOpenEvent("baz"),//
+        startAnnotationCloseEvent("baz"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("baz"),//
+        endAnnotationCloseEvent("baz"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
 
-  @Ignore
   @Test
   public void parseLMNL13() {
     // Overlapping annotations (error)
     String lmnl = "[foo [bar}...[baz}...{bar]...{baz]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      startTagOpenEvent("baz"),//
-      startTagCloseEvent("baz"),//
-      textEvent("...")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        startTagOpenEvent("baz"),//
+        startTagCloseEvent("baz"),//
+        textEvent("...")//
     );
-    assertEventsAreExpected(lmnl, expectedEvents);
+    try {
+      assertEventsAreExpected(lmnl, expectedEvents);
+      fail();
+    } catch (LMNLSyntaxError e) {
+      assertThat(e).hasMessage("handleCloseRange: unexpected token: {bar]");
+    }
   }
 
   @Test
@@ -379,20 +384,20 @@ public class LMNLImporter2Test {
     // Nested annotations
     String lmnl = "[foo [bar [baz}...{baz]}...{bar]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationOpenEvent("baz"),//
-      startAnnotationCloseEvent("baz"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("baz"),//
-      endAnnotationCloseEvent("baz"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationOpenEvent("baz"),//
+        startAnnotationCloseEvent("baz"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("baz"),//
+        endAnnotationCloseEvent("baz"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -402,11 +407,11 @@ public class LMNLImporter2Test {
     // l range
     String lmnl = "[l}...{l]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("l"),//
-      startTagCloseEvent("l"),//
-      textEvent("..."),//
-      endTagOpenEvent("l"),//
-      endTagCloseEvent("l")//
+        startTagOpenEvent("l"),//
+        startTagCloseEvent("l"),//
+        textEvent("..."),//
+        endTagOpenEvent("l"),//
+        endTagCloseEvent("l")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -416,15 +421,15 @@ public class LMNLImporter2Test {
     // Simple annotation with shortened end-tag
     String lmnl = "[foo [bar}...{]]";
     List<Event> expectedEvents = asList(//
-      startTagOpenEvent("foo"),//
-      startAnnotationOpenEvent("bar"),//
-      startAnnotationCloseEvent("bar"),//
-      textEvent("..."),//
-      endAnnotationOpenEvent("bar"),//
-      endAnnotationCloseEvent("bar"),//
-      startTagCloseEvent("foo"),//
-      endTagOpenEvent("foo"),//
-      endTagCloseEvent("foo")//
+        startTagOpenEvent("foo"),//
+        startAnnotationOpenEvent("bar"),//
+        startAnnotationCloseEvent("bar"),//
+        textEvent("..."),//
+        endAnnotationOpenEvent("bar"),//
+        endAnnotationCloseEvent("bar"),//
+        startTagCloseEvent("foo"),//
+        endTagOpenEvent("foo"),//
+        endTagCloseEvent("foo")//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }
@@ -434,14 +439,14 @@ public class LMNLImporter2Test {
   public void parseLMNL17() {
     // Namespaced range
     String lmnl = "[!ns x=\"http://www.example.com/\"]\n[x:foo}...{x:foo]";
-    Basics.QName foo = qName("http://www.example.com/","foo");
+    Basics.QName foo = qName("http://www.example.com/", "foo");
     List<Event> expectedEvents = asList(//
-      textEvent("\n"),//
-      startTagOpenEvent(foo),//
-      startTagCloseEvent(foo),//
-      textEvent("..."),//
-      endTagOpenEvent(foo),//
-      endTagCloseEvent(foo)//
+        textEvent("\n"),//
+        startTagOpenEvent(foo),//
+        startTagCloseEvent(foo),//
+        textEvent("..."),//
+        endTagOpenEvent(foo),//
+        endTagCloseEvent(foo)//
     );
     assertEventsAreExpected(lmnl, expectedEvents);
   }

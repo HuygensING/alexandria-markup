@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
      */
 
+import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
@@ -96,7 +98,7 @@ public class LMNLImporter2 {
     }
 
     private Markup currentMarkup() {
-      return openMarkupDeque.isEmpty() ? null : openMarkupStack.peek();
+      return openMarkupStack.isEmpty() ? null : openMarkupStack.peek();
     }
 
     void openAnnotation(Annotation annotation) {
@@ -215,35 +217,41 @@ public class LMNLImporter2 {
     }
 
     private void addStartTagOpenEvent(Markup markup) {
+      checkNotNull(markup);
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
       eventList.add(new StartTagOpenEvent(qName, id));
     }
 
     void addStartTagCloseEvent(Markup markup) {
+      checkNotNull(markup);
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
       eventList.add(new StartTagCloseEvent(qName, id));
     }
 
     void addEndTagOpenEvent(Markup markup) {
+      checkNotNull(markup);
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
       eventList.add(new EndTagOpenEvent(qName, id));
     }
 
     void addEndTagCloseEvent(Markup markup) {
+      checkNotNull(markup);
       Basics.QName qName = getQName(markup);
       Basics.Id id = getId(markup);
       eventList.add(new EndTagCloseEvent(qName, id));
     }
 
     private Basics.Id getId(Markup markup) {
+      checkNotNull(markup);
       String idString = markup.hasId() ? markup.getId() : "";
       return Basics.id(idString);
     }
 
     private Basics.QName getQName(Markup markup) {
+      checkNotNull(markup);
       return qName(markup.getTag());
     }
 
@@ -434,6 +442,11 @@ public class LMNLImporter2 {
           break;
 
         case LMNLLexer.Name_Close_Annotation:
+          String tag = token.getText();
+          if (!tag.equals(annotation.getTag())) {
+            String message = String.format("Found unexpected annotation close tag {%s], expected {%s]", tag, annotation.getTag());
+            throw new LMNLSyntaxError(message);
+          }
           break;
 
         case LMNLLexer.END_CLOSE_ANNO:
@@ -469,7 +482,12 @@ public class LMNLImporter2 {
         case LMNLLexer.Name_Close_Range:
           String rangeName = token.getText();
           context.pushOpenMarkup(rangeName);
-          context.addEndTagOpenEvent(context.currentLimenContext().currentMarkup());
+          Markup markup = context.currentLimenContext().currentMarkup();
+          if (markup==null){
+            String message = String.format("%s: unexpected token: {%s]", methodName, rangeName);
+            throw new LMNLSyntaxError(message);
+          }
+          context.addEndTagOpenEvent(markup);
           break;
         case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
           handleAnnotation(context);
@@ -488,7 +506,7 @@ public class LMNLImporter2 {
   }
 
   private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
-    String message = methodName + ": unexpected rule/token: token=" + token + ", ruleName=" + ruleName + ", mode=" + modeName;
+    String message = String.format("%s: unexpected rule/token: token=%s, ruleName=%s, mode=%s", methodName, token, ruleName, modeName);
     LOG.error(message);
     throw new LMNLSyntaxError(message);
   }

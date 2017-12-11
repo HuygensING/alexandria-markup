@@ -21,11 +21,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 // In the default mode we are outside a Range
 
 ATOM
-  : '{{' .*? '}}' -> skip
+  : '{{' .*? '}}' -> skip // TODO: implement
   ;
 
 COMMENT
-  : '[!--' .*? '--]' -> skip //channel(HIDDEN)
+  : '[!--' .*? '--]' -> skip // TODO: implement
+  ;
+
+NAMESPACE_DEFINITION
+  : '[!ns ' .*? ']' -> skip // TODO: implement
   ;
 
 BEGIN_OPEN_RANGE // [ moves into range
