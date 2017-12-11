@@ -33,5 +33,7 @@ public class All extends PatternWithTwoPatternParameters {
     allowsText = pattern1.isNullable()//
         ? (pattern1.allowsText() || pattern2.allowsText())//
         : pattern1.allowsText();
+    allowsAnnotations = pattern1.allowsAnnotations() && pattern2.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() || pattern2.onlyAnnotations();
   }
 }

@@ -39,5 +39,7 @@ public abstract class PatternWithOnePatternParameter extends AbstractPattern {
   void init() {
     nullable = pattern.isNullable();
     allowsText = pattern.allowsText();
+    allowsAnnotations = pattern.allowsText();
+    onlyAnnotations = pattern.onlyAnnotations();
   }
 }

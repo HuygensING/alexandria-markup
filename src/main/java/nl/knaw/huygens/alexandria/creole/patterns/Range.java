@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole.patterns;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,12 +18,10 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import nl.knaw.huygens.alexandria.creole.Basics;
-import nl.knaw.huygens.alexandria.creole.Constructors;
-import static nl.knaw.huygens.alexandria.creole.Constructors.endRange;
-import static nl.knaw.huygens.alexandria.creole.Constructors.group;
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
+import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import nl.knaw.huygens.alexandria.creole.NameClass;
 import nl.knaw.huygens.alexandria.creole.Pattern;
 
@@ -49,6 +47,8 @@ public class Range extends AbstractPattern {
   void init() {
     nullable = false;
     allowsText = false;
+    allowsAnnotations = false;
+    onlyAnnotations = false;
   }
 
   @Override
@@ -58,6 +58,13 @@ public class Range extends AbstractPattern {
     //                    else NotAllowed
     return (nameClass.contains(qName))//
         ? group(pattern, endRange(qName, id))//
+        : notAllowed();
+  }
+
+  @Override
+  public Pattern startTagOpenDeriv(Basics.QName qn, Basics.Id id) {
+    return (nameClass.contains(qn))//
+        ? group(pattern, endRange(qn, id))//
         : notAllowed();
   }
 

@@ -29,5 +29,7 @@ public class NotAllowed extends PatternWithoutParameters {
   void init() {
     nullable = false;
     allowsText = false;
+    allowsAnnotations = false;
+    onlyAnnotations = false;
   }
 }

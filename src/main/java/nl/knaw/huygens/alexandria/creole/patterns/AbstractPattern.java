@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole.patterns;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,13 +18,16 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import com.google.common.base.Preconditions;
 import nl.knaw.huygens.alexandria.creole.Pattern;
 
 abstract class AbstractPattern implements Pattern {
   Boolean nullable;
   Boolean allowsText;
+  Boolean allowsAnnotations;
+  Boolean onlyAnnotations;
 
   abstract void init();
 
@@ -57,6 +60,30 @@ abstract class AbstractPattern implements Pattern {
       }
     }
     return allowsText;
+  }
+
+  @Override
+  public boolean allowsAnnotations() {
+    if (allowsAnnotations == null) {
+      init();
+      if (allowsAnnotations == null) {
+        throw new RuntimeException("allowsAnnotations == null! Make sure allowsAnnotations is initialized in the init() of " //
+            + getClass().getSimpleName());
+      }
+    }
+    return allowsAnnotations;
+  }
+
+  @Override
+  public boolean onlyAnnotations() {
+    if (onlyAnnotations == null) {
+      init();
+      if (onlyAnnotations == null) {
+        throw new RuntimeException("onlyAnnotations == null! Make sure onlyAnnotations is initialized in the init() of " //
+            + getClass().getSimpleName());
+      }
+    }
+    return onlyAnnotations;
   }
 
   @Override

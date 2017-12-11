@@ -46,6 +46,8 @@ public class EndRange extends AbstractPattern {
   void init() {
     nullable = false;
     allowsText = false;
+    allowsAnnotations = false;
+    onlyAnnotations = false;
   }
 
   @Override

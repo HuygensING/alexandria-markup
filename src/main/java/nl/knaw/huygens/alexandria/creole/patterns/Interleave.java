@@ -33,6 +33,8 @@ public class Interleave extends PatternWithTwoPatternParameters {
   void init() {
     nullable = pattern1.isNullable() && pattern2.isNullable();
     allowsText = pattern1.allowsText() || pattern2.allowsText();
+    allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
   }
 
   @Override
@@ -54,6 +56,14 @@ public class Interleave extends PatternWithTwoPatternParameters {
     return choice(//
         interleave(pattern1.startTagDeriv(qn, id), pattern2),//
         interleave(pattern1, pattern2.startTagDeriv(qn, id))//
+    );
+  }
+
+  @Override
+  public Pattern startTagOpenDeriv(Basics.QName qn, Basics.Id id) {
+    return choice(//
+        interleave(pattern1.startTagOpenDeriv(qn, id), pattern2),//
+        interleave(pattern1, pattern2.startTagOpenDeriv(qn, id))//
     );
   }
 

@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole.patterns;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,7 +18,8 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Constructors.choice;
 import static nl.knaw.huygens.alexandria.creole.Constructors.group;
@@ -35,6 +36,8 @@ public class Group extends PatternWithTwoPatternParameters {
     allowsText = pattern1.isNullable()//
         ? (pattern1.allowsText() || pattern2.allowsText())//
         : pattern1.allowsText();
+    allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
   }
 
   @Override
@@ -73,4 +76,22 @@ public class Group extends PatternWithTwoPatternParameters {
         ? choice(p, pattern2.endTagDeriv(qn, id))//
         : p;
   }
+
+  @Override
+  public Pattern startAnnotationDeriv(Basics.QName qn) {
+    Pattern p = group(pattern1, pattern2.startAnnotationDeriv(qn));
+    return pattern1.allowsAnnotations()//
+        ? null//
+        : p;
+  }
+
+  @Override
+  public Pattern endAnnotationDeriv(Basics.QName qn) {
+    Pattern p = group(pattern1.endAnnotationDeriv(qn), pattern2);
+    return pattern1.isNullable()//
+        ? choice(p, pattern2.endAnnotationDeriv(qn))//
+        : p;
+  }
+
+
 }

@@ -36,6 +36,16 @@ public class CreoleTest {
     public boolean allowsText() {
       return false;
     }
+
+    @Override
+    public boolean allowsAnnotations() {
+      return false;
+    }
+
+    @Override
+    public boolean onlyAnnotations() {
+      return false;
+    }
   }
 
   static final Pattern NULLABLE_PATTERN = new NullablePattern();

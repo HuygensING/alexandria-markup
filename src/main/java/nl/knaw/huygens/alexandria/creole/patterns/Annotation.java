@@ -45,6 +45,8 @@ public class Annotation extends AbstractPattern {
   void init() {
     nullable = false;
     allowsText = false;
+    allowsAnnotations = true;
+    onlyAnnotations = true;
   }
 
 }

@@ -402,6 +402,7 @@ public class LMNLImporter2 {
           annotation.setTag(token.getText());
           context.addStartAnnotationOpenEvent(annotation.getTag());
           break;
+
         case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
         case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
           if (annotation.getTag().isEmpty()) {
@@ -409,6 +410,7 @@ public class LMNLImporter2 {
           }
           handleAnnotation(context);
           break;
+
         case LMNLLexer.END_OPEN_ANNO:
           context.addStartAnnotationCloseEvent(annotation.getTag());
           context.pushLimenContext(context.currentAnnotationLimen());
@@ -428,12 +430,21 @@ public class LMNLImporter2 {
           break;
 
         case LMNLLexer.BEGIN_CLOSE_ANNO:
-        case LMNLLexer.Name_Close_Annotation:
           context.addEndAnnotationOpenEvent(annotation.getTag());
           break;
+
+        case LMNLLexer.Name_Close_Annotation:
+          break;
+
         case LMNLLexer.END_CLOSE_ANNO:
           context.popLimenContext();
+          context.closeAnnotation();
+          goOn = false;
+          break;
+
         case LMNLLexer.END_EMPTY_ANNO:
+          context.addStartAnnotationCloseEvent(annotation.getTag());
+          context.addEndAnnotationOpenEvent(annotation.getTag());
           context.closeAnnotation();
           goOn = false;
           break;

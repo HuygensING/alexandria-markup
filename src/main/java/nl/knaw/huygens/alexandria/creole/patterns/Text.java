@@ -28,6 +28,8 @@ public class Text extends PatternWithoutParameters {
   void init() {
     nullable = true;
     allowsText = true;
+    allowsAnnotations = false;
+    onlyAnnotations = false;
   }
 
   @Override

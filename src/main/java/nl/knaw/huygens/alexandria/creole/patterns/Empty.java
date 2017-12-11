@@ -29,5 +29,7 @@ public class Empty extends PatternWithoutParameters {
   void init() {
     nullable = true;
     allowsText = false;
+    allowsAnnotations = false;
+    onlyAnnotations = false;
   }
 }

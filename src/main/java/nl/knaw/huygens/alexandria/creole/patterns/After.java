@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole.patterns;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,10 +18,13 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Constructors.after;
 import nl.knaw.huygens.alexandria.creole.Pattern;
+
+import java.util.function.Function;
 
 public class After extends PatternWithTwoPatternParameters {
   public After(Pattern pattern1, Pattern pattern2) {
@@ -34,6 +37,10 @@ public class After extends PatternWithTwoPatternParameters {
     allowsText = pattern1.isNullable()//
         ? (pattern1.allowsText() || pattern2.allowsText())//
         : pattern1.allowsText();
+    allowsAnnotations = pattern1.isNullable()//
+        ? (pattern1.allowsAnnotations() || pattern2.allowsAnnotations())//
+        : pattern1.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
   }
 
   @Override
@@ -65,6 +72,13 @@ public class After extends PatternWithTwoPatternParameters {
         pattern1.endTagDeriv(qn, id),//
         pattern2//
     );
+  }
 
+  @Override
+  public Pattern applyAfter(Function<Pattern, Pattern> f) {
+    return after(//
+        pattern1,//
+        f.apply(pattern2)//
+    );
   }
 }

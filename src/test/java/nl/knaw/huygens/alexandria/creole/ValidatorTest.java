@@ -20,21 +20,24 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
-import nl.knaw.huygens.alexandria.creole.events.Events;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static java.util.Arrays.asList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import static nl.knaw.huygens.alexandria.creole.Constructors.*;
 import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+import nl.knaw.huygens.alexandria.creole.events.Events;
+import nl.knaw.huygens.tei.Document;
+import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ValidatorTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -763,23 +766,34 @@ public class ValidatorTest {
     assertValidationFailsWithUnexpectedEvent(book, events, closeBook);
   }
 
-//  @Test
-//  public void extractTests() throws IOException {
-//    String xml = FileUtils.readFileToString(new File("data/creole/validate-lmnl.xsl"), "UTF-8");
-//    Document doc = Document.createFromXml(xml, true);
-//    TestVisitor testVisitor = new TestVisitor();
-//    doc.accept(testVisitor);
-//    List<LMNLTest> tests = testVisitor.getTests();
-//    for (int i = 0; i < tests.size(); i++) {
-//      LMNLTest t = tests.get(i);
-//      String baseDir = "src/test/resources/";
-//      String dir = t.isValid() ? "valid" : "invalid";
-////      String lmnlFile = baseDir + dir + "/test_" + i + ".lmnl";
-////      FileUtils.writeStringToFile(new File(lmnlFile), t.getLMNL(), "UTF-8");
-//      String creoleFile = baseDir + "/test_" + i + ".creole";
-//      FileUtils.writeStringToFile(new File(creoleFile), t.getCreole(), "UTF-8");
-//    }
-//  }
+  @Ignore
+  @Test
+  public void extractTests() throws IOException {
+    String xml = FileUtils.readFileToString(new File("data/creole/validate-lmnl.xsl"), "UTF-8");
+    Document doc = Document.createFromXml(xml, true);
+    TestVisitor testVisitor = new TestVisitor();
+    doc.accept(testVisitor);
+    List<LMNLTest> tests = testVisitor.getTests();
+    for (int i = 0; i < tests.size(); i++) {
+      LMNLTest t = tests.get(i);
+      String baseDir = "src/test/resources/";
+      String dir = t.isValid() ? "valid" : "invalid";
+//      String lmnlFile = baseDir + dir + "/test_" + i + ".lmnl";
+//      FileUtils.writeStringToFile(new File(lmnlFile), t.getLMNL(), "UTF-8");
+      String creoleFile = baseDir + "/test_" + i + ".creole";
+      FileUtils.writeStringToFile(new File(creoleFile), t.getCreole(), "UTF-8");
+    }
+  }
+
+  @Ignore
+  @Test
+  public void extractParseTests() throws IOException {
+    String xml = FileUtils.readFileToString(new File("data/creole/parse-lmnl.xsl"), "UTF-8");
+    Document doc = Document.createFromXml(xml, true);
+    ParseTestVisitor testVisitor = new ParseTestVisitor();
+    doc.accept(testVisitor);
+    System.out.println(testVisitor.getTestCode());
+  }
 
   /* private methods*/
 

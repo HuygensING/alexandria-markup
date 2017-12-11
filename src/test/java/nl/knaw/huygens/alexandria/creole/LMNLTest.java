@@ -19,7 +19,7 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
-class LMNLTest {
+public class LMNLTest {
   private String lmnl;
   private String creole;
   private boolean valid;

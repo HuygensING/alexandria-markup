@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole.patterns;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,10 +18,13 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import nl.knaw.huygens.alexandria.creole.Basics;
 import static nl.knaw.huygens.alexandria.creole.Constructors.choice;
 import nl.knaw.huygens.alexandria.creole.Pattern;
+
+import java.util.function.Function;
 
 public class Choice extends PatternWithTwoPatternParameters {
   public Choice(Pattern pattern1, Pattern pattern2) {
@@ -32,6 +35,8 @@ public class Choice extends PatternWithTwoPatternParameters {
   void init() {
     nullable = pattern1.isNullable() || pattern2.isNullable();
     allowsText = pattern1.allowsText() || pattern2.allowsText();
+    allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
   }
 
   @Override
@@ -55,6 +60,13 @@ public class Choice extends PatternWithTwoPatternParameters {
     );
   }
 
+  public Pattern startTagOpenDeriv(Basics.QName qn, Basics.Id id) {
+    return choice(//
+        pattern1.startTagOpenDeriv(qn, id),//
+        pattern2.startTagOpenDeriv(qn, id)//
+    );
+  }
+
   @Override
   public Pattern endTagDeriv(Basics.QName qn, Basics.Id id) {
     // endTagDeriv (Choice p1 p2) qn id =
@@ -65,4 +77,29 @@ public class Choice extends PatternWithTwoPatternParameters {
         pattern2.endTagDeriv(qn, id)//
     );
   }
+
+  @Override
+  public Pattern startAnnotationDeriv(Basics.QName qn) {
+    return choice(//
+        pattern1.startAnnotationDeriv(qn),//
+        pattern2.startAnnotationDeriv(qn)//
+    );
+  }
+
+  @Override
+  public Pattern endAnnotationDeriv(Basics.QName qn) {
+    return choice(//
+        pattern1.endAnnotationDeriv(qn),//
+        pattern2.endAnnotationDeriv(qn)//
+    );
+  }
+
+  @Override
+  public Pattern applyAfter(Function<Pattern, Pattern> f) {
+    return choice(//
+        pattern1.applyAfter(f),//
+        pattern2.applyAfter(f)//
+    );
+  }
+
 }

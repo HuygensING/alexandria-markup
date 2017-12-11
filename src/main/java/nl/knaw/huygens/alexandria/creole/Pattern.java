@@ -1,7 +1,7 @@
 package nl.knaw.huygens.alexandria.creole;
 
-/*-
- * #%L
+    /*-
+     * #%L
  * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
@@ -18,17 +18,23 @@ package nl.knaw.huygens.alexandria.creole;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+     */
+
 import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
 import nl.knaw.huygens.alexandria.creole.patterns.PatternWithTwoPatternParameters;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Function;
 
 public interface Pattern {
 
   boolean isNullable();
 
   boolean allowsText();
+
+  boolean allowsAnnotations();
+
+  boolean onlyAnnotations();
 
   default Pattern textDeriv(Basics.Context cx, String s) {
     // No other patterns can match a text event; the default is specified as
@@ -54,6 +60,14 @@ public interface Pattern {
     return notAllowed();
   }
 
+  default Pattern startTagOpenDeriv(Basics.QName qn, Basics.Id id) {
+    return notAllowed();
+  }
+
+  default Pattern applyAfter(Function<Pattern, Pattern> f) {
+    return notAllowed();
+  }
+
   default Pattern flip() {
     if (!(this instanceof PatternWithTwoPatternParameters)) {
       return this;
@@ -69,4 +83,5 @@ public interface Pattern {
       throw new RuntimeException(e);
     }
   }
+
 }

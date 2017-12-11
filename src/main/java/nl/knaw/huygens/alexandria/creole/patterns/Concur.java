@@ -33,6 +33,8 @@ public class Concur extends PatternWithTwoPatternParameters {
   void init() {
     nullable = pattern1.isNullable() && pattern2.isNullable();
     allowsText = pattern1.allowsText() && pattern2.allowsText();
+    allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations();
+    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
   }
 
   @Override
