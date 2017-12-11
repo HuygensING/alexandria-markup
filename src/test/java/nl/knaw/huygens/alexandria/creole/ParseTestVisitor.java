@@ -144,7 +144,6 @@ public class ParseTestVisitor extends DelegatingVisitor<XmlContext> {
     }
   }
 
-
   private static List<String> expectedEvents = new ArrayList<>();
 
   static class TestExpectHandler extends DefinitionVisitor.DefaultElementHandler {

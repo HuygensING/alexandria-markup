@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
      */
 
-import com.google.common.base.Preconditions;
 import static com.google.common.base.Preconditions.checkNotNull;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.creole.Basics;
@@ -483,15 +482,17 @@ public class LMNLImporter2 {
           String rangeName = token.getText();
           context.pushOpenMarkup(rangeName);
           Markup markup = context.currentLimenContext().currentMarkup();
-          if (markup==null){
+          if (markup == null) {
             String message = String.format("%s: unexpected token: {%s]", methodName, rangeName);
             throw new LMNLSyntaxError(message);
           }
           context.addEndTagOpenEvent(markup);
           break;
+
         case LMNLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
           handleAnnotation(context);
           break;
+
         case LMNLLexer.END_CLOSE_RANGE:
           context.closeMarkup();
           goOn = false;
