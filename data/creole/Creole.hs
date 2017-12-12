@@ -1,3 +1,4 @@
+module Creole where
 -- because we're re-using all as a function name
 -- import qualified Prelude.all as Prelude.all
 
@@ -135,7 +136,7 @@ concur NotAllowed p = NotAllowed
 concur p Text = p
 concur Text p = p
 concur (After p1 p2) (After p3 p4) = 
-  after (all p1 p3) (concur p2 p4)
+  after (all2 p1 p3) (concur p2 p4)
 concur (After p1 p2) p3 = after p1 (concur p2 p3)
 concur p1 (After p2 p3) = after p2 (concur p1 p3)
 concur p1 p2 = Concur p1 p2
@@ -162,14 +163,14 @@ after Empty p = p
 after (After p1 p2) p3 = after p1 (after p2 p3)
 after p1 p2 = After p1 p2
 
-all :: Pattern -> Pattern -> Pattern
-all p NotAllowed = NotAllowed
-all NotAllowed p = NotAllowed
-all p Empty = if nullable p then Empty else NotAllowed
-all Empty p = if nullable p then Empty else NotAllowed
-all (After p1 p2) (After p3 p4) = 
-  after (all p1 p3) (all p2 p4)
-all p1 p2 = All p1 p2
+all2 :: Pattern -> Pattern -> Pattern
+all2 p NotAllowed = NotAllowed
+all2 NotAllowed p = NotAllowed
+all2 p Empty = if nullable p then Empty else NotAllowed
+all2 Empty p = if nullable p then Empty else NotAllowed
+all2 (After p1 p2) (After p3 p4) =
+  after (all2 p1 p3) (all2 p2 p4)
+all2 p1 p2 = All p1 p2
 
 -- Derivatives
 
@@ -296,3 +297,9 @@ endTagDeriv (ConcurOneOrMore p) qn id =
 endTagDeriv (After p1 p2) qn id =
   after (endTagDeriv p1 qn id) p2
 endTagDeriv _ _ _ = NotAllowed
+
+-- whitespace tests whether a string is contains only whitespace.
+whitespace :: String -> Bool
+whitespace s = all isSpace s
+
+
