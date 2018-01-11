@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.TAGView;
+import static nl.knaw.huygens.alexandria.TAGView.SHOW_ALL_VIEW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
@@ -259,7 +261,7 @@ public class TexMECSImporterTest {
     TexMECSImporter importer = new TexMECSImporter();
     Document doc = importer.importTexMECS(texMECS);
     assertThat(doc.value()).isNotNull();
-    LMNLExporter ex = new LMNLExporter();
+    LMNLExporter ex = new LMNLExporter(SHOW_ALL_VIEW);
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);
     assertThat(lmnl).isEqualTo(expectedLMNL);

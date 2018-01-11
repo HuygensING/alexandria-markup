@@ -1,5 +1,6 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
+import static nl.knaw.huygens.alexandria.TAGView.SHOW_ALL_VIEW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -50,7 +51,7 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
-  final LMNLExporter lmnlExporter = new LMNLExporter().useShorthand();
+  final LMNLExporter lmnlExporter = new LMNLExporter(SHOW_ALL_VIEW).useShorthand();
 
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {

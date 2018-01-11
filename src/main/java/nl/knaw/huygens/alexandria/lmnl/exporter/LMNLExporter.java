@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +27,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
+import nl.knaw.huygens.alexandria.TAGView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +42,15 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 public class LMNLExporter {
   private static Logger LOG = LoggerFactory.getLogger(LMNLExporter.class);
   boolean useShorthand = false;
+  private TAGView view;
+
+  public LMNLExporter(TAGView view){
+    this.view = view;
+  }
+
+  public LMNLExporter(){
+    this.view = TAGView.SHOW_ALL_VIEW;
+  }
 
   public LMNLExporter useShorthand() {
     useShorthand = true;
@@ -61,15 +70,16 @@ public class LMNLExporter {
       Deque<Markup> openMarkups = new ArrayDeque<>();
       limen.getTextNodeIterator().forEachRemaining(tn -> {
         Set<Markup> markups = limen.getMarkups(tn);
+        Set<Markup> relevantMarkups = view.filterRelevantMarkup(markups);
 
         List<Markup> toClose = new ArrayList<>();
         toClose.addAll(openMarkups);
-        toClose.removeAll(markups);
+        toClose.removeAll(relevantMarkups);
         Collections.reverse(toClose);
         toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
 
         List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        toOpen.addAll(relevantMarkups);
         toOpen.removeAll(openMarkups);
         toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
 

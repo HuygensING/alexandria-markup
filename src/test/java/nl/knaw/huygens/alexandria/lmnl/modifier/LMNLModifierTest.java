@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.TAGView;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class LMNLModifierTest {
     assertThat(spainPosition.getLength()).isEqualTo(5);
     modifier.addMarkup(countryRange, spainPosition);
 
-    LMNLExporter exporter = new LMNLExporter();
+    LMNLExporter exporter = new LMNLExporter(TAGView.SHOW_ALL_VIEW);
     String modifiedLMNL = exporter.toLMNL(document);
     LOG.info("document.value().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);
