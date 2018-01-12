@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria;
  * #%L
  * alexandria-markup
  * =======
- * Copyright (C) 2016 - 2017 Huygens ING (KNAW)
+ * Copyright (C) 2016 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
 public class ErrorListener implements ANTLRErrorListener {
-  private List<String> errors = new ArrayList<>();
+  private final List<String> errors = new ArrayList<>();
 
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
