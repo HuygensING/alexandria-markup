@@ -20,10 +20,42 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
+
+import static java.util.stream.Collectors.toSet;
+
+import javax.json.*;
+import java.io.StringReader;
+import java.util.Set;
+
 public class TAGViewFactory {
   public static final TAGView SHOW_ALL_VIEW = new TAGView();
 
-  public static TAGView fromJson(String json) {
-    return SHOW_ALL_VIEW;
+  public static TAGView fromJsonString(String json) {
+
+    JsonReader reader = Json.createReader(new StringReader(json));
+    JsonObject jsonObject = reader.readObject();
+    reader.close();
+
+    TAGView tagView = new TAGView();
+
+    JsonArray includeArray = jsonObject.getJsonArray("include");
+    if (includeArray != null) {
+      Set<String> include = getMarkupTags(includeArray);
+      tagView.setMarkupToInclude(include);
+    }
+
+    JsonArray excludeArray = jsonObject.getJsonArray("exclude");
+    if (excludeArray != null) {
+      Set<String> exclude = getMarkupTags(excludeArray);
+      tagView.setMarkupToExclude(exclude);
+    }
+    return tagView;
+  }
+
+  private static Set<String> getMarkupTags(JsonArray jsonArray) {
+    return jsonArray.getValuesAs(JsonString.class)//
+        .stream()//
+        .map(JsonString::getString)//
+        .collect(toSet());
   }
 }
