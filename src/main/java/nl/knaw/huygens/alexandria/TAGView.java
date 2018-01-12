@@ -20,11 +20,13 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.TAGView.RelevanceStyle.*;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TAGView {
@@ -38,17 +40,17 @@ public class TAGView {
   private Set<String> markupToExclude = new HashSet<>();
 
   public Set<Markup> filterRelevantMarkup(Set<Markup> markups) {
-    Set<Markup> relevantMarkups = new HashSet<>(markups);
+    Set<Markup> relevantMarkups = new LinkedHashSet<>(markups);
     if (include.equals(relevanceStyle)) {
-      Set<Markup> retain = markups.stream()//
+      List<Markup> retain = markups.stream()//
           .filter(m -> markupToInclude.contains(m.getTag()))//
-          .collect(toSet());
+          .collect(toList());
       relevantMarkups.retainAll(retain);
 
     } else if (exclude.equals(relevanceStyle)) {
-      Set<Markup> remove = markups.stream()//
+      List<Markup> remove = markups.stream()//
           .filter(m -> markupToExclude.contains(m.getTag()))//
-          .collect(toSet());
+          .collect(toList());
 
       relevantMarkups.removeAll(remove);
     }
