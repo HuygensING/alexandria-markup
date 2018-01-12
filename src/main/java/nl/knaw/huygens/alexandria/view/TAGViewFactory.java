@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-
 import static java.util.stream.Collectors.toSet;
 
 import javax.json.*;
@@ -36,6 +35,10 @@ public class TAGViewFactory {
     JsonObject jsonObject = reader.readObject();
     reader.close();
 
+    return toTagView(jsonObject);
+  }
+
+  private static TAGView toTagView(JsonObject jsonObject) {
     TAGView tagView = new TAGView();
 
     JsonArray includeArray = jsonObject.getJsonArray("include");
