@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.data_model;
+package nl.knaw.huygens.alexandria.view;
 
 /*
  * #%L
@@ -20,20 +20,10 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  * #L%
  */
 
+public class TAGViewFactory {
+  public static final TAGView SHOW_ALL_VIEW = new TAGView();
 
-/**
- * Created by Ronald Haentjens Dekker on 29/12/16.
- * <p>
- * A document contains a Limen.
- */
-public class Document {
-  private final Limen value;
-
-  public Document() {
-    this.value = new Limen();
-  }
-
-  public Limen value() {
-    return value;
+  public static TAGView fromJson(String json) {
+    return SHOW_ALL_VIEW;
   }
 }

@@ -1,9 +1,18 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-import static nl.knaw.huygens.alexandria.TAGView.SHOW_ALL_VIEW;
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
+import static nl.knaw.huygens.alexandria.view.TAGViewFactory.SHOW_ALL_VIEW;
+import org.apache.commons.io.FileUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +21,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * #%L
@@ -37,17 +41,6 @@ import org.slf4j.LoggerFactory;
  * limitations under the License.
  * #L%
  */
-
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.data_model.NodeRangeIndex;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 
 public class LMNLImporterTest extends AlexandriaLMNLBaseTest {
   final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);

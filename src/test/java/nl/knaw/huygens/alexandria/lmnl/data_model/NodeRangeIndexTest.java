@@ -1,10 +1,11 @@
 package nl.knaw.huygens.alexandria.lmnl.data_model;
 
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
 import java.util.Set;
-
-import org.junit.Test;
 
 /*
  * #%L
@@ -25,9 +26,6 @@ import org.junit.Test;
  * limitations under the License.
  * #L%
  */
-
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 public class NodeRangeIndexTest {
 

@@ -20,16 +20,12 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,9 +33,11 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
@@ -68,7 +66,7 @@ public class ImportDataLMNLTest extends AlexandriaLMNLBaseTest {
         .stream()//
         .map(File::getName)//
         .map(n -> n.replace(".lmnl", ""))//
-        .map(b -> new String[] { b })//
+        .map(b -> new String[]{b})//
         .collect(Collectors.toList());
   }
 

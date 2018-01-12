@@ -20,22 +20,21 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.TAGView;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import static nl.knaw.huygens.alexandria.view.TAGViewFactory.SHOW_ALL_VIEW;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LMNLModifierTest {
   static final Logger LOG = LoggerFactory.getLogger(LMNLModifierTest.class);
@@ -54,7 +53,7 @@ public class LMNLModifierTest {
     assertThat(spainPosition.getLength()).isEqualTo(5);
     modifier.addMarkup(countryRange, spainPosition);
 
-    LMNLExporter exporter = new LMNLExporter(TAGView.SHOW_ALL_VIEW);
+    LMNLExporter exporter = new LMNLExporter(SHOW_ALL_VIEW);
     String modifiedLMNL = exporter.toLMNL(document);
     LOG.info("document.value().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);

@@ -21,12 +21,7 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  */
 
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A k-d tree (short for k-dimensional tree) is a space-partitioning data

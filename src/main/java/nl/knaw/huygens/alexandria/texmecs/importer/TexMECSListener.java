@@ -20,36 +20,15 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.lmnl.data_model.*;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.*;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.AttsContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EidContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.EndTagSetContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.GiContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.ResumeTagContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SoleTagContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.StartTagSetContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.SuspendTagContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.TextContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.VirtualElementContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TexMECSListener extends TexMECSParserBaseListener {
 

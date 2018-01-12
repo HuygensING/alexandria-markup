@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria;
+package nl.knaw.huygens.alexandria.view;
 
 /*
  * #%L
@@ -21,8 +21,8 @@ package nl.knaw.huygens.alexandria;
  */
 
 import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.TAGView.RelevanceStyle.*;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import static nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 public class TAGView {
-  public static final TAGView SHOW_ALL_VIEW = new TAGView();
-
   enum RelevanceStyle {include, exclude, undefined}
 
   private RelevanceStyle relevanceStyle = undefined;

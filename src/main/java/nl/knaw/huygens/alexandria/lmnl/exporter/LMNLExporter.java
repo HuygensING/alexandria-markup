@@ -20,21 +20,16 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.Set;
-
-import nl.knaw.huygens.alexandria.TAGView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import static nl.knaw.huygens.alexandria.view.TAGViewFactory.SHOW_ALL_VIEW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Created by bramb on 07/02/2017.
@@ -44,12 +39,12 @@ public class LMNLExporter {
   boolean useShorthand = false;
   private TAGView view;
 
-  public LMNLExporter(TAGView view){
+  public LMNLExporter(TAGView view) {
     this.view = view;
   }
 
-  public LMNLExporter(){
-    this.view = TAGView.SHOW_ALL_VIEW;
+  public LMNLExporter() {
+    this.view = SHOW_ALL_VIEW;
   }
 
   public LMNLExporter useShorthand() {

@@ -20,14 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.data_model;
  * #L%
  */
 
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Ronald Haentjens Dekker on 25/01/17.

@@ -26,6 +26,7 @@ import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
 import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.view.TAGView;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -47,23 +48,23 @@ public class TAGViewTest {
     Markup markup4 = new Markup(limen, tag4);
     Set<Markup> allMarkup = new HashSet<>(asList(markup1, markup2, markup3, markup4));
 
-    Set<String> odds = new HashSet<>(asList(tag1,tag3));
-    Set<String> evens = new HashSet<>(asList(tag2,tag4));
+    Set<String> odds = new HashSet<>(asList(tag1, tag3));
+    Set<String> evens = new HashSet<>(asList(tag2, tag4));
 
     TAGView viewNoAC = new TAGView().setMarkupToExclude(odds);
 
     Set<Markup> filteredMarkups = viewNoAC.filterRelevantMarkup(allMarkup);
-    assertThat(filteredMarkups).containsExactlyInAnyOrder(markup2,markup4);
+    assertThat(filteredMarkups).containsExactlyInAnyOrder(markup2, markup4);
 
     TAGView viewBD = new TAGView().setMarkupToInclude(evens);
 
     Set<Markup> filteredMarkups2 = viewBD.filterRelevantMarkup(allMarkup);
-    assertThat(filteredMarkups2).containsExactlyInAnyOrder(markup2,markup4);
+    assertThat(filteredMarkups2).containsExactlyInAnyOrder(markup2, markup4);
 
     TAGView viewAC = new TAGView().setMarkupToInclude(odds);
 
     Set<Markup> filteredMarkups3 = viewAC.filterRelevantMarkup(allMarkup);
-    assertThat(filteredMarkups3).containsExactlyInAnyOrder(markup1,markup3);
+    assertThat(filteredMarkups3).containsExactlyInAnyOrder(markup1, markup3);
 
     LMNLImporter importer = new LMNLImporter();
     Document document = importer.importLMNL("[a}a[b}b[c}c[d}da{a]b{b]c{c]d{d]");
