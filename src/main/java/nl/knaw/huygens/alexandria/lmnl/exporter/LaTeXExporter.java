@@ -43,11 +43,11 @@ import java.util.stream.Stream;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
-  public static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
+  private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
       .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
   private List<IndexPoint> indexPoints;
   private static TAGStore store;
-  private DocumentWrapper document;
+  private final DocumentWrapper document;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndex index;
 
@@ -114,13 +114,11 @@ public class LaTeXExporter {
         textNodeIndices.put(tn, i);
         Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<MarkupWrapper> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<MarkupWrapper> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<MarkupWrapper> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<MarkupWrapper> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -266,13 +264,11 @@ public class LaTeXExporter {
         // textNodeIndices.put(tn, i);
         Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<MarkupWrapper> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<MarkupWrapper> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<MarkupWrapper> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<MarkupWrapper> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -440,7 +436,7 @@ public class LaTeXExporter {
       this.textNodeIndex = textNodeIndex;
     }
 
-    public void addMarkup(MarkupWrapper markup) {
+    void addMarkup(MarkupWrapper markup) {
       // LOG.info("markup={}", markup.getTag());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
@@ -451,7 +447,7 @@ public class LaTeXExporter {
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
-    public List<MarkupWrapper> getMarkups() {
+    List<MarkupWrapper> getMarkups() {
       return markups;
     }
 
@@ -459,15 +455,15 @@ public class LaTeXExporter {
       return tags.contains(tag);
     }
 
-    public String getTag() {
+    String getTag() {
       return tags.iterator().next();
     }
 
-    public int getMaxRangeSize() {
+    int getMaxRangeSize() {
       return maxMarkupSize;
     }
 
-    public boolean canAdd(MarkupWrapper markup) {
+    boolean canAdd(MarkupWrapper markup) {
       String nTag = normalize(markup.getTag());
       if (!tags.contains(nTag)) {
         return false;

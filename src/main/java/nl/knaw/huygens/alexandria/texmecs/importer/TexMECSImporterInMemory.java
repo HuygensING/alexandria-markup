@@ -39,8 +39,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TexMECSImporterInMemory {
-  final Logger LOG = LoggerFactory.getLogger(getClass());
+class TexMECSImporterInMemory {
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   public Document importTexMECS(String input) throws TexMECSSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);

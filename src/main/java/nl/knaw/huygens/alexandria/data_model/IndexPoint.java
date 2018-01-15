@@ -25,8 +25,8 @@ package nl.knaw.huygens.alexandria.data_model;
  * Created by bramb on 3-3-2017.
  */
 public class IndexPoint {
-  final int textNodeIndex;
-  final int markupIndex;
+  private final int textNodeIndex;
+  private final int markupIndex;
 
   public IndexPoint(int textNodeIndex, int markupIndex) {
     this.textNodeIndex = textNodeIndex;

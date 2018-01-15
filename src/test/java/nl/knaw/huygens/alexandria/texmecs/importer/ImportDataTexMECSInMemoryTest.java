@@ -44,10 +44,10 @@ import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class ImportDataTexMECSInMemoryTest {
-  private static Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSInMemoryTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSInMemoryTest.class);
 
-  private String basename;
-  public static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
+  private final String basename;
+  private static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
       return isTexMECS(file.getName());
@@ -137,7 +137,7 @@ public class ImportDataTexMECSInMemoryTest {
     printTokens(CharStreams.fromString(input));
   }
 
-  protected void printTokens(InputStream input) throws IOException {
+  private void printTokens(InputStream input) throws IOException {
     printTokens(CharStreams.fromStream(input));
   }
 

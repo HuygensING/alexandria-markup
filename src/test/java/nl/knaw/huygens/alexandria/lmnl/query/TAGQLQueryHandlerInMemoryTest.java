@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TAGQLQueryHandlerInMemoryTest {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testTAGQLQuery1() throws LMNLSyntaxError {
@@ -176,7 +176,7 @@ public class TAGQLQueryHandlerInMemoryTest {
   }
 
   @Test
-  public void testTAGQLQueryWithSyntaxError() throws IOException, LMNLSyntaxError {
+  public void testTAGQLQueryWithSyntaxError() throws LMNLSyntaxError {
     String lmnl = "[text}\n"//
         + "[l}line 1{l]\n"//
         + "[l}line 2{l]\n"//

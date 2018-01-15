@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 public class LaTeXExporterInMemory {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporterInMemory.class);
-  public static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
+  private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
       .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
   private List<IndexPoint> indexPoints;
-  private Limen limen;
+  private final Limen limen;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndexInMemory index;
 
@@ -105,13 +105,11 @@ public class LaTeXExporterInMemory {
         textNodeIndices.put(tn, i);
         Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<Markup> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<Markup> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -251,13 +249,11 @@ public class LaTeXExporterInMemory {
         // textNodeIndices.put(tn, i);
         Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
+        List<Markup> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
+        List<Markup> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -424,7 +420,7 @@ public class LaTeXExporterInMemory {
       this.textNodeIndex = textNodeIndex;
     }
 
-    public void addMarkup(Markup markup) {
+    void addMarkup(Markup markup) {
       // LOG.info("markup={}", markup.getTag());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
@@ -435,7 +431,7 @@ public class LaTeXExporterInMemory {
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
-    public List<Markup> getMarkups() {
+    List<Markup> getMarkups() {
       return markups;
     }
 
@@ -443,15 +439,15 @@ public class LaTeXExporterInMemory {
       return tags.contains(tag);
     }
 
-    public String getTag() {
+    String getTag() {
       return tags.iterator().next();
     }
 
-    public int getMaxRangeSize() {
+    int getMaxRangeSize() {
       return maxMarkupSize;
     }
 
-    public boolean canAdd(Markup markup) {
+    boolean canAdd(Markup markup) {
       String nTag = normalize(markup.getTag());
       if (!tags.contains(nTag)) {
         return false;

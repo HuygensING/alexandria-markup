@@ -31,10 +31,10 @@ import java.util.function.Predicate;
 
 public class TAGQLSelectStatement implements TAGQLStatement {
 
-  private Logger LOG = LoggerFactory.getLogger(this.getClass());
+  private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  Predicate<? super Markup> markupFilter = tr -> true;
-  Function<? super Markup, ? super Object> markupMapper = a -> a;
+  private Predicate<? super Markup> markupFilter = tr -> true;
+  private Function<? super Markup, ? super Object> markupMapper = a -> a;
 
   private Integer index = null;
 

@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 import java.awt.*;
 
-public class ColorUtil {
+class ColorUtil {
 
   public static Color interpolate(Color start, Color end, float p) {
     float[] startHSB = Color.RGBtoHSB(start.getRed(), start.getGreen(), start.getBlue(), null);

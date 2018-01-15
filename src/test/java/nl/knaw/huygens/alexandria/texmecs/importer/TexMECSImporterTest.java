@@ -45,7 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
-  final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testExample1() {

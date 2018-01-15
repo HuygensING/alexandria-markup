@@ -35,13 +35,13 @@ public class TestTheLMNLLexer extends AlexandriaLMNLBaseTest {
   static final Logger LOG = LoggerFactory.getLogger(TestTheLMNLLexer.class);
 
   @Test
-  public void testLexerTextWithOneRange() throws RecognitionException {
+  public void testLexerTextWithOneRange() {
     String input = "[l}He manages to keep the upper hand{l]";
     printTokens(input);
   }
 
   @Test
-  public void testLexerComplexExample() throws RecognitionException {
+  public void testLexerComplexExample() {
     String input = "[excerpt\n"//
         + "  [source [date}1915{][title}The Housekeeper{]]\n"//
         + "  [author\n"//

@@ -39,16 +39,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class TAGQLQueryListener extends TAGQLBaseListener {
+class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private List<TAGQLStatement> statements = new ArrayList<>();
+  private final List<TAGQLStatement> statements = new ArrayList<>();
 
   public List<TAGQLStatement> getStatements() {
     return statements;
   }
 
-  public String toText(Markup markup) {
+  private String toText(Markup markup) {
     StringBuilder textBuilder = new StringBuilder();
     markup.textNodes.forEach(textNode -> textBuilder.append(textNode.getContent()));
     return textBuilder.toString();
@@ -90,11 +90,10 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
       List<Annotation> annotationsToFilter = tr.getAnnotations();
       while (depth < annotationTags.size() - 1) {
         String filterTag = annotationTags.get(depth);
-        List<Annotation> newList = annotationsToFilter.stream()//
+        annotationsToFilter = annotationsToFilter.stream()//
             .filter(hasTag(filterTag))//
             .flatMap(a -> a.annotations().stream())//
             .collect(Collectors.toList());
-        annotationsToFilter = newList;
         depth += 1;
       }
       String filterTag = annotationTags.get(depth);

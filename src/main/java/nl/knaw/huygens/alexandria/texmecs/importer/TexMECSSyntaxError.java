@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-public class TexMECSSyntaxError extends RuntimeException {
+class TexMECSSyntaxError extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
   public TexMECSSyntaxError(String message) {

@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TAGViewFactoryTest extends AlexandriaBaseStoreTest {
-  TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+  private final TAGViewFactory tagViewFactory = new TAGViewFactory(store);
 
   @Test
   public void fromJsonWithInclusion() {

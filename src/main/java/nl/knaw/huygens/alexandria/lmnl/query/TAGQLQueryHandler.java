@@ -33,9 +33,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.List;
 
-public class TAGQLQueryHandler {
+class TAGQLQueryHandler {
 
-  private Document document;
+  private final Document document;
 
   public TAGQLQueryHandler(Document document) {
     this.document = document;
@@ -64,7 +64,7 @@ public class TAGQLQueryHandler {
     return result;
   }
 
-  TAGQLResult execute(TAGQLStatement statement) {
+  private TAGQLResult execute(TAGQLStatement statement) {
     return statement.getLimenProcessor()//
         .apply(document.value());
   }

@@ -41,10 +41,10 @@ import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
-  private static Logger LOG = LoggerFactory.getLogger(ImportDataLMNLInMemoryTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ImportDataLMNLInMemoryTest.class);
 
-  private String basename;
-  public static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
+  private final String basename;
+  private static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
       return isLMNL(file.getName());

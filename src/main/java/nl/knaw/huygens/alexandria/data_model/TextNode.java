@@ -34,7 +34,7 @@ public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
   private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
-  private Set<Markup> parents = new HashSet<>();
+  private final Set<Markup> parents = new HashSet<>();
 
   public TextNode(String content) {
     this.content = content;

@@ -41,7 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class LMNLImporter {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
 
   private static TAGStore tagStore;
 
@@ -50,11 +50,11 @@ public class LMNLImporter {
   }
 
   static class DocumentContext {
-    private TAGDocument document;
+    private final TAGDocument document;
     private final Deque<TAGMarkup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<TAGMarkup> openMarkupStack = new Stack<>();
     private final Stack<TAGAnnotation> annotationStack = new Stack<>();
-    private ImporterContext importerContext;
+    private final ImporterContext importerContext;
 
     DocumentContext(TAGDocument document, ImporterContext importerContext) {
       this.document = document;
@@ -454,7 +454,7 @@ public class LMNLImporter {
 //    joinDiscontinuedRanges(document.getDocumentId());
 //  }
 
-  public static void joinDiscontinuedRanges(DocumentWrapper document) {
+  private static void joinDiscontinuedRanges(DocumentWrapper document) {
     Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
     List<Long> markupIdsToRemove = new ArrayList<>();
     document.getMarkupStream()//

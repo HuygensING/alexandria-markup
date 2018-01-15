@@ -27,8 +27,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import java.util.stream.Stream;
 
 public class AnnotationWrapper {
-  private TAGStore store;
-  private TAGAnnotation annotation;
+  private final TAGStore store;
+  private final TAGAnnotation annotation;
 
   public AnnotationWrapper(TAGStore store, TAGAnnotation annotation) {
     this.store = store;

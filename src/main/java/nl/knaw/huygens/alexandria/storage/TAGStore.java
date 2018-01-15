@@ -42,9 +42,9 @@ public class TAGStore {
   private static final Logger LOG = LoggerFactory.getLogger(TAGStore.class);
   private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
 
-  Environment bdbEnvironment = null;
-  private String dbDir;
-  private boolean readOnly;
+  private Environment bdbEnvironment = null;
+  private final String dbDir;
+  private final boolean readOnly;
   private DataAccessor da;
   private EntityStore store;
   private ThreadLocal<Boolean> transactionOpen;
@@ -259,7 +259,7 @@ public class TAGStore {
     }
   }
 
-  Boolean getTransactionIsOpen() {
+  private Boolean getTransactionIsOpen() {
     return getTransactionOpen().get();
   }
 
@@ -277,7 +277,7 @@ public class TAGStore {
     setTransactionIsOpen(true);
   }
 
-  void setTransactionIsOpen(Boolean b) {
+  private void setTransactionIsOpen(Boolean b) {
     getTransactionOpen().set(b);
   }
 

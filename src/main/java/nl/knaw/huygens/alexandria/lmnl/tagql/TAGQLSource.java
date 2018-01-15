@@ -21,7 +21,7 @@ package nl.knaw.huygens.alexandria.lmnl.tagql;
  */
 
 
-public class TAGQLSource {
+class TAGQLSource {
   String type;
   String variable;
 }

@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MarkupWrapper {
-  private TAGStore store;
-  private TAGMarkup markup;
+  private final TAGStore store;
+  private final TAGMarkup markup;
 
   public MarkupWrapper(TAGStore store, TAGMarkup markup) {
     this.store = store;
@@ -169,7 +169,7 @@ public class MarkupWrapper {
 
   }
 
-  public void setDominatingMarkup(MarkupWrapper dominatingMarkup) {
+  private void setDominatingMarkup(MarkupWrapper dominatingMarkup) {
     markup.setDominatingMarkupId(dominatingMarkup.getId());
     if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);

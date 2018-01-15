@@ -36,14 +36,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LMNLImporterInMemory {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemory.class);
 
   static class LimenContext {
-    private Limen limen;
+    private final Limen limen;
     private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<Markup> openMarkupStack = new Stack<>();
     private final Stack<Annotation> annotationStack = new Stack<>();
-    private ImporterContext importerContext;
+    private final ImporterContext importerContext;
 
     LimenContext(Limen limen, ImporterContext importerContext) {
       this.limen = limen;
@@ -426,7 +426,7 @@ public class LMNLImporterInMemory {
     joinDiscontinuedRanges(document.value());
   }
 
-  public static void joinDiscontinuedRanges(Limen limen) {
+  private static void joinDiscontinuedRanges(Limen limen) {
     Map<String, Markup> markupsToJoin = new HashMap<>();
     List<Markup> markupsToRemove = new ArrayList<>();
     limen.markupList.stream()//

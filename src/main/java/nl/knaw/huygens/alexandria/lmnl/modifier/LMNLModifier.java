@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.List;
 
-public class LMNLModifier {
-  Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
+class LMNLModifier {
+  private final Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
 
-  private Limen limen;
+  private final Limen limen;
 
   public LMNLModifier(Limen limen) {
     this.limen = limen;
@@ -203,33 +203,33 @@ public class LMNLModifier {
     private int textNodeIndex = 0;
     private int offset = 0;
 
-    public TextNodeCursor(Limen limen) {
+    TextNodeCursor(Limen limen) {
       currentTextNode = limen.textNodeList.get(0);
     }
 
-    public void advance() {
+    void advance() {
       offset += getCurrentTextLength();
       currentTextNode = currentTextNode.getNextTextNode();
       textNodeIndex++;
     }
 
-    public TextNode getCurrentTextNode() {
+    TextNode getCurrentTextNode() {
       return currentTextNode;
     }
 
-    public String getCurrentText() {
+    String getCurrentText() {
       return currentTextNode.getContent();
     }
 
-    public int getCurrentTextLength() {
+    int getCurrentTextLength() {
       return getCurrentText().length();
     }
 
-    public int getTextNodeIndex() {
+    int getTextNodeIndex() {
       return textNodeIndex;
     }
 
-    public boolean canAdvance() {
+    boolean canAdvance() {
       return currentTextNode.getNextTextNode() != null;
     }
 

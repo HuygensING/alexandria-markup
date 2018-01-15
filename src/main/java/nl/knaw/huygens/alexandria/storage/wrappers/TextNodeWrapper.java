@@ -24,8 +24,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
 public class TextNodeWrapper {
-  private TAGStore store;
-  private TAGTextNode textNode;
+  private final TAGStore store;
+  private final TAGTextNode textNode;
 
   public TextNodeWrapper(TAGStore store, TAGTextNode textNode) {
     this.store = store;

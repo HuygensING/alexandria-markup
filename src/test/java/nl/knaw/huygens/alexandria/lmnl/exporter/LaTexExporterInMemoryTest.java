@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class LaTexExporterInMemoryTest {
-  private static Logger LOG = LoggerFactory.getLogger(LaTexExporterInMemoryTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LaTexExporterInMemoryTest.class);
 
   @Test
   public void testLaTeXOutput1() throws LMNLSyntaxError {

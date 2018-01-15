@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LMNLModifierInMemoryTest {
-  static final Logger LOG = LoggerFactory.getLogger(LMNLModifierInMemoryTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LMNLModifierInMemoryTest.class);
 
   @Test
   public void testAddRange() throws LMNLSyntaxError {

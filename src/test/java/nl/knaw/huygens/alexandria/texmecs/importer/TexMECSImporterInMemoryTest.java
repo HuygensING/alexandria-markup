@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TexMECSImporterInMemoryTest {
-  final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testExample1() {
@@ -261,7 +261,7 @@ public class TexMECSImporterInMemoryTest {
     return doc;
   }
 
-  protected void printTokens(String input) {
+  private void printTokens(String input) {
     System.out.println("TexMECS:");
     System.out.println(input);
     System.out.println("Tokens:");

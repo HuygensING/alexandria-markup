@@ -585,19 +585,19 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
     private KdNode lesser = null;
     private KdNode greater = null;
 
-    public KdNode(IndexPoint id) {
+    KdNode(IndexPoint id) {
       this.id = id;
       this.k = 3;
       this.depth = 0;
     }
 
-    public KdNode(IndexPoint id, int k, int depth) {
+    KdNode(IndexPoint id, int k, int depth) {
       this.id = id;
       this.k = k;
       this.depth = depth;
     }
 
-    public static int compareTo(int depth, int k, IndexPoint o1, IndexPoint o2) {
+    static int compareTo(int depth, int k, IndexPoint o1, IndexPoint o2) {
       int axis = depth % k;
       if (axis == TEXTNODE_AXIS)
         return TEXTNODE_INDEX_COMPARATOR.compare(o1, o2);
@@ -660,7 +660,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
   static class TreePrinter {
 
-    public static <T extends IndexPoint> String getString(KdTree<T> tree) {
+    static <T extends IndexPoint> String getString(KdTree<T> tree) {
       if (tree.root == null)
         return "Tree has no nodes.";
       return getString(tree.root, "", true);

@@ -38,9 +38,9 @@ import java.util.*;
 public class LMNLExporter {
   private static Logger LOG = LoggerFactory.getLogger(LMNLExporter.class);
 
-  boolean useShorthand = false;
-  private TAGStore store;
-  private TAGView view;
+  private boolean useShorthand = false;
+  private final TAGStore store;
+  private final TAGView view;
 
   public LMNLExporter(TAGStore store, TAGView view) {
     Preconditions.checkNotNull(store);
@@ -81,14 +81,12 @@ public class LMNLExporter {
         });
         Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
-        List<Long> toClose = new ArrayList<>();
-        toClose.addAll(openMarkupIds);
+        List<Long> toClose = new ArrayList<>(openMarkupIds);
         toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
         toClose.forEach(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
 
-        List<Long> toOpen = new ArrayList<>();
-        toOpen.addAll(relevantMarkupIds);
+        List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
         toOpen.removeAll(openMarkupIds);
         toOpen.forEach(markupId -> lmnlBuilder.append(openTags.get(markupId)));
 

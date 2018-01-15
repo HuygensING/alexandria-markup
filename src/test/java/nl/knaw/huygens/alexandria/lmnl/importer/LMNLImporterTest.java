@@ -46,7 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LMNLImporterTest extends AlexandriaBaseStoreTest {
-  final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
+  private final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
 
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {

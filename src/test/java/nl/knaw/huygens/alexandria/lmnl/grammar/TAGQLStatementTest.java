@@ -43,10 +43,10 @@ import java.util.List;
 
 @RunWith(Parameterized.class)
 public class TAGQLStatementTest {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private String statement;
-  private Boolean ok;
+  private final String statement;
+  private final Boolean ok;
 
   public TAGQLStatementTest(String statement, Boolean ok) {
     this.statement = statement;

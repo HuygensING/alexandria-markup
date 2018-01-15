@@ -28,7 +28,7 @@ import java.io.StringReader;
 import java.util.Set;
 
 public class TAGViewFactory {
-  private TAGStore store;
+  private final TAGStore store;
 
   public TAGViewFactory(TAGStore store) {
     this.store = store;

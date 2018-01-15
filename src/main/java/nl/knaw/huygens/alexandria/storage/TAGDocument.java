@@ -41,7 +41,7 @@ public class TAGDocument implements TAGObject {
 
   private final Map<Long, Set<Long>> textNodeIdToMarkupIds = new LinkedHashMap<>();
 
-  protected TAGDocument() {
+  TAGDocument() {
   }
 
   public Long getId() {

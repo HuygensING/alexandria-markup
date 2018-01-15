@@ -30,18 +30,18 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TexMECSListenerInMemory extends TexMECSParserBaseListener {
+class TexMECSListenerInMemory extends TexMECSParserBaseListener {
 
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private Document document = new Document();
-  private Limen limen = document.value();
-  private Deque<Markup> openMarkup = new ArrayDeque<>();
-  private Deque<Markup> suspendedMarkup = new ArrayDeque<>();
+  private final Document document = new Document();
+  private final Limen limen = document.value();
+  private final Deque<Markup> openMarkup = new ArrayDeque<>();
+  private final Deque<Markup> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
-  private HashMap<String, Markup> identifiedMarkups = new HashMap<>();
-  private HashMap<String, String> idsInUse = new HashMap<>();
-  private List<String> errors = new ArrayList<>();
+  private final HashMap<String, Markup> identifiedMarkups = new HashMap<>();
+  private final HashMap<String, String> idsInUse = new HashMap<>();
+  private final List<String> errors = new ArrayList<>();
 
   public TexMECSListenerInMemory() {
   }

@@ -42,8 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
-  final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemoryTest.class);
-  final LMNLExporterInMemory lmnlExporterInMemory = new LMNLExporterInMemory().useShorthand();
+  private final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemoryTest.class);
+  private final LMNLExporterInMemory lmnlExporterInMemory = new LMNLExporterInMemory().useShorthand();
 
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {

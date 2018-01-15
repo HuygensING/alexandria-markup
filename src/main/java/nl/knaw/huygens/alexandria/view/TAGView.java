@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 public class TAGView {
-  private TAGStore store;
+  private final TAGStore store;
 
   enum RelevanceStyle {include, exclude, undefined}
 

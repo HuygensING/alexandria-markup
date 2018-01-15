@@ -34,18 +34,18 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TexMECSListener extends TexMECSParserBaseListener {
+class TexMECSListener extends TexMECSParserBaseListener {
 
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private DocumentWrapper document;
-  private Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
-  private Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
+  private final DocumentWrapper document;
+  private final Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
+  private final Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
-  private HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
-  private HashMap<String, String> idsInUse = new HashMap<>();
-  private List<String> errors = new ArrayList<>();
-  private TAGStore store;
+  private final HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
+  private final HashMap<String, String> idsInUse = new HashMap<>();
+  private final List<String> errors = new ArrayList<>();
+  private final TAGStore store;
 
   public TexMECSListener(TAGStore store) {
     this.store = store;

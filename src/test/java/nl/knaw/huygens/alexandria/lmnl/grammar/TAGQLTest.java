@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class TAGQLTest {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
   public void testCorrectTAGQLStatement() {

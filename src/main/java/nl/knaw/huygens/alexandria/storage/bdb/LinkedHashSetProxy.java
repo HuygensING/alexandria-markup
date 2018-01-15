@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 @Persistent(proxyFor=LinkedHashSet.class)
 public class LinkedHashSetProxy implements PersistentProxy<LinkedHashSet> {
 
-  protected ArrayList setList = null;
+  private ArrayList setList = null;
 
   public  LinkedHashSetProxy() {}
 

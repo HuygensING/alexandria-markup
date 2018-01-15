@@ -32,8 +32,8 @@ import java.util.stream.Stream;
 
 public class DocumentWrapper {
 
-  private TAGStore store;
-  private TAGDocument document;
+  private final TAGStore store;
+  private final TAGDocument document;
 
   public DocumentWrapper(TAGStore store, TAGDocument document) {
     this.store = store;
@@ -99,7 +99,7 @@ public class DocumentWrapper {
     update();
   }
 
-  public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
+  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
     associateTextNodeWithMarkup(textNodeWrapper, markup.getId());
   }
 
@@ -111,7 +111,7 @@ public class DocumentWrapper {
     update();
   }
 
-  public void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
+  private void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
     document.getTextNodeIdToMarkupIds()
         .computeIfAbsent(
             node.getId(),

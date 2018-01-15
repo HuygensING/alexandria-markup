@@ -181,7 +181,7 @@ public class Markup {
     return Optional.ofNullable(dominatingMarkup);
   }
 
-  public void setDominatingMarkup(Markup dominatingMarkup) {
+  private void setDominatingMarkup(Markup dominatingMarkup) {
     this.dominatingMarkup = dominatingMarkup;
     if (!dominatingMarkup.getDominatedMarkup().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
