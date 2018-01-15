@@ -40,6 +40,10 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[{\\[]+
   ;
 
+//NL
+//  : [\r\n]+ -> skip
+//  ;
+
 // ----------------- Everything INSIDE of a RANGE OPENER ---------------------
 mode INSIDE_RANGE_OPENER;
 

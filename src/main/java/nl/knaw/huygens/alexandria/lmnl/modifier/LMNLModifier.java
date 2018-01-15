@@ -27,9 +27,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.data_model.Markup;
 
 public class LMNLModifier {
 
@@ -101,7 +101,7 @@ public class LMNLModifier {
 
           } else {
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
             throw new RuntimeException("tail=empty!");
           }
         }
@@ -151,7 +151,7 @@ public class LMNLModifier {
             limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
 
           } else {
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
             throw new RuntimeException("head=empty!");
           }

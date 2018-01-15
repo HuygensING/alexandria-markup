@@ -47,7 +47,7 @@ resumeTag /* WFC: resume-tag OK */
   : BEGIN_RESUME_TAG gi END_START_TAG
   ;
 
-virtualElement // WFC: idref OK. The idref value in a virtual element must appear on some element in the document as the value of an id.
+virtualElement // WFC: idref OK. The idref getDocumentId in a virtual element must appear on some element in the document as the getDocumentId of an id.
   : BEGIN_VIRTUAL_ELEMENT eid CARET idref atts END_VIRTUAL_ELEMENT
   ;
 
