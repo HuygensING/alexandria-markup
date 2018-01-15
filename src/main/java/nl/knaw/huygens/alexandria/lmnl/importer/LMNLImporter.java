@@ -46,7 +46,7 @@ public class LMNLImporter {
   private static TAGStore tagStore;
 
   public LMNLImporter(TAGStore tagStore) {
-    this.tagStore = tagStore;
+    LMNLImporter.tagStore = tagStore;
   }
 
   static class DocumentContext {

@@ -52,7 +52,7 @@ public class LaTeXExporter {
   private NodeRangeIndex index;
 
   public LaTeXExporter(TAGStore store, DocumentWrapper document) {
-    this.store = store;
+    LaTeXExporter.store = store;
     this.document = document;
   }
 
