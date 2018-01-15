@@ -1,5 +1,12 @@
 package nl.knaw.huygens.alexandria.storage;
 
+import java.io.File;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * alexandria-markup
@@ -21,24 +28,23 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import com.google.common.base.Preconditions;
-import com.sleepycat.je.*;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
+
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
-public class TAGStore {
+public class TAGStore implements AutoCloseable {
   private static final Logger LOG = LoggerFactory.getLogger(TAGStore.class);
   private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
 
@@ -53,6 +59,7 @@ public class TAGStore {
   public TAGStore(String dbDir, boolean readOnly) {
     this.dbDir = dbDir;
     this.readOnly = readOnly;
+    open();
   }
 
   public void open() {
@@ -78,6 +85,7 @@ public class TAGStore {
     }
   }
 
+  @Override
   public void close() {
     try {
       if (tx != null && tx.isValid()) {
@@ -179,7 +187,7 @@ public class TAGStore {
     markup.setMarkupId(id);
     markup.setSuffix(suffix);
     persist(markup);
-//    document.addMarkup(markup);
+    // document.addMarkup(markup);
     return new MarkupWrapper(this, markup);
   }
 
