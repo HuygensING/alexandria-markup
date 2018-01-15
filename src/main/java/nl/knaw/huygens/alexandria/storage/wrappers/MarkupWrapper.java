@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.Markup;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 

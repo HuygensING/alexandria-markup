@@ -1,17 +1,5 @@
 package nl.knaw.huygens.alexandria.lmnl.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /*
  * #%L
  * alexandria-markup
@@ -35,6 +23,16 @@ import org.slf4j.LoggerFactory;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+import org.apache.commons.io.FileUtils;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TAGQLQueryHandlerInMemoryTest {
   Logger LOG = LoggerFactory.getLogger(getClass());

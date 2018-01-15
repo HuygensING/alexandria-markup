@@ -20,12 +20,13 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-
 import com.google.common.base.Preconditions;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +37,21 @@ import java.util.*;
  */
 public class LMNLExporter {
   private static Logger LOG = LoggerFactory.getLogger(LMNLExporter.class);
+
   boolean useShorthand = false;
   private TAGStore store;
+  private TAGView view;
+
+  public LMNLExporter(TAGStore store, TAGView view) {
+    Preconditions.checkNotNull(store);
+    this.store = store;
+    this.view = view;
+  }
 
   public LMNLExporter(TAGStore store) {
     Preconditions.checkNotNull(store);
     this.store = store;
+    this.view = new TAGViewFactory(store).getDefaultView();
   }
 
   public LMNLExporter useShorthand() {
@@ -69,15 +79,16 @@ public class LMNLExporter {
           openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
           closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
         });
+        Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
         List<Long> toClose = new ArrayList<>();
         toClose.addAll(openMarkupIds);
-        toClose.removeAll(markupIds);
+        toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
         toClose.forEach(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
 
         List<Long> toOpen = new ArrayList<>();
-        toOpen.addAll(markupIds);
+        toOpen.addAll(relevantMarkupIds);
         toOpen.removeAll(openMarkupIds);
         toOpen.forEach(markupId -> lmnlBuilder.append(openTags.get(markupId)));
 

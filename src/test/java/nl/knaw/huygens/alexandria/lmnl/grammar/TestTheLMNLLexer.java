@@ -21,12 +21,11 @@ package nl.knaw.huygens.alexandria.lmnl.grammar;
  */
 
 
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 
 /**
  * Created by Ronald Haentjens Dekker on 28/12/16.

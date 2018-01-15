@@ -21,11 +21,11 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.awt.Color;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 
 public class ColorUtilTest {
   Logger LOG = LoggerFactory.getLogger(this.getClass());

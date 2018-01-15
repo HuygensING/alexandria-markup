@@ -20,19 +20,18 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
-import java.util.List;
-
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
-import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
+import java.util.List;
 
 public class TAGQLQueryHandler {
 

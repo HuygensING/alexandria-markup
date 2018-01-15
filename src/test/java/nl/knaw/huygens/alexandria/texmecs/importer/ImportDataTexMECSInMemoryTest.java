@@ -20,19 +20,15 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -40,9 +36,11 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSLexer;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
 public class ImportDataTexMECSInMemoryTest {
@@ -71,7 +69,7 @@ public class ImportDataTexMECSInMemoryTest {
         .stream()//
         .map(File::getName)//
         .map(n -> n.replace(".texmecs", ""))//
-        .map(b -> new String[] { b })//
+        .map(b -> new String[]{b})//
         .collect(Collectors.toList());
   }
 

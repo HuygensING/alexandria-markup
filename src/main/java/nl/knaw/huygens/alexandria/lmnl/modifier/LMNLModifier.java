@@ -20,19 +20,16 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.TextNode;
-import nl.knaw.huygens.alexandria.data_model.Markup;
-
 public class LMNLModifier {
-
   Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
 
   private Limen limen;

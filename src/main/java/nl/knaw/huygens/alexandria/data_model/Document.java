@@ -23,18 +23,17 @@ package nl.knaw.huygens.alexandria.data_model;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
- *
+ * <p>
  * A document contains a Limen.
- *
  */
 public class Document {
-    private final Limen value;
+  private final Limen value;
 
-    public Document() {
-        this.value = new Limen();
-    }
+  public Document() {
+    this.value = new Limen();
+  }
 
-    public Limen value() {
-        return value;
-    }
+  public Limen value() {
+    return value;
+  }
 }

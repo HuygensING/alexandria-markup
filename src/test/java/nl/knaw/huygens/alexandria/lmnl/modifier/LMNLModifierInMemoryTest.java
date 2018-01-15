@@ -20,21 +20,19 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.data_model.Markup;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LMNLModifierInMemoryTest {
   static final Logger LOG = LoggerFactory.getLogger(LMNLModifierInMemoryTest.class);
@@ -54,6 +52,7 @@ public class LMNLModifierInMemoryTest {
     modifier.addMarkup(countryRange, spainPosition);
 
     LMNLExporterInMemory exporter = new LMNLExporterInMemory();
+//    LMNLExporter exporter = new LMNLExporter(SHOW_ALL_VIEW);
     String modifiedLMNL = exporter.toLMNL(document);
     LOG.info("document.getDocumentId().textNodeList={}", document.value().textNodeList);
     LOG.info("modifiedLMNL={}", modifiedLMNL);

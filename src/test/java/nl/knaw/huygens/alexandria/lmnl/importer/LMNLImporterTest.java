@@ -1,6 +1,5 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-
 /*
  * #%L
  * alexandria-markup
@@ -33,7 +32,6 @@ import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.apache.commons.io.FileUtils;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -69,11 +67,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       r1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(r1);
-      expected.associateTextNodeWithMarkup(t1,r1);
+      expected.associateTextNodeWithMarkup(t1, r1);
 
       logLMNL(actual);
-      assertTrue(compareDocuments(expected, actual));
-      assertActualMatchesExpected(actual,expected);
+      assertThat(compareDocuments(expected, actual)).isTrue();
+      assertActualMatchesExpected(actual, expected);
 
       logKdTree(actual);
       NodeRangeIndex index = new NodeRangeIndex(store, actual);
@@ -150,37 +148,37 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
           .addMarkup(s2)//
           .addMarkup(s3)//
           .addMarkup(l3);
-      expected.associateTextNodeWithMarkup(tn00,excerpt);
-      expected.associateTextNodeWithMarkup(tn01,excerpt);
-      expected.associateTextNodeWithMarkup(tn02,excerpt);
-      expected.associateTextNodeWithMarkup(tn03,excerpt);
-      expected.associateTextNodeWithMarkup(tn04,excerpt);
-      expected.associateTextNodeWithMarkup(tn05,excerpt);
-      expected.associateTextNodeWithMarkup(tn06,excerpt);
-      expected.associateTextNodeWithMarkup(tn07,excerpt);
-      expected.associateTextNodeWithMarkup(tn08,excerpt);
-      expected.associateTextNodeWithMarkup(tn09,excerpt);
-      expected.associateTextNodeWithMarkup(tn10,excerpt);
+      expected.associateTextNodeWithMarkup(tn00, excerpt);
+      expected.associateTextNodeWithMarkup(tn01, excerpt);
+      expected.associateTextNodeWithMarkup(tn02, excerpt);
+      expected.associateTextNodeWithMarkup(tn03, excerpt);
+      expected.associateTextNodeWithMarkup(tn04, excerpt);
+      expected.associateTextNodeWithMarkup(tn05, excerpt);
+      expected.associateTextNodeWithMarkup(tn06, excerpt);
+      expected.associateTextNodeWithMarkup(tn07, excerpt);
+      expected.associateTextNodeWithMarkup(tn08, excerpt);
+      expected.associateTextNodeWithMarkup(tn09, excerpt);
+      expected.associateTextNodeWithMarkup(tn10, excerpt);
 
-      expected.associateTextNodeWithMarkup(tn01,s1);
-      expected.associateTextNodeWithMarkup(tn02,s1);
-      expected.associateTextNodeWithMarkup(tn03,s1);
+      expected.associateTextNodeWithMarkup(tn01, s1);
+      expected.associateTextNodeWithMarkup(tn02, s1);
+      expected.associateTextNodeWithMarkup(tn03, s1);
 
-      expected.associateTextNodeWithMarkup(tn05,s2);
+      expected.associateTextNodeWithMarkup(tn05, s2);
 
-      expected.associateTextNodeWithMarkup(tn07,s3);
-      expected.associateTextNodeWithMarkup(tn08,s3);
-      expected.associateTextNodeWithMarkup(tn09,s3);
+      expected.associateTextNodeWithMarkup(tn07, s3);
+      expected.associateTextNodeWithMarkup(tn08, s3);
+      expected.associateTextNodeWithMarkup(tn09, s3);
 
-      expected.associateTextNodeWithMarkup(tn01,l1);
+      expected.associateTextNodeWithMarkup(tn01, l1);
 
-      expected.associateTextNodeWithMarkup(tn03,l2);
-      expected.associateTextNodeWithMarkup(tn04,l2);
-      expected.associateTextNodeWithMarkup(tn05,l2);
-      expected.associateTextNodeWithMarkup(tn06,l2);
-      expected.associateTextNodeWithMarkup(tn07,l2);
+      expected.associateTextNodeWithMarkup(tn03, l2);
+      expected.associateTextNodeWithMarkup(tn04, l2);
+      expected.associateTextNodeWithMarkup(tn05, l2);
+      expected.associateTextNodeWithMarkup(tn06, l2);
+      expected.associateTextNodeWithMarkup(tn07, l2);
 
-      expected.associateTextNodeWithMarkup(tn09,l3);
+      expected.associateTextNodeWithMarkup(tn09, l3);
 
       assertActualMatchesExpected(actual, expected);
 
@@ -319,7 +317,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       logLMNL(actual);
       compareLMNL(expected, actual);
-      assertTrue(compareDocuments(expected, actual));
+      assertThat(compareDocuments(expected, actual)).isTrue();
 
       logKdTree(actual);
       NodeRangeIndex index = new NodeRangeIndex(store, actual);
@@ -363,7 +361,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       logLMNL(actual);
       compareLMNL(expected, actual);
-      assertTrue(compareDocuments(expected, actual));
+      assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
 
@@ -388,7 +386,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       logLMNL(actual);
       compareLMNL(expected, actual);
-      assertTrue(compareDocuments(expected, actual));
+      assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
 
@@ -429,7 +427,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       logLMNL(actual);
       compareLMNL(expected, actual);
-      assertTrue(compareDocuments(expected, actual));
+      assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
 

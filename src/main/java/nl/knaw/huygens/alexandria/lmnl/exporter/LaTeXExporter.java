@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.KdTree;

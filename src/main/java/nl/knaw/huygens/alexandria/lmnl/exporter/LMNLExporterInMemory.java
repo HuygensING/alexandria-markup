@@ -21,20 +21,14 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.data_model.Limen;
 import nl.knaw.huygens.alexandria.data_model.Markup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Created by bramb on 07/02/2017.

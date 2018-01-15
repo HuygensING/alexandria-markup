@@ -21,34 +21,18 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.awt.Color;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import nl.knaw.huygens.alexandria.data_model.*;
+import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.data_model.IndexPoint;
-import nl.knaw.huygens.alexandria.data_model.KdTree;
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.Markup;
-import nl.knaw.huygens.alexandria.data_model.NodeRangeIndexInMemory;
-import nl.knaw.huygens.alexandria.data_model.TextNode;
+import java.awt.*;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class LaTeXExporterInMemory {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporterInMemory.class);

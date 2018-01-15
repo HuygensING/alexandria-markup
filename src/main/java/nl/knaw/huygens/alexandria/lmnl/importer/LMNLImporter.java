@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
+import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.*;
@@ -38,8 +39,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.joining;
 
 public class LMNLImporter {
   static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
@@ -470,7 +469,7 @@ public class LMNLImporter {
           if (markupsToJoin.containsKey(key)) {
             TAGMarkup originalMarkup = markupsToJoin.get(key);
             markup.getMarkup().getAnnotationIds().remove(annotation.getId());
-            document.joinMarkup(originalMarkup,markup);
+            document.joinMarkup(originalMarkup, markup);
             markupIdsToRemove.add(markup.getId());
           } else {
             markupsToJoin.put(key, markup.getMarkup());
@@ -501,6 +500,5 @@ public class LMNLImporter {
   private static Long update(TAGObject tagObject) {
     return tagStore.persist(tagObject);
   }
-
 
 }

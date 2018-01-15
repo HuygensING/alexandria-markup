@@ -21,7 +21,7 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 
-import java.awt.Color;
+import java.awt.*;
 
 public class ColorUtil {
 
