@@ -20,13 +20,14 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import static java.util.Arrays.asList;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGViewFactoryTest extends AlexandriaBaseStoreTest {
   private final TAGViewFactory tagViewFactory = new TAGViewFactory(store);
@@ -49,6 +50,28 @@ public class TAGViewFactoryTest extends AlexandriaBaseStoreTest {
 
     String json = "{'exclude':['verse','l']}".replace("'", "\"");
     TAGView view = tagViewFactory.fromJsonString(json);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+
+  @Test
+  public void fromDefinitionWithInclusion() {
+    Set<String> included = new HashSet<>(asList("chapter", "p"));
+    TAGView expected = new TAGView(store).setMarkupToInclude(included);
+
+    TAGViewDefinition def = new TAGViewDefinition().setInclude(included);
+    TAGView view = tagViewFactory.fromDefinition(def);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+
+  @Test
+  public void fromDefinitionWithExclusion() {
+    Set<String> excluded = new HashSet<>(asList("verse", "l"));
+    TAGView expected = new TAGView(store).setMarkupToExclude(excluded);
+
+    TAGViewDefinition def = new TAGViewDefinition().setExclude(excluded);
+    TAGView view = tagViewFactory.fromDefinition(def);
 
     assertThat(view).isEqualToComparingFieldByField(expected);
   }

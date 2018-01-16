@@ -20,18 +20,23 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import static java.util.stream.Collectors.toSet;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import javax.json.*;
 import java.io.StringReader;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
+
 public class TAGViewFactory {
   private final TAGStore store;
 
   public TAGViewFactory(TAGStore store) {
     this.store = store;
+  }
+
+  public TAGView fromDefinition(TAGViewDefinition definition) {
+    return createTAGView(definition.getInclude(), definition.getExclude());
   }
 
   public TAGView fromJsonString(String json) {
@@ -43,17 +48,28 @@ public class TAGViewFactory {
   }
 
   private TAGView toTagView(JsonObject jsonObject) {
-    TAGView tagView = new TAGView(store);
-
     JsonArray includeArray = jsonObject.getJsonArray("include");
+    JsonArray excludeArray = jsonObject.getJsonArray("exclude");
+    Set<String> include = null;
+    Set<String> exclude = null;
+
     if (includeArray != null) {
-      Set<String> include = getMarkupTags(includeArray);
-      tagView.setMarkupToInclude(include);
+      include = getMarkupTags(includeArray);
     }
 
-    JsonArray excludeArray = jsonObject.getJsonArray("exclude");
     if (excludeArray != null) {
-      Set<String> exclude = getMarkupTags(excludeArray);
+      exclude = getMarkupTags(excludeArray);
+    }
+
+    return createTAGView(include, exclude);
+  }
+
+  private TAGView createTAGView(Set<String> include, Set<String> exclude) {
+    TAGView tagView = new TAGView(store);
+    if (include != null && !include.isEmpty()) {
+      tagView.setMarkupToInclude(include);
+    }
+    if (exclude != null && !exclude.isEmpty()) {
       tagView.setMarkupToExclude(exclude);
     }
     return tagView;

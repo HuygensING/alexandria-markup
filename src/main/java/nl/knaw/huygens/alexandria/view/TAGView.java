@@ -20,14 +20,15 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import static nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*;
 
 public class TAGView {
   private final TAGStore store;
@@ -79,8 +80,15 @@ public class TAGView {
     return this;
   }
 
+  public TAGViewDefinition getDefinition(){
+    return new TAGViewDefinition()
+        .setInclude(markupToInclude)
+        .setExclude(markupToExclude);
+  }
+
   private String getTag(Long markupId) {
     return store.getMarkupWrapper(markupId).getTag();
   }
+
 
 }
