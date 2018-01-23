@@ -21,9 +21,9 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  */
 
 
-public class Position {
-  Integer offset = 0;
-  Integer length = 0;
+class Position {
+  private Integer offset = 0;
+  private Integer length = 0;
 
   public Position(int offset, int length) {
     this.offset = offset;

@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
+
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
@@ -29,14 +30,14 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
 import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 
 public class TAGQLQueryHandler {
 
-  private Document document;
+  private final Document document;
 
   public TAGQLQueryHandler(Document document) {
     this.document = document;
@@ -65,7 +66,7 @@ public class TAGQLQueryHandler {
     return result;
   }
 
-  TAGQLResult execute(TAGQLStatement statement) {
+  private TAGQLResult execute(TAGQLStatement statement) {
     return statement.getLimenProcessor()//
         .apply(document.value());
   }

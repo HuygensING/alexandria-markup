@@ -20,6 +20,17 @@ package nl.knaw.huygens.alexandria.lmnl.query;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLBaseListener;
+import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.*;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLSelectStatement;
+import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,44 +39,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLBaseListener;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.AnnotationValuePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.CombiningExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.EqualityComparisonExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ExprContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ExtendedIdentifierContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.JoiningExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.NamePartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.ParameterizedMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.PartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SelectStmtContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SelectVariableContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SimpleMarkupSourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.SourceContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.TextContainsExpressionContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.TextPartContext;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser.WhereClauseContext;
-import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLSelectStatement;
-import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
-
-public class TAGQLQueryListener extends TAGQLBaseListener {
+class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private List<TAGQLStatement> statements = new ArrayList<>();
+  private final List<TAGQLStatement> statements = new ArrayList<>();
 
   public List<TAGQLStatement> getStatements() {
     return statements;
   }
 
-  public String toText(Markup markup) {
+  private String toText(Markup markup) {
     StringBuilder textBuilder = new StringBuilder();
     markup.textNodes.forEach(textNode -> textBuilder.append(textNode.getContent()));
     return textBuilder.toString();
@@ -107,11 +90,10 @@ public class TAGQLQueryListener extends TAGQLBaseListener {
       List<Annotation> annotationsToFilter = tr.getAnnotations();
       while (depth < annotationTags.size() - 1) {
         String filterTag = annotationTags.get(depth);
-        List<Annotation> newList = annotationsToFilter.stream()//
+        annotationsToFilter = annotationsToFilter.stream()//
             .filter(hasTag(filterTag))//
             .flatMap(a -> a.annotations().stream())//
             .collect(Collectors.toList());
-        annotationsToFilter = newList;
         depth += 1;
       }
       String filterTag = annotationTags.get(depth);

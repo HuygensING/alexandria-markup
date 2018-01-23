@@ -20,89 +20,108 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.base.Preconditions;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Annotation;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
+import java.util.*;
 
 /**
  * Created by bramb on 07/02/2017.
  */
 public class LMNLExporter {
   private static Logger LOG = LoggerFactory.getLogger(LMNLExporter.class);
-  boolean useShorthand = false;
+
+  private boolean useShorthand = false;
+  private final TAGStore store;
+  private final TAGView view;
+
+  public LMNLExporter(TAGStore store, TAGView view) {
+    Preconditions.checkNotNull(store);
+    this.store = store;
+    this.view = view;
+  }
+
+  public LMNLExporter(TAGStore store) {
+    Preconditions.checkNotNull(store);
+    this.store = store;
+    this.view = new TAGViewFactory(store).getDefaultView();
+  }
 
   public LMNLExporter useShorthand() {
     useShorthand = true;
     return this;
   }
 
-  public String toLMNL(Document document) {
+  public String toLMNL(DocumentWrapper document) {
     StringBuilder lmnlBuilder = new StringBuilder();
-    Limen limen = document.value();
-    appendLimen(lmnlBuilder, limen);
+    store.runInTransaction(() -> appendLimen(lmnlBuilder, document));
     // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
-  private void appendLimen(StringBuilder lmnlBuilder, Limen limen) {
-    if (limen != null) {
-      Deque<Markup> openMarkups = new ArrayDeque<>();
-      limen.getTextNodeIterator().forEachRemaining(tn -> {
-        Set<Markup> markups = limen.getMarkups(tn);
+  private void appendLimen(StringBuilder lmnlBuilder, DocumentWrapper document) {
+    if (document != null) {
+      Deque<Long> openMarkupIds = new ArrayDeque<>();
+      Map<Long, StringBuilder> openTags = new HashMap<>();
+      Map<Long, StringBuilder> closeTags = new HashMap<>();
+      document.getTextNodeStream().forEach(tn -> {
+        Set<Long> markupIds = new HashSet<>();
+        document.getMarkupStreamForTextNode(tn).forEach(mw -> {
+          Long id = mw.getId();
+          markupIds.add(id);
+          openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
+          closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+        });
+        Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
-        List<Markup> toClose = new ArrayList<>();
-        toClose.addAll(openMarkups);
-        toClose.removeAll(markups);
+        List<Long> toClose = new ArrayList<>(openMarkupIds);
+        toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
-        toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
+        toClose.forEach(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
 
-        List<Markup> toOpen = new ArrayList<>();
-        toOpen.addAll(markups);
-        toOpen.removeAll(openMarkups);
-        toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
+        List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
+        toOpen.removeAll(openMarkupIds);
+        toOpen.forEach(markupId -> lmnlBuilder.append(openTags.get(markupId)));
 
-        openMarkups.removeAll(toClose);
-        openMarkups.addAll(toOpen);
-        lmnlBuilder.append(tn.getContent());
+        openMarkupIds.removeAll(toClose);
+        openMarkupIds.addAll(toOpen);
+        lmnlBuilder.append(tn.getText());
       });
-      openMarkups.descendingIterator()//
-          .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
+      openMarkupIds.descendingIterator()//
+          .forEachRemaining(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
     }
+
   }
 
-  private StringBuilder toCloseTag(Markup markup) {
+  private StringBuilder toCloseTag(MarkupWrapper markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(Markup markup) {
+  private StringBuilder toOpenTag(MarkupWrapper markup) {
     StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
-    markup.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
     return markup.isAnonymous()//
         ? tagBuilder.append("]")//
         : tagBuilder.append("}");
   }
 
-  public StringBuilder toLMNL(Annotation annotation) {
+  public StringBuilder toLMNL(AnnotationWrapper annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotations().forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
-    Limen limen = annotation.value();
-    if (limen.hasTextNodes()) {
+    annotation.getAnnotationStream()
+        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
+    DocumentWrapper document = annotation.getDocument();
+    if (document.hasTextNodes()) {
       annotationBuilder.append("}");
-      appendLimen(annotationBuilder, limen);
+      appendLimen(annotationBuilder, document);
       if (useShorthand) {
         annotationBuilder.append("{]");
       } else {

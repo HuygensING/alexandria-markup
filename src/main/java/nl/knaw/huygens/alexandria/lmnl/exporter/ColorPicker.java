@@ -24,9 +24,9 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 /**
  * Created by bramb on 24/02/2017.
  */
-public class ColorPicker {
+class ColorPicker {
   private final String[] colors;
-  int i = 0;
+  private int i = 0;
 
   public ColorPicker(String... colors) {
     this.colors = colors;

@@ -20,22 +20,19 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+class LMNLModifier {
+  private final Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
 
-import nl.knaw.huygens.alexandria.lmnl.data_model.Limen;
-import nl.knaw.huygens.alexandria.lmnl.data_model.TextNode;
-import nl.knaw.huygens.alexandria.lmnl.data_model.Markup;
-
-public class LMNLModifier {
-
-  Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
-
-  private Limen limen;
+  private final Limen limen;
 
   public LMNLModifier(Limen limen) {
     this.limen = limen;
@@ -101,7 +98,7 @@ public class LMNLModifier {
 
           } else {
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
             throw new RuntimeException("tail=empty!");
           }
         }
@@ -151,7 +148,7 @@ public class LMNLModifier {
             limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
 
           } else {
-            // limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
             throw new RuntimeException("head=empty!");
           }
@@ -206,33 +203,33 @@ public class LMNLModifier {
     private int textNodeIndex = 0;
     private int offset = 0;
 
-    public TextNodeCursor(Limen limen) {
+    TextNodeCursor(Limen limen) {
       currentTextNode = limen.textNodeList.get(0);
     }
 
-    public void advance() {
+    void advance() {
       offset += getCurrentTextLength();
       currentTextNode = currentTextNode.getNextTextNode();
       textNodeIndex++;
     }
 
-    public TextNode getCurrentTextNode() {
+    TextNode getCurrentTextNode() {
       return currentTextNode;
     }
 
-    public String getCurrentText() {
+    String getCurrentText() {
       return currentTextNode.getContent();
     }
 
-    public int getCurrentTextLength() {
+    int getCurrentTextLength() {
       return getCurrentText().length();
     }
 
-    public int getTextNodeIndex() {
+    int getTextNodeIndex() {
       return textNodeIndex;
     }
 
-    public boolean canAdvance() {
+    boolean canAdvance() {
       return currentTextNode.getNextTextNode() != null;
     }
 
