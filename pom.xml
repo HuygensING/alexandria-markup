@@ -17,22 +17,22 @@
         <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
         <java.version>1.8</java.version>
 
-        <antlr.version>4.7</antlr.version>
+        <antlr.version>4.7.1</antlr.version>
         <antlr4.visitor>true</antlr4.visitor>
         <assertj.version>3.6.1</assertj.version>
         <berkeleydb.version>7.4.5</berkeleydb.version>
-        <commons-io.version>2.5</commons-io.version>
-        <commons-lang3.version>3.5</commons-lang3.version>
-        <freemarker.version>2.3.26-incubating</freemarker.version>
-        <guava.version>23.0</guava.version>
+        <commons-io.version>2.6</commons-io.version>
+        <commons-lang3.version>3.7</commons-lang3.version>
+        <freemarker.version>2.3.27-incubating</freemarker.version>
+        <guava.version>23.6-jre</guava.version>
         <jacoco.version>0.7.9</jacoco.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
         <slf4j-api.version>1.7.25</slf4j-api.version>
 
-        <maven-compiler.version>3.5.1</maven-compiler.version>
-        <maven-jar.version>2.6</maven-jar.version>
-        <maven-license.version>1.8</maven-license.version>
+        <maven-compiler.version>3.7.0</maven-compiler.version>
+        <maven-jar.version>3.0.2</maven-jar.version>
+        <maven-license.version>1.14</maven-license.version>
         <wagon-ssh.version>2.7</wagon-ssh.version>
     </properties>
 
