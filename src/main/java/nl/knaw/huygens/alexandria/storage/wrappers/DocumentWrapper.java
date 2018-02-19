@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.compare.TAGToken;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -34,6 +35,7 @@ public class DocumentWrapper {
 
   private final TAGStore store;
   private final TAGDocument document;
+  private Stream<TAGToken> TAGTokenStream;
 
   public DocumentWrapper(TAGStore store, TAGDocument document) {
     this.store = store;
@@ -172,6 +174,5 @@ public class DocumentWrapper {
   private void update() {
     store.persist(document);
   }
-
 
 }

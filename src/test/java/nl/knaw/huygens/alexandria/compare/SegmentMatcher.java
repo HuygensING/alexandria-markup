@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,21 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import java.util.function.Predicate;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+public class SegmentMatcher implements Predicate<Segment> {
+  private final Score.Type scoreType;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  private SegmentMatcher(Score.Type scoreType) {
+    this.scoreType = scoreType;
+  }
+
+  @Override
+  public boolean test(Segment segment) {
+    return segment.type().equals(scoreType);
+  }
+
+  public static SegmentMatcher sM(Score.Type scoreType) {
+    return new SegmentMatcher(scoreType);
   }
 }

@@ -35,7 +35,7 @@ import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLLexer;
 import nl.knaw.huygens.alexandria.lmnl.grammar.TAGQLParser;
 import nl.knaw.huygens.alexandria.lmnl.tagql.TAGQLStatement;
 
-public class TAGQLQueryHandler {
+class TAGQLQueryHandler {
 
   private final Document document;
 

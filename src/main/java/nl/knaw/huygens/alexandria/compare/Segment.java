@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,28 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import java.util.List;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+class Segment {
+  private final List<TAGToken> segmentTokensA;
+  private final List<TAGToken> segmentTokensB;
+  private final Score.Type type;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  public Segment(List<TAGToken> segmentTokensA, List<TAGToken> segmentTokensB, Score.Type type) {
+    this.segmentTokensA = segmentTokensA;
+    this.segmentTokensB = segmentTokensB;
+    this.type = type;
+  }
+
+  public Score.Type type() {
+    return type;
+  }
+
+  public List<TAGToken> tokensA() {
+    return segmentTokensA;
+  }
+
+  public List<TAGToken> tokensB() {
+    return segmentTokensB;
   }
 }

@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,21 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+import java.util.stream.Stream;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+class Tokenizer {
+  private final DocumentWrapper document;
+
+  public Tokenizer(DocumentWrapper document, TAGView tagView) {
+    this.document = document;
+    TAGView tagView1 = tagView;
+  }
+
+  public Stream<TAGToken> getTAGTokenStream() {
+    return document.getTextNodeStream()//
+        .map(tn -> new TextToken(tn.getText()));
   }
 }

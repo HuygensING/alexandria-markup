@@ -39,7 +39,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TexMECSImporter {
+class TexMECSImporter {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
   private final TAGStore store;
 

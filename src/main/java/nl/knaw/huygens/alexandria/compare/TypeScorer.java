@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,15 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
-
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
-
-  public TexMECSSyntaxError(String message) {
-    super(message);
+public class TypeScorer implements Scorer {
+  @Override
+  public boolean match(TAGToken tokenA, TAGToken tokenB) {
+    boolean punctuationType = (tokenA.content.matches("\\W+") && tokenB.content.matches("\\W+"));
+    boolean contentType = (tokenA.content.matches("\\w+") && tokenB.content.matches("\\w+"));
+//        System.out.println(punctuationType + " " + contentType);
+    if (tokenA instanceof MarkupToken && tokenB instanceof MarkupToken) {
+      return true;
+    }
+    return tokenA instanceof TextToken && tokenB instanceof TextToken && (punctuationType || contentType);
   }
 }
