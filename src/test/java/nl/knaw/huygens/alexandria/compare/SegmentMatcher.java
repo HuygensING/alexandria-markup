@@ -20,15 +20,20 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.Streams.zip;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 public class SegmentMatcher implements Predicate<Segment> {
   private final Score.Type scoreType;
   private TAGTokenContentMatcher[] tokenContentMatchersA;
   private TAGTokenContentMatcher[] tokenContentMatchersB;
+  private List<String> failMessages = new ArrayList<>();
 
   private SegmentMatcher(Score.Type scoreType) {
     this.scoreType = scoreType;
@@ -37,9 +42,32 @@ public class SegmentMatcher implements Predicate<Segment> {
   @Override
   public boolean test(Segment segment) {
     boolean typeCheck = segment.type().equals(scoreType);
+    if (!typeCheck) {
+      failMessages.add(format("Expected segment.type to be '%s', but was '%s'", scoreType, segment.type()));
+    }
     boolean tokenCheckA = zip(stream(tokenContentMatchersA), segment.tokensA().stream(), this::matchTest).allMatch(b -> b);
+    if (!tokenCheckA) {
+      failMessages.add(tokenExpectationFailure("tokensA", segment.tokensA(), tokenContentMatchersA));
+    }
     boolean tokenCheckB = zip(stream(tokenContentMatchersB), segment.tokensB().stream(), this::matchTest).allMatch(b -> b);
+    if (!tokenCheckB) {
+      failMessages.add(tokenExpectationFailure("tokensB", segment.tokensB(), tokenContentMatchersB));
+    }
     return typeCheck && tokenCheckA && tokenCheckB;
+  }
+
+  private String tokenExpectationFailure(String tokensName,//
+                                         List<TAGToken> tagTokens,//
+                                         TAGTokenContentMatcher[] tokenContentMatchers) {
+    return format("Expected segment.%s to match %s, but was %s",//
+        tokensName,//
+        tagTokens.stream()//
+            .map(t -> t.content)//
+            .collect(toList()),//
+        stream(tokenContentMatchers)//
+            .map(TAGTokenContentMatcher::getExpectedContent)//
+            .collect(toList())
+    );
   }
 
   private Boolean matchTest(TAGTokenContentMatcher tagTokenContentMatcher, TAGToken tagToken) {
@@ -58,5 +86,9 @@ public class SegmentMatcher implements Predicate<Segment> {
   public SegmentMatcher tokensB(TAGTokenContentMatcher... tokenContentMatchers) {
     tokenContentMatchersB = tokenContentMatchers;
     return this;
+  }
+
+  public List<String> getFailMessages() {
+    return failMessages;
   }
 }

@@ -36,4 +36,8 @@ public class TAGTokenContentMatcher implements Predicate<TAGToken> {
   public static TAGTokenContentMatcher t(String expectedContent) {
     return new TAGTokenContentMatcher(expectedContent);
   }
+
+  public String getExpectedContent() {
+    return expectedContent;
+  }
 }
