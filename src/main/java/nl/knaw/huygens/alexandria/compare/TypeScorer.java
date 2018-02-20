@@ -21,8 +21,8 @@ package nl.knaw.huygens.alexandria.compare;
  */
 public class TypeScorer implements Scorer {
 
-  public static final String REGEX_NON_WORD_CHARACTERS = "\\W+";
-  public static final String REGEX_WORD_CHARACTERS = "\\w+";
+  private static final String REGEX_NON_WORD_CHARACTERS = "\\W+";
+  private static final String REGEX_WORD_CHARACTERS = "\\w+";
 
   @Override
   public boolean match(TAGToken tokenA, TAGToken tokenB) {

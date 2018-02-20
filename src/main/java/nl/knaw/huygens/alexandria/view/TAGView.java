@@ -96,10 +96,7 @@ public class TAGView {
     if (include.equals(relevanceStyle)) {
       return markupToInclude.contains(tag);
     }
-    if (exclude.equals(relevanceStyle)) {
-      return !markupToExclude.contains(tag);
-    }
-    return false;
+    return exclude.equals(relevanceStyle) && !markupToExclude.contains(tag);
   }
 
 

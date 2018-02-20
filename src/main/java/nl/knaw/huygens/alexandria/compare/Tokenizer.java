@@ -25,7 +25,6 @@ import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
@@ -43,7 +42,9 @@ class Tokenizer {
     List<TAGToken> tokens = new ArrayList<>();
     Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
     document.getTextNodeStream().forEach(tn -> {
-      List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).filter(m->tagView.isIncluded(m)).collect(toList());
+      List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
+          .filter(tagView::isIncluded)//
+          .collect(toList());
 
       List<MarkupWrapper> toClose = new ArrayList<>(openMarkup);
       toClose.removeAll(markups);
@@ -76,9 +77,4 @@ class Tokenizer {
     return tokens;
   }
 
-
-  public Stream<TAGToken> getTAGTokenStream1() {
-    return document.getTextNodeStream()//
-        .map(tn -> new TextToken(tn.getText()));
-  }
 }

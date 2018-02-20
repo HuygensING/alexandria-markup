@@ -21,7 +21,6 @@ package nl.knaw.huygens.alexandria.data_model;
  */
 
 
-import static java.util.stream.Collectors.toSet;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -33,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toSet;
 
 public class NodeRangeIndex {
   private final Logger LOG = LoggerFactory.getLogger(NodeRangeIndex.class);
@@ -59,6 +60,7 @@ public class NodeRangeIndex {
           .filter(document::containsAtLeastHalfOfAllTextNodes)//
           .collect(Collectors.toList());
       invertedMarkupsIndices = markupsToInvert.stream()//
+          .map(MarkupWrapper::getId)//
           .map(markupIndex::get)//
           .collect(Collectors.toSet());
 
