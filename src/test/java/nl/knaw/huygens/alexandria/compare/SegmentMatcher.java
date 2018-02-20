@@ -31,8 +31,8 @@ import static java.util.stream.Collectors.toList;
 
 public class SegmentMatcher implements Predicate<Segment> {
   private final Score.Type scoreType;
-  private TAGTokenContentMatcher[] tokenContentMatchersA;
-  private TAGTokenContentMatcher[] tokenContentMatchersB;
+  private TAGTokenMatcher[] tokenContentMatchersA;
+  private TAGTokenMatcher[] tokenContentMatchersB;
   private List<String> failMessages = new ArrayList<>();
 
   private SegmentMatcher(Score.Type scoreType) {
@@ -58,19 +58,19 @@ public class SegmentMatcher implements Predicate<Segment> {
 
   private String tokenExpectationFailure(String tokensName,//
                                          List<TAGToken> tagTokens,//
-                                         TAGTokenContentMatcher[] tokenContentMatchers) {
+                                         TAGTokenMatcher[] tokenContentMatchers) {
     return format("Expected segment.%s to match %s, but was %s",//
         tokensName,//
         tagTokens.stream()//
             .map(t -> t.content)//
             .collect(toList()),//
         stream(tokenContentMatchers)//
-            .map(TAGTokenContentMatcher::getExpectedContent)//
+            .map(TAGTokenMatcher::getExpectedContent)//
             .collect(toList())
     );
   }
 
-  private Boolean matchTest(TAGTokenContentMatcher tagTokenContentMatcher, TAGToken tagToken) {
+  private Boolean matchTest(TAGTokenMatcher tagTokenContentMatcher, TAGToken tagToken) {
     return tagTokenContentMatcher.test(tagToken);
   }
 
@@ -78,12 +78,12 @@ public class SegmentMatcher implements Predicate<Segment> {
     return new SegmentMatcher(scoreType);
   }
 
-  public SegmentMatcher tokensA(TAGTokenContentMatcher... tokenContentMatchers) {
+  public SegmentMatcher tokensA(TAGTokenMatcher... tokenContentMatchers) {
     tokenContentMatchersA = tokenContentMatchers;
     return this;
   }
 
-  public SegmentMatcher tokensB(TAGTokenContentMatcher... tokenContentMatchers) {
+  public SegmentMatcher tokensB(TAGTokenMatcher... tokenContentMatchers) {
     tokenContentMatchersB = tokenContentMatchers;
     return this;
   }

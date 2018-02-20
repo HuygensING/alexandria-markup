@@ -19,22 +19,35 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import java.util.function.Predicate;
 
-public class TAGTokenContentMatcher implements Predicate<TAGToken> {
+public class TAGTokenMatcher implements Predicate<TAGToken> {
+  private Class<? extends TAGToken> expectedClass;
   private String expectedContent;
 
-  private TAGTokenContentMatcher(String expectedContent) {
+  private TAGTokenMatcher(Class<? extends TAGToken> expectedClass, String expectedContent) {
+    this.expectedClass = expectedClass;
     this.expectedContent = expectedContent;
   }
 
   @Override
   public boolean test(TAGToken tagToken) {
-    return tagToken.content.equals(expectedContent);
+    return
+        tagToken.getClass().equals(expectedClass) //
+            && tagToken.content.equals(expectedContent);
   }
 
-  public static TAGTokenContentMatcher t(String expectedContent) {
-    return new TAGTokenContentMatcher(expectedContent);
+  public static TAGTokenMatcher text(String expectedContent) {
+    return new TAGTokenMatcher(TextToken.class, expectedContent);
+  }
+
+  public static TAGTokenMatcher markupOpen(String expectedContent) {
+    return new TAGTokenMatcher(MarkupOpenToken.class, expectedContent);
+  }
+
+  public static TAGTokenMatcher markupClose(String expectedContent) {
+    return new TAGTokenMatcher(MarkupCloseToken.class, expectedContent);
   }
 
   public String getExpectedContent() {

@@ -35,7 +35,9 @@ import static nl.knaw.huygens.alexandria.compare.Score.Type.aligned;
 import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
 import static nl.knaw.huygens.alexandria.compare.SegmentAssert.assertThat;
 import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
-import static nl.knaw.huygens.alexandria.compare.TAGTokenContentMatcher.t;
+import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.markupClose;
+import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.markupOpen;
+import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.text;
 
 public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
@@ -53,13 +55,13 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       ViewAligner viewAligner = new ViewAligner(scorer);
       List<Segment> segments = viewAligner.align(tokens1, tokens2);
 
-      SegmentMatcher expected0 = sM(aligned).tokensA(t("s")).tokensB(t("s"));
+      SegmentMatcher expected0 = sM(aligned).tokensA(markupOpen("s")).tokensB(markupOpen("s"));
       assertThat(segments.get(0)).matches(expected0);
 
-      SegmentMatcher expected1 = sM(replacement).tokensA(t("a")).tokensB(t("c"));
+      SegmentMatcher expected1 = sM(replacement).tokensA(text("a")).tokensB(text("c"));
       assertThat(segments.get(1)).matches(expected1);
 
-      SegmentMatcher expected2 = sM(aligned).tokensA(t("s")).tokensB(t("s"));
+      SegmentMatcher expected2 = sM(aligned).tokensA(markupClose("s")).tokensB(markupClose("s"));
       assertThat(segments.get(2)).matches(expected2);
     });
   }
