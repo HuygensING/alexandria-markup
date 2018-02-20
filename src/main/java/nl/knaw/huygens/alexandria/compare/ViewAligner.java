@@ -67,7 +67,7 @@ class ViewAligner {
       Score max = Collections.max(Arrays.asList(upperLeft, left, upper), Comparator.comparingInt(score -> score.globalScore));
       this.cells[y][x] = max;
     }));
-    Segmenter segmenter = new Segmenter();
+    Segmenter segmenter = new ContentSegmenter();
     return segmenter.calculateSegmentation(tokensA, tokensB, cells);
   }
 }

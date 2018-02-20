@@ -19,13 +19,5 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-
-public interface Segmenter {
-
-  List<Segment> calculateSegmentation(List<TAGToken> tokensA,//
-                                      List<TAGToken> tokensB,//
-                                      Score[][] editTable);
-
+public class TypeSegmenter extends AbstractSegmenter {
 }
