@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.view;
  */
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -80,7 +81,7 @@ public class TAGView {
     return this;
   }
 
-  public TAGViewDefinition getDefinition(){
+  public TAGViewDefinition getDefinition() {
     return new TAGViewDefinition()
         .setInclude(markupToInclude)
         .setExclude(markupToExclude);
@@ -88,6 +89,17 @@ public class TAGView {
 
   private String getTag(Long markupId) {
     return store.getMarkupWrapper(markupId).getTag();
+  }
+
+  public boolean isIncluded(MarkupWrapper markupWrapper) {
+    String tag = markupWrapper.getTag();
+    if (include.equals(relevanceStyle)) {
+      return markupToInclude.contains(tag);
+    }
+    if (exclude.equals(relevanceStyle)) {
+      return !markupToExclude.contains(tag);
+    }
+    return false;
   }
 
 

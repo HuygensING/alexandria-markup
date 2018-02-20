@@ -19,15 +19,11 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 class ViewAligner {
 
@@ -38,10 +34,7 @@ class ViewAligner {
     this.scorer = scorer;
   }
 
-  public List<Segment> align(Stream<TAGToken> tokenStream1, Stream<TAGToken> tokenStream2) {
-    List<TAGToken> tokensA = tokenStream1.collect(toList());
-    List<TAGToken> tokensB = tokenStream2.collect(toList());
-
+  public List<Segment> align(List<TAGToken> tokensA, List<TAGToken> tokensB) {
     // init cells and scorer
     this.cells = new Score[tokensB.size() + 1][tokensA.size() + 1];
 

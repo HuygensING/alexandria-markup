@@ -20,10 +20,10 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
 
 class Segmenter {
   private List<Segment> superwitness;
@@ -45,7 +45,7 @@ class Segmenter {
       // stateChange if the type of the lastCell is not the same as the currentCell
       Boolean stateChange = lastCell.match != currentCell.match;
       if (stateChange) {
-        System.out.println(lastCell.match + ", " + currentCell.match);
+//        System.out.println(lastCell.match + ", " + currentCell.match);
         addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY);
         // System.out.println(String.format("%d %d %d %d", lastX, lastY, x, y));
         // change the pointer

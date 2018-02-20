@@ -19,20 +19,65 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
+import java.util.*;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 class Tokenizer {
   private final DocumentWrapper document;
+  private final TAGView tagView;
 
   public Tokenizer(DocumentWrapper document, TAGView tagView) {
     this.document = document;
-    TAGView tagView1 = tagView;
+    this.tagView = tagView;
   }
 
-  public Stream<TAGToken> getTAGTokenStream() {
+  public List<TAGToken> getTAGTokenStream() {
+    List<TAGToken> tokens = new ArrayList<>();
+    Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
+    document.getTextNodeStream().forEach(tn -> {
+      List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).filter(m->tagView.isIncluded(m)).collect(toList());
+
+      List<MarkupWrapper> toClose = new ArrayList<>(openMarkup);
+      toClose.removeAll(markups);
+      Collections.reverse(toClose);
+
+      List<MarkupWrapper> toOpen = new ArrayList<>(markups);
+      toOpen.removeAll(openMarkup);
+
+      openMarkup.removeAll(toClose);
+      openMarkup.addAll(toOpen);
+
+      toClose.stream()//
+          .map(MarkupWrapper::getTag)//
+          .map(MarkupCloseToken::new)//
+          .forEach(tokens::add);
+
+      toOpen.stream()//
+          .map(MarkupWrapper::getTag)//
+          .map(MarkupOpenToken::new)//
+          .forEach(tokens::add);
+
+      tokens.add(new TextToken(tn.getText()));
+
+    });
+    stream(openMarkup.descendingIterator())//
+        .map(MarkupWrapper::getTag)//
+        .map(MarkupCloseToken::new)//
+        .forEach(tokens::add);
+
+    return tokens;
+  }
+
+
+  public Stream<TAGToken> getTAGTokenStream1() {
     return document.getTextNodeStream()//
         .map(tn -> new TextToken(tn.getText()));
   }

@@ -20,14 +20,30 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class TypeScorer implements Scorer {
+
+  public static final String REGEX_NON_WORD_CHARACTERS = "\\W+";
+  public static final String REGEX_WORD_CHARACTERS = "\\w+";
+
   @Override
   public boolean match(TAGToken tokenA, TAGToken tokenB) {
-    boolean punctuationType = (tokenA.content.matches("\\W+") && tokenB.content.matches("\\W+"));
-    boolean contentType = (tokenA.content.matches("\\w+") && tokenB.content.matches("\\w+"));
-//        System.out.println(punctuationType + " " + contentType);
-    if (tokenA instanceof MarkupToken && tokenB instanceof MarkupToken) {
+    if (tokenA instanceof MarkupOpenToken && tokenB instanceof MarkupOpenToken//
+        || tokenA instanceof MarkupCloseToken && tokenB instanceof MarkupCloseToken) {
       return true;
     }
-    return tokenA instanceof TextToken && tokenB instanceof TextToken && (punctuationType || contentType);
+    boolean bothContainWordCharacters = (containsOnlyWordCharacters(tokenA)//
+        && containsOnlyWordCharacters(tokenB));
+    boolean bothContainPunctuation = (containsOnlyNonWordCharacters(tokenA)//
+        && containsOnlyNonWordCharacters(tokenB));
+    return tokenA instanceof TextToken//
+        && tokenB instanceof TextToken//
+        && (bothContainPunctuation || bothContainWordCharacters);
+  }
+
+  private boolean containsOnlyWordCharacters(TAGToken tokenA) {
+    return tokenA.content.matches(REGEX_WORD_CHARACTERS);
+  }
+
+  private boolean containsOnlyNonWordCharacters(TAGToken tokenA) {
+    return tokenA.content.matches(REGEX_NON_WORD_CHARACTERS);
   }
 }

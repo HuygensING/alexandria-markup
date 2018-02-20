@@ -19,21 +19,21 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import static java.util.Arrays.asList;
+
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
-import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+
+import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
+import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
@@ -45,13 +45,13 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       DocumentWrapper document2 = importer.importLMNL("[TEI}[s}c{s]{TEI]");
       Set<String> tei = new HashSet<>(Collections.singletonList("TEI"));
       TAGView ignoreTEI = new TAGView(store).setMarkupToExclude(tei);
-      Stream<TAGToken> tokenStream1 = new Tokenizer(document1,ignoreTEI).getTAGTokenStream();
-      Stream<TAGToken> tokenStream2 = new Tokenizer(document2,ignoreTEI).getTAGTokenStream();
+      List<TAGToken> tokens1 = new Tokenizer(document1, ignoreTEI).getTAGTokenStream();
+      List<TAGToken> tokens2 = new Tokenizer(document2, ignoreTEI).getTAGTokenStream();
       Scorer scorer = new ContentScorer();
       ViewAligner viewAligner = new ViewAligner(scorer);
-      List<Segment> segments = viewAligner.align(tokenStream1, tokenStream2);
+      List<Segment> segments = viewAligner.align(tokens1, tokens2);
       SegmentMatcher expected = sM(replacement);
-      assertThat(segments.get(0)).matches(expected, "is replacement");
+      assertThat(segments.get(1)).matches(expected, "is replacement");
     });
   }
 

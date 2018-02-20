@@ -19,14 +19,14 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-class MarkupToken extends TAGToken {
-  public MarkupToken(String tag) {
+class MarkupOpenToken extends TAGToken {
+  public MarkupOpenToken(String tag) {
     super(tag);
   }
 
   @Override
   public String toString() {
-    return content;
+    return "[" + content + "}";
   }
 
 }

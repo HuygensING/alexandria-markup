@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.KdTree;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
@@ -40,6 +39,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
@@ -112,7 +113,8 @@ public class LaTeXExporter {
       document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         textNodeIndices.put(tn, i);
-        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
+        Set<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
+            .collect(Collectors.toSet());
 
         List<MarkupWrapper> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
