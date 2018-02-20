@@ -33,6 +33,7 @@ import java.util.Set;
 
 import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
 import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
+import static nl.knaw.huygens.alexandria.compare.TAGTokenContentMatcher.t;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ViewAlignerTest extends AlexandriaBaseStoreTest {
@@ -50,8 +51,8 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       Scorer scorer = new ContentScorer();
       ViewAligner viewAligner = new ViewAligner(scorer);
       List<Segment> segments = viewAligner.align(tokens1, tokens2);
-      SegmentMatcher expected = sM(replacement);
-      assertThat(segments.get(1)).matches(expected, "is replacement");
+      SegmentMatcher expected1 = sM(replacement).tokensA(t("a")).tokensB(t("c"));
+      assertThat(segments.get(1)).matches(expected1, "is replacement");
     });
   }
 

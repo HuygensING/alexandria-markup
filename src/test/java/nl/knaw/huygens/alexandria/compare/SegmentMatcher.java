@@ -19,10 +19,16 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import java.util.function.Predicate;
+
+import static com.google.common.collect.Streams.zip;
+import static java.util.Arrays.stream;
 
 public class SegmentMatcher implements Predicate<Segment> {
   private final Score.Type scoreType;
+  private TAGTokenContentMatcher[] tokenContentMatchersA;
+  private TAGTokenContentMatcher[] tokenContentMatchersB;
 
   private SegmentMatcher(Score.Type scoreType) {
     this.scoreType = scoreType;
@@ -30,10 +36,27 @@ public class SegmentMatcher implements Predicate<Segment> {
 
   @Override
   public boolean test(Segment segment) {
-    return segment.type().equals(scoreType);
+    boolean typeCheck = segment.type().equals(scoreType);
+    boolean tokenCheckA = zip(stream(tokenContentMatchersA), segment.tokensA().stream(), this::matchTest).allMatch(b -> b);
+    boolean tokenCheckB = zip(stream(tokenContentMatchersB), segment.tokensB().stream(), this::matchTest).allMatch(b -> b);
+    return typeCheck && tokenCheckA && tokenCheckB;
   }
 
-  public static SegmentMatcher sM(Score.Type scoreType) {
+  private Boolean matchTest(TAGTokenContentMatcher tagTokenContentMatcher, TAGToken tagToken) {
+    return tagTokenContentMatcher.test(tagToken);
+  }
+
+  static SegmentMatcher sM(Score.Type scoreType) {
     return new SegmentMatcher(scoreType);
+  }
+
+  public SegmentMatcher tokensA(TAGTokenContentMatcher... tokenContentMatchers) {
+    tokenContentMatchersA = tokenContentMatchers;
+    return this;
+  }
+
+  public SegmentMatcher tokensB(TAGTokenContentMatcher... tokenContentMatchers) {
+    tokenContentMatchersB = tokenContentMatchers;
+    return this;
   }
 }
