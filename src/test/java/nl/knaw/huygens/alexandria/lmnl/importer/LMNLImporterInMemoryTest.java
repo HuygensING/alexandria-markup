@@ -26,9 +26,6 @@ import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
 import org.apache.commons.io.FileUtils;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +37,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
   private final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemoryTest.class);

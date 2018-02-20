@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.*;
@@ -39,6 +38,8 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class LMNLImporter {
   private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
