@@ -104,8 +104,6 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
 
     TAGComparator comparator = compare(originText, editedText);
 
-    assertThat(comparator.getDiffLines()).contains();
-    assertThat(comparator.getDiffLines()).contains();
     List<String> expected = new ArrayList<>(asList(//
         "-[quote}",//
         "+[s}",//
