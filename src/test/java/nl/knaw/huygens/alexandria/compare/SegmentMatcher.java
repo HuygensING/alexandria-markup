@@ -33,7 +33,7 @@ public class SegmentMatcher implements Predicate<Segment> {
   private final Score.Type scoreType;
   private TAGTokenMatcher[] tokenContentMatchersA;
   private TAGTokenMatcher[] tokenContentMatchersB;
-  private List<String> failMessages = new ArrayList<>();
+  private final List<String> failMessages = new ArrayList<>();
 
   private SegmentMatcher(Score.Type scoreType) {
     this.scoreType = scoreType;

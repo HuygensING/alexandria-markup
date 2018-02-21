@@ -38,7 +38,7 @@ class Tokenizer {
     this.tagView = tagView;
   }
 
-  public List<TAGToken> getTAGTokenStream() {
+  public List<TAGToken> getTAGTokens() {
     List<TAGToken> tokens = new ArrayList<>();
     Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
     document.getTextNodeStream().forEach(tn -> {

@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 import java.util.List;
 
-public interface Segmenter {
+interface Segmenter {
 
   List<Segment> calculateSegmentation(List<TAGToken> tokensA,//
                                       List<TAGToken> tokensB,//

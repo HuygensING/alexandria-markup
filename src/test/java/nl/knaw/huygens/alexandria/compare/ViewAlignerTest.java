@@ -20,7 +20,12 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import static nl.knaw.huygens.alexandria.compare.Score.Type.aligned;
+import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
+import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
+import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.*;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
@@ -30,14 +35,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static nl.knaw.huygens.alexandria.compare.Score.Type.aligned;
-import static nl.knaw.huygens.alexandria.compare.Score.Type.replacement;
-import static nl.knaw.huygens.alexandria.compare.SegmentAssert.assertThat;
-import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
-import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.markupClose;
-import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.markupOpen;
-import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.text;
 
 public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
@@ -49,8 +46,8 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       DocumentWrapper document2 = importer.importLMNL("[TEI}[s}c{s]{TEI]");
       Set<String> tei = new HashSet<>(Collections.singletonList("TEI"));
       TAGView ignoreTEI = new TAGView(store).setMarkupToExclude(tei);
-      List<TAGToken> tokens1 = new Tokenizer(document1, ignoreTEI).getTAGTokenStream();
-      List<TAGToken> tokens2 = new Tokenizer(document2, ignoreTEI).getTAGTokenStream();
+      List<TAGToken> tokens1 = new Tokenizer(document1, ignoreTEI).getTAGTokens();
+      List<TAGToken> tokens2 = new Tokenizer(document2, ignoreTEI).getTAGTokens();
       Scorer scorer = new ContentScorer();
       ViewAligner viewAligner = new ViewAligner(scorer);
       List<Segment> segments = viewAligner.align(tokens1, tokens2);

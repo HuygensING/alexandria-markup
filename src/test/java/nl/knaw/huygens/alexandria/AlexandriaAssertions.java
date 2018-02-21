@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.compare;
+package nl.knaw.huygens.alexandria;
 
 /*-
  * #%L
@@ -19,28 +19,20 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import java.util.List;
+import nl.knaw.huygens.alexandria.compare.Segment;
+import nl.knaw.huygens.alexandria.compare.SegmentAssert;
+import nl.knaw.huygens.alexandria.compare.TAGComparator;
+import nl.knaw.huygens.alexandria.compare.TAGComparatorAssert;
+import org.assertj.core.api.Assertions;
 
-public class Segment {
-  private final List<TAGToken> segmentTokensA;
-  private final List<TAGToken> segmentTokensB;
-  private final Score.Type type;
+public class AlexandriaAssertions extends Assertions {
 
-  public Segment(List<TAGToken> segmentTokensA, List<TAGToken> segmentTokensB, Score.Type type) {
-    this.segmentTokensA = segmentTokensA;
-    this.segmentTokensB = segmentTokensB;
-    this.type = type;
+  public static TAGComparatorAssert assertThat(TAGComparator actual) {
+    return new TAGComparatorAssert(actual);
   }
 
-  public Score.Type type() {
-    return type;
+  public static SegmentAssert assertThat(Segment actual) {
+    return new SegmentAssert(actual);
   }
 
-  public List<TAGToken> tokensA() {
-    return segmentTokensA;
-  }
-
-  public List<TAGToken> tokensB() {
-    return segmentTokensB;
-  }
 }

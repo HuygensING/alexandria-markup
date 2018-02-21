@@ -19,18 +19,14 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import org.assertj.core.api.AbstractAssert;
 
 import static java.util.stream.Collectors.joining;
+import org.assertj.core.api.AbstractAssert;
 
 public class SegmentAssert extends AbstractAssert<SegmentAssert, Segment> {
 
-  private SegmentAssert(Segment actual) {
+  public SegmentAssert(Segment actual) {
     super(actual, SegmentAssert.class);
-  }
-
-  public static SegmentAssert assertThat(Segment actual) {
-    return new SegmentAssert(actual);
   }
 
   public SegmentAssert matches(SegmentMatcher segmentMatcher) {

@@ -19,28 +19,24 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+import org.assertj.core.api.AbstractAssert;
+
 import java.util.List;
 
-public class Segment {
-  private final List<TAGToken> segmentTokensA;
-  private final List<TAGToken> segmentTokensB;
-  private final Score.Type type;
+public class TAGComparatorAssert extends AbstractAssert<TAGComparatorAssert, TAGComparator> {
 
-  public Segment(List<TAGToken> segmentTokensA, List<TAGToken> segmentTokensB, Score.Type type) {
-    this.segmentTokensA = segmentTokensA;
-    this.segmentTokensB = segmentTokensB;
-    this.type = type;
+  public TAGComparatorAssert(TAGComparator actual) {
+    super(actual, TAGComparatorAssert.class);
   }
 
-  public Score.Type type() {
-    return type;
-  }
+  public TAGComparatorAssert hasFoundNoDifference() {
+    List<String> diffLines = actual.getDiffLines();
+    if (!diffLines.isEmpty()) {
+      failWithMessage("Expected there to be no differences, but found diff lines: %n%s",//
+          diffLines.stream().collect(joining("\n")));
+    }
+    return this;
 
-  public List<TAGToken> tokensA() {
-    return segmentTokensA;
-  }
-
-  public List<TAGToken> tokensB() {
-    return segmentTokensB;
   }
 }

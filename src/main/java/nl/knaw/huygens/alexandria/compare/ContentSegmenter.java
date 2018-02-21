@@ -19,5 +19,5 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-public class ContentSegmenter extends AbstractSegmenter {
+class ContentSegmenter extends AbstractSegmenter {
 }

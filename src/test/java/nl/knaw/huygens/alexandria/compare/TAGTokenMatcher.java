@@ -23,8 +23,8 @@ package nl.knaw.huygens.alexandria.compare;
 import java.util.function.Predicate;
 
 public class TAGTokenMatcher implements Predicate<TAGToken> {
-  private Class<? extends TAGToken> expectedClass;
-  private String expectedContent;
+  private final Class<? extends TAGToken> expectedClass;
+  private final String expectedContent;
 
   private TAGTokenMatcher(Class<? extends TAGToken> expectedClass, String expectedContent) {
     this.expectedClass = expectedClass;
