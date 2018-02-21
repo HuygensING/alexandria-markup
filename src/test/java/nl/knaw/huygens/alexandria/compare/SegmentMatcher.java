@@ -61,12 +61,12 @@ public class SegmentMatcher implements Predicate<Segment> {
                                          TAGTokenMatcher[] tokenContentMatchers) {
     return format("Expected segment.%s to match %s, but was %s",//
         tokensName,//
-        tagTokens.stream()//
-            .map(t -> t.content)//
-            .collect(toList()),//
         stream(tokenContentMatchers)//
             .map(TAGTokenMatcher::getExpectedContent)//
-            .collect(toList())
+            .collect(toList()),
+        tagTokens.stream()//
+            .map(t -> t.content)//
+            .collect(toList())//
     );
   }
 

@@ -69,7 +69,6 @@ public class TAGComparator {
     }
   }
 
-
   private void handleOmission(Segment segment) {
     String omissionLine = toLine(segment.tokensA());
     diffLines.add("-" + omissionLine);
