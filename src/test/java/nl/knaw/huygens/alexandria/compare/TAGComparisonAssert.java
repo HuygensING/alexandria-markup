@@ -24,13 +24,13 @@ import org.assertj.core.api.AbstractAssert;
 
 import java.util.List;
 
-public class TAGComparatorAssert extends AbstractAssert<TAGComparatorAssert, TAGComparator> {
+public class TAGComparisonAssert extends AbstractAssert<TAGComparisonAssert, TAGComparison> {
 
-  public TAGComparatorAssert(TAGComparator actual) {
-    super(actual, TAGComparatorAssert.class);
+  public TAGComparisonAssert(TAGComparison actual) {
+    super(actual, TAGComparisonAssert.class);
   }
 
-  public TAGComparatorAssert hasFoundNoDifference() {
+  public TAGComparisonAssert hasFoundNoDifference() {
     List<String> diffLines = actual.getDiffLines();
     if (!diffLines.isEmpty()) {
       failWithMessage("Expected there to be no differences, but found diff lines: %n%s",//

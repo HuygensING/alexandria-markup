@@ -27,14 +27,10 @@ import nl.knaw.huygens.alexandria.view.TAGView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TAGComparator {
+public class TAGComparison {
   private final List<String> diffLines = new ArrayList<>();
 
-  public List<String> getDiffLines() {
-    return diffLines;
-  }
-
-  public TAGComparator(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
+  public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
     Scorer scorer = new ContentScorer();
     Segmenter segmenter = new ContentSegmenter();
     ViewAligner viewAligner = new ViewAligner(scorer, segmenter);
@@ -69,6 +65,14 @@ public class TAGComparator {
         }
       }
     }
+  }
+
+  public List<String> getDiffLines() {
+    return diffLines;
+  }
+
+  public boolean hasDifferences() {
+    return !diffLines.isEmpty();
   }
 
   private void handleOmission(Segment segment) {

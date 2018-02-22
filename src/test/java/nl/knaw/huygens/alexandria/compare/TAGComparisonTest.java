@@ -36,18 +36,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class TAGComparatorTest extends AlexandriaBaseStoreTest {
+public class TAGComparisonTest extends AlexandriaBaseStoreTest {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TAGComparatorTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
 
   @Test
   public void testNoChanges() {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
     String editedText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
 
-    TAGComparator comparator = compare(originText, editedText);
+    TAGComparison comparison = compare(originText, editedText);
 
-    assertThat(comparator).hasFoundNoDifference();
+    assertThat(comparison).hasFoundNoDifference();
   }
 
   @Test
@@ -55,14 +55,14 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
     String editedText = "[quote}Any sufficiently advanced technology is magic.{quote]";
 
-    TAGComparator comparator = compare(originText, editedText);
+    TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
         " [quote}Any sufficiently advanced technology is ",//
         "-indistinguishable from ",//
         " magic.{quote]"//
     ));
-    assertThat(comparator.getDiffLines()).containsExactlyElementsOf(expected);
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
@@ -70,14 +70,14 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
     String editedText = "[quote}Any sufficiently advanced technology is virtually indistinguishable from magic.{quote]";
 
-    TAGComparator comparator = compare(originText, editedText);
+    TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
         " [quote}Any sufficiently advanced technology is ",//
         "+virtually ",//
         " indistinguishable from magic.{quote]"//
     ));
-    assertThat(comparator.getDiffLines()).containsExactlyElementsOf(expected);
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
@@ -85,7 +85,7 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
     String editedText = "[quote}Any sufficiently advanced code is indistinguishable from magic.{quote]";
 
-    TAGComparator comparator = compare(originText, editedText);
+    TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
         " [quote}Any sufficiently advanced ",//
@@ -93,7 +93,7 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
         "+code ",//
         " is indistinguishable from magic.{quote]"//
     ));
-    assertThat(comparator.getDiffLines()).containsExactlyElementsOf(expected);
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
@@ -101,7 +101,7 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
     String editedText = "[s}Any sufficiently advanced code is indistinguishable from magic.{s]";
 
-    TAGComparator comparator = compare(originText, editedText);
+    TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
         "-[quote}",//
@@ -113,10 +113,10 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
         "-{quote]",//
         "+{s]"//
     ));
-    assertThat(comparator.getDiffLines()).containsExactlyElementsOf(expected);
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  private TAGComparator compare(String originText, String editedText) {
+  private TAGComparison compare(String originText, String editedText) {
     return store.runInTransaction(() -> {
       LMNLImporter importer = new LMNLImporter(store);
       DocumentWrapper original = importer.importLMNL(originText);
@@ -124,12 +124,12 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
       Set<String> none = Collections.EMPTY_SET;
       TAGView onlyQuote = new TAGView(store).setMarkupToExclude(none);
 
-      TAGComparator comparator = new TAGComparator(original, onlyQuote, edited);
-      LOG.info("diffLines = \n{}", comparator.getDiffLines()//
+      TAGComparison comparison = new TAGComparison(original, onlyQuote, edited);
+      LOG.info("diffLines = \n{}", comparison.getDiffLines()//
           .stream()//
           .map(l -> "'" + l + "'")//
           .collect(joining("\n")));
-      return comparator;
+      return comparison;
     });
   }
 }

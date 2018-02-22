@@ -129,6 +129,10 @@ public class TAGStore implements AutoCloseable {
     return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
+  public DocumentWrapper getDocumentWrapper(Long documentId) {
+    return new DocumentWrapper(this, getDocument(documentId));
+  }
+
   public DocumentWrapper createDocumentWrapper() {
     TAGDocument document = new TAGDocument();
     persist(document);

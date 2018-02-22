@@ -44,17 +44,12 @@ abstract class AbstractSegmenter implements Segmenter {
       // stateChange if the type of the lastCell is not the same as the currentCell
       Boolean stateChange = lastCell.isMatch != currentCell.isMatch;
       if (stateChange) {
-//        System.out.println(lastCell.isMatch + ", " + currentCell.isMatch);
         addLastCellToSuperWitness(lastCell, tokensA, tokensB, x, y, superWitness);
-        // System.out.println(String.format("%d %d %d %d", lastX, lastY, x, y));
         // change the pointer
-        lastY = y;
-        lastX = x;
-        lastCell = editTable[lastY][lastX];
+        lastCell = editTable[y][x];
       }
     }
     // process the final cell in de EditGraphTable (additions/omissions at the beginning of the witnesses
-//    Score currentCell = editTable[0][0];
     addLastCellToSuperWitness(lastCell, tokensA, tokensB, 0, 0, superWitness);
     // System.out.println(String.format("%d %d %d %d", lastX, lastY, 0, 0));
     return superWitness;

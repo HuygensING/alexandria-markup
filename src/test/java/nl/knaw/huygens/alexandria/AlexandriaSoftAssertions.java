@@ -22,14 +22,14 @@ package nl.knaw.huygens.alexandria;
 
 import nl.knaw.huygens.alexandria.compare.Segment;
 import nl.knaw.huygens.alexandria.compare.SegmentAssert;
-import nl.knaw.huygens.alexandria.compare.TAGComparator;
-import nl.knaw.huygens.alexandria.compare.TAGComparatorAssert;
+import nl.knaw.huygens.alexandria.compare.TAGComparison;
+import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
 import org.assertj.core.api.SoftAssertions;
 
 public class AlexandriaSoftAssertions extends SoftAssertions {
 
-  public TAGComparatorAssert assertThat(TAGComparator actual) {
-    return proxy(TAGComparatorAssert.class, TAGComparator.class, actual);
+  public TAGComparisonAssert assertThat(TAGComparison actual) {
+    return proxy(TAGComparisonAssert.class, TAGComparison.class, actual);
   }
 
   public SegmentAssert assertThat(Segment actual) {

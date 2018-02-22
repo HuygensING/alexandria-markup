@@ -21,14 +21,14 @@ package nl.knaw.huygens.alexandria;
  */
 import nl.knaw.huygens.alexandria.compare.Segment;
 import nl.knaw.huygens.alexandria.compare.SegmentAssert;
-import nl.knaw.huygens.alexandria.compare.TAGComparator;
-import nl.knaw.huygens.alexandria.compare.TAGComparatorAssert;
+import nl.knaw.huygens.alexandria.compare.TAGComparison;
+import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
 import org.assertj.core.api.Assertions;
 
 public class AlexandriaAssertions extends Assertions {
 
-  public static TAGComparatorAssert assertThat(TAGComparator actual) {
-    return new TAGComparatorAssert(actual);
+  public static TAGComparisonAssert assertThat(TAGComparison actual) {
+    return new TAGComparisonAssert(actual);
   }
 
   public static SegmentAssert assertThat(Segment actual) {
