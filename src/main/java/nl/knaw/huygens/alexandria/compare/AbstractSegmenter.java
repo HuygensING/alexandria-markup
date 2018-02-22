@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
+import static nl.knaw.huygens.alexandria.compare.Segment.Type.*;
 
 import java.util.ArrayList;
 import java.util.List;

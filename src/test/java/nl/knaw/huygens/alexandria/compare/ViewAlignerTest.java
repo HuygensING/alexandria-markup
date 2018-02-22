@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.compare;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.AlexandriaSoftAssertions;
-import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
+import static nl.knaw.huygens.alexandria.compare.Segment.Type.*;
 import static nl.knaw.huygens.alexandria.compare.SegmentMatcher.sM;
 import static nl.knaw.huygens.alexandria.compare.TAGTokenMatcher.*;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;

@@ -30,12 +30,12 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 public class SegmentMatcher implements Predicate<Segment> {
-  private final Score.Type scoreType;
+  private final Segment.Type scoreType;
   private TAGTokenMatcher[] tokenContentMatchersA;
   private TAGTokenMatcher[] tokenContentMatchersB;
   private final List<String> failMessages = new ArrayList<>();
 
-  private SegmentMatcher(Score.Type scoreType) {
+  private SegmentMatcher(Segment.Type scoreType) {
     this.scoreType = scoreType;
   }
 
@@ -74,7 +74,7 @@ public class SegmentMatcher implements Predicate<Segment> {
     return tagTokenContentMatcher.test(tagToken);
   }
 
-  static SegmentMatcher sM(Score.Type scoreType) {
+  static SegmentMatcher sM(Segment.Type scoreType) {
     return new SegmentMatcher(scoreType);
   }
 

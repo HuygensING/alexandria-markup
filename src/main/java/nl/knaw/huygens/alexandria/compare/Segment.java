@@ -24,15 +24,15 @@ import java.util.List;
 public class Segment {
   private final List<TAGToken> segmentTokensA;
   private final List<TAGToken> segmentTokensB;
-  private final Score.Type type;
+  private final Type type;
 
-  public Segment(List<TAGToken> segmentTokensA, List<TAGToken> segmentTokensB, Score.Type type) {
+  public Segment(List<TAGToken> segmentTokensA, List<TAGToken> segmentTokensB, Type type) {
     this.segmentTokensA = segmentTokensA;
     this.segmentTokensB = segmentTokensB;
     this.type = type;
   }
 
-  public Score.Type type() {
+  public Type type() {
     return type;
   }
 
@@ -42,5 +42,9 @@ public class Segment {
 
   public List<TAGToken> tokensB() {
     return segmentTokensB;
+  }
+
+  public enum Type {
+    aligned, replacement, addition, omission, empty, semanticVariation
   }
 }
