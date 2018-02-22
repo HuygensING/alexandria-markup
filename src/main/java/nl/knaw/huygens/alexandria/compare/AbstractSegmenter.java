@@ -45,7 +45,7 @@ abstract class AbstractSegmenter implements Segmenter {
       Boolean stateChange = lastCell.isMatch != currentCell.isMatch;
       if (stateChange) {
 //        System.out.println(lastCell.isMatch + ", " + currentCell.isMatch);
-        addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY, superWitness);
+        addLastCellToSuperWitness(lastCell, tokensA, tokensB, x, y, superWitness);
         // System.out.println(String.format("%d %d %d %d", lastX, lastY, x, y));
         // change the pointer
         lastY = y;
@@ -54,23 +54,25 @@ abstract class AbstractSegmenter implements Segmenter {
       }
     }
     // process the final cell in de EditGraphTable (additions/omissions at the beginning of the witnesses
-    Score currentCell = editTable[0][0];
-    addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY, superWitness);
+//    Score currentCell = editTable[0][0];
+    addLastCellToSuperWitness(lastCell, tokensA, tokensB, 0, 0, superWitness);
     // System.out.println(String.format("%d %d %d %d", lastX, lastY, 0, 0));
     return superWitness;
   }
 
-  private void addCellToSuperWitness(Score currentCell,//
-                                     List<TAGToken> tokensA, List<TAGToken> tokensB,//
-                                     int lastX, int lastY,//
-                                     List<Segment> superWitness) {
-    int x = currentCell.x;
-    int y = currentCell.y;
-    List<TAGToken> segmentTokensA = tokensA.subList(x, lastX);
-    List<TAGToken> segmentTokensB = tokensB.subList(y, lastY);
+  private void addLastCellToSuperWitness(Score lastCell,//
+                                         List<TAGToken> tokensA, List<TAGToken> tokensB,//
+                                         int currentX, int currentY,//
+                                         List<Segment> superWitness) {
+    int lastX = lastCell.x;
+    int lastY = lastCell.y;
+    List<TAGToken> segmentTokensA = tokensA.subList(currentX, lastX);
+    List<TAGToken> segmentTokensB = tokensB.subList(currentY, lastY);
 
-    // if currentCell has tokens of type "isMatch", lastcell is replacement (because stateChange)
-    if (currentCell.isMatch) {
+    if (lastCell.isMatch) {
+      Segment segment = new Segment(segmentTokensA, segmentTokensB, aligned);
+      superWitness.add(0, segment);
+    } else {
       // if cell contains tokens from both witnesses its a replacement
       if (!segmentTokensA.isEmpty() && !segmentTokensB.isEmpty()) {
         Segment segment = new Segment(segmentTokensA, segmentTokensB, replacement);
@@ -88,11 +90,7 @@ abstract class AbstractSegmenter implements Segmenter {
         superWitness.add(0, segment);
       }
     }
-    // aligned
-    else {
-      Segment segment = new Segment(segmentTokensA, segmentTokensB, aligned);
-      superWitness.add(0, segment);
-    }
+
   }
 
 }
