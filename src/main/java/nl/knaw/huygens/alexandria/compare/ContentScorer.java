@@ -20,8 +20,9 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class ContentScorer implements Scorer {
+
   @Override
   public boolean match(TAGToken tokenA, TAGToken tokenB) {
-    return tokenA.normalizedContent.trim().equals(tokenB.normalizedContent.trim());
+    return tokenA.normalizedContent.equals(tokenB.normalizedContent);
   }
 }

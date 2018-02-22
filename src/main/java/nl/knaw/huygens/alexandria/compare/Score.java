@@ -26,10 +26,10 @@ public class Score {
   final int y;
   final int previousX;
   final int previousY;
-  final Boolean match;
+  final Boolean isMatch;
 
-  public Score(Boolean match, int x, int y, Score parent, int i) {
-    this.match = match;
+  public Score(Boolean isMatch, int x, int y, Score parent, int i) {
+    this.isMatch = isMatch;
     this.x = x;
     this.y = y;
     this.parent = parent;
@@ -38,8 +38,8 @@ public class Score {
     this.globalScore = i;
   }
 
-  public Score(Boolean match, int x, int y, Score parent) {
-    this.match = match;
+  public Score(Boolean isMatch, int x, int y, Score parent) {
+    this.isMatch = isMatch;
     this.x = x;
     this.y = y;
     this.parent = parent;
@@ -62,7 +62,7 @@ public class Score {
   }
 
   public enum Type {
-    aligned, replacement, addition, omission, empty
+    aligned, replacement, addition, omission, empty, semanticVariation
   }
 
 }

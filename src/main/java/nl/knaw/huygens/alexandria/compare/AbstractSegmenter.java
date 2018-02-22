@@ -20,16 +20,15 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static nl.knaw.huygens.alexandria.compare.Score.Type.*;
-
 abstract class AbstractSegmenter implements Segmenter {
-  private List<Segment> superwitness;
 
-  public List<Segment> calculateSegmentation(List<TAGToken> tokensA, List<TAGToken> tokensB, Score[][] editTable) {
-    this.superwitness = new ArrayList<>();
+  public List<Segment> calculateSegmentation(Score[][] editTable, List<TAGToken> tokensA, List<TAGToken> tokensB) {
+    List<Segment> superWitness = new ArrayList<>();
     // ScoreIterator iterates cells:
     ScoreIterator iterateTable = new ScoreIterator(editTable);
     // pointer is set in lower right corner at "lastCell"
@@ -43,10 +42,10 @@ abstract class AbstractSegmenter implements Segmenter {
       int x = currentCell.x;
       int y = currentCell.y;
       // stateChange if the type of the lastCell is not the same as the currentCell
-      Boolean stateChange = lastCell.match != currentCell.match;
+      Boolean stateChange = lastCell.isMatch != currentCell.isMatch;
       if (stateChange) {
-//        System.out.println(lastCell.match + ", " + currentCell.match);
-        addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY);
+//        System.out.println(lastCell.isMatch + ", " + currentCell.isMatch);
+        addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY, superWitness);
         // System.out.println(String.format("%d %d %d %d", lastX, lastY, x, y));
         // change the pointer
         lastY = y;
@@ -56,40 +55,43 @@ abstract class AbstractSegmenter implements Segmenter {
     }
     // process the final cell in de EditGraphTable (additions/omissions at the beginning of the witnesses
     Score currentCell = editTable[0][0];
-    addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY);
+    addCellToSuperWitness(currentCell, tokensA, tokensB, lastX, lastY, superWitness);
     // System.out.println(String.format("%d %d %d %d", lastX, lastY, 0, 0));
-    return superwitness;
+    return superWitness;
   }
 
-  private void addCellToSuperWitness(Score currentCell, List<TAGToken> tokensA, List<TAGToken> tokensB, int lastX, int lastY) {
+  private void addCellToSuperWitness(Score currentCell,//
+                                     List<TAGToken> tokensA, List<TAGToken> tokensB,//
+                                     int lastX, int lastY,//
+                                     List<Segment> superWitness) {
     int x = currentCell.x;
     int y = currentCell.y;
     List<TAGToken> segmentTokensA = tokensA.subList(x, lastX);
     List<TAGToken> segmentTokensB = tokensB.subList(y, lastY);
 
-    // if currentCell has tokens of type "match", lastcell is replacement (because stateChange)
-    if (currentCell.match) {
+    // if currentCell has tokens of type "isMatch", lastcell is replacement (because stateChange)
+    if (currentCell.isMatch) {
       // if cell contains tokens from both witnesses its a replacement
       if (!segmentTokensA.isEmpty() && !segmentTokensB.isEmpty()) {
         Segment segment = new Segment(segmentTokensA, segmentTokensB, replacement);
         // insert the segment to the list at the first position (position "0")
-        superwitness.add(0, segment);
+        superWitness.add(0, segment);
       }
       // addition: no TokensA
       else if (segmentTokensA.isEmpty()) {
         Segment segment = new Segment(segmentTokensA, segmentTokensB, addition);
-        superwitness.add(0, segment);
+        superWitness.add(0, segment);
       }
       // omission: no TokensB
       else if (segmentTokensB.isEmpty()) {
         Segment segment = new Segment(segmentTokensA, segmentTokensB, omission);
-        superwitness.add(0, segment);
+        superWitness.add(0, segment);
       }
     }
     // aligned
     else {
       Segment segment = new Segment(segmentTokensA, segmentTokensB, aligned);
-      superwitness.add(0, segment);
+      superWitness.add(0, segment);
     }
   }
 

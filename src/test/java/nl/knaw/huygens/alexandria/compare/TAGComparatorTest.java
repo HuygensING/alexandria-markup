@@ -21,7 +21,6 @@ package nl.knaw.huygens.alexandria.compare;
  */
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
@@ -33,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -59,8 +58,8 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
     TAGComparator comparator = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
-        " [quote}Any sufficiently advanced technology ",//
-        "-is indistinguishable from ",//
+        " [quote}Any sufficiently advanced technology is ",//
+        "-indistinguishable from ",//
         " magic.{quote]"//
     ));
     assertThat(comparator.getDiffLines()).containsExactlyElementsOf(expected);
@@ -84,7 +83,7 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
   @Test
   public void testReplacement() {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[quote}Any sufficiently advanced code is virtually indistinguishable from magic.{quote]";
+    String editedText = "[quote}Any sufficiently advanced code is indistinguishable from magic.{quote]";
 
     TAGComparator comparator = compare(originText, editedText);
 
@@ -100,7 +99,7 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
   @Test
   public void testReplacement2() {
     String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[s}Any sufficiently advanced code is virtually indistinguishable from magic.{s]";
+    String editedText = "[s}Any sufficiently advanced code is indistinguishable from magic.{s]";
 
     TAGComparator comparator = compare(originText, editedText);
 
@@ -122,8 +121,8 @@ public class TAGComparatorTest extends AlexandriaBaseStoreTest {
       LMNLImporter importer = new LMNLImporter(store);
       DocumentWrapper original = importer.importLMNL(originText);
       DocumentWrapper edited = importer.importLMNL(editedText);
-      Set<String> quote = new HashSet<>(singletonList("quote"));
-      TAGView onlyQuote = new TAGView(store).setMarkupToInclude(quote);
+      Set<String> none = Collections.EMPTY_SET;
+      TAGView onlyQuote = new TAGView(store).setMarkupToExclude(none);
 
       TAGComparator comparator = new TAGComparator(original, onlyQuote, edited);
       LOG.info("diffLines = \n{}", comparator.getDiffLines()//

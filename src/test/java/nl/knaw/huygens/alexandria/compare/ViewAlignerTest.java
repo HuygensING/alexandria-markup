@@ -69,13 +69,13 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
     AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
     SegmentMatcher expected0 = sM(aligned)//
-        .tokensA(markupOpen("s"), text("a"))//
-        .tokensB(markupOpen("s"), text("a"));
+        .tokensA(markupOpen("s"), text("a "))//
+        .tokensB(markupOpen("s"), text("a "));
     softly.assertThat(segments.get(0)).matches(expected0);
 
     SegmentMatcher expected1 = sM(addition)//
         .tokensA()//
-        .tokensB(text("different"));
+        .tokensB(text("different "));
     softly.assertThat(segments.get(1)).matches(expected1);
 
     SegmentMatcher expected2 = sM(aligned)//
@@ -100,7 +100,7 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
     assertThat(segments.get(0)).matches(expected0);
 
     SegmentMatcher expected1 = sM(omission)//
-        .tokensA(text("a"))//
+        .tokensA(text("a "))//
         .tokensB();
     assertThat(segments.get(1)).matches(expected1);
 
@@ -122,7 +122,8 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       List<TAGToken> tokens1 = new Tokenizer(document1, ignoreTEI).getTAGTokens();
       List<TAGToken> tokens2 = new Tokenizer(document2, ignoreTEI).getTAGTokens();
       Scorer scorer = new ContentScorer();
-      List<Segment> segments = new ViewAligner(scorer).align(tokens1, tokens2);
+      Segmenter segmenter = new ContentSegmenter();
+      List<Segment> segments = new ViewAligner(scorer, segmenter).align(tokens1, tokens2);
       return segments;
     });
   }

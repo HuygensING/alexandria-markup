@@ -24,8 +24,9 @@ import java.util.List;
 
 interface Segmenter {
 
-  List<Segment> calculateSegmentation(List<TAGToken> tokensA,//
-                                      List<TAGToken> tokensB,//
-                                      Score[][] editTable);
+  List<Segment> calculateSegmentation(Score[][] editTable,//
+                                      List<TAGToken> tokensA,//
+                                      List<TAGToken> tokensB//
+  );
 
 }

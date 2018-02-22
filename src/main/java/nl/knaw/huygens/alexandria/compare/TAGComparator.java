@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
@@ -35,7 +36,8 @@ public class TAGComparator {
 
   public TAGComparator(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
     Scorer scorer = new ContentScorer();
-    ViewAligner viewAligner = new ViewAligner(scorer);
+    Segmenter segmenter = new ContentSegmenter();
+    ViewAligner viewAligner = new ViewAligner(scorer, segmenter);
     List<TAGToken> originalTokens = new Tokenizer(originalDocument, tagView).getTAGTokens();
     List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
     List<Segment> segments = viewAligner.align(originalTokens, editedTokens);
@@ -93,7 +95,7 @@ public class TAGComparator {
   }
 
   private String toLine(List<TAGToken> tagTokens) {
-    return tagTokens.stream().map(TAGToken::toString).collect(joining(" "));
+    return tagTokens.stream().map(TAGToken::toString).collect(joining(""));
   }
 
 

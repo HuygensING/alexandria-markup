@@ -19,19 +19,23 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.max;
+import static java.util.Comparator.comparingInt;
+
 import java.util.List;
 import java.util.stream.IntStream;
 
 class ViewAligner {
 
   private final Scorer scorer;
+  private Segmenter segmenter;
   private Score[][] cells;
 
-  public ViewAligner(Scorer scorer) {
+  public ViewAligner(Scorer scorer, Segmenter segmenter) {
     this.scorer = scorer;
+    this.segmenter = segmenter;
   }
 
   public List<Segment> align(List<TAGToken> tokensA, List<TAGToken> tokensB) {
@@ -55,20 +59,21 @@ class ViewAligner {
 
     // fill the remaining cells
     // fill the rest of the cells in a  y by x fashion
-    IntStream.range(1, tokensB.size() + 1).forEach(y -> IntStream.range(1, tokensA.size() + 1).forEach(x -> {
-      int previousY = y - 1;
-      int previousX = x - 1;
-      boolean match = scorer.match(tokensA.get(x - 1), tokensB.get(y - 1));
-      Score upperLeft = scorer.score(x, y, this.cells[previousY][previousX], match);
-      Score left = scorer.gap(x, y, this.cells[y][previousX]);
-      Score upper = scorer.gap(x, y, this.cells[previousY][x]);
-      //NOTE: performance: The creation of a List is a potential performance problem; better to do two
-      //separate comparisons.
-      Score max = Collections.max(Arrays.asList(upperLeft, left, upper), Comparator.comparingInt(score -> score.globalScore));
-      this.cells[y][x] = max;
-    }));
-    Segmenter segmenter = new ContentSegmenter();
-    return segmenter.calculateSegmentation(tokensA, tokensB, cells);
+    IntStream.range(1, tokensB.size() + 1)//
+        .forEach(y -> IntStream.range(1, tokensA.size() + 1)//
+            .forEach(x -> {
+              int previousY = y - 1;
+              int previousX = x - 1;
+              boolean match = scorer.match(tokensA.get(x - 1), tokensB.get(y - 1));
+              Score upperLeft = scorer.score(x, y, this.cells[previousY][previousX], match);
+              Score left = scorer.gap(x, y, this.cells[y][previousX]);
+              Score upper = scorer.gap(x, y, this.cells[previousY][x]);
+              //NOTE: performance: The creation of a List is a potential performance problem; better to do two
+              //separate comparisons.
+              Score max = max(asList(upperLeft, left, upper), comparingInt(score -> score.globalScore));
+              this.cells[y][x] = max;
+            }));
+    return segmenter.calculateSegmentation(cells, tokensA, tokensB);
   }
 }
 

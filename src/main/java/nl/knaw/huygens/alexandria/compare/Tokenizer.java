@@ -20,18 +20,19 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.StreamUtil.stream;
+import java.util.regex.Pattern;
 
 class Tokenizer {
   private final DocumentWrapper document;
   private final TAGView tagView;
+  public static final Pattern PATTERN = Pattern.compile("\\w+|[^\\w\\s]+");
 
   public Tokenizer(DocumentWrapper document, TAGView tagView) {
     this.document = document;
@@ -66,7 +67,7 @@ class Tokenizer {
           .map(MarkupOpenToken::new)//
           .forEach(tokens::add);
 
-      tokens.add(new TextToken(tn.getText()));
+      tokens.addAll(tokenizeText(tn.getText()));
 
     });
     stream(openMarkup.descendingIterator())//
@@ -75,6 +76,13 @@ class Tokenizer {
         .forEach(tokens::add);
 
     return tokens;
+  }
+
+  private List<TextToken> tokenizeText(String string) {
+    return SimplePatternTokenizer.BY_WS_AND_PUNCT//
+        .apply(string)//
+        .map(TextToken::new)//
+        .collect(toList());
   }
 
 }
