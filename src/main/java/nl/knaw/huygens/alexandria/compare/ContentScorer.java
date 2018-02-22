@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+public class ContentScorer implements Scorer {
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
-
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  @Override
+  public boolean match(TAGToken tokenA, TAGToken tokenB) {
+    return tokenA.normalizedContent.equals(tokenB.normalizedContent);
   }
 }

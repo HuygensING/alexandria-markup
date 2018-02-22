@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,24 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+import org.assertj.core.api.AbstractAssert;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+import java.util.List;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+public class TAGComparatorAssert extends AbstractAssert<TAGComparatorAssert, TAGComparator> {
+
+  public TAGComparatorAssert(TAGComparator actual) {
+    super(actual, TAGComparatorAssert.class);
+  }
+
+  public TAGComparatorAssert hasFoundNoDifference() {
+    List<String> diffLines = actual.getDiffLines();
+    if (!diffLines.isEmpty()) {
+      failWithMessage("Expected there to be no differences, but found diff lines: %n%s",//
+          diffLines.stream().collect(joining("\n")));
+    }
+    return this;
+
   }
 }

@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,20 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.alexandria.compare.Segment;
+import nl.knaw.huygens.alexandria.compare.SegmentAssert;
+import nl.knaw.huygens.alexandria.compare.TAGComparator;
+import nl.knaw.huygens.alexandria.compare.TAGComparatorAssert;
+import org.assertj.core.api.Assertions;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+public class AlexandriaAssertions extends Assertions {
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  public static TAGComparatorAssert assertThat(TAGComparator actual) {
+    return new TAGComparatorAssert(actual);
   }
+
+  public static SegmentAssert assertThat(Segment actual) {
+    return new SegmentAssert(actual);
+  }
+
 }

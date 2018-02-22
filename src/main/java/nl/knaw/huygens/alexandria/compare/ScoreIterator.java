@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,29 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+import java.util.Iterator;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+class ScoreIterator implements Iterator<Score> {
+  private Integer y;
+  private Integer x;
+  private final Score[][] matrix;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  ScoreIterator(Score[][] matrix) {
+    this.matrix = matrix;
+    this.x = matrix[0].length - 1;
+    this.y = matrix.length - 1;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return !(this.x == 0 && this.y == 0);
+  }
+
+  @Override
+  public Score next() {
+    Score currentScore = this.matrix[this.y][this.x];
+    this.x = currentScore.previousX;
+    this.y = currentScore.previousY;
+    return currentScore;
   }
 }

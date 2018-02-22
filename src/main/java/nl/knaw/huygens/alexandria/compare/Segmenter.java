@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -20,10 +20,13 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+import java.util.List;
 
-  public TexMECSSyntaxError(String message) {
-    super(message);
-  }
+interface Segmenter {
+
+  List<Segment> calculateSegmentation(Score[][] editTable,//
+                                      List<TAGToken> tokensA,//
+                                      List<TAGToken> tokensB//
+  );
+
 }

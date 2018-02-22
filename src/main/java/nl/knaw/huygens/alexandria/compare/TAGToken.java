@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.texmecs.importer;
+package nl.knaw.huygens.alexandria.compare;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,11 +19,13 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * limitations under the License.
  * #L%
  */
+public class TAGToken {
+  public final String content;
+  public final String normalizedContent;
 
-class TexMECSSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
-
-  public TexMECSSyntaxError(String message) {
-    super(message);
+  TAGToken(String content){
+    this.content = content;
+    this.normalizedContent = content.trim();
   }
+
 }

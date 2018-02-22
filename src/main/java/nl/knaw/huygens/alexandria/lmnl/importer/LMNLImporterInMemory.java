@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
@@ -34,6 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class LMNLImporterInMemory {
   private static final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemory.class);
