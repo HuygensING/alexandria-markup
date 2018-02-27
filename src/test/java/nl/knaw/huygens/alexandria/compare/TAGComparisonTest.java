@@ -123,15 +123,16 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   @Test
   public void testNewlinesInText() {
     String originText = "[l}line 1{l]\n[l}line 2{l]\n[l}line 3{l]";
-    String editedText = "[l}line 1{l]\n[l}line b{l]\n[l}line 2{l]\n[l}line 3{l]";
+    String editedText = "[l}line 1{l]\n[l}line 1a{l]\n[l}line 2{l]\n[l}line 3{l]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
         " [l}line 1{l]\n",//
-        "+[l}line b{l]\n",//
-        "+[l}line 2{l]\n"//
+        "+[l}line 1a{l]\n",//
+        " [l}line 2{l]\n",//
+        " [l}line 3{l]\n"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }

@@ -60,4 +60,21 @@ public class TokenizerTest {
     assertThat(textTokens.get(0).content).isEqualTo("! ");
   }
 
+  @Test
+  public void testTokenizeText5() {
+    List<TextToken> textTokens = Tokenizer.tokenizeText("Alas, poor Yorick!");
+    assertThat(textTokens).hasSize(3);
+    assertThat(textTokens.get(0).content).isEqualTo("Alas, ");
+    assertThat(textTokens.get(1).content).isEqualTo("poor ");
+    assertThat(textTokens.get(2).content).isEqualTo("Yorick!");
+  }
+
+  @Test
+  public void testTokenizeText6() {
+    List<TextToken> textTokens = Tokenizer.tokenizeText("Lucy, for you the snowdrop and the bay");
+    assertThat(textTokens).hasSize(8);
+    assertThat(textTokens.get(0).content).isEqualTo("Lucy, ");
+    assertThat(textTokens.get(1).content).isEqualTo("for ");
+    assertThat(textTokens.get(2).content).isEqualTo("you ");
+  }
 }

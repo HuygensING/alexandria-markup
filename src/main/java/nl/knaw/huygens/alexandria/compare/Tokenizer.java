@@ -80,7 +80,7 @@ class Tokenizer {
     return tokens;
   }
 
-  static Pattern WS_AND_PUNCT = Pattern.compile("[" + SimplePatternTokenizer.PUNCT + "\\s]+");
+  private static Pattern WS_AND_PUNCT = Pattern.compile("[" + SimplePatternTokenizer.PUNCT + "\\s]+");
 
   static List<TextToken> tokenizeText(String text) {
     if (WS_AND_PUNCT.matcher(text).matches()) {

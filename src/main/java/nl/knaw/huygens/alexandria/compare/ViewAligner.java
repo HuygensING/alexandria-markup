@@ -20,12 +20,12 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.max;
 import static java.util.Comparator.comparingInt;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 class ViewAligner {
 
@@ -58,7 +58,7 @@ class ViewAligner {
     });
 
     // fill the remaining cells
-    // fill the rest of the cells in a  y by x fashion
+    // fill the rest of the cells in a y by x fashion
     IntStream.range(1, tokensB.size() + 1)//
         .forEach(y -> IntStream.range(1, tokensA.size() + 1)//
             .forEach(x -> {

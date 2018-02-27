@@ -24,6 +24,7 @@ import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -77,13 +78,11 @@ public class TAGComparison {
   }
 
   private void handleOmission(Segment segment) {
-    String omissionLine = toLine(segment.tokensA());
-    diffLines.add("-" + omissionLine);
+    asLines(segment.tokensA()).forEach(l -> diffLines.add("-" + l));
   }
 
   private void handleAddition(Segment segment) {
-    String additionLine = toLine(segment.tokensB());
-    diffLines.add("+" + additionLine);
+    asLines(segment.tokensB()).forEach(l -> diffLines.add("+" + l));
   }
 
   private void handleReplacement(Segment segment) {
@@ -95,12 +94,21 @@ public class TAGComparison {
   }
 
   private void handleAligned(Segment segment) {
-    String alignedLine = toLine(segment.tokensA());
-    diffLines.add(" " + alignedLine);
+    List<String> lines = asLines(segment.tokensA());
+    diffLines.add(" " + lines.get(0));
+    if (lines.size() > 2) {
+      diffLines.add(" ...");
+    }
+    if (lines.size() > 1) {
+      diffLines.add(" " + lines.get(lines.size() - 1));
+    }
   }
 
-  private String toLine(List<TAGToken> tagTokens) {
-    return tagTokens.stream().map(TAGToken::toString).collect(joining(""));
+  private List<String> asLines(List<TAGToken> tagTokens) {
+    return Arrays.asList(tagTokens.stream()//
+        .map(TAGToken::toString)//
+        .collect(joining(""))//
+        .split("\n"));
   }
 
 
