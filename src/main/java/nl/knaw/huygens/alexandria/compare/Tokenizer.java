@@ -20,14 +20,16 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 class Tokenizer {
   private final DocumentWrapper document;
@@ -78,9 +80,14 @@ class Tokenizer {
     return tokens;
   }
 
-  private List<TextToken> tokenizeText(String string) {
+  static Pattern WS_AND_PUNCT = Pattern.compile("[" + SimplePatternTokenizer.PUNCT + "\\s]+");
+
+  static List<TextToken> tokenizeText(String text) {
+    if (WS_AND_PUNCT.matcher(text).matches()) {
+      return new ArrayList<>(singletonList(new TextToken(text)));
+    }
     return SimplePatternTokenizer.BY_WS_AND_PUNCT//
-        .apply(string)//
+        .apply(text)//
         .map(TextToken::new)//
         .collect(toList());
   }

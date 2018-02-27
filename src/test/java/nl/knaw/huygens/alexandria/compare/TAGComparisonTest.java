@@ -20,13 +20,11 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +33,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
 
@@ -102,6 +104,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String editedText = "[s}Any sufficiently advanced code is indistinguishable from magic.{s]";
 
     TAGComparison comparison = compare(originText, editedText);
+    assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
         "-[quote}",//
@@ -116,15 +119,32 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  @Ignore
+  @Test
+  public void testNewlinesInText() {
+    String originText = "[l}line 1{l]\n[l}line 2{l]\n[l}line 3{l]";
+    String editedText = "[l}line 1{l]\n[l}line b{l]\n[l}line 2{l]\n[l}line 3{l]";
+
+    TAGComparison comparison = compare(originText, editedText);
+    assertThat(comparison.hasDifferences()).isTrue();
+
+    List<String> expected = new ArrayList<>(asList(//
+        " [l}line 1{l]\n",//
+        "+[l}line b{l]\n",//
+        "+[l}line 2{l]\n"//
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
+
   private TAGComparison compare(String originText, String editedText) {
     return store.runInTransaction(() -> {
       LMNLImporter importer = new LMNLImporter(store);
       DocumentWrapper original = importer.importLMNL(originText);
       DocumentWrapper edited = importer.importLMNL(editedText);
       Set<String> none = Collections.EMPTY_SET;
-      TAGView onlyQuote = new TAGView(store).setMarkupToExclude(none);
+      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
-      TAGComparison comparison = new TAGComparison(original, onlyQuote, edited);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
       LOG.info("diffLines = \n{}", comparison.getDiffLines()//
           .stream()//
           .map(l -> "'" + l + "'")//

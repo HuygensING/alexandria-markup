@@ -20,12 +20,13 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.joining;
 
 public class TAGComparison {
   private final List<String> diffLines = new ArrayList<>();
