@@ -20,10 +20,10 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import static nl.knaw.huygens.alexandria.compare.Segment.Type.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static nl.knaw.huygens.alexandria.compare.Segment.Type.*;
 
 abstract class AbstractSegmenter implements Segmenter {
 
