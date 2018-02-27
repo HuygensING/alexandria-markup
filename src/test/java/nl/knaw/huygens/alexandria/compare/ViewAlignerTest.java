@@ -124,8 +124,7 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
       List<TAGToken> tokens2 = new Tokenizer(document2, ignoreTEI).getTAGTokens();
       Scorer scorer = new ContentScorer();
       Segmenter segmenter = new ContentSegmenter();
-      List<Segment> segments = new ViewAligner(scorer, segmenter).align(tokens1, tokens2);
-      return segments;
+      return new ViewAligner(scorer, segmenter).align(tokens1, tokens2);
     });
   }
 

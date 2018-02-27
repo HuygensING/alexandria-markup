@@ -30,7 +30,7 @@ import static java.util.Comparator.comparingInt;
 class ViewAligner {
 
   private final Scorer scorer;
-  private Segmenter segmenter;
+  private final Segmenter segmenter;
   private Score[][] cells;
 
   public ViewAligner(Scorer scorer, Segmenter segmenter) {
