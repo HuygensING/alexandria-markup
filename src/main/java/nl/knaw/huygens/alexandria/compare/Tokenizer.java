@@ -44,6 +44,7 @@ class Tokenizer {
   public List<TAGToken> getTAGTokens() {
     List<TAGToken> tokens = new ArrayList<>();
     Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
+    StringBuilder textBuilder = new StringBuilder();
     document.getTextNodeStream().forEach(tn -> {
       List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
           .filter(tagView::isIncluded)//
@@ -59,6 +60,10 @@ class Tokenizer {
       openMarkup.removeAll(toClose);
       openMarkup.addAll(toOpen);
 
+      if (!toClose.isEmpty() || !toOpen.isEmpty()) {
+        tokens.addAll(tokenizeText(textBuilder.toString()));
+        textBuilder.delete(0, textBuilder.length());
+      }
       toClose.stream()//
           .map(MarkupWrapper::getTag)//
           .map(MarkupCloseToken::new)//
@@ -69,9 +74,10 @@ class Tokenizer {
           .map(MarkupOpenToken::new)//
           .forEach(tokens::add);
 
-      tokens.addAll(tokenizeText(tn.getText()));
-
+      String text = tn.getText();
+      textBuilder.append(text);
     });
+    tokens.addAll(tokenizeText(textBuilder.toString()));
     stream(openMarkup.descendingIterator())//
         .map(MarkupWrapper::getTag)//
         .map(MarkupCloseToken::new)//

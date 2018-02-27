@@ -19,13 +19,19 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 
 import java.util.List;
 
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TokenizerTest {
+public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTokenizeText() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("a b c");
@@ -76,5 +82,17 @@ public class TokenizerTest {
     assertThat(textTokens.get(0).content).isEqualTo("Lucy, ");
     assertThat(textTokens.get(1).content).isEqualTo("for ");
     assertThat(textTokens.get(2).content).isEqualTo("you ");
+  }
+
+  @Test
+  public void testTokenizer() {
+    store.runInTransaction(() -> {
+      DocumentWrapper doc = new LMNLImporter(store).importLMNL("[l}[phr}Alas,{phr] [phr}poor Yorick!{phr]{l]");
+      TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
+      Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
+      List<TAGToken> tokens = tokenizer.getTAGTokens();
+      assertThat(tokens).extracting("content")//
+          .containsExactly("l", "Alas, ", "poor ", "Yorick!", "l");
+    });
   }
 }
