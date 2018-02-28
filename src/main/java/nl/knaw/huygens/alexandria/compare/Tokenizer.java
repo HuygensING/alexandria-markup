@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
@@ -32,20 +33,16 @@ import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 class Tokenizer {
-  private final DocumentWrapper document;
-  private final TAGView tagView;
   public static final Pattern PATTERN = Pattern.compile("\\w+|[^\\w\\s]+");
+  List<TAGToken> tokens = new ArrayList<>();
+  Map<TAGToken, List<TextNodeWrapper>> tokenToNodeMap = new HashMap<>();
 
   public Tokenizer(DocumentWrapper document, TAGView tagView) {
-    this.document = document;
-    this.tagView = tagView;
-  }
-
-  public List<TAGToken> getTAGTokens() {
-    List<TAGToken> tokens = new ArrayList<>();
     Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
     StringBuilder textBuilder = new StringBuilder();
+    List<TextNodeWrapper> textNodesToMap = new ArrayList<>();
     document.getTextNodeStream().forEach(tn -> {
+      textNodesToMap.add(tn);
       List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
           .filter(tagView::isIncluded)//
           .collect(toList());
@@ -82,8 +79,14 @@ class Tokenizer {
         .map(MarkupWrapper::getTag)//
         .map(MarkupCloseToken::new)//
         .forEach(tokens::add);
+  }
 
+  public List<TAGToken> getTAGTokens() {
     return tokens;
+  }
+
+  public Map<TAGToken, List<TextNodeWrapper>> getTokenToNodeMap() {
+    return tokenToNodeMap;
   }
 
   private static final Pattern WS_AND_PUNCT = Pattern.compile("[" + SimplePatternTokenizer.PUNCT + "\\s]+");
