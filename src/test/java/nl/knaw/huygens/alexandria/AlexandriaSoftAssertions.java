@@ -24,9 +24,13 @@ import nl.knaw.huygens.alexandria.compare.Segment;
 import nl.knaw.huygens.alexandria.compare.SegmentAssert;
 import nl.knaw.huygens.alexandria.compare.TAGComparison;
 import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
-import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.AbstractStandardSoftAssertions;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.MultipleFailureException;
+import org.junit.runners.model.Statement;
 
-public class AlexandriaSoftAssertions extends SoftAssertions {
+public class AlexandriaSoftAssertions extends AbstractStandardSoftAssertions implements TestRule {
 
   public TAGComparisonAssert assertThat(TAGComparison actual) {
     return proxy(TAGComparisonAssert.class, TAGComparison.class, actual);
@@ -34,6 +38,15 @@ public class AlexandriaSoftAssertions extends SoftAssertions {
 
   public SegmentAssert assertThat(Segment actual) {
     return proxy(SegmentAssert.class, Segment.class, actual);
+  }
+
+  public Statement apply(final Statement base, Description description) {
+    return new Statement() {
+      public void evaluate() throws Throwable {
+        base.evaluate();
+        MultipleFailureException.assertEmpty(AlexandriaSoftAssertions.this.errorsCollected());
+      }
+    };
   }
 
 }

@@ -25,6 +25,7 @@ import nl.knaw.huygens.alexandria.AlexandriaSoftAssertions;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(ViewAlignerTest.class);
 
+  @Rule
+  public final AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
+
   @Test
   public void testSegmentReplaced() {
     String sourceA = "[TEI}[s}a{s]{TEI]";
@@ -50,7 +54,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
     List<Segment> segments = calculateSegments(sourceA, sourceB);
 
-    AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
     SegmentMatcher expected0 = sM(aligned).tokensA(markupOpen("s")).tokensB(markupOpen("s"));
     softly.assertThat(segments.get(0)).matches(expected0);
 
@@ -68,7 +71,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
     List<Segment> segments = calculateSegments(sourceA, sourceB);
 
-    AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
     SegmentMatcher expected0 = sM(aligned)//
         .tokensA(markupOpen("s"), text("a "))//
         .tokensB(markupOpen("s"), text("a "));
@@ -84,7 +86,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
         .tokensB(text("text"), markupClose("s"));
     softly.assertThat(segments.get(2)).matches(expected2);
 
-    softly.assertAll();
   }
 
   @Test
@@ -94,7 +95,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
     List<Segment> segments = calculateSegments(sourceA, sourceB);
 
-    AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
     SegmentMatcher expected0 = sM(aligned)//
         .tokensA(markupOpen("s"))//
         .tokensB(markupOpen("s"));
@@ -110,7 +110,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
         .tokensB(text("text"), markupClose("s"));
     assertThat(segments.get(2)).matches(expected2);
 
-    softly.assertAll();
   }
 
   private List<Segment> calculateSegments(String input, String input1) {

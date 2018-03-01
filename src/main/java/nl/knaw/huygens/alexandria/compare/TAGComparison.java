@@ -33,10 +33,8 @@ import static nl.knaw.huygens.alexandria.compare.Segment.Type.aligned;
 public class TAGComparison {
   private final List<Segment> segments;
   private final Map<TAGToken, List<TextNodeWrapper>> tokenToNodeMap;
-  private DocumentWrapper originalDocument;
 
   public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
-    this.originalDocument = originalDocument;
     Scorer scorer = new ContentScorer();
     Segmenter segmenter = new ContentSegmenter();
     Tokenizer originalTokenizer = new Tokenizer(originalDocument, tagView);
@@ -56,7 +54,7 @@ public class TAGComparison {
       for (Segment segment : segments) {
         switch (segment.type()) {
           case aligned:
-            handleAligned(segment, diffLines);
+            reportAligned(segment, diffLines);
             break;
 
 //          case empty:
@@ -64,15 +62,15 @@ public class TAGComparison {
 //            break;
 
           case addition:
-            handleAddition(segment, diffLines);
+            reportAddition(segment, diffLines);
             break;
 
           case omission:
-            handleOmission(segment, diffLines);
+            reportOmission(segment, diffLines);
             break;
 
           case replacement:
-            handleReplacement(segment, diffLines);
+            reportReplacement(segment, diffLines);
             break;
 
           default:
@@ -98,23 +96,23 @@ public class TAGComparison {
     return segments.stream().anyMatch(this::isNotAligned);
   }
 
-  private void handleOmission(Segment segment, List<String> diffLines) {
+  private void reportOmission(Segment segment, List<String> diffLines) {
     asLines(segment.tokensA()).forEach(l -> diffLines.add("-" + l));
   }
 
-  private void handleAddition(Segment segment, List<String> diffLines) {
+  private void reportAddition(Segment segment, List<String> diffLines) {
     asLines(segment.tokensB()).forEach(l -> diffLines.add("+" + l));
   }
 
-  private void handleReplacement(Segment segment, List<String> diffLines) {
-    handleOmission(segment, diffLines);
-    handleAddition(segment, diffLines);
+  private void reportReplacement(Segment segment, List<String> diffLines) {
+    reportOmission(segment, diffLines);
+    reportAddition(segment, diffLines);
   }
 
 //  private void handleEmpty(Segment segment, final List<String> diffLines) {
 //  }
 
-  private void handleAligned(Segment segment, final List<String> diffLines) {
+  private void reportAligned(Segment segment, final List<String> diffLines) {
     List<String> lines = asLines(segment.tokensA());
     diffLines.add(" " + lines.get(0));
     if (lines.size() > 2) {
