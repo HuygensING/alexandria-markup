@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.compare;
  */
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
@@ -135,6 +136,152 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
         " [l}line 3{l]\n"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
+
+  @Test
+  public void testMergeTextReplacement() {
+    String originText = "[quote}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{quote]";
+    String editedText = "[quote}Any sufficiently advanced code is indistinguishable from magic.{quote]";
+    String expected = "[quote}Any [emp}sufficiently advanced code{emp] is indistinguishable from magic.{quote]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> quote = Collections.singleton("quote");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(quote);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
+  }
+
+  @Test
+  public void testMergeMarkupReplacement() {
+    String originText = "[quote}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{quote]";
+    String editedText = "[s}Any sufficiently advanced technology is indistinguishable from magic.{s]";
+    String expected = "[s}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{s]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> quote = Collections.singleton("quote");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(quote);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
+  }
+
+  @Test
+  public void testMergeTextAddition() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1{l]" +
+        "[l}line 1a{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 1a{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> lines = Collections.singleton("l");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(lines);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
+  }
+
+  @Test
+  public void testMergeMarkupAddition() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1{l]" +
+        "[l}line{l] [l}2{l]" +
+        "[l}line 3{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line{l] [l}2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> lines = Collections.singleton("l");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(lines);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
+  }
+
+  @Test
+  public void testMergeTextOmission() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1{l]" +
+        "[l}line 2{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> lines = Collections.singleton("l");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(lines);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
+  }
+
+  @Test
+  public void testMergeMarkupOmission() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1{l]" +
+        "[l}line 2 line 3{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2 line 3{l]" +
+        "{excerpt]";
+    store.runInTransaction(() -> {
+      LMNLImporter importer = new LMNLImporter(store);
+      DocumentWrapper original = importer.importLMNL(originText);
+      DocumentWrapper edited = importer.importLMNL(editedText);
+      Set<String> lines = Collections.singleton("l");
+      TAGView allTags = new TAGView(store).setMarkupToInclude(lines);
+      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      comparison.mergeChanges();
+      String editedOriginText = new LMNLExporter(store).toLMNL(original);
+      assertThat(editedOriginText).isEqualTo(expected);
+    });
   }
 
   private TAGComparison compare(String originText, String editedText) {
