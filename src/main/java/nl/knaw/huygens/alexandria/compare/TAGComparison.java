@@ -20,25 +20,30 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static nl.knaw.huygens.alexandria.compare.Segment.Type.aligned;
 
 public class TAGComparison {
   private final List<Segment> segments;
-  private final Map<TAGToken, List<TextNodeWrapper>> tokenToNodeMap;
+  private final Map<TAGToken, List<TokenProvenance>> tokenProvenanceMap;
+  private final DocumentWrapper originalDocument;
+  private final Map<TAGToken, TextNodeWrapper> map = new HashMap<>();
 
   public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
+    this.originalDocument = originalDocument;
     Scorer scorer = new ContentScorer();
     Segmenter segmenter = new ContentSegmenter();
     Tokenizer originalTokenizer = new Tokenizer(originalDocument, tagView);
-    tokenToNodeMap = originalTokenizer.getTokenToNodeMap();
+    tokenProvenanceMap = originalTokenizer.getTokenProvenanceMap();
     List<TAGToken> originalTokens = originalTokenizer.getTAGTokens();
     List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
     segments = new ViewAligner(scorer, segmenter).align(originalTokens, editedTokens);
@@ -83,13 +88,14 @@ public class TAGComparison {
 
   public Set<TextNodeWrapper> getTextNodeWrappersForSegment(Segment segment) {
     return segment.tokensA().stream()
-        .map(this::getTextNodeWrappersForToken)
+        .map(this::getTokenProvenance)
         .flatMap(List::stream)
+        .map(p -> ((TextTokenProvenance) p).getTextNodeWrapper())
         .collect(toSet());
   }
 
-  private List<TextNodeWrapper> getTextNodeWrappersForToken(final TAGToken tagToken) {
-    return tokenToNodeMap.get(tagToken);
+  private List<TokenProvenance> getTokenProvenance(final TAGToken tagToken) {
+    return tokenProvenanceMap.get(tagToken);
   }
 
   public boolean hasDifferences() {
@@ -131,55 +137,73 @@ public class TAGComparison {
   }
 
   public void mergeChanges() {
-    segments.stream()
-        .filter(this::isNotAligned)
-        .forEach(s ->
-            getTextNodeWrappersForSegment(s)
-                .forEach(tn -> handleChanges(s, tn))
-        );
+    for (int i = 0; i < segments.size(); i++) {
+      Segment segment = segments.get(i);
+      if (isNotAligned(segment)) {
+        switch (segment.type()) {
+          case addition:
+            handleAddition(i);
+            break;
+
+          case omission:
+            handleOmission(i);
+            break;
+
+          case replacement:
+            handleReplacement(i);
+            break;
+
+          default:
+            throw new RuntimeException("unexpected type:" + segment.type());
+        }
+      }
+    }
   }
 
   private boolean isNotAligned(final Segment s) {
     return !s.type().equals(aligned);
   }
 
-  private void handleChanges(final Segment segment, final TextNodeWrapper textNodeWrapper) {
-    switch (segment.type()) {
-//      case empty:
-//        handleEmpty(segment, textNodeWrapper);
-//        break;
+  private void handleAddition(final int i) {
+    if (i > 0) {
+      Segment previousSegment = segments.get(i - 1);
+      List<TAGToken> tagTokensA = previousSegment.tokensA();
+      TAGToken previousToken = tagTokensA.get(tagTokensA.size() - 1);
+      List<TokenProvenance> previousTokenProvenances = tokenProvenanceMap.get(previousToken);
+      TokenProvenance previousTokenProvenance = previousTokenProvenances.get(previousTokenProvenances.size() - 1);
 
-      case addition:
-        handleAddition(segment, textNodeWrapper);
-        break;
+    }
+    Segment segment = segments.get(i);
+    if (i < segments.size() - 1) {
+      Segment nextSegment = segments.get(i + 1);
+      List<TAGToken> tagTokensA = nextSegment.tokensA();
+      TAGToken nextToken = tagTokensA.get(0);
+      TokenProvenance nextTokenProvenance = tokenProvenanceMap.get(nextToken).get(0);
+    }
+    final List<TAGToken> tokens2Add = segment.tokensB();
+    final TAGStore store = originalDocument.getStore();
+    for (TAGToken token : tokens2Add) {
 
-      case omission:
-        handleOmission(segment, textNodeWrapper);
-        break;
-
-      case replacement:
-        handleReplacement(segment, textNodeWrapper);
-        break;
-
-      default:
-        throw new RuntimeException("unexpected type:" + segment.type());
     }
 
   }
 
-//  private void handleEmpty(final Segment segment, final TextNodeWrapper textNodeWrapper) {
-//
-//  }
-
-  private void handleAddition(final Segment segment, final TextNodeWrapper textNodeWrapper) {
-
-  }
-
-  private void handleOmission(final Segment segment, final TextNodeWrapper textNodeWrapper) {
+  private void handleOmission(final int i) {
+    Segment segment = segments.get(i);
+    List<TAGToken> toRemove = segment.tokensA();
+    List<TextNodeWrapper> relevantTextNodes = toRemove.stream().map(this::toTextNodeWrapper).distinct().collect(toList());
+//    originalDocument.
 
   }
 
-  private void handleReplacement(final Segment segment, final TextNodeWrapper textNodeWrapper) {
+  private TextNodeWrapper toTextNodeWrapper(final TAGToken tagToken) {
+    return map.get(tagToken);
+  }
+
+  private void handleReplacement(final int i) {
+    Segment segment = segments.get(i);
+    List<TAGToken> toRemove = segment.tokensA();
+    List<TAGToken> toAdd = segment.tokensB();
 
   }
 

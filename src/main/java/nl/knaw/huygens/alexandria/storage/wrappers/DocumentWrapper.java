@@ -175,4 +175,7 @@ public class DocumentWrapper {
     store.persist(document);
   }
 
+  public TAGStore getStore() {
+    return store;
+  }
 }

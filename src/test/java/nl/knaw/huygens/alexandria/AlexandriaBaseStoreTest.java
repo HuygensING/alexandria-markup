@@ -26,6 +26,7 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +37,9 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   protected static TAGStore store;
   protected static LMNLExporter lmnlExporter;
   private static Path tmpDir;
+
+  @Rule
+  public final AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
 
   @BeforeClass
   public static void beforeClass() throws IOException {

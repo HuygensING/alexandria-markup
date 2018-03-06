@@ -44,9 +44,6 @@ public class ViewAlignerTest extends AlexandriaBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(ViewAlignerTest.class);
 
-  @Rule
-  public final AlexandriaSoftAssertions softly = new AlexandriaSoftAssertions();
-
   @Test
   public void testSegmentReplaced() {
     String sourceA = "[TEI}[s}a{s]{TEI]";

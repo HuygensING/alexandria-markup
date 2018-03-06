@@ -24,9 +24,11 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.apache.commons.lang3.Range;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,5 +96,19 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
       assertThat(tokens).extracting("content")//
           .containsExactly("l", "Alas, ", "poor ", "Yorick!", "l");
     });
+  }
+
+  @Test
+  public void testCalcRange() {
+    String text = "1234567890";
+    AtomicInteger ai = new AtomicInteger(0);
+    Range<Integer> range = Tokenizer.calcRange(text, ai);
+    softly.assertThat(range.getMinimum()).isEqualTo(0);
+    softly.assertThat(range.getMaximum()).isEqualTo(10);
+    softly.assertThat(ai.get()).isEqualTo(11);
+
+    Range<Integer> otherRange = Range.between(8, 16);
+    softly.assertThat(range.isOverlappedBy(otherRange)).isTrue();
+    softly.assertThat(otherRange.isOverlappedBy(range)).isTrue();
   }
 }
