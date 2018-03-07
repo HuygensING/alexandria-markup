@@ -321,8 +321,8 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
       LMNLImporter importer = new LMNLImporter(store);
       DocumentWrapper original = importer.importLMNL(originText);
       DocumentWrapper edited = importer.importLMNL(editedText);
-      TAGView allTags = new TAGView(store).setMarkupToInclude(includedTags);
-      TAGComparison comparison = new TAGComparison(original, allTags, edited);
+      TAGView tagView = new TAGView(store).setMarkupToInclude(includedTags);
+      TAGComparison comparison = new TAGComparison(original, tagView, edited);
       comparison.mergeChanges();
       String editedOriginText = new LMNLExporter(store).toLMNL(original);
       assertThat(editedOriginText).isEqualTo(expectedLmnl);

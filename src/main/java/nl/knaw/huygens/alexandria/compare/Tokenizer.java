@@ -87,10 +87,14 @@ class Tokenizer {
       textNodesToJoin.add(tn);
     });
     addTokens(textNodesToJoin);
+    TextNodeWrapper lastTextNodeWrapper = textNodesToJoin.get(textNodesToJoin.size() - 1);
     stream(openMarkup.descendingIterator())//
         .map(MarkupWrapper::getTag)//
         .map(MarkupCloseToken::new)//
-        .forEach(tokens::add);
+        .forEach(t -> {
+          tokens.add(t);
+          tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(lastTextNodeWrapper)));
+        });
   }
 
   private void addTokens(final List<TextNodeWrapper> textNodesToJoin) {

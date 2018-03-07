@@ -221,7 +221,7 @@ public class TAGComparison {
         Segment nextSegment = segments.get(i + 1);
         Optional<TAGToken> firstTextToken = nextSegment.tokensA()
             .stream()
-            .filter(t -> t instanceof TextToken)
+            .filter(TextToken.class::isInstance)
             .findFirst();
         TAGTextNode nextTextNode = ((TextTokenProvenance) tokenProvenanceMap.get(firstTextToken.get()).get(0)).getTextNodeWrapper().getTextNode();
         TextNodeWrapper newTextNode = originalDocument.insertTextNodeBefore(textNode, nextTextNode);
