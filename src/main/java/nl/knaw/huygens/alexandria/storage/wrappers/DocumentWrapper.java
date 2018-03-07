@@ -31,6 +31,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+
 public class DocumentWrapper {
 
   private final TAGStore store;
@@ -136,12 +138,28 @@ public class DocumentWrapper {
     return this;
   }
 
+  public TextNodeWrapper insertTextNodeBefore(TAGTextNode newTextNode, TAGTextNode nextTextNode) {
+    TextNodeWrapper newTextNodeWrapper = new TextNodeWrapper(store, newTextNode);
+    List<Long> textNodeIds = document.getTextNodeIds();
+    Long newId = newTextNode.getId();
+    Long nextId = nextTextNode.getId();
+    int offset = textNodeIds.indexOf(nextId);
+    textNodeIds.add(offset, newId);
+    newTextNode.setNextTextNodeId(nextId);
+    ofNullable(nextTextNode.getPrevTextNodeId())
+        .ifPresent(newTextNode::setPrevTextNodeId);
+    nextTextNode.setPrevTextNodeId(newId);
+    // TODO: add implied markup?
+    update();
+    return newTextNodeWrapper;
+  }
+
   public DocumentWrapper addTextNode(TextNodeWrapper textNode) {
     List<Long> textNodeIds = document.getTextNodeIds();
     textNodeIds.add(textNode.getId());
     if (textNodeIds.size() > 1) {
-      Long textNodeId = textNodeIds.get(textNodeIds.size() - 2);
-      TAGTextNode prevTextNode = store.getTextNode(textNodeId);
+      Long prevTextNodeId = textNodeIds.get(textNodeIds.size() - 2);
+      TAGTextNode prevTextNode = store.getTextNode(prevTextNodeId);
       TextNodeWrapper previousTextNode = new TextNodeWrapper(store, prevTextNode);
       textNode.setPreviousTextNode(previousTextNode);
     }
@@ -178,4 +196,5 @@ public class DocumentWrapper {
   public TAGStore getStore() {
     return store;
   }
+
 }

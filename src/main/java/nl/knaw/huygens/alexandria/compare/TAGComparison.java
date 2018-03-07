@@ -20,8 +20,6 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.TextNode;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
@@ -165,27 +163,96 @@ public class TAGComparison {
   }
 
   private void handleAddition(final int i) {
+    Segment segment = segments.get(i);
+    Optional<TokenProvenance> previousTokenProvenance = getPreviousTokenProvenance(i);
+    Optional<TokenProvenance> nextTokenProvenance = getNextTokenProvenance(i);
+
+    final List<TAGToken> tokens2Add = segment.tokensB();
+//      final TAGStore store = originalDocument.getStore();
+    StringBuilder stringToAdd = new StringBuilder();
+    for (TAGToken token : tokens2Add) {
+      if (token instanceof TextToken) {
+        TextToken textToken = (TextToken) token;
+        stringToAdd.append(textToken.content);
+
+      } else if (token instanceof MarkupOpenToken) {
+        // TODO
+
+      } else if (token instanceof MarkupCloseToken) {
+        // TODO
+
+      } else {
+        throw new RuntimeException("Unknown token type: " + token.getClass());
+      }
+    }
+
+    if (previousTokenProvenance.isPresent() && previousTokenProvenance.get() instanceof TextTokenProvenance) {
+      TextTokenProvenance previousTextTokenProvenance = (TextTokenProvenance) previousTokenProvenance.get();
+      if (nextTokenProvenance.isPresent() && nextTokenProvenance.get() instanceof TextTokenProvenance) {
+        TextTokenProvenance nextTextTokenProvenance = (TextTokenProvenance) nextTokenProvenance.get();
+        TextNodeWrapper previousTextNodeWrapper = previousTextTokenProvenance.getTextNodeWrapper();
+        if (previousTextNodeWrapper.equals(nextTextTokenProvenance.getTextNodeWrapper())) {
+          String originalText = previousTextNodeWrapper.getText();
+          int nextOffset = nextTextTokenProvenance.getOffset() - 1;
+          String head = originalText.substring(0, nextOffset);
+          String tail = originalText.substring(nextOffset);
+          String mergedText = head + stringToAdd + tail;
+          previousTextNodeWrapper.setText(mergedText);
+          previousTextNodeWrapper.update();
+        }
+      } else {
+        TextNodeWrapper previousTextNodeWrapper = previousTextTokenProvenance.getTextNodeWrapper();
+        String originalText = previousTextNodeWrapper.getText();
+        previousTextNodeWrapper.setText(originalText + " " + stringToAdd);
+        previousTextNodeWrapper.update();
+      }
+
+    } else if (nextTokenProvenance.isPresent()) {
+      if (nextTokenProvenance.get() instanceof TextTokenProvenance) {
+        TextTokenProvenance nextTextTokenProvenance = (TextTokenProvenance) nextTokenProvenance.get();
+        TextNodeWrapper nextTextNodeWrapper = nextTextTokenProvenance.getTextNodeWrapper();
+        String originalText = nextTextNodeWrapper.getText();
+        nextTextNodeWrapper.setText(stringToAdd + originalText);
+        nextTextNodeWrapper.update();
+
+      } else {
+        // prepend new TextNode,
+        TAGTextNode textNode = new TAGTextNode(stringToAdd.toString());
+        Segment nextSegment = segments.get(i + 1);
+        Optional<TAGToken> firstTextToken = nextSegment.tokensA()
+            .stream()
+            .filter(t -> t instanceof TextToken)
+            .findFirst();
+        TAGTextNode nextTextNode = ((TextTokenProvenance) tokenProvenanceMap.get(firstTextToken.get()).get(0)).getTextNodeWrapper().getTextNode();
+        TextNodeWrapper newTextNode = originalDocument.insertTextNodeBefore(textNode, nextTextNode);
+      }
+
+    } else {
+      throw new RuntimeException("Unhandled situation!");
+    }
+  }
+
+  private Optional<TokenProvenance> getNextTokenProvenance(int i) {
+    TokenProvenance nextTokenProvenance = null;
+    if (i < segments.size() - 1) {
+      Segment nextSegment = segments.get(i + 1);
+      List<TAGToken> tagTokensA1 = nextSegment.tokensA();
+      TAGToken nextToken = tagTokensA1.get(0);
+      nextTokenProvenance = tokenProvenanceMap.get(nextToken).get(0);
+    }
+    return Optional.ofNullable(nextTokenProvenance);
+  }
+
+  private Optional<TokenProvenance> getPreviousTokenProvenance(int i) {
+    TokenProvenance previousTokenProvenance = null;
     if (i > 0) {
       Segment previousSegment = segments.get(i - 1);
       List<TAGToken> tagTokensA = previousSegment.tokensA();
       TAGToken previousToken = tagTokensA.get(tagTokensA.size() - 1);
       List<TokenProvenance> previousTokenProvenances = tokenProvenanceMap.get(previousToken);
-      TokenProvenance previousTokenProvenance = previousTokenProvenances.get(previousTokenProvenances.size() - 1);
-
+      previousTokenProvenance = previousTokenProvenances.get(previousTokenProvenances.size() - 1);
     }
-    Segment segment = segments.get(i);
-    if (i < segments.size() - 1) {
-      Segment nextSegment = segments.get(i + 1);
-      List<TAGToken> tagTokensA = nextSegment.tokensA();
-      TAGToken nextToken = tagTokensA.get(0);
-      TokenProvenance nextTokenProvenance = tokenProvenanceMap.get(nextToken).get(0);
-    }
-    final List<TAGToken> tokens2Add = segment.tokensB();
-    final TAGStore store = originalDocument.getStore();
-    for (TAGToken token : tokens2Add) {
-
-    }
-
+    return Optional.ofNullable(previousTokenProvenance);
   }
 
   private void handleOmission(final int i) {
@@ -193,7 +260,6 @@ public class TAGComparison {
     List<TAGToken> toRemove = segment.tokensA();
     List<TextNodeWrapper> relevantTextNodes = toRemove.stream().map(this::toTextNodeWrapper).distinct().collect(toList());
 //    originalDocument.
-
   }
 
   private TextNodeWrapper toTextNodeWrapper(final TAGToken tagToken) {

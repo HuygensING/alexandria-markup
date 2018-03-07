@@ -41,7 +41,11 @@ public class TextNodeWrapper {
     return textNode.getText();
   }
 
-  private TAGTextNode getTextNode() {
+  public void setText(String text) {
+    textNode.setText(text);
+  }
+
+  public TAGTextNode getTextNode() {
     return textNode;
   }
 
@@ -69,7 +73,7 @@ public class TextNodeWrapper {
     return new TextNodeWrapper(store, nextTextNode);
   }
 
-  private void update() {
+  public void update() {
     store.persist(textNode);
   }
 

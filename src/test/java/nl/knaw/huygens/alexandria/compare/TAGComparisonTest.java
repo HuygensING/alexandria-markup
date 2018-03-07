@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
@@ -143,7 +144,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{quote]";
     String editedText = "[quote}Any sufficiently advanced code is indistinguishable from magic.{quote]";
     String expected = "[quote}Any [emp}sufficiently advanced code{emp] is indistinguishable from magic.{quote]";
-    Set<String> quote = Collections.singleton("quote");
+    Set<String> quote = singleton("quote");
     assertMerge(originText, quote, editedText, expected);
   }
 
@@ -152,12 +153,78 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{quote]";
     String editedText = "[s}Any sufficiently advanced technology is indistinguishable from magic.{s]";
     String expected = "[s}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{s]";
-    Set<String> quote = Collections.singleton("quote");
+    Set<String> quote = singleton("quote");
     assertMerge(originText, quote, editedText, expected);
   }
 
   @Test
-  public void testMergeTextAddition() {
+  public void testMergeTextPrepend() {
+    String originText = "[l}text{l]";
+    String editedText = "prequel [l}text{l]";
+    String expected = "prequel [l}text{l]";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAppend() {
+    String originText = "[l}text{l]";
+    String editedText = "[l}text{l] postscript";
+    String expected = "[l}text{l] postscript";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAdditionStart() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    String editedText = "[l}A line 1{l]" +
+        "[l}line 2{l]";
+    String expected = "[excerpt}" +
+        "[l}A line 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAdditionMiddle() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    String editedText = "[l}line = 1{l]" +
+        "[l}line 2{l]";
+    String expected = "[excerpt}" +
+        "[l}line = 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAdditionEnd() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1 A{l]" +
+        "[l}line 2{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1 A{l]" +
+        "[l}line 2{l]" +
+        "{excerpt]";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAndMarkupAddition() {
     String originText = "[excerpt}" +
         "[l}line 1{l]" +
         "[l}line 2{l]" +
@@ -173,7 +240,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
         "[l}line 2{l]" +
         "[l}line 3{l]" +
         "{excerpt]";
-    Set<String> lines = Collections.singleton("l");
+    Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
   }
 
@@ -192,7 +259,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
         "[l}line{l] [l}2{l]" +
         "[l}line 3{l]" +
         "{excerpt]";
-    Set<String> lines = Collections.singleton("l");
+    Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
   }
 
@@ -204,12 +271,31 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
         "[l}line 3{l]" +
         "{excerpt]";
     String editedText = "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line{l]";
+    String expected = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line{l]" +
+        "{excerpt]";
+    Set<String> lines = singleton("l");
+    assertMerge(originText, lines, editedText, expected);
+  }
+
+  @Test
+  public void testMergeTextAndMarkupOmission() {
+    String originText = "[excerpt}" +
+        "[l}line 1{l]" +
+        "[l}line 2{l]" +
+        "[l}line 3{l]" +
+        "{excerpt]";
+    String editedText = "[l}line 1{l]" +
         "[l}line 2{l]";
     String expected = "[excerpt}" +
         "[l}line 1{l]" +
         "[l}line 2{l]" +
         "{excerpt]";
-    Set<String> lines = Collections.singleton("l");
+    Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
   }
 
@@ -226,7 +312,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
         "[l}line 1{l]" +
         "[l}line 2 line 3{l]" +
         "{excerpt]";
-    Set<String> lines = Collections.singleton("l");
+    Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
   }
 
