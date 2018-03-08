@@ -19,15 +19,14 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.emptySet;
+import static java.util.Arrays.asList;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.compare.MarkupInfo.State.*;
 import static nl.knaw.huygens.alexandria.compare.Segment.Type.addition;
@@ -36,8 +35,20 @@ public class SegmentToolTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testComputeTextNodeInfo() {
-    List<TAGToken> tokensA = tokenize("");
-    List<TAGToken> tokensB = tokenize("a{x][y}{z]bla bla [b}bla{b]");
+    // ""
+    List<TAGToken> tokensA = new ArrayList<>();
+    // "a{x][y}{z]bla bla [b}bla{b]"
+    List<TAGToken> tokensB = new ArrayList<>(asList(
+        t("a"),
+        mc("x"),
+        mo("y"),
+        mc("z"),
+        t("bla "),
+        t("bla "),
+        mo("b"),
+        t("bla"),
+        mc("b")
+    ));
 
     Segment segment = new Segment(tokensA, tokensB, addition);
     List<TextNodeInfo> textNodeInfos = SegmentTool.computeTextNodeInfo(segment);
@@ -53,7 +64,7 @@ public class SegmentToolTest extends AlexandriaBaseStoreTest {
     assertThat(markupInfo00.getTag()).isEqualTo("x");
     assertThat(markupInfo00.getState()).isEqualTo(openStart);
 
-    MarkupInfo markupInfo01 = markupInfo0.get(0);
+    MarkupInfo markupInfo01 = markupInfo0.get(1);
     assertThat(markupInfo01.getTag()).isEqualTo("z");
     assertThat(markupInfo01.getState()).isEqualTo(openStart);
 
@@ -70,19 +81,27 @@ public class SegmentToolTest extends AlexandriaBaseStoreTest {
     assertThat(textNodeInfo2.getText()).isEqualTo("bla");
 
     List<MarkupInfo> markupInfo2 = textNodeInfo2.getMarkupInfoList();
-    assertThat(markupInfo2).hasSize(1); // [b}
+    assertThat(markupInfo2).hasSize(2); // [y}, [b}
 
-    MarkupInfo markupInfo20 = markupInfo1.get(0);
-    assertThat(markupInfo20.getTag()).isEqualTo("b");
-    assertThat(markupInfo20.getState()).isEqualTo(closed);
+    MarkupInfo markupInfo20 = markupInfo2.get(0);
+    assertThat(markupInfo20.getTag()).isEqualTo("y");
+    assertThat(markupInfo20.getState()).isEqualTo(openEnd);
 
+    MarkupInfo markupInfo21 = markupInfo2.get(1);
+    assertThat(markupInfo21.getTag()).isEqualTo("b");
+    assertThat(markupInfo21.getState()).isEqualTo(closed);
   }
 
-  private List<TAGToken> tokenize(String string) {
-    TAGView tagView = new TAGView(store).setMarkupToExclude(emptySet());
-    LMNLImporter importer = new LMNLImporter(store);
-    DocumentWrapper aDocument = importer.importLMNL(string);
-    return new Tokenizer(aDocument, tagView).getTAGTokens();
+  private static TextToken t(String content) {
+    return new TextToken(content);
+  }
+
+  private static MarkupOpenToken mo(String content) {
+    return new MarkupOpenToken(content);
+  }
+
+  private static MarkupCloseToken mc(String content) {
+    return new MarkupCloseToken(content);
   }
 
 }

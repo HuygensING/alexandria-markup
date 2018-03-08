@@ -19,11 +19,17 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.compare.MarkupInfo.State.closed;
+import static nl.knaw.huygens.alexandria.compare.MarkupInfo.State.openStart;
 
 public class TextNodeInfo {
   private String text;
-  private List<MarkupInfo> markupInfoList;
+  private List<MarkupInfo> markupInfoList = new ArrayList<>();
 
   public String getText() {
     return text;
@@ -46,6 +52,18 @@ public class TextNodeInfo {
   }
 
   public void closeMarkup(String tag) {
-    // TODO
+    List<MarkupInfo> matchingMarkupOpen = markupInfoList.stream()
+        .filter(mi -> isMarkupOpen(tag, mi))
+        .collect(toList());
+    if (matchingMarkupOpen.isEmpty()) {
+      markupInfoList.add(new MarkupInfo(tag, openStart));
+    } else {
+      matchingMarkupOpen.get(matchingMarkupOpen.size() - 1).setState(closed);
+    }
+  }
+
+  private boolean isMarkupOpen(final String tag, final MarkupInfo mi) {
+    return MarkupInfo.State.openEnd.equals(mi.getState())
+        && tag.equals(mi.getTag());
   }
 }

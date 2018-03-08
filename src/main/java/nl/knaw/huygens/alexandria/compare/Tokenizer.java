@@ -44,6 +44,10 @@ class Tokenizer {
   Map<TAGToken, List<TokenProvenance>> tokenProvenanceMap = new HashMap<>();
 
   public Tokenizer(DocumentWrapper document, TAGView tagView) {
+    if (!document.hasTextNodes()) {
+      return;
+    }
+
     Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
 //    StringBuilder textBuilder = new StringBuilder();
     List<TextNodeWrapper> textNodesToJoin = new ArrayList<>();
