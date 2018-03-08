@@ -28,6 +28,7 @@ import org.apache.commons.lang3.Range;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singleton;
@@ -95,7 +96,55 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
       List<TAGToken> tokens = tokenizer.getTAGTokens();
       assertThat(tokens).extracting("content")//
           .containsExactly("l", "Alas, ", "poor ", "Yorick!", "l");
+
+      Map<TAGToken, List<TokenProvenance>> tokenProvenanceMap = tokenizer.getTokenProvenanceMap();
+
+      // [l}
+      TAGToken tagToken0 = tokens.get(0);
+      List<TokenProvenance> tokenProvenances0 = tokenProvenanceMap.get(tagToken0);
+      assertThat(tokenProvenances0).hasSize(1);
+
+      assertMarkupOpenTokenProvenance(tokenProvenances0.get(0), "l", "Alas,");
+
+      // "Alas, "
+      TAGToken tagToken1 = tokens.get(1);
+      List<TokenProvenance> tokenProvenances1 = tokenProvenanceMap.get(tagToken1);
+      assertThat(tokenProvenances1).hasSize(2);
+
+      assertTextTokenProvenance(tokenProvenances1.get(0), 0, "Alas,");
+      assertTextTokenProvenance(tokenProvenances1.get(1), 0, " ");
+
+      // {l]
+      TAGToken tagToken4 = tokens.get(4);
+      List<TokenProvenance> tokenProvenances4 = tokenProvenanceMap.get(tagToken4);
+      assertThat(tokenProvenances4).hasSize(1);
+
+      assertMarkupCloseTokenProvenance(tokenProvenances4.get(0), "l", "poor Yorick!");
     });
+  }
+
+  private void assertMarkupOpenTokenProvenance(final TokenProvenance tokenProvenance, final String expectedTag, final String expectedTextNodeText) {
+    assertThat(tokenProvenance).isInstanceOf(MarkupOpenTokenProvenance.class);
+
+    MarkupOpenTokenProvenance markupOpenTokenProvenance = (MarkupOpenTokenProvenance) tokenProvenance;
+    assertThat(markupOpenTokenProvenance.getTag()).isEqualTo(expectedTag);
+    assertThat(markupOpenTokenProvenance.getTextNodeWrapper().getText()).isEqualTo(expectedTextNodeText);
+  }
+
+  private void assertTextTokenProvenance(final TokenProvenance tokenProvenance, final int expectedOffset, final String expectedContent) {
+    assertThat(tokenProvenance).isInstanceOf(TextTokenProvenance.class);
+
+    TextTokenProvenance textTokenProvenance11 = (TextTokenProvenance) tokenProvenance;
+    assertThat(textTokenProvenance11.getOffset()).isEqualTo(expectedOffset);
+    assertThat(textTokenProvenance11.getTextNodeWrapper().getText()).isEqualTo(expectedContent);
+  }
+
+  private void assertMarkupCloseTokenProvenance(final TokenProvenance tokenProvenance, final String expectedTag, final String expectedTextNodeText) {
+    assertThat(tokenProvenance).isInstanceOf(MarkupCloseTokenProvenance.class);
+
+    MarkupCloseTokenProvenance markupCloseTokenProvenance = (MarkupCloseTokenProvenance) tokenProvenance;
+    assertThat(markupCloseTokenProvenance.getTag()).isEqualTo(expectedTag);
+    assertThat(markupCloseTokenProvenance.getTextNodeWrapper().getText()).isEqualTo(expectedTextNodeText);
   }
 
   @Test

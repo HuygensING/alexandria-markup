@@ -44,7 +44,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatedMarkupId;
   private Long dominatingMarkupId;
 
-  private TAGMarkup() {
+  public TAGMarkup() {
   }
 
   public TAGMarkup(long documentId, String tagName) {
@@ -69,8 +69,9 @@ public class TAGMarkup implements TAGObject {
     return tag;
   }
 
-  public void setTag(String tag) {
+  public TAGMarkup setTag(String tag) {
     this.tag = tag;
+    return this;
   }
 
   public List<Long> getAnnotationIds() {

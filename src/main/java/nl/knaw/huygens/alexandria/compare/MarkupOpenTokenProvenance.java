@@ -19,13 +19,30 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 
 public class MarkupOpenTokenProvenance implements TokenProvenance {
 
+  // The textnode where the markup begins
   private TextNodeWrapper textNodeWrapper;
+  private String tag;
 
-  public MarkupOpenTokenProvenance(final TextNodeWrapper textNodeWrapper) {
+  public MarkupOpenTokenProvenance(final String tag, final TextNodeWrapper textNodeWrapper) {
+    this.tag = tag;
     this.textNodeWrapper = textNodeWrapper;
   }
+
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(final String tag) {
+    this.tag = tag;
+  }
+
+  public TextNodeWrapper getTextNodeWrapper() {
+    return textNodeWrapper;
+  }
+
 }

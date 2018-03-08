@@ -19,9 +19,11 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import static java.lang.String.format;
 
 public class MarkupInfo {
+
   enum State {openStart, openEnd, closed}
 
   private String tag;
@@ -46,6 +48,10 @@ public class MarkupInfo {
 
   public void setState(State state) {
     this.state = state;
+  }
+
+  public boolean isClosed() {
+    return State.closed.equals(state);
   }
 
   @Override

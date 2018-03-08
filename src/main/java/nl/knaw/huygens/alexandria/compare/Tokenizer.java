@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
@@ -52,6 +53,7 @@ class Tokenizer {
 //    StringBuilder textBuilder = new StringBuilder();
     List<TextNodeWrapper> textNodesToJoin = new ArrayList<>();
     List<TextNodeWrapper> textNodesToMap = new ArrayList<>();
+    AtomicReference<TextNodeWrapper> previousTextNode = new AtomicReference<TextNodeWrapper>();
     document.getTextNodeStream().forEach(tn -> {
       textNodesToMap.add(tn);
       List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
@@ -77,7 +79,7 @@ class Tokenizer {
           .map(MarkupCloseToken::new)//
           .forEach(t -> {
             tokens.add(t);
-            tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(tn)));
+            tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(t.content, previousTextNode.get())));
           });
 
       toOpen.stream()//
@@ -85,19 +87,19 @@ class Tokenizer {
           .map(MarkupOpenToken::new)//
           .forEach(t -> {
             tokens.add(t);
-            tokenProvenanceMap.put(t, singletonList(new MarkupOpenTokenProvenance(tn)));
+            tokenProvenanceMap.put(t, singletonList(new MarkupOpenTokenProvenance(t.content, tn)));
           });
 
       textNodesToJoin.add(tn);
+      previousTextNode.set(tn);
     });
     addTokens(textNodesToJoin);
-    TextNodeWrapper lastTextNodeWrapper = textNodesToJoin.get(textNodesToJoin.size() - 1);
     stream(openMarkup.descendingIterator())//
         .map(MarkupWrapper::getTag)//
         .map(MarkupCloseToken::new)//
         .forEach(t -> {
           tokens.add(t);
-          tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(lastTextNodeWrapper)));
+          tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(t.content, previousTextNode.get())));
         });
   }
 

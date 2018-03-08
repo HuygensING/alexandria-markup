@@ -52,7 +52,6 @@ public class SegmentTool {
         lastTextNodeInfo.closeMarkup(markupCloseToken.content);
         closingMarkup.add(token);
         state = ParseState.markup;
-
       }
 
     }

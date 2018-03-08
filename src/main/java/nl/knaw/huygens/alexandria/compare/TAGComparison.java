@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.data_model.TextNode;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
@@ -164,6 +165,22 @@ public class TAGComparison {
 
   private void handleAddition(final int i) {
     Segment segment = segments.get(i);
+    List<TextNodeInfo> textNodeInfos = SegmentTool.computeTextNodeInfo(segment);
+
+    for (TextNodeInfo textNodeInfo : textNodeInfos) {
+      TextNode newTextNode = new TextNode(textNodeInfo.getText());
+//      originalDocument.
+//      textNodeInfo.getMarkupInfoList()
+//          .stream()
+//          .filter(MarkupInfo::isClosed)
+//          .forEach(mi -> {
+//            TAGMarkup m = new TAGMarkup(originalDocument.getDocument(), mi.getTag());
+//            originalDocument.addMarkup(m);
+//            originalDocument.associateTextNodeWithMarkup(newTextNode);
+//          });
+
+    }
+
     Optional<TokenProvenance> previousTokenProvenance = getPreviousTokenProvenance(i);
     Optional<TokenProvenance> nextTokenProvenance = getNextTokenProvenance(i);
 
