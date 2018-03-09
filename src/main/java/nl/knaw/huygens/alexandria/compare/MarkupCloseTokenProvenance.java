@@ -20,24 +20,14 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 
-public class MarkupCloseTokenProvenance implements TokenProvenance {
+public class MarkupCloseTokenProvenance extends MarkupTokenProvenance {
 
-  // the textnode after which this markup ends.
-  private TextNodeWrapper textNodeWrapper;
-  private String tag;
-
-  public MarkupCloseTokenProvenance(final String tag, final TextNodeWrapper textNodeWrapper) {
-    this.tag = tag;
-    this.textNodeWrapper = textNodeWrapper;
+  public MarkupCloseTokenProvenance(final String tag, final TextNodeWrapper textNodeWrapper, final MarkupWrapper markupWrapper) {
+    // the textnode after which this markup ends.
+    super(tag, textNodeWrapper, markupWrapper);
   }
 
-  public String getTag() {
-    return tag;
-  }
-
-  public TextNodeWrapper getTextNodeWrapper() {
-    return textNodeWrapper;
-  }
 }

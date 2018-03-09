@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 class Tokenizer {
   public static final Pattern PATTERN = Pattern.compile("\\w+|[^\\w\\s]+");
@@ -54,10 +53,10 @@ class Tokenizer {
     List<TextNodeWrapper> textNodesToJoin = new ArrayList<>();
     List<TextNodeWrapper> textNodesToMap = new ArrayList<>();
     AtomicReference<TextNodeWrapper> previousTextNode = new AtomicReference<TextNodeWrapper>();
-    document.getTextNodeStream().forEach(tn -> {
+    document.getTextNodeStream().forEach((TextNodeWrapper tn) -> {
       textNodesToMap.add(tn);
       List<MarkupWrapper> markups = document.getMarkupStreamForTextNode(tn)//
-          .filter(tagView::isIncluded)//
+          .filter(markupWrapper -> tagView == null || tagView.isIncluded(markupWrapper))//
           .collect(toList());
 
       List<MarkupWrapper> toClose = new ArrayList<>(openMarkup);
@@ -74,55 +73,60 @@ class Tokenizer {
         addTokens(textNodesToJoin);
         textNodesToJoin.clear();
       }
-      toClose.stream()//
-          .map(MarkupWrapper::getTag)//
-          .map(MarkupCloseToken::new)//
-          .forEach(t -> {
-            tokens.add(t);
-            tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(t.content, previousTextNode.get())));
-          });
 
-      toOpen.stream()//
-          .map(MarkupWrapper::getTag)//
-          .map(MarkupOpenToken::new)//
-          .forEach(t -> {
-            tokens.add(t);
-            tokenProvenanceMap.put(t, singletonList(new MarkupOpenTokenProvenance(t.content, tn)));
-          });
+      for (MarkupWrapper markupWrapper : toClose) {
+        handleMarkupClose(markupWrapper, previousTextNode);
+      }
+
+      for (MarkupWrapper markupWrapper : toOpen) {
+        MarkupOpenToken markupOpenToken = new MarkupOpenToken(markupWrapper.getTag());// TODO: add markup annotations
+        tokens.add(markupOpenToken);
+        TokenProvenance markupOpenTokenProvenance = new MarkupOpenTokenProvenance(markupOpenToken.content, tn, markupWrapper);
+        tokenProvenanceMap.put(markupOpenToken, singletonList(markupOpenTokenProvenance));
+      }
 
       textNodesToJoin.add(tn);
       previousTextNode.set(tn);
     });
     addTokens(textNodesToJoin);
-    stream(openMarkup.descendingIterator())//
-        .map(MarkupWrapper::getTag)//
-        .map(MarkupCloseToken::new)//
-        .forEach(t -> {
-          tokens.add(t);
-          tokenProvenanceMap.put(t, singletonList(new MarkupCloseTokenProvenance(t.content, previousTextNode.get())));
-        });
+    openMarkup.descendingIterator().forEachRemaining((MarkupWrapper mw) -> handleMarkupClose(mw, previousTextNode));
+  }
+
+  private void handleMarkupClose(final MarkupWrapper markupWrapper, final AtomicReference<TextNodeWrapper> previousTextNode) {
+    MarkupCloseToken markupCloseToken = new MarkupCloseToken(markupWrapper.getTag());// TODO: add markup annotations
+    tokens.add(markupCloseToken);
+    TokenProvenance markupCloseTokenProvenance = new MarkupCloseTokenProvenance(markupCloseToken.content, previousTextNode.get(), markupWrapper);
+    tokenProvenanceMap.put(markupCloseToken, singletonList(markupCloseTokenProvenance));
   }
 
   private void addTokens(final List<TextNodeWrapper> textNodesToJoin) {
     String joinedText = textNodesToJoin.stream().map(TextNodeWrapper::getText).collect(joining());
     Map<TextNodeWrapper, Range<Integer>> textNodeRanges = getTextNodeWrapperRangeMap(textNodesToJoin);
-    AtomicInteger start = new AtomicInteger(0);
+    AtomicInteger offsetInJoinedText = new AtomicInteger(0);
     for (TextToken t : tokenizeText(joinedText)) {
       tokens.add(t);
-      final int offset = start.get();
-      Range<Integer> range = calcRange(t.content, start);
-      final List<TokenProvenance> textNodeWrappers = textNodeRanges.keySet()
-          .stream()
-          .filter(tn -> textNodeRanges.get(tn).isOverlappedBy(range))
-          .map(tn -> new TextTokenProvenance(tn, offset))
-          .collect(toList());
-      tokenProvenanceMap.put(t, textNodeWrappers);
+      Range<Integer> tokenRange = calcRange(t.content, offsetInJoinedText);
+
+      List<TokenProvenance> textTokenProvenances = new ArrayList<>();
+      for (TextNodeWrapper tn : textNodesToJoin) {
+        Range<Integer> textNodeRange = textNodeRanges.get(tn);
+        if (textNodeRange.isOverlappedBy(tokenRange)) {
+          Integer textNodeRangeMinimum = textNodeRange.getMinimum();
+          Integer tokenRangeMinimum = tokenRange.getMinimum();
+          int offsetInTextNode = (textNodeRangeMinimum < tokenRangeMinimum)
+              ? tokenRangeMinimum - textNodeRangeMinimum
+              : 0;
+          TextTokenProvenance textTokenProvenance = new TextTokenProvenance(tn, offsetInTextNode);
+          textTokenProvenances.add(textTokenProvenance);
+        }
+      }
+      tokenProvenanceMap.put(t, textTokenProvenances);
     }
   }
 
   static Range<Integer> calcRange(final String content, final AtomicInteger start) {
     int fromInclusive = start.get();
-    int toInclusive = fromInclusive + content.length();
+    int toInclusive = fromInclusive + content.length() - 1;
     Range<Integer> range = Range.between(fromInclusive, toInclusive);
     start.set(toInclusive + 1);
     return range;

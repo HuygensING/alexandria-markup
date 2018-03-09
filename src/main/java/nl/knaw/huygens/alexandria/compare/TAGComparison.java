@@ -27,15 +27,16 @@ import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 import static nl.knaw.huygens.alexandria.compare.Segment.Type.aligned;
 
 public class TAGComparison {
   private final List<Segment> segments;
   private final Map<TAGToken, List<TokenProvenance>> tokenProvenanceMap;
   private final DocumentWrapper originalDocument;
-  private final Map<TAGToken, TextNodeWrapper> map = new HashMap<>();
 
   public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
     this.originalDocument = originalDocument;
@@ -44,7 +45,7 @@ public class TAGComparison {
     Tokenizer originalTokenizer = new Tokenizer(originalDocument, tagView);
     tokenProvenanceMap = originalTokenizer.getTokenProvenanceMap();
     List<TAGToken> originalTokens = originalTokenizer.getTAGTokens();
-    List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
+    List<TAGToken> editedTokens = new Tokenizer(otherDocument, null).getTAGTokens();
     segments = new ViewAligner(scorer, segmenter).align(originalTokens, editedTokens);
   }
 
@@ -145,11 +146,11 @@ public class TAGComparison {
             break;
 
           case omission:
-            handleOmission(i);
+            handleOmission(segment);
             break;
 
           case replacement:
-            handleReplacement(i);
+            handleReplacement(segment);
             break;
 
           default:
@@ -272,22 +273,47 @@ public class TAGComparison {
     return Optional.ofNullable(previousTokenProvenance);
   }
 
-  private void handleOmission(final int i) {
-    Segment segment = segments.get(i);
-    List<TAGToken> toRemove = segment.tokensA();
-    List<TextNodeWrapper> relevantTextNodes = toRemove.stream().map(this::toTextNodeWrapper).distinct().collect(toList());
+  private void handleOmission(final Segment segment) {
+    segment.tokensA()
+        .stream()
+        .filter(TextToken.class::isInstance)
+        .forEach(token -> tokenProvenanceMap.get(token)
+            .forEach(tokenProvenance -> {
+              TextTokenProvenance textTokenProvenance = (TextTokenProvenance) tokenProvenance;
+              TextNodeWrapper textNodeWrapper = textTokenProvenance.getTextNodeWrapper();
+              String originalText = textNodeWrapper.getText();
+              String head = originalText.substring(0, textTokenProvenance.getOffset());
+              String tail = originalText.substring(textTokenProvenance.getOffset() + token.content.length());
+              String newText = head + tail;
+              textNodeWrapper.setText(newText);
+              textNodeWrapper.update();
+            }));
 //    originalDocument.
   }
 
-  private TextNodeWrapper toTextNodeWrapper(final TAGToken tagToken) {
-    return map.get(tagToken);
-  }
+  private void handleReplacement(final Segment segment) {
+    List<TAGToken> toRemove = segment.tokensA().stream()
+        .filter(TextToken.class::isInstance)
+        .collect(Collectors.toList());
 
-  private void handleReplacement(final int i) {
-    Segment segment = segments.get(i);
-    List<TAGToken> toRemove = segment.tokensA();
-    List<TAGToken> toAdd = segment.tokensB();
+    List<TAGToken> toAdd = segment.tokensB().stream()
+        .filter(TextToken.class::isInstance)
+        .collect(Collectors.toList());
+    if (toRemove.size() == 1 && tokenProvenanceMap.get(toRemove.get(0)).size() == 1) {
+      TAGToken token = toRemove.get(0);
+      TextTokenProvenance textTokenProvenance = (TextTokenProvenance) tokenProvenanceMap.get(toRemove.get(0)).get(0);
+      TextNodeWrapper textNodeWrapper = textTokenProvenance.getTextNodeWrapper();
+      String originalText = textNodeWrapper.getText();
+      String head = originalText.substring(0, textTokenProvenance.getOffset());
+      String tail = originalText.substring(textTokenProvenance.getOffset() + token.content.length());
+      String replace = toAdd.stream().map(t -> t.content).collect(joining());
+      String newText = head + replace + tail;
+      textNodeWrapper.setText(newText);
+      textNodeWrapper.update();
 
+    } else {
+      throw new RuntimeException("TODO: unhandled situation!");
+    }
   }
 
 }

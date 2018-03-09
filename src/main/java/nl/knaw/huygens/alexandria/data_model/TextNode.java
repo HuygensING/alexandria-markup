@@ -70,7 +70,6 @@ public class TextNode {
 
   public void setContent(String content) {
     this.content = content;
-
   }
 
   public void addParent(Markup parent) {

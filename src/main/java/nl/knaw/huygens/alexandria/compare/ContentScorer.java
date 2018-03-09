@@ -23,6 +23,6 @@ public class ContentScorer implements Scorer {
 
   @Override
   public boolean match(TAGToken tokenA, TAGToken tokenB) {
-    return tokenA.normalizedContent.equals(tokenB.normalizedContent);
+    return tokenA.content.equals(tokenB.content);
   }
 }

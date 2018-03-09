@@ -150,11 +150,11 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testCalcRange() {
     String text = "1234567890";
-    AtomicInteger ai = new AtomicInteger(0);
-    Range<Integer> range = Tokenizer.calcRange(text, ai);
+    AtomicInteger offset = new AtomicInteger(0);
+    Range<Integer> range = Tokenizer.calcRange(text, offset);
     softly.assertThat(range.getMinimum()).isEqualTo(0);
-    softly.assertThat(range.getMaximum()).isEqualTo(10);
-    softly.assertThat(ai.get()).isEqualTo(11);
+    softly.assertThat(range.getMaximum()).isEqualTo(9);
+    softly.assertThat(offset.get()).isEqualTo(10);
 
     Range<Integer> otherRange = Range.between(8, 16);
     softly.assertThat(range.isOverlappedBy(otherRange)).isTrue();

@@ -146,6 +146,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String expected = "[quote}Any [emp}sufficiently advanced code{emp] is indistinguishable from magic.{quote]";
     Set<String> quote = singleton("quote");
     assertMerge(originText, quote, editedText, expected);
+    // [sufficiently ... technology] textnode needs to change
   }
 
   @Test
@@ -153,8 +154,9 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String originText = "[quote}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{quote]";
     String editedText = "[s}Any sufficiently advanced technology is indistinguishable from magic.{s]";
     String expected = "[s}Any [emp}sufficiently advanced technology{emp] is indistinguishable from magic.{s]";
-    Set<String> quote = singleton("quote");
-    assertMerge(originText, quote, editedText, expected);
+    Set<String> tagsShown = singleton("quote");
+    assertMerge(originText, tagsShown, editedText, expected);
+    // change quote markup, set tag = s
   }
 
   @Test
@@ -164,6 +166,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String expected = "prequel [l}text{l]";
     Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
+    // add a textnode "prequel " at the start of the textnode chain
   }
 
   @Test
@@ -173,6 +176,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String expected = "[l}text{l] postscript";
     Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);
+    // add a textnode " postscript" at the end of the textnode chain
   }
 
   @Test
@@ -268,15 +272,15 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     String originText = "[excerpt}" +
         "[l}line 1{l]" +
         "[l}line 2{l]" +
-        "[l}line 3{l]" +
+        "[l}line 3 4{l]" +
         "{excerpt]";
     String editedText = "[l}line 1{l]" +
         "[l}line 2{l]" +
-        "[l}line{l]";
+        "[l}line 4{l]";
     String expected = "[excerpt}" +
         "[l}line 1{l]" +
         "[l}line 2{l]" +
-        "[l}line{l]" +
+        "[l}line 4{l]" +
         "{excerpt]";
     Set<String> lines = singleton("l");
     assertMerge(originText, lines, editedText, expected);

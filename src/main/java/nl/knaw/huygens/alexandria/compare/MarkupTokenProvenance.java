@@ -23,11 +23,27 @@ package nl.knaw.huygens.alexandria.compare;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 
-public class MarkupOpenTokenProvenance extends MarkupTokenProvenance {
+public abstract class MarkupTokenProvenance implements TokenProvenance {
 
-  public MarkupOpenTokenProvenance(final String tag, final TextNodeWrapper textNodeWrapper, final MarkupWrapper markupWrapper) {
-    // The textnode where the markup begins
-    super(tag, textNodeWrapper, markupWrapper);
+  private TextNodeWrapper textNodeWrapper;
+  private MarkupWrapper markupWrapper;
+  private String tag;
+
+  public MarkupTokenProvenance(final String tag, final TextNodeWrapper textNodeWrapper, final MarkupWrapper markupWrapper) {
+    this.tag = tag;
+    this.textNodeWrapper = textNodeWrapper;
+    this.markupWrapper = markupWrapper;
   }
 
+  public String getTag() {
+    return tag;
+  }
+
+  public TextNodeWrapper getTextNodeWrapper() {
+    return textNodeWrapper;
+  }
+
+  public MarkupWrapper getMarkupWrapper() {
+    return markupWrapper;
+  }
 }

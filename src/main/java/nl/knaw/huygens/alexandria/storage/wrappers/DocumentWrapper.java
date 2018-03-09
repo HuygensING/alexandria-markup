@@ -42,7 +42,6 @@ public class DocumentWrapper {
   public DocumentWrapper(TAGStore store, TAGDocument document) {
     this.store = store;
     this.document = document;
-//    update();
   }
 
   public TAGDocument getDocument() {
