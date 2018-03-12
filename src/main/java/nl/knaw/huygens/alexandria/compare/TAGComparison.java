@@ -27,10 +27,8 @@ import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static nl.knaw.huygens.alexandria.compare.Segment.Type.aligned;
 
 public class TAGComparison {
@@ -211,7 +209,7 @@ public class TAGComparison {
         TextNodeWrapper previousTextNodeWrapper = previousTextTokenProvenance.getTextNodeWrapper();
         if (previousTextNodeWrapper.equals(nextTextTokenProvenance.getTextNodeWrapper())) {
           String originalText = previousTextNodeWrapper.getText();
-          int nextOffset = nextTextTokenProvenance.getOffset() - 1;
+          int nextOffset = nextTextTokenProvenance.getOffset();
           String head = originalText.substring(0, nextOffset);
           String tail = originalText.substring(nextOffset);
           String mergedText = head + stringToAdd + tail;
@@ -246,7 +244,17 @@ public class TAGComparison {
       }
 
     } else {
-      throw new RuntimeException("Unhandled situation!");
+      TAGTextNode textNode = new TAGTextNode(stringToAdd.toString());
+      Segment prevSegment = segments.get(i - 1);
+      List<TAGToken> textTokens = prevSegment.tokensA()
+          .stream()
+          .filter(TextToken.class::isInstance)
+          .collect(toList());
+      TAGToken lastTextToken = textTokens.get(textTokens.size() - 1);
+      List<TokenProvenance> tokenProvenances = tokenProvenanceMap.get(lastTextToken);
+      TextTokenProvenance textTokenProvenance = (TextTokenProvenance) tokenProvenances.get(tokenProvenances.size() - 1);
+      TAGTextNode prevTextNode = textTokenProvenance.getTextNodeWrapper().getTextNode();
+      originalDocument.insertTextNodeAfter(textNode, prevTextNode);
     }
   }
 
@@ -294,11 +302,11 @@ public class TAGComparison {
   private void handleReplacement(final Segment segment) {
     List<TAGToken> toRemove = segment.tokensA().stream()
         .filter(TextToken.class::isInstance)
-        .collect(Collectors.toList());
+        .collect(toList());
 
     List<TAGToken> toAdd = segment.tokensB().stream()
         .filter(TextToken.class::isInstance)
-        .collect(Collectors.toList());
+        .collect(toList());
     if (toRemove.size() == 1 && tokenProvenanceMap.get(toRemove.get(0)).size() == 1) {
       TAGToken token = toRemove.get(0);
       TextTokenProvenance textTokenProvenance = (TextTokenProvenance) tokenProvenanceMap.get(toRemove.get(0)).get(0);

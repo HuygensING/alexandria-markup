@@ -153,6 +153,22 @@ public class DocumentWrapper {
     return newTextNodeWrapper;
   }
 
+  public TextNodeWrapper insertTextNodeAfter(TAGTextNode newTextNode, TAGTextNode prevTextNode) {
+    TextNodeWrapper newTextNodeWrapper = new TextNodeWrapper(store, newTextNode);
+    List<Long> textNodeIds = document.getTextNodeIds();
+    Long newId = newTextNode.getId();
+    Long prevId = prevTextNode.getId();
+    int offset = textNodeIds.indexOf(prevId)+1;
+    textNodeIds.add(offset, newId);
+    newTextNode.setPrevTextNodeId(prevId);
+    ofNullable(prevTextNode.getNextTextNodeId())
+        .ifPresent(newTextNode::setNextTextNodeId);
+    prevTextNode.setNextTextNodeId(newId);
+    // TODO: add implied markup?
+    update();
+    return newTextNodeWrapper;
+  }
+
   public DocumentWrapper addTextNode(TextNodeWrapper textNode) {
     List<Long> textNodeIds = document.getTextNodeIds();
     textNodeIds.add(textNode.getId());
