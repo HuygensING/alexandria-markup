@@ -240,7 +240,7 @@ public class TAGComparison {
             .filter(TextToken.class::isInstance)
             .findFirst();
         TAGTextNode nextTextNode = ((TextTokenProvenance) tokenProvenanceMap.get(firstTextToken.get()).get(0)).getTextNodeWrapper().getTextNode();
-        TextNodeWrapper newTextNode = originalDocument.insertTextNodeBefore(textNode, nextTextNode);
+        originalDocument.insertTextNodeBefore(textNode, nextTextNode);
       }
 
     } else {
