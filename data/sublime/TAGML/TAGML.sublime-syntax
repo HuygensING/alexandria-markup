@@ -1,0 +1,25 @@
+%YAML 1.2
+---
+name: TAGML
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - tagml
+scope: source.tagml
+
+contexts:
+  main:
+    - match: "\\[[^>]*>"
+      scope: markup.open.tagml
+
+    - match: "<[^]]*]"
+      scope: markup.close.tagml
+
+    - match: "\\|>"
+      scope: set.open.tagml
+
+    - match: "<\\|"
+      scope: set.close.tagml
+
+    - match: "\\[!ns\\w\\W+\\w\\W+]"
+      scope: namespace.tagml
+
