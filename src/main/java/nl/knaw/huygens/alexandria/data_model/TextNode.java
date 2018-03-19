@@ -21,9 +21,6 @@ package nl.knaw.huygens.alexandria.data_model;
  */
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  * <p>
@@ -34,7 +31,6 @@ public class TextNode {
   private String content = "";
   private TextNode previousTextNode = null; // for the leftmost (first) TextNode, this is null;
   private TextNode nextTextNode = null; // for the rightmost (last) TextNode, this is null;
-  private final Set<Markup> parents = new HashSet<>();
 
   public TextNode(String content) {
     this.content = content;
@@ -73,17 +69,6 @@ public class TextNode {
 
   }
 
-  public void addParent(Markup parent) {
-    parents.add(parent);
-  }
-
-  public void removeParent(Markup parent) {
-    parents.remove(parent);
-  }
-
-  public Set<Markup> getParents() {
-    return parents;
-  }
 
   @Override
   public String toString() {
