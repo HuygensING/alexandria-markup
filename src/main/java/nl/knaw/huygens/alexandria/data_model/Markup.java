@@ -36,8 +36,8 @@ public class Markup {
   private String id = ""; // LMNL, should be unique
   private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
-  public final List<TextNode> textNodes;
-  private Markup dominatedMarkup; // markup that's dominated by this markup
+  public final List<TextNode> textNodes; // TODO: move TextNode-Markup hyperEdge to graph
+  private Markup dominatedMarkup; // markup that's dominated by this markup // TODO: move to Markup-Markup Edge
   private Markup dominatingMarkup; // markup that dominates this markup
 
   public Markup(Limen owner, String tag) {
