@@ -1,4 +1,4 @@
-TAG based on LMNL, so validation based on Creole?
+TAGML based on LMNL, so validation based on Creole?
 Creole based on relax ng
 validation with 1 schema.
 labeling seperate hierarchies in the schema

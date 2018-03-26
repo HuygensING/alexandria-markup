@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -167,7 +168,7 @@ public class TAGMLImporter {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + ">")//
             .collect(Collectors.joining(", "));
-        errors.add("Unclosed TAGML markup(s): " + openRanges);
+        errors.add("Unclosed TAGML tag(s): " + openRanges);
       }
       return documentContext;
     }
@@ -244,7 +245,7 @@ public class TAGMLImporter {
     TAGDocument document = documentWrapper.getDocument();
     update(document);
     context.pushDocumentContext(document);
-//    handleDefaultMode(context);
+    handleDefaultMode(context);
 //    joinDiscontinuedRanges(documentWrapper);
     context.popDocumentContext();
 
@@ -262,6 +263,113 @@ public class TAGMLImporter {
     }
     update(document);
     return documentWrapper;
+  }
+
+  private void handleDefaultMode(TAGMLImporter.ImporterContext context) {
+    String methodName = "defaultMode";
+    Token token;
+    do {
+      token = context.nextToken();
+      if (token.getType() != Token.EOF) {
+        String ruleName = context.getRuleName();
+        String modeName = context.getModeName();
+        log(methodName, ruleName, modeName, token, context);
+        switch (token.getType()) {
+          case TAGMLLexer.BEGIN_OPEN_MARKUP:
+            handleOpenMarkup(context);
+            break;
+
+          case TAGMLLexer.BEGIN_CLOSE_MARKUP:
+            handleCloseMarkup(context);
+            break;
+
+          case TAGMLLexer.TEXT:
+            TAGTextNode textNode = new TAGTextNode(token.getText());
+            update(textNode);
+            context.addTextNode(textNode);
+            break;
+
+          default:
+            handleUnexpectedToken(methodName, token, ruleName, modeName);
+            break;
+        }
+      }
+    } while (token.getType() != Token.EOF);
+  }
+
+  private void handleOpenMarkup(ImporterContext context) {
+    String methodName = "handleOpenMarkup";
+    boolean goOn = true;
+    while (goOn) {
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log(methodName, ruleName, modeName, token, context);
+      switch (token.getType()) {
+        case TAGMLLexer.Name_Open_Range:
+          TAGMarkup markup = context.newMarkup(token.getText());
+          context.openMarkup(markup);
+          break;
+//        case TAGMLLexer.BEGIN_OPEN_ANNO:
+//          handleAnnotation(context);
+//          break;
+        case TAGMLLexer.END_OPEN_MARKUP:
+          context.popOpenMarkup();
+          goOn = false;
+          break;
+//        case TAGMLLexer.END_ANONYMOUS_RANGE:
+//          TAGTextNode textNode = new TAGTextNode("");
+//          update(textNode);
+//          context.addTextNode(textNode);
+//          context.closeMarkup();
+//          goOn = false;
+//          break;
+
+        default:
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
+          break;
+      }
+      goOn = goOn && token.getType() != Token.EOF;
+    }
+  }
+
+  private void handleCloseMarkup(TAGMLImporter.ImporterContext context) {
+    String methodName = "handleCloseMarkup";
+    boolean goOn = true;
+    while (goOn) {
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log(methodName, ruleName, modeName, token, context);
+      switch (token.getType()) {
+        case TAGMLLexer.Name_Close_Range:
+          String rangeName = token.getText();
+          context.pushOpenMarkup(rangeName);
+          break;
+//        case TAGMLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
+//          handleAnnotation(context);
+//          break;
+        case TAGMLLexer.END_CLOSE_MARKUP:
+          context.closeMarkup();
+          goOn = false;
+          break;
+
+        default:
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
+          break;
+      }
+      goOn = goOn && token.getType() != Token.EOF;
+    }
+  }
+
+  private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
+    String message = methodName + ": unexpected rule/token: token=" + token + ", ruleName=" + ruleName + ", mode=" + modeName;
+    LOG.error(message);
+    throw new TAGMLSyntaxError(message);
+  }
+
+  private void log(final String methodName, final String ruleName, final String modeName, final Token token, final ImporterContext context) {
+
   }
 
   private static Long update(TAGObject tagObject) {
