@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LaTeXExporterInMemory;
+import nl.knaw.huygens.alexandria.exporter.LaTeXExporterInMemory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import static org.assertj.core.api.Assertions.assertThat;

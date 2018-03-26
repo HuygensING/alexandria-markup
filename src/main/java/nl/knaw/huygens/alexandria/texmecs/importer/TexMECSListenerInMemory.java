@@ -21,9 +21,9 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.huygens.alexandria.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.*;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
