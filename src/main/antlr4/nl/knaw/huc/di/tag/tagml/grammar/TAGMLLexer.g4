@@ -91,25 +91,25 @@ AnnotationIdentifier
   ;
 
 AnnotationValue
-  : StringValue
-  | BooleanValue
+//  : StringValue
+  : BooleanValue
   | NumberValue
-  | MixedContentValue
+//  | MixedContentValue
   | ObjectValue
   ;
 
-StringValue
-  : '"' TEXT1 '"'
-  | '\'' TEXT2 '\''
-  ;
-
-TEXT1
-  : ~["]+
-  ;
-
-TEXT2
-  : ~[']+
-  ;
+//StringValue
+//  : '"' TEXT1 '"'
+//  | '\'' TEXT2 '\''
+//  ;
+//
+//TEXT1
+//  : ~["]+
+//  ;
+//
+//TEXT2
+//  : ~[']+
+//  ;
 
 BooleanValue
   : 'true'
