@@ -114,7 +114,7 @@ public class TAGMarkup implements TAGObject {
 
   @Override
   public int hashCode() {
-    return super.hashCode();
+    return id.intValue();
   }
 
   @Override

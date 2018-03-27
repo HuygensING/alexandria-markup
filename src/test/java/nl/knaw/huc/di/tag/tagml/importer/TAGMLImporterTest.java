@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml;
+package nl.knaw.huc.di.tag.tagml.importer;
 
 /*-
  * #%L
@@ -20,8 +20,8 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
-import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
@@ -35,7 +35,7 @@ import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.
 import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.textNodeSketch;
 import static org.junit.Assert.fail;
 
-public class TAGMLImporterTest extends AlexandriaBaseStoreTest {
+public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testSimpleTAGML() {

@@ -13,11 +13,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 }
 
 @lexer::members{
-  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in rangeopener/closer, 2 = inside annotation in rangeopener/closer inside annotation in rangeopener/closer, etc.
+  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in markup open tag, 2 = inside annotation in markup open tag inside annotation in markup open tag, etc.
   Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
 }
 
-// In the default mode we are outside a Range
+// In the default mode we are outside a Narkup Range
 
 NAMESPACE
   : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
@@ -39,6 +39,17 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[<\\[]+
   ;
 
+
+Nameinit
+  : [a-zA-Z_]
+  ;
+
+Namechar
+  : Nameinit
+  | [0-9]
+  ;
+
+
 //NL
 //  : [\r\n]+ -> skip
 //  ;
@@ -47,28 +58,78 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
 mode INSIDE_MARKUP_OPENER;
 
 COMMENT_IN_MARKUP_OPENER
-  : '[!--' .*? '--]' -> skip // channel(HIDDEN)
+  : '[!' .*? '!]' -> skip //channel(HIDDEN)
   ;
 
-END_ANONYMOUS_MARKUP
-  : ']'  {
-    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
-    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
-    popMode();
-  }
-  ;
-
-END_OPEN_MARKUP
-  :   TagOpenEndChar  -> popMode
-  ;
-
+//END_ANONYMOUS_MARKUP
+//  : ']'  {
+//    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
+//    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
+//    popMode();
+//  }
+//  ;
 
 Name_Open_Range
-  :   NameStartChar NameChar* ('=' NameChar+)?
+  :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
+  ;
+
+SUFFIX
+  : '~' NameChar*
   ;
 
 MARKUP_S
   :   WS  -> skip
+  ;
+
+
+Annotation
+  : AnnotationIdentifier '=' AnnotationValue
+  ;
+
+AnnotationIdentifier
+  : NameStartChar NameChar*
+  ;
+
+AnnotationValue
+  : StringValue
+  | BooleanValue
+  | NumberValue
+  | MixedContentValue
+  | ObjectValue
+  ;
+
+StringValue
+  : '"' TEXT1 '"'
+  | '\'' TEXT2 '\''
+  ;
+
+TEXT1
+  : ~["]+
+  ;
+
+TEXT2
+  : ~[']+
+  ;
+
+BooleanValue
+  : 'true'
+  | 'false'
+  ;
+
+NumberValue
+  : DIGIT+
+  ;
+
+MixedContentValue
+  : '|' ~[|] '|'
+  ;
+
+ObjectValue
+  : '{' Annotation (' ' Annotation)+ '}'
+  ;
+
+END_OPEN_MARKUP
+  :  TagOpenEndChar  -> popMode
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
