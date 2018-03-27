@@ -55,4 +55,4 @@ Markup - TextNode HyperEdge
   
 
 Common:
-- TextGraph<TextNode,Markup>
+- TextGraph<T extends TextNode,M extends Markup>
