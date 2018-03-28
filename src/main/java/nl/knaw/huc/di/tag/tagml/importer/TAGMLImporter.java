@@ -290,11 +290,11 @@ public class TAGMLImporter {
             break;
 
           case TAGMLLexer.COMMENT:
-            // TODO
+            handleComment(context);
             break;
 
           case TAGMLLexer.NAMESPACE:
-            // TODO
+            handleNamespace(context);
             break;
 
           default:
@@ -303,6 +303,14 @@ public class TAGMLImporter {
         }
       }
     } while (token.getType() != Token.EOF);
+  }
+
+  private void handleNamespace(final ImporterContext context) {
+    // TODO
+  }
+
+  private void handleComment(final ImporterContext context) {
+    // TODO
   }
 
   private void handleOpenMarkup(ImporterContext context) {
@@ -318,9 +326,6 @@ public class TAGMLImporter {
           TAGMarkup markup = context.newMarkup(token.getText());
           context.openMarkup(markup);
           break;
-//        case TAGMLLexer.BEGIN_OPEN_ANNO:
-//          handleAnnotation(context);
-//          break;
         case TAGMLLexer.END_OPEN_MARKUP:
           context.popOpenMarkup();
           goOn = false;
@@ -332,6 +337,9 @@ public class TAGMLImporter {
 //          context.closeMarkup();
 //          goOn = false;
 //          break;
+        case TAGMLLexer.Annotation:
+          handleAnnotation(context);
+          break;
 
         default:
           handleUnexpectedToken(methodName, token, ruleName, modeName);
@@ -339,6 +347,10 @@ public class TAGMLImporter {
       }
       goOn = goOn && token.getType() != Token.EOF;
     }
+  }
+
+  private void handleAnnotation(final ImporterContext context) {
+    // TODO
   }
 
   private void handleCloseMarkup(TAGMLImporter.ImporterContext context) {

@@ -22,6 +22,7 @@ package nl.knaw.huc.di.tag.tagml;
 
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
+import de.vandermeer.asciithemes.a7.A7_Grids;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import org.antlr.v4.runtime.CharStream;
@@ -37,12 +38,7 @@ public class TAGMLBaseTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLBaseTest.class);
 
   protected void printTokens(String input) {
-    // This gets all the tokens at once, it does not stop for errors
-    // List<? extends Token> allTokens = grammar.getAllTokens();
-    // System.out.println(allTokens);
-    System.out.println("TAGML:");
-    System.out.println(input);
-    System.out.println("Tokens:");
+    LOG.info("\nTAGML:\n{}\n", input);
     printTokens(CharStreams.fromString(input));
   }
 
@@ -52,30 +48,27 @@ public class TAGMLBaseTest {
 
   private void printTokens(CharStream inputStream) {
     TAGMLLexer lexer = new TAGMLLexer(inputStream);
-    AsciiTable table = new AsciiTable()//
+    AsciiTable table = new AsciiTable()
         .setTextAlignment(TextAlignment.LEFT);
     CWC_LongestLine cwc = new CWC_LongestLine();
     table.getRenderer().setCWC(cwc);
     table.addRule();
-    table.addRow("Text", "Rule", "Mode", "Token");
+    table.addRow("Pos", "Text", "Rule", "Mode", "Token");
     table.addRule();
 
     Token token;
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
-        String ruleName = lexer.getRuleNames()[token.getType() - 1];
-        String modeName = lexer.getModeNames()[lexer._mode];
-        table.addRow(
-            "'" + token.getText() + "'",
-            ruleName,
-            modeName,
-            token
-        );
-//        System.out.println(token + "\t| " + lexer.getRuleNames()[token.getType() - 1] + "\t| " + lexer.getModeNames()[lexer._mode]);
+        String pos = token.getLine() + ":" + token.getCharPositionInLine();
+        String text = "'" + token.getText() + "'";
+        String rule = lexer.getRuleNames()[token.getType() - 1];
+        String mode = lexer.getModeNames()[lexer._mode];
+        table.addRow(pos, text, rule, mode, token);
       }
     } while (token.getType() != Token.EOF);
     table.addRule();
+    table.getContext().setGrid(A7_Grids.minusBarPlusEquals());
     LOG.info("\nTokens:\n{}\n", table.render());
   }
 

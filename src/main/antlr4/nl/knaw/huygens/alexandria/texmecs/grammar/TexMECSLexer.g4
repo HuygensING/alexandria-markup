@@ -233,8 +233,6 @@ ExternalEntityOpen : '<<';
 
 ExternalEntityClose : '>>';
 
-Dot : '.';
-
 InternalEntityOpen : '<&';
 
 ResumeOpen : '<+';
@@ -246,8 +244,6 @@ StartTagSetOpen : '<|';
 EndTagSetClose : '|>';
 
 VirtualElementOpen : '<^';
-
-Caret : '^';
 
 fragment
 D : 'd' | 'D' ;

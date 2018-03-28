@@ -89,25 +89,18 @@ AnnotationIdentifier
   ;
 
 AnnotationValue
-//  : StringValue
-  : BooleanValue
+  : StringValue
+  | BooleanValue
   | NumberValue
-//  | MixedContentValue
+  | MixedContentValue
+  | ListValue
   | ObjectValue
   ;
 
-//StringValue
-//  : '"' TEXT1 '"'
-//  | '\'' TEXT2 '\''
-//  ;
-//
-//TEXT1
-//  : ~["]+
-//  ;
-//
-//TEXT2
-//  : ~[']+
-//  ;
+StringValue
+  : '"' ~["]+ '"'
+  | '\'' ~[']+ '\''
+  ;
 
 BooleanValue
   : 'true'
@@ -120,6 +113,10 @@ NumberValue
 
 MixedContentValue
   : '|' ~[|] '|'
+  ;
+
+ListValue
+  : '[' AnnotationValue (',' AnnotationValue)+ ']'
   ;
 
 ObjectValue
@@ -138,7 +135,7 @@ END_CLOSE_MARKUP
   ;
 
 Name_Close_Range
-  :   NameStartChar NameChar* ('=' NameChar+)?
+  :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
   ;
 
 MARKUP_S2
