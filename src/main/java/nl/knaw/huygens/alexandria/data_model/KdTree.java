@@ -254,7 +254,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
     KdNode parent = node.parent;
     if (parent != null) {
-      if (parent.lesser != null && node.equals(parent.lesser)) {
+      if (node.equals(parent.lesser)) {
         List<IndexPoint> nodes = getTree(node);
         if (nodes.size() > 0) {
           parent.lesser = createNode(nodes, node.k, node.depth);

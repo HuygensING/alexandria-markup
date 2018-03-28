@@ -81,7 +81,7 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testTAGMLFile() throws IOException, TAGMLSyntaxError {
+  public void testTAGMLFile() throws TAGMLSyntaxError {
     LOG.info("testing data/tagml/{}.tagml", basename);
     processTAGMLFile(basename);
     LOG.info("done testing data/tagml/{}.tagml", basename);

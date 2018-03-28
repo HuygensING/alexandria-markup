@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 public class LaTeXExporter {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporter.class);
   private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
-      .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
+      .thenComparingInt(MarkupLayer::getMaxRangeSize);
   private List<IndexPoint> indexPoints;
   private static TAGStore store;
   private final DocumentWrapper document;
@@ -318,7 +318,6 @@ public class LaTeXExporter {
   }
 
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {
-    latexBuilder.append("");
     latexBuilder.append("\n    % connect TextNodes\n    \\graph{").append("(doc)");
     for (int i = 0; i < textNodeCounter.get(); i++) {
       latexBuilder.append(" -> (tn").append(i).append(")");

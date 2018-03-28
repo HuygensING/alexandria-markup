@@ -43,7 +43,7 @@ public class TAGMLImporter {
   private static TAGStore tagStore;
 
   public TAGMLImporter(final TAGStore store) {
-    this.tagStore = store;
+    tagStore = store;
   }
 
   static class DocumentContext {
@@ -287,6 +287,14 @@ public class TAGMLImporter {
             TAGTextNode textNode = new TAGTextNode(token.getText());
             update(textNode);
             context.addTextNode(textNode);
+            break;
+
+          case TAGMLLexer.COMMENT:
+            // TODO
+            break;
+
+          case TAGMLLexer.NAMESPACE:
+            // TODO
             break;
 
           default:

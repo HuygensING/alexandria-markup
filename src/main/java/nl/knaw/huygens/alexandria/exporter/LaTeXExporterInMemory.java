@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class LaTeXExporterInMemory {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporterInMemory.class);
   private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
-      .thenComparing(Comparator.comparingInt(MarkupLayer::getMaxRangeSize));
+      .thenComparingInt(MarkupLayer::getMaxRangeSize);
   private List<IndexPoint> indexPoints;
   private final Limen limen;
   private Set<Integer> longMarkupIndexes;
@@ -301,7 +301,6 @@ public class LaTeXExporterInMemory {
   }
 
   private void connectTextNodes(StringBuilder latexBuilder, AtomicInteger textNodeCounter) {
-    latexBuilder.append("");
     latexBuilder.append("\n    % connect TextNodes\n    \\graph{").append("(doc)");
     for (int i = 0; i < textNodeCounter.get(); i++) {
       latexBuilder.append(" -> (tn").append(i).append(")");

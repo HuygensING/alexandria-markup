@@ -51,7 +51,7 @@ public class TAGMLBaseTest {
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
-        System.out.println(token + ": " + lexer.getRuleNames()[token.getType() - 1] + ": " + lexer.getModeNames()[lexer._mode]);
+        System.out.println(token + "\t| " + lexer.getRuleNames()[token.getType() - 1] + "\t| " + lexer.getModeNames()[lexer._mode]);
       }
     } while (token.getType() != Token.EOF);
   }

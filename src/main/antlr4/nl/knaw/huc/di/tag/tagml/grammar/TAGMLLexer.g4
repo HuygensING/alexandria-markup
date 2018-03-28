@@ -19,12 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // In the default mode we are outside a Narkup Range
 
-NAMESPACE
-  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
+COMMENT
+  : '[! ' .*? ' !]' //-> skip //channel(HIDDEN)
   ;
 
-COMMENT
-  : '[!' .*? '!]' -> skip //channel(HIDDEN)
+NAMESPACE
+  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
   ;
 
 BEGIN_OPEN_MARKUP // [ moves into markup tag
@@ -39,7 +39,6 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[<\\[]+
   ;
 
-
 Nameinit
   : [a-zA-Z_]
   ;
@@ -48,7 +47,6 @@ Namechar
   : Nameinit
   | [0-9]
   ;
-
 
 //NL
 //  : [\r\n]+ -> skip
@@ -190,7 +188,7 @@ NamespaceIdentifier
   ;
 
 NamespaceURI // TODO!
-  : NameChar+
+  : ('http://' | 'https://') ( NameChar | '/' )+
   ;
 
 fragment
@@ -219,7 +217,7 @@ DIGIT
 
 fragment
 WS
-  : [ \t\r\n]
+  : [ \t\r\n]+
   ;
 
 //UNEXPECTED_CHAR // Throw unexpected token exception

@@ -215,7 +215,6 @@ HEXDIGITS
 
 DoublePipeChar : '||';
 
-
 DQuoteChar : '"';
 
 SQuoteChar : '\'';

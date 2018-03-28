@@ -68,7 +68,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
 
   public static class TextNodeSketch {
 
-    private String text;
+    private final String text;
 
     public TextNodeSketch(final String text) {
       this.text = text;
