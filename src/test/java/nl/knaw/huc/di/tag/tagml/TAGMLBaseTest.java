@@ -20,16 +20,21 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
-
+import de.vandermeer.asciitable.AsciiTable;
+import de.vandermeer.asciitable.CWC_LongestLine;
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class TAGMLBaseTest {
+  private static final Logger LOG = LoggerFactory.getLogger(TAGMLBaseTest.class);
 
   protected void printTokens(String input) {
     // This gets all the tokens at once, it does not stop for errors
@@ -47,13 +52,31 @@ public class TAGMLBaseTest {
 
   private void printTokens(CharStream inputStream) {
     TAGMLLexer lexer = new TAGMLLexer(inputStream);
+    AsciiTable table = new AsciiTable()//
+        .setTextAlignment(TextAlignment.LEFT);
+    CWC_LongestLine cwc = new CWC_LongestLine();
+    table.getRenderer().setCWC(cwc);
+    table.addRule();
+    table.addRow("Text", "Rule", "Mode", "Token");
+    table.addRule();
+
     Token token;
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
-        System.out.println(token + "\t| " + lexer.getRuleNames()[token.getType() - 1] + "\t| " + lexer.getModeNames()[lexer._mode]);
+        String ruleName = lexer.getRuleNames()[token.getType() - 1];
+        String modeName = lexer.getModeNames()[lexer._mode];
+        table.addRow(
+            "'" + token.getText() + "'",
+            ruleName,
+            modeName,
+            token
+        );
+//        System.out.println(token + "\t| " + lexer.getRuleNames()[token.getType() - 1] + "\t| " + lexer.getModeNames()[lexer._mode]);
       }
     } while (token.getType() != Token.EOF);
+    table.addRule();
+    LOG.info("\nTokens:\n{}\n", table.render());
   }
 
 }
