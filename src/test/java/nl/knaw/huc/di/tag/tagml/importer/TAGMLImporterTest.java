@@ -160,6 +160,34 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testTextVariation() {
+    String tagML = "[t>This is a |>lame|dope<| test!<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("This is a "),
+          textNodeSketch("lame"),
+          textNodeSketch("dope"),
+          textNodeSketch(" test!")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(4);
+
+      TextNodeWrapper textNodeWrapper = textNodeWrappers.get(0);
+      assertThat(textNodeWrapper).hasText("This is a ");
+
+      final List<MarkupWrapper> markupForTextNode = document.getMarkupStreamForTextNode(textNodeWrapper).collect(toList());
+      assertThat(markupForTextNode).hasSize(1);
+      assertThat(markupForTextNode).extracting("tag").containsExactly("t");
+    });
+  }
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);

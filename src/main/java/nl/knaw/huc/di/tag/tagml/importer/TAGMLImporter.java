@@ -283,6 +283,10 @@ public class TAGMLImporter {
             handleCloseMarkup(context);
             break;
 
+          case TAGMLLexer.BEGIN_TEXT_VARIATION:
+            handleTextVariation(context);
+            break;
+
           case TAGMLLexer.TEXT:
             TAGTextNode textNode = new TAGTextNode(token.getText());
             update(textNode);
@@ -305,6 +309,38 @@ public class TAGMLImporter {
     } while (token.getType() != Token.EOF);
   }
 
+  private void handleTextVariation(final ImporterContext context) {
+    String methodName = "handleTextVariation";
+    boolean goOn = true;
+    while (goOn) {
+      Token token = context.nextToken();
+      String ruleName = context.getRuleName();
+      String modeName = context.getModeName();
+      log(methodName, ruleName, modeName, token, context);
+      switch (token.getType()) {
+        case TAGMLLexer.END_TEXT_VARIATION:
+          // TODO
+          goOn = false;
+          break;
+
+        case TAGMLLexer.TEXT_VARIATION:
+          TAGTextNode textNode = new TAGTextNode(token.getText());
+          update(textNode);
+          context.addTextNode(textNode);
+          break;
+
+        case TAGMLLexer.TextVariationSeparator:
+          // TODO
+          break;
+
+        default:
+          handleUnexpectedToken(methodName, token, ruleName, modeName);
+          break;
+      }
+      goOn = goOn && token.getType() != Token.EOF;
+    }
+  }
+
   private void handleNamespace(final ImporterContext context) {
     // TODO
   }
@@ -322,7 +358,7 @@ public class TAGMLImporter {
       String modeName = context.getModeName();
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
-        case TAGMLLexer.Name_Open_Range:
+        case TAGMLLexer.NameOpenMarkup:
           TAGMarkup markup = context.newMarkup(token.getText());
           context.openMarkup(markup);
           break;
@@ -362,7 +398,7 @@ public class TAGMLImporter {
       String modeName = context.getModeName();
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
-        case TAGMLLexer.Name_Close_Range:
+        case TAGMLLexer.NameCloseMarkup:
           String rangeName = token.getText();
           context.pushOpenMarkup(rangeName);
           break;

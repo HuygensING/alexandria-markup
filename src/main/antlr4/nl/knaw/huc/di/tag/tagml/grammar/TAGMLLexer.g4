@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
   Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
 }
 
-// In the default mode we are outside a Narkup Range
+// In the default mode we are outside a Markup Range
 
 COMMENT
   : '[! ' .*? ' !]' //-> skip //channel(HIDDEN)
@@ -31,12 +31,16 @@ BEGIN_OPEN_MARKUP // [ moves into markup tag
   : TagOpenStartChar  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
+BEGIN_TEXT_VARIATION
+  : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
+  ;
+
 BEGIN_CLOSE_MARKUP
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
 TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
-  : ~[<\\[]+
+  : ~[<\\[|]+
   ;
 
 Nameinit
@@ -67,7 +71,7 @@ COMMENT_IN_MARKUP_OPENER
 //  }
 //  ;
 
-Name_Open_Range
+NameOpenMarkup
   :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
   ;
 
@@ -134,12 +138,23 @@ END_CLOSE_MARKUP
   :   TagCloseEndChar  -> popMode
   ;
 
-Name_Close_Range
+NameCloseMarkup
   :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
   ;
 
 MARKUP_S2
   :   WS  -> skip
+  ;
+
+// ----------------- Everything INSIDE of a MARKUP CLOSER -------------
+mode INSIDE_TEXT_VARIATION;
+
+TEXT_VARIATION
+  : ~[|<]+
+  ;
+
+END_TEXT_VARIATION
+  : TextVariationEndTag -> popMode
   ;
 
 // ----------------- lots of repeated stuff --------------------------
@@ -166,6 +181,10 @@ TextVariationStartTag
 
 TextVariationEndTag
   : '<|'
+  ;
+
+TextVariationSeparator
+  : '|'
   ;
 
 Optional
