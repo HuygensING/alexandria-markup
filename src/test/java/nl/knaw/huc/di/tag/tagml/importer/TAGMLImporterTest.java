@@ -72,7 +72,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         fail("TAGMLSyntaxError expected!");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
-            "Closing tag {l] found without corresponding open tag.\n" +
+            "Closing tag <l] found without corresponding open tag.\n" +
             "Unclosed TAGML tag(s): [line>");
       }
     });

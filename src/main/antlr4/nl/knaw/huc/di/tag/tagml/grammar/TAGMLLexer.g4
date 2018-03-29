@@ -112,7 +112,7 @@ BooleanValue
   ;
 
 NumberValue
-  : DIGIT+
+  : DIGIT+ ( '.' DIGIT+ )?
   ;
 
 MixedContentValue

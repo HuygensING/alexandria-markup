@@ -82,7 +82,7 @@ public class TAGMLImporter {
         }
         openMarkupStack.push(markup);
       } else {
-        importerContext.errors.add("Closing tag {" + rangeName + "] found without corresponding open tag.");
+        importerContext.errors.add("Closing tag <" + rangeName + "] found without corresponding open tag.");
       }
     }
 
@@ -159,7 +159,8 @@ public class TAGMLImporter {
     }
 
     String getRuleName() {
-      return lexer.getRuleNames()[currentToken.getType() - 1];
+      int type = currentToken.getType();
+      return type == -1 ? "EOF" : lexer.getRuleNames()[type - 1];
     }
 
     void pushDocumentContext(TAGDocument document) {
