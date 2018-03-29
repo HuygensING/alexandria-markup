@@ -139,7 +139,7 @@ END_CLOSE_MARKUP
   ;
 
 NameCloseMarkup
-  :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
+  :   ( Optional | Suspend )? NameStartChar NameChar* SUFFIX?
   ;
 
 MARKUP_S2

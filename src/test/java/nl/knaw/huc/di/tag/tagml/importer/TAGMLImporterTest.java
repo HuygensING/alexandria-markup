@@ -216,6 +216,40 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testDiscontinuity() {
+    String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("This is"),
+          textNodeSketch(", he said, "),
+          textNodeSketch("a test!")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(3);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      assertThat(markupWrappers).hasSize(1);
+
+      MarkupWrapper t = markupWrappers.get(0);
+      List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
+      assertThat(tTextNodeWrappers).hasSize(2);
+
+      TextNodeWrapper t0 = tTextNodeWrappers.get(0);
+      assertThat(t0).hasText("This is ");
+
+      TextNodeWrapper t1 = tTextNodeWrappers.get(1);
+      assertThat(t1).hasText("a test!");
+    });
+  }
+
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
