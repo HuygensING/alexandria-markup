@@ -149,8 +149,8 @@ MARKUP_S2
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
 mode INSIDE_TEXT_VARIATION;
 
-TEXT_VARIATION
-  : ~[|<]+
+VARIANT_TEXT
+  : ( ~[|<] | '\\|' )+
   ;
 
 END_TEXT_VARIATION
@@ -203,7 +203,7 @@ NamespaceIdentifier
   : NameChar+
   ;
 
-NamespaceURI // TODO!
+NamespaceURI
   : ('http://' | 'https://') ( NameChar | '/' )+
   ;
 
