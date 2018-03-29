@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class TAGMLImporter {
 
-  private final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
 
   private final TAGStore tagStore;
 
@@ -48,7 +48,7 @@ public class TAGMLImporter {
     tagStore = store;
   }
 
-  class DocumentContext {
+  private class DocumentContext {
     private final TAGDocument document;
     private final Deque<TAGMarkup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<TAGMarkup> openMarkupStack = new Stack<>();
@@ -134,7 +134,7 @@ public class TAGMLImporter {
     }
   }
 
-  class ImporterContext {
+  private class ImporterContext {
     private final Deque<DocumentContext> documentContextStack = new ArrayDeque<>();
     private final TAGMLLexer lexer;
     private final List<String> errors = new ArrayList<>();
@@ -228,11 +228,11 @@ public class TAGMLImporter {
       return !errors.isEmpty();
     }
 
-    public String getMethodName() {
+    String getMethodName() {
       return methodName;
     }
 
-    public void setMethodName(String methodName) {
+    void setMethodName(String methodName) {
       this.methodName = methodName;
     }
   }
@@ -292,7 +292,6 @@ public class TAGMLImporter {
           .put(TAGMLLexer.NAMESPACE, this::handleNamespace)
           .put(TAGMLLexer.EOF, this::handleEOF)
           .build();
-
 
   private void handleDefaultMode(TAGMLImporter.ImporterContext context) {
     handle("defaultMode", defaultModeHandlers, context);
@@ -397,7 +396,6 @@ public class TAGMLImporter {
   private Boolean handleEOF(ImporterContext context) {
     return false;
   }
-
 
   private void handle(String methodName, Map<Integer, Function<ImporterContext, Boolean>> handlers, ImporterContext context) {
     context.setMethodName(methodName);
