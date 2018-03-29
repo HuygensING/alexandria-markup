@@ -188,6 +188,34 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testMilestone() {
+    String tagML = "[t>This is a [space chars=10] test!<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("This is a "),
+          textNodeSketch(""),
+          textNodeSketch(" test!")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t"),
+          markupSketch("space")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(3);
+
+      TextNodeWrapper textNodeWrapper = textNodeWrappers.get(1);
+      assertThat(textNodeWrapper).hasText("");
+
+      final List<MarkupWrapper> markupForTextNode = document.getMarkupStreamForTextNode(textNodeWrapper).collect(toList());
+      assertThat(markupForTextNode).hasSize(2);
+      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
+    });
+  }
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);

@@ -63,16 +63,16 @@ COMMENT_IN_MARKUP_OPENER
   : '[!' .*? '!]' -> skip //channel(HIDDEN)
   ;
 
-//END_ANONYMOUS_MARKUP
-//  : ']'  {
-//    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
-//    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
-//    popMode();
-//  }
-//  ;
+END_ANONYMOUS_MARKUP
+  : ']'  {
+    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
+    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
+    popMode();
+  }
+  ;
 
 NameOpenMarkup
-  :   ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
+  :  ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
   ;
 
 SUFFIX

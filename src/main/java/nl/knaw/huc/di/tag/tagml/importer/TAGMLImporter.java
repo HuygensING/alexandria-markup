@@ -302,8 +302,10 @@ public class TAGMLImporter {
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
           .put(TAGMLLexer.NameOpenMarkup, this::handleNameOpenMarkup)
           .put(TAGMLLexer.END_OPEN_MARKUP, this::handleEndOpenMarkup)
+          .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
           .put(TAGMLLexer.Annotation, this::handleAnnotation)
           .build();
+
 
   private Boolean handleOpenMarkup(ImporterContext context) {
     handle("handleOpenMarkup", openMarkupHandlers, context);
@@ -365,6 +367,14 @@ public class TAGMLImporter {
     TAGMarkup markup = context.newMarkup(context.getCurrentToken().getText());
     context.openMarkup(markup);
     return true;
+  }
+
+  private Boolean handleEndAnonymousMarkup(ImporterContext context) {
+    TAGTextNode textNode = new TAGTextNode("");
+    update(textNode);
+    context.addTextNode(textNode);
+    context.closeMarkup();
+    return false;
   }
 
   private Boolean handleEndOpenMarkup(ImporterContext context) {
