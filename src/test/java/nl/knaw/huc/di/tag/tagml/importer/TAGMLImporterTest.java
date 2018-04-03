@@ -300,6 +300,25 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+
+  @Test
+  public void testEscapeSpecialCharactersInTextVariation() {
+    String tagML = "[t>bla |>\\||!<| bla<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("bla "),
+          textNodeSketch("\\|"),
+          textNodeSketch("!"),
+          textNodeSketch(" bla")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t")
+      );
+    });
+  }
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
