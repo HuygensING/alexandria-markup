@@ -16,8 +16,6 @@ chunk
   | resumeTag
   | startTagSet
   | endTagSet
-  | startTagSet
-  | endTagSet
   | virtualElement
 //  | internalEntity
 //  | externalEntity

@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
@@ -409,6 +410,34 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TextNodeWrapper> textNodes1 = phr1.getTextNodeStream().collect(toList());
       assertThat(textNodes1).extracting("text")
           .containsExactly("word3", " word4");
+    });
+  }
+
+  @Test
+  public void testStringAnnotations() {
+    String tagML = "[markup a='string' b=\"string\">text<markup]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("text")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("markup")
+      );
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      MarkupWrapper markup = markupWrappers.get(0);
+      List<AnnotationWrapper> annotationWrappers = markup.getAnnotationStream().collect(toList());
+      assertThat(annotationWrappers).hasSize(2);
+
+      AnnotationWrapper annotationA = annotationWrappers.get(0);
+      assertThat(annotationA).extracting("tag").isEqualTo("a");
+
+      AnnotationWrapper annotationB = annotationWrappers.get(1);
+      assertThat(annotationB).extracting("tag").isEqualTo("b");
     });
   }
 

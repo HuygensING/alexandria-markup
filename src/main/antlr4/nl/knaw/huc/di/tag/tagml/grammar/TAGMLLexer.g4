@@ -28,7 +28,7 @@ NAMESPACE
   ;
 
 BEGIN_OPEN_MARKUP // [ moves into markup tag
-  : TagOpenStartChar  -> pushMode(INSIDE_MARKUP_OPENER)
+  : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
 BEGIN_TEXT_VARIATION
@@ -43,15 +43,18 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[<\\[|]+
   ;
 
-Nameinit
-  : [a-zA-Z_]
-  ;
+//Nameinit
+//  : [a-zA-Z_]
+//  ;
+//
+//Namechar
+//  : Nameinit
+//  | [0-9]
+//  ;
 
-Namechar
-  : Nameinit
-  | [0-9]
+NAME
+  : NameStartChar NameChar*
   ;
-
 //NL
 //  : [\r\n]+ -> skip
 //  ;
@@ -64,7 +67,7 @@ COMMENT_IN_MARKUP_OPENER
   ;
 
 END_ANONYMOUS_MARKUP
-  : ']'  {
+  : RIGHT_SQUARE_BRACKET  {
     openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
     openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
     popMode();
@@ -72,24 +75,23 @@ END_ANONYMOUS_MARKUP
   ;
 
 NameOpenMarkup
-  :  ( Optional | Resume )? NameStartChar NameChar* SUFFIX?
+  :  ( Optional | Resume )? NAME SUFFIX?
   ;
 
 SUFFIX
-  : '~' NameChar*
+  : TILDE NAME
   ;
 
 MARKUP_S
-  :   WS  -> skip
+  :  WS  -> skip
   ;
-
 
 Annotation
   : AnnotationIdentifier '=' AnnotationValue
   ;
 
 AnnotationIdentifier
-  : NameStartChar NameChar*
+  : NAME
   ;
 
 AnnotationValue
@@ -107,8 +109,8 @@ StringValue
   ;
 
 BooleanValue
-  : 'true'
-  | 'false'
+  : TRUE
+  | FALSE
   ;
 
 NumberValue
@@ -135,11 +137,11 @@ END_OPEN_MARKUP
 mode INSIDE_MARKUP_CLOSER;
 
 END_CLOSE_MARKUP
-  :   TagCloseEndChar  -> popMode
+  :   RIGHT_SQUARE_BRACKET  -> popMode
   ;
 
 NameCloseMarkup
-  :   ( Optional | Suspend )? NameStartChar NameChar* SUFFIX?
+  :   ( Optional | Suspend )? NAME SUFFIX?
   ;
 
 MARKUP_S2
@@ -150,7 +152,7 @@ MARKUP_S2
 mode INSIDE_TEXT_VARIATION;
 
 TV_BEGIN_OPEN_MARKUP // [ moves into markup tag
-  : TagOpenStartChar  -> pushMode(INSIDE_MARKUP_OPENER)
+  : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
 TV_BEGIN_CLOSE_MARKUP
@@ -167,9 +169,9 @@ VARIANT_TEXT
 
 // ----------------- lots of repeated stuff --------------------------
 
-TagOpenStartChar
-  : '['
-  ;
+//TagOpenStartChar
+//  : LEFT_SQUARE_BRACKET
+//  ;
 
 TagOpenEndChar
   : '>'
@@ -179,9 +181,9 @@ TagCloseStartChar
   : '<'
   ;
 
-TagCloseEndChar
-  : ']'
-  ;
+//TagCloseEndChar
+//  : RIGHT_SQUARE_BRACKET
+//  ;
 
 TextVariationStartTag
   : '|>'
@@ -192,6 +194,10 @@ TextVariationEndTag
   ;
 
 TextVariationSeparator
+  : PIPE
+  ;
+
+PIPE
   : '|'
   ;
 
@@ -207,6 +213,26 @@ Suspend
   : '-'
   ;
 
+TILDE
+  : '~'
+  ;
+
+LIST_OPENER
+  : LEFT_SQUARE_BRACKET
+  ;
+
+LIST_CLOSER
+  : RIGHT_SQUARE_BRACKET
+  ;
+
+OBJECT_OPENER
+  : '{'
+  ;
+
+OBJECT_CLOSER
+  : '}'
+  ;
+
 NamespaceIdentifier
   : NameChar+
   ;
@@ -214,6 +240,73 @@ NamespaceIdentifier
 NamespaceURI
   : ('http://' | 'https://') ( NameChar | '/' )+
   ;
+
+EQ
+  : '='
+  ;
+
+DOT
+  : '.'
+  ;
+
+COMMA
+  : ','
+  ;
+
+LEFT_SQUARE_BRACKET
+  : '['
+  ;
+
+RIGHT_SQUARE_BRACKET
+  : ']'
+  ;
+
+TRUE
+  : T R U E
+  ;
+
+FALSE
+  : F A L S E
+  ;
+
+DIGIT
+  : [0-9]
+  ;
+
+SINGLE_QUOTE
+  : '\''
+  ;
+
+DOUBLE_QUOTE
+  : '"'
+  ;
+
+fragment A : [Aa];
+fragment B : [Bb];
+fragment C : [Cc];
+fragment D : [Dd];
+fragment E : [Ee];
+fragment F : [Ff];
+fragment G : [Gg];
+fragment H : [Hh];
+fragment I : [Ii];
+fragment J : [Jj];
+fragment K : [Kk];
+fragment L : [Ll];
+fragment M : [Mm];
+fragment N : [Nn];
+fragment O : [Oo];
+fragment P : [Pp];
+fragment Q : [Qq];
+fragment R : [Rr];
+fragment S : [Ss];
+fragment T : [Tt];
+fragment U : [Uu];
+fragment V : [Vv];
+fragment W : [Ww];
+fragment X : [Xx];
+fragment Y : [Yy];
+fragment Z : [Zz];
 
 fragment
 NameChar
@@ -232,11 +325,6 @@ NameStartChar
   | '\u3001'..'\uD7FF'
   | '\uF900'..'\uFDCF'
   | '\uFDF0'..'\uFFFD'
-  ;
-
-fragment
-DIGIT
-  : [0-9]
   ;
 
 fragment
