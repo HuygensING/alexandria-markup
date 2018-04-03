@@ -45,26 +45,17 @@ annotation
   ;
 
 annotationValue
-  : stringValue
+  : StringValue
   | booleanValue
-  | numberValue
+  | NumberValue
   | mixedContentValue
   | listValue
   | objectValue
   ;
 
-stringValue
-  : SINGLE_QUOTE TEXT SINGLE_QUOTE
-  | DOUBLE_QUOTE TEXT DOUBLE_QUOTE
-  ;
-
 booleanValue
   : TRUE
   | FALSE
-  ;
-
-numberValue
-  : DIGIT+ ( DOT DIGIT+ )?
   ;
 
 mixedContentValue

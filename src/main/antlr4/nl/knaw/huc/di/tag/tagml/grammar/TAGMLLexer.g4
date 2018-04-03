@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // In the default mode we are outside a Markup Range
 
+
 COMMENT
   : '[! ' .*? ' !]' //-> skip //channel(HIDDEN)
   ;
@@ -74,63 +75,103 @@ END_ANONYMOUS_MARKUP
   }
   ;
 
+TRUE
+  : T R U E
+  ;
+
+FALSE
+  : F A L S E
+  ;
+
+//SINGLE_QUOTE
+//  : '\''
+//  ;
+//
+//DOUBLE_QUOTE
+//  : '"'
+//  ;
+
 NameOpenMarkup
-  :  ( Optional | Resume )? NAME SUFFIX?
+  :  ( Optional | Resume )? NAME SUFFIX? -> pushMode(ANNOTATIONS)
   ;
 
 SUFFIX
   : TILDE NAME
   ;
 
+
+// ----------------- Everything INSIDE of a MARKUP CLOSER -------------
+mode ANNOTATIONS;
+
 MARKUP_S
   :  WS  -> skip
   ;
 
-Annotation
-  : AnnotationIdentifier '=' AnnotationValue
-  ;
-
-AnnotationIdentifier
+ANNOTATION_NAME
   : NAME
   ;
 
-AnnotationValue
-  : StringValue
-  | BooleanValue
-  | NumberValue
-  | MixedContentValue
-  | ListValue
-  | ObjectValue
+EQ
+  : '='
   ;
 
+//Annotation
+//  : AnnotationIdentifier '=' AnnotationValue
+//  ;
+//
+//AnnotationIdentifier
+//  : NAME
+//  ;
+//
+//AnnotationValue
+//  : StringValue
+//  | BooleanValue
+//  | NumberValue
+//  | MixedContentValue
+//  | ListValue
+//  | ObjectValue
+//  ;
+//
 StringValue
   : '"' ~["]+ '"'
   | '\'' ~[']+ '\''
   ;
-
-BooleanValue
-  : TRUE
-  | FALSE
-  ;
-
+//
+//BooleanValue
+//  : TRUE
+//  | FALSE
+//  ;
+//
 NumberValue
   : DIGIT+ ( '.' DIGIT+ )?
   ;
+//
+//MixedContentValue
+//  : '|' ~[|] '|'
+//  ;
+//
+//ListValue
+//  : '[' AnnotationValue (',' AnnotationValue)+ ']'
+//  ;
+//
+//ObjectValue
+//  : '{' Annotation (' ' Annotation)+ '}'
+//  ;
 
-MixedContentValue
-  : '|' ~[|] '|'
+OPEN_MIXED_CONTENT
+  : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
   ;
 
-ListValue
-  : '[' AnnotationValue (',' AnnotationValue)+ ']'
+OPEN_OBJECT
+  : '{' -> pushMode(INSIDE_OBJECT)
   ;
 
-ObjectValue
-  : '{' Annotation (' ' Annotation)+ '}'
+OPEN_LIST
+  : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST)
   ;
 
 END_OPEN_MARKUP
-  :  TagOpenEndChar  -> popMode
+  :  TagOpenEndChar  -> popMode, popMode
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
@@ -167,7 +208,30 @@ VARIANT_TEXT
   : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
   ;
 
+// ----------------- Everything INSIDE of | | -------------
+mode INSIDE_MIXED_CONTENT;
+
+MC_END
+  : PIPE -> popMode
+  ;
+
+// ----------------- Everything INSIDE of { } -------------
+mode INSIDE_OBJECT;
+
+OBJECT_END
+  : '}' -> popMode
+  ;
+
+// ----------------- Everything INSIDE of [ ] -------------
+mode INSIDE_LIST;
+
+LIST_END
+  : RIGHT_SQUARE_BRACKET -> popMode
+  ;
+
 // ----------------- lots of repeated stuff --------------------------
+
+
 
 //TagOpenStartChar
 //  : LEFT_SQUARE_BRACKET
@@ -241,10 +305,6 @@ NamespaceURI
   : ('http://' | 'https://') ( NameChar | '/' )+
   ;
 
-EQ
-  : '='
-  ;
-
 DOT
   : '.'
   ;
@@ -261,25 +321,11 @@ RIGHT_SQUARE_BRACKET
   : ']'
   ;
 
-TRUE
-  : T R U E
-  ;
-
-FALSE
-  : F A L S E
-  ;
 
 DIGIT
   : [0-9]
   ;
 
-SINGLE_QUOTE
-  : '\''
-  ;
-
-DOUBLE_QUOTE
-  : '"'
-  ;
 
 fragment A : [Aa];
 fragment B : [Bb];

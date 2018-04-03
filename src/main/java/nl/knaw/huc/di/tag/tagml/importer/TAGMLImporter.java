@@ -310,7 +310,7 @@ public class TAGMLImporter {
           .put(TAGMLLexer.NameOpenMarkup, this::handleNameOpenMarkup)
           .put(TAGMLLexer.END_OPEN_MARKUP, this::handleEndOpenMarkup)
           .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
-          .put(TAGMLLexer.Annotation, this::handleAnnotation)
+//          .put(TAGMLLexer.Annotation, this::handleAnnotation)
           .build();
 
 

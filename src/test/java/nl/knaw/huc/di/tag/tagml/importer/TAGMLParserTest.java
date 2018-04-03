@@ -38,7 +38,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testParser() {
-    String input = "[markup a=1>text<markup]";
+    String input = "[markup s1=\"string1\" s2='string2' b=true n=3.1415>text<markup]";
     printTokens(input);
 
     CodePointCharStream antlrInputStream = CharStreams.fromString(input);
