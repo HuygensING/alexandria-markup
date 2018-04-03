@@ -38,6 +38,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 public class TAGMLImporter {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
@@ -82,8 +84,13 @@ public class TAGMLImporter {
         }
         openMarkupStack.push(markup);
       } else {
-        importerContext.errors.add("Closing tag <" + rangeName + "] found without corresponding open tag.");
+        importerContext.errors.add(format("%s Closing tag <%s] found without corresponding open tag.",
+            errorPrefix(importerContext.getCurrentToken()), rangeName));
       }
+    }
+
+    private String errorPrefix(Token currentToken) {
+      return format("line %d:%d :", currentToken.getLine(), currentToken.getCharPositionInLine());
     }
 
     void popOpenMarkup() {
@@ -337,6 +344,8 @@ public class TAGMLImporter {
 
   private final Map<Integer, Function<ImporterContext, Boolean>> textVariationHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
+          .put(TAGMLLexer.TV_BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
+          .put(TAGMLLexer.TV_BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
           .put(TAGMLLexer.END_TEXT_VARIATION, this::handleEndTextVariation)
           .put(TAGMLLexer.VARIANT_TEXT, this::handleVariantText)
           .put(TAGMLLexer.TextVariationSeparator, this::handleTextVariationSeparator)
@@ -423,7 +432,7 @@ public class TAGMLImporter {
   }
 
   private Boolean handleUnexpectedToken(ImporterContext context) {
-    String message = String.format(
+    String message = format(
         "%s: unexpected rule/token: token=%s, ruleName=%s, mode=%s",
         context.getMethodName(),
         context.getCurrentToken(),

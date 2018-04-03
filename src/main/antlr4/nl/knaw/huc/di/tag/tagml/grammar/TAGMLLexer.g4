@@ -146,15 +146,23 @@ MARKUP_S2
   :   WS  -> skip
   ;
 
-// ----------------- Everything INSIDE of a MARKUP CLOSER -------------
+// ----------------- Everything INSIDE of a TEXT VARIATION -------------
 mode INSIDE_TEXT_VARIATION;
 
-VARIANT_TEXT
-  : ( ~[|<] | '\\|' )+
+TV_BEGIN_OPEN_MARKUP // [ moves into markup tag
+  : TagOpenStartChar  -> pushMode(INSIDE_MARKUP_OPENER)
+  ;
+
+TV_BEGIN_CLOSE_MARKUP
+  : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
 END_TEXT_VARIATION
   : TextVariationEndTag -> popMode
+  ;
+
+VARIANT_TEXT
+  : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
   ;
 
 // ----------------- lots of repeated stuff --------------------------

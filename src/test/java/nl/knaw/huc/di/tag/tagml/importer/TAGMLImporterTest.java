@@ -26,6 +26,7 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         fail("TAGMLSyntaxError expected!");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
-            "Closing tag <l] found without corresponding open tag.\n" +
+            "line 1:51 : Closing tag <l] found without corresponding open tag.\n" +
             "Unclosed TAGML tag(s): [line>");
       }
     });
@@ -216,6 +217,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
@@ -249,6 +251,54 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
+  @Test
+  public void testAcceptedMarkupDifferenceInNonLinearity() {
+    String tagML = "[t>This [x>is |>a<x] [y>failing|an<x] [y>excellent<| test<y]<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("This "),
+          textNodeSketch("is "),
+          textNodeSketch("a"),
+          textNodeSketch(" "),
+          textNodeSketch("failing"),
+          textNodeSketch("an"),
+          textNodeSketch("excellent"),
+          textNodeSketch(" test")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t"),
+          markupSketch("x"),
+          markupSketch("y")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(8);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      assertThat(markupWrappers).hasSize(3);
+
+      MarkupWrapper t = markupWrappers.get(0);
+      List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
+      assertThat(tTextNodeWrappers).hasSize(8);
+    });
+  }
+
+  @Ignore
+  @Test
+  public void testIllegalMarkupDifferenceInNonLinearity() {
+    String tagML = "[t>This [x>is |>a [y>failing|an<x] [y>excellent<| test<y]<t]";
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail();
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("markup [x> not closed!");
+      }
+    });
+  }
 
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
