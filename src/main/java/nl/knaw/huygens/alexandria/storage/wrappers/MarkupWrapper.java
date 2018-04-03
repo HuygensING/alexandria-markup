@@ -127,16 +127,6 @@ public class MarkupWrapper {
     return markup.getExtendedTag();
   }
 
-  @Override
-  public int hashCode() {
-    return markup.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    return other instanceof MarkupWrapper //
-        && markup.equals(((MarkupWrapper) other).getMarkup());
-  }
 
   public boolean hasN() {
     return getAnnotationStream()//
@@ -183,5 +173,29 @@ public class MarkupWrapper {
 
   public String getMarkupId() {
     return markup.getMarkupId();
+  }
+
+  public boolean isOptional() {
+    return markup.isOptional();
+  }
+
+  public void setOptional(boolean optional) {
+    markup.setOptional(optional);
+  }
+
+  @Override
+  public String toString() {
+    return markup.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    return markup.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof MarkupWrapper //
+        && markup.equals(((MarkupWrapper) other).getMarkup());
   }
 }

@@ -319,6 +319,99 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testOptionalMarkup() {
+    String tagML = "[t>this is [?del>always<?del] optional<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("this is "),
+          textNodeSketch("always"),
+          textNodeSketch(" optional")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t"),
+          markupSketch("del")
+      );
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(3);
+
+      TextNodeWrapper always = textNodeWrappers.get(1);
+      List<MarkupWrapper> markupWrappers = document.getMarkupStreamForTextNode(always).collect(toList());
+      assertThat(markupWrappers).hasSize(2);
+
+      MarkupWrapper del = markupWrappers.get(1);
+      assertThat(del).isOptional();
+    });
+  }
+
+  @Test
+  public void testContainmentIsDefault() {
+    String tagML = "word1 [phr>word2 [phr>word3<phr] word4<phr] word5";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("word1 "),
+          textNodeSketch("word2 "),
+          textNodeSketch("word3"),
+          textNodeSketch(" word4"),
+          textNodeSketch(" word5")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("phr"),
+          markupSketch("phr")
+      );
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(5);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      MarkupWrapper phr0 = markupWrappers.get(0);
+      List<TextNodeWrapper> textNodes0 = phr0.getTextNodeStream().collect(toList());
+      assertThat(textNodes0).extracting("text")
+          .containsExactly("word2 ", "word3", " word4");
+
+      MarkupWrapper phr1 = markupWrappers.get(1);
+      List<TextNodeWrapper> textNodes1 = phr1.getTextNodeStream().collect(toList());
+      assertThat(textNodes1).extracting("text")
+          .containsExactly("word3");
+    });
+  }
+
+  @Test
+  public void testUseIdForSelfOverlap() {
+    String tagML = "word1 [phr~1>word2 [phr~2>word3<phr~1] word4<phr~2] word5";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("word1 "),
+          textNodeSketch("word2 "),
+          textNodeSketch("word3"),
+          textNodeSketch(" word4"),
+          textNodeSketch(" word5")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("phr"),
+          markupSketch("phr")
+      );
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(5);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      MarkupWrapper phr0 = markupWrappers.get(0);
+      List<TextNodeWrapper> textNodes0 = phr0.getTextNodeStream().collect(toList());
+      assertThat(textNodes0).extracting("text")
+          .containsExactly("word2 ", "word3");
+
+      MarkupWrapper phr1 = markupWrappers.get(1);
+      List<TextNodeWrapper> textNodes1 = phr1.getTextNodeStream().collect(toList());
+      assertThat(textNodes1).extracting("text")
+          .containsExactly("word3", " word4");
+    });
+  }
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);

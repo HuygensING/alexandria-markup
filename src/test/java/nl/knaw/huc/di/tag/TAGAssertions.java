@@ -19,10 +19,8 @@ package nl.knaw.huc.di.tag;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapperAssert;
+
+import nl.knaw.huygens.alexandria.storage.wrappers.*;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.CheckReturnValue;
 
@@ -40,6 +38,18 @@ public class TAGAssertions extends Assertions {
   }
 
   /**
+   * Creates a new instance of <code>{@link MarkupWrapperAssert}</code>.
+   *
+   * @param actual the actual value.
+   * @return the created assertion object.
+   */
+  @CheckReturnValue
+
+  public static MarkupWrapperAssert assertThat(MarkupWrapper actual) {
+    return new MarkupWrapperAssert(actual);
+  }
+
+  /**
    * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapperAssert}</code>.
    *
    * @param actual the actual value.
@@ -49,4 +59,5 @@ public class TAGAssertions extends Assertions {
   public static TextNodeWrapperAssert assertThat(TextNodeWrapper actual) {
     return new TextNodeWrapperAssert(actual);
   }
+
 }

@@ -333,7 +333,7 @@ public class TAGMLImporter {
   private Boolean handleNameCloseMarkup(ImporterContext context) {
     Token token = context.getCurrentToken();
     ExtendedMarkupName eName = ExtendedMarkupName.of(token.getText());
-    context.pushOpenMarkup(eName.getTagName());
+    context.pushOpenMarkup(eName.getExtendedMarkupName());
     return true;
   }
 
@@ -376,8 +376,10 @@ public class TAGMLImporter {
   private Boolean handleNameOpenMarkup(ImporterContext context) {
     Token token = context.getCurrentToken();
     ExtendedMarkupName eName = ExtendedMarkupName.of(token.getText());
-    TAGMarkup markup = context.newMarkup(eName.getTagName());
-    // TODO: handle id, suspend/resume, optional
+    TAGMarkup markup = context.newMarkup(eName.getTagName())
+        // TODO: handle id, suspend/resume, optional
+        .setMarkupId(eName.getId())
+        .setOptional(eName.isOptional());
     context.openMarkup(markup);
     return true;
   }

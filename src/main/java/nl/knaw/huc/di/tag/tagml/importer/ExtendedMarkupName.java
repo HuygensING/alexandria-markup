@@ -29,7 +29,7 @@ public class ExtendedMarkupName {
   public static ExtendedMarkupName of(String text) {
     ExtendedMarkupName extendedMarkupName = new ExtendedMarkupName();
     if (text.startsWith("?")) {
-      text = text.replaceFirst("?", "");
+      text = text.replaceFirst("\\?", "");
       extendedMarkupName.setOptional(true);
     }
     if (text.startsWith("-")) {
@@ -88,5 +88,9 @@ public class ExtendedMarkupName {
 
   public String getId() {
     return id;
+  }
+
+  public String getExtendedMarkupName() {
+    return id != null ? tagName + "=" + id : tagName;
   }
 }
