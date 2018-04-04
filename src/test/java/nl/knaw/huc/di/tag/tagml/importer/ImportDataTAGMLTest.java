@@ -48,8 +48,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(Parameterized.class)
 public class ImportDataTAGMLTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataTAGMLTest.class);
-
-  private final String basename;
   private static final IOFileFilter TAGML_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
@@ -65,6 +63,11 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
       return name.endsWith(".tagml");
     }
   };
+  private final String basename;
+
+  public ImportDataTAGMLTest(String basename) {
+    this.basename = basename;
+  }
 
   @Parameters
   public static Collection<String[]> parameters() {
@@ -74,10 +77,6 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
         .map(n -> n.replace(".tagml", ""))//
         .map(b -> new String[]{b})//
         .collect(Collectors.toList());
-  }
-
-  public ImportDataTAGMLTest(String basename) {
-    this.basename = basename;
   }
 
   @Test

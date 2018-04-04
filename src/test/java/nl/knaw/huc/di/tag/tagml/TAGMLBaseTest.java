@@ -53,7 +53,7 @@ public class TAGMLBaseTest {
     CWC_LongestLine cwc = new CWC_LongestLine();
     table.getRenderer().setCWC(cwc);
     table.addRule();
-    table.addRow("Pos", "Text", "Rule", "Mode", "Token");
+    table.addRow("Pos", "Text", "Rule", "Next mode", "Token");
     table.addRule();
 
     Token token;

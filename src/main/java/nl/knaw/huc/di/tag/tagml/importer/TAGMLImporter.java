@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,17 +38,19 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 public class TAGMLImporter {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
 
-  private static TAGStore tagStore;
+  private final TAGStore tagStore;
 
   public TAGMLImporter(final TAGStore store) {
     tagStore = store;
   }
 
-  static class DocumentContext {
+  private class DocumentContext {
     private final TAGDocument document;
     private final Deque<TAGMarkup> openMarkupDeque = new ArrayDeque<>();
     private final Stack<TAGMarkup> openMarkupStack = new Stack<>();
@@ -82,8 +84,13 @@ public class TAGMLImporter {
         }
         openMarkupStack.push(markup);
       } else {
-        importerContext.errors.add("Closing tag {" + rangeName + "] found without corresponding open tag.");
+        importerContext.errors.add(format("%s Closing tag <%s] found without corresponding open tag.",
+            errorPrefix(importerContext.getCurrentToken()), rangeName));
       }
+    }
+
+    private String errorPrefix(Token currentToken) {
+      return format("line %d:%d :", currentToken.getLine(), currentToken.getCharPositionInLine());
     }
 
     void popOpenMarkup() {
@@ -134,12 +141,12 @@ public class TAGMLImporter {
     }
   }
 
-  static class ImporterContext {
+  private class ImporterContext {
     private final Deque<DocumentContext> documentContextStack = new ArrayDeque<>();
     private final TAGMLLexer lexer;
     private final List<String> errors = new ArrayList<>();
-    private Token currentToken;
     private String methodName;
+    private Token currentToken;
 
     ImporterContext(TAGMLLexer lexer) {
       this.lexer = lexer;
@@ -150,7 +157,7 @@ public class TAGMLImporter {
       return currentToken;
     }
 
-    Token currentToken() {
+    Token getCurrentToken() {
       return currentToken;
     }
 
@@ -159,7 +166,8 @@ public class TAGMLImporter {
     }
 
     String getRuleName() {
-      return lexer.getRuleNames()[lexer.getToken().getType() - 1];
+      int type = currentToken.getType();
+      return type == -1 ? "EOF" : lexer.getRuleNames()[type - 1];
     }
 
     void pushDocumentContext(TAGDocument document) {
@@ -228,11 +236,11 @@ public class TAGMLImporter {
       return !errors.isEmpty();
     }
 
-    public String getMethodName() {
+    String getMethodName() {
       return methodName;
     }
 
-    public void setMethodName(final String methodName) {
+    void setMethodName(String methodName) {
       this.methodName = methodName;
     }
   }
@@ -282,128 +290,140 @@ public class TAGMLImporter {
     return documentWrapper;
   }
 
-  static final Map<Integer, Function<ImporterContext, Boolean>> defaultModeHandlers =
+  private final Map<Integer, Function<ImporterContext, Boolean>> defaultModeHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.BEGIN_OPEN_MARKUP, TAGMLImporter::handleBeginOpenMarkup)
-          .put(TAGMLLexer.BEGIN_CLOSE_MARKUP, TAGMLImporter::handleBeginCloseMarkup)
-          .put(TAGMLLexer.BEGIN_TEXT_VARIATION, TAGMLImporter::handleTextVariation)
-          .put(TAGMLLexer.TEXT, TAGMLImporter::handleText)
-          .put(TAGMLLexer.COMMENT, TAGMLImporter::handleComment)
-          .put(TAGMLLexer.NAMESPACE, TAGMLImporter::handleNamespace)
+          .put(TAGMLLexer.BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
+          .put(TAGMLLexer.BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
+          .put(TAGMLLexer.BEGIN_TEXT_VARIATION, this::handleTextVariation)
+          .put(TAGMLLexer.TEXT, this::handleText)
+          .put(TAGMLLexer.COMMENT, this::handleComment)
+          .put(TAGMLLexer.NAMESPACE, this::handleNamespace)
+          .put(TAGMLLexer.EOF, this::handleEOF)
           .build();
 
-  private static Boolean handleBeginOpenMarkup(final ImporterContext context) {
+  private void handleDefaultMode(TAGMLImporter.ImporterContext context) {
+    handle("defaultMode", defaultModeHandlers, context);
+  }
+
+  private final Map<Integer, Function<ImporterContext, Boolean>> openMarkupHandlers =
+      ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
+          .put(TAGMLLexer.NameOpenMarkup, this::handleNameOpenMarkup)
+          .put(TAGMLLexer.END_OPEN_MARKUP, this::handleEndOpenMarkup)
+          .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
+//          .put(TAGMLLexer.Annotation, this::handleAnnotation)
+          .build();
+
+
+  private Boolean handleOpenMarkup(ImporterContext context) {
     handle("handleOpenMarkup", openMarkupHandlers, context);
     return true;
   }
 
-  private static Boolean handleBeginCloseMarkup(final ImporterContext context) {
-    handleCloseMarkup(context);
+  private final Map<Integer, Function<ImporterContext, Boolean>> closeMarkupHandlers =
+      ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
+          .put(TAGMLLexer.NameCloseMarkup, this::handleNameCloseMarkup)
+          .put(TAGMLLexer.END_CLOSE_MARKUP, this::handleEndCloseMarkup)
+          .build();
+
+  private Boolean handleCloseMarkup(ImporterContext context) {
+    handle("handleCloseMarkup", closeMarkupHandlers, context);
     return true;
   }
 
-  private static Boolean handleText(final ImporterContext context) {
-    TAGTextNode textNode = new TAGTextNode(context.currentToken.getText());
+  private Boolean handleNameCloseMarkup(ImporterContext context) {
+    Token token = context.getCurrentToken();
+    ExtendedMarkupName eName = ExtendedMarkupName.of(token.getText());
+    context.pushOpenMarkup(eName.getExtendedMarkupName());
+    return true;
+  }
+
+  private Boolean handleEndCloseMarkup(ImporterContext context) {
+    context.closeMarkup();
+    return false;
+  }
+
+  private final Map<Integer, Function<ImporterContext, Boolean>> textVariationHandlers =
+      ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
+          .put(TAGMLLexer.TV_BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
+          .put(TAGMLLexer.TV_BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
+          .put(TAGMLLexer.END_TEXT_VARIATION, this::handleEndTextVariation)
+          .put(TAGMLLexer.VARIANT_TEXT, this::handleVariantText)
+          .put(TAGMLLexer.TextVariationSeparator, this::handleTextVariationSeparator)
+          .build();
+
+  private Boolean handleTextVariation(ImporterContext context) {
+    handle("handleTextVariation", textVariationHandlers, context);
+    return true;
+  }
+
+  private Boolean handleVariantText(ImporterContext context) {
+    TAGTextNode textNode = new TAGTextNode(context.getCurrentToken().getText());
     update(textNode);
     context.addTextNode(textNode);
     return true;
   }
 
-  private static boolean handleComment(final ImporterContext context) {
+  private Boolean handleTextVariationSeparator(ImporterContext context) {
     // TODO
     return true;
   }
 
-  private static boolean handleNamespace(final ImporterContext context) {
+  private Boolean handleEndTextVariation(ImporterContext context) {
+    // TODO
+    return false;
+  }
+
+  private Boolean handleNameOpenMarkup(ImporterContext context) {
+    Token token = context.getCurrentToken();
+    ExtendedMarkupName eName = ExtendedMarkupName.of(token.getText());
+    TAGMarkup markup = context.newMarkup(eName.getTagName())
+        // TODO: handle id, suspend/resume, optional
+        .setMarkupId(eName.getId())
+        .setOptional(eName.isOptional());
+    context.openMarkup(markup);
+    return true;
+  }
+
+  private Boolean handleEndAnonymousMarkup(ImporterContext context) {
+    TAGTextNode textNode = new TAGTextNode("");
+    update(textNode);
+    context.addTextNode(textNode);
+    context.closeMarkup();
+    return false;
+  }
+
+  private Boolean handleEndOpenMarkup(ImporterContext context) {
+    context.popOpenMarkup();
+    return false;
+  }
+
+  private Boolean handleText(ImporterContext context) {
+    TAGTextNode textNode = new TAGTextNode(context.getCurrentToken().getText());
+    update(textNode);
+    context.addTextNode(textNode);
+    return true;
+  }
+
+  private Boolean handleComment(ImporterContext context) {
     // TODO
     return true;
   }
 
-  private void handleDefaultMode(TAGMLImporter.ImporterContext context) {
-    handle("defaultMode", defaultModeHandlers, context);
-//    String methodName = "defaultMode";
-//    Token token;
-//    do {
-//      token = context.nextToken();
-//      if (token.getType() != Token.EOF) {
-//        String ruleName = context.getRuleName();
-//        String modeName = context.getModeName();
-//        log(methodName, ruleName, modeName, token, context);
-//        switch (token.getType()) {
-//          case TAGMLLexer.BEGIN_OPEN_MARKUP:
-//            break;
-//
-//          case TAGMLLexer.BEGIN_CLOSE_MARKUP:
-//            handleCloseMarkup(context);
-//            break;
-
-//          case TAGMLLexer.BEGIN_TEXT_VARIATION:
-//            handleTextVariation(context);
-//            break;
-
-//          case TAGMLLexer.TEXT:
-//            TAGTextNode textNode = new TAGTextNode(token.getText());
-//            update(textNode);
-//            context.addTextNode(textNode);
-//            break;
-//
-//          case TAGMLLexer.COMMENT:
-//            handleComment(context);
-//            break;
-//
-//          case TAGMLLexer.NAMESPACE:
-//            handleNamespace(context);
-//            break;
-//
-//          default:
-//            handleUnexpectedToken(methodName, token, ruleName, modeName);
-//            break;
-//        }
-//      }
-//    } while (token.getType() != Token.EOF);
-  }
-
-  private static boolean handleTextVariation(final ImporterContext context) {
-    String methodName = "handleTextVariation";
-    boolean goOn = true;
-    while (goOn) {
-      Token token = context.nextToken();
-      String ruleName = context.getRuleName();
-      String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token, context);
-      switch (token.getType()) {
-        case TAGMLLexer.END_TEXT_VARIATION:
-          // TODO
-          goOn = false;
-          break;
-
-        case TAGMLLexer.TEXT_VARIATION:
-          TAGTextNode textNode = new TAGTextNode(token.getText());
-          update(textNode);
-          context.addTextNode(textNode);
-          break;
-
-        case TAGMLLexer.TextVariationSeparator:
-          // TODO
-          break;
-
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
-      }
-      goOn = goOn && token.getType() != Token.EOF;
-    }
+  private Boolean handleNamespace(ImporterContext context) {
+    // TODO
     return true;
   }
 
-  static final Map<Integer, Function<ImporterContext, Boolean>> openMarkupHandlers =
-      ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.NameOpenMarkup, TAGMLImporter::handleNameOpenMarkup)
-          .put(TAGMLLexer.END_OPEN_MARKUP, TAGMLImporter::handleEndOpenMarkup)
-          .put(TAGMLLexer.Annotation, TAGMLImporter::handleAnnotation)
-          .build();
+  private Boolean handleAnnotation(final ImporterContext context) {
+    // TODO
+    return true;
+  }
 
-  private static void handle(final String methodName, final Map<Integer, Function<ImporterContext, Boolean>> handlers, final ImporterContext context) {
+  private Boolean handleEOF(ImporterContext context) {
+    return false;
+  }
+
+  private void handle(String methodName, Map<Integer, Function<ImporterContext, Boolean>> handlers, ImporterContext context) {
     context.setMethodName(methodName);
     boolean goOn = true;
     while (goOn) {
@@ -413,67 +433,18 @@ public class TAGMLImporter {
     }
   }
 
-  private Boolean handleUnexpectedToken(final ImporterContext context) {
-    String ruleName = context.getRuleName();
-    String modeName = context.getModeName();
-    String message = String.format("%s: unexpected rule/token: token=%s, ruleName=%s, mode=%s",
-        context.getMethodName(), context.currentToken, ruleName, modeName);
+  private Boolean handleUnexpectedToken(ImporterContext context) {
+    String message = format(
+        "%s: unexpected rule/token: token=%s, ruleName=%s, mode=%s",
+        context.getMethodName(),
+        context.getCurrentToken(),
+        context.getRuleName(),
+        context.getModeName());
     LOG.error(message);
     throw new TAGMLSyntaxError(message);
   }
 
-  private static Boolean handleEndOpenMarkup(final ImporterContext context) {
-    context.popOpenMarkup();
-    return false;
-  }
-
-  private static Boolean handleNameOpenMarkup(final ImporterContext context) {
-    TAGMarkup markup = context.newMarkup(context.currentToken.getText());
-    context.openMarkup(markup);
-    return true;
-  }
-
-  private static Boolean handleAnnotation(final ImporterContext context) {
-    // TODO
-    return true;
-  }
-
-  private static void handleCloseMarkup(TAGMLImporter.ImporterContext context) {
-    String methodName = "handleCloseMarkup";
-    boolean goOn = true;
-    while (goOn) {
-      Token token = context.nextToken();
-      String ruleName = context.getRuleName();
-      String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token, context);
-      switch (token.getType()) {
-        case TAGMLLexer.NameCloseMarkup:
-          String rangeName = token.getText();
-          context.pushOpenMarkup(rangeName);
-          break;
-//        case TAGMLLexer.BEGIN_OPEN_ANNO_IN_RANGE_CLOSER:
-//          handleAnnotation(context);
-//          break;
-        case TAGMLLexer.END_CLOSE_MARKUP:
-          context.closeMarkup();
-          goOn = false;
-          break;
-
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
-      }
-      goOn = goOn && token.getType() != Token.EOF;
-    }
-  }
-
-  private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
-    String message = methodName + ": unexpected rule/token: token=" + token + ", ruleName=" + ruleName + ", mode=" + modeName;
-    LOG.error(message);
-    throw new TAGMLSyntaxError(message);
-  }
-
-  private static Long update(TAGObject tagObject) {
+  private Long update(TAGObject tagObject) {
     return tagStore.persist(tagObject);
   }
 
