@@ -23,12 +23,16 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import com.google.common.collect.ImmutableMap;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,6 +268,39 @@ public class TAGMLImporter {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+    TAGMLParser parser = new TAGMLParser(tokens);
+    parser.addErrorListener(errorListener);
+    parser.setBuildParseTree(true);
+    ParseTree parseTree = parser.document();
+    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+    TAGMLListener listener = new TAGMLListener(tagStore);
+    ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    DocumentWrapper documentWrapper = listener.getDocument();
+
+    String errorMsg = "";
+    if (listener.hasErrors()) {
+      String errors = listener.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg = "Parsing errors:\n" + errors;
+    }
+    if (errorListener.hasErrors()) {
+      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      errorMsg += "\n\nTokenizing errors:\n" + errors;
+    }
+    if (!errorMsg.isEmpty()) {
+      throw new TAGMLSyntaxError(errorMsg);
+    }
+    update(documentWrapper.getDocument());
+    return documentWrapper;
+  }
+
+  private DocumentWrapper importTAGML0(CharStream antlrInputStream) throws TAGMLSyntaxError {
+    TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
+    ErrorListener errorListener = new ErrorListener();
+    lexer.addErrorListener(errorListener);
 
     TAGMLImporter.ImporterContext context = new TAGMLImporter.ImporterContext(lexer);
     DocumentWrapper documentWrapper = tagStore.createDocumentWrapper();
@@ -312,7 +349,6 @@ public class TAGMLImporter {
           .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
 //          .put(TAGMLLexer.Annotation, this::handleAnnotation)
           .build();
-
 
   private Boolean handleOpenMarkup(ImporterContext context) {
     handle("handleOpenMarkup", openMarkupHandlers, context);

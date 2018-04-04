@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 // In the default mode we are outside a Markup Range
 
 COMMENT
-  : '[! ' .*? ' !]' //-> skip //channel(HIDDEN)
+  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
   ;
 
 NAMESPACE

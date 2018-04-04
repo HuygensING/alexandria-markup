@@ -100,6 +100,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     linkTextToMarkup(tn, markup);
   }
 
+  public boolean hasErrors() {
+    return !errors.isEmpty();
+  }
+
+  public List<String> getErrors() {
+    return errors;
+  }
+
   private class DocumentContext {
     private final TAGDocument document;
     private final Deque<TAGMarkup> openMarkupDeque = new ArrayDeque<>();
