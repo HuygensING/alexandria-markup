@@ -59,6 +59,7 @@ public class TAGMLBaseTest {
     Token token;
     do {
       token = lexer.nextToken();
+//      LOG.info(token.toString());
       if (token.getType() != Token.EOF) {
         String pos = token.getLine() + ":" + token.getCharPositionInLine();
         String text = "'" + token.getText() + "'";

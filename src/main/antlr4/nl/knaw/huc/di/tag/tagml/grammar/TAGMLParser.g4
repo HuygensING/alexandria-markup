@@ -20,11 +20,26 @@ chunk
   ;
 
 startTag
-  : BEGIN_OPEN_MARKUP PREFIX? name SUFFIX? annotation* END_OPEN_MARKUP // possible recursion
+  : beginOpenMarkup markupName annotation* END_OPEN_MARKUP // possible recursion
+  ;
+
+beginOpenMarkup
+  : BEGIN_OPEN_MARKUP
+  | TV_BEGIN_OPEN_MARKUP
+  ;
+
+markupName
+  : PREFIX? name SUFFIX?
+  | ( Optional | Suspend )? name SUFFIX?
   ;
 
 endTag
-  : BEGIN_CLOSE_MARKUP ( Optional | Suspend )? name SUFFIX? END_CLOSE_MARKUP
+  : beginCloseMarkup markupName END_CLOSE_MARKUP
+  ;
+
+beginCloseMarkup
+  : BEGIN_CLOSE_MARKUP
+  | TV_BEGIN_CLOSE_MARKUP
   ;
 
 name
@@ -71,14 +86,20 @@ milestone
   ;
 
 textVariation
-  : TextVariationStartTag variantText (TextVariationSeparator variantText)+ TextVariationEndTag
+  : beginTextVariation variantText (TextVariationSeparator variantText)+ END_TEXT_VARIATION
+  ;
+
+beginTextVariation
+  : BEGIN_TEXT_VARIATION
+  | TV_BEGIN_TEXT_VARIATION
   ;
 
 variantText
-  : chunk+
+  : ( chunk | VARIANT_TEXT )+
   ;
 
 text
   : TEXT
+  | VARIANT_TEXT
   ;
 

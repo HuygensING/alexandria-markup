@@ -177,12 +177,16 @@ TV_BEGIN_OPEN_MARKUP // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
+TV_BEGIN_TEXT_VARIATION
+  : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
+  ;
+
 TV_BEGIN_CLOSE_MARKUP
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
 END_TEXT_VARIATION
-  : TextVariationEndTag -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+  : TextVariationEndTag -> popMode
   ;
 
 // ----------------- lots of repeated stuff --------------------------
