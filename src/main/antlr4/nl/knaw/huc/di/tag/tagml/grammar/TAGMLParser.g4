@@ -20,11 +20,11 @@ chunk
   ;
 
 startTag
-  : BEGIN_OPEN_MARKUP ( Optional | Resume )? name suffix? annotation* END_OPEN_MARKUP // possible recursion
+  : BEGIN_OPEN_MARKUP PREFIX? name SUFFIX? annotation* END_OPEN_MARKUP // possible recursion
   ;
 
 endTag
-  : BEGIN_CLOSE_MARKUP ( Optional | Suspend )? name suffix? END_CLOSE_MARKUP
+  : BEGIN_CLOSE_MARKUP ( Optional | Suspend )? name SUFFIX? END_CLOSE_MARKUP
   ;
 
 name
@@ -32,16 +32,12 @@ name
   | NameCloseMarkup
   ;
 
-suffix
-  : TILDE markupIdentifier
-  ;
-
 markupIdentifier
   : name
   ;
 
 annotation
-  : name EQ annotationValue
+  : ANNOTATION_NAME EQ annotationValue
   ;
 
 annotationValue
@@ -71,7 +67,7 @@ objectValue
   ;
 
 milestone
-  : LEFT_SQUARE_BRACKET name annotation+ RIGHT_SQUARE_BRACKET // possible recursion
+  : BEGIN_OPEN_MARKUP name annotation+ END_ANONYMOUS_MARKUP // possible recursion
   ;
 
 textVariation

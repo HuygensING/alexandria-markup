@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // In the default mode we are outside a Markup Range
 
-
 COMMENT
   : '[! ' .*? ' !]' //-> skip //channel(HIDDEN)
   ;
@@ -44,27 +43,28 @@ TEXT  // match any 16 bit char other than { (start close tag) and [ (start open 
   : ~[<\\[|]+
   ;
 
-//Nameinit
-//  : [a-zA-Z_]
-//  ;
-//
-//Namechar
-//  : Nameinit
-//  | [0-9]
-//  ;
-
 NAME
   : NameStartChar NameChar*
   ;
-//NL
-//  : [\r\n]+ -> skip
-//  ;
 
 // ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
 mode INSIDE_MARKUP_OPENER;
 
 COMMENT_IN_MARKUP_OPENER
   : '[!' .*? '!]' -> skip //channel(HIDDEN)
+  ;
+
+PREFIX
+  : Optional
+  | Resume
+  ;
+
+SUFFIX
+  : TILDE ( NAME | DIGIT+ )
+  ;
+
+NameOpenMarkup
+  : NAME
   ;
 
 END_ANONYMOUS_MARKUP
@@ -75,88 +75,48 @@ END_ANONYMOUS_MARKUP
   }
   ;
 
-TRUE
-  : T R U E
+MO_WS
+  : WS -> skip, pushMode(ANNOTATIONS)
   ;
 
-FALSE
-  : F A L S E
-  ;
-
-//SINGLE_QUOTE
-//  : '\''
-//  ;
-//
-//DOUBLE_QUOTE
-//  : '"'
-//  ;
-
-NameOpenMarkup
-  :  ( Optional | Resume )? NAME SUFFIX? -> pushMode(ANNOTATIONS)
-  ;
-
-SUFFIX
-  : TILDE NAME
+END_OPEN_MARKUP
+  :  TagOpenEndChar  -> popMode
   ;
 
 
-// ----------------- Everything INSIDE of a MARKUP CLOSER -------------
+// ----------------- Everything after the markup name -------------
 mode ANNOTATIONS;
-
-MARKUP_S
-  :  WS  -> skip
-  ;
 
 ANNOTATION_NAME
   : NAME
   ;
 
-EQ
-  : '='
+MARKUP_S
+  :  WS  -> skip
   ;
 
-//Annotation
-//  : AnnotationIdentifier '=' AnnotationValue
-//  ;
-//
-//AnnotationIdentifier
-//  : NAME
-//  ;
-//
-//AnnotationValue
-//  : StringValue
-//  | BooleanValue
-//  | NumberValue
-//  | MixedContentValue
-//  | ListValue
-//  | ObjectValue
-//  ;
-//
+EQ
+  : '=' -> pushMode(ANNOTATION_VALUE)
+  ;
+
+// ----------------- Everything after the = in an annotation -------------
+mode ANNOTATION_VALUE;
+
 StringValue
-  : '"' ~["]+ '"'
-  | '\'' ~[']+ '\''
+  : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode, popMode
   ;
-//
-//BooleanValue
-//  : TRUE
-//  | FALSE
-//  ;
-//
+
 NumberValue
-  : DIGIT+ ( '.' DIGIT+ )?
+  : DIGIT+ ( '.' DIGIT+ )? -> popMode, popMode
   ;
-//
-//MixedContentValue
-//  : '|' ~[|] '|'
-//  ;
-//
-//ListValue
-//  : '[' AnnotationValue (',' AnnotationValue)+ ']'
-//  ;
-//
-//ObjectValue
-//  : '{' Annotation (' ' Annotation)+ '}'
-//  ;
+
+TRUE
+  : T R U E -> popMode, popMode
+  ;
+
+FALSE
+  : F A L S E -> popMode, popMode
+  ;
 
 OPEN_MIXED_CONTENT
   : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
@@ -170,15 +130,32 @@ OPEN_LIST
   : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST)
   ;
 
-END_OPEN_MARKUP
-  :  TagOpenEndChar  -> popMode, popMode
+// ----------------- Everything INSIDE of | | -------------
+mode INSIDE_MIXED_CONTENT;
+
+MC_END
+  : PIPE -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+  ;
+
+// ----------------- Everything INSIDE of { } -------------
+mode INSIDE_OBJECT;
+
+OBJECT_END
+  : '}' -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+  ;
+
+// ----------------- Everything INSIDE of [ ] -------------
+mode INSIDE_LIST;
+
+LIST_END
+  : RIGHT_SQUARE_BRACKET -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
 mode INSIDE_MARKUP_CLOSER;
 
 END_CLOSE_MARKUP
-  :   RIGHT_SQUARE_BRACKET  -> popMode
+  :   RIGHT_SQUARE_BRACKET -> popMode // back to DEFAULT
   ;
 
 NameCloseMarkup
@@ -192,6 +169,10 @@ MARKUP_S2
 // ----------------- Everything INSIDE of a TEXT VARIATION -------------
 mode INSIDE_TEXT_VARIATION;
 
+VARIANT_TEXT
+  : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
+  ;
+
 TV_BEGIN_OPEN_MARKUP // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
@@ -201,41 +182,10 @@ TV_BEGIN_CLOSE_MARKUP
   ;
 
 END_TEXT_VARIATION
-  : TextVariationEndTag -> popMode
-  ;
-
-VARIANT_TEXT
-  : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
-  ;
-
-// ----------------- Everything INSIDE of | | -------------
-mode INSIDE_MIXED_CONTENT;
-
-MC_END
-  : PIPE -> popMode
-  ;
-
-// ----------------- Everything INSIDE of { } -------------
-mode INSIDE_OBJECT;
-
-OBJECT_END
-  : '}' -> popMode
-  ;
-
-// ----------------- Everything INSIDE of [ ] -------------
-mode INSIDE_LIST;
-
-LIST_END
-  : RIGHT_SQUARE_BRACKET -> popMode
+  : TextVariationEndTag -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- lots of repeated stuff --------------------------
-
-
-
-//TagOpenStartChar
-//  : LEFT_SQUARE_BRACKET
-//  ;
 
 TagOpenEndChar
   : '>'
@@ -244,10 +194,6 @@ TagOpenEndChar
 TagCloseStartChar
   : '<'
   ;
-
-//TagCloseEndChar
-//  : RIGHT_SQUARE_BRACKET
-//  ;
 
 TextVariationStartTag
   : '|>'
@@ -326,7 +272,6 @@ DIGIT
   : [0-9]
   ;
 
-
 fragment A : [Aa];
 fragment B : [Bb];
 fragment C : [Cc];
@@ -378,6 +323,6 @@ WS
   : [ \t\r\n]+
   ;
 
-//UNEXPECTED_CHAR // Throw unexpected token exception
-//  :  .
-//  ;
+UNEXPECTED_CHAR // Throw unexpected token exception
+  :  .
+  ;
