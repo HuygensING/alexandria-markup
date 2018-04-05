@@ -7,15 +7,15 @@
 
 lexer grammar TAGMLLexer;
 
-@lexer::header{
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-}
-
-@lexer::members{
-  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in markup open tag, 2 = inside annotation in markup open tag inside annotation in markup open tag, etc.
-  Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
-}
+//@lexer::header{
+//import java.util.*;
+//import java.util.concurrent.atomic.AtomicInteger;
+//}
+//
+//@lexer::members{
+//  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in markup open tag, 2 = inside annotation in markup open tag inside annotation in markup open tag, etc.
+//  Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
+//}
 
 // In the default mode we are outside a Markup Range
 
@@ -68,11 +68,7 @@ NameOpenMarkup
   ;
 
 END_ANONYMOUS_MARKUP
-  : RIGHT_SQUARE_BRACKET  {
-    openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
-    openRangeInAnnotationTextCount.get(annotationDepth).decrementAndGet();
-    popMode();
-  }
+  : RIGHT_SQUARE_BRACKET -> popMode
   ;
 
 MO_WS
@@ -82,7 +78,6 @@ MO_WS
 END_OPEN_MARKUP
   :  TagOpenEndChar  -> popMode
   ;
-
 
 // ----------------- Everything after the markup name -------------
 mode ANNOTATIONS;
@@ -99,30 +94,38 @@ EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
   ;
 
+A_END_OPEN_MARKUP
+  :  TagOpenEndChar  -> popMode, popMode
+  ;
+
+A_END_ANONYMOUS_MARKUP
+  : RIGHT_SQUARE_BRACKET -> popMode, popMode
+  ;
+
 // ----------------- Everything after the = in an annotation -------------
 mode ANNOTATION_VALUE;
 
 StringValue
-  : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode, popMode
+  : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode
   ;
 
 NumberValue
-  : DIGIT+ ( '.' DIGIT+ )? -> popMode, popMode
+  : DIGIT+ ( '.' DIGIT+ )? -> popMode
   ;
 
 TRUE
-  : T R U E -> popMode, popMode
+  : T R U E -> popMode
   ;
 
 FALSE
-  : F A L S E -> popMode, popMode
+  : F A L S E -> popMode
   ;
 
 OPEN_MIXED_CONTENT
   : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
   ;
 
-OPEN_OBJECT
+OBJECT_OPENER
   : '{' -> pushMode(INSIDE_OBJECT)
   ;
 
@@ -140,8 +143,20 @@ MC_END
 // ----------------- Everything INSIDE of { } -------------
 mode INSIDE_OBJECT;
 
-OBJECT_END
-  : '}' -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+O_ANNOTATION_NAME
+  : NAME
+  ;
+
+O_MARKUP_S
+  :  WS  -> skip
+  ;
+
+O_EQ
+  : '=' -> pushMode(ANNOTATION_VALUE)
+  ;
+
+OBJECT_CLOSER
+  : '}' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of [ ] -------------
@@ -248,14 +263,6 @@ LIST_CLOSER
   : RIGHT_SQUARE_BRACKET
   ;
 
-OBJECT_OPENER
-  : '{'
-  ;
-
-OBJECT_CLOSER
-  : '}'
-  ;
-
 NamespaceIdentifier
   : NameChar+
   ;
@@ -279,7 +286,6 @@ LEFT_SQUARE_BRACKET
 RIGHT_SQUARE_BRACKET
   : ']'
   ;
-
 
 DIGIT
   : [0-9]

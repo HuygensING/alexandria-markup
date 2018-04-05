@@ -36,9 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.markupSketch;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.optionalMarkupSketch;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.textNodeSketch;
+import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.*;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
 
@@ -69,7 +67,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("discontinuity")
+      );
     });
   }
 
@@ -80,7 +81,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         " post<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("milestone")
+      );
     });
   }
 
@@ -91,7 +95,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("id")
+      );
     });
   }
 
@@ -102,7 +109,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
     });
   }
 
@@ -113,7 +123,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
     });
   }
 
@@ -124,7 +137,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("markup")
+      );
     });
   }
 
@@ -135,7 +151,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
     });
   }
 
@@ -146,7 +165,33 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+    });
+  }
+
+
+  @Test
+  public void testObjectAnnotation0() {
+    String input = "[tagml>" +
+        "[m p={valid=false}>text<m]" +
+        "<tagml]";
+    assertTAGMLParsesWithSyntaxError(input, "syntax error: line 1:24 no viable alternative at input '[mp={valid=false}'");
+  }
+
+  @Test
+  public void testObjectAnnotation1() {
+    String input = "[tagml>" +
+        "[m p={x=1 y=2}>text<m]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
     });
   }
 
@@ -157,7 +202,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
     });
   }
 
@@ -168,7 +213,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
     });
   }
 
@@ -183,7 +228,13 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-//      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("del"),
+          markupSketch("del"),
+          markupSketch("add"),
+          markupSketch("add")
+      );
     });
   }
 
@@ -194,21 +245,47 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
 
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
-    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+
+    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+    assertThat(numberOfSyntaxErrors).isEqualTo(0);
+    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+
     TAGMLListener listener = new TAGMLListener(store);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
-    assertThat(numberOfSyntaxErrors).isEqualTo(0);
+
     DocumentWrapper document = listener.getDocument();
     String lmnl = LMNL_EXPORTER.toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;
   }
+
+  private void assertTAGMLParsesWithSyntaxError(String input, String expectedSyntaxErrorMessage) {
+    printTokens(input);
+
+    CodePointCharStream antlrInputStream = CharStreams.fromString(input);
+    TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
+    ErrorListener errorListener = new ErrorListener();
+    lexer.addErrorListener(errorListener);
+
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    TAGMLParser parser = new TAGMLParser(tokens);
+    parser.addErrorListener(errorListener);
+    parser.setBuildParseTree(true);
+    ParseTree parseTree = parser.document();
+    LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+
+    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    assertThat(numberOfSyntaxErrors).isEqualTo(1);
+    assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
+
+  }
+
 }
