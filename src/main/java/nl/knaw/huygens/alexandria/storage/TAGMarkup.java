@@ -91,6 +91,7 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
+    // TODO: this is output language dependent move to language
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }

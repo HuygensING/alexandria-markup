@@ -25,6 +25,7 @@ import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperAssert, DocumentWrapper> {
@@ -59,6 +60,19 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return myself;
   }
 
+  public MarkupWrapperAssert hasMarkupWithTag(String tag) {
+    isNotNull();
+    List<MarkupWrapper> relevantMarkup = actual.getMarkupStream()
+        .filter(m -> m.hasTag(tag))
+        .collect(toList());
+    if (relevantMarkup.isEmpty()) {
+      failWithMessage("No markup found with tag %s", tag);
+    }
+
+    MarkupWrapper markup = relevantMarkup.get(0);
+    return new MarkupWrapperAssert(markup);
+  }
+
   private Set<TextNodeSketch> getActualTextNodeSketches() {
     return actual.getTextNodeStream()//
         .map(this::toTextNodeSketch)//
@@ -68,6 +82,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
   private TextNodeSketch toTextNodeSketch(final TextNodeWrapper textNodeWrapper) {
     return textNodeSketch(textNodeWrapper.getText());
   }
+
 
   public static class TextNodeSketch {
 

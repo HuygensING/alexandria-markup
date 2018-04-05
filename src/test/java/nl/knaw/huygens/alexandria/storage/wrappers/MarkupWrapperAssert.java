@@ -19,7 +19,13 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * limitations under the License.
  * #L%
  */
+
 import org.assertj.core.api.AbstractObjectAssert;
+
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAssert, MarkupWrapper> {
 
@@ -33,6 +39,12 @@ public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAsser
     if (!actual.isOptional()) {
       failWithMessage(errorMessage, actual);
     }
+    return myself;
+  }
+
+  public MarkupWrapperAssert withTextNodesWithText(String... text) {
+    List<String> actualTexts = actual.getTextNodeStream().map(TextNodeWrapper::getText).collect(toList());
+    assertThat(actualTexts).containsExactly(text);
     return myself;
   }
 }

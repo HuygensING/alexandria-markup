@@ -154,16 +154,25 @@ LIST_END
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
 mode INSIDE_MARKUP_CLOSER;
 
-END_CLOSE_MARKUP
-  :   RIGHT_SQUARE_BRACKET -> popMode // back to DEFAULT
+CM_PREFIX
+  : Optional
+  | Suspend
   ;
 
 NameCloseMarkup
-  :   ( Optional | Suspend )? NAME SUFFIX?
+  : NAME
+  ;
+
+CM_SUFFIX
+  : TILDE ( NAME | DIGIT+ )
   ;
 
 MARKUP_S2
   :   WS  -> skip
+  ;
+
+END_CLOSE_MARKUP
+  :   RIGHT_SQUARE_BRACKET -> popMode // back to DEFAULT
   ;
 
 // ----------------- Everything INSIDE of a TEXT VARIATION -------------

@@ -30,7 +30,7 @@ beginOpenMarkup
 
 markupName
   : PREFIX? name SUFFIX?
-  | ( Optional | Suspend )? name SUFFIX?
+  | CM_PREFIX? name CM_SUFFIX?
   ;
 
 endTag
@@ -45,10 +45,6 @@ beginCloseMarkup
 name
   : NameOpenMarkup
   | NameCloseMarkup
-  ;
-
-markupIdentifier
-  : name
   ;
 
 annotation
@@ -102,4 +98,3 @@ text
   : TEXT
   | VARIANT_TEXT
   ;
-

@@ -80,6 +80,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testOverlap() {
+    String tagML = "[a>J'onn J'onzz [b>likes<a] Oreos<b]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).hasMarkupWithTag("a").withTextNodesWithText("J'onn J'onzz ", "likes");
+      assertThat(document).hasMarkupWithTag("b").withTextNodesWithText("likes", " Oreos");
+    });
+  }
+
+  @Test
   public void testTAGML2() {
     String tagML = "[line>[a>The rain in [country>Spain<country] [b>falls<a] mainly on the plain.<b]<line]";
     store.runInTransaction(() -> {

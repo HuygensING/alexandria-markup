@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
@@ -35,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
 
 public class TAGMLListener extends TAGMLParserBaseListener {
@@ -58,6 +59,17 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   public DocumentWrapper getDocument() {
     return document;
+  }
+
+  @Override
+  public void exitDocument(TAGMLParser.DocumentContext ctx) {
+    update(document.getDocument());
+    if (!openMarkup.isEmpty()) {
+      String openRanges = openMarkup.stream()//
+          .map(m -> "[" + m.getExtendedTag() + ">")//
+          .collect(joining(", "));
+      errors.add("Unclosed TAGML tag(s): " + openRanges);
+    }
   }
 
   @Override
@@ -94,7 +106,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public void exitEndTag(EndTagContext ctx) {
 //    String markupName = ctx.markupName().name().getText();
 //    LOG.info("   endTag.markupName=<{}>", markupName);
-    removeFromOpenMarkup(ctx.markupName().name());
+    removeFromOpenMarkup(ctx.markupName());
   }
 
   @Override
@@ -252,7 +264,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       if (!documentContext.openMarkupDeque.isEmpty()) {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + ">")//
-            .collect(Collectors.joining(", "));
+            .collect(joining(", "));
         errors.add("Unclosed TAGML tag(s): " + openRanges);
       }
       return documentContext;
@@ -349,11 +361,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return store.persist(tagObject);
   }
 
-  private MarkupWrapper removeFromOpenMarkup(ParserRuleContext ctx) {
-    String tag = ctx.getText();
-    MarkupWrapper markup = removeFromMarkupStack(tag, openMarkup);
+  private MarkupWrapper removeFromOpenMarkup(MarkupNameContext ctx) {
+    String extendedMarkupName = ctx.name().getText();
+    TerminalNode suffix = ctx.CM_SUFFIX();
+    if (suffix != null) {
+      extendedMarkupName += suffix.getText();
+    }
+    MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, openMarkup);
     if (markup == null) {
-      String message = errorPrefix(ctx) + "Closing tag <" + tag + "] found, which has no corresponding earlier opening tag.";
+      String message = format("%sClosing tag <%s] found without corresponding open tag.", errorPrefix(ctx), extendedMarkupName);
       errors.add(message);
     }
     return markup;
@@ -369,14 +385,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 //    return markup;
 //  }
 
-  private MarkupWrapper removeFromMarkupStack(String tag, Deque<MarkupWrapper> markupStack) {
+  private MarkupWrapper removeFromMarkupStack(String extendedTag, Deque<MarkupWrapper> markupStack) {
     Iterator<MarkupWrapper> descendingIterator = markupStack.descendingIterator();
     MarkupWrapper markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
-      if (markup.getTag().equals(tag)) {
+      if (markup.getExtendedTag().equals(extendedTag.replace("~", "="))) {
         break;
       }
+      markup = null;
     }
     if (markup != null) {
       markupStack.remove(markup);

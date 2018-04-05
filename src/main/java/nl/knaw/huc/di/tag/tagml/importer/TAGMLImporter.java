@@ -40,9 +40,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 public class TAGMLImporter {
 
@@ -188,7 +188,7 @@ public class TAGMLImporter {
       if (!documentContext.openMarkupDeque.isEmpty()) {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + ">")//
-            .collect(Collectors.joining(", "));
+            .collect(joining(", "));
         errors.add("Unclosed TAGML tag(s): " + openRanges);
       }
       return documentContext;
@@ -283,11 +283,11 @@ public class TAGMLImporter {
 
     String errorMsg = "";
     if (listener.hasErrors()) {
-      String errors = listener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = listener.getErrors().stream().collect(joining("\n"));
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (errorListener.hasErrors()) {
-      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = errorListener.getErrors().stream().collect(joining("\n"));
       errorMsg += "\n\nTokenizing errors:\n" + errors;
     }
     if (!errorMsg.isEmpty()) {
@@ -313,11 +313,11 @@ public class TAGMLImporter {
 
     String errorMsg = "";
     if (context.hasErrors()) {
-      String errors = context.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = context.getErrors().stream().collect(joining("\n"));
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (errorListener.hasErrors()) {
-      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = errorListener.getErrors().stream().collect(joining("\n"));
       errorMsg += "\n\nTokenizing errors:\n" + errors;
     }
     if (!errorMsg.isEmpty()) {

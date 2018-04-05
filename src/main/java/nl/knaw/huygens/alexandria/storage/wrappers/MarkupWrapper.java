@@ -204,4 +204,8 @@ public class MarkupWrapper {
     markup.setMarkupId(id);
     return this;
   }
+
+  public boolean hasTag(String tag) {
+    return tag.equals(markup.getTag());
+  }
 }
