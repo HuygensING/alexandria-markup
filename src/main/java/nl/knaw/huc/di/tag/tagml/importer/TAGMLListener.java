@@ -29,6 +29,7 @@ import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,21 +71,30 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
-    String markupName = ctx.markupName().getText();
+    String markupName = ctx.markupName().name().getText();
     LOG.info("startTag.markupName=<{}>", markupName);
     ctx.annotation()
         .forEach(annotation -> LOG.info("  startTag.annotation={{}}", annotation.getText()));
 
-    MarkupWrapper markup = addMarkup(markupName, ctx.annotation());
-    openMarkup.add(markup);
+    TerminalNode prefix = ctx.markupName().PREFIX();
+    boolean optional = prefix != null && prefix.getText().equals("?");
 
+    MarkupWrapper markup = addMarkup(markupName, ctx.annotation()).setOptional(optional);
+
+    TerminalNode suffix = ctx.markupName().SUFFIX();
+    if (suffix != null) {
+      String id = suffix.getText().replace("~", "");
+      markup.setMarkupId(id);
+    }
+
+    openMarkup.add(markup);
   }
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
-    String markupName = ctx.markupName().getText();
-    LOG.info("   endTag.markupName=<{}>", markupName);
-    removeFromOpenMarkup(ctx.markupName());
+//    String markupName = ctx.markupName().name().getText();
+//    LOG.info("   endTag.markupName=<{}>", markupName);
+    removeFromOpenMarkup(ctx.markupName().name());
   }
 
   @Override
@@ -339,7 +349,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return store.persist(tagObject);
   }
 
-  private MarkupWrapper removeFromOpenMarkup(MarkupNameContext ctx) {
+  private MarkupWrapper removeFromOpenMarkup(ParserRuleContext ctx) {
     String tag = ctx.getText();
     MarkupWrapper markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {

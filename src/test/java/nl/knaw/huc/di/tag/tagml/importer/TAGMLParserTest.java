@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.markupSketch;
+import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.optionalMarkupSketch;
 import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.textNodeSketch;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
@@ -53,7 +54,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
       assertThat(documentWrapper).hasMarkupMatching(
           markupSketch("tagml"),
-          markupSketch("optional")
+          optionalMarkupSketch("optional")
       );
       assertThat(documentWrapper).hasTextNodesMatching(
           textNodeSketch("optional")

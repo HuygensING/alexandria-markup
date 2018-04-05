@@ -36,8 +36,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.markupSketch;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.textNodeSketch;
+import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.*;
 import static org.junit.Assert.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {
@@ -333,7 +332,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       );
       assertThat(document).hasMarkupMatching(
           markupSketch("t"),
-          markupSketch("del")
+          optionalMarkupSketch("del")
       );
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
       assertThat(textNodeWrappers).hasSize(3);
@@ -434,10 +433,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(annotationWrappers).hasSize(2);
 
       AnnotationWrapper annotationA = annotationWrappers.get(0);
-      assertThat(annotationA).extracting("tag").isEqualTo("a");
+      assertThat(annotationA).hasTag("a");
 
       AnnotationWrapper annotationB = annotationWrappers.get(1);
-      assertThat(annotationB).extracting("tag").isEqualTo("b");
+      assertThat(annotationB).hasTag("b");
     });
   }
 

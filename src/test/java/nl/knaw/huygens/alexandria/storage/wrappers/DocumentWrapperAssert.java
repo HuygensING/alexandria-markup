@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import org.assertj.core.api.AbstractObjectAssert;
 
@@ -33,6 +34,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
   }
 
   public DocumentWrapperAssert hasTextNodesMatching(final TextNodeSketch... textNodeSketches) {
+    isNotNull();
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
     expectedTextNodeSketches.removeAll(actualTextNodeSketches);
@@ -45,6 +47,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
   }
 
   public DocumentWrapperAssert hasMarkupMatching(final MarkupSketch... markupSketches) {
+    isNotNull();
     Set<MarkupSketch> actualMarkupSketches = getActualMarkupSketches();
     Set<MarkupSketch> expectedMarkupSketches = new HashSet<>(Arrays.asList(markupSketches));
     expectedMarkupSketches.removeAll(actualMarkupSketches);
@@ -102,10 +105,12 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
   public static class MarkupSketch {
     private final String tag;
     private final List<Annotation> annotations;
+    private boolean optional = false;
 
-    MarkupSketch(String tag, List<Annotation> annotations) {
+    MarkupSketch(String tag, List<Annotation> annotations, Boolean optional) {
       this.tag = tag;
       this.annotations = annotations;
+      this.optional = optional;
     }
 
     @Override
@@ -124,14 +129,26 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     public String toString() {
       return String.format("MarkupSketch(%s %s)", tag, annotations);
     }
+
+    public boolean isOptional() {
+      return optional;
+    }
   }
 
-  public static MarkupSketch markupSketch(String tag, List<Annotation> annotations) {
-    return new MarkupSketch(tag, annotations);
+  public static MarkupSketch markupSketch(String tag, List<Annotation> annotations, Boolean optional) {
+    return new MarkupSketch(tag, annotations, optional);
+  }
+
+  public static MarkupSketch markupSketch(String tag, boolean optional) {
+    return markupSketch(tag, new ArrayList<>(), optional);
   }
 
   public static MarkupSketch markupSketch(String tag) {
-    return markupSketch(tag, new ArrayList<>());
+    return markupSketch(tag, new ArrayList<>(), false);
+  }
+
+  public static MarkupSketch optionalMarkupSketch(String tag) {
+    return markupSketch(tag, new ArrayList<>(), true);
   }
 
   private Set<MarkupSketch> getActualMarkupSketches() {
@@ -141,7 +158,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
   }
 
   public MarkupSketch toMarkupSketch(MarkupWrapper markup) {
-    return markupSketch(markup.getTag());
+    return markupSketch(markup.getTag(), markup.isOptional());
   }
 
 }

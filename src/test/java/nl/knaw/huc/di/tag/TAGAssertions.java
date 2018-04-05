@@ -50,6 +50,17 @@ public class TAGAssertions extends Assertions {
   }
 
   /**
+   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapperAssert}</code>.
+   *
+   * @param actual the actual value.
+   * @return the created assertion object.
+   */
+  @CheckReturnValue
+  public static AnnotationWrapperAssert assertThat(AnnotationWrapper actual) {
+    return new AnnotationWrapperAssert(actual);
+  }
+
+  /**
    * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapperAssert}</code>.
    *
    * @param actual the actual value.

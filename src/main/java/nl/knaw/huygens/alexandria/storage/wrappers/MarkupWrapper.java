@@ -179,8 +179,9 @@ public class MarkupWrapper {
     return markup.isOptional();
   }
 
-  public void setOptional(boolean optional) {
+  public MarkupWrapper setOptional(boolean optional) {
     markup.setOptional(optional);
+    return this;
   }
 
   @Override
@@ -197,5 +198,10 @@ public class MarkupWrapper {
   public boolean equals(Object other) {
     return other instanceof MarkupWrapper //
         && markup.equals(((MarkupWrapper) other).getMarkup());
+  }
+
+  public MarkupWrapper setMarkupId(String id) {
+    markup.setMarkupId(id);
+    return this;
   }
 }

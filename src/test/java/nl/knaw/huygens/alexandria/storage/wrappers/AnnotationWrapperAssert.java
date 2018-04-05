@@ -22,19 +22,18 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class TextNodeWrapperAssert extends AbstractObjectAssert<TextNodeWrapperAssert, TextNodeWrapper> {
+public class AnnotationWrapperAssert extends AbstractObjectAssert<AnnotationWrapperAssert, AnnotationWrapper> {
 
-  public TextNodeWrapperAssert(final TextNodeWrapper actual) {
-    super(actual, TextNodeWrapperAssert.class);
+  public AnnotationWrapperAssert(final AnnotationWrapper actual) {
+    super(actual, AnnotationWrapperAssert.class);
   }
 
-  public TextNodeWrapperAssert hasText(final String expectedText) {
+  public AnnotationWrapperAssert hasTag(final String tag) {
     isNotNull();
-    String errorMessage = "\nExpected text to be %s, but was %s";
-    if (!actual.getText().equals(expectedText)) {
-      failWithMessage(errorMessage, expectedText, actual.getText());
+    if (!actual.getTag().equals(tag)) {
+      failWithMessage("Expected annotation's tag to be <%s> but was <%s>", tag, actual.getTag());
     }
     return myself;
-
   }
+
 }

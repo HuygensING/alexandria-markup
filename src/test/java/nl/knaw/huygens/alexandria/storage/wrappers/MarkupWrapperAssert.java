@@ -28,11 +28,11 @@ public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAsser
   }
 
   public MarkupWrapperAssert isOptional() {
+    isNotNull();
     String errorMessage = "\nExpected markup %s to be optional, but it wasn't.";
     if (!actual.isOptional()) {
       failWithMessage(errorMessage, actual);
     }
     return myself;
-
   }
 }
