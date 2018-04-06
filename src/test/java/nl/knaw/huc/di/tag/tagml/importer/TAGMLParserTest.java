@@ -223,7 +223,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testSimpleTextVariation() {
     String input = "[tagml>" +
-        "pre |>to be|not to be<| post" +
+        "pre <(to be|not to be)> post" +
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
@@ -234,7 +234,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testTextVariationWithMarkup() {
     String input = "[tagml>" +
-        "pre |>[del>to be<del]|[add>not to be<add]<| post" +
+        "pre <([del>to be<del]|[add>not to be<add])> post" +
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
@@ -249,11 +249,11 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testNestedTextVariationWithMarkup() {
     String input = "[tagml>" +
-        "pre |>" +
+        "pre <(" +
         "[del>to be<del]" +
         "|" +
-        "[add>not to |>[del>completely<del]|[add>utterly<add]<| be<add]" +
-        "<| post" +
+        "[add>not to <([del>completely<del]|[add>utterly<add])> be<add]" +
+        ")> post" +
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
@@ -294,6 +294,16 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testMixedContentAnnotation1() {
+    String input = "[t note=|This is a [n>note<n] about this text|>main text<t]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("t")
+      );
+    });
+  }
   private DocumentWrapper assertTAGMLParses(final String input) {
     printTokens(input);
 

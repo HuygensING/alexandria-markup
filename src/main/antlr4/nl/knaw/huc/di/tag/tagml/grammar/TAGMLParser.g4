@@ -25,6 +25,7 @@ startTag
 beginOpenMarkup
   : DEFAULT_BeginOpenMarkup
   | ITV_BeginOpenMarkup
+  | IMX_BeginOpenMarkup
   ;
 
 endOpenMarkup
@@ -44,6 +45,7 @@ endTag
 beginCloseMarkup
   : DEFAULT_BeginCloseMarkup
   | ITV_BeginCloseMarkup
+  | IMX_BeginCloseMarkup
   ;
 
 name
@@ -126,6 +128,7 @@ textVariation
 beginTextVariation
   : DEFAULT_BeginTextVariation
   | ITV_BeginTextVariation
+  | IMX_BeginTextVariation
   ;
 
 variantText
@@ -135,4 +138,5 @@ variantText
 text
   : DEFAULT_Text
   | ITV_Text
+  | IMX_Text
   ;

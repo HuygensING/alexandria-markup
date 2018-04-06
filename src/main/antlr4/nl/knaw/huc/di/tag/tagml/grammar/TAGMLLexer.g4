@@ -14,7 +14,7 @@ DEFAULT_Namespace
   ;
 
 DEFAULT_Comment
-  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
+  : Comment -> skip
   ;
 
 DEFAULT_BeginOpenMarkup // [ moves into markup tag
@@ -41,7 +41,7 @@ NAME
 mode INSIDE_MARKUP_OPENER;
 
 IMO_Comment
-  : '[!' .*? '!]' -> skip //channel(HIDDEN)
+  : Comment -> skip
   ;
 
 IMO_Prefix
@@ -149,6 +149,26 @@ RV_RefValue
 // ----------------- Everything INSIDE of | | -------------
 mode INSIDE_MIXED_CONTENT;
 
+IMX_Comment
+  : Comment -> skip
+  ;
+
+IMX_BeginOpenMarkup // [ moves into markup tag
+  : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
+  ;
+
+IMX_BeginTextVariation
+  : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
+  ;
+
+IMX_BeginCloseMarkup
+  : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
+  ;
+
+IMX_Text  // match any 16 bit char other than { (start close tag) and [ (start open tag)
+  : ~[<\\[|]+
+  ;
+
 IMX_MixedContentCloser
   : PIPE -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
@@ -219,11 +239,11 @@ IMC_EndCloseMarkup
 mode INSIDE_TEXT_VARIATION;
 
 ITV_Comment
-  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
+  : Comment -> skip
   ;
 
 ITV_Text
-  : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
+  : ( ~[|>[)] | '\\|' | '\\>' | '\\[' | '\\)' )+
   ;
 
 ITV_BeginOpenMarkup // [ moves into markup tag
@@ -244,6 +264,10 @@ ITV_EndTextVariation
 
 // ----------------- lots of repeated stuff --------------------------
 
+Comment
+  : '[! ' .*? ' !]'
+  ;
+
 TagOpenEndChar
   : '>'
   ;
@@ -253,11 +277,11 @@ TagCloseStartChar
   ;
 
 TextVariationStartTag
-  : '|>'
+  : '<('
   ;
 
 TextVariationEndTag
-  : '<|'
+  : ')>'
   ;
 
 TextVariationSeparator
