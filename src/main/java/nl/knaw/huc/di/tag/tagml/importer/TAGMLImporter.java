@@ -329,12 +329,12 @@ public class TAGMLImporter {
 
   private final Map<Integer, Function<ImporterContext, Boolean>> defaultModeHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
-          .put(TAGMLLexer.BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
-          .put(TAGMLLexer.BEGIN_TEXT_VARIATION, this::handleTextVariation)
-          .put(TAGMLLexer.TEXT, this::handleText)
-          .put(TAGMLLexer.COMMENT, this::handleComment)
-          .put(TAGMLLexer.NAMESPACE, this::handleNamespace)
+//          .put(TAGMLLexer.BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
+//          .put(TAGMLLexer.BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
+//          .put(TAGMLLexer.BEGIN_TEXT_VARIATION, this::handleTextVariation)
+//          .put(TAGMLLexer.TEXT, this::handleText)
+//          .put(TAGMLLexer.COMMENT, this::handleComment)
+//          .put(TAGMLLexer.NAMESPACE, this::handleNamespace)
           .put(TAGMLLexer.EOF, this::handleEOF)
           .build();
 
@@ -344,9 +344,9 @@ public class TAGMLImporter {
 
   private final Map<Integer, Function<ImporterContext, Boolean>> openMarkupHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.NameOpenMarkup, this::handleNameOpenMarkup)
-          .put(TAGMLLexer.END_OPEN_MARKUP, this::handleEndOpenMarkup)
-          .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
+//          .put(TAGMLLexer.NameOpenMarkup, this::handleNameOpenMarkup)
+//          .put(TAGMLLexer.END_OPEN_MARKUP, this::handleEndOpenMarkup)
+//          .put(TAGMLLexer.END_ANONYMOUS_MARKUP, this::handleEndAnonymousMarkup)
 //          .put(TAGMLLexer.Annotation, this::handleAnnotation)
           .build();
 
@@ -357,8 +357,8 @@ public class TAGMLImporter {
 
   private final Map<Integer, Function<ImporterContext, Boolean>> closeMarkupHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.NameCloseMarkup, this::handleNameCloseMarkup)
-          .put(TAGMLLexer.END_CLOSE_MARKUP, this::handleEndCloseMarkup)
+//          .put(TAGMLLexer.NameCloseMarkup, this::handleNameCloseMarkup)
+//          .put(TAGMLLexer.END_CLOSE_MARKUP, this::handleEndCloseMarkup)
           .build();
 
   private Boolean handleCloseMarkup(ImporterContext context) {
@@ -380,10 +380,10 @@ public class TAGMLImporter {
 
   private final Map<Integer, Function<ImporterContext, Boolean>> textVariationHandlers =
       ImmutableMap.<Integer, Function<ImporterContext, Boolean>>builder()
-          .put(TAGMLLexer.TV_BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
-          .put(TAGMLLexer.TV_BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
-          .put(TAGMLLexer.END_TEXT_VARIATION, this::handleEndTextVariation)
-          .put(TAGMLLexer.VARIANT_TEXT, this::handleVariantText)
+//          .put(TAGMLLexer.TV_BEGIN_OPEN_MARKUP, this::handleOpenMarkup)
+//          .put(TAGMLLexer.TV_BEGIN_CLOSE_MARKUP, this::handleCloseMarkup)
+//          .put(TAGMLLexer.END_TEXT_VARIATION, this::handleEndTextVariation)
+//          .put(TAGMLLexer.VARIANT_TEXT, this::handleVariantText)
           .put(TAGMLLexer.TextVariationSeparator, this::handleTextVariationSeparator)
           .build();
 

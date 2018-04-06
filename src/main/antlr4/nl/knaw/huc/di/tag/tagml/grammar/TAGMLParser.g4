@@ -7,7 +7,7 @@ document
   ;
 
 namespaceDefinition
-  : NAMESPACE
+  : DEFAULT_Namespace
   ;
 
 chunk
@@ -24,32 +24,41 @@ startTag
   ;
 
 beginOpenMarkup
-  : BEGIN_OPEN_MARKUP
-  | TV_BEGIN_OPEN_MARKUP
+  : DEFAULT_BeginOpenMarkup
+  | ITV_BeginOpenMarkup
   ;
 
 endOpenMarkup
-  : END_OPEN_MARKUP
-  | A_END_OPEN_MARKUP
+  : IMO_EndOpenMarkup
+  | A_EndOpenMarkup
   ;
 
 markupName
-  : PREFIX? name SUFFIX?
-  | CM_PREFIX? name CM_SUFFIX?
+  : IMO_Prefix? name IMO_Suffix?
+  | IMC_Prefix? name IMC_Suffix?
   ;
 
 endTag
-  : beginCloseMarkup markupName END_CLOSE_MARKUP
+  : beginCloseMarkup markupName IMC_EndCloseMarkup
   ;
 
 beginCloseMarkup
-  : BEGIN_CLOSE_MARKUP
-  | TV_BEGIN_CLOSE_MARKUP
+  : DEFAULT_BeginCloseMarkup
+  | ITV_BeginCloseMarkup
   ;
 
 name
-  : NameOpenMarkup
-  | NameCloseMarkup
+  : IMO_NameOpenMarkup
+  | IMC_NameCloseMarkup
+  ;
+
+milestoneTag
+  : beginOpenMarkup name annotation+ endMilestoneTag // possible recursion
+  ;
+
+endMilestoneTag
+  : IMO_EndMilestoneMarkup
+  | A_EndMilestoneMarkup
   ;
 
 annotation
@@ -59,81 +68,72 @@ annotation
   ;
 
 annotationName
-  : ANNOTATION_NAME
-  | O_ANNOTATION_NAME
+  : A_AnnotationName
+  | IO_AnnotationName
   ;
 
 idAnnotation
-  : ID_ANNOTATION
-  | O_ID_ANNOTATION
+  : A_IdAnnotation
+  | IO_IdAnnotation
   ;
 
 eq
-  : EQ
-  | O_EQ
+  : A_EQ
+  | IO_EQ
   ;
 
 annotationValue
-  : StringValue
+  : AV_StringValue
   | booleanValue
-  | NumberValue
+  | AV_NumberValue
   | mixedContentValue
   | listValue
   | objectValue
   ;
 
 idValue
-  : ID_VALUE
+  : AV_IdValue
   ;
 
 ref
-  : REF
+  : A_Ref
   ;
 
 refValue
-  : REF_VALUE
+  : RV_RefValue
   ;
 
 booleanValue
-  : TRUE
-  | FALSE
+  : AV_TRUE
+  | AV_FALSE
   ;
 
 mixedContentValue
-  : PIPE chunk* PIPE // recursion!
+  : AV_MixedContentOpener chunk* IMX_MixedContentCloser // recursion!
   ;
 
 listValue
-  : LIST_OPENER annotationValue (COMMA annotationValue)+ LIST_CLOSER // possible recursion
+  : AV_ListOpener annotationValue (COMMA annotationValue)+ IL_ListCloser // possible recursion
   ;
 
 objectValue
-  : OBJECT_OPENER annotation (annotation)* OBJECT_CLOSER // recursion!
-  ;
-
-milestoneTag
-  : BEGIN_OPEN_MARKUP name annotation+ endMilestoneTag // possible recursion
-  ;
-
-endMilestoneTag
-  : END_ANONYMOUS_MARKUP
-  | A_END_ANONYMOUS_MARKUP
+  : AV_ObjectOpener annotation (annotation)* IO_ObjectCloser // recursion!
   ;
 
 textVariation
-  : beginTextVariation variantText (TextVariationSeparator variantText)+ END_TEXT_VARIATION
+  : beginTextVariation variantText (TextVariationSeparator variantText)+ ITV_EndTextVariation
   ;
 
 beginTextVariation
-  : BEGIN_TEXT_VARIATION
-  | TV_BEGIN_TEXT_VARIATION
+  : DEFAULT_BeginTextVariation
+  | ITV_BeginTextVariation
   ;
 
 variantText
-  : ( chunk | VARIANT_TEXT )+
+  : ( chunk | ITV_VariantText )+
   ;
 
 text
-  : TEXT
-  | VARIANT_TEXT
+  : DEFAULT_Text
+  | ITV_VariantText
   ;

@@ -88,12 +88,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     ctx.annotation()
         .forEach(annotation -> LOG.info("  startTag.annotation={{}}", annotation.getText()));
 
-    TerminalNode prefix = ctx.markupName().PREFIX();
+    TerminalNode prefix = ctx.markupName().IMO_Prefix();
     boolean optional = prefix != null && prefix.getText().equals("?");
 
     MarkupWrapper markup = addMarkup(markupName, ctx.annotation()).setOptional(optional);
 
-    TerminalNode suffix = ctx.markupName().SUFFIX();
+    TerminalNode suffix = ctx.markupName().IMO_Suffix();
     if (suffix != null) {
       String id = suffix.getText().replace("~", "");
       markup.setMarkupId(id);
@@ -382,7 +382,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private MarkupWrapper removeFromOpenMarkup(MarkupNameContext ctx) {
     String extendedMarkupName = ctx.name().getText();
-    TerminalNode suffix = ctx.CM_SUFFIX();
+    TerminalNode suffix = ctx.IMC_Suffix();
     if (suffix != null) {
       extendedMarkupName += suffix.getText();
     }

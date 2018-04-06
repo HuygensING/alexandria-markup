@@ -9,27 +9,27 @@ lexer grammar TAGMLLexer;
 
 // default mode
 
-NAMESPACE
+DEFAULT_Namespace
   : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
   ;
 
-COMMENT
+DEFAULT_Comment
   : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
   ;
 
-BEGIN_OPEN_MARKUP // [ moves into markup tag
+DEFAULT_BeginOpenMarkup // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
-BEGIN_TEXT_VARIATION
+DEFAULT_BeginTextVariation
   : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
   ;
 
-BEGIN_CLOSE_MARKUP
+DEFAULT_BeginCloseMarkup
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
-TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
+DEFAULT_Text  // match any 16 bit char other than { (start close tag) and [ (start open tag)
   : ~[<\\[|]+
   ;
 
@@ -40,47 +40,47 @@ NAME
 // ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
 mode INSIDE_MARKUP_OPENER;
 
-COMMENT_IN_MARKUP_OPENER
+IMO_Comment
   : '[!' .*? '!]' -> skip //channel(HIDDEN)
   ;
 
-PREFIX
+IMO_Prefix
   : Optional
   | Resume
   ;
 
-SUFFIX
+IMO_Suffix
   : TILDE ( NAME | DIGIT+ )
   ;
 
-NameOpenMarkup
+IMO_NameOpenMarkup
   : NAME
   ;
 
-END_ANONYMOUS_MARKUP
-  : RIGHT_SQUARE_BRACKET -> popMode
-  ;
-
-MO_WS
+IMO_WS
   : WS -> skip, pushMode(ANNOTATIONS)
   ;
 
-END_OPEN_MARKUP
+IMO_EndMilestoneMarkup
+  : RIGHT_SQUARE_BRACKET -> popMode
+  ;
+
+IMO_EndOpenMarkup
   :  TagOpenEndChar  -> popMode
   ;
 
 // ----------------- Everything after the markup name -------------
 mode ANNOTATIONS;
 
-REF
+A_Ref
   : '->' -> pushMode(INSIDE_REF_VALUE)
   ;
 
-ID_ANNOTATION
+A_IdAnnotation
   : ':id'
   ;
 
-ANNOTATION_NAME
+A_AnnotationName
   : NAME
   ;
 
@@ -88,16 +88,15 @@ A_WS
   :  WS  -> skip
   ;
 
-EQ
+A_EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
   ;
 
-
-A_END_OPEN_MARKUP
+A_EndOpenMarkup
   :  TagOpenEndChar -> popMode, popMode
   ;
 
-A_END_ANONYMOUS_MARKUP
+A_EndMilestoneMarkup
   : RIGHT_SQUARE_BRACKET -> popMode, popMode
   ;
 
@@ -108,134 +107,130 @@ AV_WS
   :  WS  -> skip
   ;
 
-StringValue
+AV_StringValue
   : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode
   ;
 
-NumberValue
+AV_NumberValue
   : DIGIT+ ( '.' DIGIT+ )? -> popMode
   ;
 
-TRUE
+AV_TRUE
   : T R U E -> popMode
   ;
 
-FALSE
+AV_FALSE
   : F A L S E -> popMode
   ;
 
-ID_VALUE
+AV_IdValue
   : NAME -> popMode
   ;
 
-OPEN_MIXED_CONTENT
+AV_MixedContentOpener
   : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
   ;
 
-OBJECT_OPENER
+AV_ObjectOpener
   : '{' -> pushMode(INSIDE_OBJECT)
   ;
 
-OPEN_LIST
+AV_ListOpener
   : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST)
   ;
 
 // ----------------- Everything after the -> in an annotation -------------
 mode INSIDE_REF_VALUE;
 
-REF_VALUE
+RV_RefValue
   : NAME -> popMode
   ;
 
 // ----------------- Everything INSIDE of | | -------------
 mode INSIDE_MIXED_CONTENT;
 
-MC_END
+IMX_MixedContentCloser
   : PIPE -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of { } -------------
 mode INSIDE_OBJECT;
 
-O_WS
+IO_WS
   :  WS  -> skip
   ;
 
-O_ID_ANNOTATION
+IO_IdAnnotation
   : ':id'
   ;
 
-O_ANNOTATION_NAME
+IO_AnnotationName
   : NAME
   ;
 
-O_MARKUP_S
-  :  WS  -> skip
-  ;
-
-O_EQ
+IO_EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
   ;
 
-OBJECT_CLOSER
+IO_ObjectCloser
   : '}' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of [ ] -------------
 mode INSIDE_LIST;
 
-L_WS
+IL_WS
   :  WS  -> skip
   ;
 
-LIST_END
+IL_ListCloser
   : RIGHT_SQUARE_BRACKET -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
 mode INSIDE_MARKUP_CLOSER;
 
-CM_PREFIX
+IMC_Prefix
   : Optional
   | Suspend
   ;
 
-NameCloseMarkup
+IMC_NameCloseMarkup
   : NAME
   ;
 
-CM_SUFFIX
+IMC_Suffix
   : TILDE ( NAME | DIGIT+ )
   ;
 
-MARKUP_S2
-  :   WS  -> skip
+IMC_WS
+  : WS  -> skip
   ;
 
-END_CLOSE_MARKUP
-  :   RIGHT_SQUARE_BRACKET -> popMode // back to DEFAULT
+IMC_EndCloseMarkup
+  : RIGHT_SQUARE_BRACKET -> popMode // back to DEFAULT
   ;
 
 // ----------------- Everything INSIDE of a TEXT VARIATION -------------
 mode INSIDE_TEXT_VARIATION;
 
-VARIANT_TEXT
+ITV_VariantText
   : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
   ;
 
-TV_BEGIN_OPEN_MARKUP // [ moves into markup tag
+ITV_BeginOpenMarkup // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
-TV_BEGIN_TEXT_VARIATION
+ITV_BeginTextVariation
   : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
   ;
 
-TV_BEGIN_CLOSE_MARKUP
+ITV_BeginCloseMarkup
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
-END_TEXT_VARIATION
+ITV_EndTextVariation
   : TextVariationEndTag -> popMode
   ;
 
