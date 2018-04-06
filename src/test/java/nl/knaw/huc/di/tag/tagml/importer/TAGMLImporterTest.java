@@ -310,7 +310,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-
   @Test
   public void testEscapeSpecialCharactersInTextVariation() {
     String tagML = "[t>bla |>\\||!<| bla<t]";
@@ -450,6 +449,34 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testListAnnotations() {
+    String tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("text")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("markup")
+      );
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      MarkupWrapper markup = markupWrappers.get(0);
+      List<AnnotationWrapper> annotationWrappers = markup.getAnnotationStream().collect(toList());
+      assertThat(annotationWrappers).hasSize(1);
+
+      AnnotationWrapper annotationPrimes = annotationWrappers.get(0);
+      assertThat(annotationPrimes).hasTag("primes");
+      List<TextNodeWrapper> annotationTextNodes = annotationPrimes.getDocument().getTextNodeStream().collect(toList());
+      assertThat(annotationTextNodes).hasSize(1);
+      assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
+    });
+  }
+
   // private
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
@@ -457,7 +484,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagML);
     LMNLExporter lmnlExporter = new LMNLExporter(store);
     String lmnl = lmnlExporter.toLMNL(documentWrapper);
-    LOG.info("\nLMNL:\n{}\n", lmnl);
+    LOG.info("\n\nLMNL:\n{}\n", lmnl);
     return documentWrapper;
   }
 

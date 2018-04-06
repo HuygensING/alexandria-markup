@@ -113,7 +113,7 @@ mixedContentValue
   ;
 
 listValue
-  : AV_ListOpener annotationValue (COMMA annotationValue)+ IL_ListCloser // possible recursion
+  : AV_ListOpener annotationValue (IL_COMMA annotationValue)+ IL_ListCloser // possible recursion
   ;
 
 objectValue
@@ -130,10 +130,10 @@ beginTextVariation
   ;
 
 variantText
-  : ( chunk | ITV_VariantText )+
+  : ( chunk | ITV_Text )+
   ;
 
 text
   : DEFAULT_Text
-  | ITV_VariantText
+  | ITV_Text
   ;

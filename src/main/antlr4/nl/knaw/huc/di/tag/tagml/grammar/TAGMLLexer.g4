@@ -136,7 +136,7 @@ AV_ObjectOpener
   ;
 
 AV_ListOpener
-  : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST)
+  : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST), pushMode(ANNOTATION_VALUE)
   ;
 
 // ----------------- Everything after the -> in an annotation -------------
@@ -183,6 +183,10 @@ IL_WS
   :  WS  -> skip
   ;
 
+IL_COMMA
+  : COMMA -> pushMode(ANNOTATION_VALUE)
+  ;
+
 IL_ListCloser
   : RIGHT_SQUARE_BRACKET -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
@@ -214,7 +218,11 @@ IMC_EndCloseMarkup
 // ----------------- Everything INSIDE of a TEXT VARIATION -------------
 mode INSIDE_TEXT_VARIATION;
 
-ITV_VariantText
+ITV_Comment
+  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
+  ;
+
+ITV_Text
   : ( ~[|<[] | '\\|' | '\\<' | '\\[' )+
   ;
 
