@@ -188,7 +188,7 @@ IL_COMMA
   ;
 
 IL_ListCloser
-  : RIGHT_SQUARE_BRACKET -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+  : RIGHT_SQUARE_BRACKET -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
@@ -371,6 +371,6 @@ WS
   : [ \t\r\n]+
   ;
 
-UNEXPECTED_CHAR // Throw unexpected token exception
-  :  .
-  ;
+//UNEXPECTED_CHAR // Throw unexpected token exception
+//  :  .
+//  ;

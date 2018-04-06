@@ -172,7 +172,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
-
   @Test
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
@@ -205,7 +204,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   public void testNestedObjectAnnotation() {
     String input = "[text meta={\n" +
         "    persons=[\n" +
-        "      {:id='huyg0001' name='Constantijn Huygens'}\n" +
+        "      {:id=huyg0001 name='Constantijn Huygens'}\n" +
         "    ]\n" +
         "  }>[title>De Zee-Straet<title]\n" +
         "  door [author pers->huyg0001>Constantijn Huygens<author]\n" +
@@ -282,6 +281,18 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testNestedObjectAnnotation2() {
+    String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" +
+        "text" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("t")
+      );
+    });
+  }
 
   private DocumentWrapper assertTAGMLParses(final String input) {
     printTokens(input);

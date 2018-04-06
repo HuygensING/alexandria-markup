@@ -3,7 +3,7 @@ parser grammar TAGMLParser;
 options { tokenVocab=TAGMLLexer; }
 
 document
-  :  namespaceDefinition* chunk* EOF
+  :  namespaceDefinition* chunk+ EOF
   ;
 
 namespaceDefinition
@@ -15,7 +15,6 @@ chunk
   | endTag
   | milestoneTag
   | textVariation
-//  | comment
   | text
   ;
 
@@ -113,15 +112,15 @@ mixedContentValue
   ;
 
 listValue
-  : AV_ListOpener annotationValue (IL_COMMA annotationValue)+ IL_ListCloser // possible recursion
+  : AV_ListOpener annotationValue ( IL_COMMA annotationValue )* IL_ListCloser // possible recursion
   ;
 
 objectValue
-  : AV_ObjectOpener annotation (annotation)* IO_ObjectCloser // recursion!
+  : AV_ObjectOpener annotation annotation* IO_ObjectCloser // recursion!
   ;
 
 textVariation
-  : beginTextVariation variantText (TextVariationSeparator variantText)+ ITV_EndTextVariation
+  : beginTextVariation variantText ( TextVariationSeparator variantText )+ ITV_EndTextVariation
   ;
 
 beginTextVariation
