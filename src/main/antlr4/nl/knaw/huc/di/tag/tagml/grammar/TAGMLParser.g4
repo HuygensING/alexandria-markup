@@ -20,12 +20,17 @@ chunk
   ;
 
 startTag
-  : beginOpenMarkup markupName annotation* END_OPEN_MARKUP // possible recursion
+  : beginOpenMarkup markupName annotation* endOpenMarkup // possible recursion
   ;
 
 beginOpenMarkup
   : BEGIN_OPEN_MARKUP
   | TV_BEGIN_OPEN_MARKUP
+  ;
+
+endOpenMarkup
+  : END_OPEN_MARKUP
+  | A_END_OPEN_MARKUP
   ;
 
 markupName
@@ -74,7 +79,7 @@ listValue
   ;
 
 objectValue
-  : OBJECT_OPENER annotation (annotation)+ OBJECT_CLOSER // recursion!
+  : OBJECT_OPENER annotation (annotation)* OBJECT_CLOSER // recursion!
   ;
 
 milestone
