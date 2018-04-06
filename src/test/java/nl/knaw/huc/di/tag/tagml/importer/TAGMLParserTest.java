@@ -178,7 +178,13 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m p={valid=false}>text<m]" +
         "<tagml]";
-    assertTAGMLParsesWithSyntaxError(input, "syntax error: line 1:24 no viable alternative at input '[mp={valid=false}'");
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+    });
   }
 
   @Test
@@ -191,6 +197,26 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(documentWrapper).hasMarkupMatching(
           markupSketch("tagml"),
           markupSketch("m")
+      );
+    });
+  }
+
+  @Test
+  public void testNestedObjectAnnotation() {
+    String input = "[text meta={\n" +
+        "    persons=[\n" +
+        "      {:id='huyg0001' name='Constantijn Huygens'}\n" +
+        "    ]\n" +
+        "  }>[title>De Zee-Straet<title]\n" +
+        "  door [author pers->huyg0001>Constantijn Huygens<author]\n" +
+        "  .......\n" +
+        "<text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("text"),
+          markupSketch("title"),
+          markupSketch("author")
       );
     });
   }
@@ -213,7 +239,11 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
-      assertThat(documentWrapper).hasMarkupMatching(markupSketch("tagml"));
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("del"),
+          markupSketch("add")
+      );
     });
   }
 
@@ -237,6 +267,21 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       );
     });
   }
+
+  @Test
+  public void testElementLinking() {
+    String input = "[tagml meta={:id=meta01 name='test'}>" +
+        "pre [x ref->meta01>text<x] post" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("x")
+      );
+    });
+  }
+
 
   private DocumentWrapper assertTAGMLParses(final String input) {
     printTokens(input);

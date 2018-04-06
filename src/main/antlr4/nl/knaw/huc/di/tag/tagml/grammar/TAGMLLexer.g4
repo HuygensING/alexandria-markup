@@ -7,24 +7,14 @@
 
 lexer grammar TAGMLLexer;
 
-//@lexer::header{
-//import java.util.*;
-//import java.util.concurrent.atomic.AtomicInteger;
-//}
-//
-//@lexer::members{
-//  int annotationDepth = 0; // 0 = before first annotation, 1 = inside annotation in markup open tag, 2 = inside annotation in markup open tag inside annotation in markup open tag, etc.
-//  Map<Integer,AtomicInteger> openRangeInAnnotationTextCount = new HashMap<>();
-//}
-
-// In the default mode we are outside a Markup Range
-
-COMMENT
-  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
-  ;
+// default mode
 
 NAMESPACE
   : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
+  ;
+
+COMMENT
+  : '[! ' .*? ' !]' -> skip //channel(HIDDEN)
   ;
 
 BEGIN_OPEN_MARKUP // [ moves into markup tag
@@ -82,11 +72,19 @@ END_OPEN_MARKUP
 // ----------------- Everything after the markup name -------------
 mode ANNOTATIONS;
 
+REF
+  : '->' -> pushMode(INSIDE_REF_VALUE)
+  ;
+
+ID_ANNOTATION
+  : ':id'
+  ;
+
 ANNOTATION_NAME
   : NAME
   ;
 
-MARKUP_S
+A_WS
   :  WS  -> skip
   ;
 
@@ -94,8 +92,9 @@ EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
   ;
 
+
 A_END_OPEN_MARKUP
-  :  TagOpenEndChar  -> popMode, popMode
+  :  TagOpenEndChar -> popMode, popMode
   ;
 
 A_END_ANONYMOUS_MARKUP
@@ -104,6 +103,10 @@ A_END_ANONYMOUS_MARKUP
 
 // ----------------- Everything after the = in an annotation -------------
 mode ANNOTATION_VALUE;
+
+AV_WS
+  :  WS  -> skip
+  ;
 
 StringValue
   : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode
@@ -121,6 +124,10 @@ FALSE
   : F A L S E -> popMode
   ;
 
+ID_VALUE
+  : NAME -> popMode
+  ;
+
 OPEN_MIXED_CONTENT
   : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
   ;
@@ -133,6 +140,13 @@ OPEN_LIST
   : LEFT_SQUARE_BRACKET -> pushMode(INSIDE_LIST)
   ;
 
+// ----------------- Everything after the -> in an annotation -------------
+mode INSIDE_REF_VALUE;
+
+REF_VALUE
+  : NAME -> popMode
+  ;
+
 // ----------------- Everything INSIDE of | | -------------
 mode INSIDE_MIXED_CONTENT;
 
@@ -142,6 +156,14 @@ MC_END
 
 // ----------------- Everything INSIDE of { } -------------
 mode INSIDE_OBJECT;
+
+O_WS
+  :  WS  -> skip
+  ;
+
+O_ID_ANNOTATION
+  : ':id'
+  ;
 
 O_ANNOTATION_NAME
   : NAME
@@ -161,6 +183,10 @@ OBJECT_CLOSER
 
 // ----------------- Everything INSIDE of [ ] -------------
 mode INSIDE_LIST;
+
+L_WS
+  :  WS  -> skip
+  ;
 
 LIST_END
   : RIGHT_SQUARE_BRACKET -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
@@ -321,7 +347,7 @@ fragment Z : [Zz];
 fragment
 NameChar
   : NameStartChar
-  | '-' | '_' | '.' | DIGIT
+  | '_' | DIGIT
   | '\u00B7'
   | '\u0300'..'\u036F'
   | '\u203F'..'\u2040'

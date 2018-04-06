@@ -110,7 +110,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   @Override
-  public void exitMilestone(MilestoneContext ctx) {
+  public void exitMilestoneTag(MilestoneTagContext ctx) {
 //    String markupName = ctx.name().getText();
 //    LOG.info("milestone.markupName=<{}>", markupName);
 //    ctx.annotation()
@@ -327,7 +327,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private MarkupWrapper addMarkup(String extendedTag, List<AnnotationContext> atts) {
     MarkupWrapper markup = store.createMarkupWrapper(document, extendedTag);
-    addAttributes(atts, markup);
+    addAnnotations(atts, markup);
     document.addMarkup(markup);
     if (markup.hasMarkupId()) {
       identifiedMarkups.put(extendedTag, markup);
@@ -341,14 +341,33 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return markup;
   }
 
-  private void addAttributes(List<AnnotationContext> annotationContexts, MarkupWrapper markup) {
+  private void addAnnotations(List<AnnotationContext> annotationContexts, MarkupWrapper markup) {
     annotationContexts.forEach(actx -> {
-      String attrName = actx.ANNOTATION_NAME().getText();
-      String quotedAttrValue = actx.annotationValue().getText();
-      // TODO: handle recursion, value types
+      if (actx instanceof BasicAnnotationContext) {
+        BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) actx;
+        String aName = basicAnnotationContext.annotationName().getText();
+        String quotedAttrValue = basicAnnotationContext.annotationValue().getText();
+        // TODO: handle recursion, value types
 //      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      AnnotationWrapper annotation = store.createAnnotationWrapper(attrName, quotedAttrValue);
-      markup.addAnnotation(annotation);
+        AnnotationWrapper annotation = store.createAnnotationWrapper(aName, quotedAttrValue);
+        markup.addAnnotation(annotation);
+
+      } else if (actx instanceof IdentifyingAnnotationContext) {
+        IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
+        String aName = idAnnotationContext.idAnnotation().getText();
+        String id = idAnnotationContext.idValue().getText();
+        // TODO add id to model
+        AnnotationWrapper annotation = store.createAnnotationWrapper(aName, id);
+        markup.addAnnotation(annotation);
+
+      } else if (actx instanceof RefAnnotationContext) {
+        RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
+        String aName = refAnnotationContext.annotationName().getText();
+        String refId = refAnnotationContext.refValue().getText();
+        // TODO add ref to model
+        AnnotationWrapper annotation = store.createAnnotationWrapper(aName, refId);
+        markup.addAnnotation(annotation);
+      }
     });
   }
 

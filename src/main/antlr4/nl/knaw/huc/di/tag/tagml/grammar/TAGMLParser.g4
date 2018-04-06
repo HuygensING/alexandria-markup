@@ -13,7 +13,7 @@ namespaceDefinition
 chunk
   : startTag
   | endTag
-  | milestone
+  | milestoneTag
   | textVariation
 //  | comment
   | text
@@ -53,7 +53,24 @@ name
   ;
 
 annotation
-  : ANNOTATION_NAME EQ annotationValue
+  : annotationName eq annotationValue # BasicAnnotation
+  | annotationName ref refValue       # RefAnnotation
+  | idAnnotation eq idValue           # IdentifyingAnnotation
+  ;
+
+annotationName
+  : ANNOTATION_NAME
+  | O_ANNOTATION_NAME
+  ;
+
+idAnnotation
+  : ID_ANNOTATION
+  | O_ID_ANNOTATION
+  ;
+
+eq
+  : EQ
+  | O_EQ
   ;
 
 annotationValue
@@ -63,6 +80,18 @@ annotationValue
   | mixedContentValue
   | listValue
   | objectValue
+  ;
+
+idValue
+  : ID_VALUE
+  ;
+
+ref
+  : REF
+  ;
+
+refValue
+  : REF_VALUE
   ;
 
 booleanValue
@@ -82,8 +111,13 @@ objectValue
   : OBJECT_OPENER annotation (annotation)* OBJECT_CLOSER // recursion!
   ;
 
-milestone
-  : BEGIN_OPEN_MARKUP name annotation+ END_ANONYMOUS_MARKUP // possible recursion
+milestoneTag
+  : BEGIN_OPEN_MARKUP name annotation+ endMilestoneTag // possible recursion
+  ;
+
+endMilestoneTag
+  : END_ANONYMOUS_MARKUP
+  | A_END_ANONYMOUS_MARKUP
   ;
 
 textVariation
