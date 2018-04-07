@@ -9,8 +9,9 @@ lexer grammar TAGMLLexer;
 
 // default mode
 
-DEFAULT_Namespace
-  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
+DEFAULT_NamespaceOpener
+//  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
+  : '[!ns ' -> pushMode(INSIDE_NAMESPACE)
   ;
 
 DEFAULT_Comment
@@ -35,6 +36,25 @@ DEFAULT_Text  // match any 16 bit char other than { (start close tag) and [ (sta
 
 NAME
   : NameStartChar NameChar*
+  ;
+
+// ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
+mode INSIDE_NAMESPACE;
+
+IN_NamespaceIdentifier
+  : NameChar+
+  ;
+
+IN_WS
+  : WS -> skip
+  ;
+
+IN_NamespaceURI
+  : ('http://' | 'https://') ( NameChar | '/' | '.' )+
+  ;
+
+IN_NamespaceCloser
+  : ']' -> popMode
   ;
 
 // ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
@@ -128,7 +148,7 @@ AV_IdValue
   ;
 
 AV_MixedContentOpener
-  : PIPE -> pushMode(INSIDE_MIXED_CONTENT)
+  : '[>' -> pushMode(INSIDE_MIXED_CONTENT)
   ;
 
 AV_ObjectOpener
@@ -170,7 +190,7 @@ IMX_Text  // match any 16 bit char other than { (start close tag) and [ (start o
   ;
 
 IMX_MixedContentCloser
-  : PIPE -> popMode, popMode, popMode // back to INSIDE_MARKUP_OPENER
+  : '<]' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of { } -------------
@@ -277,11 +297,11 @@ TagCloseStartChar
   ;
 
 TextVariationStartTag
-  : '<('
+  : '<|'
   ;
 
 TextVariationEndTag
-  : ')>'
+  : '|>'
   ;
 
 TextVariationSeparator
@@ -314,14 +334,6 @@ LIST_OPENER
 
 LIST_CLOSER
   : RIGHT_SQUARE_BRACKET
-  ;
-
-NamespaceIdentifier
-  : NameChar+
-  ;
-
-NamespaceURI
-  : ('http://' | 'https://') ( NameChar | '/' )+
   ;
 
 DOT
@@ -390,7 +402,6 @@ NameStartChar
   | '\uFDF0'..'\uFFFD'
   ;
 
-fragment
 WS
   : [ \t\r\n]+
   ;

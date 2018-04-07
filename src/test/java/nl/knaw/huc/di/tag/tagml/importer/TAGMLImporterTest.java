@@ -173,7 +173,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testTextVariation() {
-    String tagML = "[t>This is a <(lame|dope)> test!<t]";
+    String tagML = "[t>This is a <|lame|dope|> test!<t]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -312,7 +312,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testEscapeSpecialCharactersInTextVariation() {
-    String tagML = "[t>bla <(\\||!)> bla<t]";
+    String tagML = "[t>bla <|\\||!|> bla<t]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
