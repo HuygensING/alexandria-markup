@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
@@ -31,8 +30,6 @@ import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.apache.commons.io.FileUtils;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +41,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);

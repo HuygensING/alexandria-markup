@@ -21,10 +21,10 @@ package nl.knaw.huygens.alexandria.query;
  */
 
 import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.data_model.Document;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

@@ -21,7 +21,6 @@ package nl.knaw.huygens.alexandria.exporter;
  */
 
 
-import nl.knaw.huygens.alexandria.exporter.ColorUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

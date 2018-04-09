@@ -24,7 +24,6 @@ import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 import org.apache.commons.io.FileUtils;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LaTexExporterInMemoryTest {
   private static final Logger LOG = LoggerFactory.getLogger(LaTexExporterInMemoryTest.class);

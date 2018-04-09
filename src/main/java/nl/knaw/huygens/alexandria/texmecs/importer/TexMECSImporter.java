@@ -21,11 +21,11 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
