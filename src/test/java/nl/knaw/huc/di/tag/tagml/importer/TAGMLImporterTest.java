@@ -147,7 +147,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testNamespaces() {
+  public void testNamespace() {
     String tagML = "[!ns a http://tag.com/a][a:a>Ah!<a:a]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
@@ -168,6 +168,32 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       final List<MarkupWrapper> markupForTextNode = document.getMarkupStreamForTextNode(textNodeWrapper).collect(toList());
       assertThat(markupForTextNode).hasSize(1);
       assertThat(markupForTextNode).extracting("tag").containsExactly("a:a");
+    });
+  }
+
+  @Test
+  public void testMultipleNamespaces() {
+    String tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<a:a]<b:b]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("Ah!")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("a:a"),
+          markupSketch("b:b")
+      );
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
+
+      TextNodeWrapper textNodeWrapper = textNodeWrappers.get(0);
+      assertThat(textNodeWrapper).hasText("Ah!");
+
+      final List<MarkupWrapper> markupForTextNode = document.getMarkupStreamForTextNode(textNodeWrapper).collect(toList());
+      assertThat(markupForTextNode).hasSize(2);
+      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a","b:b");
     });
   }
 

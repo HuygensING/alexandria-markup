@@ -31,6 +31,7 @@ import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
   private final List<String> errors = new ArrayList<>();
   private final HashMap<String, String> idsInUse = new HashMap<>();
+  private boolean atDocumentStart = true;
 
   public TAGMLListener(final TAGStore store) {
     this.store = store;
@@ -76,9 +78,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public void exitText(TextContext ctx) {
     String text = ctx.getText();
     LOG.info("text=<{}>", text);
-    TextNodeWrapper tn = store.createTextNodeWrapper(text);
-    document.addTextNode(tn);
-    openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+    atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
+    if (!atDocumentStart) {
+      TextNodeWrapper tn = store.createTextNodeWrapper(text);
+      document.addTextNode(tn);
+      openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+    }
   }
 
   @Override

@@ -1,4 +1,6 @@
-[!ns b http://example.com/body][!ns t http://example.com/timing][!ns c http://example.com/chords]
+[!ns b http://example.com/body]
+[!ns t http://example.com/timing]
+[!ns c http://example.com/chords]
 [b:body>[t:timing>[c:chords>
 [b:div class='stanza' title=4>[b:p>[t:screenful~68 starts=68>[t:main~68>[c:em>Bright are the<c:em] [c:bm>stars that shine<c:bm]<t:main~68]<b:p]
 [b:p>[t:next~68>[t:screenful~72 starts=72>[t:main~72>[c:em>Dark is the<c:em] [c:bm>sky<c:bm]<t:main~72]<t:next~68]<t:screenful~68]<b:p]

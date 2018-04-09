@@ -3,7 +3,7 @@ parser grammar TAGMLParser;
 options { tokenVocab=TAGMLLexer; }
 
 document
-  :  ( namespaceDefinition )* chunk+ EOF
+  :  ( namespaceDefinition text* )* chunk+ EOF
   ;
 
 namespaceDefinition
