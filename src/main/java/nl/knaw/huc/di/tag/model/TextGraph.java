@@ -19,7 +19,9 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TextGraph<T extends TAGTextNode, M extends TAGMarkup> extends HyperGraph<Node, Edge> {
 

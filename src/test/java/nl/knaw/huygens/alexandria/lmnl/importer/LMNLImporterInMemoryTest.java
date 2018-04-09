@@ -22,9 +22,9 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  */
 
 import nl.knaw.huygens.alexandria.data_model.*;
+import nl.knaw.huygens.alexandria.exporter.LaTeXExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
-import nl.knaw.huygens.alexandria.exporter.LaTeXExporterInMemory;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
