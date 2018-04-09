@@ -166,25 +166,27 @@ public class LaTeXExporter {
         ;
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
-    IndexPoint indexPoint = pointIterator.next();
-    for (int i = 0; i < allTextNodes.size(); i++) {
-      List<String> row = new ArrayList<>();
-      row.add(String.valueOf(i));
-      for (int j = 0; j < allMarkups.size(); j++) {
-        if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getMarkupIndex()) {
-          String cell = longMarkupIndexes.contains(j) ? "\\underline{X}" : "X";
-          row.add(cell);
-          if (pointIterator.hasNext()) {
-            indexPoint = pointIterator.next();
-          }
+    if (pointIterator.hasNext()) {
+      IndexPoint indexPoint = pointIterator.next();
+      for (int i = 0; i < allTextNodes.size(); i++) {
+        List<String> row = new ArrayList<>();
+        row.add(String.valueOf(i));
+        for (int j = 0; j < allMarkups.size(); j++) {
+          if (i == indexPoint.getTextNodeIndex() && j == indexPoint.getMarkupIndex()) {
+            String cell = longMarkupIndexes.contains(j) ? "\\underline{X}" : "X";
+            row.add(cell);
+            if (pointIterator.hasNext()) {
+              indexPoint = pointIterator.next();
+            }
 
-        } else {
-          row.add(" ");
+          } else {
+            row.add(" ");
+          }
         }
+        String content = escapedContent(allTextNodes.get(i));
+        row.add(content);
+        latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
       }
-      String content = escapedContent(allTextNodes.get(i));
-      row.add(content);
-      latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
     }
 
     latexBuilder
@@ -206,11 +208,13 @@ public class LaTeXExporter {
   private String exportKdTree(KdTree<IndexPoint> kdTree, Set<Integer> longMarkupIndexes) {
     StringBuilder latexBuilder = new StringBuilder();
     KdTree.KdNode root = kdTree.getRoot();
-    IndexPoint rootIP = root.getContent();
-    String content = toNodeContent(rootIP, longMarkupIndexes);
-    latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(content).append("};\n");
-    appendChildTree(latexBuilder, root.getLesser(), "markupAxis", longMarkupIndexes);
-    appendChildTree(latexBuilder, root.getGreater(), "markupAxis", longMarkupIndexes);
+    if (root != null) {
+      IndexPoint rootIP = root.getContent();
+      String content = toNodeContent(rootIP, longMarkupIndexes);
+      latexBuilder.append("\\Tree [.\\node[textNodeAxis]{").append(content).append("};\n");
+      appendChildTree(latexBuilder, root.getLesser(), "markupAxis", longMarkupIndexes);
+      appendChildTree(latexBuilder, root.getGreater(), "markupAxis", longMarkupIndexes);
+    }
     return latexBuilder.append("]\\\\\n").toString();
   }
 
