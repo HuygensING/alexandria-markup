@@ -43,6 +43,7 @@ public class TAGMarkup implements TAGObject {
   private String suffix;
   private Long dominatedMarkupId;
   private Long dominatingMarkupId;
+  private boolean optional = false;
 
   private TAGMarkup() {
   }
@@ -90,6 +91,7 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
+    // TODO: this is output language dependent move to language
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
@@ -110,17 +112,6 @@ public class TAGMarkup implements TAGObject {
 
   public Long getDocumentId() {
     return documentId;
-  }
-
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    return other instanceof TAGMarkup//
-        && getId().equals(((TAGMarkup) other).getId());
   }
 
   public String getSuffix() {
@@ -147,12 +138,37 @@ public class TAGMarkup implements TAGObject {
     this.dominatingMarkupId = dominatingMarkupId;
   }
 
-
   public String getMarkupId() {
     return markupId;
   }
 
-  public void setMarkupId(String markupId) {
+  public TAGMarkup setMarkupId(String markupId) {
     this.markupId = markupId;
+    return this;
+  }
+
+  public TAGMarkup setOptional(boolean optional) {
+    this.optional = optional;
+    return this;
+  }
+
+  public boolean isOptional() {
+    return optional;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + tag + "]";
+  }
+
+  @Override
+  public int hashCode() {
+    return id.intValue();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof TAGMarkup//
+        && getId().equals(((TAGMarkup) other).getId());
   }
 }

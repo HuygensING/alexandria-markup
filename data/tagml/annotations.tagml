@@ -1,0 +1,11 @@
+[poem type="limerick"
+      author='John'
+      year=1818
+      rhymes=true
+      keywords=["unfinished","censored"]>There once was a vicar from Slough...<poem]
+
+[origin
+  location={
+    position={x=1 y=2}
+    countrycode='nl'
+  }>Amsterdam<origin]

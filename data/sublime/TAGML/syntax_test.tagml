@@ -1,0 +1,27 @@
+// SYNTAX TEST "Packages/TAGML/TAGML.sublime-syntax"
+
+[markup>
+// <- source.tagml markup.open.tagml
+
+<markup]
+// <- source.tagml markup.close.tagml
+
+[m bla="x">bla bla vla<m][a>asdads <a]
+|>[del>del<del][add>add<add]<|
+
+// discontinuous
+[phr>to be,<-phr] he quoted [+phr>or not to be<phr]
+
+[tag |attr}atrr-value{attr|>mixed [b>content<b]<tag]
+    [anonymous a="b" ]
+
+
+// optional
+[?del><?del]
+
+// whitespace significance
+
+// namespace definition
+[!ns x http://bla.com/x.tagsl]
+
+[x:phr> <x:phr]
