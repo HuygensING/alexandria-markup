@@ -81,4 +81,7 @@ public class ErrorListener implements ANTLRErrorListener {
     return !errors.isEmpty();
   }
 
+  public void addError(String error) {
+    errors.add(error);
+  }
 }

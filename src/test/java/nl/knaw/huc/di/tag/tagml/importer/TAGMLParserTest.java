@@ -285,7 +285,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   public void testNestedObjectAnnotation2() {
     String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" +
         "text" +
-        "<tagml]";
+        "<t]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
       assertThat(documentWrapper).hasMarkupMatching(
@@ -304,6 +304,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       );
     });
   }
+
+  @Test
+  public void testNamespaceNeedsToBeDefinedBeforeUsage() {
+    String input = "[z:t>text<z:t]";
+    store.runInTransaction(() -> {
+      assertTAGMLParsesWithSyntaxError(input, "line 1:0 : namespace z has not been defined.");
+    });
+  }
+
   private DocumentWrapper assertTAGMLParses(final String input) {
     printTokens(input);
 
@@ -320,11 +329,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("parsetree: {}", parseTree.toStringTree(parser));
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    assertThat(numberOfSyntaxErrors).isEqualTo(0);
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
-    TAGMLListener listener = new TAGMLListener(store);
+    TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    if (errorListener.hasErrors()) {
+      LOG.error("errors: {}", errorListener.getErrors());
+    }
+    assertThat(errorListener.hasErrors()).isFalse();
 
     DocumentWrapper document = listener.getDocument();
     String lmnl = LMNL_EXPORTER.toLMNL(document);
@@ -349,9 +362,13 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
-    assertThat(numberOfSyntaxErrors).isEqualTo(1);
-    assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
 
+    TAGMLListener listener = new TAGMLListener(store, errorListener);
+    ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    if (errorListener.hasErrors()) {
+      LOG.error("errors: {}", errorListener.getErrors());
+    }
+    assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
   }
 
 }

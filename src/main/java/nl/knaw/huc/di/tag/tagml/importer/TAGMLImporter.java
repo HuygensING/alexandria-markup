@@ -277,18 +277,14 @@ public class TAGMLImporter {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     LOG.info("parsetree: {}", parseTree.toStringTree(parser));
-    TAGMLListener listener = new TAGMLListener(tagStore);
+    TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     DocumentWrapper documentWrapper = listener.getDocument();
 
     String errorMsg = "";
-    if (listener.hasErrors()) {
-      String errors = listener.getErrors().stream().collect(joining("\n"));
-      errorMsg = "Parsing errors:\n" + errors;
-    }
     if (errorListener.hasErrors()) {
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
-      errorMsg += "\n\nTokenizing errors:\n" + errors;
+      errorMsg = "Parsing errors:\n" + errors;
     }
     if (!errorMsg.isEmpty()) {
       throw new TAGMLSyntaxError(errorMsg);

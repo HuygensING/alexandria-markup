@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
@@ -47,16 +48,18 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private final TAGStore store;
   private final DocumentWrapper document;
+  private final ErrorListener errorListener;
   private final Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
   private final Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
   private final HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
-  private final List<String> errors = new ArrayList<>();
   private final HashMap<String, String> idsInUse = new HashMap<>();
+  private final Map<String, String> namespaces = new HashMap<>();
   private boolean atDocumentStart = true;
 
-  public TAGMLListener(final TAGStore store) {
+  public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
     this.store = store;
     this.document = store.createDocumentWrapper();
+    this.errorListener = errorListener;
   }
 
   public DocumentWrapper getDocument() {
@@ -70,8 +73,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String openRanges = openMarkup.stream()//
           .map(m -> "[" + m.getExtendedTag() + ">")//
           .collect(joining(", "));
-      errors.add("Unclosed TAGML tag(s): " + openRanges);
+      errorListener.addError("Unclosed TAGML tag(s): " + openRanges);
     }
+  }
+
+  @Override
+  public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
+    String ns = ctx.IN_NamespaceIdentifier().getText();
+    String url = ctx.IN_NamespaceURI().getText();
+    namespaces.put(ns, url);
   }
 
   @Override
@@ -90,13 +100,20 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public void enterStartTag(StartTagContext ctx) {
     String markupName = ctx.markupName().name().getText();
     LOG.info("startTag.markupName=<{}>", markupName);
+    if (markupName.contains(":")) {
+      String namespace = markupName.split(":", 2)[0];
+      if (!namespaces.containsKey(namespace)) {
+        String message = format("%snamespace %s has not been defined.", errorPrefix(ctx), namespace);
+        errorListener.addError(message);
+      }
+    }
     ctx.annotation()
         .forEach(annotation -> LOG.info("  startTag.annotation={{}}", annotation.getText()));
 
     TerminalNode prefix = ctx.markupName().IMO_Prefix();
     boolean optional = prefix != null && prefix.getText().equals("?");
 
-    MarkupWrapper markup = addMarkup(markupName, ctx.annotation()).setOptional(optional);
+    MarkupWrapper markup = addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
 
     TerminalNode suffix = ctx.markupName().IMO_Suffix();
     if (suffix != null) {
@@ -123,16 +140,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     TextNodeWrapper tn = store.createTextNodeWrapper("");
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    MarkupWrapper markup = addMarkup(ctx.name().getText(), ctx.annotation());
+    MarkupWrapper markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
     linkTextToMarkup(tn, markup);
-  }
-
-  public boolean hasErrors() {
-    return !errors.isEmpty();
-  }
-
-  public List<String> getErrors() {
-    return errors;
   }
 
   private class DocumentContext {
@@ -169,7 +178,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         }
         openMarkupStack.push(markup);
       } else {
-        listenerContext.errors.add(format("%s Closing tag <%s] found without corresponding open tag.",
+        errorListener.addError(format("%s Closing tag <%s] found without corresponding open tag.",
             errorPrefix(listenerContext.getCurrentToken()), rangeName));
       }
     }
@@ -270,7 +279,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + ">")//
             .collect(joining(", "));
-        errors.add("Unclosed TAGML tag(s): " + openRanges);
+        errorListener.addError("Unclosed TAGML tag(s): " + openRanges);
       }
       return documentContext;
     }
@@ -330,7 +339,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
-  private MarkupWrapper addMarkup(String extendedTag, List<AnnotationContext> atts) {
+  private MarkupWrapper addMarkup(String extendedTag, List<AnnotationContext> atts, ParserRuleContext ctx) {
     MarkupWrapper markup = store.createMarkupWrapper(document, extendedTag);
     addAnnotations(atts, markup);
     document.addMarkup(markup);
@@ -338,8 +347,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       identifiedMarkups.put(extendedTag, markup);
       String id = markup.getMarkupId();
       if (idsInUse.containsKey(id)) {
-        String message = "id '" + id + "' was already used in markup [" + idsInUse.get(id) + ">.";
-        errors.add(message);
+        String message = format("%sid '%s' was already used in markup [%s>.", errorPrefix(ctx), id, idsInUse.get(id));
+        errorListener.addError(message);
       }
       idsInUse.put(id, extendedTag);
     }
@@ -394,7 +403,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, openMarkup);
     if (markup == null) {
       String message = format("%sClosing tag <%s] found without corresponding open tag.", errorPrefix(ctx), extendedMarkupName);
-      errors.add(message);
+      errorListener.addError(message);
     }
     return markup;
   }
@@ -404,7 +413,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 //    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
 //    if (markup == null) {
 //      String message = errorPrefix(ctx) + "Resuming tag [+" + tag + "> found, which has no corresponding earlier suspending tag <-" + tag + "].";
-//      errors.add(message);
+//      errorListener.addError(message);
 //    }
 //    return markup;
 //  }

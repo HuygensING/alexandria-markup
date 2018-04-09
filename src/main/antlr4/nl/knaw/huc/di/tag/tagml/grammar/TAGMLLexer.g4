@@ -263,7 +263,7 @@ ITV_Comment
   ;
 
 ITV_Text
-  : ( ~[|>[)] | '\\|' | '\\>' | '\\[' | '\\)' )+
+  : ( ~[|><[)] | '\\|' | '\\>' | '\\<' | '\\[' | '\\)' )+
   ;
 
 ITV_BeginOpenMarkup // [ moves into markup tag
