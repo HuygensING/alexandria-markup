@@ -193,7 +193,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<MarkupWrapper> markupForTextNode = document.getMarkupStreamForTextNode(textNodeWrapper).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a","b:b");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a", "b:b");
     });
   }
 
@@ -253,7 +253,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore
+  //  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
@@ -277,13 +277,21 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       MarkupWrapper t = markupWrappers.get(0);
       List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
-      assertThat(tTextNodeWrappers).hasSize(2);
+      assertThat(tTextNodeWrappers).extracting("text").containsExactly("This is", "a test!");
+    });
+  }
 
-      TextNodeWrapper t0 = tTextNodeWrappers.get(0);
-      assertThat(t0).hasText("This is ");
-
-      TextNodeWrapper t1 = tTextNodeWrappers.get(1);
-      assertThat(t1).hasText("a test!");
+  @Test
+  public void testUnclosedDiscontinuityLeadsToError() {
+    String tagML = "[t>This is<-t], he said...";
+    store.runInTransaction(() -> {
+      try {
+        parseTAGML(tagML);
+        fail("Expected TAGMLSyntaxError");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            "Some suspended markup was not resumed: <t]");
+      }
     });
   }
 

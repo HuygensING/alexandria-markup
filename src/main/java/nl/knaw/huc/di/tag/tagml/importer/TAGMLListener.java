@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -73,8 +74,21 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String openRanges = openMarkup.stream()//
           .map(m -> "[" + m.getExtendedTag() + ">")//
           .collect(joining(", "));
-      errorListener.addError("Unclosed TAGML tag(s): " + openRanges);
+      errorListener.addError(
+          "Unclosed TAGML tag(s): %s",
+          openRanges
+      );
     }
+    if (!suspendedMarkup.isEmpty()) {
+      String suspendedMarkupString = suspendedMarkup.stream()//
+          .map(this::suspendTag)//
+          .collect(Collectors.joining(", "));
+      errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
+    }
+  }
+
+  private String suspendTag(MarkupWrapper markupWrapper) {
+    return "<" + markupWrapper.getExtendedTag() + "]";
   }
 
   @Override
@@ -103,8 +117,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (markupName.contains(":")) {
       String namespace = markupName.split(":", 2)[0];
       if (!namespaces.containsKey(namespace)) {
-        String message = format("%snamespace %s has not been defined.", errorPrefix(ctx), namespace);
-        errorListener.addError(message);
+        errorListener.addError(
+            "%snamespace %s has not been defined.",
+            errorPrefix(ctx), namespace
+        );
       }
     }
     ctx.annotation()
@@ -112,22 +128,37 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     TerminalNode prefix = ctx.markupName().IMO_Prefix();
     boolean optional = prefix != null && prefix.getText().equals("?");
+    boolean resume = prefix != null && prefix.getText().equals("+");
 
-    MarkupWrapper markup = addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
+    MarkupWrapper markup = resume
+        ? resumeMarkup(ctx)
+        : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
 
-    TerminalNode suffix = ctx.markupName().IMO_Suffix();
-    if (suffix != null) {
-      String id = suffix.getText().replace("~", "");
-      markup.setMarkupId(id);
+    if (markup != null) {
+      TerminalNode suffix = ctx.markupName().IMO_Suffix();
+      if (suffix != null) {
+        String id = suffix.getText().replace("~", "");
+        markup.setMarkupId(id);
+      }
+
+      openMarkup.add(markup);
     }
+  }
 
-    openMarkup.add(markup);
+  private MarkupWrapper resumeMarkup(StartTagContext ctx) {
+    String tag = ctx.markupName().getText().replace("+", "");
+    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
+    if (markup == null) {
+      errorListener.addError(
+          "Resuming tag [+%s> found, which has no corresponding earlier suspending tag <-%s].",
+          tag, tag
+      );
+    }
+    return markup;
   }
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
-//    String markupName = ctx.markupName().name().getText();
-//    LOG.info("   endTag.markupName=<{}>", markupName);
     removeFromOpenMarkup(ctx.markupName());
   }
 
@@ -178,8 +209,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         }
         openMarkupStack.push(markup);
       } else {
-        errorListener.addError(format("%s Closing tag <%s] found without corresponding open tag.",
-            errorPrefix(listenerContext.getCurrentToken()), rangeName));
+        errorListener.addError(
+            "%s Closing tag <%s] found without corresponding open tag.",
+            errorPrefix(listenerContext.getCurrentToken()), rangeName
+        );
       }
     }
 
@@ -279,7 +312,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String openRanges = documentContext.openMarkupDeque.stream()//
             .map(m -> "[" + m.getExtendedTag() + ">")//
             .collect(joining(", "));
-        errorListener.addError("Unclosed TAGML tag(s): " + openRanges);
+        errorListener.addError("Unclosed TAGML tag(s): %s", openRanges);
       }
       return documentContext;
     }
@@ -347,8 +380,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       identifiedMarkups.put(extendedTag, markup);
       String id = markup.getMarkupId();
       if (idsInUse.containsKey(id)) {
-        String message = format("%sid '%s' was already used in markup [%s>.", errorPrefix(ctx), id, idsInUse.get(id));
-        errorListener.addError(message);
+        errorListener.addError(
+            "%sid '%s' was already used in markup [%s>.",
+            errorPrefix(ctx), id, idsInUse.get(id));
       }
       idsInUse.put(id, extendedTag);
     }
@@ -396,15 +430,34 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private MarkupWrapper removeFromOpenMarkup(MarkupNameContext ctx) {
     String extendedMarkupName = ctx.name().getText();
+
     TerminalNode suffix = ctx.IMC_Suffix();
     if (suffix != null) {
       extendedMarkupName += suffix.getText();
     }
+
     MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, openMarkup);
     if (markup == null) {
-      String message = format("%sClosing tag <%s] found without corresponding open tag.", errorPrefix(ctx), extendedMarkupName);
-      errorListener.addError(message);
+      errorListener.addError(
+          "%sClosing tag <%s] found without corresponding open tag.",
+          errorPrefix(ctx), extendedMarkupName
+      );
+    } else {
+
+      TerminalNode prefixNode = ctx.IMC_Prefix();
+      if (prefixNode != null) {
+        String prefixNodeText = prefixNode.getText();
+        if (prefixNodeText.equals("?")) {
+          // optional
+          // TODO
+
+        } else if (prefixNodeText.equals("-")) {
+          // suspend
+          suspendedMarkup.add(markup);
+        }
+      }
     }
+
     return markup;
   }
 
