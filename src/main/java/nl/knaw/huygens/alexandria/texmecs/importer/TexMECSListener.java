@@ -20,14 +20,14 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParser.*;
-import nl.knaw.huygens.alexandria.lmnl.grammar.TexMECSParserBaseListener;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,6 @@ class TexMECSListener extends TexMECSParserBaseListener {
     openMarkup.add(markup);
     insideTagSet = true;
   }
-
 
   @Override
   public void exitText(TextContext ctx) {

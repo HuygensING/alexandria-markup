@@ -34,6 +34,7 @@
         <maven-jar.version>3.0.2</maven-jar.version>
         <maven-license.version>1.14</maven-license.version>
         <wagon-ssh.version>2.7</wagon-ssh.version>
+        <asciitable.version>0.3.2</asciitable.version>
     </properties>
 
     <organization>
@@ -264,6 +265,11 @@
             <artifactId>freemarker</artifactId>
             <version>${freemarker.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>
@@ -284,10 +290,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <groupId>de.vandermeer</groupId>
+            <artifactId>asciitable</artifactId>
+            <version>${asciitable.version}</version>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <distributionManagement>

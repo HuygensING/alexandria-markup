@@ -33,7 +33,7 @@ BEGIN_OPEN_RANGE // [ moves into range
   ;
 
 BEGIN_CLOSE_RANGE
-  : '{'  -> pushMode(INSIDE_RANGE_CLOSER)
+  : LeftCurlyBracket  -> pushMode(INSIDE_RANGE_CLOSER)
   ;
 
 TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
@@ -60,7 +60,7 @@ END_ANONYMOUS_RANGE
   ;
 
 END_OPEN_RANGE
-  :   '}'  -> popMode
+  :   RightCurlyBracket  -> popMode
   ;
 
 BEGIN_OPEN_ANNO
@@ -108,7 +108,7 @@ END_EMPTY_ANNO
   ;
 
 END_OPEN_ANNO
-  :   '}'  { annotationDepth++; popMode(); pushMode(INSIDE_ANNOTATION_TEXT); }
+  :   RightCurlyBracket  { annotationDepth++; popMode(); pushMode(INSIDE_ANNOTATION_TEXT); }
   ;
 
 OPEN_ANNO_IN_ANNO_OPENER
@@ -160,7 +160,7 @@ BEGIN_ANNO_OPEN_RANGE
   ;
 
 BEGIN_ANNO_CLOSE_RANGE
-  : '{'  {
+  : LeftCurlyBracket  {
     openRangeInAnnotationTextCount.computeIfAbsent(annotationDepth, k -> new AtomicInteger(0));
     if (openRangeInAnnotationTextCount.get(annotationDepth).get() == 0) {
       setType(BEGIN_CLOSE_ANNO);
@@ -175,7 +175,7 @@ BEGIN_ANNO_CLOSE_RANGE
   ;
 
 BEGIN_CLOSE_ANNO
-  : '{'  //-> popMode, pushMode(INSIDE_ANNOTATION_CLOSER) // never actually reached, just for defining BEGIN_CLOSE_ANNO (?)
+  : LeftCurlyBracket  //-> popMode, pushMode(INSIDE_ANNOTATION_CLOSER) // never actually reached, just for defining BEGIN_CLOSE_ANNO (?)
   ;
 
 ANNO_TEXT  // match any 16 bit char other than { (start close tag) and [ (start open tag)
@@ -187,11 +187,11 @@ TagOpenStartChar
   : '['
   ;
 
-TagOpenEndChar
+RightCurlyBracket
   : '}'
   ;
 
-TagCloseStartChar
+LeftCurlyBracket
   : '{'
   ;
 
