@@ -423,7 +423,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testUseIdForSelfOverlap() {
+  public void testUseSuffixForSelfOverlap() {
     String tagML = "word1 [phr~1>word2 [phr~2>word3<phr~1] word4<phr~2] word5";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);

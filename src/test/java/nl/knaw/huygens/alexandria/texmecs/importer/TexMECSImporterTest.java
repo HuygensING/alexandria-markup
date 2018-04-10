@@ -156,11 +156,13 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
+//  @Ignore
   @Test
   public void testVirtualElement() {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
+//      DocumentWrapper document = testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
+      DocumentWrapper document = testTexMECS(texMECS, "[real}[e}Reality{e]{real][virtual}[e}Reality{e]{virtual]");
       assertThat(document).isNotNull();
     });
   }

@@ -95,9 +95,9 @@ public class TAGMarkup implements TAGObject {
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
-    if (StringUtils.isNotEmpty(markupId)) {
-      return tag + "=" + markupId;
-    }
+//    if (StringUtils.isNotEmpty(markupId)) {
+//      return tag + "=" + markupId;
+//    }
     return tag;
   }
 
