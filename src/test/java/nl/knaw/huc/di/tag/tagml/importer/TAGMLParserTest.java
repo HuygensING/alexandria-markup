@@ -26,6 +26,7 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -310,6 +311,22 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[z:t>text<z:t]";
     store.runInTransaction(() -> {
       assertTAGMLParsesWithSyntaxError(input, "line 1:0 : namespace z has not been defined.");
+    });
+  }
+
+  @Test
+  public void testIdentifyingMarkup() {
+    String input = "[m :id=m1>" +
+        "pre [x ref->m1>text<x] post" +
+        "<m]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("m"),
+          markupSketch("x")
+      );
+      MarkupWrapper m1 = documentWrapper.getMarkupStream().filter(m -> m.hasTag("m")).findFirst().get();
+      assertThat(m1).hasMarkupId("m1");
     });
   }
 

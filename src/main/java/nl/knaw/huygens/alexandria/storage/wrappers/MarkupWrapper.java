@@ -208,4 +208,8 @@ public class MarkupWrapper {
   public boolean hasTag(String tag) {
     return tag.equals(markup.getTag());
   }
+
+  public void setSuffix(String suffix) {
+    markup.setSuffix(suffix);
+  }
 }

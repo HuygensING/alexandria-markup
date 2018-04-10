@@ -138,7 +138,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       TerminalNode suffix = ctx.markupName().IMO_Suffix();
       if (suffix != null) {
         String id = suffix.getText().replace("~", "");
-        markup.setMarkupId(id);
+        markup.setSuffix(id);
       }
 
       openMarkup.add(markup);
@@ -402,11 +402,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
       } else if (actx instanceof IdentifyingAnnotationContext) {
         IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
-        String aName = idAnnotationContext.idAnnotation().getText();
         String id = idAnnotationContext.idValue().getText();
-        // TODO add id to model
-        AnnotationWrapper annotation = store.createAnnotationWrapper(aName, id);
-        markup.addAnnotation(annotation);
+        markup.setMarkupId(id);
 
       } else if (actx instanceof RefAnnotationContext) {
         RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
@@ -461,22 +458,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return markup;
   }
 
-//  private MarkupWrapper removeFromSuspendedMarkup(ResumeTagContext ctx) {
-//    String tag = ctx.gi().getText();
-//    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
-//    if (markup == null) {
-//      String message = errorPrefix(ctx) + "Resuming tag [+" + tag + "> found, which has no corresponding earlier suspending tag <-" + tag + "].";
-//      errorListener.addError(message);
-//    }
-//    return markup;
-//  }
-
   private MarkupWrapper removeFromMarkupStack(String extendedTag, Deque<MarkupWrapper> markupStack) {
     Iterator<MarkupWrapper> descendingIterator = markupStack.descendingIterator();
     MarkupWrapper markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
-      if (markup.getExtendedTag().equals(extendedTag.replace("~", "="))) {
+      if (markup.getExtendedTag().equals(extendedTag)) {
         break;
       }
       markup = null;
