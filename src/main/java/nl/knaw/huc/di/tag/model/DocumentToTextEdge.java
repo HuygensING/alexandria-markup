@@ -19,5 +19,5 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class TextDivergenceNode extends ContentLessTextNode {
+public class DocumentToTextEdge implements Edge {
 }

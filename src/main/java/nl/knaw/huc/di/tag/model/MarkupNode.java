@@ -20,4 +20,6 @@ package nl.knaw.huc.di.tag.model;
  * #L%
  */
 public class MarkupNode implements Node {
+  String tag;
+  String namespace;
 }

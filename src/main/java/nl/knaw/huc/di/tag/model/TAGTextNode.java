@@ -20,4 +20,5 @@ package nl.knaw.huc.di.tag.model;
  * #L%
  */
 public interface TAGTextNode extends Node {
+  String getContent();
 }

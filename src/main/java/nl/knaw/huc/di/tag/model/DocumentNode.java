@@ -19,5 +19,12 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class TextDivergenceNode extends ContentLessTextNode {
+
+import java.time.Instant;
+
+public class DocumentNode implements Node {
+  String name;
+  Long identifier;
+  Instant creationDate;
+  Instant modificationDate;
 }

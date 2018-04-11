@@ -19,12 +19,5 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-
-import java.time.Instant;
-
-public class TAGDocumentNode implements Node {
-  String name;
-  Long identifier;
-  Instant creationDate;
-  Instant modificationDate;
+public class TextToTextEdge implements Edge {
 }

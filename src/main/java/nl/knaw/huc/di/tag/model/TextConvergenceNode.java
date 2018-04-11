@@ -19,5 +19,5 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class TextConvergenceNode implements TAGTextNode {
+public class TextConvergenceNode extends ContentLessTextNode {
 }

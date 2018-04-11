@@ -26,7 +26,7 @@ import java.util.*;
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
-public class DirectedAcyclicGraph<N> extends HyperGraph<N, TraditionalEdge> {
+public class DirectedAcyclicGraph<N> extends HyperGraph<N, Edge> {
   private static final Logger LOG = LoggerFactory.getLogger(DirectedAcyclicGraph.class);
   private N root;
 
@@ -43,11 +43,11 @@ public class DirectedAcyclicGraph<N> extends HyperGraph<N, TraditionalEdge> {
     this.root = root;
   }
 
-  // Question: do we want labels here?
-  public void addDirectedEdge(N source, N target, Set<String> sigils) {
-    TraditionalEdge edge = new TraditionalEdge(sigils);
-    super.addDirectedHyperEdge(edge, "", source, target);
-  }
+//  // Question: do we want labels here?
+//  public void addDirectedEdge(N source, N target) {
+//    TraditionalEdge edge = new TraditionalEdge(sigils);
+//    super.addDirectedHyperEdge(edge, "", source, target);
+//  }
 
   public List<N> traverse() {
     Set<N> visitedNodes = new HashSet<>();
@@ -58,9 +58,9 @@ public class DirectedAcyclicGraph<N> extends HyperGraph<N, TraditionalEdge> {
       N pop = nodesToVisit.pop();
       if (!visitedNodes.contains(pop)) {
         result.add(pop);
-        Collection<TraditionalEdge> outgoingEdges = this.getOutgoingEdges(pop);
+        Collection<Edge> outgoingEdges = this.getOutgoingEdges(pop);
         visitedNodes.add(pop);
-        for (TraditionalEdge e : outgoingEdges) {
+        for (Edge e : outgoingEdges) {
           N target = this.getTarget(e);
           if (target == null) {
             throw new RuntimeException("edge target is null for edge " + pop + "->");
@@ -74,7 +74,7 @@ public class DirectedAcyclicGraph<N> extends HyperGraph<N, TraditionalEdge> {
     return result;
   }
 
-  public N getTarget(TraditionalEdge e) {
+  public N getTarget(Edge e) {
     Collection<N> nodes = super.getTargets(e);
     if (nodes.size() != 1) {
       throw new RuntimeException("trouble!");

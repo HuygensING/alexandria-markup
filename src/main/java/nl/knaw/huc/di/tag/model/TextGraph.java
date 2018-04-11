@@ -23,7 +23,7 @@ package nl.knaw.huc.di.tag.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TextGraph<T extends TAGTextNode, M extends TAGMarkup> extends HyperGraph<Node, Edge> {
+public class TextGraph<T extends TAGTextNode, M extends Markup> extends HyperGraph<Node, Edge> {
 
   private TextDelimiterNode textStartNode = new TextDelimiterNode();
   private TextDelimiterNode textEndNode = new TextDelimiterNode();
