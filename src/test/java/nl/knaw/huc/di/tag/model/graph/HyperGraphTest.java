@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package nl.knaw.huc.di.tag.model;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.model.graph.HyperGraph;
 import org.junit.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
