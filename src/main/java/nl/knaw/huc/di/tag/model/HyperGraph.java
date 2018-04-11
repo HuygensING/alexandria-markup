@@ -23,7 +23,7 @@ package nl.knaw.huc.di.tag.model;
 
 /*
  * Generic Hypergraph definition
- * Directed, labelled, hyperedges (one to many)
+ * Directed, labelled, hyperedges (one-to-many)
  * Are we going to make the child nodes ordered?
  * @author: Ronald Haentjens Dekker
  */
