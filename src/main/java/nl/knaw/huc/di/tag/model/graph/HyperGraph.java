@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph;
 
 
 /*-

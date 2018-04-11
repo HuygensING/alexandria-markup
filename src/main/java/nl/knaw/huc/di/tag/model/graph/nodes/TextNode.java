@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,5 +19,20 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class TextDivergenceNode extends ContentLessTextNode {
+public class TextNode implements TAGTextNode {
+  private String content;
+
+  TextNode(String content) {
+    this.content = content;
+  }
+
+  public TextNode setContent(final String content) {
+    this.content = content;
+    return this;
+  }
+
+  @Override
+  public String getContent() {
+    return content;
+  }
 }

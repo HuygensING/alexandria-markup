@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
@@ -19,6 +19,8 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
+
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

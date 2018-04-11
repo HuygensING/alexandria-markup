@@ -19,6 +19,8 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
+
+import nl.knaw.huc.di.tag.model.graph.HyperGraph;
 import org.junit.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;

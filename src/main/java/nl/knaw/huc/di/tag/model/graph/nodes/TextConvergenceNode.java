@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,5 +19,5 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class MarkupToAnnotationHyperEdge implements Edge {
+public class TextConvergenceNode extends ContentLessTextNode {
 }

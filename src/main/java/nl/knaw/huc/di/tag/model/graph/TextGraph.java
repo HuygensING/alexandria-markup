@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
@@ -19,6 +19,12 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
+
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.nodes.MarkupNode;
+import nl.knaw.huc.di.tag.model.graph.nodes.Node;
+import nl.knaw.huc.di.tag.model.graph.nodes.TAGTextNode;
+import nl.knaw.huc.di.tag.model.graph.nodes.TextDelimiterNode;
 
 import java.util.HashMap;
 import java.util.Map;
