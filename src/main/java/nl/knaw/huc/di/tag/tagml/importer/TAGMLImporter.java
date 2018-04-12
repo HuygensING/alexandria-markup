@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 
 import static java.util.stream.Collectors.joining;
 
@@ -61,7 +62,7 @@ public class TAGMLImporter {
       return importTAGML(antlrInputStream);
     } catch (IOException e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 

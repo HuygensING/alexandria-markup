@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -235,7 +236,7 @@ public class LMNLImporter {
       return importLMNL(antlrInputStream);
     } catch (IOException e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 
