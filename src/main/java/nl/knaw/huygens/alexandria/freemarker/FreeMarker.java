@@ -55,7 +55,7 @@ public class FreeMarker {
       FileWriter out = new FileWriter(file);
       return processTemplate(fmTemplate, fmRootMap, clazz, out);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 }

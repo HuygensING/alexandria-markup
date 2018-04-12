@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,18 +19,12 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-import org.junit.Test;
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import java.time.Instant;
 
-public class HyperGraphTest {
-
-  @Test
-  public void test() {
-    HyperGraph<String, String> hg = new HyperGraph<>(HyperGraph.GraphType.UNORDERED);
-    assertThat(hg).isNotNull();
-
-    hg.addDirectedHyperEdge("edge", "label", "source", "target");
-  }
-
+public class DocumentNode implements Node {
+  String name;
+  Long identifier;
+  Instant creationDate;
+  Instant modificationDate;
 }

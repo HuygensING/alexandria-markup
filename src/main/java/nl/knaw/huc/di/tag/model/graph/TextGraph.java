@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
@@ -20,10 +20,16 @@ package nl.knaw.huc.di.tag.model;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.nodes.MarkupNode;
+import nl.knaw.huc.di.tag.model.graph.nodes.Node;
+import nl.knaw.huc.di.tag.model.graph.nodes.TAGTextNode;
+import nl.knaw.huc.di.tag.model.graph.nodes.TextDelimiterNode;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class TextGraph<T extends TAGTextNode, M extends TAGMarkup> extends HyperGraph<Node, Edge> {
+public class TextGraph<T extends TAGTextNode, M extends Markup> extends HyperGraph<Node, Edge> {
 
   private TextDelimiterNode textStartNode = new TextDelimiterNode();
   private TextDelimiterNode textEndNode = new TextDelimiterNode();

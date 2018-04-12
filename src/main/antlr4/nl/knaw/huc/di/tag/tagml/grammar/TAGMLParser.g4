@@ -122,13 +122,17 @@ objectValue
   ;
 
 textVariation
-  : beginTextVariation variantText ( TextVariationSeparator variantText )+ ITV_EndTextVariation
+  : beginTextVariation variantText ( textVariationSeparator variantText )+ ITV_EndTextVariation
   ;
 
 beginTextVariation
   : DEFAULT_BeginTextVariation
   | ITV_BeginTextVariation
   | IMX_BeginTextVariation
+  ;
+
+textVariationSeparator
+  : TextVariationSeparator
   ;
 
 variantText

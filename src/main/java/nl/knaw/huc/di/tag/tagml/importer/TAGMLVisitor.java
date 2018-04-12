@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.tagml.importer;
 
 /*-
  * #%L
@@ -19,5 +19,23 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public interface TAGTextNode extends Node {
+
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseVisitor;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+
+public class TAGMLVisitor extends TAGMLParserBaseVisitor {
+  private TAGStore tagStore;
+  private ErrorListener errorListener;
+
+  public TAGMLVisitor(final TAGStore tagStore, final ErrorListener errorListener) {
+    this.tagStore = tagStore;
+    this.errorListener = errorListener;
+  }
+
+  public DocumentWrapper getDocumentWrapper() {
+    // TODO
+    return null;
+  }
 }

@@ -214,7 +214,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       );
 
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
-      assertThat(textNodeWrappers).hasSize(4);
+      assertThat(textNodeWrappers).hasSize(6);
 
       TextNodeWrapper textNodeWrapper = textNodeWrappers.get(0);
       assertThat(textNodeWrapper).hasText("This is a ");
@@ -298,7 +298,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
-    String tagML = "[t>This [x>is |>a<x] [y>failing|an<x] [y>excellent<| test<y]<t]";
+    String tagML = "[t>This [x>is <|a<x] [y>failing|an<x] [y>excellent|> test<y]<t]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -333,7 +333,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Ignore
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
-    String tagML = "[t>This [x>is |>a [y>failing|an<x] [y>excellent<| test<y]<t]";
+    String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
     store.runInTransaction(() -> {
       try {
         DocumentWrapper document = parseTAGML(tagML);

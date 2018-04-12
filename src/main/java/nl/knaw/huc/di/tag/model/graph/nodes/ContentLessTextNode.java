@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,5 +19,10 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public interface Node {
+public class ContentLessTextNode implements TAGTextNode {
+
+  @Override
+  public String getContent() {
+    return "";
+  }
 }

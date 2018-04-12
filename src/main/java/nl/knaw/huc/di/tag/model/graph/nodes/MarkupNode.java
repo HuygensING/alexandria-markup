@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,5 +19,7 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-public class TextDelimiterNode implements TAGTextNode {
+public class MarkupNode implements Node {
+  String tag;
+  String namespace;
 }

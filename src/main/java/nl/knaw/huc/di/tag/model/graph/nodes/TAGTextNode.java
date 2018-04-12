@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,21 +19,6 @@ package nl.knaw.huc.di.tag.model;
  * limitations under the License.
  * #L%
  */
-import java.util.Set;
-
-public class TraditionalEdge {
-
-  private Set<String> sigils;
-
-  TraditionalEdge(Set<String> label){
-    this.sigils = label;
-  }
-
-  public Set<String> getSigils() {
-    return sigils;
-  }
-
-  public void setSigils(Set<String> sigils) {
-    this.sigils = sigils;
-  }
+public interface TAGTextNode extends Node {
+  String getContent();
 }

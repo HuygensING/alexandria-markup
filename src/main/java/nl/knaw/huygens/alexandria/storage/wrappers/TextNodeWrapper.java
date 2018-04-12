@@ -55,7 +55,7 @@ public class TextNodeWrapper {
     return this;
   }
 
-  private void setNextTextNode(TextNodeWrapper textNodeWrapper) {
+  public void setNextTextNode(TextNodeWrapper textNodeWrapper) {
     textNode.setNextTextNodeId(textNodeWrapper.getId());
     update();
   }
