@@ -155,6 +155,26 @@
 
     <dependencies>
         <dependency>
+            <groupId>nl.knaw.huygens.alexandria</groupId>
+            <artifactId>lmnl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.knaw.huygens.alexandria</groupId>
+            <artifactId>texmecs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.knaw.huygens.alexandria</groupId>
+            <artifactId>tagml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.knaw.huygens.alexandria</groupId>
+            <artifactId>tagql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr.version}</version>
