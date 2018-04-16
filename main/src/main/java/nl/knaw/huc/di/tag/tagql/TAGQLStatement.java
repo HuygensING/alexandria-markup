@@ -21,13 +21,13 @@ package nl.knaw.huc.di.tag.tagql;
  */
 
 
-import nl.knaw.huygens.alexandria.data_model.Limen;
 import nl.knaw.huygens.alexandria.query.TAGQLResult;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 
 import java.util.function.Function;
 
 public interface TAGQLStatement {
 
-  Function<Limen, TAGQLResult> getLimenProcessor();
+  Function<DocumentWrapper, TAGQLResult> getLimenProcessor();
 
 }

@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,9 +35,9 @@ import java.util.List;
 
 public class TAGQLQueryHandler {
 
-  private final Document document;
+  private final DocumentWrapper document;
 
-  public TAGQLQueryHandler(Document document) {
+  public TAGQLQueryHandler(DocumentWrapper document) {
     this.document = document;
   }
 
@@ -66,7 +66,7 @@ public class TAGQLQueryHandler {
 
   private TAGQLResult execute(TAGQLStatement statement) {
     return statement.getLimenProcessor()//
-        .apply(document.value());
+        .apply(document);
   }
 
 }

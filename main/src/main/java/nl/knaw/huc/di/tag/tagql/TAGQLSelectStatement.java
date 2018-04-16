@@ -20,9 +20,9 @@ package nl.knaw.huc.di.tag.tagql;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.Markup;
 import nl.knaw.huygens.alexandria.query.TAGQLResult;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,27 +33,27 @@ public class TAGQLSelectStatement implements TAGQLStatement {
 
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  private Predicate<? super Markup> markupFilter = tr -> true;
-  private Function<? super Markup, ? super Object> markupMapper = a -> a;
+  private Predicate<? super MarkupWrapper> markupFilter = tr -> true;
+  private Function<? super MarkupWrapper, ? super Object> markupMapper = a -> a;
 
   private Integer index = null;
 
-  public void setMarkupFilter(Predicate<? super Markup> markupFilter) {
+  public void setMarkupFilter(Predicate<? super MarkupWrapper> markupFilter) {
     this.markupFilter = markupFilter;
   }
 
-  public void setMarkupMapper(Function<? super Markup, ? super Object> markupMapper) {
+  public void setMarkupMapper(Function<? super MarkupWrapper, ? super Object> markupMapper) {
     this.markupMapper = markupMapper;
   }
 
   @Override
-  public Function<Limen, TAGQLResult> getLimenProcessor() {
-    return (Limen limen) -> {
+  public Function<DocumentWrapper, TAGQLResult> getLimenProcessor() {
+    return (DocumentWrapper documentWrapper) -> {
       TAGQLResult result = new TAGQLResult();
-      limen.markupList.stream()//
+      documentWrapper.getMarkupStream()//
           .filter(markupFilter)//
           .map(markupMapper)//
-          // .map(this::logger)//
+          // .peek(this::logger)//
           .forEach(result::addValue);
       if (index != null) {
         Object selectedValue = result.getValues().get(index);
@@ -65,9 +65,8 @@ public class TAGQLSelectStatement implements TAGQLStatement {
     };
   }
 
-  private Object logger(Object o) {
+  private void logger(Object o) {
     LOG.info("object={}, class={}", o, o.getClass().getName());
-    return o;
   }
 
   public void setIndex(int index) {
