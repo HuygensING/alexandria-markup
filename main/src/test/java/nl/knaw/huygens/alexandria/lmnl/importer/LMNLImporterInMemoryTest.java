@@ -1,6 +1,5 @@
 package nl.knaw.huygens.alexandria.lmnl.importer;
 
-
 /*
  * #%L
  * alexandria-markup
@@ -374,6 +373,165 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     compareLMNL(expected, actual);
     assertTrue(compareDocuments(expected, actual));
   }
+
+  @Test
+  public void testBalisage2018a() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[page [n}21v{]}\n" +
+        "[div [type}p{]}\n" +
+        "[line [rend}indent2{]}1[rend [place}sup{]}st{rend]. Voice from the Mountains {line]\n" +
+        "[line}Thrice three hundred thousand years {line]\n" +
+        "[line [rend}indent1{]}Oe'r the Earthquakes couch we stood {line]\n" +
+        "[line}Oft as men convulsed with fear {line]\n" +
+        "[line [rend}indent1{]}We trembeld in our [w [facs}#ms_shelley_e1-0046-1{]}multitude{w] {line]\n" +
+        "{div]\n" +
+        "[div [type}p{]}\n" +
+        "[line [rend}indent2{]}2[rend [place}sub{]}d{rend]. Voice from the Springs {line]\n" +
+        "[line}Thunderbolts had parched our water{line]\n" +
+        "[line [rend}indent2{]}We had been stained with bitter blood {line]\n" +
+        "{page]\n" +
+        "[page [n}22v{]}\n" +
+        "[line}And had ran mute [w [facs}#ms_shelley_e1-0046-2{]}mid{w] shrieks of slaugter{line]\n" +
+        "[line [rend}indent2{]}Thro' a city & a solitude!{line]\n" +
+        "{div]\n" +
+        "{page]\n" +
+        "{text]";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
+  @Test
+  public void testBalisage2018b() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[poem}\n" +
+        "[sp}\n" +
+        "[speaker}1st. Voice from the Mountains{speaker]\n" +
+        "[stanza [rhyme}abab{]}\n" +
+        "[lg [type}quatrain{]}\n" +
+        "[l}Thrice three hundred thousand [w}[rhyme [label}a{]}year{rhyme]s{w] {l]\n" +
+        "[l}Oe'r the Earthquakes couch we [w}[rhyme [label}b{]}stood{rhyme]{w] {l]\n" +
+        "[l}Oft as men convulsed with [w}[rhyme}a{]}fear{rhyme]{w] {l]\n" +
+        "[l}We trembled in our [w}multi[rhyme [label}b{]}tude{rhyme]{w] {l]\n" +
+        "{lg]\n" +
+        "{sp]\n" +
+        "[sp}\n" +
+        "[speaker}2d. Voice from the Mountains{speaker]\n" +
+        "[lg [type}quatrain{]}\n" +
+        "[l}Thunderbolts had parched our [w}[rhyme [label}a{]}water{rhyme]{w]{l]\n" +
+        "[l}We had been stained with bitter [w}[rhyme [label}b{]}blood{rhyme]{w]{l]\n" +
+        "[l}And had ran mute 'mid shrieks of [w}[rhyme [label}a{]}slaugter{rhyme]{w]{l]\n" +
+        "[l}Thro' a city & a [w}[rhyme [label}b{]}solitude{rhyme]{w]{l]\n" +
+        "{lg]\n" +
+        "{sp]\n" +
+        "{stanza]\n" +
+        "{poem]\n" +
+        "{text]";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
+  @Test
+  public void testBalisage2018c() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[s}\n" +
+        "[cl}[phr}1st. Voice{phr] [phr}from the Mountains{phr]\n" +
+        "{cl]\n" +
+        "[cl}\n" +
+        "    [phr [type}NP{]}[w [type}Adjunct{]}Thrice{w] three hundred thousand years{phr] \n" +
+        "    [phr [type}PP{]}Oe'r the Earthquakes couch{phr] [phr [type}VP{]}we stood;{phr]{cl]\n" +
+        "[cl}\n" +
+        "    [phr=1 [type}Adverb{]}[w [type}Adjunct{]}Oft{w] [phr=2 [type}Adverb{]}as men convulsed with fears{phr=2] [phr [type}VP{]}We trembled{phr] in our multitude{phr=1]{cl]\n" +
+        "[cl}\n" +
+        "    [phr [type}NP{]}2d. Voice{phr] [phr [type}Adverb{]}from the Springs{phr]{cl]\n" +
+        "[cl}\n" +
+        "    [phr [type}N{]}Thunderbolts{phr] [phr [type}V{]}had parched{phr] [phr [type}O{]}our water[pc},{pc]{phr] \n" +
+        "    [phr [type}N{]}We{phr] [phr [type}VP{]}had been stained{phr] [phr [type}Adjunct{]}with [w [type}A{]}bitter{w] blood{phr]{cl]\n" +
+        "[cl}\n" +
+        "    [phr}[w [type}contr{]}And{w] [phr [type}VP{]}had ran mute{phr] 'mid shrieks of slaugter{phr] \n" +
+        "    [phr}Thro' a city & a solitude!{phr]\n" +
+        "{cl]\n" +
+        "{s]{text]\n";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
+  @Test
+  public void testBalisage2018d() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[poem}\n" +
+        "[title}My Alba{title]\n" +
+        "[stanza [type}octave{] [rhyme}abab{]}\n" +
+        "[lg}\n" +
+        "[l}Now that I've [w}was[rhyme [label}a{]}ted{rhyme]{w]{l]\n" +
+        "[l}five years in [w}Manhat[rhyme [label}b{]}tan{rhyme]{w]{l]\n" +
+        "[l}life [w}deca[rhyme [label}a{]}ying{rhyme]{w]{l]\n" +
+        "[l}talent a [w}[rhyme [label}b{]}blank{rhyme]{w]{l]\n" +
+        "{lg]\n" +
+        "[lg}\n" +
+        "[l}talking [w}disconnec[rhyme [label}a{]}ted{rhyme]{w]{l]\n" +
+        "[l}patient and [w}men[rhyme [label}b{]}tal{rhyme]{w]{l]\n" +
+        "[l}sliderule and [w}num[rhyme [label}a{]}ber{rhyme]{w]{l]\n" +
+        "[l}machine on a [w}[rhyme [label}b{]}desk{rhyme]{w]{l]\n" +
+        "{lg]\n" +
+        "{stanza]\n" +
+        "{poem]\n" +
+        "{text]\n";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
+  @Test
+  public void testBalisage2018e() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[page [n}1{]}\n" +
+        "[div [type}title{]}My Alba{div]\n" +
+        "[div [type}body{]}\n" +
+        "[line}Now that I've wasted five years in{line]\n" +
+        "[line}Manhattan{line]\n" +
+        "[line}life decaying talent a {line]\n" +
+        "[line}blank {line]\n" +
+        "[line}talking disconnected patient {line]\n" +
+        "[line}and mental {line]\n" +
+        "[line}sliderule and number machine on a desk{line]\n" +
+        "{div]\n" +
+        "{page]\n" +
+        "{text]\n";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
+  @Test
+  public void testBalisage2018f() throws LMNLSyntaxError {
+    String input = "[text}\n" +
+        "[s}\n" +
+        "[cl}Now that \n" +
+        "    [phr [type}VP{]}[w [type}S{]}I{w][w [type}AV{]}[m [type}contr{]}[pc}'{pc]ve{m]{w] [w [type}V{]}[m [type}root{]}wast{m][m [type}suffix{]}ed{m]{w]{phr] \n" +
+        "    [phr [type}NP{]}[w [type}A{]}five{w] [w [type}N{]}years{w]{phr] \n" +
+        "    [phr [type}PP{]}[w [type}P{]}in{w] [w [type}N{]}Manhattan{w]{phr]\n" +
+        "{cl]\n" +
+        "[cl}\n" +
+        "    [phr [type}VP{]}[w [type}N{]}life{w] [w [type}V{]}[m [type}root{]}decay{m][m [type}suffix{]}ing{m]{w]{phr] \n" +
+        "    [phr [type}NP{]}[w [type}N{]}talent{w] [w [type}D{]}a{w] [w [type}N{]}blank{w]{phr]\n" +
+        "{cl]\n" +
+        "[cl}\n" +
+        "    [phr [type}VP{]}[w [type}V{]}talking{w] [w [type}Adv{]}disconnected{w] [w [type}Adv{]}patient{w] [w [type}C{]}and{w] [w [type}Adv{]}mental{w]{phr]\n" +
+        "{cl]  \n" +
+        "[cl}\n" +
+        "    [phr=1 [type}NP{]}[w [type}N{]}sliderule{w] [w [type}C{]}and{w] [phr=2 [type}N{]}[w [type}N{]}number{w] [w [type}N{]}machine{w]{phr=2]{phr=1] \n" +
+        "    [phr [type}PP{]}[w [type}P{]}on{w] [w [type}D{]}a{w] [w [type}N{]}desk{w]{phr]\n" +
+        "{cl]\n" +
+        "{s]\n" +
+        "{text]\n";
+    printTokens(input);
+    Document actual = new LMNLImporterInMemory().importLMNL(input);
+    assertThat(actual).isNotNull();
+  }
+
 
   @Test
   public void testComments() throws LMNLSyntaxError {
