@@ -22,6 +22,9 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import prioritised_xml_collation.Segment;
+import prioritised_xml_collation.TAGToken;
+import prioritised_xml_collation.TypeAndContentAligner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,21 +36,14 @@ public class TAGComparison {
   private final List<String> diffLines = new ArrayList<>();
 
   public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
-    Scorer scorer = new ContentScorer();
-    Segmenter segmenter = new ContentSegmenter();
-    ViewAligner viewAligner = new ViewAligner(scorer, segmenter);
     List<TAGToken> originalTokens = new Tokenizer(originalDocument, tagView).getTAGTokens();
     List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
-    List<Segment> segments = viewAligner.align(originalTokens, editedTokens);
+    List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTokens, editedTokens);
     if (segments.size() > 1) {
       for (Segment segment : segments) {
-        switch (segment.type()) {
+        switch (segment.type) {
           case aligned:
             handleAligned(segment);
-            break;
-
-          case empty:
-            handleEmpty(segment);
             break;
 
           case addition:
@@ -63,7 +59,7 @@ public class TAGComparison {
             break;
 
           default:
-            throw new RuntimeException("unexpected type:" + segment.type());
+            throw new RuntimeException("unexpected type:" + segment.type);
         }
       }
     }
@@ -78,11 +74,11 @@ public class TAGComparison {
   }
 
   private void handleOmission(Segment segment) {
-    asLines(segment.tokensA()).forEach(l -> diffLines.add("-" + l));
+    asLines(segment.tokensWa).forEach(l -> diffLines.add("-" + l));
   }
 
   private void handleAddition(Segment segment) {
-    asLines(segment.tokensB()).forEach(l -> diffLines.add("+" + l));
+    asLines(segment.tokensWb).forEach(l -> diffLines.add("+" + l));
   }
 
   private void handleReplacement(Segment segment) {
@@ -90,11 +86,8 @@ public class TAGComparison {
     handleAddition(segment);
   }
 
-  private void handleEmpty(Segment segment) {
-  }
-
   private void handleAligned(Segment segment) {
-    List<String> lines = asLines(segment.tokensA());
+    List<String> lines = asLines(segment.tokensWa);
     diffLines.add(" " + lines.get(0));
     if (lines.size() > 2) {
       diffLines.add(" ...");

@@ -37,6 +37,7 @@
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
         <slf4j-api.version>1.7.25</slf4j-api.version>
+        <tag.version>1.0-SNAPSHOT</tag.version>
 
         <maven-compiler.version>3.7.0</maven-compiler.version>
         <maven-jar.version>3.0.2</maven-jar.version>

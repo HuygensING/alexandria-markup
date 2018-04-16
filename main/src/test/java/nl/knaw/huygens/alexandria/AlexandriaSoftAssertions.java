@@ -20,8 +20,6 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.compare.Segment;
-import nl.knaw.huygens.alexandria.compare.SegmentAssert;
 import nl.knaw.huygens.alexandria.compare.TAGComparison;
 import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
 import org.assertj.core.api.SoftAssertions;
@@ -30,10 +28,6 @@ public class AlexandriaSoftAssertions extends SoftAssertions {
 
   public TAGComparisonAssert assertThat(TAGComparison actual) {
     return proxy(TAGComparisonAssert.class, TAGComparison.class, actual);
-  }
-
-  public SegmentAssert assertThat(Segment actual) {
-    return proxy(SegmentAssert.class, Segment.class, actual);
   }
 
 }

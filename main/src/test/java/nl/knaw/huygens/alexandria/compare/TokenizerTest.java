@@ -25,6 +25,8 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
+import prioritised_xml_collation.TAGToken;
+import prioritised_xml_collation.TextToken;
 
 import java.util.List;
 
@@ -35,53 +37,50 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTokenizeText() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("a b c");
-    assertThat(textTokens).hasSize(3);
+    assertThat(textTokens).extracting("content")
+        .containsExactly("a ", "b ", "c");
   }
 
   @Test
-  public void testTokenizeText1() {
+  public void testLeadingWhitespaceIsPreserved() {
     List<TextToken> textTokens = Tokenizer.tokenizeText(" a b c");
-    assertThat(textTokens).hasSize(3);
-    assertThat(textTokens.get(0).content).isEqualTo(" a ");
+    assertThat(textTokens).extracting("content")
+        .containsExactly(" a ", "b ", "c");
   }
 
   @Test
   public void testTokenizeText2() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("\n");
-    assertThat(textTokens).hasSize(1);
-    assertThat(textTokens.get(0).content).isEqualTo("\n");
+    assertThat(textTokens).extracting("content")
+        .containsExactly("\n");
   }
 
   @Test
   public void testTokenizeText3() {
     List<TextToken> textTokens = Tokenizer.tokenizeText(" ");
-    assertThat(textTokens).hasSize(1);
-    assertThat(textTokens.get(0).content).isEqualTo(" ");
+    assertThat(textTokens).extracting("content")
+        .containsExactly(" ");
   }
 
   @Test
   public void testTokenizeText4() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("! ");
-    assertThat(textTokens).hasSize(1);
-    assertThat(textTokens.get(0).content).isEqualTo("! ");
+    assertThat(textTokens).extracting("content")
+        .containsExactly("! ");
   }
 
   @Test
   public void testTokenizeText5() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("Alas, poor Yorick!");
-    assertThat(textTokens).hasSize(3);
-    assertThat(textTokens.get(0).content).isEqualTo("Alas, ");
-    assertThat(textTokens.get(1).content).isEqualTo("poor ");
-    assertThat(textTokens.get(2).content).isEqualTo("Yorick!");
+    assertThat(textTokens).extracting("content")
+        .containsExactly("Alas", ", ", "poor ", "Yorick", "!");
   }
 
   @Test
   public void testTokenizeText6() {
     List<TextToken> textTokens = Tokenizer.tokenizeText("Lucy, for you the snowdrop and the bay");
-    assertThat(textTokens).hasSize(8);
-    assertThat(textTokens.get(0).content).isEqualTo("Lucy, ");
-    assertThat(textTokens.get(1).content).isEqualTo("for ");
-    assertThat(textTokens.get(2).content).isEqualTo("you ");
+    assertThat(textTokens).extracting("content")
+        .containsExactly("Lucy", ", ", "for ", "you ", "the ", "snowdrop ", "and ", "the ", "bay");
   }
 
   @Test
@@ -92,7 +91,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();
       assertThat(tokens).extracting("content")//
-          .containsExactly("l", "Alas, ", "poor ", "Yorick!", "l");
+          .containsExactly("l", "Alas", ", ", "poor ", "Yorick", "!", "l");
     });
   }
 }

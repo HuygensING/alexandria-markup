@@ -23,18 +23,23 @@ package nl.knaw.huygens.alexandria.compare;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import prioritised_xml_collation.MarkupCloseToken;
+import prioritised_xml_collation.MarkupOpenToken;
+import prioritised_xml_collation.TAGToken;
+import prioritised_xml_collation.TextToken;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
+import static nl.knaw.huygens.alexandria.compare.SimplePatternTokenizer.PUNCT;
 
 class Tokenizer {
   private final DocumentWrapper document;
   private final TAGView tagView;
-  public static final Pattern PATTERN = Pattern.compile("\\w+|[^\\w\\s]+");
 
   public Tokenizer(DocumentWrapper document, TAGView tagView) {
     this.document = document;
@@ -66,6 +71,7 @@ class Tokenizer {
       }
       toClose.stream()//
           .map(MarkupWrapper::getTag)//
+          .map(s -> "/" + s)
           .map(MarkupCloseToken::new)//
           .forEach(tokens::add);
 
@@ -86,13 +92,13 @@ class Tokenizer {
     return tokens;
   }
 
-  private static final Pattern WS_AND_PUNCT = Pattern.compile("[" + SimplePatternTokenizer.PUNCT + "\\s]+");
+  private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
 
   static List<TextToken> tokenizeText(String text) {
-    if (WS_AND_PUNCT.matcher(text).matches()) {
+    if (WS_OR_PUNCT.matcher(text).matches()) {
       return new ArrayList<>(singletonList(new TextToken(text)));
     }
-    return SimplePatternTokenizer.BY_WS_AND_PUNCT//
+    return SimplePatternTokenizer.BY_WS_OR_PUNCT//
         .apply(text)//
         .map(TextToken::new)//
         .collect(toList());

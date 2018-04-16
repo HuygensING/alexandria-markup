@@ -27,13 +27,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+
 /**
  * @author <a href="http://gregor.middell.net/">Gregor Middell</a>
  * @author Ronald Haentjens Dekker
  */
 public class SimplePatternTokenizer {
 
-  static final String PUNCT = Pattern.quote(".?!,;:");
+  static final String PUNCT = Pattern.quote(".,;:¿?¡!‘’“”'\"");
 
   static Function<String, Stream<String>> tokenizer(Pattern pattern) {
     return input -> {
@@ -48,8 +50,10 @@ public class SimplePatternTokenizer {
 
   public static final Function<String, Stream<String>> BY_WHITESPACE = tokenizer(Pattern.compile("\\s*?\\S+\\s*]"));
 
-  public static final Function<String, Stream<String>> BY_WS_AND_PUNCT = tokenizer(Pattern.compile("[\\s" + PUNCT + "]*?[^\\s" + PUNCT + "]+[\\s" + PUNCT + "]*"));
+  public static final Function<String, Stream<String>> BY_WS_AND_PUNCT = tokenizer(Pattern.compile(format(
+      "[\\s%s]*?[^\\s%s]+[\\s%s]*", PUNCT, PUNCT, PUNCT)));
 
-  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile("[" + PUNCT + "]+[\\s]*|[^" + PUNCT + "\\s]+[\\s]*"));
+  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(format(
+      "\\s*[%s]+[\\s]*|\\s*[^%s\\s]+[\\s]*", PUNCT, PUNCT)));
 
 }
