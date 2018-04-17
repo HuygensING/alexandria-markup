@@ -45,7 +45,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   public void testLeadingWhitespaceIsPreserved() {
     List<TextToken> textTokens = Tokenizer.tokenizeText(" a b c");
     assertThat(textTokens).extracting("content")
-        .containsExactly(" a ", "b ", "c");
+        .containsExactly(" ", "a ", "b ", "c");
   }
 
   @Test
@@ -71,9 +71,9 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTokenizeText5() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("Alas, poor Yorick!");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("(Alas, poor Yorick!)");
     assertThat(textTokens).extracting("content")
-        .containsExactly("Alas", ", ", "poor ", "Yorick", "!");
+        .containsExactly("(", "Alas", ", ", "poor ", "Yorick", "!)");
   }
 
   @Test
@@ -91,7 +91,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();
       assertThat(tokens).extracting("content")//
-          .containsExactly("l", "Alas", ", ", "poor ", "Yorick", "!", "l");
+          .containsExactly("l", "Alas", ", ", "poor ", "Yorick", "!", "/l");
     });
   }
 }

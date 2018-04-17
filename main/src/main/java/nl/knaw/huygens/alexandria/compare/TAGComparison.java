@@ -22,14 +22,12 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import prioritised_xml_collation.Segment;
-import prioritised_xml_collation.TAGToken;
-import prioritised_xml_collation.TypeAndContentAligner;
+import prioritised_xml_collation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 
 public class TAGComparison {
@@ -38,7 +36,8 @@ public class TAGComparison {
   public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
     List<TAGToken> originalTokens = new Tokenizer(originalDocument, tagView).getTAGTokens();
     List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
-    List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTokens, editedTokens);
+    SegmenterInterface segmenter = new AlignedNonAlignedSegmenter();
+    List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTokens, editedTokens, segmenter);
     if (segments.size() > 1) {
       for (Segment segment : segments) {
         switch (segment.type) {
@@ -98,10 +97,16 @@ public class TAGComparison {
   }
 
   private List<String> asLines(List<TAGToken> tagTokens) {
-    return Arrays.asList(tagTokens.stream()//
-        .map(TAGToken::toString)//
+    return asList(tagTokens.stream()//
+        .map(this::tokenContent)//
         .collect(joining(""))//
         .split("\n"));
+  }
+
+  private String tokenContent(TAGToken tagToken) {
+    return tagToken instanceof MarkupCloseToken
+        ? tagToken.toString().replace("/", "")
+        : tagToken.toString();
   }
 
 

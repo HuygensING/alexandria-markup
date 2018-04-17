@@ -86,6 +86,7 @@ class Tokenizer {
     tokens.addAll(tokenizeText(textBuilder.toString()));
     stream(openMarkup.descendingIterator())//
         .map(MarkupWrapper::getTag)//
+        .map(s -> "/" + s)
         .map(MarkupCloseToken::new)//
         .forEach(tokens::add);
 

@@ -94,7 +94,7 @@ public class SnarkTest extends AlexandriaBaseStoreTest {
       String lmnlM = exporterM.toLMNL(document).replaceAll("\n\\s*\n", "\n").trim();
       LOG.info("material view: lmnlM=\n{}", lmnlM);
 
-      Set<String> poeticMarkup = new HashSet<>(asList("poem", "canto", "stanza", "l"));
+          Set<String> poeticMarkup = new HashSet<>(asList("poem", "canto", "stanza", "l"));
       TAGView viewP = new TAGView(store).setMarkupToInclude(poeticMarkup);
       LMNLExporter exporterP = new LMNLExporter(store, viewP).useShorthand();
       String lmnlP = exporterP.toLMNL(document).replaceAll("\n\\s*\n", "\n").trim();

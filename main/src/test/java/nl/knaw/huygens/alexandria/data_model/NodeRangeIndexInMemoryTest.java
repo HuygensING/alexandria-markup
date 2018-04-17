@@ -22,10 +22,11 @@ package nl.knaw.huygens.alexandria.data_model;
 
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NodeRangeIndexInMemoryTest {
 

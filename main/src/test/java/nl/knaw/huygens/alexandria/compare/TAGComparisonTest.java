@@ -119,6 +119,55 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  @Test
+  public void testJoin() {
+    String originText = "[t}[l}one two{l]\n[l}three four{l]{t]";
+    String editedText = "[t}[l}one two three four{l]{t]";
+
+    TAGComparison comparison = compare(originText, editedText);
+    assertThat(comparison.hasDifferences()).isTrue();
+
+    List<String> expected = new ArrayList<>(asList(//
+        " [t}[l}one two",
+        "-{l]",
+        "-[l}",
+        " three four{l]{t]"
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
+
+  @Test
+  public void testSplit() {
+    String originText = "[t}[l}one two three four{l]{t]";
+    String editedText = "[t}[l}one two{l]\n[l}five three four{l]{t]";
+
+    TAGComparison comparison = compare(originText, editedText);
+    assertThat(comparison.hasDifferences()).isTrue();
+
+    List<String> expected = new ArrayList<>(asList(//
+        " [t}[l}one two ",
+        "+{l]",
+        "+[l}five ",
+        " three four{l]{t]"
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
+
+  @Test
+  public void testAddedNewlines() {
+    String originText = "[t}one two three four{t]";
+    String editedText = "[t}one two three four{t]\n";
+
+    TAGComparison comparison = compare(originText, editedText);
+    assertThat(comparison.hasDifferences()).isTrue();
+
+    List<String> expected = new ArrayList<>(asList(//
+        " [t}one two three four{t]"
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
+
+
   @Ignore
   @Test
   public void testNewlinesInText() {
