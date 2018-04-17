@@ -77,7 +77,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       } else if (part instanceof TAGQLParser.NamePartContext) {
         statement.setMarkupMapper(MarkupWrapper::getExtendedTag);
       } else if (part instanceof TAGQLParser.AnnotationValuePartContext) {
-        String annotationIdentifier = stringValue(((TAGQLParser.AnnotationValuePartContext) part).annotationIdentifier());
+        String annotationIdentifier = getAnnotationName(part);
         statement.setMarkupMapper(toAnnotationTextMapper(annotationIdentifier));
       } else {
         unhandled("selectVariable", selectVariable.getText());
@@ -148,7 +148,15 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
       String value = stringValue(ecec.literalValue());
       if (extendedIdentifier.part() instanceof NamePartContext) {
-        filter = tr -> tr.getExtendedTag().equals(value);
+        filter = markup -> markup.getExtendedTag().equals(value);
+
+      } else if (extendedIdentifier.part() instanceof AnnotationValuePartContext) {
+        String annotationIdentifier = getAnnotationName(extendedIdentifier.part());
+        filter = markup -> markup.getAnnotationStream()
+            .anyMatch(a -> annotationIdentifier.equals(a.getTag()) && value.equals(toAnnotationText(a)));
+
+      } else {
+        unhandled(extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()", extendedIdentifier.part().getText());
       }
 
     } else if (expr instanceof JoiningExpressionContext) {
@@ -160,7 +168,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     } else if (expr instanceof CombiningExpressionContext) {
       CombiningExpressionContext context = (CombiningExpressionContext) expr;
       Predicate<MarkupWrapper> predicate0 = handleExpression(context.expr(0));
-      Predicate<MarkupWrapper> predicate1 = handleExpression(context.expr(1));
+      Predicate<MarkupWrapper> predicate1 = handleExpression(context.expr(2));
       filter = predicate0.or(predicate1);
 
     } else if (expr instanceof TextContainsExpressionContext) {
@@ -168,6 +176,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       String substring = stringValue(context.STRING_LITERAL());
       filter = tr -> toText(tr).contains(substring);
 
+    } else {
+      unhandled(expr.getClass().getName() + " expression", expr.getText());
     }
     return filter;
   }
@@ -193,5 +203,12 @@ class TAGQLQueryListener extends TAGQLBaseListener {
         .map(TextNodeWrapper::getText)//
         .collect(joining());
   }
+
+  private String getAnnotationName(PartContext partContext) {
+    AnnotationValuePartContext annotationValuePartContext = (AnnotationValuePartContext) partContext;
+    AnnotationIdentifierContext annotationIdentifierContext = annotationValuePartContext.annotationIdentifier();
+    return stringValue(annotationIdentifierContext);
+  }
+
 
 }

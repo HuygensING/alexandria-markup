@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.query;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
@@ -142,6 +143,36 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
       // assertThat(result2.getValues()).containsExactlyElementsOf(expected2);
     });
 
+  }
+
+  @Test
+  public void testTAGQLQuery4() throws LMNLSyntaxError {
+    String lmnl = "[text}\n"//
+        + "[l [type}A{]}line 1{l]\n"//
+        + "[l [type}B{]}line 2{l]\n"//
+        + "[l [type}A{]}line 3{l]\n"//
+        + "{text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper alice = new LMNLImporter(store).importLMNL(lmnl);
+
+      TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
+
+      String statement1 = "select m.text from markup m where m.name='l' and m.annotationText('type')='A'";
+      TAGQLResult result1 = h.execute(statement1);
+      LOG.info("result1.values={}", result1.getValues());
+      assertQuerySucceeded(result1);
+      List<String> expected1 = ImmutableList.of("line 1", "line 3");
+      assertThat(result1.getValues())
+          .containsExactlyElementsOf(expected1);
+
+      String statement2 = "select m.text from markup m where m.name='l' and m.annotationText('type')='B'";
+      TAGQLResult result2 = h.execute(statement2);
+      LOG.info("result2.values={}", result2.getValues());
+      assertQuerySucceeded(result2);
+      List<String> expected2 = ImmutableList.of("line 2");
+      assertThat(result2.getValues())
+          .containsExactlyElementsOf(expected2);
+    });
   }
 
   @Test

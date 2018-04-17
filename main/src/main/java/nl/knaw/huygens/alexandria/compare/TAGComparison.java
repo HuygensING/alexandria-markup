@@ -92,7 +92,8 @@ public class TAGComparison {
       diffLines.add(" ...");
     }
     if (lines.size() > 1) {
-      diffLines.add(" " + lines.get(lines.size() - 1));
+      int last = lines.size() - 1;
+      diffLines.add(" " + lines.get(last));
     }
   }
 
