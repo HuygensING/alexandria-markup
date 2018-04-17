@@ -20,14 +20,10 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_LongestLine;
-import de.vandermeer.asciithemes.a7.A7_Grids;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
+import nl.knaw.AntlrUtils;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,29 +44,8 @@ public class TAGMLBaseTest {
 
   private void printTokens(CharStream inputStream) {
     TAGMLLexer lexer = new TAGMLLexer(inputStream);
-    AsciiTable table = new AsciiTable()
-        .setTextAlignment(TextAlignment.LEFT);
-    CWC_LongestLine cwc = new CWC_LongestLine();
-    table.getRenderer().setCWC(cwc);
-    table.addRule();
-    table.addRow("Pos", "Text", "Rule", "Next mode", "Token");
-    table.addRule();
-
-    Token token;
-    do {
-      token = lexer.nextToken();
-//      LOG.info(token.toString());
-      if (token.getType() != Token.EOF) {
-        String pos = token.getLine() + ":" + token.getCharPositionInLine();
-        String text = "'" + token.getText() + "'";
-        String rule = lexer.getRuleNames()[token.getType() - 1];
-        String mode = lexer.getModeNames()[lexer._mode];
-        table.addRow(pos, text, rule, mode, token);
-      }
-    } while (token.getType() != Token.EOF);
-    table.addRule();
-    table.getContext().setGrid(A7_Grids.minusBarPlusEquals());
-    LOG.info("\nTokens:\n{}\n", table.render());
+    String table = AntlrUtils.makeTokenTable(lexer);
+    LOG.info("\nTokens:\n{}\n", table);
   }
 
 }

@@ -21,15 +21,18 @@ package nl.knaw.huygens.alexandria.lmnl;
  */
 
 
+import nl.knaw.AntlrUtils;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class AlexandriaLMNLBaseTest {
+  private static final Logger LOG = LoggerFactory.getLogger(AlexandriaLMNLBaseTest.class);
 
   protected void printTokens(String input) {
     // This gets all the tokens at once, it does not stop for errors
@@ -47,13 +50,8 @@ public class AlexandriaLMNLBaseTest {
 
   private void printTokens(CharStream inputStream) {
     LMNLLexer lexer = new LMNLLexer(inputStream);
-    Token token;
-    do {
-      token = lexer.nextToken();
-      if (token.getType() != Token.EOF) {
-        System.out.println(token + ": " + lexer.getRuleNames()[token.getType() - 1] + ": " + lexer.getModeNames()[lexer._mode]);
-      }
-    } while (token.getType() != Token.EOF);
+    String table = AntlrUtils.makeTokenTable(lexer);
+    LOG.info("\nTokens:\n{}\n", table);
   }
 
 }

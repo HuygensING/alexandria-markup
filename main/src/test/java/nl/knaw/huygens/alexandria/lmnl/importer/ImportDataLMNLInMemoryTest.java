@@ -84,8 +84,8 @@ public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
 
   private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     InputStream input = getInputStream(basename);
-    LOG.info("showTokens\n");
-    printTokens(input);
+//    LOG.info("showTokens\n");
+//    printTokens(input);
 
     input = getInputStream(basename);
     LOG.info("testing data/lmnl/{}.lmnl", basename);

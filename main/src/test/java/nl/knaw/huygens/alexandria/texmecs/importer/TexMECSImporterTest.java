@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
+import nl.knaw.AntlrUtils;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
@@ -29,7 +30,6 @@ import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -156,7 +156,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-//  @Ignore
+  //  @Ignore
   @Test
   public void testVirtualElement() {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
@@ -320,13 +320,8 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
 
   private void printTokens(CharStream inputStream) {
     TexMECSLexer lexer = new TexMECSLexer(inputStream);
-    Token token;
-    do {
-      token = lexer.nextToken();
-      if (token.getType() != Token.EOF) {
-        System.out.println(token + "\t: " + lexer.getRuleNames()[token.getType() - 1] + "\t -> " + lexer.getModeNames()[lexer._mode]);
-      }
-    } while (token.getType() != Token.EOF);
+    String table = AntlrUtils.makeTokenTable(lexer);
+    LOG.info("\nTokens:\n{}\n", table);
   }
 
 }

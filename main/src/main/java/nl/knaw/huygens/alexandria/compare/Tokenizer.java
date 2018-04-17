@@ -70,14 +70,11 @@ class Tokenizer {
         textBuilder.delete(0, textBuilder.length());
       }
       toClose.stream()//
-          .map(MarkupWrapper::getTag)//
-          .map(s -> "/" + s)
-          .map(MarkupCloseToken::new)//
+          .map(this::toMarkupCloseToken)//
           .forEach(tokens::add);
 
       toOpen.stream()//
-          .map(MarkupWrapper::getTag)//
-          .map(MarkupOpenToken::new)//
+          .map(this::toMarkupOpenToken)//
           .forEach(tokens::add);
 
       String text = tn.getText();
@@ -85,12 +82,18 @@ class Tokenizer {
     });
     tokens.addAll(tokenizeText(textBuilder.toString()));
     stream(openMarkup.descendingIterator())//
-        .map(MarkupWrapper::getTag)//
-        .map(s -> "/" + s)
-        .map(MarkupCloseToken::new)//
+        .map(this::toMarkupCloseToken)//
         .forEach(tokens::add);
 
     return tokens;
+  }
+
+  private MarkupOpenToken toMarkupOpenToken(MarkupWrapper markupWrapper) {
+    return new MarkupOpenToken(markupWrapper.getTag());
+  }
+
+  private MarkupCloseToken toMarkupCloseToken(MarkupWrapper markupWrapper) {
+    return new MarkupCloseToken("/" + markupWrapper.getTag());
   }
 
   private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
