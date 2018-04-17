@@ -20,12 +20,12 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
+import nl.knaw.AntlrUtils;
 import nl.knaw.huygens.alexandria.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -276,13 +276,8 @@ public class TexMECSImporterInMemoryTest {
 
   private void printTokens(CharStream inputStream) {
     TexMECSLexer lexer = new TexMECSLexer(inputStream);
-    Token token;
-    do {
-      token = lexer.nextToken();
-      if (token.getType() != Token.EOF) {
-        System.out.println(token + "\t: " + lexer.getRuleNames()[token.getType() - 1] + "\t -> " + lexer.getModeNames()[lexer._mode]);
-      }
-    } while (token.getType() != Token.EOF);
+    String tokenTable = AntlrUtils.makeTokenTable(lexer);
+    System.out.println(tokenTable);
   }
 
 }
