@@ -72,6 +72,10 @@ public class TAGView {
     return this;
   }
 
+  public Set<String> getMarkupToInclude() {
+    return markupToInclude;
+  }
+
   public TAGView setMarkupToExclude(Set<String> markupToExclude) {
     if (include.equals(relevanceStyle)) {
       throw new RuntimeException("This TAGView already has set markupToInclude");
@@ -81,14 +85,22 @@ public class TAGView {
     return this;
   }
 
+  public Set<String> getMarkupToExclude() {
+    return markupToExclude;
+  }
+
   public TAGViewDefinition getDefinition() {
     return new TAGViewDefinition()
         .setInclude(markupToInclude)
         .setExclude(markupToExclude);
   }
 
-  private String getTag(Long markupId) {
-    return store.getMarkupWrapper(markupId).getTag();
+  public boolean styleIsInclude() {
+    return include.equals(relevanceStyle);
+  }
+
+  public boolean styleIsExclude() {
+    return exclude.equals(relevanceStyle);
   }
 
   public boolean isIncluded(MarkupWrapper markupWrapper) {
@@ -99,5 +111,8 @@ public class TAGView {
     return exclude.equals(relevanceStyle) && !markupToExclude.contains(tag);
   }
 
+  private String getTag(Long markupId) {
+    return store.getMarkupWrapper(markupId).getTag();
+  }
 
 }
