@@ -169,6 +169,7 @@ public class DocumentWrapper {
   }
 
   private void update() {
+    document.updateModificationDate();
     store.persist(document);
   }
 

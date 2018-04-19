@@ -22,12 +22,13 @@ package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 import com.sleepycat.persist.model.SecondaryKey;
 
 import java.util.*;
 
-@Entity(version = 1)
+import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
+
+@Entity(version = 2)
 public class TAGDocument implements TAGObject {
   // previously: Limen
   @PrimaryKey(sequence = "document_pk_sequence")
@@ -40,6 +41,9 @@ public class TAGDocument implements TAGObject {
   private List<Long> markupIds = new ArrayList<>();
 
   private final Map<Long, Set<Long>> textNodeIdToMarkupIds = new LinkedHashMap<>();
+
+  private Date creationDate = new Date();
+  private Date modificationDate = new Date();
 
   TAGDocument() {
   }
@@ -91,4 +95,23 @@ public class TAGDocument implements TAGObject {
     textNodeIdToMarkupIds.computeIfAbsent(textNode.getId(), f -> new LinkedHashSet<>()).add(markup.getId());
   }
 
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public void setCreationDate(final Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public Date getModificationDate() {
+    return modificationDate;
+  }
+
+  public void setModificationDate(final Date modificationDate) {
+    this.modificationDate = modificationDate;
+  }
+
+  public void updateModificationDate() {
+    modificationDate = new Date();
+  }
 }
