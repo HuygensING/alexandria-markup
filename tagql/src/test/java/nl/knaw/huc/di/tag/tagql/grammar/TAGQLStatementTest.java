@@ -1,8 +1,8 @@
-package nl.knaw.huc.di.tag.tagql;
+package nl.knaw.huc.di.tag.tagql.grammar;
 
 /*
  * #%L
- * alexandria-markup
+ * tagql
  * =======
  * Copyright (C) 2016 - 2018 Huygens ING (KNAW)
  * =======

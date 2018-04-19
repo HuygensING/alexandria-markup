@@ -1,8 +1,8 @@
-package nl.knaw.huc.di.tag.tagql;
+package nl.knaw.huc.di.tag.tagql.grammar;
 
 /*
  * #%L
- * alexandria-markup
+ * tagql
  * =======
  * Copyright (C) 2016 - 2018 Huygens ING (KNAW)
  * =======
@@ -20,8 +20,6 @@ package nl.knaw.huc.di.tag.tagql;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
