@@ -20,4 +20,5 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * #L%
  */
 public class TextDivergenceNode extends ContentLessTextNode {
+  public static final String LABEL = "TextDivergence";
 }

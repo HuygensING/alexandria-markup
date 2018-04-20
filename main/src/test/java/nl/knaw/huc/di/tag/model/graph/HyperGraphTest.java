@@ -20,6 +20,11 @@ package nl.knaw.huc.di.tag.model.graph;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.edges.DocumentToTextEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.nodes.DocumentNode;
+import nl.knaw.huc.di.tag.model.graph.nodes.Node;
+import nl.knaw.huc.di.tag.model.graph.nodes.TextNode;
 import org.junit.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
@@ -33,5 +38,23 @@ public class HyperGraphTest {
 
     hg.addDirectedHyperEdge("edge", "label", "source", "target");
   }
+
+  @Test
+  public void test2() {
+    HyperGraph<Node, Edge> hg = new HyperGraph<>(HyperGraph.GraphType.UNORDERED);
+    assertThat(hg).isNotNull();
+
+    final DocumentNode documentNode = new DocumentNode();
+    hg.addNode(documentNode,DocumentNode.LABEL);
+
+    TextNode textNode = new TextNode("text1");
+    hg.addNode(textNode,textNode.getLabel());
+
+    final DocumentToTextEdge firstTextEdge = new DocumentToTextEdge();
+    hg.addDirectedHyperEdge(firstTextEdge,firstTextEdge.LABEL, documentNode,textNode);
+
+  }
+
+
 
 }

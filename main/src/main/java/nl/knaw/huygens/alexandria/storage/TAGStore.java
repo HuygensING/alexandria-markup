@@ -1,13 +1,6 @@
 package nl.knaw.huygens.alexandria.storage;
 
-import java.io.File;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -26,31 +19,32 @@ import org.slf4j.LoggerFactory;
  * limitations under the License.
  * #L%
  */
-
 import com.google.common.base.Preconditions;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.je.LockMode;
-import com.sleepycat.je.Transaction;
+import com.sleepycat.je.*;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
-
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class TAGStore implements AutoCloseable {
   private static final Logger LOG = LoggerFactory.getLogger(TAGStore.class);
   private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
 
-  private Environment bdbEnvironment = null;
   private final String dbDir;
   private final boolean readOnly;
+
+  private Environment bdbEnvironment;
   private DataAccessor da;
   private EntityStore store;
   private ThreadLocal<Boolean> transactionOpen;
@@ -64,18 +58,18 @@ public class TAGStore implements AutoCloseable {
 
   public void open() {
     try {
-      EnvironmentConfig envConfig = new EnvironmentConfig();
-      envConfig.setReadOnly(readOnly);
-      envConfig.setAllowCreate(!readOnly);
-      envConfig.setTransactional(true);
+      EnvironmentConfig envConfig = new EnvironmentConfig()
+          .setReadOnly(readOnly)
+          .setAllowCreate(!readOnly)
+          .setTransactional(true);
       bdbEnvironment = new Environment(new File(dbDir), envConfig);
 
       EntityModel model = new AnnotationModel();
       model.registerClass(LinkedHashSetProxy.class);
-      StoreConfig storeConfig = new StoreConfig();
-      storeConfig.setAllowCreate(true);
-      storeConfig.setTransactional(true);
-      storeConfig.setModel(model);
+      StoreConfig storeConfig = new StoreConfig()
+          .setAllowCreate(true)
+          .setTransactional(true)
+          .setModel(model);
       store = new EntityStore(bdbEnvironment, "TAGStore", storeConfig);
 
       da = new DataAccessor(store);
@@ -326,15 +320,18 @@ public class TAGStore implements AutoCloseable {
   }
 
   private void assertInTransaction() {
-    Preconditions.checkState(getTransactionIsOpen(), "We should be in an open transaction at this point, use runInTransaction()!");
+    Preconditions.checkState(getTransactionIsOpen(),
+        "We should be in an open transaction at this point, use runInTransaction()!");
   }
 
   private void assertTransactionIsClosed() {
-    Preconditions.checkState(!getTransactionIsOpen(), "We're already inside an open transaction!");
+    Preconditions.checkState(!getTransactionIsOpen(),
+        "We're already inside an open transaction!");
   }
 
   private void assertTransactionIsOpen() {
-    Preconditions.checkState(getTransactionIsOpen(), "We're not in an open transaction!");
+    Preconditions.checkState(getTransactionIsOpen(),
+        "We're not in an open transaction!");
   }
 
 }

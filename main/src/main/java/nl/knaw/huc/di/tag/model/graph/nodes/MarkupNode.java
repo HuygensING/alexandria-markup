@@ -22,4 +22,13 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
 public class MarkupNode implements Node {
   String tag;
   String namespace;
+
+  public MarkupNode(final String namespace, final String tag) {
+    this.namespace = namespace;
+    this.tag = tag;
+  }
+
+  public MarkupNode(final String tag) {
+    this("", tag);
+  }
 }

@@ -20,9 +20,10 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * #L%
  */
 public class TextNode implements TAGTextNode {
+  public static final String LABEL = "Text";
   private String content;
 
-  TextNode(String content) {
+  public TextNode(String content) {
     this.content = content;
   }
 
@@ -35,4 +36,9 @@ public class TextNode implements TAGTextNode {
   public String getContent() {
     return content;
   }
+
+  public String getLabel() {
+    return LABEL;
+  }
+
 }

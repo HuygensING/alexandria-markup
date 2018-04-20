@@ -20,4 +20,5 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * #L%
  */
 public class DocumentToTextEdge implements Edge {
+  public static final String LABEL = "firstTextNode";
 }
