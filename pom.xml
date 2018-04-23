@@ -48,9 +48,39 @@
   </properties>
 
   <organization>
-    <name>Huygens ING (KNAW)</name>
-    <url>https://it.huygens.knaw.nl</url>
+    <name>HuC DI (KNAW)</name>
+    <url>https://it.huygens.knaw.nl/</url>
   </organization>
+
+  <developers>
+    <developer>
+      <id>dekker</id>
+      <name>Ronald Dekker</name>
+      <email>ronald.dekker@di.huc.knaw.nl</email>
+      <url>https://www.huygens.knaw.nl/dekker/</url>
+      <roles>
+        <role>architect</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>ellibleeker</id>
+      <name>Elli Bleeker</name>
+      <email>elli.bleeker@di.huc.knaw.nl</email>
+      <url>https://www.huygens.knaw.nl/bleeker-elli/</url>
+      <roles>
+        <role>architect</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>bramb</id>
+      <name>Bram Buitendijk</name>
+      <email>bram.buitendijk@di.huc.knaw.nl</email>
+      <url>https://www.huygens.knaw.nl/buitendijk/</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
 
   <licenses>
     <license>
