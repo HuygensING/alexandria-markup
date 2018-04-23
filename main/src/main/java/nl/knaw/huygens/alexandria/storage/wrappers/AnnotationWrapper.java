@@ -42,7 +42,7 @@ public class AnnotationWrapper {
   }
 
   public Long getId() {
-    return annotation.getId();
+    return annotation.getDbId();
   }
 
   public String getTag() {

@@ -66,7 +66,7 @@ public class LMNLImporter {
     void openMarkup(TAGMarkup markup) {
       openMarkupDeque.push(markup);
       openMarkupStack.push(markup);
-      document.getMarkupIds().add(markup.getId());
+      document.getMarkupIds().add(markup.getDbId());
     }
 
     void pushOpenMarkup(String rangeName) {
@@ -179,7 +179,7 @@ public class LMNLImporter {
     }
 
     TAGMarkup newMarkup(String tagName) {
-      TAGMarkup tagMarkup = new TAGMarkup(currentDocumentContext().document.getId(), tagName);
+      TAGMarkup tagMarkup = new TAGMarkup(currentDocumentContext().document.getDbId(), tagName);
       update(tagMarkup);
       return tagMarkup;
     }

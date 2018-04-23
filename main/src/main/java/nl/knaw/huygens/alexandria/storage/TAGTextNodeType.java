@@ -1,6 +1,6 @@
 package nl.knaw.huygens.alexandria.storage;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,7 +19,6 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-
-public interface TAGObject {
-  Long getDbId();
+public enum TAGTextNodeType {
+  plaintext, divergence, convergence
 }

@@ -23,29 +23,44 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity(version = 1)
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity(version = 2)
 public class TAGTextNode implements TAGObject {
   @PrimaryKey(sequence = "textnode_pk_sequence")
-  private Long id;
+  private Long dbId;
+
+  private TAGTextNodeType type;
 
   private String text;
 
-  private Long prevTextNodeId;
-  private Long nextTextNodeId;
+  private List<Long> prevTextNodeIds = new ArrayList<>();
+  private List<Long> nextTextNodeIds = new ArrayList<>();
 
   private TAGTextNode() {
   }
 
   public TAGTextNode(String text) {
     this.text = text;
+    this.type = TAGTextNodeType.plaintext;
   }
 
-  public Long getId() {
-    return id;
+  public TAGTextNode(TAGTextNodeType type) {
+    this.text = "";
+    this.type = type;
   }
 
-  public String getText() {
-    return text;
+  public Long getDbId() {
+    return dbId;
+  }
+
+  public void setType(final TAGTextNodeType type) {
+    this.type = type;
+  }
+
+  public TAGTextNodeType getType() {
+    return type;
   }
 
   public TAGTextNode setText(String text) {
@@ -53,22 +68,69 @@ public class TAGTextNode implements TAGObject {
     return this;
   }
 
-  public Long getPrevTextNodeId() {
-    return prevTextNodeId;
+  public String getText() {
+    return text;
   }
 
-  public TAGTextNode setPrevTextNodeId(long prevId) {
-    this.prevTextNodeId = prevId;
-    return this;
+  // link to previous nodes
+  public void setPrevTextNodeIds(final List<Long> prevTextNodeIds) {
+    this.prevTextNodeIds = prevTextNodeIds;
+  }
+
+  public void setPrevTextNodeId(final Long prevTextNodeId) {
+    if (type.equals(TAGTextNodeType.convergence)) {
+      throw new RuntimeException("Use addPrevTextNodeId(prevTextNodeId) for convergence nodes.");
+    }
+    this.prevTextNodeIds.clear();
+    this.prevTextNodeIds.add(prevTextNodeId);
+  }
+
+  public void addPrevTextNodeId(final Long prevTextNodeId) {
+    if (!type.equals(TAGTextNodeType.convergence)) {
+      throw new RuntimeException("Use setPrevTextNodeId(prevTextNodeId) for " + type + " nodes.");
+    }
+    this.prevTextNodeIds.add(prevTextNodeId);
+  }
+
+  public Long getPrevTextNodeId() {
+    if (type.equals(TAGTextNodeType.convergence)) {
+      throw new RuntimeException("Use getPrevTextNodeIds() for convergence nodes.");
+    }
+    return prevTextNodeIds.isEmpty() ? null : prevTextNodeIds.get(0);
+  }
+
+  public List<Long> getPrevTextNodeIds() {
+    return prevTextNodeIds;
+  }
+
+  // link to next nodes
+  public void setNextTextNodeIds(final List<Long> nextTextNodeIds) {
+    this.nextTextNodeIds = nextTextNodeIds;
+  }
+
+  public void setNextTextNodeId(final Long nextTextNodeId) {
+    if (type.equals(TAGTextNodeType.divergence)) {
+      throw new RuntimeException("Use addNextTextNodeId(nextTextNodeId) for divergence nodes.");
+    }
+    this.nextTextNodeIds.clear();
+    this.nextTextNodeIds.add(nextTextNodeId);
+  }
+
+  public void addNextTextNodeId(final Long prevTextNodeId) {
+    if (!type.equals(TAGTextNodeType.divergence)) {
+      throw new RuntimeException("Use setNextTextNodeId(nextTextNodeId) for " + type + " nodes.");
+    }
+    this.nextTextNodeIds.add(prevTextNodeId);
   }
 
   public Long getNextTextNodeId() {
-    return nextTextNodeId;
+    if (type.equals(TAGTextNodeType.convergence)) {
+      throw new RuntimeException("Use getNextTextNodeIds() for convergence nodes.");
+    }
+    return prevTextNodeIds.isEmpty() ? null : prevTextNodeIds.get(0);
   }
 
-  public TAGTextNode setNextTextNodeId(long nextId) {
-    this.nextTextNodeId = nextId;
-    return this;
+  public List<Long> getNextTextNodeIds() {
+    return nextTextNodeIds;
   }
-
 }

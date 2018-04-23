@@ -60,6 +60,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Map<String, String> namespaces = new HashMap<>();
 
   private boolean atDocumentStart = true;
+  private TextNodeWrapper previousTextNode = null;
 
   public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
     this.store = store;
@@ -109,6 +110,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {
       TextNodeWrapper tn = store.createTextNodeWrapper(text);
+      if (previousTextNode != null) {
+        tn.setPreviousTextNode(previousTextNode);
+      }
+      previousTextNode = tn;
       document.addTextNode(tn);
       openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     }

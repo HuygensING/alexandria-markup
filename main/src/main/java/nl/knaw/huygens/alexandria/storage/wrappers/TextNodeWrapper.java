@@ -23,6 +23,10 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
 public class TextNodeWrapper {
   private final TAGStore store;
   private final TAGTextNode textNode;
@@ -34,29 +38,28 @@ public class TextNodeWrapper {
   }
 
   public Long getId() {
-    return textNode.getId();
+    return textNode.getDbId();
   }
 
   public String getText() {
     return textNode.getText();
   }
 
-  private TAGTextNode getTextNode() {
+  public TAGTextNode getTextNode() {
     return textNode;
   }
 
-  public TextNodeWrapper setPreviousTextNode(TextNodeWrapper textNodeWrapper) {
-    TextNodeWrapper previousTextNode = new TextNodeWrapper(store, textNodeWrapper.getTextNode());
+  public TextNodeWrapper setPreviousTextNode(TextNodeWrapper previousTextNode) {
     textNode.setPrevTextNodeId(previousTextNode.getId());
-    if (previousTextNode != null && previousTextNode.getNextTextNode() == null) {
+    if (previousTextNode.getNextTextNode() == null) {
       previousTextNode.setNextTextNode(this);
     }
     update();
     return this;
   }
 
-  public void setNextTextNode(TextNodeWrapper textNodeWrapper) {
-    textNode.setNextTextNodeId(textNodeWrapper.getId());
+  public void setNextTextNode(TextNodeWrapper nextTextNode) {
+    textNode.setNextTextNodeId(nextTextNode.getId());
     update();
   }
 
@@ -65,8 +68,14 @@ public class TextNodeWrapper {
     if (nextTextNodeId == null) {
       return null;
     }
-    TAGTextNode nextTextNode = store.getTextNode(nextTextNodeId);
-    return new TextNodeWrapper(store, nextTextNode);
+    return store.getTextNodeWrapper(nextTextNodeId);
+  }
+
+  public List<TextNodeWrapper> getNextTextNodes() {
+    return textNode.getNextTextNodeIds()
+        .stream()
+        .map(store::getTextNodeWrapper)
+        .collect(toList());
   }
 
   private void update() {
@@ -75,7 +84,7 @@ public class TextNodeWrapper {
 
   @Override
   public int hashCode() {
-    return textNode.getId().hashCode();
+    return textNode.getDbId().hashCode();
   }
 
   @Override

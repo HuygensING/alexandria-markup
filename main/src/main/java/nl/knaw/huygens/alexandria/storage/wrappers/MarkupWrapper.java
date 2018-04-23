@@ -39,7 +39,7 @@ public class MarkupWrapper {
   }
 
   public Long getId() {
-    return markup.getId();
+    return markup.getDbId();
   }
 
   public String getTag() {

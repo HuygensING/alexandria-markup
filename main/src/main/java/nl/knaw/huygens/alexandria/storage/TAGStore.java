@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
+
 import com.google.common.base.Preconditions;
 import com.sleepycat.je.*;
 import com.sleepycat.persist.EntityStore;
@@ -114,7 +115,7 @@ public class TAGStore implements AutoCloseable {
     } else {
       throw new RuntimeException("unhandled class: " + tagObject.getClass());
     }
-    return tagObject.getId();
+    return tagObject.getDbId();
   }
 
   // Document
@@ -181,7 +182,7 @@ public class TAGStore implements AutoCloseable {
       tag = tagName;
     }
 
-    TAGMarkup markup = new TAGMarkup(document.getId(), tag);
+    TAGMarkup markup = new TAGMarkup(document.getDbId(), tag);
     markup.setMarkupId(id);
     markup.setSuffix(suffix);
     persist(markup);
@@ -203,7 +204,7 @@ public class TAGStore implements AutoCloseable {
     TAGDocument document = new TAGDocument();
     persist(document);
     TAGAnnotation annotation = new TAGAnnotation(tag);
-    annotation.setDocumentId(document.getId());
+    annotation.setDocumentId(document.getDbId());
     persist(annotation);
     return annotation;
   }
