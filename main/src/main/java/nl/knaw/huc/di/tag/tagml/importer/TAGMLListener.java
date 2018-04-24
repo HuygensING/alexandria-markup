@@ -202,7 +202,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
     TextNodeWrapper lastTextNode = textNodeWrappers.get(textNodeWrappers.size() - 1);
     lastTextNodes.add(lastTextNode);
-    lastTextNode = textVariationStartNodeStack.peek();
+    previousTextNode = textVariationStartNodeStack.peek();
   }
 
   @Override
