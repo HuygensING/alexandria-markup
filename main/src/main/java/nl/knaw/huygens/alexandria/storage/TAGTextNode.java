@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup
  * =======
- * Copyright (C) 2016 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,18 +116,18 @@ public class TAGTextNode implements TAGObject {
     this.nextTextNodeIds.add(nextTextNodeId);
   }
 
-  public void addNextTextNodeId(final Long prevTextNodeId) {
+  public void addNextTextNodeId(final Long nextTextNodeId) {
     if (!type.equals(TAGTextNodeType.divergence)) {
       throw new RuntimeException("Use setNextTextNodeId(nextTextNodeId) for " + type + " nodes.");
     }
-    this.nextTextNodeIds.add(prevTextNodeId);
+    this.nextTextNodeIds.add(nextTextNodeId);
   }
 
   public Long getNextTextNodeId() {
     if (type.equals(TAGTextNodeType.convergence)) {
       throw new RuntimeException("Use getNextTextNodeIds() for convergence nodes.");
     }
-    return prevTextNodeIds.isEmpty() ? null : prevTextNodeIds.get(0);
+    return nextTextNodeIds.isEmpty() ? null : nextTextNodeIds.get(0);
   }
 
   public List<Long> getNextTextNodeIds() {
