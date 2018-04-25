@@ -1,15 +1,5 @@
 package nl.knaw.huc.di.tag.tagml.exporter;
 
-import nl.knaw.huygens.alexandria.StreamUtil;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Stream;
-
 /*-
  * #%L
  * alexandria-markup
@@ -29,6 +19,18 @@ import java.util.stream.Stream;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.alexandria.StreamUtil;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Stream;
+
+import static nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE;
+
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
 
@@ -56,34 +58,78 @@ public class TAGMLExporter {
     return StreamUtil.stream(stringIterator);
   }
 
-  public List<String> method(DocumentWrapper document) {
-    List<String> text = new ArrayList<>();
-    Deque<TextNodeWrapper> nextNodes = new LinkedList<>();
-    nextNodes.add(document.getFirstTextNode());
+  public String asTAGML(DocumentWrapper document) {
+    StringBuilder tagml = new StringBuilder();
+    Deque<TextNodeWrapper> unprocessedNodes = new LinkedList<>();
+    unprocessedNodes.add(document.getFirstTextNode());
     Set<TextNodeWrapper> processedNodes = new HashSet<>();
-    while (!nextNodes.isEmpty()) {
-      final TextNodeWrapper nodeWrapper = nextNodes.pop();
-      if (nodeWrapper != null) {
-        LOG.info("text=<{}>", nodeWrapper.getText());
-        if (!processedNodes.contains(nodeWrapper)) {
-          TAGTextNode textNode = nodeWrapper.getTextNode();
-          String content = nodeWrapper.getText();
-          text.add(content);
+    while (!unprocessedNodes.isEmpty()) {
+      final TextNodeWrapper nodeWrapper = unprocessedNodes.pop();
+      List<TextNodeWrapper> nextTextNodes = nodeWrapper.getNextTextNodes();
+      logTextNode(nodeWrapper);
+      if (!processedNodes.contains(nodeWrapper)) {
+        TAGTextNode textNode = nodeWrapper.getTextNode();
+        String content = nodeWrapper.getText();
+        switch (textNode.getType()) {
+          case plaintext:
+            if (hasPrecedingDivergence(nodeWrapper)) {
+              tagml.append("|");
+            }
+            tagml.append(content);
+            break;
+          case divergence:
+            tagml.append("<");
+            break;
+          case convergence:
+            if (closeTextVariation(nodeWrapper, unprocessedNodes)) {
+              tagml.append(CONVERGENCE);
+            }
+            break;
+        }
+        if (!nextTextNodes.isEmpty()) {
+          TextNodeWrapper firstNextTextNode = nextTextNodes.get(0);
           switch (textNode.getType()) {
             case plaintext:
-              nextNodes.addFirst(nodeWrapper.getNextTextNode());
+              unprocessedNodes.addFirst(firstNextTextNode);
+              processedNodes.add(nodeWrapper);
               break;
             case divergence:
-              nodeWrapper.getNextTextNodes().forEach(nextNodes::add);
+              nextTextNodes.forEach(unprocessedNodes::add);
+              processedNodes.add(nodeWrapper);
               break;
             case convergence:
-              nextNodes.add(nodeWrapper.getNextTextNode());
+              unprocessedNodes.add(firstNextTextNode);
               break;
           }
-          processedNodes.add(nodeWrapper);
         }
       }
     }
-    return text;
+    return tagml.toString();
+  }
+
+  private boolean closeTextVariation(final TextNodeWrapper nodeWrapper, Deque<TextNodeWrapper> unprocessedNodes) {
+    List<TextNodeWrapper> nextTextNodes = nodeWrapper.getNextTextNodes();
+    if (nextTextNodes.isEmpty() && unprocessedNodes.isEmpty()) {
+      return true;
+    }
+    TextNodeWrapper nextToProcess = unprocessedNodes.peek();
+    TextNodeWrapper nextTextNode = nextTextNodes.get(0);
+    return nextTextNode.equals(nextToProcess);
+  }
+
+  private boolean hasPrecedingDivergence(final TextNodeWrapper nodeWrapper) {
+    List<TextNodeWrapper> prevTextNodes = nodeWrapper.getPrevTextNodes();
+    return prevTextNodes.size() == 1 && prevTextNodes.get(0).isDivergence();
+  }
+
+  private void logTextNode(final TextNodeWrapper nodeWrapper) {
+    TAGTextNode textNode = nodeWrapper.getTextNode();
+    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
+        nodeWrapper.getDbId(),
+        textNode.getType(),
+        textNode.getText(),
+        textNode.getPrevTextNodeIds(),
+        textNode.getNextTextNodeIds()
+    );
   }
 }

@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGObject;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -43,6 +44,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
 public class TAGMLListener extends TAGMLParserBaseListener {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLListener.class);
@@ -106,23 +109,24 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitText(TextContext ctx) {
     String text = ctx.getText();
-    LOG.info("text=<{}>", text);
+//    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {
       TextNodeWrapper tn = store.createTextNodeWrapper(text);
       if (previousTextNode != null) {
-        tn.setPreviousTextNode(previousTextNode);
+        tn.addPreviousTextNode(previousTextNode);
       }
       previousTextNode = tn;
       document.addTextNode(tn);
       openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+      logTextNode(tn);
     }
   }
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
     String markupName = ctx.markupName().name().getText();
-    LOG.info("startTag.markupName=<{}>", markupName);
+    LOG.debug("startTag.markupName=<{}>", markupName);
     if (markupName.contains(":")) {
       String namespace = markupName.split(":", 2)[0];
       if (!namespaces.containsKey(namespace)) {
@@ -133,7 +137,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       }
     }
     ctx.annotation()
-        .forEach(annotation -> LOG.info("  startTag.annotation={{}}", annotation.getText()));
+        .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
 
     TerminalNode prefix = ctx.markupName().IMO_Prefix();
     boolean optional = prefix != null && prefix.getText().equals("?");
@@ -168,17 +172,20 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
+    String markupName = ctx.markupName().name().getText();
+    LOG.debug("endTag.markupName=<{}>", markupName);
     removeFromOpenMarkup(ctx.markupName());
   }
 
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
 //    String markupName = ctx.name().getText();
-//    LOG.info("milestone.markupName=<{}>", markupName);
+//    LOG.debug("milestone.markupName=<{}>", markupName);
 //    ctx.annotation()
-//        .forEach(annotation -> LOG.info("milestone.annotation={{}}", annotation.getText()));
+//        .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
     TextNodeWrapper tn = store.createTextNodeWrapper("");
     document.addTextNode(tn);
+    logTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     MarkupWrapper markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
     linkTextToMarkup(tn, markup);
@@ -186,10 +193,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterTextVariation(final TextVariationContext ctx) {
-    TextNodeWrapper tn = store.createTextNodeWrapper("");
+    TextNodeWrapper tn = store.createTextNodeWrapper(divergence);
+    if (previousTextNode != null) {
+      tn.addPreviousTextNode(previousTextNode);
+    }
+    previousTextNode = tn;
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     textVariationStartNodeStack.push(tn);
+    logTextNode(tn);
   }
 
   @Override
@@ -207,11 +219,17 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
-    TextNodeWrapper textVariationEndNode = store.createTextNodeWrapper("");
-    document.addTextNode(textVariationEndNode);
-    openMarkup.forEach(m -> linkTextToMarkup(textVariationEndNode, m));
-    lastTextNodeStack.pop().forEach(n -> n.setNextTextNode(textVariationEndNode));
+    lastTextNodeStack.peek().add(previousTextNode);
+    TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
+    previousTextNode = tn;
+    document.addTextNode(tn);
+    openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+    lastTextNodeStack.pop().forEach(n -> {
+      n.addNextTextNode(tn);
+      tn.addPreviousTextNode(n);
+    });
     textVariationStartNodeStack.pop();
+    logTextNode(tn);
   }
 
   private MarkupWrapper addMarkup(String extendedTag, List<AnnotationContext> atts, ParserRuleContext ctx) {
@@ -321,4 +339,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return format("line %d:%d :", startToken.getLine(), startToken.getCharPositionInLine());
   }
 
+  private void logTextNode(final TextNodeWrapper nodeWrapper) {
+    TAGTextNode textNode = nodeWrapper.getTextNode();
+    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
+        nodeWrapper.getDbId(),
+        textNode.getType(),
+        textNode.getText(),
+        textNode.getPrevTextNodeIds(),
+        textNode.getNextTextNodeIds()
+    );
+  }
 }

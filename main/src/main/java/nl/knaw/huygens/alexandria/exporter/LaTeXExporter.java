@@ -353,13 +353,13 @@ public class LaTeXExporter {
         boolean finished = false;
         int partNo = 0;
         while (!finished) {
-          TextNodeWrapper expectedNextNode = firstTextNode.getNextTextNode();
+          TextNodeWrapper expectedNextNode = firstTextNode.getNextTextNodes().get(0);// TODO: handle divergence
           boolean goOn = textNodeIterator.hasNext();
           while (goOn) {
             TextNodeWrapper nextTextNode = textNodeIterator.next();
             if (nextTextNode.equals(expectedNextNode)) {
               lastTextNode = nextTextNode;
-              expectedNextNode = lastTextNode.getNextTextNode();
+              expectedNextNode = lastTextNode.getNextTextNodes().get(0);// TODO: handle divergence
               goOn = textNodeIterator.hasNext();
 
             } else {
@@ -387,7 +387,7 @@ public class LaTeXExporter {
   }
 
   private void appendMarkupPart(StringBuilder latexBuilder, Map<TextNodeWrapper, Integer> textNodeIndices, MarkupWrapper tr, int rangeLayerIndex, float markupRow, String color, TextNodeWrapper firstTextNode,
-                                TextNodeWrapper lastTextNode, int partNo) {
+      TextNodeWrapper lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
     String markupPartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;

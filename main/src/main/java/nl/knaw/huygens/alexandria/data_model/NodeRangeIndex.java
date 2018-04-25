@@ -60,7 +60,7 @@ public class NodeRangeIndex {
           .filter(document::containsAtLeastHalfOfAllTextNodes)//
           .collect(Collectors.toList());
       invertedMarkupsIndices = markupsToInvert.stream()//
-          .map(MarkupWrapper::getId)//
+          .map(MarkupWrapper::getDbId)//
           .map(markupIndex::get)//
           .collect(Collectors.toSet());
 
@@ -84,7 +84,7 @@ public class NodeRangeIndex {
         markups.addAll(relevantInvertedMarkups);
 
         markups.stream()//
-            .map(MarkupWrapper::getId)//
+            .map(MarkupWrapper::getDbId)//
             .sorted(Comparator.comparingInt(markupIndex::get))//
             .forEach(markupId -> {
               int j = markupIndex.get(markupId);

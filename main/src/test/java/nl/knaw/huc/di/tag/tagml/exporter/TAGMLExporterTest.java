@@ -25,8 +25,6 @@ import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import org.junit.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGMLExporterTest extends TAGStoreTest {
@@ -34,26 +32,26 @@ public class TAGMLExporterTest extends TAGStoreTest {
   @Test
   public void testLinearAnnotatedText() {
     store.runInTransaction(() -> {
-      String tagml = "[a>I've got a [b>bad<b] feeling about [c>this<c].<a]";
+      String tagmlIn = "[a>I've got a [b>bad<b] feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
-      DocumentWrapper documentWrapper = importer.importTAGML(tagml);
+      DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
       TAGMLExporter exporter = new TAGMLExporter();
-      List<String> strings = exporter.method(documentWrapper);
-      strings.forEach(System.out::println);
-      assertThat(strings).containsExactly("I've got a ", "bad", " feeling about ", "this", ".");
+      String tagmlOut = exporter.asTAGML(documentWrapper);
+      System.out.println(tagmlOut);
+      assertThat(tagmlOut).isEqualTo(tagmlIn);
     });
   }
 
   @Test
   public void testNonLinearAnnotatedText() {
     store.runInTransaction(() -> {
-      String tagml = "[a>I've got a <|[b>bad<b]|good|> feeling about [c>this<c].<a]";
+      String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
-      DocumentWrapper documentWrapper = importer.importTAGML(tagml);
+      DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
       TAGMLExporter exporter = new TAGMLExporter();
-      List<String> strings = exporter.method(documentWrapper);
-      strings.forEach(System.out::println);
-      assertThat(strings).containsExactly("I've got a ", "bad", "good", " feeling about ", "this", ".");
+      String tagmlOut = exporter.asTAGML(documentWrapper);
+      System.out.println(tagmlOut);
+      assertThat(tagmlOut).isEqualTo(tagmlIn);
     });
   }
 }

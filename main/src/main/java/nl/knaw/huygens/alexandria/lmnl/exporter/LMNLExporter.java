@@ -74,7 +74,7 @@ public class LMNLExporter {
       document.getTextNodeStream().forEach(tn -> {
         Set<Long> markupIds = new HashSet<>();
         document.getMarkupStreamForTextNode(tn).forEach(mw -> {
-          Long id = mw.getId();
+          Long id = mw.getDbId();
           markupIds.add(id);
           openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
           closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));

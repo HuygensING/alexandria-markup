@@ -26,6 +26,8 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
 public class TextNodeWrapper {
   private final TAGStore store;
@@ -37,7 +39,7 @@ public class TextNodeWrapper {
     update();
   }
 
-  public Long getId() {
+  public Long getDbId() {
     return textNode.getDbId();
   }
 
@@ -49,26 +51,19 @@ public class TextNodeWrapper {
     return textNode;
   }
 
-  public TextNodeWrapper setPreviousTextNode(TextNodeWrapper previousTextNode) {
-    textNode.setPrevTextNodeId(previousTextNode.getId());
-    if (previousTextNode.getNextTextNode() == null) {
-      previousTextNode.setNextTextNode(this);
+  public TextNodeWrapper addPreviousTextNode(TextNodeWrapper previousTextNode) {
+    textNode.addPrevTextNodeId(previousTextNode.getDbId());
+    if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
+      previousTextNode.addNextTextNode(this);
     }
     update();
     return this;
   }
 
-  public void setNextTextNode(TextNodeWrapper nextTextNode) {
-    textNode.setNextTextNodeId(nextTextNode.getId());
+  public void addNextTextNode(final TextNodeWrapper nextTextNode) {
+    Long id = nextTextNode.getDbId();
+    textNode.addNextTextNodeId(id);
     update();
-  }
-
-  public TextNodeWrapper getNextTextNode() {
-    Long nextTextNodeId = textNode.getNextTextNodeId();
-    if (nextTextNodeId == null) {
-      return null;
-    }
-    return store.getTextNodeWrapper(nextTextNodeId);
   }
 
   public List<TextNodeWrapper> getNextTextNodes() {
@@ -76,6 +71,21 @@ public class TextNodeWrapper {
         .stream()
         .map(store::getTextNodeWrapper)
         .collect(toList());
+  }
+
+  public List<TextNodeWrapper> getPrevTextNodes() {
+    return textNode.getPrevTextNodeIds()
+        .stream()
+        .map(store::getTextNodeWrapper)
+        .collect(toList());
+  }
+
+  public boolean isDivergence() {
+    return divergence.equals(textNode.getType());
+  }
+
+  public boolean isConvergence() {
+    return convergence.equals(textNode.getType());
   }
 
   private void update() {
@@ -90,7 +100,7 @@ public class TextNodeWrapper {
   @Override
   public boolean equals(Object other) {
     return other instanceof TextNodeWrapper//
-        && ((TextNodeWrapper) other).getId().equals(getId());
+        && ((TextNodeWrapper) other).getDbId().equals(getDbId());
   }
 
 }

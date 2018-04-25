@@ -26,6 +26,8 @@ import com.sleepycat.persist.model.PrimaryKey;
 import java.util.ArrayList;
 import java.util.List;
 
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.*;
+
 @Entity(version = 2)
 public class TAGTextNode implements TAGObject {
   @PrimaryKey(sequence = "textnode_pk_sequence")
@@ -43,7 +45,7 @@ public class TAGTextNode implements TAGObject {
 
   public TAGTextNode(String text) {
     this.text = text;
-    this.type = TAGTextNodeType.plaintext;
+    this.type = plaintext;
   }
 
   public TAGTextNode(TAGTextNodeType type) {
@@ -77,26 +79,11 @@ public class TAGTextNode implements TAGObject {
     this.prevTextNodeIds = prevTextNodeIds;
   }
 
-  public void setPrevTextNodeId(final Long prevTextNodeId) {
-    if (type.equals(TAGTextNodeType.convergence)) {
-      throw new RuntimeException("Use addPrevTextNodeId(prevTextNodeId) for convergence nodes.");
-    }
-    this.prevTextNodeIds.clear();
-    this.prevTextNodeIds.add(prevTextNodeId);
-  }
-
   public void addPrevTextNodeId(final Long prevTextNodeId) {
-    if (!type.equals(TAGTextNodeType.convergence)) {
-      throw new RuntimeException("Use setPrevTextNodeId(prevTextNodeId) for " + type + " nodes.");
+    if (!convergence.equals(type) && !prevTextNodeIds.isEmpty()) {
+      throw new RuntimeException(type + " nodes may have at most 1 prevTextNode.");
     }
     this.prevTextNodeIds.add(prevTextNodeId);
-  }
-
-  public Long getPrevTextNodeId() {
-    if (type.equals(TAGTextNodeType.convergence)) {
-      throw new RuntimeException("Use getPrevTextNodeIds() for convergence nodes.");
-    }
-    return prevTextNodeIds.isEmpty() ? null : prevTextNodeIds.get(0);
   }
 
   public List<Long> getPrevTextNodeIds() {
@@ -108,26 +95,11 @@ public class TAGTextNode implements TAGObject {
     this.nextTextNodeIds = nextTextNodeIds;
   }
 
-  public void setNextTextNodeId(final Long nextTextNodeId) {
-    if (type.equals(TAGTextNodeType.divergence)) {
-      throw new RuntimeException("Use addNextTextNodeId(nextTextNodeId) for divergence nodes.");
-    }
-    this.nextTextNodeIds.clear();
-    this.nextTextNodeIds.add(nextTextNodeId);
-  }
-
   public void addNextTextNodeId(final Long nextTextNodeId) {
-    if (!type.equals(TAGTextNodeType.divergence)) {
-      throw new RuntimeException("Use setNextTextNodeId(nextTextNodeId) for " + type + " nodes.");
+    if (!divergence.equals(type) && !this.nextTextNodeIds.isEmpty()) {
+      throw new RuntimeException(type + " nodes may have at most 1 nextTextNode.");
     }
     this.nextTextNodeIds.add(nextTextNodeId);
-  }
-
-  public Long getNextTextNodeId() {
-    if (type.equals(TAGTextNodeType.convergence)) {
-      throw new RuntimeException("Use getNextTextNodeIds() for convergence nodes.");
-    }
-    return nextTextNodeIds.isEmpty() ? null : nextTextNodeIds.get(0);
   }
 
   public List<Long> getNextTextNodeIds() {

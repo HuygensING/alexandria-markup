@@ -103,16 +103,16 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       DocumentWrapper expected = store.createDocumentWrapper();
 
       TextNodeWrapper tn00 = store.createTextNodeWrapper("\n");
-      TextNodeWrapper tn01 = store.createTextNodeWrapper("He manages to keep the upper hand").setPreviousTextNode(tn00);
-      TextNodeWrapper tn02 = store.createTextNodeWrapper("\n").setPreviousTextNode(tn01);
-      TextNodeWrapper tn03 = store.createTextNodeWrapper("On his own farm.").setPreviousTextNode(tn02);
-      TextNodeWrapper tn04 = store.createTextNodeWrapper(" ").setPreviousTextNode(tn03);
-      TextNodeWrapper tn05 = store.createTextNodeWrapper("He's boss.").setPreviousTextNode(tn04);
-      TextNodeWrapper tn06 = store.createTextNodeWrapper(" ").setPreviousTextNode(tn05);
-      TextNodeWrapper tn07 = store.createTextNodeWrapper("But as to hens:").setPreviousTextNode(tn06);
-      TextNodeWrapper tn08 = store.createTextNodeWrapper("\n").setPreviousTextNode(tn07);
-      TextNodeWrapper tn09 = store.createTextNodeWrapper("We fence our flowers in and the hens range.").setPreviousTextNode(tn08);
-      TextNodeWrapper tn10 = store.createTextNodeWrapper("\n").setPreviousTextNode(tn09);
+      TextNodeWrapper tn01 = store.createTextNodeWrapper("He manages to keep the upper hand").addPreviousTextNode(tn00);
+      TextNodeWrapper tn02 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn01);
+      TextNodeWrapper tn03 = store.createTextNodeWrapper("On his own farm.").addPreviousTextNode(tn02);
+      TextNodeWrapper tn04 = store.createTextNodeWrapper(" ").addPreviousTextNode(tn03);
+      TextNodeWrapper tn05 = store.createTextNodeWrapper("He's boss.").addPreviousTextNode(tn04);
+      TextNodeWrapper tn06 = store.createTextNodeWrapper(" ").addPreviousTextNode(tn05);
+      TextNodeWrapper tn07 = store.createTextNodeWrapper("But as to hens:").addPreviousTextNode(tn06);
+      TextNodeWrapper tn08 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn07);
+      TextNodeWrapper tn09 = store.createTextNodeWrapper("We fence our flowers in and the hens range.").addPreviousTextNode(tn08);
+      TextNodeWrapper tn10 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn09);
 
       AnnotationWrapper date = simpleAnnotation("date", "1915");
       AnnotationWrapper title = simpleAnnotation("title", "The Housekeeper");

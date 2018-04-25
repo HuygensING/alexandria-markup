@@ -74,6 +74,7 @@ public class TAGStore implements AutoCloseable {
       store = new EntityStore(bdbEnvironment, "TAGStore", storeConfig);
 
       da = new DataAccessor(store);
+      tx = null;
 
     } catch (DatabaseException dbe) {
       throw new RuntimeException(dbe);
@@ -142,6 +143,12 @@ public class TAGStore implements AutoCloseable {
 
   public TextNodeWrapper createTextNodeWrapper(String content) {
     TAGTextNode textNode = new TAGTextNode(content);
+    persist(textNode);
+    return new TextNodeWrapper(this, textNode);
+  }
+
+  public TextNodeWrapper createTextNodeWrapper(TAGTextNodeType type) {
+    TAGTextNode textNode = new TAGTextNode(type);
     persist(textNode);
     return new TextNodeWrapper(this, textNode);
   }
