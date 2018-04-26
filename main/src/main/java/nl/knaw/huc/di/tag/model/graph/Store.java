@@ -25,7 +25,7 @@ import nl.knaw.huc.di.tag.model.graph.nodes.*;
 
 public class Store {
 
-  static final HyperGraph<Node, Edge> hg = new HyperGraph<Node, Edge>(HyperGraph.GraphType.ORDERED);
+  static final HyperGraph<Node, Edge> hg = new HyperGraph<>(HyperGraph.GraphType.ORDERED);
 
   public static DocumentNode createDocumentNode() {
     DocumentNode documentNode = new DocumentNode();

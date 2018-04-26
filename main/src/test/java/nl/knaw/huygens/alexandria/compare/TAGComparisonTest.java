@@ -161,7 +161,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(asList(//
+    List<String> expected = new ArrayList<>(Collections.singletonList(//
         " [t}one two three four{t]"
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);

@@ -94,7 +94,7 @@ public class TAGMLExporter {
               processedNodes.add(nodeWrapper);
               break;
             case divergence:
-              nextTextNodes.forEach(unprocessedNodes::add);
+              unprocessedNodes.addAll(nextTextNodes);
               processedNodes.add(nodeWrapper);
               break;
             case convergence:

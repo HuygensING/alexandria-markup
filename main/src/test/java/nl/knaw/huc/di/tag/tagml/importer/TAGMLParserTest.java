@@ -311,9 +311,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testNamespaceNeedsToBeDefinedBeforeUsage() {
     String input = "[z:t>text<z:t]";
-    store.runInTransaction(() -> {
-      assertTAGMLParsesWithSyntaxError(input, "line 1:0 : namespace z has not been defined.");
-    });
+    store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, "line 1:0 : namespace z has not been defined."));
   }
 
   @Test
