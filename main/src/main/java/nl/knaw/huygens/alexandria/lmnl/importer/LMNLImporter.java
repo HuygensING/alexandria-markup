@@ -107,6 +107,9 @@ public class LMNLImporter {
             m.addTextNode(textNode);
             document.associateTextWithMarkup(textNode, m);
           });
+      if (!document.hasTextNodes()){
+        document.setFirstTextNodeId(textNode.getDbId());
+      }
       document.addTextNode(textNode);
     }
 

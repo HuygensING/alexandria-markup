@@ -35,7 +35,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
       String tagmlIn = "[a>I've got a [b>bad<b] feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
       DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
-      TAGMLExporter exporter = new TAGMLExporter();
+      TAGMLExporter exporter = new TAGMLExporter(null);
       String tagmlOut = exporter.asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
@@ -48,7 +48,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
       String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
       DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
-      TAGMLExporter exporter = new TAGMLExporter();
+      TAGMLExporter exporter = new TAGMLExporter(null);
       String tagmlOut = exporter.asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
