@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
 
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
@@ -51,12 +52,15 @@ public class TAGMLExporter {
     unprocessedNodes.add(document.getFirstTextNode());
     Set<TextNodeWrapper> processedNodes = new HashSet<>();
     while (!unprocessedNodes.isEmpty()) {
-      final TextNodeWrapper nodeWrapper = unprocessedNodes.pop();
-      List<TextNodeWrapper> nextTextNodes = nodeWrapper.getNextTextNodes();
-      logTextNode(nodeWrapper);
-      if (!processedNodes.contains(nodeWrapper)) {
+      final TextNodeWrapper nodeToProcess = unprocessedNodes.pop();
+      List<TextNodeWrapper> nextTextNodes = nodeToProcess.getNextTextNodes();
+      logTextNode(nodeToProcess);
+      if (!processedNodes.contains(nodeToProcess)) {
+//        LOG.debug("processedNodes:");
+//        processedNodes.forEach(this::logTextNode);
+//        LOG.debug("");
         Set<Long> markupIds = new HashSet<>();
-        document.getMarkupStreamForTextNode(nodeWrapper).forEach(mw -> {
+        document.getMarkupStreamForTextNode(nodeToProcess).forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);
           openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
@@ -76,11 +80,11 @@ public class TAGMLExporter {
         openMarkupIds.removeAll(toClose);
         openMarkupIds.addAll(toOpen);
 
-        TAGTextNode textNode = nodeWrapper.getTextNode();
-        String content = nodeWrapper.getText();
+        TAGTextNode textNode = nodeToProcess.getTextNode();
+        String content = nodeToProcess.getText();
         switch (textNode.getType()) {
           case plaintext:
-            if (hasPrecedingDivergence(nodeWrapper)) {
+            if (hasPrecedingDivergence(nodeToProcess)) {
               tagmlBuilder.append(DIVIDER);
             }
             tagmlBuilder.append(content);
@@ -89,21 +93,22 @@ public class TAGMLExporter {
             tagmlBuilder.append(DIVERGENCE_STARTCHAR);
             break;
           case convergence:
-            if (closeTextVariation(nodeWrapper, unprocessedNodes)) {
+            if (closeTextVariation(nodeToProcess, unprocessedNodes)) {
               tagmlBuilder.append(CONVERGENCE);
             }
             break;
+        }
+        if (!convergence.equals(textNode.getType())) {
+          processedNodes.add(nodeToProcess);
         }
         if (!nextTextNodes.isEmpty()) {
           TextNodeWrapper firstNextTextNode = nextTextNodes.get(0);
           switch (textNode.getType()) {
             case plaintext:
               unprocessedNodes.addFirst(firstNextTextNode);
-              processedNodes.add(nodeWrapper);
               break;
             case divergence:
               unprocessedNodes.addAll(nextTextNodes);
-              processedNodes.add(nodeWrapper);
               break;
             case convergence:
               unprocessedNodes.add(firstNextTextNode);
