@@ -23,11 +23,14 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGMLExporterTest extends TAGStoreTest {
+
+  public static final TAGView SHOW_ALL_MARKUP_VIEW = TAGViews.getShowAllMarkupView(store);
 
   @Test
   public void testLinearAnnotatedText() {
@@ -35,7 +38,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
       String tagmlIn = "[a>I've got a [b>bad<b] feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
       DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
-      TAGMLExporter exporter = new TAGMLExporter(null);
+      TAGMLExporter exporter = new TAGMLExporter(SHOW_ALL_MARKUP_VIEW);
       String tagmlOut = exporter.asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
@@ -48,7 +51,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
       String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
       TAGMLImporter importer = new TAGMLImporter(store);
       DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
-      TAGMLExporter exporter = new TAGMLExporter(null);
+      TAGMLExporter exporter = new TAGMLExporter(SHOW_ALL_MARKUP_VIEW);
       String tagmlOut = exporter.asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);

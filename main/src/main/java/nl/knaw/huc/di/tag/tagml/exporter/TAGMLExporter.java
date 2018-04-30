@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE;
+import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
@@ -42,7 +42,7 @@ public class TAGMLExporter {
   }
 
   public String asTAGML(DocumentWrapper document) {
-    StringBuilder tagml = new StringBuilder();
+    StringBuilder tagmlBuilder = new StringBuilder();
     Deque<Long> openMarkupIds = new ArrayDeque<>();
     Map<Long, StringBuilder> openTags = new HashMap<>();
     Map<Long, StringBuilder> closeTags = new HashMap<>();
@@ -64,21 +64,33 @@ public class TAGMLExporter {
         });
         Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
+        List<Long> toClose = new ArrayList<>(openMarkupIds);
+        toClose.removeAll(relevantMarkupIds);
+        Collections.reverse(toClose);
+        toClose.forEach(markupId -> tagmlBuilder.append(closeTags.get(markupId)));
+
+        List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
+        toOpen.removeAll(openMarkupIds);
+        toOpen.forEach(markupId -> tagmlBuilder.append(openTags.get(markupId)));
+
+        openMarkupIds.removeAll(toClose);
+        openMarkupIds.addAll(toOpen);
+
         TAGTextNode textNode = nodeWrapper.getTextNode();
         String content = nodeWrapper.getText();
         switch (textNode.getType()) {
           case plaintext:
             if (hasPrecedingDivergence(nodeWrapper)) {
-              tagml.append("|");
+              tagmlBuilder.append(DIVIDER);
             }
-            tagml.append(content);
+            tagmlBuilder.append(content);
             break;
           case divergence:
-            tagml.append("<");
+            tagmlBuilder.append(DIVERGENCE_STARTCHAR);
             break;
           case convergence:
             if (closeTextVariation(nodeWrapper, unprocessedNodes)) {
-              tagml.append(CONVERGENCE);
+              tagmlBuilder.append(CONVERGENCE);
             }
             break;
         }
@@ -100,7 +112,9 @@ public class TAGMLExporter {
         }
       }
     }
-    return tagml.toString();
+    openMarkupIds.descendingIterator()//
+        .forEachRemaining(markupId -> tagmlBuilder.append(closeTags.get(markupId)));
+    return tagmlBuilder.toString();
   }
 
   private boolean closeTextVariation(final TextNodeWrapper nodeWrapper, Deque<TextNodeWrapper> unprocessedNodes) {
@@ -121,19 +135,19 @@ public class TAGMLExporter {
   private StringBuilder toCloseTag(MarkupWrapper markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
-        : new StringBuilder("<").append(markup.getExtendedTag()).append("]");
+        : new StringBuilder(CLOSE_TAG_STARTCHAR).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
   private StringBuilder toOpenTag(MarkupWrapper markup) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR).append(markup.getExtendedTag());
     markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toTAGML(a)));
     return markup.isAnonymous()//
-        ? tagBuilder.append("]")//
-        : tagBuilder.append(">");
+        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
+        : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 
   private StringBuilder toTAGML(final AnnotationWrapper a) {
-    return new StringBuilder();
+    return new StringBuilder();// TODO
   }
 
   private void logTextNode(final TextNodeWrapper nodeWrapper) {

@@ -1,8 +1,8 @@
-package nl.knaw.huc.di.tag.tagml;
+package nl.knaw.huc.di.tag.tagml.exporter;
 
 /*-
  * #%L
- * tagml
+ * alexandria-markup
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -19,18 +19,17 @@ package nl.knaw.huc.di.tag.tagml;
  * limitations under the License.
  * #L%
  */
-public class TAGML {
-  public static final String OPEN_TAG_STARTCHAR = "[";
-  public static final String OPEN_TAG_ENDCHAR = ">";
-  public static final String MILESTONE_TAG_ENDCHAR = "]";
-  public static final String CLOSE_TAG_STARTCHAR = "<";
-  public static final String CLOSE_TAG_ENDCHAR = "]";
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
-  public static final String DIVERGENCE = "<|";
-  public static final String DIVERGENCE_STARTCHAR = "<";
-  public static final String CONVERGENCE = "|>";
-  public static final String DIVIDER = "|";
+import java.util.HashSet;
 
+public class TAGViews {
+  public static TAGView getShowAllMarkupView(final TAGStore store) {
+    return new TAGView(store).setMarkupToExclude(new HashSet<>());
+  }
+
+  public static TAGView getShowNoMarkupView(final TAGStore store) {
+    return new TAGView(store).setMarkupToInclude(new HashSet<>());
+  }
 }
-
-
