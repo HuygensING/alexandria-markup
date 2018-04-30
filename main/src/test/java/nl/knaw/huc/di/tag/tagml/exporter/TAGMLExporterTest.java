@@ -50,12 +50,36 @@ public class TAGMLExporterTest extends TAGStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
+  @Test
+  public void testNestedNonLinearity() {
+    String tagmlIn = "[l>This is <|" +
+        "[del>great stuff!<del]" +
+        "|" +
+        "[add>questionable <|[del>text<del]|[add>code<add]|><add]" +
+        "|><l]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
+  public void testDoublyNestedNonLinearity() {
+    String tagmlIn = "[l>This is <|" +
+        "[del>great stuff!<del]" +
+        "|" +
+        "[add>questionable <|" +
+        "[del>text<del]" +
+        "|" +
+        "[add>but readable <|" +
+        "[del>cdoe<del]|[add>code<add]" +
+        "|><add]" +
+        "|><add]" +
+        "|><l]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
   private void assertTAGMLOutIsIn(final String tagmlIn) {
     store.runInTransaction(() -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      DocumentWrapper documentWrapper = importer.importTAGML(tagmlIn);
-      TAGMLExporter exporter = new TAGMLExporter(SHOW_ALL_MARKUP_VIEW);
-      String tagmlOut = exporter.asTAGML(documentWrapper);
+      DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagmlIn);
+      String tagmlOut = new TAGMLExporter(SHOW_ALL_MARKUP_VIEW).asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
     });

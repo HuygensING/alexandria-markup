@@ -57,7 +57,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
   private final Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
   private final Deque<TextNodeWrapper> textVariationStartNodeStack = new ArrayDeque<>();
-  private final Deque<List<TextNodeWrapper>> lastTextNodeStack = new ArrayDeque<>();
+  private final Deque<List<TextNodeWrapper>> lastTextNodeInTextVariationStack = new ArrayDeque<>();
   private final HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
@@ -193,6 +193,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterTextVariation(final TextVariationContext ctx) {
+//    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
+    lastTextNodeInTextVariationStack.push(new ArrayList<>());
     TextNodeWrapper tn = store.createTextNodeWrapper(divergence);
     if (previousTextNode != null) {
       tn.addPreviousTextNode(previousTextNode);
@@ -206,28 +208,26 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
-    if (lastTextNodeStack.isEmpty()) {
-      lastTextNodeStack.add(new ArrayList<>());
-    }
-    List<TextNodeWrapper> lastTextNodes = lastTextNodeStack.peek();
-
     List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
     TextNodeWrapper lastTextNode = textNodeWrappers.get(textNodeWrappers.size() - 1);
-    lastTextNodes.add(lastTextNode);
+    lastTextNodeInTextVariationStack.peek().add(lastTextNode);
     previousTextNode = textVariationStartNodeStack.peek();
   }
 
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
-    lastTextNodeStack.peek().add(previousTextNode);
+    lastTextNodeInTextVariationStack.peek().add(previousTextNode);
+//    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
     previousTextNode = tn;
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    lastTextNodeStack.pop().forEach(n -> {
+    lastTextNodeInTextVariationStack.pop().forEach(n -> {
+//      logTextNode(n);
       n.addNextTextNode(tn);
       tn.addPreviousTextNode(n);
     });
+//    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     textVariationStartNodeStack.pop();
     logTextNode(tn);
   }

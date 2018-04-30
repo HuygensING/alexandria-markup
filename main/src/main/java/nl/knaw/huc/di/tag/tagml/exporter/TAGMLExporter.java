@@ -30,9 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
 
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
@@ -42,99 +42,115 @@ public class TAGMLExporter {
     this.view = view;
   }
 
-  public String asTAGML(DocumentWrapper document) {
-    StringBuilder tagmlBuilder = new StringBuilder();
+  class ExporterState {
     Deque<Long> openMarkupIds = new ArrayDeque<>();
     Map<Long, StringBuilder> openTags = new HashMap<>();
     Map<Long, StringBuilder> closeTags = new HashMap<>();
+    Long lastTextNodeId = null;
+
+    public ExporterState copy() {
+      final ExporterState copy = new ExporterState();
+      copy.openMarkupIds = openMarkupIds;
+      copy.openTags = openTags;
+      copy.closeTags = closeTags;
+      copy.lastTextNodeId = lastTextNodeId;
+      return copy;
+    }
+  }
+
+  public String asTAGML(DocumentWrapper document) {
+    StringBuilder tagmlBuilder = new StringBuilder();
+
+    Deque<ExporterState> stateStack = new ArrayDeque<>();
+    stateStack.push(new ExporterState());
 
     Deque<TextNodeWrapper> unprocessedNodes = new LinkedList<>();
     unprocessedNodes.add(document.getFirstTextNode());
     Set<TextNodeWrapper> processedNodes = new HashSet<>();
     while (!unprocessedNodes.isEmpty()) {
+      final AtomicReference<ExporterState> stateRef = new AtomicReference<>(stateStack.peek());
       final TextNodeWrapper nodeToProcess = unprocessedNodes.pop();
       List<TextNodeWrapper> nextTextNodes = nodeToProcess.getNextTextNodes();
       logTextNode(nodeToProcess);
-      if (!processedNodes.contains(nodeToProcess)) {
+      if (!processedNodes.contains(nodeToProcess) || nodeToProcess.isConvergence()) {
 //        LOG.debug("processedNodes:");
 //        processedNodes.forEach(this::logTextNode);
 //        LOG.debug("");
+//        ExporterContext context = contextStack.peek();
+        ExporterState state = stateRef.get();
         Set<Long> markupIds = new HashSet<>();
         document.getMarkupStreamForTextNode(nodeToProcess).forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);
-          openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
-          closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+          state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
+          state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
         });
         Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
-        List<Long> toClose = new ArrayList<>(openMarkupIds);
+        if (needsDivider(nodeToProcess)) {
+          tagmlBuilder.append(DIVIDER);
+        }
+
+        List<Long> toClose = new ArrayList<>(state.openMarkupIds);
         toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
-        toClose.forEach(markupId -> tagmlBuilder.append(closeTags.get(markupId)));
+        toClose.forEach(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
 
         List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
-        toOpen.removeAll(openMarkupIds);
-        toOpen.forEach(markupId -> tagmlBuilder.append(openTags.get(markupId)));
+        toOpen.removeAll(state.openMarkupIds);
+        toOpen.forEach(markupId -> tagmlBuilder.append(state.openTags.get(markupId)));
 
-        openMarkupIds.removeAll(toClose);
-        openMarkupIds.addAll(toOpen);
+        state.openMarkupIds.removeAll(toClose);
+        state.openMarkupIds.addAll(toOpen);
 
         TAGTextNode textNode = nodeToProcess.getTextNode();
         String content = nodeToProcess.getText();
         switch (textNode.getType()) {
           case plaintext:
-            if (hasPrecedingDivergence(nodeToProcess)) {
-              tagmlBuilder.append(DIVIDER);
-            }
             tagmlBuilder.append(content);
+            if (!nextTextNodes.isEmpty()) {
+              unprocessedNodes.addFirst(nextTextNodes.get(0));
+            }
             break;
-          case divergence:
-            tagmlBuilder.append(DIVERGENCE_STARTCHAR);
+          case divergence: // This node will be visited only once
+            tagmlBuilder.append(DIVERGENCE);
+            stateStack.push(state.copy());
+            unprocessedNodes.addAll(nextTextNodes);
             break;
-          case convergence:
-            if (closeTextVariation(nodeToProcess, unprocessedNodes)) {
+          case convergence: // this node will be visisted for every textvariation branch
+            if (closeTextVariation(nodeToProcess, state.lastTextNodeId)) { // have we visited all branches of this textvariation?
+              stateStack.pop();
               tagmlBuilder.append(CONVERGENCE);
+            }else{
+              // go back to state saved at start of corresponding divergence
+              stateRef.set(stateStack.peek());
+            }
+            if (!nextTextNodes.isEmpty()) {
+              unprocessedNodes.add(nextTextNodes.get(0));
             }
             break;
         }
-        if (!convergence.equals(textNode.getType())) {
-          processedNodes.add(nodeToProcess);
-        }
-        if (!nextTextNodes.isEmpty()) {
-          TextNodeWrapper firstNextTextNode = nextTextNodes.get(0);
-          switch (textNode.getType()) {
-            case plaintext:
-              unprocessedNodes.addFirst(firstNextTextNode);
-              break;
-            case divergence:
-              unprocessedNodes.addAll(nextTextNodes);
-              break;
-            case convergence:
-              unprocessedNodes.add(firstNextTextNode);
-              break;
-          }
-        }
+        processedNodes.add(nodeToProcess);
+        state.lastTextNodeId = nodeToProcess.getDbId();
       }
     }
-    openMarkupIds.descendingIterator()//
-        .forEachRemaining(markupId -> tagmlBuilder.append(closeTags.get(markupId)));
+    final ExporterState state = stateStack.pop();
+    state.openMarkupIds.descendingIterator()//
+        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     return tagmlBuilder.toString();
   }
 
-  private boolean closeTextVariation(final TextNodeWrapper nodeWrapper, Deque<TextNodeWrapper> unprocessedNodes) {
-    List<TextNodeWrapper> nextTextNodes = nodeWrapper.getNextTextNodes();
-    if (nextTextNodes.isEmpty() && unprocessedNodes.isEmpty()) {
-      return true;
-    }
-    TextNodeWrapper nextToProcess = unprocessedNodes.peek();
-    TextNodeWrapper nextTextNode = nextTextNodes.get(0);
-    return nextTextNode.equals(nextToProcess);
+  private boolean closeTextVariation(final TextNodeWrapper convergenceNode, final Long lastTextNodeId) {
+    List<Long> prevTextNodeIds = convergenceNode.getTextNode().getPrevTextNodeIds();
+    final Long lastPrevNodeId = prevTextNodeIds.get(prevTextNodeIds.size() - 1);
+    return (lastTextNodeId.equals(lastPrevNodeId));
   }
 
-  private boolean hasPrecedingDivergence(final TextNodeWrapper nodeWrapper) {
+  private boolean needsDivider(final TextNodeWrapper nodeWrapper) {
     List<TextNodeWrapper> prevTextNodes = nodeWrapper.getPrevTextNodes();
-    return prevTextNodes.size() == 1 && prevTextNodes.get(0).isDivergence();
+    return prevTextNodes.size() == 1
+        && prevTextNodes.get(0).isDivergence()
+        && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(nodeWrapper);
   }
 
   private StringBuilder toCloseTag(MarkupWrapper markup) {
