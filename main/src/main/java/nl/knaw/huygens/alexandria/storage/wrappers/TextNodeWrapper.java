@@ -103,4 +103,15 @@ public class TextNodeWrapper {
         && ((TextNodeWrapper) other).getDbId().equals(getDbId());
   }
 
+  @Override
+  public String toString() {
+    String prefix = getDbId() + ":";
+    if (isDivergence()) {
+      return prefix + "<|";
+    }
+    if (isConvergence()) {
+      return prefix + "|>";
+    }
+    return prefix + getText();
+  }
 }
