@@ -70,7 +70,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(r1);
       expected.associateTextNodeWithMarkup(t1, r1);
 
-      logLMNL(actual);
+      logTAGML(actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
       assertActualMatchesExpected(actual, expected);
 
@@ -200,7 +200,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       LOG.info("document={}", actual);
 
-      logLMNL(actual);
+      logTAGML(actual);
 
       List<MarkupWrapper> actualMarkupList = actual.getMarkupStream().collect(toList());
 
@@ -215,9 +215,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       source.addAnnotation(book);
       AnnotationWrapper chapter = simpleAnnotation("chapter", "12");
       source.addAnnotation(chapter);
-      String actualSourceLMNL = lmnlExporter.toLMNL(annotations.get(0)).toString();
-      String expectedSourceLMNL = lmnlExporter.toLMNL(source).toString();
-      assertThat(actualSourceLMNL).isEqualTo(expectedSourceLMNL);
+      String actualSourceTAGML = tagmlExporter.toTAGML(annotations.get(0)).toString();
+      String expectedSourceTAGML = tagmlExporter.toTAGML(source).toString();
+      assertThat(actualSourceTAGML).isEqualTo(expectedSourceTAGML);
 
       MarkupWrapper q1 = actualMarkupList.get(2);
       assertThat(q1.getTag()).isEqualTo("q"); // first q
@@ -227,7 +227,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
       assertThat(q2.getTextNodeStream()).hasSize(1); // has 1 textnode
 
-      // compareLMNL(pathname, actual);
+      // compareTAGML(pathname, actual);
       logKdTree(actual);
 
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
@@ -243,12 +243,12 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       DocumentWrapper actual = new LMNLImporter(store).importLMNL(input);
       LOG.info("document={}", actual);
-      logLMNL(actual);
+      logTAGML(actual);
       assertThat(actual.hasTextNodes()).isTrue();
-      String lmnl = lmnlExporter.toLMNL(actual);
-      assertThat(lmnl).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
-      assertThat(lmnl).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous markup
-      // compareLMNL(pathname, actual);
+      String tagml = tagmlExporter.asTAGML(actual);
+      assertThat(tagml).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
+      assertThat(tagml).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous markup
+      // compareTAGML(pathname, actual);
 
       logKdTree(actual);
 
@@ -264,9 +264,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       DocumentWrapper actual = new LMNLImporter(store).importLMNL(input);
 
-      String lmnl = lmnlExporter.toLMNL(actual);
-      LOG.info("lmnl={}", lmnl);
-      assertThat(lmnl).isEqualTo(input);
+      String tagml = tagmlExporter.asTAGML(actual);
+      LOG.info("tagml={}", tagml);
+      assertThat(tagml).isEqualTo(input);
 
       LOG.info("textNodes={}", actual.getTextNodeStream());
       LOG.info("markups={}", actual.getMarkupStream());
@@ -316,8 +316,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.associateTextNodeWithMarkup(t1, m1);
 
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logTAGML(actual);
+      compareTAGML(expected, actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
 
       logKdTree(actual);
@@ -360,8 +360,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkup(t1, m1);
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logTAGML(actual);
+      compareTAGML(expected, actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
@@ -385,8 +385,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkup(t1, m1);
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logTAGML(actual);
+      compareTAGML(expected, actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
@@ -407,8 +407,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkup(t1, m1);
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logTAGML(actual);
+      compareTAGML(expected, actual);
     });
   }
 
@@ -426,8 +426,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkup(t1, m1);
 
-      logLMNL(actual);
-      compareLMNL(expected, actual);
+      logTAGML(actual);
+      compareTAGML(expected, actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
@@ -449,8 +449,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       document.setOnlyTextNode(t1);
       document.associateTextNodeWithMarkup(t1, m1);
       document.addMarkup(m1);
-      logLMNL(actual);
-      compareLMNL(document, actual);
+      logTAGML(actual);
+      compareTAGML(document, actual);
     });
   }
 
@@ -508,16 +508,16 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  private void compareLMNL(String pathname, DocumentWrapper actual) throws IOException {
-    String inLMNL = FileUtils.readFileToString(new File(pathname), "UTF-8");
-    String outLMNL = lmnlExporter.toLMNL(actual);
-    assertThat(outLMNL).isEqualTo(inLMNL);
-  }
+//  private void compareTAGML(String pathname, DocumentWrapper actual) throws IOException {
+//    String inLMNL = FileUtils.readFileToString(new File(pathname), "UTF-8");
+//    String outTAGML = tagmlExporter.asTAGML(actual);
+//    assertThat(outTAGML).isEqualTo(inLMNL);
+//  }
 
-  private void compareLMNL(DocumentWrapper expected, DocumentWrapper actual) {
-    String expectedLMNL = lmnlExporter.toLMNL(expected);
-    String actualLMNL = lmnlExporter.toLMNL(actual);
-    assertThat(actualLMNL).isEqualTo(expectedLMNL);
+  private void compareTAGML(DocumentWrapper expected, DocumentWrapper actual) {
+    String expectedTAGML = tagmlExporter.asTAGML(expected);
+    String actualTAGML = tagmlExporter.asTAGML(actual);
+    assertThat(actualTAGML).isEqualTo(expectedTAGML);
   }
 
   private AnnotationWrapper simpleAnnotation(String tag) {
@@ -556,10 +556,10 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       assertThat(actualMarkup).usingComparator(markupComparator).isEqualTo(expectedMarkup);
     }
 
-    String actualLMNL = lmnlExporter.toLMNL(actual);
-    String expectedLMNL = lmnlExporter.toLMNL(expected);
-    LOG.info("LMNL={}", actualLMNL);
-    assertThat(actualLMNL).isEqualTo(expectedLMNL);
+    String actualTAGML = tagmlExporter.asTAGML(actual);
+    String expectedTAGML = tagmlExporter.asTAGML(expected);
+    LOG.info("TAGML={}", actualTAGML);
+    assertThat(actualTAGML).isEqualTo(expectedTAGML);
     // assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
   }
 
@@ -579,8 +579,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     return t1.getText().equals(t2.getText());
   }
 
-  private void logLMNL(DocumentWrapper documentWrapper) {
-    LOG.info("LMNL=\n{}", lmnlExporter.toLMNL(documentWrapper));
+  private void logTAGML(DocumentWrapper documentWrapper) {
+    LOG.info("TAGML=\n{}", tagmlExporter.asTAGML(documentWrapper));
   }
 
   private void logKdTree(DocumentWrapper documentWrapper) {

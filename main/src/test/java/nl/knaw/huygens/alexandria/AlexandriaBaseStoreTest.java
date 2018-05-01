@@ -21,8 +21,8 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -34,7 +34,7 @@ import java.nio.file.Path;
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   protected static TAGStore store;
-  protected static LMNLExporter lmnlExporter;
+  protected static TAGMLExporter tagmlExporter;
   private static Path tmpDir;
 
   @BeforeClass
@@ -43,7 +43,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
     tmpDir.toFile().deleteOnExit();
     store = new TAGStore(tmpDir.toString(), false);
     store.open();
-    lmnlExporter = new LMNLExporter(store).useShorthand();
+    tagmlExporter = new TAGMLExporter(store);
   }
 
   @AfterClass
