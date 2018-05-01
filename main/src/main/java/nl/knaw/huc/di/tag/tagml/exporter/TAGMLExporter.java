@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static javax.swing.JSplitPane.DIVIDER;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGMLExporter {
