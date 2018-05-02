@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.regex.Pattern.quote;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
@@ -109,7 +110,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitText(TextContext ctx) {
-    String text = ctx.getText();
+    String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {
@@ -122,6 +123,18 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       logTextNode(tn);
     }
+  }
+
+  private String unEscape(final String text) {
+    return text
+        .replaceAll(quote("\\<"), "<")
+        .replaceAll(quote("\\["), "[")
+        .replaceAll(quote("\\|"), "|")
+        .replaceAll(quote("\\!"), "!")
+        .replaceAll(quote("\\\""), "\"")
+        .replaceAll(quote("\\'"), "'")
+        .replace("\\\\", "\\")
+        ;
   }
 
   @Override
