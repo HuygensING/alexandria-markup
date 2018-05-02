@@ -248,7 +248,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore
   @Test
   public void testNestedTextVariationWithMarkup() {
     String input = "[tagml>" +
