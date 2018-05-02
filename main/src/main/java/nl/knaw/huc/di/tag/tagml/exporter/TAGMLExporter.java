@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  */
 
 import com.google.common.base.Preconditions;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
@@ -110,6 +111,10 @@ public class TAGMLExporter {
     public boolean allBranchesTraversed() {
       return branchesToTraverse == 0;
     }
+
+    public boolean inVariation() {
+      return !branchStartNodeIds.isEmpty();
+    }
   }
 
   public String asTAGML(DocumentWrapper document) {
@@ -169,7 +174,10 @@ public class TAGMLExporter {
         String content = nodeToProcess.getText();
         switch (textNode.getType()) {
           case plaintext:
-            tagmlBuilder.append(content);
+            String escapedText = variationState.inVariation()
+                ? TAGML.escapeVariantText(content)
+                : TAGML.escapeRegularText(content);
+            tagmlBuilder.append(escapedText);
             if (!nextTextNodes.isEmpty()) {
               nodesToProcess.push(nextTextNodes.get(0));
             }
@@ -206,7 +214,7 @@ public class TAGMLExporter {
     }
     while (!textVariationStates.isEmpty()) {
       TextVariationState textVariationState = textVariationStates.pop();
-      if (!textVariationState.branchStartNodeIds.isEmpty()) {
+      if (textVariationState.inVariation()) {
         tagmlBuilder.append(CONVERGENCE);
       }
     }

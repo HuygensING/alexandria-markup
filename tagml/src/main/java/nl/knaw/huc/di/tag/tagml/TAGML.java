@@ -19,6 +19,8 @@ package nl.knaw.huc.di.tag.tagml;
  * limitations under the License.
  * #L%
  */
+import static java.util.regex.Pattern.quote;
+
 public class TAGML {
   public static final String OPEN_TAG_STARTCHAR = "[";
   public static final String OPEN_TAG_ENDCHAR = ">";
@@ -34,6 +36,45 @@ public class TAGML {
   public static final String OPTIONAL_PREFIX = "?";
   public static final String SUSPEND_PREFIX = "-";
   public static final String RESUME_PREFIX = "+";
+
+  public static String escapeRegularText(final String content) {
+    return content
+        .replace("\\", "\\\\")
+        .replace("<", "\\<")
+        .replace("[", "\\[")
+        ;
+  }
+
+  public static String escapeVariantText(final String content) {
+    return content
+        .replace("\\", "\\\\")
+        .replace("<", "\\<")
+        .replace("[", "\\[")
+        .replace("|", "\\|");
+  }
+
+  public static String escapeSingleQuotedText(final String content) {
+    return content
+        .replace("\\", "\\\\")
+        .replace("'", "\\'");
+  }
+
+  public static String escapeDoubleQuotedText(final String content) {
+    return content
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"");
+  }
+
+  public static String unEscape(final String text) {
+    return text
+        .replaceAll(quote("\\<"), "<")
+        .replaceAll(quote("\\["), "[")
+        .replaceAll(quote("\\|"), "|")
+        .replaceAll(quote("\\!"), "!")
+        .replaceAll(quote("\\\""), "\"")
+        .replaceAll(quote("\\'"), "'")
+        .replace("\\\\", "\\");
+  }
 
 }
 
