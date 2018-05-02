@@ -51,7 +51,7 @@ public class HyperGraphTest {
     hg.addNode(textNode,textNode.getLabel());
 
     final DocumentToTextEdge firstTextEdge = new DocumentToTextEdge();
-    hg.addDirectedHyperEdge(firstTextEdge,firstTextEdge.LABEL, documentNode,textNode);
+    hg.addDirectedHyperEdge(firstTextEdge, DocumentToTextEdge.LABEL, documentNode,textNode);
 
   }
 

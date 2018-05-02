@@ -26,8 +26,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 
 public class TAGMLVisitor extends TAGMLParserBaseVisitor {
-  private TAGStore tagStore;
-  private ErrorListener errorListener;
+  private final TAGStore tagStore;
+  private final ErrorListener errorListener;
 
   public TAGMLVisitor(final TAGStore tagStore, final ErrorListener errorListener) {
     this.tagStore = tagStore;
