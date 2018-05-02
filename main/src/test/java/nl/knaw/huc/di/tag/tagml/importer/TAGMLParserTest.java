@@ -32,7 +32,6 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -248,7 +247,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore
   @Test
   public void testNestedTextVariationWithMarkup() {
     String input = "[tagml>" +
@@ -311,9 +309,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testNamespaceNeedsToBeDefinedBeforeUsage() {
     String input = "[z:t>text<z:t]";
-    store.runInTransaction(() -> {
-      assertTAGMLParsesWithSyntaxError(input, "line 1:0 : namespace z has not been defined.");
-    });
+    store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, "line 1:0 : Namespace z has not been defined."));
   }
 
   @Test

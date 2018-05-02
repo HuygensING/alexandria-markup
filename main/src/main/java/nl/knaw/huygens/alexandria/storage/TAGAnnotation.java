@@ -53,7 +53,7 @@ public class TAGAnnotation implements TAGObject {
     this.id = id;
   }
 
-  public Long getId() {
+  public Long getDbId() {
     return id;
   }
 
@@ -66,7 +66,7 @@ public class TAGAnnotation implements TAGObject {
   }
 
   public TAGAnnotation addAnnotation(TAGAnnotation annotation) {
-    annotationIds.add(annotation.getId());
+    annotationIds.add(annotation.getDbId());
     return this;
   }
 

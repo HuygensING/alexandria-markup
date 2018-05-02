@@ -38,7 +38,7 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest{
       Long textNodeId = store.persist(textNode);
 
       TAGDocument document = new TAGDocument();
-      document.getTextNodeIds().add(textNode.getId());
+      document.getTextNodeIds().add(textNode.getDbId());
       documentId.set(store.persist(document));
     });
 
@@ -48,7 +48,7 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest{
 
     store.runInTransaction(() -> {
       TAGDocument document = store.getDocument(documentId.get());
-      assertThat(document.getTextNodeIds()).contains(textNode.getId());
+      assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
     });
 
     store.close();

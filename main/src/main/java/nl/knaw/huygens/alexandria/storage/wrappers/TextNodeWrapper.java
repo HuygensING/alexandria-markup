@@ -20,8 +20,15 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
 public class TextNodeWrapper {
   private final TAGStore store;
@@ -33,40 +40,53 @@ public class TextNodeWrapper {
     update();
   }
 
-  public Long getId() {
-    return textNode.getId();
+  public Long getDbId() {
+    return textNode.getDbId();
   }
 
   public String getText() {
     return textNode.getText();
   }
 
-  private TAGTextNode getTextNode() {
+  public TAGTextNode getTextNode() {
     return textNode;
   }
 
-  public TextNodeWrapper setPreviousTextNode(TextNodeWrapper textNodeWrapper) {
-    TextNodeWrapper previousTextNode = new TextNodeWrapper(store, textNodeWrapper.getTextNode());
-    textNode.setPrevTextNodeId(previousTextNode.getId());
-    if (previousTextNode != null && previousTextNode.getNextTextNode() == null) {
-      previousTextNode.setNextTextNode(this);
+  public TextNodeWrapper addPreviousTextNode(TextNodeWrapper previousTextNode) {
+    textNode.addPrevTextNodeId(previousTextNode.getDbId());
+    if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
+      previousTextNode.addNextTextNode(this);
     }
     update();
     return this;
   }
 
-  public void setNextTextNode(TextNodeWrapper textNodeWrapper) {
-    textNode.setNextTextNodeId(textNodeWrapper.getId());
+  public void addNextTextNode(final TextNodeWrapper nextTextNode) {
+    Long id = nextTextNode.getDbId();
+    textNode.addNextTextNodeId(id);
     update();
   }
 
-  public TextNodeWrapper getNextTextNode() {
-    Long nextTextNodeId = textNode.getNextTextNodeId();
-    if (nextTextNodeId == null) {
-      return null;
-    }
-    TAGTextNode nextTextNode = store.getTextNode(nextTextNodeId);
-    return new TextNodeWrapper(store, nextTextNode);
+  public List<TextNodeWrapper> getNextTextNodes() {
+    return textNode.getNextTextNodeIds()
+        .stream()
+        .map(store::getTextNodeWrapper)
+        .collect(toList());
+  }
+
+  public List<TextNodeWrapper> getPrevTextNodes() {
+    return textNode.getPrevTextNodeIds()
+        .stream()
+        .map(store::getTextNodeWrapper)
+        .collect(toList());
+  }
+
+  public boolean isDivergence() {
+    return divergence.equals(textNode.getType());
+  }
+
+  public boolean isConvergence() {
+    return convergence.equals(textNode.getType());
   }
 
   private void update() {
@@ -75,13 +95,24 @@ public class TextNodeWrapper {
 
   @Override
   public int hashCode() {
-    return textNode.getId().hashCode();
+    return textNode.getDbId().hashCode();
   }
 
   @Override
   public boolean equals(Object other) {
     return other instanceof TextNodeWrapper//
-        && ((TextNodeWrapper) other).getId().equals(getId());
+        && ((TextNodeWrapper) other).getDbId().equals(getDbId());
   }
 
+  @Override
+  public String toString() {
+    String prefix = getDbId() + ":";
+    if (isDivergence()) {
+      return prefix + TAGML.DIVERGENCE;
+    }
+    if (isConvergence()) {
+      return prefix + TAGML.CONVERGENCE;
+    }
+    return prefix + getText();
+  }
 }

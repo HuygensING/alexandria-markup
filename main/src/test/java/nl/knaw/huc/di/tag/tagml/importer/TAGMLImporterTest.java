@@ -64,17 +64,87 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
-  public void testTAGMLSyntaxError() {
-    String tagML = "[line>The rain in Spain falls mainly on the plain.<l]";
+  public void testCharacterEscapingInRegularText() {
+    String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(textNodeSketch("In regular text, <, [, and \\ need to be escaped, |, !, \", and ' don't."));
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
+    });
+  }
+
+  @Ignore
+  @Test
+  public void testCharacterEscapingInTextVariation() {
+    String tagML = "In text in between textVariation tags, \\< \\[ \\| and \\\\ need to be escaped, ! \" and ' don't.";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(textNodeSketch("In text in between textVariation tags, <, [, |, and \\ need to be escaped, !, \", and ' don't."));
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(1);
+    });
+  }
+
+  @Test
+  public void testMissingEndTagThrowsTAGMLSyntaxError() {
+    String tagML = "[line>The rain";
     store.runInTransaction(() -> {
       try {
         DocumentWrapper document = parseTAGML(tagML);
         fail("TAGMLSyntaxError expected!");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
-            "line 1:51 : Closing tag <l] found without corresponding open tag.\n" +
-            "Unclosed TAGML tag(s): [line>");
+            "Missing close tag(s) for: [line>");
+      }
+    });
+  }
+
+  @Test
+  public void testMissingOpenTagThrowsTAGMLSyntaxError() {
+    String tagML = "on the plain.<line] ";
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail("TAGMLSyntaxError expected!");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            "line 1:14 : Close tag <line] found without corresponding open tag.");
+      }
+    });
+  }
+
+  @Test
+  public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
+    String tagML = "[line>The Spanish rain.<paragraph]";
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail("TAGMLSyntaxError expected!");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
+            "Missing close tag(s) for: [line>");
+      }
+    });
+  }
+
+  @Ignore
+  @Test
+  public void testNamelessTagsThrowsTAGMLSyntaxError() {
+    String tagML = "[>The Spanish rain.<]";
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail("TAGMLSyntaxError expected!");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("");
       }
     });
   }
@@ -290,7 +360,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         fail("Expected TAGMLSyntaxError");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
-            "Some suspended markup was not resumed: <t]");
+            "Some suspended markup was not resumed: <-t]");
       }
     });
   }
@@ -511,7 +581,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  // private
+  // private methods
+
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
     printTokens(tagML);

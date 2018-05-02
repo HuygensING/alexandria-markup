@@ -188,8 +188,8 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
 
       MarkupWrapper markupB = markupList.get(2);
       assertThat(markupB.getExtendedTag()).isEqualTo("b");
-      assertThat(markupI.getDominatedMarkup().get().getId()).isEqualTo(markupB.getId());
-      assertThat(markupB.getDominatingMarkup().get().getId()).isEqualTo(markupI.getId());
+      assertThat(markupI.getDominatedMarkup().get().getDbId()).isEqualTo(markupB.getDbId());
+      assertThat(markupB.getDominatingMarkup().get().getDbId()).isEqualTo(markupI.getDbId());
     });
   }
 

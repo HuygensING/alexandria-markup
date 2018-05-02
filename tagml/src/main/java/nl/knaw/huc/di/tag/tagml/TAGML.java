@@ -1,0 +1,40 @@
+package nl.knaw.huc.di.tag.tagml;
+
+/*-
+ * #%L
+ * tagml
+ * =======
+ * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+public class TAGML {
+  public static final String OPEN_TAG_STARTCHAR = "[";
+  public static final String OPEN_TAG_ENDCHAR = ">";
+  public static final String MILESTONE_TAG_ENDCHAR = "]";
+  public static final String CLOSE_TAG_STARTCHAR = "<";
+  public static final String CLOSE_TAG_ENDCHAR = "]";
+
+  public static final String DIVERGENCE = "<|";
+  public static final String DIVERGENCE_STARTCHAR = "<";
+  public static final String CONVERGENCE = "|>";
+  public static final String DIVIDER = "|";
+
+  public static final String OPTIONAL_PREFIX = "?";
+  public static final String SUSPEND_PREFIX = "-";
+  public static final String RESUME_PREFIX = "+";
+
+}
+
+

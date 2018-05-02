@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model.graph.nodes;
+package nl.knaw.huygens.alexandria.storage;
 
 /*-
  * #%L
@@ -19,12 +19,6 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * limitations under the License.
  * #L%
  */
-public class AnnotationNode implements Node {
-  private final String propertyName;
-  private final Object propertyValue;
-
-  public AnnotationNode(String name, Object value) {
-    this.propertyName = name;
-    this.propertyValue = value;
-  }
+public enum TAGTextNodeType {
+  plaintext, divergence, convergence
 }

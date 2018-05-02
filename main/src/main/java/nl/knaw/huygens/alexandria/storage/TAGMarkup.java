@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -54,11 +55,11 @@ public class TAGMarkup implements TAGObject {
   }
 
   public TAGMarkup(TAGDocument document, String tagName) {
-    this.documentId = document.getId();
+    this.documentId = document.getDbId();
     this.tag = tagName;
   }
 
-  public Long getId() {
+  public Long getDbId() {
     return id;
   }
 
@@ -91,7 +92,10 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
-    // TODO: this is output language dependent move to language
+    if (optional) {
+      return TAGML.OPTIONAL_PREFIX + tag;
+    }
+    // TODO: this is output language dependent: move to language dependency
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }
@@ -102,11 +106,11 @@ public class TAGMarkup implements TAGObject {
   }
 
   public void addTextNode(TAGTextNode textNode) {
-    textNodeIds.add(textNode.getId());
+    textNodeIds.add(textNode.getDbId());
   }
 
   public TAGMarkup addAnnotation(TAGAnnotation annotation) {
-    annotationIds.add(annotation.getId());
+    annotationIds.add(annotation.getDbId());
     return this;
   }
 
@@ -169,6 +173,6 @@ public class TAGMarkup implements TAGObject {
   @Override
   public boolean equals(Object other) {
     return other instanceof TAGMarkup//
-        && getId().equals(((TAGMarkup) other).getId());
+        && getDbId().equals(((TAGMarkup) other).getDbId());
   }
 }

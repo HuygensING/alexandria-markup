@@ -24,46 +24,16 @@ import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.nodes.MarkupNode;
 import nl.knaw.huc.di.tag.model.graph.nodes.Node;
 import nl.knaw.huc.di.tag.model.graph.nodes.TAGTextNode;
-import nl.knaw.huc.di.tag.model.graph.nodes.TextDelimiterNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class TextGraph<T extends TAGTextNode, M extends Markup> extends HyperGraph<Node, Edge> {
 
-  private TextDelimiterNode textStartNode = new TextDelimiterNode();
-  private TextDelimiterNode textEndNode = new TextDelimiterNode();
   private Map<M, MarkupNode> markupNodeIndex = new HashMap<>();
 
   protected TextGraph() {
     super(GraphType.ORDERED);
   }
-
-//  public TextGraph<T, M> addTextNode(T textNode) {
-//    this.textNodeList.add(textNode);
-//    return this;
-//  }
-//
-//  public TextGraph<T, M> addMarkup(M markup) {
-//    this.markupList.add(markup);
-//    return this;
-//  }
-//
-//  public void associateTextNodeWithMarkup(T node, M markup) {
-//    textNodeToMarkup.computeIfAbsent(node, f -> new LinkedHashSet<>()).add(markup);
-//  }
-//
-//  public void disAssociateTextNodeFromMarkup(T node, M markup) {
-//    textNodeToMarkup.computeIfAbsent(node, f -> new LinkedHashSet<>()).remove(markup);
-//  }
-//
-//  public Set<M> getMarkups(T node) {
-//    Set<M> markups = textNodeToMarkup.get(node);
-//    return markups == null ? new LinkedHashSet<>() : markups;
-//  }
-//
-//  public boolean hasTextNodes() {
-//    return !textNodeList.isEmpty();
-//  }
 
 }

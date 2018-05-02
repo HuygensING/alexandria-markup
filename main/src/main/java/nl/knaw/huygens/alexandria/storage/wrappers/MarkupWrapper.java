@@ -38,8 +38,8 @@ public class MarkupWrapper {
     update();
   }
 
-  public Long getId() {
-    return markup.getId();
+  public Long getDbId() {
+    return markup.getDbId();
   }
 
   public String getTag() {
@@ -47,7 +47,7 @@ public class MarkupWrapper {
   }
 
   public MarkupWrapper addTextNode(TextNodeWrapper textNodeWrapper) {
-    markup.getTextNodeIds().add(textNodeWrapper.getId());
+    markup.getTextNodeIds().add(textNodeWrapper.getDbId());
     Long ownerId = markup.getDocumentId();
     new DocumentWrapper(store, store.getDocument(ownerId))//
         .associateTextNodeWithMarkup(textNodeWrapper, this);
@@ -64,11 +64,11 @@ public class MarkupWrapper {
   public MarkupWrapper setFirstAndLastTextNode(TextNodeWrapper first, TextNodeWrapper last) {
     markup.getTextNodeIds().clear();
     addTextNode(first);
-    if (!first.getId().equals(last.getId())) {
-      TextNodeWrapper next = first.getNextTextNode();
-      while (!next.getId().equals(last.getId())) {
+    if (!first.getDbId().equals(last.getDbId())) {
+      TextNodeWrapper next = first.getNextTextNodes().get(0); // TODO: handle divergence
+      while (!next.getDbId().equals(last.getDbId())) {
         addTextNode(next);
-        next = next.getNextTextNode();
+        next = next.getNextTextNodes().get(0);// TODO: handle divergence
       }
       addTextNode(next);
     }
@@ -77,7 +77,7 @@ public class MarkupWrapper {
   }
 
   public MarkupWrapper addAnnotation(AnnotationWrapper annotation) {
-    markup.getAnnotationIds().add(annotation.getId());
+    markup.getAnnotationIds().add(annotation.getDbId());
     update();
     return this;
   }
@@ -111,14 +111,14 @@ public class MarkupWrapper {
     boolean isContinuous = true;
     List<TextNodeWrapper> textNodes = getTextNodeStream().collect(Collectors.toList());
     TextNodeWrapper textNode = textNodes.get(0);
-    TextNodeWrapper expectedNext = textNode.getNextTextNode();
+    TextNodeWrapper expectedNext = textNode.getNextTextNodes().get(0); // TODO: handle divergence
     for (int i = 1; i < textNodes.size(); i++) {
       textNode = textNodes.get(i);
       if (!textNode.equals(expectedNext)) {
         isContinuous = false;
         break;
       }
-      expectedNext = textNode.getNextTextNode();
+      expectedNext = textNode.getNextTextNodes().get(0);// TODO: handle divergence
     }
     return isContinuous;
   }
@@ -126,7 +126,6 @@ public class MarkupWrapper {
   public String getExtendedTag() {
     return markup.getExtendedTag();
   }
-
 
   public boolean hasN() {
     return getAnnotationStream()//
@@ -145,7 +144,7 @@ public class MarkupWrapper {
   }
 
   public void setDominatedMarkup(MarkupWrapper dominatedMarkup) {
-    markup.setDominatedMarkupId(dominatedMarkup.getId());
+    markup.setDominatedMarkupId(dominatedMarkup.getDbId());
     if (!dominatedMarkup.getMarkup().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
     }
@@ -160,7 +159,7 @@ public class MarkupWrapper {
   }
 
   private void setDominatingMarkup(MarkupWrapper dominatingMarkup) {
-    markup.setDominatingMarkupId(dominatingMarkup.getId());
+    markup.setDominatingMarkupId(dominatingMarkup.getDbId());
     if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
     }

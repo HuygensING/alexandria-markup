@@ -23,29 +23,46 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity(version = 1)
+import java.util.ArrayList;
+import java.util.List;
+
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.*;
+
+@Entity(version = 2)
 public class TAGTextNode implements TAGObject {
   @PrimaryKey(sequence = "textnode_pk_sequence")
-  private Long id;
+  private Long dbId;
+
+  private TAGTextNodeType type;
 
   private String text;
 
-  private Long prevTextNodeId;
-  private Long nextTextNodeId;
+  private List<Long> prevTextNodeIds = new ArrayList<>();
+  private List<Long> nextTextNodeIds = new ArrayList<>();
 
   private TAGTextNode() {
   }
 
   public TAGTextNode(String text) {
     this.text = text;
+    this.type = plaintext;
   }
 
-  public Long getId() {
-    return id;
+  public TAGTextNode(TAGTextNodeType type) {
+    this.text = "";
+    this.type = type;
   }
 
-  public String getText() {
-    return text;
+  public Long getDbId() {
+    return dbId;
+  }
+
+  public void setType(final TAGTextNodeType type) {
+    this.type = type;
+  }
+
+  public TAGTextNodeType getType() {
+    return type;
   }
 
   public TAGTextNode setText(String text) {
@@ -53,22 +70,39 @@ public class TAGTextNode implements TAGObject {
     return this;
   }
 
-  public Long getPrevTextNodeId() {
-    return prevTextNodeId;
+  public String getText() {
+    return text;
   }
 
-  public TAGTextNode setPrevTextNodeId(long prevId) {
-    this.prevTextNodeId = prevId;
-    return this;
+  // link to previous nodes
+  public void setPrevTextNodeIds(final List<Long> prevTextNodeIds) {
+    this.prevTextNodeIds = prevTextNodeIds;
   }
 
-  public Long getNextTextNodeId() {
-    return nextTextNodeId;
+  public void addPrevTextNodeId(final Long prevTextNodeId) {
+    if (!convergence.equals(type) && !prevTextNodeIds.isEmpty()) {
+      throw new RuntimeException(type + " nodes may have at most 1 prevTextNode.");
+    }
+    this.prevTextNodeIds.add(prevTextNodeId);
   }
 
-  public TAGTextNode setNextTextNodeId(long nextId) {
-    this.nextTextNodeId = nextId;
-    return this;
+  public List<Long> getPrevTextNodeIds() {
+    return prevTextNodeIds;
   }
 
+  // link to next nodes
+  public void setNextTextNodeIds(final List<Long> nextTextNodeIds) {
+    this.nextTextNodeIds = nextTextNodeIds;
+  }
+
+  public void addNextTextNodeId(final Long nextTextNodeId) {
+    if (!divergence.equals(type) && !this.nextTextNodeIds.isEmpty()) {
+      throw new RuntimeException(type + " nodes may have at most 1 nextTextNode.");
+    }
+    this.nextTextNodeIds.add(nextTextNodeId);
+  }
+
+  public List<Long> getNextTextNodeIds() {
+    return nextTextNodeIds;
+  }
 }

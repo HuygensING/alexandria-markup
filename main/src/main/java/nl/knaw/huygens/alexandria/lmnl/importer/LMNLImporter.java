@@ -66,7 +66,7 @@ public class LMNLImporter {
     void openMarkup(TAGMarkup markup) {
       openMarkupDeque.push(markup);
       openMarkupStack.push(markup);
-      document.getMarkupIds().add(markup.getId());
+      document.getMarkupIds().add(markup.getDbId());
     }
 
     void pushOpenMarkup(String rangeName) {
@@ -107,6 +107,9 @@ public class LMNLImporter {
             m.addTextNode(textNode);
             document.associateTextWithMarkup(textNode, m);
           });
+      if (!document.hasTextNodes()){
+        document.setFirstTextNodeId(textNode.getDbId());
+      }
       document.addTextNode(textNode);
     }
 
@@ -179,7 +182,7 @@ public class LMNLImporter {
     }
 
     TAGMarkup newMarkup(String tagName) {
-      TAGMarkup tagMarkup = new TAGMarkup(currentDocumentContext().document.getId(), tagName);
+      TAGMarkup tagMarkup = new TAGMarkup(currentDocumentContext().document.getDbId(), tagName);
       update(tagMarkup);
       return tagMarkup;
     }
@@ -470,9 +473,9 @@ public class LMNLImporter {
           String key = tag + "-" + annotationText(annotation);
           if (markupsToJoin.containsKey(key)) {
             TAGMarkup originalMarkup = markupsToJoin.get(key);
-            markup.getMarkup().getAnnotationIds().remove(annotation.getId());
+            markup.getMarkup().getAnnotationIds().remove(annotation.getDbId());
             document.joinMarkup(originalMarkup, markup);
-            markupIdsToRemove.add(markup.getId());
+            markupIdsToRemove.add(markup.getDbId());
           } else {
             markupsToJoin.put(key, markup.getMarkup());
           }

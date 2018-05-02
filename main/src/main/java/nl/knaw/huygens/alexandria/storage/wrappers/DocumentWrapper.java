@@ -44,8 +44,8 @@ public class DocumentWrapper {
     return document;
   }
 
-  public long getId() {
-    return document.getId();
+  public long getDbId() {
+    return document.getDbId();
   }
 
   public Stream<TextNodeWrapper> getTextNodeStream() {
@@ -59,8 +59,12 @@ public class DocumentWrapper {
         .map(m -> new MarkupWrapper(store, m));
   }
 
+  public TextNodeWrapper getFirstTextNode() {
+    return store.getTextNodeWrapper(document.getFirstTextNodeId());
+  }
+
   public boolean hasTextNodes() {
-    return !document.getTextNodeIds().isEmpty();
+    return document.getFirstTextNodeId() != null;
   }
 
   public boolean containsAtLeastHalfOfAllTextNodes(MarkupWrapper markupWrapper) {
@@ -68,24 +72,18 @@ public class DocumentWrapper {
   }
 
   public void setOnlyTextNode(TextNodeWrapper annotationText) {
-    document.getTextNodeIds().add(annotationText.getId());
+    document.getTextNodeIds().add(annotationText.getDbId());
     update();
   }
 
   public DocumentWrapper addMarkup(TAGMarkup markup) {
-    Long id = markup.getId();
+    Long id = markup.getDbId();
     return addMarkupId(id);
   }
 
   public DocumentWrapper addMarkup(MarkupWrapper markup) {
-    Long id = markup.getId();
+    Long id = markup.getDbId();
     return addMarkupId(id);
-  }
-
-  private DocumentWrapper addMarkupId(Long id) {
-    document.getMarkupIds().add(id);
-    update();
-    return this;
   }
 
   public Iterator<TAGTextNode> getTextNodeIterator() {
@@ -94,38 +92,18 @@ public class DocumentWrapper {
   }
 
   public void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, MarkupWrapper markupWrapper) {
-    associateTextNodeWithMarkup(textNodeWrapper, markupWrapper.getId());
-    update();
-  }
-
-  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
-    associateTextNodeWithMarkup(textNodeWrapper, markup.getId());
-  }
-
-  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, Long id) {
-    document.getTextNodeIdToMarkupIds()
-        .computeIfAbsent(
-            textNodeWrapper.getId(),
-            f -> new LinkedHashSet<>()).add(id);
-    update();
-  }
-
-  private void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
-    document.getTextNodeIdToMarkupIds()
-        .computeIfAbsent(
-            node.getId(),
-            f -> new LinkedHashSet<>()).remove(markup.getId());
+    associateTextNodeWithMarkup(textNodeWrapper, markupWrapper.getDbId());
     update();
   }
 
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
-    if (!firstTextNode.getId().equals(lastTextNode.getId())) {
-      TextNodeWrapper next = firstTextNode.getNextTextNode();
-      while (!next.getId().equals(lastTextNode.getId())) {
+    if (!firstTextNode.getDbId().equals(lastTextNode.getDbId())) {
+      TextNodeWrapper next = firstTextNode.getNextTextNodes().get(0);// TODO: handle divergence
+      while (!next.getDbId().equals(lastTextNode.getDbId())) {
         addTextNode(next);
-        next = next.getNextTextNode();
+        next = next.getNextTextNodes().get(0);// TODO: handle divergence
       }
       addTextNode(next);
     }
@@ -135,19 +113,22 @@ public class DocumentWrapper {
 
   public DocumentWrapper addTextNode(TextNodeWrapper textNode) {
     List<Long> textNodeIds = document.getTextNodeIds();
-    textNodeIds.add(textNode.getId());
-    if (textNodeIds.size() > 1) {
+    textNodeIds.add(textNode.getDbId());
+    if (textNodeIds.size() == 1) {
+      document.setFirstTextNodeId(textNode.getDbId());
+
+    } else {
       Long textNodeId = textNodeIds.get(textNodeIds.size() - 2);
       TAGTextNode prevTextNode = store.getTextNode(textNodeId);
       TextNodeWrapper previousTextNode = new TextNodeWrapper(store, prevTextNode);
-      textNode.setPreviousTextNode(previousTextNode);
+//      textNode.addPreviousTextNode(previousTextNode);
     }
     update();
     return this;
   }
 
   public Stream<MarkupWrapper> getMarkupStreamForTextNode(TextNodeWrapper tn) {
-    return document.getMarkupIdsForTextNodeIds(tn.getId()).stream()//
+    return document.getMarkupIdsForTextNodeIds(tn.getDbId()).stream()//
         .map(store::getMarkup)//
         .map(m -> new MarkupWrapper(store, m));
   }
@@ -171,6 +152,32 @@ public class DocumentWrapper {
   private void update() {
     document.updateModificationDate();
     store.persist(document);
+  }
+
+  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, TAGMarkup markup) {
+    associateTextNodeWithMarkup(textNodeWrapper, markup.getDbId());
+  }
+
+  private void associateTextNodeWithMarkup(TextNodeWrapper textNodeWrapper, Long id) {
+    document.getTextNodeIdToMarkupIds()
+        .computeIfAbsent(
+            textNodeWrapper.getDbId(),
+            f -> new LinkedHashSet<>()).add(id);
+    update();
+  }
+
+  private void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
+    document.getTextNodeIdToMarkupIds()
+        .computeIfAbsent(
+            node.getDbId(),
+            f -> new LinkedHashSet<>()).remove(markup.getDbId());
+    update();
+  }
+
+  private DocumentWrapper addMarkupId(Long id) {
+    document.getMarkupIds().add(id);
+    update();
+    return this;
   }
 
 }

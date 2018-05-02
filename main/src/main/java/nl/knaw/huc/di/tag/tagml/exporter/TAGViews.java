@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model.graph.nodes;
+package nl.knaw.huc.di.tag.tagml.exporter;
 
 /*-
  * #%L
@@ -19,5 +19,17 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * limitations under the License.
  * #L%
  */
-public class TextDelimiterNode extends ContentLessTextNode {
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.view.TAGView;
+
+import java.util.HashSet;
+
+public class TAGViews {
+  public static TAGView getShowAllMarkupView(final TAGStore store) {
+    return new TAGView(store).setMarkupToExclude(new HashSet<>());
+  }
+
+  public static TAGView getShowNoMarkupView(final TAGStore store) {
+    return new TAGView(store).setMarkupToInclude(new HashSet<>());
+  }
 }

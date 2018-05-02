@@ -86,7 +86,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
 
   private Long createNewMarkup(DocumentWrapper document, String tag1) {
     MarkupWrapper markup1 = store.createMarkupWrapper(document, tag1);
-    return markup1.getId();
+    return markup1.getDbId();
   }
 
 }

@@ -28,7 +28,7 @@ import java.util.*;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
-@Entity(version = 2)
+@Entity(version = 3)
 public class TAGDocument implements TAGObject {
   // previously: Limen
   @PrimaryKey(sequence = "document_pk_sequence")
@@ -44,11 +44,12 @@ public class TAGDocument implements TAGObject {
 
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
+  private Long firstTextNodeId;
 
   TAGDocument() {
   }
 
-  public Long getId() {
+  public Long getDbId() {
     return id;
   }
 
@@ -72,6 +73,14 @@ public class TAGDocument implements TAGObject {
     return !getTextNodeIds().isEmpty();
   }
 
+  public void setFirstTextNodeId(final Long firstTextNodeId) {
+    this.firstTextNodeId = firstTextNodeId;
+  }
+
+  public Long getFirstTextNodeId() {
+    return firstTextNodeId;
+  }
+
   public Map<Long, Set<Long>> getTextNodeIdToMarkupIds() {
     return textNodeIdToMarkupIds;
   }
@@ -88,11 +97,11 @@ public class TAGDocument implements TAGObject {
   }
 
   public void addTextNode(TAGTextNode textNode) {
-    textNodeIds.add(textNode.getId());
+    textNodeIds.add(textNode.getDbId());
   }
 
   public void associateTextWithMarkup(TAGTextNode textNode, TAGMarkup markup) {
-    textNodeIdToMarkupIds.computeIfAbsent(textNode.getId(), f -> new LinkedHashSet<>()).add(markup.getId());
+    textNodeIdToMarkupIds.computeIfAbsent(textNode.getDbId(), f -> new LinkedHashSet<>()).add(markup.getDbId());
   }
 
   public Date getCreationDate() {

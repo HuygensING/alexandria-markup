@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
 import java.time.Instant;
 
 public class DocumentNode implements Node {
+  public static final String LABEL = "Document";
   String name;
   Long identifier;
   Instant creationDate;

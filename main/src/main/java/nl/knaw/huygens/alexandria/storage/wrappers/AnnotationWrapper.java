@@ -41,8 +41,8 @@ public class AnnotationWrapper {
     return new DocumentWrapper(store, document);
   }
 
-  public Long getId() {
-    return annotation.getId();
+  public Long getDbId() {
+    return annotation.getDbId();
   }
 
   public String getTag() {
@@ -50,7 +50,7 @@ public class AnnotationWrapper {
   }
 
   public AnnotationWrapper addAnnotation(AnnotationWrapper annotationWrapper) {
-    annotation.getAnnotationIds().add(annotationWrapper.getId());
+    annotation.getAnnotationIds().add(annotationWrapper.getDbId());
     update();
     return this;
   }
