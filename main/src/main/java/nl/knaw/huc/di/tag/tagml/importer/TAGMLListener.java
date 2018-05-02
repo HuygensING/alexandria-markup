@@ -83,7 +83,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           .map(m -> "[" + m.getExtendedTag() + ">")//
           .collect(joining(", "));
       errorListener.addError(
-          "Unclosed TAGML tag(s): %s",
+          "Missing close tag(s) for: %s",
           openRanges
       );
     }
@@ -131,7 +131,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String namespace = markupName.split(":", 2)[0];
       if (!namespaces.containsKey(namespace)) {
         errorListener.addError(
-            "%s namespace %s has not been defined.",
+            "%s Namespace %s has not been defined.",
             errorPrefix(ctx), namespace
         );
       }
@@ -163,7 +163,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
       errorListener.addError(
-          "%s Resuming tag %s found, which has no corresponding earlier suspending tag <-%s].",
+          "%s Resume tag %s found, which has no corresponding earlier suspend tag <-%s].",
           errorPrefix(ctx), ctx.getText(), tag
       );
     }
@@ -241,7 +241,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String id = markup.getMarkupId();
       if (idsInUse.containsKey(id)) {
         errorListener.addError(
-            "%s id '%s' was already used in markup [%s>.",
+            "%s Id '%s' was already used in markup [%s>.",
             errorPrefix(ctx), id, idsInUse.get(id));
       }
       idsInUse.put(id, extendedTag);
@@ -296,7 +296,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, openMarkup);
     if (markup == null) {
       errorListener.addError(
-          "%s Closing tag <%s] found without corresponding open tag.",
+          "%s Close tag <%s] found without corresponding open tag.",
           errorPrefix(ctx), extendedMarkupName
       );
     } else {

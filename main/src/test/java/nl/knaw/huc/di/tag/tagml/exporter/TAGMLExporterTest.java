@@ -32,6 +32,13 @@ public class TAGMLExporterTest extends TAGStoreTest {
 
   public static final TAGView SHOW_ALL_MARKUP_VIEW = TAGViews.getShowAllMarkupView(store);
 
+
+  @Test
+  public void testMarkedUpText() {
+    String tagmlIn = "[line>The rain in Spain falls mainly on the plain.<line]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
   @Test
   public void testLinearAnnotatedText() {
     String tagmlIn = "[a>I've got a [b>bad<b] feeling about [c>this<c].<a]";
