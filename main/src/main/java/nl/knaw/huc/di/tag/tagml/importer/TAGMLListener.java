@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 import static nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
@@ -96,7 +97,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private String suspendTag(MarkupWrapper markupWrapper) {
-    return "<" + markupWrapper.getExtendedTag() + "]";
+    return "<" + SUSPEND_PREFIX + markupWrapper.getExtendedTag() + "]";
   }
 
   @Override
@@ -140,8 +141,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
 
     TerminalNode prefix = ctx.markupName().IMO_Prefix();
-    boolean optional = prefix != null && prefix.getText().equals("?");
-    boolean resume = prefix != null && prefix.getText().equals("+");
+    boolean optional = prefix != null && prefix.getText().equals(OPTIONAL_PREFIX);
+    boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
 
     MarkupWrapper markup = resume
         ? resumeMarkup(ctx)
@@ -159,12 +160,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private MarkupWrapper resumeMarkup(StartTagContext ctx) {
-    String tag = ctx.markupName().getText().replace("+", "");
+    String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
     MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
       errorListener.addError(
-          "%s Resume tag %s found, which has no corresponding earlier suspend tag <-%s].",
-          errorPrefix(ctx), ctx.getText(), tag
+          "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
+          errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag
       );
     }
     return markup;
@@ -288,10 +289,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private MarkupWrapper removeFromOpenMarkup(MarkupNameContext ctx) {
     String extendedMarkupName = ctx.name().getText();
 
-    TerminalNode suffix = ctx.IMC_Suffix();
-    if (suffix != null) {
-      extendedMarkupName += suffix.getText();
-    }
+    extendedMarkupName = withPrefix(ctx, extendedMarkupName);
+    extendedMarkupName = withSuffix(ctx, extendedMarkupName);
 
     MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, openMarkup);
     if (markup == null) {
@@ -304,11 +303,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       TerminalNode prefixNode = ctx.IMC_Prefix();
       if (prefixNode != null) {
         String prefixNodeText = prefixNode.getText();
-        if (prefixNodeText.equals("?")) {
+        if (prefixNodeText.equals(OPTIONAL_PREFIX)) {
           // optional
           // TODO
 
-        } else if (prefixNodeText.equals("-")) {
+        } else if (prefixNodeText.equals(SUSPEND_PREFIX)) {
           // suspend
           suspendedMarkup.add(markup);
         }
@@ -316,6 +315,22 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
 
     return markup;
+  }
+
+  private String withSuffix(final MarkupNameContext ctx, String extendedMarkupName) {
+    TerminalNode suffix = ctx.IMC_Suffix();
+    if (suffix != null) {
+      extendedMarkupName += suffix.getText();
+    }
+    return extendedMarkupName;
+  }
+
+  private String withPrefix(final MarkupNameContext ctx, String extendedMarkupName) {
+    TerminalNode prefix = ctx.IMC_Prefix();
+    if (prefix != null && prefix.getText().equals(OPTIONAL_PREFIX)) {
+      extendedMarkupName = prefix.getText() + extendedMarkupName;
+    }
+    return extendedMarkupName;
   }
 
   private MarkupWrapper removeFromMarkupStack(String extendedTag, Deque<MarkupWrapper> markupStack) {

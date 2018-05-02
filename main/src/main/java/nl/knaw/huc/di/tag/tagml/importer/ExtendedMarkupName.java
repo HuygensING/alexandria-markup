@@ -19,6 +19,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
+import static java.util.regex.Pattern.quote;
+import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+
 public class ExtendedMarkupName {
   private String tagName;
   private boolean optional = false;
@@ -28,16 +31,16 @@ public class ExtendedMarkupName {
 
   public static ExtendedMarkupName of(String text) {
     ExtendedMarkupName extendedMarkupName = new ExtendedMarkupName();
-    if (text.startsWith("?")) {
-      text = text.replaceFirst("\\?", "");
+    if (text.startsWith(OPTIONAL_PREFIX)) {
+      text = text.replaceFirst(quote(OPTIONAL_PREFIX), "");
       extendedMarkupName.setOptional(true);
     }
-    if (text.startsWith("-")) {
-      text = text.replaceFirst("-", "");
+    if (text.startsWith(SUSPEND_PREFIX)) {
+      text = text.replaceFirst(quote(SUSPEND_PREFIX), "");
       extendedMarkupName.setSuspend(true);
     }
-    if (text.startsWith("+")) {
-      text = text.replaceFirst("\\+", "");
+    if (text.startsWith(RESUME_PREFIX)) {
+      text = text.replaceFirst(quote(RESUME_PREFIX), "");
       extendedMarkupName.setResume(true);
     }
     if (text.contains("~")) {

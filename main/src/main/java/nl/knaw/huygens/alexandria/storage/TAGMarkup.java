@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -91,7 +92,10 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
-    // TODO: this is output language dependent move to language
+    if (optional) {
+      return TAGML.OPTIONAL_PREFIX + tag;
+    }
+    // TODO: this is output language dependent: move to language dependency
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix;
     }

@@ -360,7 +360,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         fail("Expected TAGMLSyntaxError");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
-            "Some suspended markup was not resumed: <t]");
+            "Some suspended markup was not resumed: <-t]");
       }
     });
   }

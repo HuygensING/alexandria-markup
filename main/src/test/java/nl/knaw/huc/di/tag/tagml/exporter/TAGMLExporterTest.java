@@ -32,7 +32,6 @@ public class TAGMLExporterTest extends TAGStoreTest {
 
   public static final TAGView SHOW_ALL_MARKUP_VIEW = TAGViews.getShowAllMarkupView(store);
 
-
   @Test
   public void testMarkedUpText() {
     String tagmlIn = "[line>The rain in Spain falls mainly on the plain.<line]";
@@ -80,6 +79,12 @@ public class TAGMLExporterTest extends TAGStoreTest {
         "|><add]" +
         "|><add]" +
         "|><l]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
+  public void testOptionalTags() {
+    String tagmlIn = "[l>This [?w>word<?w] is optional.<l]";
     assertTAGMLOutIsIn(tagmlIn);
   }
 

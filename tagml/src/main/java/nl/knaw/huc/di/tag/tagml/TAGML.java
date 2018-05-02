@@ -31,6 +31,10 @@ public class TAGML {
   public static final String CONVERGENCE = "|>";
   public static final String DIVIDER = "|";
 
+  public static final String OPTIONAL_PREFIX = "?";
+  public static final String SUSPEND_PREFIX = "-";
+  public static final String RESUME_PREFIX = "+";
+
 }
 
 
