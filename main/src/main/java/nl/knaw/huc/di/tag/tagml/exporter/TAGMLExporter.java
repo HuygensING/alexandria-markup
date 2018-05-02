@@ -70,6 +70,7 @@ public class TAGMLExporter {
     private ExporterState startState;
     private Set<Long> branchStartNodeIds = new HashSet<>();
     private Long convergenceSucceedingNodeId;
+    private Integer branchesToTraverse;
 
     public TextVariationState setStartState(ExporterState startState) {
       Preconditions.checkNotNull(startState);
@@ -85,6 +86,7 @@ public class TAGMLExporter {
     public TextVariationState setBranchStartNodes(List<TextNodeWrapper> branchStartNodes) {
       this.branchStartNodeIds = branchStartNodes.stream()
           .map(TextNodeWrapper::getDbId).collect(toSet());
+      this.branchesToTraverse = branchStartNodes.size();
       return this;
     }
 
@@ -101,8 +103,12 @@ public class TAGMLExporter {
       return node.getDbId().equals(convergenceSucceedingNodeId);
     }
 
-    public boolean convergenceIsLastTextNode() {
-      return convergenceSucceedingNodeId == null;
+    public void incrementBranchesStarted() {
+      branchesToTraverse--;
+    }
+
+    public boolean allBranchesTraversed() {
+      return branchesToTraverse == 0;
     }
   }
 
@@ -141,6 +147,13 @@ public class TAGMLExporter {
           tagmlBuilder.append(DIVIDER);
         }
 
+        TextVariationState variationState = textVariationStates.peek();
+        if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
+          tagmlBuilder.append(CONVERGENCE);
+          textVariationStates.pop();
+          variationState = textVariationStates.peek();
+        }
+
         List<Long> toClose = new ArrayList<>(state.openMarkupIds);
         toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
@@ -153,17 +166,13 @@ public class TAGMLExporter {
         state.openMarkupIds.removeAll(toClose);
         state.openMarkupIds.addAll(toOpen);
 
-        TextVariationState variationState = textVariationStates.peek();
         if (variationState.isBranchStartNode(nodeToProcess)) {
           // this node starts a new branch of the current textvariation
           stateRef.set(variationState.getStartState());
-          if (!nextTextNodes.isEmpty()) {
-            nodesToProcess.add(nextTextNodes.get(0));
-          }
-        }
-        if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
-          textVariationStates.pop();
-          tagmlBuilder.append(CONVERGENCE);
+          variationState.incrementBranchesStarted();
+//          if (!nextTextNodes.isEmpty()) {
+//            nodesToProcess.add(nextTextNodes.get(0));
+//          }
         }
         TAGTextNode textNode = nodeToProcess.getTextNode();
         String content = nodeToProcess.getText();
@@ -190,7 +199,15 @@ public class TAGMLExporter {
             textVariationState = textVariationStates.peek();
             if (!nextTextNodes.isEmpty()) {
               textVariationState.setConvergenceSucceedingNodeId(nextTextNodes.get(0).getDbId());
+              if (textVariationState.allBranchesTraversed()) {
+                nodesToProcess.push(nextTextNodes.get(0));
+              }
             }
+//            if ((textVariationState.convergenceSucceedingNodeId == null && nodesToProcess.isEmpty())
+//                || ((textVariationState.convergenceSucceedingNodeId != null && !nodesToProcess.isEmpty())) && (textVariationState.convergenceSucceedingNodeId.equals(nodesToProcess.peek().getDbId()))) {
+//              processedNodes.add(nodeToProcess);
+//            }
+
 //            textVariationState.closeBranch();
 //            if (textVariationState.allBranchesDone()) { // have we visited all branches of this textvariation?
 ////              stateStack.pop();
@@ -204,19 +221,25 @@ public class TAGMLExporter {
 //            }
             break;
         }
-        processedNodes.add(nodeToProcess);
+        if (!nodeToProcess.isConvergence()) {
+          processedNodes.add(nodeToProcess);
+        }
         state.lastTextNodeId = nodeToProcess.getDbId();
-        LOG.info("nextToProcess:{}", nodesToProcess.stream().map(TextNodeWrapper::getDbId).collect(toList()));
+//        LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TextNodeWrapper::getDbId).collect(toList()));
+//        nodesToProcess.removeAll(processedNodes);
+        LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TextNodeWrapper::getDbId).collect(toList()));
         LOG.info("TAGML={}\n", tagmlBuilder);
+      }
+    }
+    while (!textVariationStates.isEmpty()) {
+      TextVariationState textVariationState = textVariationStates.pop();
+      if (!textVariationState.branchStartNodeIds.isEmpty()) {
+        tagmlBuilder.append(CONVERGENCE);
       }
     }
     final ExporterState state = stateRef.get();
     state.openMarkupIds.descendingIterator()//
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
-    while (!textVariationStates.isEmpty()) {
-      textVariationStates.pop();
-      tagmlBuilder.append(CONVERGENCE);
-    }
     return tagmlBuilder.toString();
   }
 
@@ -253,6 +276,7 @@ public class TAGMLExporter {
 
   private void logTextNode(final TextNodeWrapper nodeWrapper) {
     TAGTextNode textNode = nodeWrapper.getTextNode();
+    LOG.debug("\n");
     LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
         nodeWrapper.getDbId(),
         textNode.getType(),
