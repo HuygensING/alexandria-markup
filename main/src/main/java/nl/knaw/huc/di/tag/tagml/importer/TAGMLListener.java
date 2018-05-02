@@ -109,7 +109,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitText(TextContext ctx) {
-    String text = ctx.getText();
+    String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {

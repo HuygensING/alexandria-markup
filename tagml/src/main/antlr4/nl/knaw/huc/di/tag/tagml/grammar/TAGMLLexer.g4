@@ -31,7 +31,7 @@ DEFAULT_BeginCloseMarkup
   ;
 
 DEFAULT_Text  // match any 16 bit char other than { (start close tag) and [ (start open tag)
-  : ~[<\\[|]+
+  : ( ~[[<\\] | REGULAR_TEXT_ESCAPE_CHARACTER )+
   ;
 
 NAME
@@ -128,7 +128,7 @@ AV_WS
   ;
 
 AV_StringValue
-  : ( '"' ~["]+ '"' | '\'' ~[']+ '\'' ) -> popMode
+  : ( '"' ( ~["] | SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '"' | '\'' ( ~['] | DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '\'' ) -> popMode
   ;
 
 AV_NumberValue
@@ -185,8 +185,8 @@ IMX_BeginCloseMarkup
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
-IMX_Text  // match any 16 bit char other than { (start close tag) and [ (start open tag)
-  : ~[<\\[|]+
+IMX_Text
+  : ( ~[[<\\] | REGULAR_TEXT_ESCAPE_CHARACTER )+
   ;
 
 IMX_MixedContentCloser
@@ -263,7 +263,7 @@ ITV_Comment
   ;
 
 ITV_Text
-  : ( ~[|><[)] | '\\|' | '\\>' | '\\<' | '\\[' | '\\)' )+
+  : ( ~[<[|] | TEXT_VARIATION_ESCAPE_CHARACTER )+
   ;
 
 ITV_BeginOpenMarkup // [ moves into markup tag
@@ -355,6 +355,34 @@ RIGHT_SQUARE_BRACKET
 DIGIT
   : [0-9]
   ;
+
+REGULAR_TEXT_ESCAPE_CHARACTER
+  : '\\<'
+  | '\\['
+  | ESCAPE_CHARACTER
+  ;
+
+TEXT_VARIATION_ESCAPE_CHARACTER
+  : REGULAR_TEXT_ESCAPE_CHARACTER
+  | '\\|'
+  ;
+
+COMMENT_ESCAPE_CHARACTER
+  : ESCAPE_CHARACTER
+  | '\\!'
+  ;
+
+SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER
+  : ESCAPE_CHARACTER
+  | '\\\''
+  ;
+
+DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER
+  : ESCAPE_CHARACTER
+  | '\\"'
+  ;
+
+fragment ESCAPE_CHARACTER  : '\\\\';
 
 fragment A : [Aa];
 fragment B : [Bb];

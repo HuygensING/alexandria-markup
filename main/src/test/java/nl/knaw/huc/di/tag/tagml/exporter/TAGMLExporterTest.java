@@ -33,6 +33,12 @@ public class TAGMLExporterTest extends TAGStoreTest {
   public static final TAGView SHOW_ALL_MARKUP_VIEW = TAGViews.getShowAllMarkupView(store);
 
   @Test
+  public void testEscapedCharacters() {
+    String tagmlIn = "[line>\\[, \\< and \\\\ need to be escaped.<line]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
   public void testMarkedUpText() {
     String tagmlIn = "[line>The rain in Spain falls mainly on the plain.<line]";
     assertTAGMLOutIsIn(tagmlIn);

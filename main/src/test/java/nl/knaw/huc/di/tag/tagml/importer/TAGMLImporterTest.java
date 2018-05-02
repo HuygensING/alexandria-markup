@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
@@ -64,31 +64,38 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore
+  //  @Ignore
   @Test
   public void testCharacterEscapingInRegularText() {
     String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
-      assertThat(document).hasTextNodesMatching(textNodeSketch("In regular text, <, [, and \\ need to be escaped, |, !, \", and ' don't."));
+      assertThat(document).hasTextNodesMatching(textNodeSketch("In regular text, <, [ and \\ need to be escaped, |, !, \", and ' don't."));
 
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
       assertThat(textNodeWrappers).hasSize(1);
     });
   }
 
-  @Ignore
+  //  @Ignore
   @Test
   public void testCharacterEscapingInTextVariation() {
-    String tagML = "In text in between textVariation tags, \\< \\[ \\| and \\\\ need to be escaped, ! \" and ' don't.";
+    String tagML = "In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
-      assertThat(document).hasTextNodesMatching(textNodeSketch("In text in between textVariation tags, <, [, |, and \\ need to be escaped, !, \", and ' don't."));
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("In text in between textVariation tags, "),
+//          textDivergenceSketch(),
+          textNodeSketch("<, [, | and \\ need to be escaped"),
+          textNodeSketch("!, \" and ' don't"),
+//          textConvergenceSketch(),
+          textNodeSketch(".")
+      );
 
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
-      assertThat(textNodeWrappers).hasSize(1);
+      assertThat(textNodeWrappers).hasSize(6);
     });
   }
 
@@ -422,7 +429,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(document).isNotNull();
       assertThat(document).hasTextNodesMatching(
           textNodeSketch("bla "),
-          textNodeSketch("\\|"),
+          textNodeSketch("|"),
           textNodeSketch("!"),
           textNodeSketch(" bla")
       );
@@ -587,9 +594,9 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 //    LOG.info("TAGML=\n{}\n", tagML);
     printTokens(tagML);
     DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagML);
-    LMNLExporter lmnlExporter = new LMNLExporter(store);
-    String lmnl = lmnlExporter.toLMNL(documentWrapper);
-    LOG.info("\n\nLMNL:\n{}\n", lmnl);
+    TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+    String tagml = tagmlExporter.asTAGML(documentWrapper);
+    LOG.info("\n\nTAGML:\n{}\n", tagml);
     return documentWrapper;
   }
 

@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import org.assertj.core.api.AbstractObjectAssert;
 
@@ -83,7 +84,6 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return textNodeSketch(textNodeWrapper.getText());
   }
 
-
   public static class TextNodeSketch {
 
     private final String text;
@@ -115,6 +115,14 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
 
   public static TextNodeSketch textNodeSketch(final String text) {
     return new TextNodeSketch(text);
+  }
+
+  public static TextNodeSketch textDivergenceSketch() {
+    return textNodeSketch(TAGML.DIVERGENCE);
+  }
+
+  public static TextNodeSketch textConvergenceSketch() {
+    return textNodeSketch(TAGML.CONVERGENCE);
   }
 
   public static class MarkupSketch {
