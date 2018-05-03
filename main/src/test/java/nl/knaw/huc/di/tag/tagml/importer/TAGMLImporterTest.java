@@ -344,6 +344,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
+  @Ignore("TODO: Handle richText annotations first")
+  @Test
+  public void testResumeInInnerDocumentLeadsToError() {
+    String tagML = "[text> [q>Hello my name is " +
+        "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
+        "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
+    String expectedErrors = "";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
   @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
@@ -385,6 +395,97 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
     String expectedErrors = "markup [x> not closed!";
     parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Ignore("passed where it should fail.")
+  @Test
+  public void testIncorrectOverlapNonLinearityCombination() {
+    String tagML = "[text>It is a truth universally acknowledged that every <|[add>young [b>woman<add]|[del>rich<del]|> man <b] is in need of a maid.<text] ";
+    String expectedErrors = "some error about the [b> tags";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testCorrectOverlapNonLinearityCombination1() {
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<add]<b]" +
+        "|[b>[del>rich<del]|>" +
+        " man <b] is in need of a maid.<text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("It is a truth universally acknowledged that every "),
+          textNodeSketch("young "),
+          textNodeSketch("woman"),
+          textNodeSketch("rich"),
+          textNodeSketch(" man "),
+          textNodeSketch(" is in need of a maid.")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text"),
+          markupSketch("add"),
+          markupSketch("del"),
+          markupSketch("b")
+      );
+    });
+  }
+
+  @Test
+  public void testCorrectOverlapNonLinearityCombination2() {
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<add]<b]" +
+        "|[b>[del>rich<del]<b]|>" +
+        " [b>man<b] is in need of a maid.<text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("It is a truth universally acknowledged that every "),
+          textNodeSketch("young "),
+          textNodeSketch("woman"),
+          textNodeSketch("man"),
+          textNodeSketch(" is in need of a maid.")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text"),
+          markupSketch("add"),
+          markupSketch("del"),
+          markupSketch("b")
+      );
+    });
+  }
+
+  @Ignore("passes where it should fail")
+  @Test
+  public void testIncorrectDiscontinuityNonLinearityCombination() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<-q]<del]" +
+        "| [add>thought Alice<add]|>" +
+        " [+q>without pictures or conversation?<q]";
+    String expectedErrors = "some error about the [q> tags, with branch mentioned";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testCorrectDiscontinuityNonLinearityCombination() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<del]" +
+        "|<-q][add>thought Alice<add][+q>|>" +
+        "without pictures or conversation?<q] ";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("and what is the use of a "),
+          textNodeSketch("book,"),
+          textNodeSketch("thought Alice"),
+          textNodeSketch("without pictures or conversation?")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("q")
+      );
+    });
   }
 
   @Test
