@@ -340,40 +340,34 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return markup;
   }
 
-  private String errorPrefix(ParserRuleContext ctx) {
-    Token startToken = ctx.start;
-    return format("line %d:%d :", startToken.getLine(), startToken.getCharPositionInLine());
-  }
-
-  private void logTextNode(final TextNodeWrapper nodeWrapper) {
-    TAGTextNode textNode = nodeWrapper.getTextNode();
-    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
-        nodeWrapper.getDbId(),
-        textNode.getType(),
-        textNode.getText(),
-        textNode.getPrevTextNodeIds(),
-        textNode.getNextTextNodeIds()
-    );
-  }
-
-  private String openTag(final MarkupWrapper m) {
-    return OPEN_TAG_STARTCHAR + m.getExtendedTag() + OPEN_TAG_ENDCHAR;
-  }
-
-  private String suspendTag(MarkupWrapper markupWrapper) {
-    return CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX + markupWrapper.getExtendedTag() + CLOSE_TAG_ENDCHAR;
-  }
-
   private MarkupWrapper resumeMarkup(StartTagContext ctx) {
     String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
     MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
+    checkForCorrespondingSuspendTag(ctx, tag, markup);
+    checkForTextBetweenSuspendAndResumeTags(ctx, markup);
+    return markup;
+  }
+
+  private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag, final MarkupWrapper markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
           errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag
       );
     }
-    return markup;
+  }
+
+  private void checkForTextBetweenSuspendAndResumeTags(final StartTagContext ctx, final MarkupWrapper markup) {
+    List<Long> markupTextNodeIds = markup.getMarkup().getTextNodeIds();
+    Long lastMarkupTextNodeId = markupTextNodeIds.get(markupTextNodeIds.size() - 1);
+    List<Long> documentTextNodeIds = document.getDocument().getTextNodeIds();
+    Long lastDocumentTextNodeId = documentTextNodeIds.get(documentTextNodeIds.size() - 1);
+    if (lastDocumentTextNodeId.equals(lastMarkupTextNodeId)) {
+      errorListener.addError(
+          "%s There is no text between this resume tag %s and it's corresponding suspend tag %s. This is not allowed.",
+          errorPrefix(ctx), resumeTag(markup), suspendTag(markup)
+      );
+    }
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {
@@ -402,4 +396,31 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return true;
   }
 
+  private String openTag(final MarkupWrapper m) {
+    return OPEN_TAG_STARTCHAR + m.getExtendedTag() + OPEN_TAG_ENDCHAR;
+  }
+
+  private String suspendTag(MarkupWrapper markupWrapper) {
+    return CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX + markupWrapper.getExtendedTag() + CLOSE_TAG_ENDCHAR;
+  }
+
+  private String resumeTag(MarkupWrapper markupWrapper) {
+    return OPEN_TAG_STARTCHAR + RESUME_PREFIX + markupWrapper.getExtendedTag() + OPEN_TAG_ENDCHAR;
+  }
+
+  private String errorPrefix(ParserRuleContext ctx) {
+    Token startToken = ctx.start;
+    return format("line %d:%d :", startToken.getLine(), startToken.getCharPositionInLine());
+  }
+
+  private void logTextNode(final TextNodeWrapper nodeWrapper) {
+    TAGTextNode textNode = nodeWrapper.getTextNode();
+    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
+        nodeWrapper.getDbId(),
+        textNode.getType(),
+        textNode.getText(),
+        textNode.getPrevTextNodeIds(),
+        textNode.getNextTextNodeIds()
+    );
+  }
 }

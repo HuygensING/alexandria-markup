@@ -100,60 +100,32 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingEndTagThrowsTAGMLSyntaxError() {
     String tagML = "[line>The rain";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail("TAGMLSyntaxError expected!");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "Missing close tag(s) for: [line>");
-      }
-    });
+    String expectedErrors = "Missing close tag(s) for: [line>";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
-    String tagML = "on the plain.<line] ";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail("TAGMLSyntaxError expected!");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "line 1:14 : Close tag <line] found without corresponding open tag.");
-      }
-    });
+    String tagML = "on the plain.<line]";
+    String expectedErrors = "line 1:14 : Close tag <line] found without corresponding open tag.";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
     String tagML = "[line>The Spanish rain.<paragraph]";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail("TAGMLSyntaxError expected!");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
-            "Missing close tag(s) for: [line>");
-      }
-    });
+    String expectedErrors = "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
+        "Missing close tag(s) for: [line>";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
     String tagML = "[>The Spanish rain.<]";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail("TAGMLSyntaxError expected!");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "syntax error: line 1:1 no viable alternative at input '[>'\n" +
-            "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
-            "line 1:19 : Nameless markup is not allowed here.");
-      }
-    });
+    String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
+        "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
+        "line 1:19 : Nameless markup is not allowed here.";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
@@ -330,7 +302,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  //  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
@@ -361,15 +332,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUnclosedDiscontinuityLeadsToError() {
     String tagML = "[t>This is<-t], he said...";
-    store.runInTransaction(() -> {
-      try {
-        parseTAGML(tagML);
-        fail("Expected TAGMLSyntaxError");
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("Parsing errors:\n" +
-            "Some suspended markup was not resumed: <-t]");
-      }
-    });
+    String expectedErrors = "Some suspended markup was not resumed: <-t]";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testFalseDiscontinuityLeadsToError() {
+    // There must be text between a pause and a resume tag, so the following example is not allowed:
+    String tagML = "[markup>Cookie <-markup][+markup> Monster<markup]";
+    String expectedErrors = "line 1:24 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Ignore
@@ -411,14 +383,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    store.runInTransaction(() -> {
-      try {
-        DocumentWrapper document = parseTAGML(tagML);
-        fail();
-      } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("markup [x> not closed!");
-      }
-    });
+    String expectedErrors = "markup [x> not closed!";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
@@ -589,6 +555,18 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   // private methods
+
+  private void parseWithExpectedErrors(final String tagML, final String expectedErrors) {
+    store.runInTransaction(() -> {
+      try {
+        DocumentWrapper document = parseTAGML(tagML);
+        fail("TAGMLSyntaxError expected!");
+      } catch (TAGMLSyntaxError e) {
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            expectedErrors);
+      }
+    });
+  }
 
   private DocumentWrapper parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
