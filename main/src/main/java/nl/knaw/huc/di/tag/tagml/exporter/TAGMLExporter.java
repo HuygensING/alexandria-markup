@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.toList;
@@ -42,13 +43,15 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
   private final TAGView view;
-
-  public TAGMLExporter(TAGView view) {
-    this.view = view;
-  }
+  private final TAGStore store;
 
   public TAGMLExporter(TAGStore store) {
-    this.view = TAGViews.getShowAllMarkupView(store);
+    this(store, TAGViews.getShowAllMarkupView(store));
+  }
+
+  public TAGMLExporter(TAGStore store, TAGView view) {
+    this.store = store;
+    this.view = view;
   }
 
   class ExporterState {
@@ -118,6 +121,11 @@ public class TAGMLExporter {
   }
 
   public String asTAGML(DocumentWrapper document) {
+    Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
+    document.getMarkupStream()
+        .filter(MarkupWrapper::isDiscontinuous)
+        .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
+
     StringBuilder tagmlBuilder = new StringBuilder();
 
     Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
@@ -139,6 +147,9 @@ public class TAGMLExporter {
           markupIds.add(id);
           state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
           state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+          if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
+            discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
+          }
         });
         Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
@@ -156,11 +167,19 @@ public class TAGMLExporter {
         List<Long> toClose = new ArrayList<>(state.openMarkupIds);
         toClose.removeAll(relevantMarkupIds);
         Collections.reverse(toClose);
-        toClose.forEach(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
+        toClose.forEach(markupId -> {
+          String closeTag = state.closeTags.get(markupId).toString();
+          closeTag = addSuspendPrefixIfRequired(closeTag, markupId, discontinuousMarkupTextNodesToHandle);
+          tagmlBuilder.append(closeTag);
+        });
 
         List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
         toOpen.removeAll(state.openMarkupIds);
-        toOpen.forEach(markupId -> tagmlBuilder.append(state.openTags.get(markupId)));
+        toOpen.forEach(markupId -> {
+          String openTag = state.openTags.get(markupId).toString();
+          openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle);
+          tagmlBuilder.append(openTag);
+        });
 
         state.openMarkupIds.removeAll(toClose);
         state.openMarkupIds.addAll(toOpen);
@@ -222,6 +241,29 @@ public class TAGMLExporter {
     state.openMarkupIds.descendingIterator()//
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     return tagmlBuilder.toString();
+  }
+
+  private String addResumePrefixIfRequired(String openTag, Long markupId,
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+    if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
+      int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
+      MarkupWrapper markup = store.getMarkupWrapper(markupId);
+      if (textNodesToHandle < markup.getTextNodeCount() - 1) {
+        openTag = openTag.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX);
+      }
+    }
+    return openTag;
+  }
+
+  private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+    if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
+      int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
+      if (textNodesToHandle > 0) {
+        closeTag = closeTag.replace(CLOSE_TAG_STARTCHAR, CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX);
+      }
+    }
+    return closeTag;
   }
 
   private boolean needsDivider(final TextNodeWrapper nodeWrapper) {

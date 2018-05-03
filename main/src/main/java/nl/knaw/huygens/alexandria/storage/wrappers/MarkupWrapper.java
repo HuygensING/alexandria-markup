@@ -23,9 +23,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MarkupWrapper {
@@ -107,20 +105,16 @@ public class MarkupWrapper {
     return markup;
   }
 
+  public void setIsDiscontinuous(final boolean b) {
+    markup.setDiscontinuous(b);
+  }
+
+  public boolean isDiscontinuous() {
+    return markup.isDiscontinuous();
+  }
+
   public boolean isContinuous() {
-    boolean isContinuous = true;
-    List<TextNodeWrapper> textNodes = getTextNodeStream().collect(Collectors.toList());
-    TextNodeWrapper textNode = textNodes.get(0);
-    TextNodeWrapper expectedNext = textNode.getNextTextNodes().get(0); // TODO: handle divergence
-    for (int i = 1; i < textNodes.size(); i++) {
-      textNode = textNodes.get(i);
-      if (!textNode.equals(expectedNext)) {
-        isContinuous = false;
-        break;
-      }
-      expectedNext = textNode.getNextTextNodes().get(0);// TODO: handle divergence
-    }
-    return isContinuous;
+    return !markup.isDiscontinuous();
   }
 
   public String getExtendedTag() {
@@ -183,6 +177,23 @@ public class MarkupWrapper {
     return this;
   }
 
+  public MarkupWrapper setMarkupId(String id) {
+    markup.setMarkupId(id);
+    return this;
+  }
+
+  public boolean hasTag(String tag) {
+    return tag.equals(markup.getTag());
+  }
+
+  public void setSuffix(String suffix) {
+    markup.setSuffix(suffix);
+  }
+
+  public int getTextNodeCount() {
+    return markup.getTextNodeIds().size();
+  }
+
   @Override
   public String toString() {
     return markup.toString();
@@ -199,16 +210,4 @@ public class MarkupWrapper {
         && markup.equals(((MarkupWrapper) other).getMarkup());
   }
 
-  public MarkupWrapper setMarkupId(String id) {
-    markup.setMarkupId(id);
-    return this;
-  }
-
-  public boolean hasTag(String tag) {
-    return tag.equals(markup.getTag());
-  }
-
-  public void setSuffix(String suffix) {
-    markup.setSuffix(suffix);
-  }
 }

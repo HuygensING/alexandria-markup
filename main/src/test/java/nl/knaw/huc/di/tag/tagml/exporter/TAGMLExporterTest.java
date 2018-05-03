@@ -23,14 +23,11 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGMLExporterTest extends TAGStoreTest {
-
-  public static final TAGView SHOW_ALL_MARKUP_VIEW = TAGViews.getShowAllMarkupView(store);
 
   @Test
   public void testEscapedCharacters() {
@@ -94,10 +91,18 @@ public class TAGMLExporterTest extends TAGStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
+  @Test
+  public void testDiscontinuity() {
+    String tagmlIn = "[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  // --- private methods ---
+
   private void assertTAGMLOutIsIn(final String tagmlIn) {
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagmlIn);
-      String tagmlOut = new TAGMLExporter(SHOW_ALL_MARKUP_VIEW).asTAGML(documentWrapper);
+      String tagmlOut = new TAGMLExporter(store).asTAGML(documentWrapper);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
     });

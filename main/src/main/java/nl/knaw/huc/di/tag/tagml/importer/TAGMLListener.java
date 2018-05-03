@@ -345,6 +345,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
     checkForCorrespondingSuspendTag(ctx, tag, markup);
     checkForTextBetweenSuspendAndResumeTags(ctx, markup);
+    markup.setIsDiscontinuous(true);
     return markup;
   }
 

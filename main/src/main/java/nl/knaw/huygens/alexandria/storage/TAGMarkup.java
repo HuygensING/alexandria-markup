@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Entity(version = 1)
+@Entity(version = 2)
 public class TAGMarkup implements TAGObject {
   @PrimaryKey(sequence = "textrange_pk_sequence")
   private Long id;
@@ -45,6 +45,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatedMarkupId;
   private Long dominatingMarkupId;
   private boolean optional = false;
+  private boolean discontinuous = false;
 
   private TAGMarkup() {
   }
@@ -160,6 +161,14 @@ public class TAGMarkup implements TAGObject {
     return optional;
   }
 
+  public void setDiscontinuous(final boolean discontinuous) {
+    this.discontinuous = discontinuous;
+  }
+
+  public boolean isDiscontinuous() {
+    return discontinuous;
+  }
+
   @Override
   public String toString() {
     return "[" + tag + "]";
@@ -175,4 +184,5 @@ public class TAGMarkup implements TAGObject {
     return other instanceof TAGMarkup//
         && getDbId().equals(((TAGMarkup) other).getDbId());
   }
+
 }
