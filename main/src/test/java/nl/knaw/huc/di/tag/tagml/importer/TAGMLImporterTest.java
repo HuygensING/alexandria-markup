@@ -64,7 +64,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  //  @Ignore
   @Test
   public void testCharacterEscapingInRegularText() {
     String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
@@ -78,7 +77,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  //  @Ignore
   @Test
   public void testCharacterEscapingInTextVariation() {
     String tagML = "In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.";
@@ -142,7 +140,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore
   @Test
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
     String tagML = "[>The Spanish rain.<]";
@@ -151,7 +148,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         DocumentWrapper document = parseTAGML(tagML);
         fail("TAGMLSyntaxError expected!");
       } catch (TAGMLSyntaxError e) {
-        assertThat(e).hasMessage("");
+        assertThat(e).hasMessage("Parsing errors:\n" +
+            "syntax error: line 1:1 no viable alternative at input '[>'\n" +
+            "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
+            "line 1:19 : Nameless markup is not allowed here.");
       }
     });
   }

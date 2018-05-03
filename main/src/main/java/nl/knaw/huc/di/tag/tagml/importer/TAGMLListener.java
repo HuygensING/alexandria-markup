@@ -81,7 +81,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     update(document.getDocument());
     if (!openMarkup.isEmpty()) {
       String openRanges = openMarkup.stream()//
-          .map(m -> "[" + m.getExtendedTag() + ">")//
+          .map(this::openTag)//
           .collect(joining(", "));
       errorListener.addError(
           "Missing close tag(s) for: %s",
@@ -94,10 +94,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           .collect(Collectors.joining(", "));
       errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
-  }
-
-  private String suspendTag(MarkupWrapper markupWrapper) {
-    return "<" + SUSPEND_PREFIX + markupWrapper.getExtendedTag() + "]";
   }
 
   @Override
@@ -126,70 +122,65 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
-    String markupName = ctx.markupName().name().getText();
-    LOG.debug("startTag.markupName=<{}>", markupName);
-    if (markupName.contains(":")) {
-      String namespace = markupName.split(":", 2)[0];
-      if (!namespaces.containsKey(namespace)) {
-        errorListener.addError(
-            "%s Namespace %s has not been defined.",
-            errorPrefix(ctx), namespace
-        );
+    if (tagNameIsValid(ctx)) {
+      MarkupNameContext markupNameContext = ctx.markupName();
+      String markupName = markupNameContext.name().getText();
+      LOG.debug("startTag.markupName=<{}>", markupName);
+      if (markupName.contains(":")) {
+        String namespace = markupName.split(":", 2)[0];
+        if (!namespaces.containsKey(namespace)) {
+          errorListener.addError(
+              "%s Namespace %s has not been defined.",
+              errorPrefix(ctx), namespace
+          );
+        }
+      }
+      ctx.annotation()
+          .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
+
+      TerminalNode prefix = markupNameContext.IMO_Prefix();
+      boolean optional = prefix != null && prefix.getText().equals(OPTIONAL_PREFIX);
+      boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
+
+      MarkupWrapper markup = resume
+          ? resumeMarkup(ctx)
+          : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
+
+      if (markup != null) {
+        TerminalNode suffix = markupNameContext.IMO_Suffix();
+        if (suffix != null) {
+          String id = suffix.getText().replace(TILDE, "");
+          markup.setSuffix(id);
+        }
+
+        openMarkup.add(markup);
       }
     }
-    ctx.annotation()
-        .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
-
-    TerminalNode prefix = ctx.markupName().IMO_Prefix();
-    boolean optional = prefix != null && prefix.getText().equals(OPTIONAL_PREFIX);
-    boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
-
-    MarkupWrapper markup = resume
-        ? resumeMarkup(ctx)
-        : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
-
-    if (markup != null) {
-      TerminalNode suffix = ctx.markupName().IMO_Suffix();
-      if (suffix != null) {
-        String id = suffix.getText().replace(TILDE, "");
-        markup.setSuffix(id);
-      }
-
-      openMarkup.add(markup);
-    }
-  }
-
-  private MarkupWrapper resumeMarkup(StartTagContext ctx) {
-    String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
-    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
-    if (markup == null) {
-      errorListener.addError(
-          "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
-          errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag
-      );
-    }
-    return markup;
   }
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
-    String markupName = ctx.markupName().name().getText();
-    LOG.debug("endTag.markupName=<{}>", markupName);
-    removeFromOpenMarkup(ctx.markupName());
+    if (tagNameIsValid(ctx)) {
+      String markupName = ctx.markupName().name().getText();
+      LOG.debug("endTag.markupName=<{}>", markupName);
+      removeFromOpenMarkup(ctx.markupName());
+    }
   }
 
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
+    if (tagNameIsValid(ctx)) {
 //    String markupName = ctx.name().getText();
 //    LOG.debug("milestone.markupName=<{}>", markupName);
 //    ctx.annotation()
 //        .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
-    TextNodeWrapper tn = store.createTextNodeWrapper("");
-    document.addTextNode(tn);
-    logTextNode(tn);
-    openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    MarkupWrapper markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
-    linkTextToMarkup(tn, markup);
+      TextNodeWrapper tn = store.createTextNodeWrapper("");
+      document.addTextNode(tn);
+      logTextNode(tn);
+      openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+      MarkupWrapper markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
+      linkTextToMarkup(tn, markup);
+    }
   }
 
   @Override
@@ -298,19 +289,19 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           "%s Close tag <%s] found without corresponding open tag.",
           errorPrefix(ctx), extendedMarkupName
       );
-    } else {
+      return null;
+    }
 
-      TerminalNode prefixNode = ctx.IMC_Prefix();
-      if (prefixNode != null) {
-        String prefixNodeText = prefixNode.getText();
-        if (prefixNodeText.equals(OPTIONAL_PREFIX)) {
-          // optional
-          // TODO
+    TerminalNode prefixNode = ctx.IMC_Prefix();
+    if (prefixNode != null) {
+      String prefixNodeText = prefixNode.getText();
+      if (prefixNodeText.equals(OPTIONAL_PREFIX)) {
+        // optional
+        // TODO
 
-        } else if (prefixNodeText.equals(SUSPEND_PREFIX)) {
-          // suspend
-          suspendedMarkup.add(markup);
-        }
+      } else if (prefixNodeText.equals(SUSPEND_PREFIX)) {
+        // suspend
+        suspendedMarkup.add(markup);
       }
     }
 
@@ -364,4 +355,51 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         textNode.getNextTextNodeIds()
     );
   }
+
+  private String openTag(final MarkupWrapper m) {
+    return OPEN_TAG_STARTCHAR + m.getExtendedTag() + OPEN_TAG_ENDCHAR;
+  }
+
+  private String suspendTag(MarkupWrapper markupWrapper) {
+    return CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX + markupWrapper.getExtendedTag() + CLOSE_TAG_ENDCHAR;
+  }
+
+  private MarkupWrapper resumeMarkup(StartTagContext ctx) {
+    String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
+    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
+    if (markup == null) {
+      errorListener.addError(
+          "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
+          errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag
+      );
+    }
+    return markup;
+  }
+
+  private boolean tagNameIsValid(final StartTagContext ctx) {
+    NameContext nameContext = ctx.markupName().name();
+    return nameContextIsValid(ctx, nameContext);
+  }
+
+  private boolean tagNameIsValid(final EndTagContext ctx) {
+    NameContext nameContext = ctx.markupName().name();
+    return nameContextIsValid(ctx, nameContext);
+  }
+
+  private boolean tagNameIsValid(final MilestoneTagContext ctx) {
+    NameContext nameContext = ctx.name();
+    return nameContextIsValid(ctx, nameContext);
+  }
+
+  private boolean nameContextIsValid(final ParserRuleContext ctx, final NameContext nameContext) {
+    if (nameContext == null || nameContext.getText().isEmpty()) {
+      errorListener.addError(
+          "%s Nameless markup is not allowed here.",
+          errorPrefix(ctx)
+      );
+      return false;
+    }
+    return true;
+  }
+
 }
