@@ -226,12 +226,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     currentTextVariationState().endNodes.add(lastTextNode);
     previousTextNode = currentTextVariationState().startNode;
     currentTextVariationState().endStates.add(state.copy());
-//    state = currentTextVariationState().startState;
+    state = currentTextVariationState().startState.copy();
   }
 
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
     currentTextVariationState().endNodes.add(previousTextNode);
+    currentTextVariationState().endStates.add(state.copy());
+    checkEndStates(ctx);
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
     previousTextNode = tn;
@@ -244,6 +246,91 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     });
 //    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     logTextNode(tn);
+  }
+
+  private void checkEndStates(final TextVariationContext ctx) {
+    List<List<String>> suspendedMarkupInBranch = new ArrayList<>();
+    List<List<String>> resumedMarkupInBranch = new ArrayList<>();
+
+    List<List<String>> openedMarkupInBranch = new ArrayList<>();
+    List<List<String>> closedMarkupInBranch = new ArrayList<>();
+
+    State startState = currentTextVariationState().startState;
+    Deque<MarkupWrapper> suspendedMarkupBeforeDivergence = startState.suspendedMarkup;
+    Deque<MarkupWrapper> openMarkupBeforeDivergence = startState.openMarkup;
+
+    currentTextVariationState().endStates.forEach(state -> {
+      List<String> suspendedMarkup = state.suspendedMarkup.stream()
+          .filter(m -> !suspendedMarkupBeforeDivergence.contains(m))
+          .map(this::suspendTag)
+          .collect(toList());
+      suspendedMarkupInBranch.add(suspendedMarkup);
+
+      // TODO: resumedMarkup
+
+      List<String> openedInBranch = state.openMarkup.stream()
+          .filter(m -> !openMarkupBeforeDivergence.contains(m))
+          .map(this::openTag)
+          .collect(toList());
+      openedMarkupInBranch.add(openedInBranch);
+
+      List<String> closedInBranch = openMarkupBeforeDivergence.stream()
+          .filter(m -> !state.openMarkup.contains(m))
+          .map(this::closeTag)
+          .collect(toList());
+      closedMarkupInBranch.add(closedInBranch);
+    });
+
+    String errorPrefix = errorPrefix(ctx);
+    checkSuspendedOrResumedMarkupBetweenBranches(suspendedMarkupInBranch, resumedMarkupInBranch, errorPrefix);
+    checkOpenedOrClosedMarkupBetweenBranches(openedMarkupInBranch, closedMarkupInBranch, errorPrefix);
+  }
+
+  private void checkSuspendedOrResumedMarkupBetweenBranches(final List<List<String>> suspendedMarkupInBranch, final List<List<String>> resumedMarkupInBranch, final String errorPrefix) {
+    Set<List<String>> suspendedMarkupSet = new HashSet<>(suspendedMarkupInBranch);
+    if (suspendedMarkupSet.size() > 1) {
+      StringBuilder branchLines = new StringBuilder();
+      for (int i = 0; i < suspendedMarkupInBranch.size(); i++) {
+        branchLines.append("\n\tbranch ")
+            .append(i + 1)
+            .append(" has suspended markup ")
+            .append(suspendedMarkupInBranch.get(i));
+      }
+      errorListener.addError(
+          "%s There is a discrepancy in suspended markup between branches:%s",
+          errorPrefix, branchLines);
+    }
+  }
+
+  private void checkOpenedOrClosedMarkupBetweenBranches(final List<List<String>> openedMarkupInBranch, final List<List<String>> closedMarkupInBranch, final String errorPrefix) {
+    Set<List<String>> branchMarkupSet = new HashSet<>(openedMarkupInBranch);
+    branchMarkupSet.addAll(closedMarkupInBranch);
+    if (branchMarkupSet.size() > 2) {
+      StringBuilder branchLines = new StringBuilder();
+      for (int i = 0; i < openedMarkupInBranch.size(); i++) {
+        String closed = closedMarkupInBranch.get(i).stream().collect(joining(", "));
+        String closedStatement = closed.isEmpty()
+            ? "didn't close any markup"
+            : "closed markup " + closed;
+        String opened = openedMarkupInBranch.get(i).stream().collect(joining(", "));
+        String openedStatement = opened.isEmpty()
+            ? "didn't open any new markup"
+            : "opened markup " + opened;
+        branchLines.append("\n\tbranch ")
+            .append(i + 1)
+            .append(" ")
+            .append(closedStatement)
+            .append(" that was opened before the ")
+            .append(DIVERGENCE)
+            .append(" and ")
+            .append(openedStatement)
+            .append(" to be closed after the ")
+            .append(CONVERGENCE);
+      }
+      errorListener.addError(
+          "%s There is an open markup discrepancy between the branches:%s",
+          errorPrefix, branchLines);
+    }
   }
 
   private MarkupWrapper addMarkup(String extendedTag, List<AnnotationContext> atts, ParserRuleContext ctx) {
@@ -425,6 +512,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private String openTag(final MarkupWrapper m) {
     return OPEN_TAG_STARTCHAR + m.getExtendedTag() + OPEN_TAG_ENDCHAR;
+  }
+
+  private String closeTag(final MarkupWrapper m) {
+    return CLOSE_TAG_STARTCHAR + m.getExtendedTag() + CLOSE_TAG_ENDCHAR;
   }
 
   private String suspendTag(MarkupWrapper markupWrapper) {

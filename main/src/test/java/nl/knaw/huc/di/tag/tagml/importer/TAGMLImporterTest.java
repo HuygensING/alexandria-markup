@@ -363,51 +363,52 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(document).isNotNull();
 
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
-      assertThat(textNodeWrappers).hasSize(8);
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("This "),
-          textNodeSketch("is "),
-          textNodeSketch("a"),
-          textNodeSketch(" "),
-          textNodeSketch("failing"),
-          textNodeSketch("an"),
-          textNodeSketch("excellent"),
-          textNodeSketch(" test")
+      assertThat(textNodeWrappers).extracting("text").containsExactly(
+          "This ",
+          "is ",
+          "", // <|
+          "a",
+          " ",
+          "failing",
+          "an",
+          " ",
+          "excellent",
+          "", // |>
+          " test"
       );
 
       List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
-      assertThat(markupWrappers).hasSize(3);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("t"),
-          markupSketch("x"),
-          markupSketch("y")
-      );
+      assertThat(markupWrappers)
+          .extracting("tag")
+          .containsExactly("t", "x", "y");
 
       MarkupWrapper t = markupWrappers.get(0);
       assertThat(t.getTag()).isEqualTo("t");
       List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
-      assertThat(tTextNodeWrappers).hasSize(8);
+      assertThat(tTextNodeWrappers).hasSize(11);
 
       MarkupWrapper x = markupWrappers.get(1);
       assertThat(x.getTag()).isEqualTo("x");
       List<TextNodeWrapper> xTextNodeWrappers = x.getTextNodeStream().collect(toList());
-      assertThat(xTextNodeWrappers).hasSize(3);
-      assertThat(xTextNodeWrappers).extracting("text").containsExactly("is", "a", "an");
+      assertThat(xTextNodeWrappers)
+          .extracting("text")
+          .containsExactly("is ", "", "a", "an");
 
       MarkupWrapper y = markupWrappers.get(2);
       assertThat(y.getTag()).isEqualTo("y");
-      List<TextNodeWrapper> yTextNodeWrappers = x.getTextNodeStream().collect(toList());
-      assertThat(xTextNodeWrappers).hasSize(3);
-      assertThat(xTextNodeWrappers).extracting("text").containsExactly("failing", "excellent", "test");
-
+      List<TextNodeWrapper> yTextNodeWrappers = y.getTextNodeStream().collect(toList());
+      assertThat(yTextNodeWrappers)
+          .extracting("text")
+          .containsExactly("failing", "excellent", "", "test");
     });
   }
 
-  @Ignore
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    String expectedErrors = "markup [x> not closed!";
+    String expectedErrors = "line 1:14 : There is an open markup discrepancy between the branches:\n" +
+        "\tbranch 1 didn't close any markup that was opened before the <| and opened markup [y> to be closed after the |>\n" +
+        "\tbranch 2 closed markup <x] that was opened before the <| and opened markup [y> to be closed after the |>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
