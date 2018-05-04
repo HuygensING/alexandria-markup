@@ -354,13 +354,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore
+  //  @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a<x] [y>failing|an<x] [y>excellent|> test<y]<t]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
+
+      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
+      assertThat(textNodeWrappers).hasSize(8);
       assertThat(document).hasTextNodesMatching(
           textNodeSketch("This "),
           textNodeSketch("is "),
@@ -371,21 +374,32 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
           textNodeSketch("excellent"),
           textNodeSketch(" test")
       );
+
+      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
+      assertThat(markupWrappers).hasSize(3);
       assertThat(document).hasMarkupMatching(
           markupSketch("t"),
           markupSketch("x"),
           markupSketch("y")
       );
 
-      List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
-      assertThat(textNodeWrappers).hasSize(8);
-
-      List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
-      assertThat(markupWrappers).hasSize(3);
-
       MarkupWrapper t = markupWrappers.get(0);
+      assertThat(t.getTag()).isEqualTo("t");
       List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
       assertThat(tTextNodeWrappers).hasSize(8);
+
+      MarkupWrapper x = markupWrappers.get(1);
+      assertThat(x.getTag()).isEqualTo("x");
+      List<TextNodeWrapper> xTextNodeWrappers = x.getTextNodeStream().collect(toList());
+      assertThat(xTextNodeWrappers).hasSize(3);
+      assertThat(xTextNodeWrappers).extracting("text").containsExactly("is", "a", "an");
+
+      MarkupWrapper y = markupWrappers.get(2);
+      assertThat(y.getTag()).isEqualTo("y");
+      List<TextNodeWrapper> yTextNodeWrappers = x.getTextNodeStream().collect(toList());
+      assertThat(xTextNodeWrappers).hasSize(3);
+      assertThat(xTextNodeWrappers).extracting("text").containsExactly("failing", "excellent", "test");
+
     });
   }
 
@@ -653,6 +667,13 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(annotationTextNodes).hasSize(1);
       assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
     });
+  }
+
+  @Test
+  public void testUnclosedTextVariationThrowsSyntaxError() {
+    String tagML = "[t>This is <|good|bad.<t]";
+    String expectedErrors = "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   // private methods
