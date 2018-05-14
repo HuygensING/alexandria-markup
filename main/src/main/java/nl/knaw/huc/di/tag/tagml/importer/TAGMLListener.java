@@ -249,6 +249,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
+    if (errorListener.hasErrors()){
+      return;
+    }
     mergeNewOpenMarkup();
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
