@@ -412,6 +412,18 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
+  @Test
+  public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
+    String tagML = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
+    String expectedErrors = "line 1:7 : There is an open markup discrepancy between the branches:\n" +
+        "\tbranch 1 closed markup <l] that was opened before the <| and opened markup [l> to be closed after the |>\n" +
+        "\tbranch 2 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>\n" +
+        "\tbranch 3 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+
+
   @Ignore("passed where it should fail.")
   @Test
   public void testIncorrectOverlapNonLinearityCombination() {

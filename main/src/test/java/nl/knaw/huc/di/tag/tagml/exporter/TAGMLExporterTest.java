@@ -55,12 +55,6 @@ public class TAGMLExporterTest extends TAGStoreTest {
   }
 
   @Test
-  public void testOpenMarkupInNonLinearAnnotatedText() {
-    String tagmlIn = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
-    assertTAGMLOutIsIn(tagmlIn);
-  }
-
-  @Test
   public void testNestedNonLinearity() {
     String tagmlIn = "[l>This is <|" +
         "[del>great stuff!<del]" +
