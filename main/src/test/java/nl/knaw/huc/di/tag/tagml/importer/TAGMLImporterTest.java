@@ -107,14 +107,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
     String tagML = "on the plain.<line]";
-    String expectedErrors = "line 1:14 : Close tag <line] found without corresponding open tag.";
+    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
     String tagML = "[line>The Spanish rain.<paragraph]";
-    String expectedErrors = "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:25 : Close tag <paragraph] found without corresponding open tag.\n" +
         "Missing close tag(s) for: [line>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -124,7 +124,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
         "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
-        "line 1:19 : Nameless markup is not allowed here.";
+        "line 1:20 : Nameless markup is not allowed here.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -340,7 +340,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testFalseDiscontinuityLeadsToError() {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
     String tagML = "[markup>Cookie <-markup][+markup> Monster<markup]";
-    String expectedErrors = "line 1:24 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
+    String expectedErrors = "line 1:25 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -406,7 +406,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    String expectedErrors = "line 1:14 : There is an open markup discrepancy between the branches:\n" +
+    String expectedErrors = "line 1:48 : There is an open markup discrepancy between the branches:\n" +
         "\tbranch 1 didn't close any markup that was opened before the <| and opened markup [y> to be closed after the |>\n" +
         "\tbranch 2 closed markup <x] that was opened before the <| and opened markup [y> to be closed after the |>";
     parseWithExpectedErrors(tagML, expectedErrors);
@@ -415,7 +415,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
     String tagML = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
-    String expectedErrors = "line 1:7 : There is an open markup discrepancy between the branches:\n" +
+    String expectedErrors = "line 1:38 : There is an open markup discrepancy between the branches:\n" +
         "\tbranch 1 closed markup <l] that was opened before the <| and opened markup [l> to be closed after the |>\n" +
         "\tbranch 2 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>\n" +
         "\tbranch 3 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>";
@@ -431,8 +431,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "[del>rich<del]" +
         "|>" +
         " man<b] is in need of a maid.<text] ";
-    String expectedErrors = "line 1:97 : Markup [b> found in branch 1, but not in branch 2.\n" +
-        "line 1:104 : Close tag <b] found without corresponding open tag.";
+    String expectedErrors = "line 1:98 : Markup [b> found in branch 1, but not in branch 2.\n" +
+        "line 1:105 : Close tag <b] found without corresponding open tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 

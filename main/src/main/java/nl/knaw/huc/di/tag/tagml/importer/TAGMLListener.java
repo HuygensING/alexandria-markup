@@ -591,7 +591,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private String errorPrefix(ParserRuleContext ctx, boolean useStopToken) {
     Token token = useStopToken ? ctx.stop : ctx.start;
-    return format("line %d:%d :", token.getLine(), token.getCharPositionInLine());
+    return format("line %d:%d :", token.getLine(), token.getCharPositionInLine() + 1);
   }
 
   private void logTextNode(final TextNodeWrapper nodeWrapper) {
