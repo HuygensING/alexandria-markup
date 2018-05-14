@@ -422,11 +422,17 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore("passed where it should fail.")
   @Test
   public void testIncorrectOverlapNonLinearityCombination() {
-    String tagML = "[text>It is a truth universally acknowledged that every <|[add>young [b>woman<add]|[del>rich<del]|> man <b] is in need of a maid.<text] ";
-    String expectedErrors = "some error about the [b> tags";
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|" +
+        "[add>young [b>woman<add]" +
+        "|" +
+        "[del>rich<del]" +
+        "|>" +
+        " man<b] is in need of a maid.<text] ";
+    String expectedErrors = "line 1:97 : Markup [b> found in branch 1, but not in branch 2.\n" +
+        "line 1:104 : Close tag <b] found without corresponding open tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -481,7 +487,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore("passes where it should fail")
+  @Ignore()
   @Test
   public void testIncorrectDiscontinuityNonLinearityCombination() {
     String tagML = "[q>and what is the use of a " +

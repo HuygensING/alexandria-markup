@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -249,10 +250,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
-    if (errorListener.hasErrors()){
+    if (errorListener.hasErrors()) {
       return;
     }
-    mergeNewOpenMarkup();
+    mergeNewOpenMarkup(ctx);
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
     previousTextNode = tn;
@@ -267,7 +268,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     logTextNode(tn);
   }
 
-  private void mergeNewOpenMarkup() {
+  private void mergeNewOpenMarkup(ParserRuleContext ctx) {
     /// TODO: refactor!
     TextVariationState textVariationState = currentTextVariationState();
     if (textVariationState.openMarkup.isEmpty()) {
@@ -276,26 +277,33 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     List<MarkupWrapper> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
     for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
       List<MarkupWrapper> markupToMerge = textVariationState.openMarkup.get(branch);
-      markupToMerge.forEach(otherMarkup -> {
-            MarkupWrapper masterMarkup = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
-            List<Long> textNodeIdsToAdd = new ArrayList<>();
-            otherMarkup.getTextNodeStream().forEach(textNode -> {
-              document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
-              document.associateTextNodeWithMarkup(textNode, masterMarkup);
-              textNodeIdsToAdd.add(textNode.getDbId());
-            });
-            masterMarkup.getMarkup().getTextNodeIds().addAll(0, textNodeIdsToAdd);
-            document.getDocument().getMarkupIds().remove(otherMarkup.getDbId());
-            store.persist(document.getDocument());
-            store.persist(masterMarkup.getMarkup());
-            store.remove(otherMarkup.getMarkup());
-          }
-      );
+      for (MarkupWrapper otherMarkup : markupToMerge) {
+        Optional<MarkupWrapper> masterMarkupOptional = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
+        if (masterMarkupOptional.isPresent()) {
+          List<Long> textNodeIdsToAdd = new ArrayList<>();
+          MarkupWrapper masterMarkup = masterMarkupOptional.get();
+          otherMarkup.getTextNodeStream().forEach(textNode -> {
+            document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
+            document.associateTextNodeWithMarkup(textNode, masterMarkup);
+            textNodeIdsToAdd.add(textNode.getDbId());
+          });
+          masterMarkup.getMarkup().getTextNodeIds().addAll(0, textNodeIdsToAdd);
+          document.getDocument().getMarkupIds().remove(otherMarkup.getDbId());
+          store.persist(document.getDocument());
+          store.persist(masterMarkup.getMarkup());
+          store.remove(otherMarkup.getMarkup());
+        } else {
+          errorListener.addError(
+              "%s Markup %s found in branch %s, but not in branch %s.",
+              errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
+          );
+        }
+      }
     }
   }
 
-  private MarkupWrapper findMatchingMarkup(List<MarkupWrapper> markupOpenedInBranch0, MarkupWrapper m) {
-    return markupOpenedInBranch0.stream().filter(m0 -> m.matches(m0)).findFirst().get();
+  private Optional<MarkupWrapper> findMatchingMarkup(List<MarkupWrapper> markupOpenedInBranch0, MarkupWrapper m) {
+    return markupOpenedInBranch0.stream().filter(m0 -> m.matches(m0)).findFirst();
   }
 
   private void checkEndStates(final TextVariationContext ctx) {
@@ -331,7 +339,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       closedMarkupInBranch.add(closedInBranch);
     });
 
-    String errorPrefix = errorPrefix(ctx);
+    String errorPrefix = errorPrefix(ctx, true);
     checkSuspendedOrResumedMarkupBetweenBranches(suspendedMarkupInBranch, resumedMarkupInBranch, errorPrefix);
     checkOpenedOrClosedMarkupBetweenBranches(openedMarkupInBranch, closedMarkupInBranch, errorPrefix);
   }
@@ -578,8 +586,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private String errorPrefix(ParserRuleContext ctx) {
-    Token startToken = ctx.start;
-    return format("line %d:%d :", startToken.getLine(), startToken.getCharPositionInLine());
+    return errorPrefix(ctx, false);
+  }
+
+  private String errorPrefix(ParserRuleContext ctx, boolean useStopToken) {
+    Token token = useStopToken ? ctx.stop : ctx.start;
+    return format("line %d:%d :", token.getLine(), token.getCharPositionInLine());
   }
 
   private void logTextNode(final TextNodeWrapper nodeWrapper) {
