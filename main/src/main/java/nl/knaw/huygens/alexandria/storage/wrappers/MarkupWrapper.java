@@ -26,11 +26,15 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class MarkupWrapper {
   private final TAGStore store;
   private final TAGMarkup markup;
 
   public MarkupWrapper(TAGStore store, TAGMarkup markup) {
+    checkNotNull(store);
+    checkNotNull(markup);
     this.store = store;
     this.markup = markup;
     update();
@@ -210,4 +214,27 @@ public class MarkupWrapper {
         && markup.equals(((MarkupWrapper) other).getMarkup());
   }
 
+  public boolean matches(MarkupWrapper other) {
+    if (!other.getExtendedTag().equals(getExtendedTag())) {
+      return false;
+    }
+
+    int thisAnnotationCount = markup.getAnnotationIds().size();
+    int otherAnnotationCount = other.getMarkup().getAnnotationIds().size();
+    if (thisAnnotationCount != otherAnnotationCount) {
+      return false;
+    }
+
+    String thisAnnotationString = annotationsString();
+    String otherAnnotationString = other.annotationsString();
+    return thisAnnotationString.equals(otherAnnotationString);
+  }
+
+  private String annotationsString() {
+    StringBuilder annotationsString = new StringBuilder();
+    getAnnotationStream().forEach(a ->
+        annotationsString.append(" ").append(a.toString())
+    );
+    return annotationsString.toString();
+  }
 }

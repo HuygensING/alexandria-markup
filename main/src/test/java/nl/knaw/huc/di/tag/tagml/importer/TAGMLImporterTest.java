@@ -399,7 +399,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TextNodeWrapper> yTextNodeWrappers = y.getTextNodeStream().collect(toList());
       assertThat(yTextNodeWrappers)
           .extracting("text")
-          .containsExactly("failing", "excellent", "", "test");
+          .containsExactly("failing", "excellent", "", " test");
     });
   }
 
@@ -421,8 +421,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "\tbranch 3 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
-
-
 
   @Ignore("passed where it should fail.")
   @Test

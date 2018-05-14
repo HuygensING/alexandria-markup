@@ -93,6 +93,18 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     public List<State> endStates = new ArrayList<>();
     public TextNodeWrapper startNode;
     public List<TextNodeWrapper> endNodes = new ArrayList<>();
+    public Map<Integer, List<MarkupWrapper>> openMarkup = new HashMap<>();
+    public int branch = 0;
+
+    public void addOpenMarkup(MarkupWrapper markup) {
+      openMarkup.computeIfAbsent(branch, (b) -> new ArrayList<>());
+      openMarkup.get(branch).add(markup);
+    }
+
+    public void removeOpenMarkup(MarkupWrapper markup) {
+      openMarkup.computeIfAbsent(branch, (b) -> new ArrayList<>());
+      openMarkup.get(branch).remove(markup);
+    }
   }
 
   @Override
@@ -173,6 +185,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         }
 
         state.openMarkup.add(markup);
+        currentTextVariationState().addOpenMarkup(markup);
       }
     }
   }
@@ -215,6 +228,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startNode = tn;
     textVariationState.startState = state.copy();
+    textVariationState.branch = 0;
     logTextNode(tn);
     textVariationStateStack.push(textVariationState);
   }
@@ -227,6 +241,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     previousTextNode = currentTextVariationState().startNode;
     currentTextVariationState().endStates.add(state.copy());
     state = currentTextVariationState().startState.copy();
+    currentTextVariationState().branch += 1;
   }
 
   @Override
@@ -234,6 +249,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
+    mergeNewOpenMarkup();
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TextNodeWrapper tn = store.createTextNodeWrapper(convergence);
     previousTextNode = tn;
@@ -246,6 +262,37 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     });
 //    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     logTextNode(tn);
+  }
+
+  private void mergeNewOpenMarkup() {
+    /// TODO: refactor!
+    TextVariationState textVariationState = currentTextVariationState();
+    if (textVariationState.openMarkup.isEmpty()) {
+      return;
+    }
+    List<MarkupWrapper> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
+    for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
+      List<MarkupWrapper> markupToMerge = textVariationState.openMarkup.get(branch);
+      markupToMerge.forEach(otherMarkup -> {
+            MarkupWrapper masterMarkup = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
+            List<Long> textNodeIdsToAdd = new ArrayList<>();
+            otherMarkup.getTextNodeStream().forEach(textNode -> {
+              document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
+              document.associateTextNodeWithMarkup(textNode, masterMarkup);
+              textNodeIdsToAdd.add(textNode.getDbId());
+            });
+            masterMarkup.getMarkup().getTextNodeIds().addAll(0, textNodeIdsToAdd);
+            document.getDocument().getMarkupIds().remove(otherMarkup.getDbId());
+            store.persist(document.getDocument());
+            store.persist(masterMarkup.getMarkup());
+            store.remove(otherMarkup.getMarkup());
+          }
+      );
+    }
+  }
+
+  private MarkupWrapper findMatchingMarkup(List<MarkupWrapper> markupOpenedInBranch0, MarkupWrapper m) {
+    return markupOpenedInBranch0.stream().filter(m0 -> m.matches(m0)).findFirst().get();
   }
 
   private void checkEndStates(final TextVariationContext ctx) {
@@ -445,6 +492,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
     if (markup != null) {
       markupStack.remove(markup);
+      currentTextVariationState().removeOpenMarkup(markup);
     }
     return markup;
   }

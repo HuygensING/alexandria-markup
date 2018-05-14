@@ -68,4 +68,9 @@ public class AnnotationWrapper {
     store.persist(annotation);
   }
 
+  @Override
+  public String toString() {
+    // TODO process different annotation types
+    return annotation.getTag() + '=';
+  }
 }

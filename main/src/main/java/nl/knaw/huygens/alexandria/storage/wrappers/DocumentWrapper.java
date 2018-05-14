@@ -96,6 +96,12 @@ public class DocumentWrapper {
     update();
   }
 
+  public void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
+    document.getTextNodeIdToMarkupIds()
+        .get(node.getDbId())
+        .remove(markup.getDbId());
+    update();
+  }
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
@@ -163,14 +169,6 @@ public class DocumentWrapper {
         .computeIfAbsent(
             textNodeWrapper.getDbId(),
             f -> new LinkedHashSet<>()).add(id);
-    update();
-  }
-
-  private void disAssociateTextNodeWithMarkup(TextNodeWrapper node, MarkupWrapper markup) {
-    document.getTextNodeIdToMarkupIds()
-        .computeIfAbsent(
-            node.getDbId(),
-            f -> new LinkedHashSet<>()).remove(markup.getDbId());
     update();
   }
 
