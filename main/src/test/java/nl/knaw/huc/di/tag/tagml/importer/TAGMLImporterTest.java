@@ -350,7 +350,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[text> [q>Hello my name is " +
         "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
         "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
-    String expectedErrors = "";
+    String expectedErrors = "some error";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -487,14 +487,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-  @Ignore()
   @Test
   public void testIncorrectDiscontinuityNonLinearityCombination() {
     String tagML = "[q>and what is the use of a " +
         "<|[del>book,<-q]<del]" +
         "| [add>thought Alice<add]|>" +
         " [+q>without pictures or conversation?<q]";
-    String expectedErrors = "some error about the [q> tags, with branch mentioned";
+    String expectedErrors = "line 1:75 : There is a discrepancy in suspended markup between branches:\n" +
+        "\tbranch 1 has suspended markup [<-q]].\n" +
+        "\tbranch 2 has no suspended markup.\n" +
+        "line 1:78 : Resume tag [+q> found, which has no corresponding earlier suspend tag <-q].";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
