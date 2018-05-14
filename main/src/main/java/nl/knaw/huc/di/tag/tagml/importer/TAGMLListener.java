@@ -349,10 +349,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (suspendedMarkupSet.size() > 1) {
       StringBuilder branchLines = new StringBuilder();
       for (int i = 0; i < suspendedMarkupInBranch.size(); i++) {
+        List<String> suspendedMarkup = suspendedMarkupInBranch.get(i);
+        String has = suspendedMarkup.isEmpty() ? "no suspended markup." : "suspended markup " + suspendedMarkup + ".";
         branchLines.append("\n\tbranch ")
             .append(i + 1)
-            .append(" has suspended markup ")
-            .append(suspendedMarkupInBranch.get(i));
+            .append(" has ")
+            .append(has);
       }
       errorListener.addError(
           "%s There is a discrepancy in suspended markup between branches:%s",
@@ -512,8 +514,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
     MarkupWrapper markup = removeFromMarkupStack(tag, state.suspendedMarkup);
     checkForCorrespondingSuspendTag(ctx, tag, markup);
-    checkForTextBetweenSuspendAndResumeTags(ctx, markup);
-    markup.setIsDiscontinuous(true);
+    if (!errorListener.hasErrors()) {
+      checkForTextBetweenSuspendAndResumeTags(markup, ctx);
+      if (!errorListener.hasErrors()) {
+        markup.setIsDiscontinuous(true);
+      }
+    }
     return markup;
   }
 
@@ -526,7 +532,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
-  private void checkForTextBetweenSuspendAndResumeTags(final StartTagContext ctx, final MarkupWrapper markup) {
+  private void checkForTextBetweenSuspendAndResumeTags(final MarkupWrapper markup, final StartTagContext ctx) {
     List<Long> markupTextNodeIds = markup.getMarkup().getTextNodeIds();
     Long lastMarkupTextNodeId = markupTextNodeIds.get(markupTextNodeIds.size() - 1);
     List<Long> documentTextNodeIds = document.getDocument().getTextNodeIds();
