@@ -111,6 +111,14 @@ public class TAGMLExporterTest extends TAGStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
+  @Test
+  public void testCombiningDiscontinuityAndNonLinearity1() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<del]" +
+        "|<-q][add>thought Alice<add][+q>|>" +
+        "without pictures or conversation?<q] ";
+    assertTAGMLOutIsIn(tagML);
+  }
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {
