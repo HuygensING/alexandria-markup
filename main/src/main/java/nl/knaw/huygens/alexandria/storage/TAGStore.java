@@ -38,6 +38,8 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class TAGStore implements AutoCloseable {
   private static final Logger LOG = LoggerFactory.getLogger(TAGStore.class);
   private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
@@ -100,6 +102,7 @@ public class TAGStore implements AutoCloseable {
   }
 
   public Long persist(TAGObject tagObject) {
+    checkNotNull(tagObject);
     assertInTransaction();
     if (tagObject instanceof TAGDocument) {
       da.documentById.put(tx, (TAGDocument) tagObject);
@@ -117,6 +120,25 @@ public class TAGStore implements AutoCloseable {
       throw new RuntimeException("unhandled class: " + tagObject.getClass());
     }
     return tagObject.getDbId();
+  }
+
+  public void remove(TAGObject tagObject) {
+    assertInTransaction();
+    if (tagObject instanceof TAGDocument) {
+      da.documentById.delete(tx, tagObject.getDbId());
+
+    } else if (tagObject instanceof TAGTextNode) {
+      da.textNodeById.delete(tx, tagObject.getDbId());
+
+    } else if (tagObject instanceof TAGMarkup) {
+      da.markupById.delete(tx, tagObject.getDbId());
+
+    } else if (tagObject instanceof TAGAnnotation) {
+      da.annotationById.delete(tx, tagObject.getDbId());
+
+    } else {
+      throw new RuntimeException("unhandled class: " + tagObject.getClass());
+    }
   }
 
   // Document

@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,13 +50,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
 
   @Test
   public void testNonLinearAnnotatedText() {
-    String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
-    assertTAGMLOutIsIn(tagmlIn);
-  }
-
-  @Test
-  public void testOpenMarkupInNonLinearAnnotatedText() {
-    String tagmlIn = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
+      String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
     assertTAGMLOutIsIn(tagmlIn);
   }
 
@@ -97,6 +92,33 @@ public class TAGMLExporterTest extends TAGStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
+  @Ignore
+  @Test
+  public void testCombiningOverlapAndNonLinearity1() {
+    String tagmlIn = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<b]<add]" +
+        "|[b>[del>rich<del]|>" +
+        " man <b] is in need of a maid.<text]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
+  public void testCombiningOverlapAndNonLinearity2() {
+    String tagmlIn = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<b]<add]" +
+        "|[b>[del>rich<del]<b]|>" +
+        " [b>man<b] is in need of a maid.<text]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
+  public void testCombiningDiscontinuityAndNonLinearity1() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<del]" +
+        "|<-q][add>thought Alice<add][+q>|>" +
+        "without pictures or conversation?<q] ";
+    assertTAGMLOutIsIn(tagML);
+  }
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {

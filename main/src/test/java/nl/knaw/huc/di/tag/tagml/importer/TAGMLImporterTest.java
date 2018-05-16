@@ -107,14 +107,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
     String tagML = "on the plain.<line]";
-    String expectedErrors = "line 1:14 : Close tag <line] found without corresponding open tag.";
+    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
     String tagML = "[line>The Spanish rain.<paragraph]";
-    String expectedErrors = "line 1:24 : Close tag <paragraph] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:25 : Close tag <paragraph] found without corresponding open tag.\n" +
         "Missing close tag(s) for: [line>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -124,7 +124,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
         "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
-        "line 1:19 : Nameless markup is not allowed here.";
+        "line 1:20 : Nameless markup is not allowed here.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -340,51 +340,185 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testFalseDiscontinuityLeadsToError() {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
     String tagML = "[markup>Cookie <-markup][+markup> Monster<markup]";
-    String expectedErrors = "line 1:24 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
+    String expectedErrors = "line 1:25 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore
+  @Ignore("TODO: Handle richText annotations first")
+  @Test
+  public void testResumeInInnerDocumentLeadsToError() {
+    String tagML = "[text> [q>Hello my name is " +
+        "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
+        "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
+    String expectedErrors = "some error";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  //  @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a<x] [y>failing|an<x] [y>excellent|> test<y]<t]";
     store.runInTransaction(() -> {
       DocumentWrapper document = parseTAGML(tagML);
       assertThat(document).isNotNull();
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("This "),
-          textNodeSketch("is "),
-          textNodeSketch("a"),
-          textNodeSketch(" "),
-          textNodeSketch("failing"),
-          textNodeSketch("an"),
-          textNodeSketch("excellent"),
-          textNodeSketch(" test")
-      );
-      assertThat(document).hasMarkupMatching(
-          markupSketch("t"),
-          markupSketch("x"),
-          markupSketch("y")
-      );
 
       List<TextNodeWrapper> textNodeWrappers = document.getTextNodeStream().collect(toList());
-      assertThat(textNodeWrappers).hasSize(8);
+      assertThat(textNodeWrappers).extracting("text").containsExactly(
+          "This ",
+          "is ",
+          "", // <|
+          "a",
+          " ",
+          "failing",
+          "an",
+          " ",
+          "excellent",
+          "", // |>
+          " test"
+      );
 
       List<MarkupWrapper> markupWrappers = document.getMarkupStream().collect(toList());
-      assertThat(markupWrappers).hasSize(3);
+      assertThat(markupWrappers)
+          .extracting("tag")
+          .containsExactly("t", "x", "y");
 
       MarkupWrapper t = markupWrappers.get(0);
+      assertThat(t.getTag()).isEqualTo("t");
       List<TextNodeWrapper> tTextNodeWrappers = t.getTextNodeStream().collect(toList());
-      assertThat(tTextNodeWrappers).hasSize(8);
+      assertThat(tTextNodeWrappers).hasSize(11);
+
+      MarkupWrapper x = markupWrappers.get(1);
+      assertThat(x.getTag()).isEqualTo("x");
+      List<TextNodeWrapper> xTextNodeWrappers = x.getTextNodeStream().collect(toList());
+      assertThat(xTextNodeWrappers)
+          .extracting("text")
+          .containsExactly("is ", "", "a", "an");
+
+      MarkupWrapper y = markupWrappers.get(2);
+      assertThat(y.getTag()).isEqualTo("y");
+      List<TextNodeWrapper> yTextNodeWrappers = y.getTextNodeStream().collect(toList());
+      assertThat(yTextNodeWrappers)
+          .extracting("text")
+          .containsExactly("failing", "excellent", "", " test");
     });
   }
 
-  @Ignore
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    String expectedErrors = "markup [x> not closed!";
+    String expectedErrors = "line 1:48 : There is an open markup discrepancy between the branches:\n" +
+        "\tbranch 1 didn't close any markup that was opened before the <| and opened markup [y> to be closed after the |>\n" +
+        "\tbranch 2 closed markup <x] that was opened before the <| and opened markup [y> to be closed after the |>";
     parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
+    String tagML = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
+    String expectedErrors = "line 1:38 : There is an open markup discrepancy between the branches:\n" +
+        "\tbranch 1 closed markup <l] that was opened before the <| and opened markup [l> to be closed after the |>\n" +
+        "\tbranch 2 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>\n" +
+        "\tbranch 3 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testIncorrectOverlapNonLinearityCombination() {
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|" +
+        "[add>young [b>woman<add]" +
+        "|" +
+        "[del>rich<del]" +
+        "|>" +
+        " man<b] is in need of a maid.<text] ";
+    String expectedErrors = "line 1:98 : Markup [b> found in branch 1, but not in branch 2.\n" +
+        "line 1:105 : Close tag <b] found without corresponding open tag.";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testCorrectOverlapNonLinearityCombination1() {
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<add]<b]" +
+        "|[b>[del>rich<del]|>" +
+        " man <b] is in need of a maid.<text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("It is a truth universally acknowledged that every "),
+          textNodeSketch("young "),
+          textNodeSketch("woman"),
+          textNodeSketch("rich"),
+          textNodeSketch(" man "),
+          textNodeSketch(" is in need of a maid.")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text"),
+          markupSketch("add"),
+          markupSketch("del"),
+          markupSketch("b")
+      );
+    });
+  }
+
+  @Test
+  public void testCorrectOverlapNonLinearityCombination2() {
+    String tagML = "[text>It is a truth universally acknowledged that every " +
+        "<|[add>young [b>woman<add]<b]" +
+        "|[b>[del>rich<del]<b]|>" +
+        " [b>man<b] is in need of a maid.<text]";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("It is a truth universally acknowledged that every "),
+          textNodeSketch("young "),
+          textNodeSketch("woman"),
+          textNodeSketch("man"),
+          textNodeSketch(" is in need of a maid.")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text"),
+          markupSketch("add"),
+          markupSketch("del"),
+          markupSketch("b")
+      );
+    });
+  }
+
+  @Test
+  public void testIncorrectDiscontinuityNonLinearityCombination() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<-q]<del]" +
+        "| [add>thought Alice<add]|>" +
+        " [+q>without pictures or conversation?<q]";
+    String expectedErrors = "line 1:75 : There is a discrepancy in suspended markup between branches:\n" +
+        "\tbranch 1 has suspended markup [<-q]].\n" +
+        "\tbranch 2 has no suspended markup.\n" +
+        "line 1:78 : Resume tag [+q> found, which has no corresponding earlier suspend tag <-q].";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testCorrectDiscontinuityNonLinearityCombination() {
+    String tagML = "[q>and what is the use of a " +
+        "<|[del>book,<del]" +
+        "|<-q][add>thought Alice<add][+q>|>" +
+        "without pictures or conversation?<q] ";
+    store.runInTransaction(() -> {
+      DocumentWrapper document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("and what is the use of a "),
+          textNodeSketch("book,"),
+          textNodeSketch("thought Alice"),
+          textNodeSketch("without pictures or conversation?")
+      );
+      assertThat(document).hasMarkupMatching(
+          markupSketch("q")
+      );
+    });
   }
 
   @Test
@@ -552,6 +686,13 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(annotationTextNodes).hasSize(1);
       assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
     });
+  }
+
+  @Test
+  public void testUnclosedTextVariationThrowsSyntaxError() {
+    String tagML = "[t>This is <|good|bad.<t]";
+    String expectedErrors = "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}";
+    parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   // private methods

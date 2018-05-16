@@ -79,14 +79,12 @@ public class TAGMLImporter {
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+//    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       errorMsg = "Parsing errors:\n" + errors;
-    }
-    if (!errorMsg.isEmpty()) {
       throw new TAGMLSyntaxError(errorMsg);
     }
     update(documentWrapper.getDocument());

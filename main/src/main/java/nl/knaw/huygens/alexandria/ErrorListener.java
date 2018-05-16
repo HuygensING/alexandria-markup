@@ -26,6 +26,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -34,7 +36,11 @@ import java.util.List;
 import static java.lang.String.format;
 
 public class ErrorListener implements ANTLRErrorListener {
+  private static final Logger LOG = LoggerFactory.getLogger(ErrorListener.class);
   private final List<String> errors = new ArrayList<>();
+  private boolean reportAmbiguity = false;
+  private boolean reportAttemptingFullContext = false;
+  private boolean reportContextSensitivity = true;
 
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
@@ -43,34 +49,39 @@ public class ErrorListener implements ANTLRErrorListener {
 
   @Override
   public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
-//    errors.add("ambiguity:\n recognizer=" + recognizer //
-//        + ",\n dfa=" + dfa //
-//        + ",\n startIndex=" + startIndex //
-//        + ",\n stopIndex=" + stopIndex//
-//        + ",\n exact=" + exact //
-//        + ",\n ambigAlts=" + ambigAlts //
-//        + ",\n configs=" + configs);
+    if (reportAmbiguity) {
+      errors.add("ambiguity:\n recognizer=" + recognizer //
+          + ",\n dfa=" + dfa //
+          + ",\n startIndex=" + startIndex //
+          + ",\n stopIndex=" + stopIndex//
+          + ",\n exact=" + exact //
+          + ",\n ambigAlts=" + ambigAlts //
+          + ",\n configs=" + configs);
+    }
   }
 
   @Override
   public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
-//    errors.add("attempting full context error:\n recognizer=" + recognizer //
-//        + ",\n dfa=" + dfa //
-//        + ",\n startIndex=" + startIndex //
-//        + ",\n stopIndex=" + stopIndex//
-//        + ",\n conflictingAlts=" + conflictingAlts //
-//        + ",\n configs=" + configs);
+    if (reportAttemptingFullContext) {
+      errors.add("attempting full context error:\n recognizer=" + recognizer //
+          + ",\n dfa=" + dfa //
+          + ",\n startIndex=" + startIndex //
+          + ",\n stopIndex=" + stopIndex//
+          + ",\n conflictingAlts=" + conflictingAlts //
+          + ",\n configs=" + configs);
+    }
   }
 
   @Override
   public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
-    errors.add("context sensitivity error:\n recognizer=" + recognizer //
-        + ",\n dfa=" + dfa //
-        + ",\n startIndex=" + startIndex //
-        + ",\n stopIndex=" + stopIndex//
-        + ",\n prediction=" + prediction //
-        + ",\n configs=" + configs);
-
+    if (reportContextSensitivity) {
+      errors.add("context sensitivity error:\n recognizer=" + recognizer //
+          + ",\n dfa=" + dfa //
+          + ",\n startIndex=" + startIndex //
+          + ",\n stopIndex=" + stopIndex//
+          + ",\n prediction=" + prediction //
+          + ",\n configs=" + configs);
+    }
   }
 
   public List<String> getErrors() {
