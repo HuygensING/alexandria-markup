@@ -1,0 +1,36 @@
+[!ld l "linguistic"]
+[!ld m "material"]
+[!ld p "poetic"]
+[p|poem title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
+[l|text title='The Hunting of the Snark (An Agony in 8 Fits)'>
+[p|canto title='The Vanishing'>
+[m|page n=81>
+[m|line>[l|phr type='NP'>[l|w type='D'>The<l|w] [l|w type='N'>Vanishing<l|w]<l|phr]
+[m|page-nr>81<m|page-nr]<m|line]
+[m|p>
+[p|stanza>
+[p|sentence>
+[m|line>[p|l>[l|s>[l|phr type='NP'>(As if stung<l|phr][l|phr type='PP'>by a spasm)<l|phr][l|phr type='VP'>plunge into a chasm,<l|phr]<p|l]<m|line]
+[m|line>[p|l>[l|phr type='VP'>While they waited [l|w type='contr'>and<l|w] listened in awe.<l|phr]<l|s]<p|l]<m|line]<p|sentence]
+<m|p]<p|stanza]
+[m|el]
+[m|el]
+[p|stanza>[m|p>
+[p|sentence~a>[m|line>[p|l>[p|sentence~b voice='Baker'>[l|s>[l|phr type='NP'>"It's a Snark!"<l|phr]<p|sentence~b] [l|phr type='VP'>was the sound that first came<l|phr]<m|line]
+[m|line>[l|phr type='PP'>to their ears,<l|phr]<p|l]<m|line]
+[m|line>[p|l>[l|phr type='VP'>And seemed almost too [l|w type='A'>good<l|w] to be true.<l|phr]<l|s]<p|l]<m|line]<p|sentence~a]
+[m|line>[p|l>[p|sentence~c>[l|s>[l|phr type='VP'>Then followed<l|phr][l|phr type='NP'>a torrent of laughter and cheers:<l|phr]<p|l]<m|line]
+[m|line>[p|l>[l|phr~a type='NP'>Then the ominous words [p|sentence~d voice='Baker'>[l|phr~b type='VP'>"It's a Boo--"<l|phr~b]<l|phr~a]<p|sentence~d]<p|l]<m|line]
+<m|p]<p|stanza]
+[m|el]
+[m|el]
+[p|stanza>[m|p>
+[m|line>[p|l>[l|phr type='NP'>Then, silence.<l|phr]<l|s]<p|sentence~c] [p|sentence~e>[l|s>[l|phr type='NP'>Some fancied<l|phr][l|phr type='VP'>they heard in the <m|line][m|line>air<l|phr]<p|l]<m|line]
+[m|line>[p|l>[l|phr type='NP'>A weary and wandering sigh<l|phr]<p|l]<m|line]
+[m|line>[p|l>[l|phr~a type='VP'>That sounded like [p|sentence~f voice='Baker'>[l|phr~b type='N'>"--jum!"<l|phr~b]<p|sentence~f] but the others de-<m|line][m|line>clare<l|phr~a]<p|l]<m|line]
+[m|line>[p|l>[l|phr type='NP'>It was only a breeze that went by.<l|phr]<l|s]<p|l]<m|line]<p|sentence~e]
+<m|p]<p|stanza]
+<p|canto]
+<m|page]
+<l|text]
+<p|poem]
