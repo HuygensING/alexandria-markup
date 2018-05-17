@@ -123,7 +123,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
-        "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_NameOpenMarkup, IMC_Prefix, IMC_NameCloseMarkup}\n" +
+        "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n" +
         "line 1:20 : Nameless markup is not allowed here.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }

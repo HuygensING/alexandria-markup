@@ -10,8 +10,11 @@ lexer grammar TAGMLLexer;
 // default mode
 
 DEFAULT_NamespaceOpener
-//  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
   : '[!ns ' -> pushMode(INSIDE_NAMESPACE)
+  ;
+
+DEFAULT_LayerDefinitionOpener
+  : '[!ld ' -> pushMode(INSIDE_LAYERDEFINITION)
   ;
 
 DEFAULT_Comment
@@ -38,7 +41,7 @@ NAME
   : NameStartChar NameChar*
   ;
 
-// ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
+// ----------------- Everything INSIDE of a NAMESPACE ---------------------
 mode INSIDE_NAMESPACE;
 
 IN_NamespaceIdentifier
@@ -57,6 +60,25 @@ IN_NamespaceCloser
   : ']' -> popMode
   ;
 
+// ----------------- Everything INSIDE of a Layer Definition ---------------------
+mode INSIDE_LAYERDEFINITION;
+
+ILD_WS
+  : WS -> skip
+  ;
+
+ILD_LayerIdentifier
+  : NameChar+
+  ;
+
+ILD_QuotedLayerDescription
+  : '"' ~["\]]+ '"'
+  ;
+
+ILD_LayerDefinitionCloser
+  : ']' -> popMode
+  ;
+
 // ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
 mode INSIDE_MARKUP_OPENER;
 
@@ -69,12 +91,20 @@ IMO_Prefix
   | Resume
   ;
 
-IMO_Suffix
-  : TILDE ( NAME | DIGIT+ )
+IMO_Comma
+  : COMMA
   ;
 
-IMO_NameOpenMarkup
+IMO_Divider
+  : PIPE
+  ;
+
+IMO_Name
   : NAME
+  ;
+
+IMO_Suffix
+  : TILDE ( NAME | DIGIT+ )
   ;
 
 IMO_WS
@@ -166,7 +196,7 @@ RV_RefValue
   : NAME -> popMode
   ;
 
-// ----------------- Everything INSIDE of | | -------------
+// ----------------- Everything INSIDE of [><] -------------
 mode INSIDE_MIXED_CONTENT;
 
 IMX_Comment
@@ -239,8 +269,16 @@ IMC_Prefix
   | Suspend
   ;
 
-IMC_NameCloseMarkup
+IMC_Name
   : NAME
+  ;
+
+IMC_Divider
+  : PIPE
+  ;
+
+IMC_Comma
+  : COMMA
   ;
 
 IMC_Suffix

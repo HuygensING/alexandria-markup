@@ -6,7 +6,7 @@
 [p|canto title='The Vanishing'>
 [m|page n=81>
 [m|line>[l|phr type='NP'>[l|w type='D'>The<l|w] [l|w type='N'>Vanishing<l|w]<l|phr]
-[m|page-nr>81<m|page-nr]<m|line]
+[m|page_nr>81<m|page_nr]<m|line]
 [m|p>
 [p|stanza>
 [p|sentence>

@@ -3,11 +3,15 @@ parser grammar TAGMLParser;
 options { tokenVocab=TAGMLLexer; }
 
 document
-  :  ( namespaceDefinition text* )* chunk+ EOF
+  :  ( ( namespaceDefinition | layerDefinition ) text* )* chunk+ EOF
   ;
 
 namespaceDefinition
   : DEFAULT_NamespaceOpener IN_NamespaceIdentifier IN_NamespaceURI IN_NamespaceCloser
+  ;
+
+layerDefinition
+  : DEFAULT_LayerDefinitionOpener ILD_LayerIdentifier ILD_QuotedLayerDescription ILD_LayerDefinitionCloser
   ;
 
 chunk
@@ -34,8 +38,36 @@ endOpenMarkup
   ;
 
 markupName
-  : IMO_Prefix? name IMO_Suffix?
-  | IMC_Prefix? name IMC_Suffix?
+  : prefix? layerInfo? name suffix?
+  ;
+
+prefix
+  : IMO_Prefix
+  | IMC_Prefix
+  ;
+
+layerInfo
+  : name ( comma name )* divider
+  ;
+
+comma
+  : IMO_Comma
+  | IMC_Comma
+  ;
+
+divider
+  : IMO_Divider
+  | IMC_Divider
+  ;
+
+name
+  : IMO_Name
+  | IMC_Name
+  ;
+
+suffix
+  : IMO_Suffix
+  | IMC_Suffix
   ;
 
 endTag
@@ -48,13 +80,8 @@ beginCloseMarkup
   | IMX_BeginCloseMarkup
   ;
 
-name
-  : IMO_NameOpenMarkup
-  | IMC_NameCloseMarkup
-  ;
-
 milestoneTag
-  : beginOpenMarkup name annotation+ endMilestoneTag // possible recursion
+  : beginOpenMarkup layerInfo? name annotation* endMilestoneTag // possible recursion
   ;
 
 endMilestoneTag

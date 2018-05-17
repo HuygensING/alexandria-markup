@@ -170,7 +170,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       ctx.annotation()
           .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
 
-      TerminalNode prefix = markupNameContext.IMO_Prefix();
+      PrefixContext prefix = markupNameContext.prefix();
       boolean optional = prefix != null && prefix.getText().equals(OPTIONAL_PREFIX);
       boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
 
@@ -179,7 +179,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
 
       if (markup != null) {
-        TerminalNode suffix = markupNameContext.IMO_Suffix();
+        SuffixContext suffix = markupNameContext.suffix();
         if (suffix != null) {
           String id = suffix.getText().replace(TILDE, "");
           markup.setSuffix(id);
@@ -461,7 +461,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       return null;
     }
 
-    TerminalNode prefixNode = ctx.IMC_Prefix();
+    PrefixContext prefixNode = ctx.prefix();
     if (prefixNode != null) {
       String prefixNodeText = prefixNode.getText();
       if (prefixNodeText.equals(OPTIONAL_PREFIX)) {
@@ -478,7 +478,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private String withSuffix(final MarkupNameContext ctx, String extendedMarkupName) {
-    TerminalNode suffix = ctx.IMC_Suffix();
+    SuffixContext suffix = ctx.suffix();
     if (suffix != null) {
       extendedMarkupName += suffix.getText();
     }
@@ -486,7 +486,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private String withPrefix(final MarkupNameContext ctx, String extendedMarkupName) {
-    TerminalNode prefix = ctx.IMC_Prefix();
+    PrefixContext prefix = ctx.prefix();
     if (prefix != null && prefix.getText().equals(OPTIONAL_PREFIX)) {
       extendedMarkupName = prefix.getText() + extendedMarkupName;
     }
