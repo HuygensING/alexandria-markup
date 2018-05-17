@@ -24,6 +24,7 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -198,6 +199,15 @@ public class MarkupWrapper {
     return markup.getTextNodeIds().size();
   }
 
+  public MarkupWrapper setLayers(final Set<String> layers) {
+    markup.setLayers(layers);
+    return this;
+  }
+
+  public Set<String> getLayers() {
+    return markup.getLayers();
+  }
+
   @Override
   public String toString() {
     return markup.toString();
@@ -237,4 +247,5 @@ public class MarkupWrapper {
     );
     return annotationsString.toString();
   }
+
 }

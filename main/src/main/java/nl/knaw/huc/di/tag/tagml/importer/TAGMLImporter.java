@@ -91,13 +91,6 @@ public class TAGMLImporter {
     return documentWrapper;
   }
 
-  private DocumentWrapper usingVisitor(final TAGMLParser parser, final ErrorListener errorListener) {
-    TAGMLParser.DocumentContext documentContext = parser.document();
-    TAGMLVisitor visitor = new TAGMLVisitor(tagStore, errorListener);
-    visitor.visit(documentContext);
-    return visitor.getDocumentWrapper();
-  }
-
   private DocumentWrapper usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
@@ -105,6 +98,13 @@ public class TAGMLImporter {
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     return listener.getDocument();
+  }
+
+  private DocumentWrapper usingVisitor(final TAGMLParser parser, final ErrorListener errorListener) {
+    TAGMLParser.DocumentContext documentContext = parser.document();
+    TAGMLVisitor visitor = new TAGMLVisitor(tagStore, errorListener);
+    visitor.visit(documentContext);
+    return visitor.getDocumentWrapper();
   }
 
   private Long update(TAGObject tagObject) {

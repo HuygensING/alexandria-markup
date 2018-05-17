@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Entity(version = 2)
 public class TAGMarkup implements TAGObject {
@@ -46,6 +47,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatingMarkupId;
   private boolean optional = false;
   private boolean discontinuous = false;
+  private Set<String> layers;
 
   private TAGMarkup() {
   }
@@ -150,6 +152,15 @@ public class TAGMarkup implements TAGObject {
   public TAGMarkup setMarkupId(String markupId) {
     this.markupId = markupId;
     return this;
+  }
+
+  public TAGMarkup setLayers(final Set<String> layers) {
+    this.layers = layers;
+    return this;
+  }
+
+  public Set<String> getLayers() {
+    return layers;
   }
 
   public TAGMarkup setOptional(boolean optional) {
