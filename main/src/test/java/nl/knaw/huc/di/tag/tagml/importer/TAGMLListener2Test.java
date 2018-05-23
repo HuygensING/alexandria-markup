@@ -128,6 +128,61 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testSublayersAreClosedBeforeUsingParentLayerOpenMarkup() {
+    String input = "[!ld a \"layer a\"]" +
+        "[!ld a.1 \"layer a1\"]" +
+        "[!ld a.2 \"layer a1\"]" +
+        "[a|tagml>" +
+        "[a|para>" +
+        "[a.1|line>" +
+        "[a.2|sentence>" +
+        "I have got a date at a quarter to eight;" +
+        "<a.1|line]\n" +
+        "[a.1|line>" +
+        "I’ll see you at the gate," +
+        "<a.1|line]\n" +
+        "[a|quote>" + // sublayers are open, so new markup from the parent layer is not allowed here.
+        "(I'm the one with the bait)" +
+        "<a|quote]" +
+        "[a.1|line>" +
+        "so don’t be late" +
+        "<a.2|sentence]" +
+        "<a.1|line]" +
+        "<a|para]" +
+        "<a|tagml]";
+
+    String expectedSyntaxErrorMessage = "some error at [a|quote>";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
+  public void testSublayersAreClosedBeforeUsingParentLayerCloseMarkup() {
+    String input = "[!ld a \"layer a\"]" +
+        "[!ld a.1 \"layer a1\"]" +
+        "[!ld a.2 \"layer a1\"]" +
+        "[a|tagml>" +
+        "[a|para>" +
+        "[a.1|line>" +
+        "[a.2|sentence>" +
+        "I have got a date at a quarter to eight;" +
+        "<a.1|line]\n" +
+        "[a.1|line>" +
+        "I’ll see you at the gate," +
+        "<a.1|line]\n" +
+        "<a|para]" + // sublayers are open, so closing markup from parent layer is not allowed yet
+        "[a|para>" +
+        "[a.1|line>" +
+        "so don’t be late" +
+        "<a.2|sentence]" +
+        "<a.1|line]" +
+        "<a|para]" +
+        "<a|tagml]";
+
+    String expectedSyntaxErrorMessage = "some error at [a|quote>";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
   public void testLayerInfo() {
     LayerInfo layerInfoA = new LayerInfo("a", "description A");
     assertThat(layerInfoA.isSubLayer()).isFalse();
@@ -178,6 +233,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
       LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
       TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
+      assertThat(errorListener.hasErrors()).isTrue();
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
     });
