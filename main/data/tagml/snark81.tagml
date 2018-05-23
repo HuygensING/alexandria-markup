@@ -3,7 +3,7 @@
 [!ld p "poetic"]
 [!ld pr "proza"]
 [p|poem title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
-[l|text title='The Hunting of the Snark (An Agony in 8 Fits)'>
+[l,pr|text title='The Hunting of the Snark (An Agony in 8 Fits)'>
 [p|canto title='The Vanishing'>
 [m|page n=81>
 [m|line>[l|phr type='NP'>[l|w type='D'>The<l|w] [l|w type='N'>Vanishing<l|w]<l|phr]
@@ -33,5 +33,5 @@
 <m|p]<p|stanza]
 <p|canto]
 <m|page]
-<l|text]
+<pr,l|text]
 <p|poem]

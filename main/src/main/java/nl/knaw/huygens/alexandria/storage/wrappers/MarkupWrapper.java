@@ -199,8 +199,8 @@ public class MarkupWrapper {
     return markup.getTextNodeIds().size();
   }
 
-  public MarkupWrapper setLayers(final Set<String> layers) {
-    markup.setLayers(layers);
+  public MarkupWrapper addAllLayers(final Set<String> layers) {
+    markup.addAllLayers(layers);
     return this;
   }
 

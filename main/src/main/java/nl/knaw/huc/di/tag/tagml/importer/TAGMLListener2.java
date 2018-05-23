@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGObject;
@@ -187,7 +188,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       Set<String> layers = extractLayers(ctx.markupName().layerInfo());
       MarkupWrapper markup = resume
           ? resumeMarkup(ctx)
-          : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional).setLayers(layers);
+          : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional).addAllLayers(layers);
 
       if (markup != null) {
         SuffixContext suffix = markupNameContext.suffix();
@@ -208,7 +209,6 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   @Override
   public void exitEndTag(EndTagContext ctx) {
     if (tagNameIsValid(ctx)) {
-      Set<String> layers = extractLayers(ctx.markupName().layerInfo());
       String markupName = ctx.markupName().name().getText();
       LOG.debug("endTag.markupName=<{}>", markupName);
       removeFromOpenMarkup(ctx.markupName());
@@ -471,7 +471,9 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     LayerInfoContext layerInfoContext = ctx.layerInfo();
     Set<String> layers = extractLayers(layerInfoContext);
     MarkupWrapper markup = null;
-    String foundLayerPrefix = layerInfoContext == null ? "" : layerInfoContext.getText();
+    String foundLayerPrefix = layerInfoContext == null
+        ? ""
+        : extractLayers(layerInfoContext).stream().sorted().collect(joining(",")) + TAGML.DIVIDER;
     extendedMarkupName = foundLayerPrefix + extendedMarkupName;
     for (String l : layers) {
       state.openMarkup.putIfAbsent(l, new ArrayDeque<>());

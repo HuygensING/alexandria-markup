@@ -46,7 +46,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatingMarkupId;
   private boolean optional = false;
   private boolean discontinuous = false;
-  private Set<String> layers = new HashSet<>();
+  private Set<String> layers = new LinkedHashSet<>();
 
   private TAGMarkup() {
   }
@@ -107,6 +107,7 @@ public class TAGMarkup implements TAGObject {
 
   private String layerPrefix() {
     String layerPrefix = layers.stream()
+        .sorted()
         .filter(l -> !l.isEmpty())
         .collect(joining(","));
     return layerPrefix.isEmpty() ? "" : layerPrefix + TAGML.DIVIDER;
@@ -158,8 +159,13 @@ public class TAGMarkup implements TAGObject {
     return this;
   }
 
-  public TAGMarkup setLayers(final Set<String> layers) {
-    this.layers = layers;
+  public TAGMarkup addLayers(final String layer) {
+    this.layers.add(layer);
+    return this;
+  }
+
+  public TAGMarkup addAllLayers(final Set<String> layers) {
+    this.layers.addAll(layers);
     return this;
   }
 
