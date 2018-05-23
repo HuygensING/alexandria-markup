@@ -319,7 +319,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private Optional<MarkupWrapper> findMatchingMarkup(List<MarkupWrapper> markupOpenedInBranch0, MarkupWrapper m) {
-    return markupOpenedInBranch0.stream().filter(m0 -> m.matches(m0)).findFirst();
+    return markupOpenedInBranch0.stream().filter(m::matches).findFirst();
   }
 
   private void checkEndStates(final TextVariationContext ctx) {

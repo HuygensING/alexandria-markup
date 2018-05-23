@@ -32,7 +32,6 @@ import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,7 +302,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private Optional<MarkupWrapper> findMatchingMarkup(List<MarkupWrapper> markupOpenedInBranch0, MarkupWrapper m) {
-    return markupOpenedInBranch0.stream().filter(m0 -> m.matches(m0)).findFirst();
+    return markupOpenedInBranch0.stream().filter(m::matches).findFirst();
   }
 
   private void checkEndStates(final TextVariationContext ctx) {
