@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -568,29 +569,47 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.markupName().layerInfo();
     NameContext nameContext = ctx.markupName().name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
   private boolean tagNameIsValid(final EndTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.markupName().layerInfo();
     NameContext nameContext = ctx.markupName().name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
   private boolean tagNameIsValid(final MilestoneTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.layerInfo();
     NameContext nameContext = ctx.name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
-  private boolean nameContextIsValid(final ParserRuleContext ctx, final NameContext nameContext) {
+  private boolean nameContextIsValid(final ParserRuleContext ctx,
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+    AtomicBoolean valid = new AtomicBoolean(true);
+    if (layerInfoContext != null) {
+      layerInfoContext.name().stream()
+          .map(NameContext::getText)
+          .forEach(lid -> {
+            if (!layerInfo.containsKey(lid)) {
+              valid.set(false);
+              errorListener.addError(
+                  "%s Layer %s is undefined at this point.",
+                  errorPrefix(ctx), lid);
+            }
+          });
+    }
+
     if (nameContext == null || nameContext.getText().isEmpty()) {
       errorListener.addError(
           "%s Nameless markup is not allowed here.",
           errorPrefix(ctx)
       );
-      return false;
+      valid.set(false);
     }
-    return true;
+    return valid.get();
   }
 
   private TextVariationState currentTextVariationState() {

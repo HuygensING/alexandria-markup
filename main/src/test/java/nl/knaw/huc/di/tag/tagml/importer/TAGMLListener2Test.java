@@ -97,6 +97,16 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testLayerMustBeDefinedBeforeUse() {
+    String input = "[x|tagml>" +
+        "text" +
+        "<x|tagml]";
+    String expectedSyntaxErrorMessage = "line 1:1 : Layer x is undefined at this point.\n" +
+        "line 1:14 : Layer x is undefined at this point.";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
   public void testLayerShouldBeHierarchical() {
     String input = "[!ld a \"layer a\"][!ld b \"layer b\"]" +
         "[a|tagml>" +
@@ -148,6 +158,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
       LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
       TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
+      assertThat(errorListener.hasErrors()).isTrue();
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
     });
