@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -56,7 +57,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private final ErrorListener errorListener;
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
-  private final Map<String, String> layerInfo = new HashMap<>();
+  private final Map<String, LayerInfo> layerInfoMap = new HashMap<>();
   private State state = new State();
 
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
@@ -106,6 +107,27 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     }
   }
 
+  public static class LayerInfo {
+    public String id;
+    public String description = "";
+    public Set<String> subLayerIds = new HashSet<>();
+
+    public LayerInfo(final String id, final String description) {
+      this.id = id;
+      this.description = description;
+    }
+
+    public boolean isSubLayer() {
+      return id.contains(".");
+    }
+
+    public String getParentLayerId() {
+      return isSubLayer()
+          ? id.replaceFirst("\\.[^\\.]+$", "")
+          : "";
+    }
+  }
+
   @Override
   public void exitDocument(DocumentContext ctx) {
     update(document.getDocument());
@@ -142,7 +164,12 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
         .replaceFirst("^\"", "")
         .replaceFirst("\"$", "")
         .replaceAll("\\\"", "\"");
-    layerInfo.put(id, description);
+    LayerInfo layerInfo = new LayerInfo(id, description);
+    layerInfoMap.put(id, layerInfo);
+    if (layerInfo.isSubLayer()) {
+      LayerInfo parentLayerInfo = layerInfoMap.get(layerInfo.getParentLayerId());
+      parentLayerInfo.subLayerIds.add(id);
+    }
   }
 
   @Override
@@ -566,29 +593,47 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.markupName().layerInfo();
     NameContext nameContext = ctx.markupName().name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
   private boolean tagNameIsValid(final EndTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.markupName().layerInfo();
     NameContext nameContext = ctx.markupName().name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
   private boolean tagNameIsValid(final MilestoneTagContext ctx) {
+    LayerInfoContext layerInfoContext = ctx.layerInfo();
     NameContext nameContext = ctx.name();
-    return nameContextIsValid(ctx, nameContext);
+    return nameContextIsValid(ctx, nameContext, layerInfoContext);
   }
 
-  private boolean nameContextIsValid(final ParserRuleContext ctx, final NameContext nameContext) {
+  private boolean nameContextIsValid(final ParserRuleContext ctx,
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+    AtomicBoolean valid = new AtomicBoolean(true);
+    if (layerInfoContext != null) {
+      layerInfoContext.name().stream()
+          .map(NameContext::getText)
+          .forEach(lid -> {
+            if (!layerInfoMap.containsKey(lid)) {
+              valid.set(false);
+              errorListener.addError(
+                  "%s Layer %s is undefined at this point.",
+                  errorPrefix(ctx), lid);
+            }
+          });
+    }
+
     if (nameContext == null || nameContext.getText().isEmpty()) {
       errorListener.addError(
           "%s Nameless markup is not allowed here.",
           errorPrefix(ctx)
       );
-      return false;
+      valid.set(false);
     }
-    return true;
+    return valid.get();
   }
 
   private TextVariationState currentTextVariationState() {

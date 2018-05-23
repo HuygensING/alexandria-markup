@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLListener2.LayerInfo;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
@@ -97,6 +98,16 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testLayerMustBeDefinedBeforeUse() {
+    String input = "[x|tagml>" +
+        "text" +
+        "<x|tagml]";
+    String expectedSyntaxErrorMessage = "line 1:1 : Layer x is undefined at this point.\n" +
+        "line 1:14 : Layer x is undefined at this point.";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
   public void testLayerShouldBeHierarchical() {
     String input = "[!ld a \"layer a\"][!ld b \"layer b\"]" +
         "[a|tagml>" +
@@ -114,6 +125,25 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "line 1:190 : Close tag <a|tagml] found, expected <a|chapter].\n" +
         "Missing close tag(s) for: [a|chapter>, [a|book>, [a|tagml>";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
+  public void testLayerInfo() {
+    LayerInfo layerInfoA = new LayerInfo("a", "description A");
+    assertThat(layerInfoA.isSubLayer()).isFalse();
+    assertThat(layerInfoA.getParentLayerId()).isEqualTo("");
+
+    LayerInfo layerInfoAB = new LayerInfo("a.b", "description B");
+    assertThat(layerInfoAB.isSubLayer()).isTrue();
+    assertThat(layerInfoAB.getParentLayerId()).isEqualTo("a");
+
+    LayerInfo layerInfoAD = new LayerInfo("a.d", "description D");
+    assertThat(layerInfoAD.isSubLayer()).isTrue();
+    assertThat(layerInfoAD.getParentLayerId()).isEqualTo("a");
+
+    LayerInfo layerInfoABC = new LayerInfo("a.b.c", "description C");
+    assertThat(layerInfoABC.isSubLayer()).isTrue();
+    assertThat(layerInfoABC.getParentLayerId()).isEqualTo("a.b");
   }
 
   // private methods
