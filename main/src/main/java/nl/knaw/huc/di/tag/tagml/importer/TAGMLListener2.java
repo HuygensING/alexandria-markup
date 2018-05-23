@@ -109,9 +109,11 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   @Override
   public void exitDocument(DocumentContext ctx) {
     update(document.getDocument());
-    if (!state.openMarkup.isEmpty()) {
+    boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
+    if (!noOpenMarkup) {
       String openRanges = state.openMarkup.values().stream().flatMap(Collection::stream)//
           .map(this::openTag)//
+          .distinct()
           .collect(joining(", "));
       errorListener.addError(
           "Missing close tag(s) for: %s",
@@ -193,7 +195,10 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           String id = suffix.getText().replace(TILDE, "");
           markup.setSuffix(id);
         }
-        markup.getLayers().forEach(l -> state.openMarkup.get(l).add(markup));
+        markup.getLayers().forEach(l -> {
+          state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
+          state.openMarkup.get(l).push(markup);
+        });
 
         currentTextVariationState().addOpenMarkup(markup);
       }
@@ -463,14 +468,23 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     extendedMarkupName = withPrefix(ctx, extendedMarkupName);
     extendedMarkupName = withSuffix(ctx, extendedMarkupName);
 
-    String layer = ctx.layerInfo().getText();
-    MarkupWrapper markup = removeFromMarkupStack(extendedMarkupName, state.openMarkup.get(layer));
-    if (markup == null) {
-      errorListener.addError(
-          "%s Close tag <%s] found without corresponding open tag.",
-          errorPrefix(ctx), extendedMarkupName
-      );
-      return null;
+    LayerInfoContext layerInfoContext = ctx.layerInfo();
+    Set<String> layers = extractLayers(layerInfoContext);
+    MarkupWrapper markup = null;
+    String foundLayerPrefix = layerInfoContext == null ? "" : layerInfoContext.getText();
+    extendedMarkupName = foundLayerPrefix + extendedMarkupName;
+    for (String l : layers) {
+      state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
+      Deque<MarkupWrapper> markupStack = state.openMarkup.get(l);
+      markup = removeFromMarkupStack(extendedMarkupName, markupStack);
+      if (markup == null) {
+        MarkupWrapper expected = markupStack.peek();
+        errorListener.addError(
+            "%s Close tag <%s] found, expected %s.",
+            errorPrefix(ctx), extendedMarkupName, closeTag(expected)
+        );
+        return null;
+      }
     }
 
     PrefixContext prefixNode = ctx.prefix();
@@ -506,20 +520,13 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private MarkupWrapper removeFromMarkupStack(String extendedTag, Deque<MarkupWrapper> markupStack) {
-    Iterator<MarkupWrapper> descendingIterator = markupStack.descendingIterator();
-    MarkupWrapper markup = null;
-    while (descendingIterator.hasNext()) {
-      markup = descendingIterator.next();
-      if (markup.getExtendedTag().equals(extendedTag)) {
-        break;
-      }
-      markup = null;
+    final MarkupWrapper expected = markupStack.peek();
+    if (expected.getExtendedTag().equals(extendedTag)) {
+      markupStack.pop();
+      currentTextVariationState().removeOpenMarkup(expected);
+      return expected;
     }
-    if (markup != null) {
-      markupStack.remove(markup);
-      currentTextVariationState().removeOpenMarkup(markup);
-    }
-    return markup;
+    return null;
   }
 
   private MarkupWrapper resumeMarkup(StartTagContext ctx) {
@@ -626,10 +633,12 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
   private Set<String> extractLayers(final LayerInfoContext layerInfoContext) {
     final Set<String> layers = new HashSet<>();
-    layers.add("");
     if (layerInfoContext != null) {
       List<String> explicitLayers = layerInfoContext.name().stream().map(NameContext::getText).collect(toList());
       layers.addAll(explicitLayers);
+    }
+    if (layers.isEmpty()) {
+      layers.add("");
     }
     return layers;
   }

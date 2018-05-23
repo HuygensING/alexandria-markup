@@ -25,10 +25,9 @@ import com.sleepycat.persist.model.PrimaryKey;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+
+import static java.util.stream.Collectors.joining;
 
 @Entity(version = 2)
 public class TAGMarkup implements TAGObject {
@@ -47,7 +46,7 @@ public class TAGMarkup implements TAGObject {
   private Long dominatingMarkupId;
   private boolean optional = false;
   private boolean discontinuous = false;
-  private Set<String> layers;
+  private Set<String> layers = new HashSet<>();
 
   private TAGMarkup() {
   }
@@ -95,17 +94,22 @@ public class TAGMarkup implements TAGObject {
   }
 
   public String getExtendedTag() {
+    String layerPrefix = layerPrefix();
     if (optional) {
-      return TAGML.OPTIONAL_PREFIX + tag;
+      return layerPrefix + TAGML.OPTIONAL_PREFIX + tag;
     }
     // TODO: this is output language dependent: move to language dependency
     if (StringUtils.isNotEmpty(suffix)) {
-      return tag + "~" + suffix;
+      return layerPrefix + tag + "~" + suffix;
     }
-//    if (StringUtils.isNotEmpty(markupId)) {
-//      return tag + "=" + markupId;
-//    }
-    return tag;
+    return layerPrefix + tag;
+  }
+
+  private String layerPrefix() {
+    String layerPrefix = layers.stream()
+        .filter(l -> !l.isEmpty())
+        .collect(joining(","));
+    return layerPrefix.isEmpty() ? "" : layerPrefix + TAGML.DIVIDER;
   }
 
   public void addTextNode(TAGTextNode textNode) {

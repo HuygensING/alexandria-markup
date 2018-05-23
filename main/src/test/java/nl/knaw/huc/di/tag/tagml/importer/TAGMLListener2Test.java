@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.stream.Collectors.joining;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGMLListener2Test extends TAGBaseStoreTest {
@@ -57,9 +58,10 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[a>a [b>b<a]<b]" +
         "<tagml]";
-    store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = assertTAGMLParses(input);
-    });
+    String expectedSyntaxErrorMessage = "line 1:18 : Close tag <a] found, expected <b].\n" +
+        "line 1:24 : Close tag <tagml] found, expected <a].\n" +
+        "Missing close tag(s) for: [a>, [tagml>";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
@@ -80,6 +82,26 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
     });
+  }
+
+  @Test
+  public void testLayerShouldBeHierarchical() {
+    String input = "[!ld a \"layer a\"][!ld b \"layer b\"]" +
+        "[a|tagml>" +
+        "[b|page>" +
+        "[a|book>book title" +
+        "[a|chapter>chapter title" +
+        "[a|para>paragraph text" +
+        "<b|page]" +
+        "<a|chapter]<a|book]" +
+        "[! para should close before chapter !]<a|para]" +
+        "<a|tagml]";
+
+    String expectedSyntaxErrorMessage = "line 1:125 : Close tag <a|chapter] found, expected <a|para].\n" +
+        "line 1:136 : Close tag <a|book] found, expected <a|para].\n" +
+        "line 1:190 : Close tag <a|tagml] found, expected <a|chapter].\n" +
+        "Missing close tag(s) for: [a|chapter>, [a|book>, [a|tagml>";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   // private methods
@@ -104,16 +126,19 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   }
 
   private void assertTAGMLParsesWithSyntaxError(String input, String expectedSyntaxErrorMessage) {
-    ErrorListener errorListener = new ErrorListener();
-    TAGMLParser parser = setupParser(input, errorListener);
-    ParseTree parseTree = parser.document();
-    LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+    store.runInTransaction(() -> {
+      ErrorListener errorListener = new ErrorListener();
+      TAGMLParser parser = setupParser(input, errorListener);
+      ParseTree parseTree = parser.document();
+      LOG.info("parsetree: {}", parseTree.toStringTree(parser));
 
-    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+      int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+      LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-    TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
-    assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
+      TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
+      String errors = errorListener.getErrors().stream().collect(joining("\n"));
+      assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
+    });
   }
 
   private TAGMLParser setupParser(final String input, final ErrorListener errorListener) {
