@@ -31,9 +31,13 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.assertj.core.util.Files;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.charset.Charset;
 
 import static java.util.stream.Collectors.joining;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
@@ -42,6 +46,14 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLListener2Test.class);
   private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
+
+  @Test
+  public void testSnarkParses() {
+    String input = Files.contentOf(new File("data/tagml/snark81.tagml"), Charset.defaultCharset());
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+    });
+  }
 
   @Test
   public void testNonOverlappingMarkupWithoutLayerInfo() {
