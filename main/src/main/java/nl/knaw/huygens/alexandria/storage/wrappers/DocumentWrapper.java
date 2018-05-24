@@ -102,6 +102,7 @@ public class DocumentWrapper {
         .remove(markup.getDbId());
     update();
   }
+
   public DocumentWrapper setFirstAndLastTextNode(TextNodeWrapper firstTextNode, TextNodeWrapper lastTextNode) {
     document.getTextNodeIds().clear();
     addTextNode(firstTextNode);
@@ -146,6 +147,18 @@ public class DocumentWrapper {
       this.associateTextNodeWithMarkup(tn, markup1);
     });
     markup1.getAnnotationIds().addAll(markup2.getMarkup().getAnnotationIds());
+  }
+
+  public List<String> getLayerIds() {
+    return document.getLayerIds();
+  }
+
+  public void addLayerId(final String id) {
+    document.addLayerId(id);
+  }
+
+  public void setLayerIds(final List<String> layerIds) {
+    document.setLayerIds(layerIds);
   }
 
   /* private methods */

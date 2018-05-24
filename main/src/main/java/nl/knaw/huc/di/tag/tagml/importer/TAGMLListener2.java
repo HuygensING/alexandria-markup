@@ -122,9 +122,11 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           openRanges
       );
     }
-    if (!state.suspendedMarkup.isEmpty()) {
+    boolean noSuspendedMarkup = state.suspendedMarkup.values().stream().allMatch(Collection::isEmpty);
+    if (!noSuspendedMarkup) {
       String suspendedMarkupString = state.suspendedMarkup.values().stream().flatMap(Collection::stream)//
           .map(this::suspendTag)//
+          .distinct()
           .collect(Collectors.joining(", "));
       errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
@@ -145,6 +147,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
         .replaceFirst("\"$", "")
         .replaceAll("\\\"", "\"");
     layerInfo.put(id, description);
+    document.addLayerId(id);
   }
 
   @Override
@@ -499,7 +502,10 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
       } else if (prefixNodeText.equals(SUSPEND_PREFIX)) {
         // suspend
-//        state.suspendedMarkup.add(markup);
+        for (String l : layers) {
+          state.suspendedMarkup.putIfAbsent(l, new ArrayDeque<>());
+          state.suspendedMarkup.get(l).add(markup);
+        }
       }
     }
 
@@ -534,19 +540,23 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
   private MarkupWrapper resumeMarkup(StartTagContext ctx) {
     String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
-//    MarkupWrapper markup = removeFromMarkupStack(tag, state.suspendedMarkup);
-//    checkForCorrespondingSuspendTag(ctx, tag, markup);
-//    if (!errorListener.hasErrors()) {
-//      checkForTextBetweenSuspendAndResumeTags(markup, ctx);
-//      if (!errorListener.hasErrors()) {
-//        markup.setIsDiscontinuous(true);
-//      }
-//    }
-//    return markup;
-    return null;
+    MarkupWrapper markup = null;
+    Set<String> layers = extractLayers(ctx.markupName().layerInfo());
+    for (String layer : layers) {
+      markup = removeFromMarkupStack(tag, state.suspendedMarkup.get(layer));
+      checkForCorrespondingSuspendTag(ctx, tag, markup);
+      if (!errorListener.hasErrors()) {
+        checkForTextBetweenSuspendAndResumeTags(markup, ctx);
+        if (!errorListener.hasErrors()) {
+          markup.setIsDiscontinuous(true);
+        }
+      }
+    }
+    return markup;
   }
 
-  private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag, final MarkupWrapper markup) {
+  private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
+      final MarkupWrapper markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -556,16 +566,16 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private void checkForTextBetweenSuspendAndResumeTags(final MarkupWrapper markup, final StartTagContext ctx) {
-    List<Long> markupTextNodeIds = markup.getMarkup().getTextNodeIds();
-    Long lastMarkupTextNodeId = markupTextNodeIds.get(markupTextNodeIds.size() - 1);
-    List<Long> documentTextNodeIds = document.getDocument().getTextNodeIds();
-    Long lastDocumentTextNodeId = documentTextNodeIds.get(documentTextNodeIds.size() - 1);
-    if (lastDocumentTextNodeId.equals(lastMarkupTextNodeId)) {
-      errorListener.addError(
-          "%s There is no text between this resume tag %s and it's corresponding suspend tag %s. This is not allowed.",
-          errorPrefix(ctx), resumeTag(markup), suspendTag(markup)
-      );
-    }
+//    List<Long> markupTextNodeIds = markup.getMarkup().getTextNodeIds();
+//    Long lastMarkupTextNodeId = markupTextNodeIds.get(markupTextNodeIds.size() - 1);
+//    List<Long> documentTextNodeIds = document.getDocument().getTextNodeIds();
+//    Long lastDocumentTextNodeId = documentTextNodeIds.get(documentTextNodeIds.size() - 1);
+//    if (lastDocumentTextNodeId.equals(lastMarkupTextNodeId)) {
+//      errorListener.addError(
+//          "%s There is no text between this resume tag %s and it's corresponding suspend tag %s. This is not allowed.",
+//          errorPrefix(ctx), resumeTag(markup), suspendTag(markup)
+//      );
+//    }
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {

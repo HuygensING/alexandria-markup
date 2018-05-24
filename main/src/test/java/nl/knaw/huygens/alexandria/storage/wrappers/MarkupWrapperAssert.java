@@ -52,7 +52,7 @@ public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAsser
   public void hasMarkupId(String markupId) {
     isNotNull();
     String actualMarkupId = actual.getMarkupId();
-    if (!actualMarkupId.equals(markupId)) {
+    if (!markupId.equals(actualMarkupId)) {
       failWithMessage("\nExpected markup %s to have markupId %s, but was %s.",
           actual, markupId, actualMarkupId);
     }

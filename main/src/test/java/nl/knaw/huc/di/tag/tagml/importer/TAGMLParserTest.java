@@ -44,6 +44,89 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
   private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
 
+  @Test // RD-131
+  public void testSimpleTextWithRoot() {
+    String input = "[tagml>simple text<tagml]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("tagml")
+      );
+      assertThat(documentWrapper).hasTextNodesMatching(
+          textNodeSketch("simple text")
+      );
+      assertThat(documentWrapper.getLayerIds()).containsExactly("");
+    });
+  }
+
+  @Test // RD-132
+  public void testTextWithMultipleLayersOfMarkup() {
+    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
+        "[L1,L2|root>[L3|post>simple text<L1,L2|root]epic epilog<L3|post]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("root"),
+          markupSketch("post")
+
+      );
+      assertThat(documentWrapper).hasTextNodesMatching(
+          textNodeSketch("simple text"),
+          textNodeSketch("epic epilog")
+      );
+      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+    });
+  }
+
+  @Test // RD-133
+  public void testTextWithMultipleLayersAndDiscontinuity() {
+    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
+        "[L1,L2|root>[L1|q>“Man,\"<-L1|q][L2|s> I cried, <L2|s][+L1|q>\"how ignorant art thou in thy pride of wisdom!”<L1|q]<L1,L2|root]― [L3|post>Mary Wollstonecraft Shelley, Frankenstein<L3|post]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("root"),
+          markupSketch("q"),
+          markupSketch("s"),
+          markupSketch("post")
+      );
+      assertThat(documentWrapper).hasTextNodesMatching(
+          textNodeSketch("“Man,\""),
+          textNodeSketch(" I cried, "),
+          textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
+          textNodeSketch("― "),
+          textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
+      );
+      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+    });
+  }
+
+  @Test // RD-134
+  public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
+    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
+        "[L1,L2|root>[L1|q>“Man,\"<-L1|q][L2|s> I <|cried|pleaded|>, <L2|s][+L1|q>\"how ignorant art thou in thy pride of wisdom!”<L1|q]<L1,L2|root]― [L3|post>Mary Wollstonecraft Shelley, Frankenstein<L3|post]";
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      assertThat(documentWrapper).hasMarkupMatching(
+          markupSketch("root"),
+          markupSketch("q"),
+          markupSketch("s"),
+          markupSketch("post")
+      );
+      assertThat(documentWrapper).hasTextNodesMatching(
+          textNodeSketch("“Man,\""),
+          textNodeSketch(" I "),
+          textNodeSketch("cried"),
+          textNodeSketch("pleaded"),
+          textNodeSketch(", "),
+          textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
+          textNodeSketch("― "),
+          textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
+      );
+      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+    });
+  }
+
   @Test
   public void testOptionalMarkup() {
     String input = "[tagml>" +
@@ -347,7 +430,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
-    TAGMLListener listener = new TAGMLListener(store, errorListener);
+    TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
@@ -378,7 +461,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-    TAGMLListener listener = new TAGMLListener(store, errorListener);
+    TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());

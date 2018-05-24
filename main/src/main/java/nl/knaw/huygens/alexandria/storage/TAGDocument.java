@@ -45,6 +45,7 @@ public class TAGDocument implements TAGObject {
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
   private Long firstTextNodeId;
+  private List<String> layerIds = new ArrayList<>();
 
   TAGDocument() {
   }
@@ -122,5 +123,17 @@ public class TAGDocument implements TAGObject {
 
   public void updateModificationDate() {
     modificationDate = new Date();
+  }
+
+  public List<String> getLayerIds() {
+    return layerIds;
+  }
+
+  public void setLayerIds(final List<String> layerIds) {
+    this.layerIds = layerIds;
+  }
+
+  public void addLayerId(final String layerId) {
+    this.layerIds.add(layerId);
   }
 }

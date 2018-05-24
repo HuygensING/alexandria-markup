@@ -84,6 +84,12 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return textNodeSketch(textNodeWrapper.getText());
   }
 
+//  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
+//    isNotNull();
+//    List<String> actualLayerIds = actual.getLayerIds();
+//    return myself;
+//  }
+//
   public static class TextNodeSketch {
 
     private final String text;
