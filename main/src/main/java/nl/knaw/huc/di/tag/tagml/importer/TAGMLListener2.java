@@ -190,6 +190,9 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
 
       Set<String> layers = extractLayers(ctx.markupName().layerInfo());
+      if (layers.contains("")) {
+        document.addLayerId("");
+      }
       MarkupWrapper markup = resume
           ? resumeMarkup(ctx)
           : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional).addAllLayers(layers);
