@@ -99,6 +99,18 @@ IMO_Divider
   : PIPE
   ;
 
+IMO_Percent
+  : PERC
+  ;
+
+IMO_Plus
+  : PLUS
+  ;
+
+IMO_At
+  : AT
+  ;
+
 IMO_Name
   : NAME
   ;
@@ -281,6 +293,10 @@ IMC_Comma
   : COMMA
   ;
 
+IMC_At
+  : AT
+  ;
+
 IMC_Suffix
   : TILDE ( NAME | DIGIT+ )
   ;
@@ -355,7 +371,7 @@ Optional
   ;
 
 Resume
-  : '+'
+  : PLUS
   ;
 
 Suspend
@@ -376,6 +392,18 @@ LIST_CLOSER
 
 DOT
   : '.'
+  ;
+
+PERC
+  : '%'
+  ;
+
+PLUS
+  : '+'
+  ;
+
+AT
+  : '@'
   ;
 
 COMMA

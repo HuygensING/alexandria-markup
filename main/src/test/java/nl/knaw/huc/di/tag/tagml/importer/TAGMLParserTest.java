@@ -411,6 +411,45 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test
+  public void testAnaphoricExample() {
+    String eag = "[Extract}An ARVN officer asked [AC in Extract}[Exp in AC}a young prisoner{Exp in AC] questions, and when [Exp in AC}he{Exp in AC] failed to answer, beat [Exp in AC}him{Exp in AC]." +
+        " [#Blue over Extract>[AC in #Blue}[Exp in AC#Blue}An American observer who saw [#Red over  Extract>[AC in  #Red}[Exp in AC#Red}the beating <#Blue  over  Extract]{Exp in AC#Blue]{AC in #Blue]that happened then {Exp in AC#Red]reported that the officer “really worked [Exp in AC}him{Exp in AC] over”." +
+        " After [Exp in AC#Red}the beating{Exp in AC#Red]{AC in #Red]<#Red over Extract], [Exp in AC}the prisoner {Exp in AC]{AC in Extract] was forced to remain standing for hours.{Extract]";
+
+    String tagml = "[extract%p+blue+red>An ARVN officer asked [ac@p>[exp@p>a young prisoner<exp@p] questions, and when [exp@p>he<exp@p] failed to answer, beat [exp@p>him<exp@p]." +
+        " [ac@blue>[exp@blue>An American observer who saw [ac@red>[exp@red>the beating<exp@blue]<ac@blue] that happened then<exp@red] reported that the officer “really worked [exp@a>him<exp@a] over”." +
+        " After [exp@red>the beating<exp@red]<ac@red], [exp@a>the prisoner<exp@p]<ac@p] was forced to remain standing for hours.<extract]";
+    /*
+    Alternative/additional way to indicate hierarchy, inspired by the anaphoric chains example from the Linear extended Annotation Graph paper.
+    The [extract%p+blue+red> markup open tag indicates that the [extract] markup contains 3 overlapping hierarchies 'p', 'blue' and 'red'
+    The first ac gets the layer id 'p' and contains the expressions 'a young prisoner','he','him','him','the prisoner'
+    The second ac gets the layer id 'blue' and contains the [exp] 'An American observer who
+saw the beating'
+    The third ac gets the layer id 'red' and contains the [exp]s 'the beating that happened then' and 'the beating'
+    The first markup tag to get a unique layer id should be the containing markup for that layer, all markup with that layer id should not overlap, and so form a markup tree for that layer.
+    In the eAG representation, the connection between AC and Extract is made Explicit.
+    In the TAGML representation, there is no such explicit connection. This connection should be in the schema, where it's defined that each [extract] has a list of (potentially overlapping) [ac] hierarchies.
+    (Alternatively, it could be added to the [extract] markup open tag like this: [extract%p+blue+red> ... <extract], where it's implied that the layers identified by p, blue and red can overlap within [extract]  )
+    So for tagml, by default it is assumed that the markup is arranged as a tree, like in xml.
+    In case of overlap, the suffixes '%' '@' must be used: the markup that contains overlapping layer should list the layer ids of those layers in the markup open tag, after '%', separated by '+'
+    All markup within a layer should be hierarchical, and identified with the layer id on both open and close tag, after the suffix '@'
+
+
+
+    */
+    store.runInTransaction(() -> {
+      DocumentWrapper documentWrapper = assertTAGMLParses(tagml);
+//      assertThat(documentWrapper).hasMarkupMatching(
+//          markupSketch("m"),
+//          markupSketch("x")
+//      );
+//      MarkupWrapper m1 = documentWrapper.getMarkupStream().filter(m -> m.hasTag("m")).findFirst().get();
+//      assertThat(m1).hasMarkupId("m1");
+    });
+
+  }
+
   private DocumentWrapper assertTAGMLParses(final String input) {
     printTokens(input);
 
