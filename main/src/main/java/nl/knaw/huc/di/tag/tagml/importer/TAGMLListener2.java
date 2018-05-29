@@ -139,16 +139,16 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     namespaces.put(ns, url);
   }
 
-  @Override
-  public void exitLayerDefinition(LayerDefinitionContext ctx) {
-    String id = ctx.ILD_LayerIdentifier().getText();
-    String description = ctx.ILD_QuotedLayerDescription().getText()
-        .replaceFirst("^\"", "")
-        .replaceFirst("\"$", "")
-        .replaceAll("\\\"", "\"");
-    layerInfo.put(id, description);
-    document.addLayerId(id);
-  }
+//  @Override
+//  public void exitLayerDefinition(LayerDefinitionContext ctx) {
+//    String id = ctx.ILD_LayerIdentifier().getText();
+//    String description = ctx.ILD_QuotedLayerDescription().getText()
+//        .replaceFirst("^\"", "")
+//        .replaceFirst("\"$", "")
+//        .replaceAll("\\\"", "\"");
+//    layerInfo.put(id, description);
+//    document.addLayerId(id);
+//  }
 
   @Override
   public void exitText(TextContext ctx) {
@@ -169,6 +169,11 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
+    // determine layer
+    // open markup in layer
+    // add markup to layer tree as child of layer.openmarkupstack.peek()
+    // push markup to layer.openmarkupstack()
+
     if (tagNameIsValid(ctx)) {
       MarkupNameContext markupNameContext = ctx.markupName();
       String markupName = markupNameContext.name().getText();
@@ -603,8 +608,8 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
-      layerInfoContext.name().stream()
-          .map(NameContext::getText)
+      layerInfoContext.layerName().stream()
+          .map(LayerNameContext::getText)
           .forEach(lid -> {
             if (!layerInfo.containsKey(lid)) {
               valid.set(false);
@@ -668,7 +673,10 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private Set<String> extractLayers(final LayerInfoContext layerInfoContext) {
     final Set<String> layers = new HashSet<>();
     if (layerInfoContext != null) {
-      List<String> explicitLayers = layerInfoContext.name().stream().map(NameContext::getText).collect(toList());
+      List<String> explicitLayers = layerInfoContext.layerName()
+          .stream()
+          .map(LayerNameContext::getText)
+          .collect(toList());
       layers.addAll(explicitLayers);
     }
     if (layers.isEmpty()) {

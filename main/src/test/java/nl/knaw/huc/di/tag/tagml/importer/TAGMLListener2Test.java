@@ -78,9 +78,9 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
 
   @Test
   public void testNonOverlappingMarkupWithLayerInfo() {
-    String input = "[!ld a \"a\"][a|tagml>" +
-        "[a|a>a<a|a] [a|b>b<a|b]" +
-        "<a|tagml]";
+    String input = "[tagml|+a>" +
+        "[a|a>a<a|a] [b|a>b<b|a]" +
+        "<tagml|a]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
     });
@@ -88,36 +88,25 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
 
   @Test
   public void testOverlappingMarkupWithLayerInfo() {
-    String input = "[!ld a \"a\"][!ld b \"b\"][a|tagml>" +
+    String input = "[tagml|+a,+b>" +
         "[a|a>a [b|b>b<a|a]<b|b]" +
-        "<a|tagml]";
+        "<tagml|a]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
     });
   }
 
   @Test
-  public void testLayerMustBeDefinedBeforeUse() {
-    String input = "[x|tagml>" +
-        "text" +
-        "<x|tagml]";
-    String expectedSyntaxErrorMessage = "line 1:1 : Layer x is undefined at this point.\n" +
-        "line 1:14 : Layer x is undefined at this point.";
-    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
-  }
-
-  @Test
   public void testLayerShouldBeHierarchical() {
-    String input = "[!ld a \"layer a\"][!ld b \"layer b\"]" +
-        "[a|tagml>" +
-        "[b|page>" +
-        "[a|book>book title" +
-        "[a|chapter>chapter title" +
-        "[a|para>paragraph text" +
-        "<b|page]" +
-        "<a|chapter]<a|book]" +
-        "[! para should close before chapter !]<a|para]" +
-        "<a|tagml]";
+    String input = "[tagml|+a,+b>" +
+        "[page|b>" +
+        "[book|b>book title" +
+        "[chapter|a>chapter title" +
+        "[para|a>paragraph text" +
+        "<page|b]" +
+        "<chapter|a]<book|a]" +
+        "[! para should close before chapter !]<para|a]" +
+        "<tagml|a]";
 
     String expectedSyntaxErrorMessage = "line 1:125 : Close tag <a|chapter] found, expected <a|para].\n" +
         "line 1:136 : Close tag <a|book] found, expected <a|para].\n" +

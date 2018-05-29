@@ -13,10 +13,6 @@ DEFAULT_NamespaceOpener
   : '[!ns ' -> pushMode(INSIDE_NAMESPACE)
   ;
 
-DEFAULT_LayerDefinitionOpener
-  : '[!ld ' -> pushMode(INSIDE_LAYERDEFINITION)
-  ;
-
 DEFAULT_Comment
   : Comment -> skip
   ;
@@ -57,25 +53,6 @@ IN_NamespaceURI
   ;
 
 IN_NamespaceCloser
-  : ']' -> popMode
-  ;
-
-// ----------------- Everything INSIDE of a Layer Definition ---------------------
-mode INSIDE_LAYERDEFINITION;
-
-ILD_WS
-  : WS -> skip
-  ;
-
-ILD_LayerIdentifier
-  : NameChar+
-  ;
-
-ILD_QuotedLayerDescription
-  : '"' ~["\]]+ '"'
-  ;
-
-ILD_LayerDefinitionCloser
   : ']' -> popMode
   ;
 

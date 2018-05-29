@@ -1,37 +1,33 @@
-[!ld l "linguistic"]
-[!ld m "material"]
-[!ld p "poetic"]
-[!ld pr "proza"]
-[p|poem title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
-[l,pr|text title='The Hunting of the Snark (An Agony in 8 Fits)'>
-[p|canto title='The Vanishing'>
-[m|page n=81>
-[m|line>[l|phr type='NP'>[l|w type='D'>The<l|w] [l|w type='N'>Vanishing<l|w]<l|phr]
-[m|page_nr>81<m|page_nr]<m|line]
-[m|p>
+[poem|+p title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
+[text|+l,+pr title='The Hunting of the Snark (An Agony in 8 Fits)'>
+[canto|p title='The Vanishing'>
+[page|+m n=81>
+[line|m>[phr|l type='NP'>[w|l type='D'>The<w|l] [w|l type='N'>Vanishing<w|l]<phr|l]
+[page_nr|m>81<page_nr|m]<line|m]
+[p|m>
 [p|stanza>
 [pr|sentence>
-[m|line>[p|l>[l|s>[l|phr type='NP'>(As if stung<l|phr][l|phr type='PP'>by a spasm)<l|phr][l|phr type='VP'>plunge into a chasm,<l|phr]<p|l]<m|line]
-[m|line>[p|l>[l|phr type='VP'>While they waited [l|w type='contr'>and<l|w] listened in awe.<l|phr]<l|s]<p|l]<m|line]<pr|sentence]
-<m|p]<p|stanza]
+[line|m>[p|l>[l|s>[phr|l type='NP'>(As if stung<phr|l][phr|l type='PP'>by a spasm)<phr|l][phr|l type='VP'>plunge into a chasm,<phr|l]<p|l]<line|m]
+[line|m>[p|l>[phr|l type='VP'>While they waited [w|l type='contr'>and<w|l] listened in awe.<phr|l]<l|s]<p|l]<line|m]<pr|sentence]
+<p|m]<p|stanza]
 [m|el]
 [m|el]
-[p|stanza>[m|p>
-[pr|sentence~a>[m|line>[p|l>[pr|sentence~b voice='Baker'>[l|s>[l|phr type='NP'>"It's a Snark!"<l|phr]<pr|sentence~b] [l|phr type='VP'>was the sound that first came<l|phr]<m|line]
-[m|line>[l|phr type='PP'>to their ears,<l|phr]<p|l]<m|line]
-[m|line>[p|l>[l|phr type='VP'>And seemed almost too [l|w type='A'>good<l|w] to be true.<l|phr]<l|s]<p|l]<m|line]<pr|sentence~a]
-[m|line>[p|l>[pr|sentence~c>[l|s>[l|phr type='VP'>Then followed<l|phr][l|phr type='NP'>a torrent of laughter and cheers:<l|phr]<p|l]<m|line]
-[m|line>[p|l>[l|phr~a type='NP'>Then the ominous words [pr|sentence~d voice='Baker'>[l|phr~b type='VP'>"It's a Boo--"<l|phr~b]<l|phr~a]<pr|sentence~d]<p|l]<m|line]
-<m|p]<p|stanza]
+[p|stanza>[p|m>
+[pr|sentence~a>[line|m>[p|l>[pr|sentence~b voice='Baker'>[l|s>[phr|l type='NP'>"It's a Snark!"<phr|l]<pr|sentence~b] [phr|l type='VP'>was the sound that first came<phr|l]<line|m]
+[line|m>[phr|l type='PP'>to their ears,<phr|l]<p|l]<line|m]
+[line|m>[p|l>[phr|l type='VP'>And seemed almost too [w|l type='A'>good<w|l] to be true.<phr|l]<l|s]<p|l]<line|m]<pr|sentence~a]
+[line|m>[p|l>[pr|sentence~c>[l|s>[phr|l type='VP'>Then followed<phr|l][phr|l type='NP'>a torrent of laughter and cheers:<phr|l]<p|l]<line|m]
+[line|m>[p|l>[phr|l~a type='NP'>Then the ominous words [pr|sentence~d voice='Baker'>[phr|l~b type='VP'>"It's a Boo--"<phr|l~b]<phr|l~a]<pr|sentence~d]<p|l]<line|m]
+<p|m]<p|stanza]
 [m|el]
 [m|el]
-[p|stanza>[m|p>
-[m|line>[p|l>[l|phr type='NP'>Then, silence.<l|phr]<l|s]<pr|sentence~c] [pr|sentence~e>[l|s>[l|phr type='NP'>Some fancied<l|phr][l|phr type='VP'>they heard in the <m|line][m|line>air<l|phr]<p|l]<m|line]
-[m|line>[p|l>[l|phr type='NP'>A weary and wandering sigh<l|phr]<p|l]<m|line]
-[m|line>[p|l>[l|phr~a type='VP'>That sounded like [pr|sentence~f voice='Baker'>[l|phr~b type='N'>"--jum!"<l|phr~b]<pr|sentence~f] but the others de-<m|line][m|line>clare<l|phr~a]<p|l]<m|line]
-[m|line>[p|l>[l|phr type='NP'>It was only a breeze that went by.<l|phr]<l|s]<p|l]<m|line]<pr|sentence~e]
-<m|p]<p|stanza]
-<p|canto]
-<m|page]
+[p|stanza>[p|m>
+[line|m>[p|l>[phr|l type='NP'>Then, silence.<phr|l]<l|s]<pr|sentence~c] [pr|sentence~e>[l|s>[phr|l type='NP'>Some fancied<phr|l][phr|l type='VP'>they heard in the <line|m][line|m>air<phr|l]<p|l]<line|m]
+[line|m>[p|l>[phr|l type='NP'>A weary and wandering sigh<phr|l]<p|l]<line|m]
+[line|m>[p|l>[phr|l~a type='VP'>That sounded like [pr|sentence~f voice='Baker'>[phr|l~b type='N'>"--jum!"<phr|l~b]<pr|sentence~f] but the others de-<line|m][line|m>clare<phr|l~a]<p|l]<line|m]
+[line|m>[p|l>[phr|l type='NP'>It was only a breeze that went by.<phr|l]<l|s]<p|l]<line|m]<pr|sentence~e]
+<p|m]<p|stanza]
+<canto|p]
+<page|m]
 <pr,l|text]
-<p|poem]
+<poep|m]
