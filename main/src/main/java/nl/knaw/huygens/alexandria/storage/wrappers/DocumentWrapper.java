@@ -28,6 +28,7 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class DocumentWrapper {
@@ -149,16 +150,16 @@ public class DocumentWrapper {
     markup1.getAnnotationIds().addAll(markup2.getMarkup().getAnnotationIds());
   }
 
-  public List<String> getLayerIds() {
+  public Set<String> getLayerIds() {
     return document.getLayerIds();
   }
 
-  public void addLayerId(final String id) {
-    document.addLayerId(id);
+  public void addLayer(String layerId, MarkupWrapper markup) {
+    document.addLayer(layerId, markup.getDbId());
   }
 
-  public void setLayerIds(final List<String> layerIds) {
-    document.setLayerIds(layerIds);
+  public LayerWrapper getLayer(String layerId) {
+    return new LayerWrapper(store, document.getLayer(layerId));
   }
 
   /* private methods */

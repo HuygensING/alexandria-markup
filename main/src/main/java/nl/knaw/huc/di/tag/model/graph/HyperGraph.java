@@ -126,4 +126,9 @@ public class HyperGraph<N, H> {
   public enum GraphType {
     ORDERED, UNORDERED
   }
+
+  protected boolean nodeExists(N node) {
+    return nodes.contains(node);
+  }
+
 }

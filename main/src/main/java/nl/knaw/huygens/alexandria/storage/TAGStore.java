@@ -27,10 +27,7 @@ import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,6 +113,9 @@ public class TAGStore implements AutoCloseable {
     } else if (tagObject instanceof TAGAnnotation) {
       da.annotationById.put(tx, (TAGAnnotation) tagObject);
 
+    } else if (tagObject instanceof Layer) {
+      da.layerById.put(tx, (Layer) tagObject);
+
     } else {
       throw new RuntimeException("unhandled class: " + tagObject.getClass());
     }
@@ -135,6 +135,9 @@ public class TAGStore implements AutoCloseable {
 
     } else if (tagObject instanceof TAGAnnotation) {
       da.annotationById.delete(tx, tagObject.getDbId());
+
+    } else if (tagObject instanceof Layer) {
+      da.layerById.delete(tx, tagObject.getDbId());
 
     } else {
       throw new RuntimeException("unhandled class: " + tagObject.getClass());
@@ -177,6 +180,16 @@ public class TAGStore implements AutoCloseable {
 
   public TextNodeWrapper getTextNodeWrapper(Long textNodeId) {
     return new TextNodeWrapper(this, getTextNode(textNodeId));
+  }
+
+  public LayerWrapper getLayerWrapper(Long layerId) {
+    return new LayerWrapper(this, getLayer(layerId));
+  }
+
+  private Layer getLayer(Long layerId) {
+    assertInTransaction();
+    return da.layerById.get(tx, layerId, LOCK_MODE);
+    ;
   }
 
   // Markup

@@ -26,10 +26,7 @@ import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGObject;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +55,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private final ErrorListener errorListener;
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
-  private final Map<String, String> layerInfo = new HashMap<>();
+  private final Map<String, LayerWrapper> layerMap = new HashMap<>();
   private State state = new State();
 
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
@@ -194,13 +191,37 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       boolean optional = prefix != null && prefix.getText().equals(OPTIONAL_PREFIX);
       boolean resume = prefix != null && prefix.getText().equals(RESUME_PREFIX);
 
-      Set<String> layers = extractLayers(ctx.markupName().layerInfo());
-      if (layers.contains("")) {
-        document.addLayerId("");
-      }
       MarkupWrapper markup = resume
           ? resumeMarkup(ctx)
-          : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional).addAllLayers(layers);
+          : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
+
+      Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
+      layerIds.forEach(layerId -> {
+        if (!layerMap.containsKey(layerId)) {
+          document.addLayer(layerId, markup);
+          layerMap.put(layerId, document.getLayer(layerId));
+        }
+        LayerWrapper layer = layerMap.get(layerId);
+        layer.layer.addDescendantMarkup();
+
+      });
+//      .forEach(li -> {
+//        if (li.equals("")) {
+//          document.addLayer("", markup);
+//        } else {
+//          if (li.contains("+")) {
+//            String[] parts = li.split("+");
+//            layers.add(parts[0]);
+//            String newLayerId = parts[1];
+//            document.addLayer(newLayerId, markup);
+//            layers.add(newLayerId);
+//          }
+//        }
+//      });
+      if (layerIds.contains("") && !document.getLayerIds().contains("")) {
+        document.addLayer("", markup);
+      }
+      markup.addAllLayers(layerIds);
 
       if (markup != null) {
         SuffixContext suffix = markupNameContext.suffix();
@@ -234,7 +255,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 //    LOG.debug("milestone.markupName=<{}>", markupName);
 //    ctx.annotation()
 //        .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
-      Set<String> layers = extractLayers(ctx.layerInfo());
+      Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TextNodeWrapper tn = store.createTextNodeWrapper("");
       document.addTextNode(tn);
       logTextNode(tn);
@@ -481,11 +502,11 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     extendedMarkupName = withSuffix(ctx, extendedMarkupName);
 
     LayerInfoContext layerInfoContext = ctx.layerInfo();
-    Set<String> layers = extractLayers(layerInfoContext);
+    Set<String> layers = extractLayerInfo(layerInfoContext);
     MarkupWrapper markup = null;
     String foundLayerPrefix = layerInfoContext == null
         ? ""
-        : extractLayers(layerInfoContext).stream().sorted().collect(joining(",")) + TAGML.DIVIDER;
+        : extractLayerInfo(layerInfoContext).stream().sorted().collect(joining(",")) + TAGML.DIVIDER;
     extendedMarkupName = foundLayerPrefix + extendedMarkupName;
     for (String l : layers) {
       state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
@@ -549,7 +570,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private MarkupWrapper resumeMarkup(StartTagContext ctx) {
     String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
     MarkupWrapper markup = null;
-    Set<String> layers = extractLayers(ctx.markupName().layerInfo());
+    Set<String> layers = extractLayerInfo(ctx.markupName().layerInfo());
     for (String layer : layers) {
       markup = removeFromMarkupStack(tag, state.suspendedMarkup.get(layer));
       checkForCorrespondingSuspendTag(ctx, tag, markup);
@@ -564,7 +585,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final MarkupWrapper markup) {
+                                               final MarkupWrapper markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -605,7 +626,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
@@ -670,7 +691,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     );
   }
 
-  private Set<String> extractLayers(final LayerInfoContext layerInfoContext) {
+  private Set<String> extractLayerInfo(final LayerInfoContext layerInfoContext) {
     final Set<String> layers = new HashSet<>();
     if (layerInfoContext != null) {
       List<String> explicitLayers = layerInfoContext.layerName()

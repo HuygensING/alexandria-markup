@@ -45,7 +45,7 @@ public class TAGDocument implements TAGObject {
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
   private Long firstTextNodeId;
-  private List<String> layerIds = new ArrayList<>();
+  private Map<String, Layer> layers = new HashMap<>();
 
   TAGDocument() {
   }
@@ -125,15 +125,15 @@ public class TAGDocument implements TAGObject {
     modificationDate = new Date();
   }
 
-  public List<String> getLayerIds() {
-    return layerIds;
+  public Set<String> getLayerIds() {
+    return layers.keySet();
   }
 
-  public void setLayerIds(final List<String> layerIds) {
-    this.layerIds = layerIds;
+  public void addLayer(String layerId, Long dbId) {
+    layers.put(layerId, new Layer(layerId, dbId));
   }
 
-  public void addLayerId(final String layerId) {
-    this.layerIds.add(layerId);
+  public Layer getLayer(String layerId) {
+    return layers.get(layerId);
   }
 }

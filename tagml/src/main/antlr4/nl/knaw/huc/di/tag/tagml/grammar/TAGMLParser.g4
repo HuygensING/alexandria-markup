@@ -81,7 +81,7 @@ beginCloseMarkup
   ;
 
 milestoneTag
-  : beginOpenMarkup layerInfo? name annotation* endMilestoneTag // possible recursion
+  : beginOpenMarkup name layerInfo? annotation* endMilestoneTag // possible recursion
   ;
 
 endMilestoneTag
