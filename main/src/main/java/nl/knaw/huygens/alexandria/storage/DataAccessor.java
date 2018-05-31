@@ -29,14 +29,12 @@ class DataAccessor {
   final PrimaryIndex<Long, TAGTextNode> textNodeById;
   final PrimaryIndex<Long, TAGMarkup> markupById;
   final PrimaryIndex<Long, TAGAnnotation> annotationById;
-  final PrimaryIndex<Long, Layer> layerById;
 
   public DataAccessor(EntityStore store) throws DatabaseException {
     documentById = store.getPrimaryIndex(Long.class, TAGDocument.class);
     textNodeById = store.getPrimaryIndex(Long.class, TAGTextNode.class);
     markupById = store.getPrimaryIndex(Long.class, TAGMarkup.class);
     annotationById = store.getPrimaryIndex(Long.class, TAGAnnotation.class);
-    layerById = store.getPrimaryIndex(Long.class, Layer.class);
   }
 
 }

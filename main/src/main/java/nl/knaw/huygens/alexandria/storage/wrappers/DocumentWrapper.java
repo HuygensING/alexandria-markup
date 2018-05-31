@@ -150,18 +150,6 @@ public class DocumentWrapper {
     markup1.getAnnotationIds().addAll(markup2.getMarkup().getAnnotationIds());
   }
 
-  public Set<String> getLayerIds() {
-    return document.getLayerIds();
-  }
-
-  public void addLayer(String layerId, MarkupWrapper markup) {
-    document.addLayer(layerId, markup.getDbId());
-  }
-
-  public LayerWrapper getLayer(String layerId) {
-    return new LayerWrapper(store, document.getLayer(layerId));
-  }
-
   /* private methods */
 
   private Stream<TAGTextNode> getTagTextNodeStream() {

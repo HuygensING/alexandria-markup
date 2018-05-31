@@ -26,7 +26,10 @@ import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGObject;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.wrappers.*;
+import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +58,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private final ErrorListener errorListener;
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
-  private final Map<String, LayerWrapper> layerMap = new HashMap<>();
+  //  private final Map<String, LayerWrapper> layerMap = new HashMap<>();
   private State state = new State();
 
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
@@ -197,12 +200,12 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
       layerIds.forEach(layerId -> {
-        if (!layerMap.containsKey(layerId)) {
-          document.addLayer(layerId, markup);
-          layerMap.put(layerId, document.getLayer(layerId));
-        }
-        LayerWrapper layer = layerMap.get(layerId);
-        layer.layer.addDescendantMarkup();
+//        if (!layerMap.containsKey(layerId)) {
+////          document.addLayer(layerId, markup);
+////          layerMap.put(layerId, document.getLayer(layerId));
+//        }
+//        LayerWrapper layer = layerMap.get(layerId);
+//        layer.layer.addDescendantMarkup();
 
       });
 //      .forEach(li -> {
@@ -218,9 +221,9 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 //          }
 //        }
 //      });
-      if (layerIds.contains("") && !document.getLayerIds().contains("")) {
-        document.addLayer("", markup);
-      }
+//      if (layerIds.contains("") && !document.getLayerIds().contains("")) {
+//        document.addLayer("", markup);
+//      }
       markup.addAllLayers(layerIds);
 
       if (markup != null) {
@@ -585,7 +588,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final MarkupWrapper markup) {
+      final MarkupWrapper markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -626,18 +629,18 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
           .map(LayerNameContext::getText)
           .forEach(lid -> {
-            if (!layerInfo.containsKey(lid)) {
-              valid.set(false);
-              errorListener.addError(
-                  "%s Layer %s is undefined at this point.",
-                  errorPrefix(ctx), lid);
-            }
+//            if (!layerInfo.containsKey(lid)) {
+//              valid.set(false);
+//              errorListener.addError(
+//                  "%s Layer %s is undefined at this point.",
+//                  errorPrefix(ctx), lid);
+//            }
           });
     }
 
