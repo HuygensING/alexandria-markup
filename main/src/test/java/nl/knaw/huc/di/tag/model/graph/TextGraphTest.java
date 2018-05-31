@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.model.graph;
  * limitations under the License.
  * #L%
  */
+
 import org.junit.Test;
 
 import java.util.List;
@@ -123,7 +124,10 @@ public class TextGraphTest {
     List<Long> layerNERTextIds = tg.getTextNodeIdStreamForLayer(layerNER).collect(toList());
     assertThat(layerNERTextIds).containsExactly(textJonn, textOreos);
 
+    List<Long> markupForJonnNER = tg.getMarkupIdStreamForTextNodeId(textJonn, layerNER).collect(toList());
+    assertThat(markupForJonnNER).containsExactly(markupName1, markupTagml);
 
-
+    List<Long> markupForJonn = tg.getMarkupIdStreamForTextNodeId(textJonn).collect(toList());
+    assertThat(markupForJonn).containsExactlyInAnyOrder(markupA, markupName1, markupTagml);
   }
 }

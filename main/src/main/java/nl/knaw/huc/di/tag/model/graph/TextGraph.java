@@ -95,7 +95,73 @@ public class TextGraph extends HyperGraph<Long, Edge> implements TAGObject {
     return getIncomingEdges(id).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
-        .anyMatch(e->e.hasLayer(layerName));
+        .anyMatch(e -> e.hasLayer(layerName));
+  }
+
+  public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId, final String layerName) {
+    return stream(new Iterator<Long>() {
+      Optional<Long> next = getParentMarkup(textNodeId);
+
+      private Optional<Long> getParentMarkup(Long nodeId) {
+        return getIncomingEdges(nodeId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .filter(e -> e.hasLayer(layerName))
+            .map(e -> getSource(e))
+            .findFirst();
+      }
+
+      @Override
+      public boolean hasNext() {
+        return next.isPresent();
+      }
+
+      @Override
+      public Long next() {
+        Long nodeId = next.get();
+        next = getParentMarkup(nodeId);
+        return nodeId;
+      }
+    });
+  }
+
+  public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
+    return stream(new Iterator<Long>() {
+      Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
+      Optional<Long> next = calcNext();
+      Set<Long> markupHandled = new HashSet<>();
+
+      private Optional<Long> calcNext() {
+        return markupToProcess.isEmpty()
+            ? Optional.empty()
+            : Optional.of(markupToProcess.pop());
+      }
+
+      private List<Long> getParentMarkupList(Long nodeId) {
+        List<Long> list = getIncomingEdges(nodeId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .map(e -> getSource(e))
+            .collect(toList());
+        return list;
+      }
+
+      @Override
+      public boolean hasNext() {
+        return next.isPresent();
+      }
+
+      @Override
+      public Long next() {
+        Long nodeId = next.get();
+        markupHandled.add(nodeId);
+        next = calcNext();
+        List<Long> parentMarkupList = getParentMarkupList(nodeId);
+        parentMarkupList.removeAll(markupHandled);
+        markupToProcess.addAll(parentMarkupList);
+        return nodeId;
+      }
+    });
   }
 
   class TextNodeIdChainIterator implements Iterator<Long> {
@@ -110,8 +176,8 @@ public class TextGraph extends HyperGraph<Long, Edge> implements TAGObject {
     public Long next() {
       Long currentNode = next;
       List<Long> nextIds = getOutgoingEdges(currentNode).stream()
-          .map(e -> getTargets(e))
-          .flatMap(c -> c.stream())
+          .map(TextGraph.this::getTargets)
+          .flatMap(Collection::stream)
           .collect(toList());
       next = nextIds.isEmpty() ? null : nextIds.get(0);
       return currentNode;
