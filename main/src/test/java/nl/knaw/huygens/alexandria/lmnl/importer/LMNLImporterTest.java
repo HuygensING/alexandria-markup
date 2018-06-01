@@ -587,12 +587,12 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     return t1.getText().equals(t2.getText());
   }
 
-  private void logTAGML(TAGDocument TAGDocument) {
-    LOG.info("TAGML=\n{}", tagmlExporter.asTAGML(TAGDocument));
+  private void logTAGML(TAGDocument document) {
+    LOG.info("TAGML=\n{}", tagmlExporter.asTAGML(document));
   }
 
-  private void logKdTree(TAGDocument TAGDocument) {
-    LaTeXExporter latexExporter = new LaTeXExporter(store, TAGDocument);
+  private void logKdTree(TAGDocument document) {
+    LaTeXExporter latexExporter = new LaTeXExporter(store, document);
     String latex1 = latexExporter.exportMatrix();
     LOG.info("matrix=\n{}", latex1);
     String latexKdTree = latexExporter.exportKdTree();

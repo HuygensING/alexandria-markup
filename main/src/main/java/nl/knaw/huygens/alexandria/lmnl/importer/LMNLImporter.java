@@ -250,12 +250,12 @@ public class LMNLImporter {
     lexer.addErrorListener(errorListener);
 
     ImporterContext context = new ImporterContext(lexer);
-    TAGDocument TAGDocument = tagStore.createDocumentWrapper();
-    TAGDocumentDTO document = TAGDocument.getDocument();
-    update(document);
-    context.pushDocumentContext(document);
+    TAGDocument document = tagStore.createDocumentWrapper();
+    TAGDocumentDTO dto = document.getDocument();
+    update(dto);
+    context.pushDocumentContext(dto);
     handleDefaultMode(context);
-    joinDiscontinuedRanges(TAGDocument);
+    joinDiscontinuedRanges(document);
     context.popDocumentContext();
 
     String errorMsg = "";
@@ -270,8 +270,8 @@ public class LMNLImporter {
     if (!errorMsg.isEmpty()) {
       throw new LMNLSyntaxError(errorMsg);
     }
-    update(document);
-    return TAGDocument;
+    update(dto);
+    return document;
   }
 
   private void handleDefaultMode(ImporterContext context) {

@@ -75,7 +75,7 @@ public class TAGMLImporter {
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
 
-    TAGDocument TAGDocument = usingListener(parser, errorListener);
+    TAGDocument document = usingListener(parser, errorListener);
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
@@ -87,8 +87,8 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    update(TAGDocument.getDocument());
-    return TAGDocument;
+    update(document.getDocument());
+    return document;
   }
 
   private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {

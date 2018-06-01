@@ -123,8 +123,8 @@ public class TAGMLExporterTest extends TAGStoreTest {
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {
     store.runInTransaction(() -> {
-      TAGDocument TAGDocument = new TAGMLImporter(store).importTAGML(tagmlIn);
-      String tagmlOut = new TAGMLExporter(store).asTAGML(TAGDocument);
+      TAGDocument document = new TAGMLImporter(store).importTAGML(tagmlIn);
+      String tagmlOut = new TAGMLExporter(store).asTAGML(document);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
     });

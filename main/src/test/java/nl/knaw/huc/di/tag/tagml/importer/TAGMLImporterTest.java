@@ -712,11 +712,11 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   private TAGDocument parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
     printTokens(tagML);
-    TAGDocument TAGDocument = new TAGMLImporter(store).importTAGML(tagML);
+    TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     TAGMLExporter tagmlExporter = new TAGMLExporter(store);
-    String tagml = tagmlExporter.asTAGML(TAGDocument);
+    String tagml = tagmlExporter.asTAGML(document);
     LOG.info("\n\nTAGML:\n{}\n", tagml);
-    return TAGDocument;
+    return document;
   }
 
 }

@@ -51,7 +51,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   public void testSnarkParses() {
     String input = Files.contentOf(new File("data/tagml/snark81.tagml"), Charset.defaultCharset());
     store.runInTransaction(() -> {
-      TAGDocument TAGDocument = assertTAGMLParses(input);
+      TAGDocument document = assertTAGMLParses(input);
     });
   }
 
@@ -61,7 +61,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a>a<a] [b>b<b]" +
         "<tagml]";
     store.runInTransaction(() -> {
-      TAGDocument TAGDocument = assertTAGMLParses(input);
+      TAGDocument document = assertTAGMLParses(input);
     });
   }
 
@@ -82,7 +82,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a|a>a<a|a] [b|a>b<b|a]" +
         "<tagml|a]";
     store.runInTransaction(() -> {
-      TAGDocument TAGDocument = assertTAGMLParses(input);
+      TAGDocument document = assertTAGMLParses(input);
     });
   }
 
@@ -92,7 +92,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a|a>a [b|b>b<a|a]<b|b]" +
         "<tagml|a]";
     store.runInTransaction(() -> {
-      TAGDocument TAGDocument = assertTAGMLParses(input);
+      TAGDocument document = assertTAGMLParses(input);
     });
   }
 

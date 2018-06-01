@@ -48,9 +48,9 @@ public class TAGQLSelectStatement implements TAGQLStatement {
 
   @Override
   public Function<TAGDocument, TAGQLResult> getLimenProcessor() {
-    return (TAGDocument TAGDocument) -> {
+    return (TAGDocument document) -> {
       TAGQLResult result = new TAGQLResult();
-      TAGDocument.getMarkupStream()//
+      document.getMarkupStream()//
           .filter(markupFilter)//
           .map(markupMapper)//
           // .peek(this::logger)//
