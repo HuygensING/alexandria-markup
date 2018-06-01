@@ -29,9 +29,9 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperAssert, DocumentWrapper> {
+public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperAssert, TAGDocument> {
 
-  public DocumentWrapperAssert(final DocumentWrapper actual) {
+  public DocumentWrapperAssert(final TAGDocument actual) {
     super(actual, DocumentWrapperAssert.class);
   }
 
@@ -63,14 +63,14 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
 
   public MarkupWrapperAssert hasMarkupWithTag(String tag) {
     isNotNull();
-    List<MarkupWrapper> relevantMarkup = actual.getMarkupStream()
+    List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
         .filter(m -> m.hasTag(tag))
         .collect(toList());
     if (relevantMarkup.isEmpty()) {
       failWithMessage("No markup found with tag %s", tag);
     }
 
-    MarkupWrapper markup = relevantMarkup.get(0);
+    TAGMarkup markup = relevantMarkup.get(0);
     return new MarkupWrapperAssert(markup);
   }
 
@@ -80,8 +80,8 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
         .collect(toSet());
   }
 
-  private TextNodeSketch toTextNodeSketch(final TextNodeWrapper textNodeWrapper) {
-    return textNodeSketch(textNodeWrapper.getText());
+  private TextNodeSketch toTextNodeSketch(final TAGTextNode TAGTextNode) {
+    return textNodeSketch(TAGTextNode.getText());
   }
 
 //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
@@ -186,7 +186,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
         .collect(toSet());
   }
 
-  public MarkupSketch toMarkupSketch(MarkupWrapper markup) {
+  public MarkupSketch toMarkupSketch(TAGMarkup markup) {
     return markupSketch(markup.getTag(), markup.isOptional());
   }
 

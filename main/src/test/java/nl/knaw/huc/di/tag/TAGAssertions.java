@@ -33,7 +33,7 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static DocumentWrapperAssert assertThat(DocumentWrapper actual) {
+  public static DocumentWrapperAssert assertThat(TAGDocument actual) {
     return new DocumentWrapperAssert(actual);
   }
 
@@ -45,7 +45,7 @@ public class TAGAssertions extends Assertions {
    */
   @CheckReturnValue
 
-  public static MarkupWrapperAssert assertThat(MarkupWrapper actual) {
+  public static MarkupWrapperAssert assertThat(TAGMarkup actual) {
     return new MarkupWrapperAssert(actual);
   }
 
@@ -56,7 +56,7 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static AnnotationWrapperAssert assertThat(AnnotationWrapper actual) {
+  public static AnnotationWrapperAssert assertThat(TAGAnnotation actual) {
     return new AnnotationWrapperAssert(actual);
   }
 
@@ -67,7 +67,7 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static TextNodeWrapperAssert assertThat(TextNodeWrapper actual) {
+  public static TextNodeWrapperAssert assertThat(TAGTextNode actual) {
     return new TextNodeWrapperAssert(actual);
   }
 

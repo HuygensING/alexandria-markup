@@ -23,11 +23,11 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,14 +87,14 @@ public class TAGMLExporter {
       return startState;
     }
 
-    public TextVariationState setBranchStartNodes(List<TextNodeWrapper> branchStartNodes) {
+    public TextVariationState setBranchStartNodes(List<TAGTextNode> branchStartNodes) {
       this.branchStartNodeIds = branchStartNodes.stream()
-          .map(TextNodeWrapper::getDbId).collect(toSet());
+          .map(TAGTextNode::getDbId).collect(toSet());
       this.branchesToTraverse = branchStartNodes.size();
       return this;
     }
 
-    public boolean isBranchStartNode(TextNodeWrapper node) {
+    public boolean isBranchStartNode(TAGTextNode node) {
       return branchStartNodeIds.contains(node.getDbId());
     }
 
@@ -103,7 +103,7 @@ public class TAGMLExporter {
       return this;
     }
 
-    public boolean isFirstNodeAfterConvergence(TextNodeWrapper node) {
+    public boolean isFirstNodeAfterConvergence(TAGTextNode node) {
       return node.getDbId().equals(convergenceSucceedingNodeId);
     }
 
@@ -120,10 +120,10 @@ public class TAGMLExporter {
     }
   }
 
-  public String asTAGML(DocumentWrapper document) {
+  public String asTAGML(TAGDocument document) {
     Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
     document.getMarkupStream()
-        .filter(MarkupWrapper::isDiscontinuous)
+        .filter(TAGMarkup::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
 
     StringBuilder tagmlBuilder = new StringBuilder();
@@ -131,13 +131,13 @@ public class TAGMLExporter {
     Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
     textVariationStates.push(new TextVariationState());
 
-    Deque<TextNodeWrapper> nodesToProcess = new LinkedList<>();
+    Deque<TAGTextNode> nodesToProcess = new LinkedList<>();
     nodesToProcess.push(document.getFirstTextNode());
-    Set<TextNodeWrapper> processedNodes = new HashSet<>();
+    Set<TAGTextNode> processedNodes = new HashSet<>();
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
     while (!nodesToProcess.isEmpty()) {
-      final TextNodeWrapper nodeToProcess = nodesToProcess.pop();
-      List<TextNodeWrapper> nextTextNodes = nodeToProcess.getNextTextNodes();
+      final TAGTextNode nodeToProcess = nodesToProcess.pop();
+      List<TAGTextNode> nextTextNodes = nodeToProcess.getNextTextNodes();
       logTextNode(nodeToProcess);
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
@@ -189,7 +189,7 @@ public class TAGMLExporter {
           stateRef.set(variationState.getStartState());
           variationState.incrementBranchesStarted();
         }
-        TAGTextNode textNode = nodeToProcess.getTextNode();
+        TAGTextNodeDTO textNode = nodeToProcess.getTextNode();
         String content = nodeToProcess.getText();
         switch (textNode.getType()) {
           case plaintext:
@@ -208,7 +208,7 @@ public class TAGMLExporter {
             TextVariationState textVariationState = textVariationStates.peek();
             textVariationState.setStartState(state.copy())
                 .setBranchStartNodes(nextTextNodes);
-            List<TextNodeWrapper> tmp = new ArrayList<>(nextTextNodes);
+            List<TAGTextNode> tmp = new ArrayList<>(nextTextNodes);
             Collections.reverse(tmp);
             tmp.forEach(nodesToProcess::push);
             break;
@@ -227,7 +227,7 @@ public class TAGMLExporter {
           processedNodes.add(nodeToProcess);
         }
         state.lastTextNodeId = nodeToProcess.getDbId();
-        LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TextNodeWrapper::getDbId).collect(toList()));
+        LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TAGTextNode::getDbId).collect(toList()));
         LOG.info("TAGML={}\n", tagmlBuilder);
       }
     }
@@ -247,7 +247,7 @@ public class TAGMLExporter {
       final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
-      MarkupWrapper markup = store.getMarkupWrapper(markupId);
+      TAGMarkup markup = store.getMarkupWrapper(markupId);
       if (textNodesToHandle < markup.getTextNodeCount() - 1) {
         openTag = openTag.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX);
       }
@@ -266,20 +266,20 @@ public class TAGMLExporter {
     return closeTag;
   }
 
-  private boolean needsDivider(final TextNodeWrapper nodeWrapper) {
-    List<TextNodeWrapper> prevTextNodes = nodeWrapper.getPrevTextNodes();
+  private boolean needsDivider(final TAGTextNode nodeWrapper) {
+    List<TAGTextNode> prevTextNodes = nodeWrapper.getPrevTextNodes();
     return prevTextNodes.size() == 1
         && prevTextNodes.get(0).isDivergence()
         && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(nodeWrapper);
   }
 
-  private StringBuilder toCloseTag(MarkupWrapper markup) {
+  private StringBuilder toCloseTag(TAGMarkup markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
         : new StringBuilder(CLOSE_TAG_STARTCHAR).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
-  private StringBuilder toOpenTag(MarkupWrapper markup) {
+  private StringBuilder toOpenTag(TAGMarkup markup) {
     StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR).append(markup.getExtendedTag());
     markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toTAGML(a)));
     return markup.isAnonymous()//
@@ -287,12 +287,12 @@ public class TAGMLExporter {
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 
-  public StringBuilder toTAGML(final AnnotationWrapper a) {
+  public StringBuilder toTAGML(final TAGAnnotation a) {
     return new StringBuilder();// TODO
   }
 
-  private void logTextNode(final TextNodeWrapper nodeWrapper) {
-    TAGTextNode textNode = nodeWrapper.getTextNode();
+  private void logTextNode(final TAGTextNode nodeWrapper) {
+    TAGTextNodeDTO textNode = nodeWrapper.getTextNode();
     LOG.debug("\n");
     LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
         nodeWrapper.getDbId(),

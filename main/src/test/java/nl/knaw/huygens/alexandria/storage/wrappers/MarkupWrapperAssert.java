@@ -27,9 +27,9 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
-public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAssert, MarkupWrapper> {
+public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAssert, TAGMarkup> {
 
-  public MarkupWrapperAssert(final MarkupWrapper actual) {
+  public MarkupWrapperAssert(final TAGMarkup actual) {
     super(actual, MarkupWrapperAssert.class);
   }
 
@@ -44,7 +44,7 @@ public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAsser
 
   public MarkupWrapperAssert withTextNodesWithText(String... text) {
     isNotNull();
-    List<String> actualTexts = actual.getTextNodeStream().map(TextNodeWrapper::getText).collect(toList());
+    List<String> actualTexts = actual.getTextNodeStream().map(TAGTextNode::getText).collect(toList());
     assertThat(actualTexts).containsExactly(text);
     return myself;
   }

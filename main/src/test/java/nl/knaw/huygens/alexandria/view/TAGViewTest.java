@@ -24,8 +24,8 @@ import static java.util.Arrays.asList;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   @Test
   public void testFilterRelevantMarkup() {
     store.runInTransaction(() -> {
-      DocumentWrapper document = store.createDocumentWrapper();
+      TAGDocument document = store.createDocumentWrapper();
 
       String tag1 = "a";
       Long markupId1 = createNewMarkup(document, tag1);
@@ -72,7 +72,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3);
 
       LMNLImporter importer = new LMNLImporter(store);
-      DocumentWrapper document1 = importer.importLMNL("[a}a[b}b[c}c[d}da{a]b{b]c{c]d{d]");
+      TAGDocument document1 = importer.importLMNL("[a}a[b}b[c}c[d}da{a]b{b]c{c]d{d]");
 
       LMNLExporter exporter1 = new LMNLExporter(store, viewNoAC);
       String lmnlBD = exporter1.toLMNL(document1);
@@ -84,8 +84,8 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  private Long createNewMarkup(DocumentWrapper document, String tag1) {
-    MarkupWrapper markup1 = store.createMarkupWrapper(document, tag1);
+  private Long createNewMarkup(TAGDocument document, String tag1) {
+    TAGMarkup markup1 = store.createMarkupWrapper(document, tag1);
     return markup1.getDbId();
   }
 

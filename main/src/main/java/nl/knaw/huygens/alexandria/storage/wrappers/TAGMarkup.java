@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import java.util.Optional;
@@ -29,11 +29,11 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class MarkupWrapper {
+public class TAGMarkup {
   private final TAGStore store;
-  private final TAGMarkup markup;
+  private final TAGMarkupDTO markup;
 
-  public MarkupWrapper(TAGStore store, TAGMarkup markup) {
+  public TAGMarkup(TAGStore store, TAGMarkupDTO markup) {
     checkNotNull(store);
     checkNotNull(markup);
     this.store = store;
@@ -49,26 +49,26 @@ public class MarkupWrapper {
     return markup.getTag();
   }
 
-  public MarkupWrapper addTextNode(TextNodeWrapper textNodeWrapper) {
-    markup.getTextNodeIds().add(textNodeWrapper.getDbId());
+  public TAGMarkup addTextNode(TAGTextNode TAGTextNode) {
+    markup.getTextNodeIds().add(TAGTextNode.getDbId());
     Long ownerId = markup.getDocumentId();
-    new DocumentWrapper(store, store.getDocument(ownerId))//
-        .associateTextNodeWithMarkup(textNodeWrapper, this);
+    new TAGDocument(store, store.getDocument(ownerId))//
+        .associateTextNodeWithMarkup(TAGTextNode, this);
     update();
     return this;
   }
 
-  public MarkupWrapper setOnlyTextNode(TextNodeWrapper textNodeWrapper) {
+  public TAGMarkup setOnlyTextNode(TAGTextNode TAGTextNode) {
     markup.getTextNodeIds().clear();
-    addTextNode(textNodeWrapper);
+    addTextNode(TAGTextNode);
     return this;
   }
 
-  public MarkupWrapper setFirstAndLastTextNode(TextNodeWrapper first, TextNodeWrapper last) {
+  public TAGMarkup setFirstAndLastTextNode(TAGTextNode first, TAGTextNode last) {
     markup.getTextNodeIds().clear();
     addTextNode(first);
     if (!first.getDbId().equals(last.getDbId())) {
-      TextNodeWrapper next = first.getNextTextNodes().get(0); // TODO: handle divergence
+      TAGTextNode next = first.getNextTextNodes().get(0); // TODO: handle divergence
       while (!next.getDbId().equals(last.getDbId())) {
         addTextNode(next);
         next = next.getNextTextNodes().get(0);// TODO: handle divergence
@@ -79,22 +79,22 @@ public class MarkupWrapper {
     return this;
   }
 
-  public MarkupWrapper addAnnotation(AnnotationWrapper annotation) {
+  public TAGMarkup addAnnotation(TAGAnnotation annotation) {
     markup.getAnnotationIds().add(annotation.getDbId());
     update();
     return this;
   }
 
-  public Stream<AnnotationWrapper> getAnnotationStream() {
+  public Stream<TAGAnnotation> getAnnotationStream() {
     return markup.getAnnotationIds().stream()//
         .map(store::getAnnotation)//
-        .map(annotation -> new AnnotationWrapper(store, annotation));
+        .map(annotation -> new TAGAnnotation(store, annotation));
   }
 
-  public Stream<TextNodeWrapper> getTextNodeStream() {
+  public Stream<TAGTextNode> getTextNodeStream() {
     return markup.getTextNodeIds().stream()//
         .map(store::getTextNode)//
-        .map(textNode -> new TextNodeWrapper(store, textNode));
+        .map(textNode -> new TAGTextNode(store, textNode));
   }
 
   private void update() {
@@ -103,10 +103,10 @@ public class MarkupWrapper {
 
   public boolean isAnonymous() {
     return markup.getTextNodeIds().size() == 1//
-        && "".equals(getTextNodeStream().findFirst().map(TextNodeWrapper::getText).get());
+        && "".equals(getTextNodeStream().findFirst().map(TAGTextNode::getText).get());
   }
 
-  public TAGMarkup getMarkup() {
+  public TAGMarkupDTO getMarkup() {
     return markup;
   }
 
@@ -128,7 +128,7 @@ public class MarkupWrapper {
 
   public boolean hasN() {
     return getAnnotationStream()//
-        .map(AnnotationWrapper::getTag) //
+        .map(TAGAnnotation::getTag) //
         .anyMatch("n"::equals);
   }
 
@@ -136,13 +136,13 @@ public class MarkupWrapper {
     return markup.getSuffix();
   }
 
-  public Optional<MarkupWrapper> getDominatedMarkup() {
+  public Optional<TAGMarkup> getDominatedMarkup() {
     return markup.getDominatedMarkupId()
         .map(store::getMarkup)
-        .map(m -> new MarkupWrapper(store, m));
+        .map(m -> new TAGMarkup(store, m));
   }
 
-  public void setDominatedMarkup(MarkupWrapper dominatedMarkup) {
+  public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
     markup.setDominatedMarkupId(dominatedMarkup.getDbId());
     if (!dominatedMarkup.getMarkup().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
@@ -150,14 +150,14 @@ public class MarkupWrapper {
     update();
   }
 
-  public Optional<MarkupWrapper> getDominatingMarkup() {
+  public Optional<TAGMarkup> getDominatingMarkup() {
     return markup.getDominatingMarkupId()
         .map(store::getMarkup)
-        .map(m -> new MarkupWrapper(store, m));
+        .map(m -> new TAGMarkup(store, m));
 
   }
 
-  private void setDominatingMarkup(MarkupWrapper dominatingMarkup) {
+  private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
     markup.setDominatingMarkupId(dominatingMarkup.getDbId());
     if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
@@ -177,12 +177,12 @@ public class MarkupWrapper {
     return markup.isOptional();
   }
 
-  public MarkupWrapper setOptional(boolean optional) {
+  public TAGMarkup setOptional(boolean optional) {
     markup.setOptional(optional);
     return this;
   }
 
-  public MarkupWrapper setMarkupId(String id) {
+  public TAGMarkup setMarkupId(String id) {
     markup.setMarkupId(id);
     return this;
   }
@@ -199,7 +199,7 @@ public class MarkupWrapper {
     return markup.getTextNodeIds().size();
   }
 
-  public MarkupWrapper addAllLayers(final Set<String> layers) {
+  public TAGMarkup addAllLayers(final Set<String> layers) {
     markup.addAllLayers(layers);
     return this;
   }
@@ -220,11 +220,11 @@ public class MarkupWrapper {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof MarkupWrapper //
-        && markup.equals(((MarkupWrapper) other).getMarkup());
+    return other instanceof TAGMarkup //
+        && markup.equals(((TAGMarkup) other).getMarkup());
   }
 
-  public boolean matches(MarkupWrapper other) {
+  public boolean matches(TAGMarkup other) {
     if (!other.getExtendedTag().equals(getExtendedTag())) {
       return false;
     }

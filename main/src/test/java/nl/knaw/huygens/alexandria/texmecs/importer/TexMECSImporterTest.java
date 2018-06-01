@@ -23,10 +23,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
 import nl.knaw.AntlrUtils;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -52,7 +52,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
       assertThat(document).isNotNull();
     });
   }
@@ -61,13 +61,13 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithAttributes() {
     String texMECS = "<s type='test'|<a|John <b|loves|a> Mary|b>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s [type}test{type]}[a}John [b}loves{a] Mary{b]{s]");
       assertThat(document).isNotNull();
-      MarkupWrapper markup0 = document.getMarkupStream().findFirst().get();
+      TAGMarkup markup0 = document.getMarkupStream().findFirst().get();
       assertThat(markup0.getTag()).isEqualTo("s");
-      AnnotationWrapper annotation = markup0.getAnnotationStream().findFirst().get();
+      TAGAnnotation annotation = markup0.getAnnotationStream().findFirst().get();
       assertThat(annotation.getTag()).isEqualTo("type");
-      List<TextNodeWrapper> textNodeList = annotation.getDocument().getTextNodeStream().collect(toList());
+      List<TAGTextNode> textNodeList = annotation.getDocument().getTextNodeStream().collect(toList());
       assertThat(textNodeList).hasSize(1);
       assertThat(textNodeList.get(0).getText()).isEqualTo("test");
     });
@@ -77,9 +77,9 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithSuffix() {
     String texMECS = "<s~0|<a|John <b|loves|a> Mary|b>|s~0>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
+      TAGDocument document = testTexMECS(texMECS, "[s~0}[a}John [b}loves{a] Mary{b]{s~0]");
       assertThat(document).isNotNull();
-      MarkupWrapper markup0 = document.getMarkupStream().findFirst().get();
+      TAGMarkup markup0 = document.getMarkupStream().findFirst().get();
       assertThat(markup0.getTag()).isEqualTo("s");
       assertThat(markup0.getSuffix()).isEqualTo("0");
     });
@@ -89,7 +89,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithSoleTag() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
       assertThat(document).isNotNull();
     });
   }
@@ -98,15 +98,15 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
       assertThat(document).isNotNull();
-      List<MarkupWrapper> markupList = document.getMarkupStream().collect(toList());
+      List<TAGMarkup> markupList = document.getMarkupStream().collect(toList());
       assertThat(markupList).hasSize(3); // s, a, b
-      MarkupWrapper markup = markupList.get(2);
+      TAGMarkup markup = markupList.get(2);
       assertThat(markup.getTag()).isEqualTo("b");
-      List<TextNodeWrapper> textNodes = markup.getTextNodeStream().collect(toList());
+      List<TAGTextNode> textNodes = markup.getTextNodeStream().collect(toList());
       assertThat(textNodes).hasSize(3);
-      List<String> textNodeContents = textNodes.stream().map(TextNodeWrapper::getText).collect(toList());
+      List<String> textNodeContents = textNodes.stream().map(TAGTextNode::getText).collect(toList());
       assertThat(textNodeContents).containsExactly("loves", " Mary", "very much");
     });
   }
@@ -115,7 +115,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right! *>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
       assertThat(document).isNotNull();
     });
   }
@@ -124,7 +124,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithNestedComment() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><* Yeah, right<*actually...*>!*>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
       assertThat(document).isNotNull();
     });
   }
@@ -133,7 +133,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testExample1WithCData() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><#CDATA<some cdata>#CDATA>|s>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
+      TAGDocument document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b]{s]");
       assertThat(document).isNotNull();
     });
   }
@@ -142,7 +142,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testSelfOverlappingElements() {
     String texMECS = "<e~1|Lorem <e~2|Ipsum |e~1>Dolor...|e~2>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
+      TAGDocument document = testTexMECS(texMECS, "[e~1}Lorem [e~2}Ipsum {e~1]Dolor...{e~2]");
       assertThat(document).isNotNull();
     });
   }
@@ -151,7 +151,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testTagSets() {
     String texMECS = "<|choice||<option|A|option><option|B|option>||choice|>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[choice}[option}A{option][option}B{option]{choice]");
+      TAGDocument document = testTexMECS(texMECS, "[choice}[option}A{option][option}B{option]{choice]");
       assertThat(document).isNotNull();
     });
   }
@@ -162,7 +162,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
     store.runInTransaction(() -> {
 //      DocumentWrapper document = testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
-      DocumentWrapper document = testTexMECS(texMECS, "[real}[e}Reality{e]{real][virtual}[e}Reality{e]{virtual]");
+      TAGDocument document = testTexMECS(texMECS, "[real}[e}Reality{e]{real][virtual}[e}Reality{e]{virtual]");
       assertThat(document).isNotNull();
     });
   }
@@ -171,7 +171,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testMultipleRoots() {
     String texMECS = "<a|A|a><a|A|a><a|A|a><a|A|a><a|A|a>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[a}A{a][a}A{a][a}A{a][a}A{a][a}A{a]");
+      TAGDocument document = testTexMECS(texMECS, "[a}A{a][a}A{a][a}A{a][a}A{a][a}A{a]");
       assertThat(document).isNotNull();
     });
   }
@@ -180,13 +180,13 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   public void testDominance() {
     String texMECS = "<l|This is <i|<b|very|b>|i> important|l>";
     store.runInTransaction(() -> {
-      DocumentWrapper document = testTexMECS(texMECS, "[l}This is [i}[b}very{b]{i] important{l]");
+      TAGDocument document = testTexMECS(texMECS, "[l}This is [i}[b}very{b]{i] important{l]");
       assertThat(document).isNotNull();
-      List<MarkupWrapper> markupList = document.getMarkupStream().collect(toList());
-      MarkupWrapper markupI = markupList.get(1);
+      List<TAGMarkup> markupList = document.getMarkupStream().collect(toList());
+      TAGMarkup markupI = markupList.get(1);
       assertThat(markupI.getExtendedTag()).isEqualTo("i");
 
-      MarkupWrapper markupB = markupList.get(2);
+      TAGMarkup markupB = markupList.get(2);
       assertThat(markupB.getExtendedTag()).isEqualTo("b");
       assertThat(markupI.getDominatedMarkup().get().getDbId()).isEqualTo(markupB.getDbId());
       assertThat(markupB.getDominatingMarkup().get().getDbId()).isEqualTo(markupI.getDbId());
@@ -198,7 +198,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<tag|opening, but not closing";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -212,7 +212,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "no opening tag|bla>";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -226,7 +226,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<^v^v12>";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -240,7 +240,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<tag|Lorem ipsum|-tag> dolores rosetta|tag>";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -254,7 +254,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<tag|Lorem ipsum <+tag|dolores rosetta|tag>";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -268,7 +268,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = "<tag@t1|Lorem ipsum <b@t1|Dolores|b> dulcetto.|tag>";
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -283,7 +283,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     String texMECS = FileUtils.readFileToString(new File(pathname), StandardCharsets.UTF_8);
     store.runInTransaction(() -> {
       try {
-        DocumentWrapper document = testTexMECS(texMECS, "whatever");
+        TAGDocument document = testTexMECS(texMECS, "whatever");
         fail();
       } catch (TexMECSSyntaxError se) {
         LOG.warn(se.getMessage());
@@ -292,12 +292,12 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  private DocumentWrapper testTexMECS(String texMECS, String expectedLMNL) {
+  private TAGDocument testTexMECS(String texMECS, String expectedLMNL) {
     printTokens(texMECS);
 
     LOG.info("parsing {}", texMECS);
     TexMECSImporter importer = new TexMECSImporter(store);
-    DocumentWrapper doc = importer.importTexMECS(texMECS);
+    TAGDocument doc = importer.importTexMECS(texMECS);
     LMNLExporter ex = new LMNLExporter(store);
     String lmnl = ex.toLMNL(doc);
     LOG.info("lmnl={}", lmnl);

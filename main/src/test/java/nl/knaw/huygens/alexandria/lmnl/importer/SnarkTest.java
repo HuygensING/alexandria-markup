@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class SnarkTest extends AlexandriaBaseStoreTest {
         "{poem]";
     printTokens(input);
     store.runInTransaction(() -> {
-      DocumentWrapper document = new LMNLImporter(store).importLMNL(input);
+      TAGDocument document = new LMNLImporter(store).importLMNL(input);
       assertThat(document).isNotNull();
 
       Set<String> linguisticMarkup = new HashSet<>(asList("text", "phr", "phr=a", "phr=b", "word", "s", "m", "c", "w"));

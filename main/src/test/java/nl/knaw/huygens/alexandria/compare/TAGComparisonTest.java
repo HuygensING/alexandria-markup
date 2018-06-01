@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -189,8 +189,8 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private TAGComparison compare(String originText, String editedText) {
     return store.runInTransaction(() -> {
       LMNLImporter importer = new LMNLImporter(store);
-      DocumentWrapper original = importer.importLMNL(originText);
-      DocumentWrapper edited = importer.importLMNL(editedText);
+      TAGDocument original = importer.importLMNL(originText);
+      TAGDocument edited = importer.importLMNL(editedText);
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 

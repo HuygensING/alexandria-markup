@@ -21,10 +21,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
@@ -38,11 +38,11 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private final DocumentWrapper document;
-  private final Deque<MarkupWrapper> openMarkup = new ArrayDeque<>();
-  private final Deque<MarkupWrapper> suspendedMarkup = new ArrayDeque<>();
+  private final TAGDocument document;
+  private final Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
+  private final Deque<TAGMarkup> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
-  private final HashMap<String, MarkupWrapper> identifiedMarkups = new HashMap<>();
+  private final HashMap<String, TAGMarkup> identifiedMarkups = new HashMap<>();
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final List<String> errors = new ArrayList<>();
   private final TAGStore store;
@@ -52,26 +52,26 @@ class TexMECSListener extends TexMECSParserBaseListener {
     document = store.createDocumentWrapper();
   }
 
-  public DocumentWrapper getDocument() {
+  public TAGDocument getDocument() {
     return document;
   }
 
   @Override
   public void exitStartTag(StartTagContext ctx) {
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
     openMarkup.add(markup);
   }
 
   @Override
   public void exitStartTagSet(StartTagSetContext ctx) {
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
     openMarkup.add(markup);
     insideTagSet = true;
   }
 
   @Override
   public void exitText(TextContext ctx) {
-    TextNodeWrapper tn = store.createTextNodeWrapper(ctx.getText());
+    TAGTextNode tn = store.createTextNodeWrapper(ctx.getText());
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
   }
@@ -89,21 +89,21 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitSoleTag(SoleTagContext ctx) {
-    TextNodeWrapper tn = store.createTextNodeWrapper("");
+    TAGTextNode tn = store.createTextNodeWrapper("");
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    MarkupWrapper markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
     linkTextToMarkup(tn, markup);
   }
 
-  private void linkTextToMarkup(TextNodeWrapper tn, MarkupWrapper markup) {
+  private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
     document.associateTextNodeWithMarkup(tn, markup);
     markup.addTextNode(tn);
   }
 
   @Override
   public void exitSuspendTag(SuspendTagContext ctx) {
-    MarkupWrapper markup = removeFromOpenMarkup(ctx.gi());
+    TAGMarkup markup = removeFromOpenMarkup(ctx.gi());
     if (markup != null) {
       suspendedMarkup.add(markup);
     }
@@ -111,7 +111,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitResumeTag(ResumeTagContext ctx) {
-    MarkupWrapper markup = removeFromSuspendedMarkup(ctx);
+    TAGMarkup markup = removeFromSuspendedMarkup(ctx);
     if (markup != null) {
       openMarkup.add(markup);
     }
@@ -123,10 +123,10 @@ class TexMECSListener extends TexMECSParserBaseListener {
     String gi = ctx.eid().gi().getText();
     String extendedTag = gi + "=" + idref;
     if (identifiedMarkups.containsKey(extendedTag)) {
-      MarkupWrapper ref = identifiedMarkups.get(extendedTag);
-      MarkupWrapper markup = addMarkup(ref.getTag(), ctx.atts());
+      TAGMarkup ref = identifiedMarkups.get(extendedTag);
+      TAGMarkup markup = addMarkup(ref.getTag(), ctx.atts());
       ref.getTextNodeStream().forEach(tn -> {
-        TextNodeWrapper copy = store.createTextNodeWrapper(tn.getText());
+        TAGTextNode copy = store.createTextNodeWrapper(tn.getText());
         document.addTextNode(copy);
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
@@ -165,13 +165,13 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return errors;
   }
 
-  private MarkupWrapper addMarkup(EidContext eid, AttsContext atts) {
+  private TAGMarkup addMarkup(EidContext eid, AttsContext atts) {
     String extendedTag = eid.getText();
     return addMarkup(extendedTag, atts);
   }
 
-  private MarkupWrapper addMarkup(String extendedTag, AttsContext atts) {
-    MarkupWrapper markup = store.createMarkupWrapper(document, extendedTag);
+  private TAGMarkup addMarkup(String extendedTag, AttsContext atts) {
+    TAGMarkup markup = store.createMarkupWrapper(document, extendedTag);
     addAttributes(atts, markup);
     document.addMarkup(markup);
     if (markup.hasMarkupId()) {
@@ -186,19 +186,19 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private void addAttributes(AttsContext attsContext, MarkupWrapper markup) {
+  private void addAttributes(AttsContext attsContext, TAGMarkup markup) {
     attsContext.avs().forEach(avs -> {
       String attrName = avs.NAME_O().getText();
       String quotedAttrValue = avs.STRING().getText();
       String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      AnnotationWrapper annotation = store.createAnnotationWrapper(attrName, attrValue);
+      TAGAnnotation annotation = store.createAnnotationWrapper(attrName, attrValue);
       markup.addAnnotation(annotation);
     });
   }
 
-  private MarkupWrapper removeFromOpenMarkup(GiContext gi) {
+  private TAGMarkup removeFromOpenMarkup(GiContext gi) {
     String tag = gi.getText();
-    MarkupWrapper markup = removeFromMarkupStack(tag, openMarkup);
+    TAGMarkup markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {
       String message = "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
       errors.add(message);
@@ -206,9 +206,9 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private MarkupWrapper removeFromSuspendedMarkup(ResumeTagContext ctx) {
+  private TAGMarkup removeFromSuspendedMarkup(ResumeTagContext ctx) {
     String tag = ctx.gi().getText();
-    MarkupWrapper markup = removeFromMarkupStack(tag, suspendedMarkup);
+    TAGMarkup markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
       String message = "Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.";
       errors.add(message);
@@ -216,9 +216,9 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private MarkupWrapper removeFromMarkupStack(String tag, Deque<MarkupWrapper> markupStack) {
-    Iterator<MarkupWrapper> descendingIterator = markupStack.descendingIterator();
-    MarkupWrapper markup = null;
+  private TAGMarkup removeFromMarkupStack(String tag, Deque<TAGMarkup> markupStack) {
+    Iterator<TAGMarkup> descendingIterator = markupStack.descendingIterator();
+    TAGMarkup markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
       if (markup.getTag().equals(tag)) {
@@ -231,11 +231,11 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private static String suspendTag(MarkupWrapper m) {
+  private static String suspendTag(TAGMarkup m) {
     return "|-" + m.getTag() + ">";
   }
 
-  private static String startTag(MarkupWrapper m) {
+  private static String startTag(TAGMarkup m) {
     return "<" + m.getExtendedTag() + "|";
   }
 

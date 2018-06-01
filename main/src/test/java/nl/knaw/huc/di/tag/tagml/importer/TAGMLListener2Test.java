@@ -25,7 +25,7 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -51,7 +51,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   public void testSnarkParses() {
     String input = Files.contentOf(new File("data/tagml/snark81.tagml"), Charset.defaultCharset());
     store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      TAGDocument TAGDocument = assertTAGMLParses(input);
     });
   }
 
@@ -61,7 +61,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a>a<a] [b>b<b]" +
         "<tagml]";
     store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      TAGDocument TAGDocument = assertTAGMLParses(input);
     });
   }
 
@@ -82,7 +82,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a|a>a<a|a] [b|a>b<b|a]" +
         "<tagml|a]";
     store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      TAGDocument TAGDocument = assertTAGMLParses(input);
     });
   }
 
@@ -92,7 +92,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
         "[a|a>a [b|b>b<a|a]<b|b]" +
         "<tagml|a]";
     store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = assertTAGMLParses(input);
+      TAGDocument TAGDocument = assertTAGMLParses(input);
     });
   }
 
@@ -117,7 +117,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
 
   // private methods
 
-  private DocumentWrapper assertTAGMLParses(final String input) {
+  private TAGDocument assertTAGMLParses(final String input) {
     ErrorListener errorListener = new ErrorListener();
     TAGMLParser parser = setupParser(input, errorListener);
     ParseTree parseTree = parser.document();
@@ -130,7 +130,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
     TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
     assertThat(errorListener.hasErrors()).isFalse();
 
-    DocumentWrapper document = listener.getDocument();
+    TAGDocument document = listener.getDocument();
     String lmnl = LMNL_EXPORTER.toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;

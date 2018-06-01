@@ -22,9 +22,9 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class AnnotationWrapperAssert extends AbstractObjectAssert<AnnotationWrapperAssert, AnnotationWrapper> {
+public class AnnotationWrapperAssert extends AbstractObjectAssert<AnnotationWrapperAssert, TAGAnnotation> {
 
-  public AnnotationWrapperAssert(final AnnotationWrapper actual) {
+  public AnnotationWrapperAssert(final TAGAnnotation actual) {
     super(actual, AnnotationWrapperAssert.class);
   }
 

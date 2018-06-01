@@ -23,7 +23,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseVisitor;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 
 public class TAGMLVisitor extends TAGMLParserBaseVisitor {
   private final TAGStore tagStore;
@@ -34,7 +34,7 @@ public class TAGMLVisitor extends TAGMLParserBaseVisitor {
     this.errorListener = errorListener;
   }
 
-  public DocumentWrapper getDocumentWrapper() {
+  public TAGDocument getDocumentWrapper() {
     // TODO
     return null;
   }

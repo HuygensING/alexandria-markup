@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDTO;
 
 import java.util.List;
 
@@ -30,11 +30,11 @@ import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
-public class TextNodeWrapper {
+public class TAGTextNode {
   private final TAGStore store;
-  private final TAGTextNode textNode;
+  private final TAGTextNodeDTO textNode;
 
-  public TextNodeWrapper(TAGStore store, TAGTextNode textNode) {
+  public TAGTextNode(TAGStore store, TAGTextNodeDTO textNode) {
     this.store = store;
     this.textNode = textNode;
     update();
@@ -48,11 +48,11 @@ public class TextNodeWrapper {
     return textNode.getText();
   }
 
-  public TAGTextNode getTextNode() {
+  public TAGTextNodeDTO getTextNode() {
     return textNode;
   }
 
-  public TextNodeWrapper addPreviousTextNode(TextNodeWrapper previousTextNode) {
+  public TAGTextNode addPreviousTextNode(TAGTextNode previousTextNode) {
     textNode.addPrevTextNodeId(previousTextNode.getDbId());
     if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
       previousTextNode.addNextTextNode(this);
@@ -61,20 +61,20 @@ public class TextNodeWrapper {
     return this;
   }
 
-  public void addNextTextNode(final TextNodeWrapper nextTextNode) {
+  public void addNextTextNode(final TAGTextNode nextTextNode) {
     Long id = nextTextNode.getDbId();
     textNode.addNextTextNodeId(id);
     update();
   }
 
-  public List<TextNodeWrapper> getNextTextNodes() {
+  public List<TAGTextNode> getNextTextNodes() {
     return textNode.getNextTextNodeIds()
         .stream()
         .map(store::getTextNodeWrapper)
         .collect(toList());
   }
 
-  public List<TextNodeWrapper> getPrevTextNodes() {
+  public List<TAGTextNode> getPrevTextNodes() {
     return textNode.getPrevTextNodeIds()
         .stream()
         .map(store::getTextNodeWrapper)
@@ -100,8 +100,8 @@ public class TextNodeWrapper {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TextNodeWrapper//
-        && ((TextNodeWrapper) other).getDbId().equals(getDbId());
+    return other instanceof TAGTextNode//
+        && ((TAGTextNode) other).getDbId().equals(getDbId());
   }
 
   @Override

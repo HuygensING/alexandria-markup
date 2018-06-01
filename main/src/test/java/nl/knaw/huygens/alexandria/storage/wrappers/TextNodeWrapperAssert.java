@@ -22,9 +22,9 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class TextNodeWrapperAssert extends AbstractObjectAssert<TextNodeWrapperAssert, TextNodeWrapper> {
+public class TextNodeWrapperAssert extends AbstractObjectAssert<TextNodeWrapperAssert, TAGTextNode> {
 
-  public TextNodeWrapperAssert(final TextNodeWrapper actual) {
+  public TextNodeWrapperAssert(final TAGTextNode actual) {
     super(actual, TextNodeWrapperAssert.class);
   }
 

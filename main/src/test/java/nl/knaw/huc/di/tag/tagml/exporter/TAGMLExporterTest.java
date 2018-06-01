@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -123,8 +123,8 @@ public class TAGMLExporterTest extends TAGStoreTest {
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {
     store.runInTransaction(() -> {
-      DocumentWrapper documentWrapper = new TAGMLImporter(store).importTAGML(tagmlIn);
-      String tagmlOut = new TAGMLExporter(store).asTAGML(documentWrapper);
+      TAGDocument TAGDocument = new TAGMLImporter(store).importTAGML(tagmlIn);
+      String tagmlOut = new TAGMLExporter(store).asTAGML(TAGDocument);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);
     });
