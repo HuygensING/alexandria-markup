@@ -25,16 +25,16 @@ import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 
 class DataAccessor {
-  final PrimaryIndex<Long, TAGDocument> documentById;
-  final PrimaryIndex<Long, TAGTextNode> textNodeById;
-  final PrimaryIndex<Long, TAGMarkup> markupById;
-  final PrimaryIndex<Long, TAGAnnotation> annotationById;
+  final PrimaryIndex<Long, TAGDocumentDTO> documentById;
+  final PrimaryIndex<Long, TAGTextNodeDTO> textNodeById;
+  final PrimaryIndex<Long, TAGMarkupDTO> markupById;
+  final PrimaryIndex<Long, TAGAnnotationDTO> annotationById;
 
   public DataAccessor(EntityStore store) throws DatabaseException {
-    documentById = store.getPrimaryIndex(Long.class, TAGDocument.class);
-    textNodeById = store.getPrimaryIndex(Long.class, TAGTextNode.class);
-    markupById = store.getPrimaryIndex(Long.class, TAGMarkup.class);
-    annotationById = store.getPrimaryIndex(Long.class, TAGAnnotation.class);
+    documentById = store.getPrimaryIndex(Long.class, TAGDocumentDTO.class);
+    textNodeById = store.getPrimaryIndex(Long.class, TAGTextNodeDTO.class);
+    markupById = store.getPrimaryIndex(Long.class, TAGMarkupDTO.class);
+    annotationById = store.getPrimaryIndex(Long.class, TAGAnnotationDTO.class);
   }
 
 }

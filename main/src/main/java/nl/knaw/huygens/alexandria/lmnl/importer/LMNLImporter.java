@@ -23,10 +23,10 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.*;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
@@ -52,18 +52,18 @@ public class LMNLImporter {
   }
 
   static class DocumentContext {
-    private final TAGDocument document;
-    private final Deque<TAGMarkup> openMarkupDeque = new ArrayDeque<>();
-    private final Stack<TAGMarkup> openMarkupStack = new Stack<>();
-    private final Stack<TAGAnnotation> annotationStack = new Stack<>();
+    private final TAGDocumentDTO document;
+    private final Deque<TAGMarkupDTO> openMarkupDeque = new ArrayDeque<>();
+    private final Stack<TAGMarkupDTO> openMarkupStack = new Stack<>();
+    private final Stack<TAGAnnotationDTO> annotationStack = new Stack<>();
     private final ImporterContext importerContext;
 
-    DocumentContext(TAGDocument document, ImporterContext importerContext) {
+    DocumentContext(TAGDocumentDTO document, ImporterContext importerContext) {
       this.document = document;
       this.importerContext = importerContext;
     }
 
-    void openMarkup(TAGMarkup markup) {
+    void openMarkup(TAGMarkupDTO markup) {
       openMarkupDeque.push(markup);
       openMarkupStack.push(markup);
       document.getMarkupIds().add(markup.getDbId());
@@ -71,14 +71,14 @@ public class LMNLImporter {
 
     void pushOpenMarkup(String rangeName) {
       // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
-      Optional<TAGMarkup> findFirst = openMarkupDeque.stream()//
+      Optional<TAGMarkupDTO> findFirst = openMarkupDeque.stream()//
           .filter(tr -> tr.getExtendedTag().equals(rangeName))//
           .findFirst();
       if (findFirst.isPresent()) {
-        TAGMarkup markup = findFirst.get();
+        TAGMarkupDTO markup = findFirst.get();
         if (markup.getTextNodeIds().isEmpty()) {
           // every markup should have at least one textNode
-          TAGTextNode emptyTextNode = new TAGTextNode("");
+          TAGTextNodeDTO emptyTextNode = new TAGTextNodeDTO("");
           update(emptyTextNode);
           addTextNode(emptyTextNode);
           closeMarkup();
@@ -95,13 +95,13 @@ public class LMNLImporter {
 
     void closeMarkup() {
       if (!openMarkupStack.isEmpty()) {
-        TAGMarkup markup = openMarkupStack.pop();
+        TAGMarkupDTO markup = openMarkupStack.pop();
         update(markup);
         openMarkupDeque.remove(markup);
       }
     }
 
-    void addTextNode(TAGTextNode textNode) {
+    void addTextNode(TAGTextNodeDTO textNode) {
       openMarkupDeque.descendingIterator()//
           .forEachRemaining(m -> {
             m.addTextNode(textNode);
@@ -113,13 +113,13 @@ public class LMNLImporter {
       document.addTextNode(textNode);
     }
 
-    private TAGMarkup currentMarkup() {
+    private TAGMarkupDTO currentMarkup() {
       return openMarkupDeque.isEmpty() ? null : openMarkupStack.peek();
     }
 
-    void openAnnotation(TAGAnnotation annotation) {
+    void openAnnotation(TAGAnnotationDTO annotation) {
       if (annotationStack.isEmpty()) {
-        TAGMarkup markup = currentMarkup();
+        TAGMarkupDTO markup = currentMarkup();
         if (markup != null) {
           markup.addAnnotation(annotation);
         }
@@ -129,13 +129,13 @@ public class LMNLImporter {
       annotationStack.push(annotation);
     }
 
-    TAGDocument currentAnnotationDocument() {
+    TAGDocumentDTO currentAnnotationDocument() {
       Long value = annotationStack.peek().getDocumentId();
       return tagStore.getDocument(value);
     }
 
     void closeAnnotation() {
-      TAGAnnotation annotation = annotationStack.pop();
+      TAGAnnotationDTO annotation = annotationStack.pop();
       update(annotation);
     }
   }
@@ -161,7 +161,7 @@ public class LMNLImporter {
       return lexer.getRuleNames()[lexer.getToken().getType() - 1];
     }
 
-    void pushDocumentContext(TAGDocument document) {
+    void pushDocumentContext(TAGDocumentDTO document) {
       documentContextStack.push(new DocumentContext(document, this));
     }
 
@@ -181,13 +181,13 @@ public class LMNLImporter {
       return documentContext;
     }
 
-    TAGMarkup newMarkup(String tagName) {
-      TAGMarkup tagMarkup = new TAGMarkup(currentDocumentContext().document.getDbId(), tagName);
-      update(tagMarkup);
-      return tagMarkup;
+    TAGMarkupDTO newMarkup(String tagName) {
+      TAGMarkupDTO tagMarkupDTO = new TAGMarkupDTO(currentDocumentContext().document.getDbId(), tagName);
+      update(tagMarkupDTO);
+      return tagMarkupDTO;
     }
 
-    void openMarkup(TAGMarkup markup) {
+    void openMarkup(TAGMarkupDTO markup) {
       currentDocumentContext().openMarkup(markup);
     }
 
@@ -203,15 +203,15 @@ public class LMNLImporter {
       currentDocumentContext().closeMarkup();
     }
 
-    void addTextNode(TAGTextNode textNode) {
+    void addTextNode(TAGTextNodeDTO textNode) {
       currentDocumentContext().addTextNode(textNode);
     }
 
-    void openAnnotation(TAGAnnotation annotation) {
+    void openAnnotation(TAGAnnotationDTO annotation) {
       currentDocumentContext().openAnnotation(annotation);
     }
 
-    TAGDocument currentAnnotationDocument() {
+    TAGDocumentDTO currentAnnotationDocument() {
       return currentDocumentContext().currentAnnotationDocument();
     }
 
@@ -228,12 +228,12 @@ public class LMNLImporter {
     }
   }
 
-  public DocumentWrapper importLMNL(String input) throws LMNLSyntaxError {
+  public TAGDocument importLMNL(String input) throws LMNLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importLMNL(antlrInputStream);
   }
 
-  public DocumentWrapper importLMNL(InputStream input) throws LMNLSyntaxError {
+  public TAGDocument importLMNL(InputStream input) throws LMNLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importLMNL(antlrInputStream);
@@ -243,18 +243,18 @@ public class LMNLImporter {
     }
   }
 
-  private DocumentWrapper importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
+  private TAGDocument importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
     LMNLLexer lexer = new LMNLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
 
     ImporterContext context = new ImporterContext(lexer);
-    DocumentWrapper documentWrapper = tagStore.createDocumentWrapper();
-    TAGDocument document = documentWrapper.getDocument();
+    TAGDocument TAGDocument = tagStore.createDocumentWrapper();
+    TAGDocumentDTO document = TAGDocument.getDocument();
     update(document);
     context.pushDocumentContext(document);
     handleDefaultMode(context);
-    joinDiscontinuedRanges(documentWrapper);
+    joinDiscontinuedRanges(TAGDocument);
     context.popDocumentContext();
 
     String errorMsg = "";
@@ -270,7 +270,7 @@ public class LMNLImporter {
       throw new LMNLSyntaxError(errorMsg);
     }
     update(document);
-    return documentWrapper;
+    return TAGDocument;
   }
 
   private void handleDefaultMode(ImporterContext context) {
@@ -292,7 +292,7 @@ public class LMNLImporter {
             break;
 
           case LMNLLexer.TEXT:
-            TAGTextNode textNode = new TAGTextNode(token.getText());
+            TAGTextNodeDTO textNode = new TAGTextNodeDTO(token.getText());
             update(textNode);
             context.addTextNode(textNode);
             break;
@@ -322,7 +322,7 @@ public class LMNLImporter {
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Range:
-          TAGMarkup markup = context.newMarkup(token.getText());
+          TAGMarkupDTO markup = context.newMarkup(token.getText());
           context.openMarkup(markup);
           break;
         case LMNLLexer.BEGIN_OPEN_ANNO:
@@ -333,7 +333,7 @@ public class LMNLImporter {
           goOn = false;
           break;
         case LMNLLexer.END_ANONYMOUS_RANGE:
-          TAGTextNode textNode = new TAGTextNode("");
+          TAGTextNodeDTO textNode = new TAGTextNodeDTO("");
           update(textNode);
           context.addTextNode(textNode);
           context.closeMarkup();
@@ -356,7 +356,7 @@ public class LMNLImporter {
 
   private void handleAnnotation(ImporterContext context) {
     String methodName = "handleAnnotation";
-    TAGAnnotation annotation = tagStore.createAnnotation("");
+    TAGAnnotationDTO annotation = tagStore.createAnnotation("");
     context.openAnnotation(annotation);
     boolean goOn = true;
     while (goOn) {
@@ -377,7 +377,7 @@ public class LMNLImporter {
           break;
 
         case LMNLLexer.ANNO_TEXT:
-          TAGTextNode textNode = new TAGTextNode(token.getText());
+          TAGTextNodeDTO textNode = new TAGTextNodeDTO(token.getText());
           update(textNode);
           context.addTextNode(textNode);
           break;
@@ -459,20 +459,20 @@ public class LMNLImporter {
 //    joinDiscontinuedRanges(document.getDocumentId());
 //  }
 
-  private static void joinDiscontinuedRanges(DocumentWrapper document) {
-    Map<String, TAGMarkup> markupsToJoin = new HashMap<>();
+  private static void joinDiscontinuedRanges(TAGDocument document) {
+    Map<String, TAGMarkupDTO> markupsToJoin = new HashMap<>();
     List<Long> markupIdsToRemove = new ArrayList<>();
     document.getMarkupStream()//
-        .filter(MarkupWrapper::hasN)//
+        .filter(TAGMarkup::hasN)//
         .forEach(markup -> {
           String tag = markup.getTag();
-          AnnotationWrapper annotation = markup.getAnnotationStream()//
+          TAGAnnotation annotation = markup.getAnnotationStream()//
               .filter(a -> a.getTag().equals("n"))//
               .findFirst()//
               .get();
           String key = tag + "-" + annotationText(annotation);
           if (markupsToJoin.containsKey(key)) {
-            TAGMarkup originalMarkup = markupsToJoin.get(key);
+            TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
             markup.getMarkup().getAnnotationIds().remove(annotation.getDbId());
             document.joinMarkup(originalMarkup, markup);
             markupIdsToRemove.add(markup.getDbId());
@@ -483,15 +483,15 @@ public class LMNLImporter {
 
     document.getDocument().getMarkupIds().removeAll(markupIdsToRemove);
     document.getMarkupStream()//
-        .map(MarkupWrapper::getAnnotationStream)//
+        .map(TAGMarkup::getAnnotationStream)//
         .flatMap(Function.identity())//
-        .map(AnnotationWrapper::getDocument)//
+        .map(TAGAnnotation::getDocument)//
         .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
-  private static String annotationText(AnnotationWrapper annotation) {
+  private static String annotationText(TAGAnnotation annotation) {
     return annotation.getDocument().getTextNodeStream()//
-        .map(TextNodeWrapper::getText)//
+        .map(TAGTextNode::getText)//
         .collect(joining());
   }
 
@@ -502,8 +502,8 @@ public class LMNLImporter {
     // ruleName, modeName);
   }
 
-  private static Long update(TAGObject tagObject) {
-    return tagStore.persist(tagObject);
+  private static Long update(TAGDTO TAGDTO) {
+    return tagStore.persist(TAGDTO);
   }
 
 }

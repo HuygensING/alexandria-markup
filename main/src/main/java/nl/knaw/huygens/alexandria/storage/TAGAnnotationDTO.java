@@ -30,22 +30,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(version = 1)
-public class TAGAnnotation implements TAGObject {
+public class TAGAnnotationDTO implements TAGDTO {
   @PrimaryKey(sequence = "annotation_pk_sequence")
   private Long id;
 
   private String tag;
 
-  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocument.class)
+  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
   private Long documentId;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotation.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
   private final List<Long> annotationIds = new ArrayList<>();
 
-  private TAGAnnotation() {
+  private TAGAnnotationDTO() {
   }
 
-  public TAGAnnotation(String tag) {
+  public TAGAnnotationDTO(String tag) {
     this.tag = tag;
   }
 
@@ -65,7 +65,7 @@ public class TAGAnnotation implements TAGObject {
     return tag;
   }
 
-  public TAGAnnotation addAnnotation(TAGAnnotation annotation) {
+  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
     annotationIds.add(annotation.getDbId());
     return this;
   }

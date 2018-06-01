@@ -30,15 +30,15 @@ import java.util.*;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 3)
-public class TAGDocument implements TAGObject {
+public class TAGDocumentDTO implements TAGDTO {
   // previously: Limen
   @PrimaryKey(sequence = "document_pk_sequence")
   private Long id;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNode.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNodeDTO.class)
   private List<Long> textNodeIds = new ArrayList<>();
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkup.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkupDTO.class)
   private List<Long> markupIds = new ArrayList<>();
 
   private final Map<Long, Set<Long>> textNodeIdToMarkupIds = new LinkedHashMap<>();
@@ -48,7 +48,7 @@ public class TAGDocument implements TAGObject {
   private Long firstTextNodeId;
   private TextGraph textGraph = new TextGraph();
 
-  TAGDocument() {
+  TAGDocumentDTO() {
   }
 
   public Long getDbId() {
@@ -87,7 +87,7 @@ public class TAGDocument implements TAGObject {
     return textNodeIdToMarkupIds;
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup markup) {
+  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
     int textNodeSize = textNodeIds.size();
     return textNodeSize > 2 //
         && markup.getTextNodeIds().size() >= textNodeSize / 2d;
@@ -98,11 +98,11 @@ public class TAGDocument implements TAGObject {
     return markups == null ? new LinkedHashSet<>() : markups;
   }
 
-  public void addTextNode(TAGTextNode textNode) {
+  public void addTextNode(TAGTextNodeDTO textNode) {
     textNodeIds.add(textNode.getDbId());
   }
 
-  public void associateTextWithMarkup(TAGTextNode textNode, TAGMarkup markup) {
+  public void associateTextWithMarkup(TAGTextNodeDTO textNode, TAGMarkupDTO markup) {
     textNodeIdToMarkupIds.computeIfAbsent(textNode.getDbId(), f -> new LinkedHashSet<>()).add(markup.getDbId());
   }
 

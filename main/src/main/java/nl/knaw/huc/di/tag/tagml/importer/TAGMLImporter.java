@@ -24,9 +24,9 @@ import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGObject;
+import nl.knaw.huygens.alexandria.storage.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -51,12 +51,12 @@ public class TAGMLImporter {
     tagStore = store;
   }
 
-  public DocumentWrapper importTAGML(final String input) throws TAGMLSyntaxError {
+  public TAGDocument importTAGML(final String input) throws TAGMLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTAGML(antlrInputStream);
   }
 
-  public DocumentWrapper importTAGML(InputStream input) throws TAGMLSyntaxError {
+  public TAGDocument importTAGML(InputStream input) throws TAGMLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTAGML(antlrInputStream);
@@ -66,7 +66,7 @@ public class TAGMLImporter {
     }
   }
 
-  private DocumentWrapper importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
+  private TAGDocument importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
@@ -75,7 +75,7 @@ public class TAGMLImporter {
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
 
-    DocumentWrapper documentWrapper = usingListener(parser, errorListener);
+    TAGDocument TAGDocument = usingListener(parser, errorListener);
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
@@ -87,11 +87,11 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    update(documentWrapper.getDocument());
-    return documentWrapper;
+    update(TAGDocument.getDocument());
+    return TAGDocument;
   }
 
-  private DocumentWrapper usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
+  private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
     LOG.info("parsetree: {}", parseTree.toStringTree(parser));
@@ -100,15 +100,15 @@ public class TAGMLImporter {
     return listener.getDocument();
   }
 
-  private DocumentWrapper usingVisitor(final TAGMLParser parser, final ErrorListener errorListener) {
+  private TAGDocument usingVisitor(final TAGMLParser parser, final ErrorListener errorListener) {
     TAGMLParser.DocumentContext documentContext = parser.document();
     TAGMLVisitor visitor = new TAGMLVisitor(tagStore, errorListener);
     visitor.visit(documentContext);
     return visitor.getDocumentWrapper();
   }
 
-  private Long update(TAGObject tagObject) {
-    return tagStore.persist(tagObject);
+  private Long update(TAGDTO TAGDTO) {
+    return tagStore.persist(TAGDTO);
   }
 
 }

@@ -20,6 +20,6 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-public interface TAGObject {
+public interface TAGDTO {
   Long getDbId();
 }
