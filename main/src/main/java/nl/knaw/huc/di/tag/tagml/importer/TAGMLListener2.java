@@ -58,7 +58,6 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   private final ErrorListener errorListener;
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
-  //  private final Map<String, LayerWrapper> layerMap = new HashMap<>();
   private State state = new State();
 
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();

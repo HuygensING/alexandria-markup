@@ -61,8 +61,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-132
   public void testTextWithMultipleLayersOfMarkup() {
-    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
-        "[L1,L2|root>[L3|post>simple text<L1,L2|root]epic epilog<L3|post]";
+    String input = "[root|+L1,+L2>[post|+L3>simple text<root|L1,L2]epic epilog<post|L3]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
       assertThat(documentWrapper).hasMarkupMatching(
@@ -80,8 +79,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-133
   public void testTextWithMultipleLayersAndDiscontinuity() {
-    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
-        "[L1,L2|root>[L1|q>“Man,\"<-L1|q][L2|s> I cried, <L2|s][+L1|q>\"how ignorant art thou in thy pride of wisdom!”<L1|q]<L1,L2|root]― [L3|post>Mary Wollstonecraft Shelley, Frankenstein<L3|post]";
+    String input = "[root|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
       assertThat(documentWrapper).hasMarkupMatching(
@@ -103,8 +101,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
-    String input = "[!ld L1 \"layer 1\"][!ld L2 \"layer 2\"][!ld L3 \"layer 3\"]\n" +
-        "[L1,L2|root>[L1|q>“Man,\"<-L1|q][L2|s> I <|cried|pleaded|>, <L2|s][+L1|q>\"how ignorant art thou in thy pride of wisdom!”<L1|q]<L1,L2|root]― [L3|post>Mary Wollstonecraft Shelley, Frankenstein<L3|post]";
+    String input = "[root|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I <|cried|pleaded|>, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
     store.runInTransaction(() -> {
       DocumentWrapper documentWrapper = assertTAGMLParses(input);
       assertThat(documentWrapper).hasMarkupMatching(
@@ -432,6 +429,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
+//    TAGMLListener listener = new TAGMLListener(store, errorListener);
     TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
@@ -463,6 +461,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
+//    TAGMLListener listener = new TAGMLListener(store, errorListener);
     TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
