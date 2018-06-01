@@ -46,29 +46,29 @@ public class TextGraphTest {
     // [a|+a>
     Long markupA = nodeIds.getAndIncrement();
     String layerA = "a";
-    tg.setLayerRootMarkup(layerA, markupTagml);
-    tg.addChildMarkup(markupTagml, layerA, markupA); // (tagml) -[a]-> (a)
+    tg.setLayerRootMarkup(layerA, markupTagml)
+        .addChildMarkup(markupTagml, layerA, markupA); // (tagml) -[a]-> (a)
 
     // [name|+ner>
     Long markupName1 = nodeIds.getAndIncrement();
     String layerNER = "ner";
-    tg.setLayerRootMarkup(layerNER, markupTagml);
-    tg.addChildMarkup(markupTagml, layerNER, markupName1); // (tagml) -[ner]-> (name)
+    tg.setLayerRootMarkup(layerNER, markupTagml)
+        .addChildMarkup(markupTagml, layerNER, markupName1); // (tagml) -[ner]-> (name)
 
     // J'onn
     Long textJonn = nodeIds.getAndIncrement();
-    tg.appendTextNode(textJonn); // () -> (J'onn)
-    tg.linkMarkupToTextNode(markupTagml, layerDefault, textJonn);
-    tg.linkMarkupToTextNode(markupA, layerA, textJonn);
-    tg.linkMarkupToTextNode(markupName1, layerNER, textJonn);
+    tg.appendTextNode(textJonn) // () -> (J'onn)
+        .linkMarkupToTextNode(markupTagml, layerDefault, textJonn)
+        .linkMarkupToTextNode(markupA, layerA, textJonn)
+        .linkMarkupToTextNode(markupName1, layerNER, textJonn);
 
     // <name|ner]
 
     // _
     Long textSpace1 = nodeIds.getAndIncrement();
-    tg.appendTextNode(textSpace1); // (J'onn) -> ( )
-    tg.linkMarkupToTextNode(markupTagml, layerDefault, textSpace1);
-    tg.linkMarkupToTextNode(markupA, layerA, textSpace1);
+    tg.appendTextNode(textSpace1) // (J'onn) -> ( )
+        .linkMarkupToTextNode(markupTagml, layerDefault, textSpace1)
+        .linkMarkupToTextNode(markupA, layerA, textSpace1);
 
     // [b|+b>
     Long markupB = nodeIds.getAndIncrement();
@@ -78,18 +78,18 @@ public class TextGraphTest {
 
     // craves
     Long textCraves = nodeIds.getAndIncrement();
-    tg.appendTextNode(textCraves); // ( ) -> (craves)
-    tg.linkMarkupToTextNode(markupTagml, layerDefault, textCraves);
-    tg.linkMarkupToTextNode(markupA, layerA, textCraves);
-    tg.linkMarkupToTextNode(markupB, layerB, textCraves);
+    tg.appendTextNode(textCraves) // ( ) -> (craves)
+        .linkMarkupToTextNode(markupTagml, layerDefault, textCraves)
+        .linkMarkupToTextNode(markupA, layerA, textCraves)
+        .linkMarkupToTextNode(markupB, layerB, textCraves);
 
     // <a|a]
 
     // _
     Long textSpace2 = nodeIds.getAndIncrement();
-    tg.appendTextNode(textSpace2); // (craves) -> ( )
-    tg.linkMarkupToTextNode(markupTagml, layerDefault, textSpace2);
-    tg.linkMarkupToTextNode(markupB, layerB, textSpace2);
+    tg.appendTextNode(textSpace2) // (craves) -> ( )
+        .linkMarkupToTextNode(markupTagml, layerDefault, textSpace2)
+        .linkMarkupToTextNode(markupB, layerB, textSpace2);
 
     // [name|ner>
     Long markupName2 = nodeIds.getAndIncrement();
@@ -97,10 +97,10 @@ public class TextGraphTest {
 
     // Oreos
     Long textOreos = nodeIds.getAndIncrement();
-    tg.appendTextNode(textOreos); // ( ) -> (Oreos)
-    tg.linkMarkupToTextNode(markupTagml, layerDefault, textOreos);
-    tg.linkMarkupToTextNode(markupB, layerB, textOreos);
-    tg.linkMarkupToTextNode(markupName2, layerNER, textOreos);
+    tg.appendTextNode(textOreos) // ( ) -> (Oreos)
+        .linkMarkupToTextNode(markupTagml, layerDefault, textOreos)
+        .linkMarkupToTextNode(markupB, layerB, textOreos)
+        .linkMarkupToTextNode(markupName2, layerNER, textOreos);
 
     // <name|ner]
     // <b|b]

@@ -28,13 +28,18 @@ package nl.knaw.huc.di.tag.model.graph;
  * @author: Ronald Haentjens Dekker
  */
 
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
+
 import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 
+@Persistent
 public class HyperGraph<N, H> {
   private final GraphType graphType;
+  @NotPersistent
   private final Function<N, Collection<H>> mappingFunction;
   private final Set<N> nodes;
   private final Map<N, Collection<H>> incomingEdges;
@@ -43,6 +48,10 @@ public class HyperGraph<N, H> {
   private final Map<H, Collection<N>> targetNodes;
   private final Map<H, String> edgeLabels;
   private final Map<N, String> nodeLabels;
+
+  protected HyperGraph() {
+    this(GraphType.ORDERED);
+  }
 
   protected HyperGraph(GraphType graphType) {
     this.graphType = graphType;

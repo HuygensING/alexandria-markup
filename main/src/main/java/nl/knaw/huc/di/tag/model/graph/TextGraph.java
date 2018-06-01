@@ -20,12 +20,11 @@ package nl.knaw.huc.di.tag.model.graph;
  * #L%
  */
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.edges.Edges;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
-import nl.knaw.huygens.alexandria.storage.TAGObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,36 +34,31 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
-@Entity(version = 1)
-public class TextGraph extends HyperGraph<Long, Edge> implements TAGObject {
+@Persistent
+public class TextGraph extends HyperGraph<Long, Edge> {
+  @NotPersistent
   Logger LOG = LoggerFactory.getLogger(getClass());
   String id = "";
   Map<String, Long> layerRootMap = new HashMap<>();
   Long firstTextNodeId;
   Long lastTextNodeId;
 
-  @PrimaryKey(sequence = "textgraph_pk_sequence")
-  private Long dbId;
-
-  @Override
-  public Long getDbId() {
-    return dbId;
-  }
-
-  protected TextGraph() {
+  public TextGraph() {
     super(GraphType.ORDERED);
   }
 
-  public void setLayerRootMarkup(final String layerName, final Long markupNodeId) {
+  public TextGraph setLayerRootMarkup(final String layerName, final Long markupNodeId) {
     layerRootMap.put(layerName, markupNodeId);
+    return this;
   }
 
-  public void addChildMarkup(final Long parentMarkupId, final String layerName, final Long childMarkupId) {
+  public TextGraph addChildMarkup(final Long parentMarkupId, final String layerName, final Long childMarkupId) {
     final LayerEdge edge = Edges.parentMarkupToChildMarkup(layerName);
     addDirectedHyperEdge(edge, edge.label(), parentMarkupId, childMarkupId);
+    return this;
   }
 
-  public void appendTextNode(final Long textNodeId) {
+  public TextGraph appendTextNode(final Long textNodeId) {
     if (firstTextNodeId == null) {
       firstTextNodeId = textNodeId;
     } else {
@@ -72,11 +66,13 @@ public class TextGraph extends HyperGraph<Long, Edge> implements TAGObject {
       addDirectedHyperEdge(edge, edge.label(), lastTextNodeId, textNodeId);
     }
     lastTextNodeId = textNodeId;
+    return this;
   }
 
-  public void linkMarkupToTextNode(final Long markupId, final String layerName, final Long textNodeId) {
+  public TextGraph linkMarkupToTextNode(final Long markupId, final String layerName, final Long textNodeId) {
     final LayerEdge edge = Edges.markupToText(layerName);
     addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
+    return this;
   }
 
   public Stream<Long> getTextNodeIdStream() {

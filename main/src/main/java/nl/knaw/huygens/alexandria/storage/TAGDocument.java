@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
 
 import java.util.*;
 
@@ -45,6 +46,7 @@ public class TAGDocument implements TAGObject {
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
   private Long firstTextNodeId;
+  private TextGraph textGraph = new TextGraph();
 
   TAGDocument() {
   }
