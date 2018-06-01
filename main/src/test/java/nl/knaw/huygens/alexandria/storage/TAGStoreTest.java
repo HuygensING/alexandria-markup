@@ -22,6 +22,9 @@ package nl.knaw.huygens.alexandria.storage;
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;

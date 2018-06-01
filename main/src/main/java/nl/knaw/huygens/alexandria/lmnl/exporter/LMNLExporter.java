@@ -22,9 +22,9 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 import com.google.common.base.Preconditions;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.slf4j.Logger;

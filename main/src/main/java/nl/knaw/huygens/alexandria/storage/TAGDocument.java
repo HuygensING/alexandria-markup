@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage;
 
 /*
  * #%L
@@ -20,10 +20,9 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.TAGMarkupDTO;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;

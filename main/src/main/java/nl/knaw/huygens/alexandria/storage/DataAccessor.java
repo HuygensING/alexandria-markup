@@ -23,6 +23,10 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
+import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
 class DataAccessor {
   final PrimaryIndex<Long, TAGDocumentDTO> documentById;

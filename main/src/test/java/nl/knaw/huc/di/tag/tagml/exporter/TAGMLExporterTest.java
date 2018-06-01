@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.junit.Ignore;
 import org.junit.Test;
 

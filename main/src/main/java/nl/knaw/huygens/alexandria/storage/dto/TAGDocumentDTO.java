@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*
  * #%L
@@ -48,7 +48,7 @@ public class TAGDocumentDTO implements TAGDTO {
   private Long firstTextNodeId;
   private TextGraph textGraph = new TextGraph();
 
-  TAGDocumentDTO() {
+  public TAGDocumentDTO() {
   }
 
   public Long getDbId() {

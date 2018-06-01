@@ -21,7 +21,7 @@ package nl.knaw.huygens.alexandria.view;
  */
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;

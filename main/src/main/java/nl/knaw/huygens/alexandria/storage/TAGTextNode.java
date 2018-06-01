@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage;
 
 /*
  * #%L
@@ -21,8 +21,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  */
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
 import java.util.List;
 

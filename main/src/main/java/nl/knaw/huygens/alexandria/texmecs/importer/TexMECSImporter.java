@@ -22,8 +22,8 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
 
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import org.antlr.v4.runtime.CharStream;

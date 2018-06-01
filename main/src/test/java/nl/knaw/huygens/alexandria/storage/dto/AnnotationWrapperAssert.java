@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*-
  * #%L
@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import org.assertj.core.api.AbstractObjectAssert;
 
 public class AnnotationWrapperAssert extends AbstractObjectAssert<AnnotationWrapperAssert, TAGAnnotation> {

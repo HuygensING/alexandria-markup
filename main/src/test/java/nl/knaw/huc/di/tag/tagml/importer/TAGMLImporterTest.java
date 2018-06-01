@@ -23,10 +23,10 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert.*;
+import static nl.knaw.huygens.alexandria.storage.dto.DocumentWrapperAssert.*;
 import static org.junit.Assert.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {

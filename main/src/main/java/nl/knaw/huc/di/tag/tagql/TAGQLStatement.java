@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagql;
 
 
 import nl.knaw.huygens.alexandria.query.TAGQLResult;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 
 import java.util.function.Function;
 

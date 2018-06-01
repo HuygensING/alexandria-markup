@@ -27,10 +27,7 @@ import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

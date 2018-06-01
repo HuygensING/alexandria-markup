@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage;
 
 /*
  * #%L
@@ -20,9 +20,8 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGAnnotationDTO;
-import nl.knaw.huygens.alexandria.storage.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 
 import java.util.stream.Stream;
 

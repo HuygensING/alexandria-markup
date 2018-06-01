@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*-
  * #%L
@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.List;

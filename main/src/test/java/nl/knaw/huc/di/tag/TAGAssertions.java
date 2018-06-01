@@ -20,14 +20,18 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.wrappers.*;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.dto.*;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.CheckReturnValue;
 
 public class TAGAssertions extends Assertions {
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.DocumentWrapperAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
@@ -50,7 +54,7 @@ public class TAGAssertions extends Assertions {
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.AnnotationWrapperAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
@@ -61,7 +65,7 @@ public class TAGAssertions extends Assertions {
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.TextNodeWrapperAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.

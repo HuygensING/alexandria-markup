@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*
  * #%L
@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.storage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeType;
 
 import java.util.ArrayList;
 import java.util.List;

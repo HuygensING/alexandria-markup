@@ -21,10 +21,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.wrappers.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
