@@ -68,19 +68,20 @@ public class LMNLImporter {
 
     void pushOpenMarkup(String rangeName) {
       // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
-      Optional<TAGMarkupDTO> findFirst = openMarkupDeque.stream()//
-          .filter(tr -> tr.getExtendedTag().equals(rangeName))//
+      Optional<TAGMarkup> findFirst = openMarkupDeque.stream()//
+          .map(dto -> new TAGMarkup(tagStore, dto))
+          .filter(m -> m.getExtendedTag().equals(rangeName))//
           .findFirst();
       if (findFirst.isPresent()) {
-        TAGMarkupDTO markup = findFirst.get();
-        if (markup.getTextNodeIds().isEmpty()) {
+        TAGMarkup markup = findFirst.get();
+        if (!markup.hasTextNodes()) {
           // every markup should have at least one textNode
           TAGTextNodeDTO emptyTextNode = new TAGTextNodeDTO("");
           update(emptyTextNode);
           addTextNode(emptyTextNode);
           closeMarkup();
         }
-        openMarkupStack.push(markup);
+        openMarkupStack.push(markup.getDTO());
       } else {
         importerContext.errors.add("Closing tag {" + rangeName + "] found without corresponding open tag.");
       }
@@ -104,7 +105,7 @@ public class LMNLImporter {
             m.addTextNode(textNode);
             document.associateTextWithMarkup(textNode, m);
           });
-      if (!document.hasTextNodes()){
+      if (!document.hasTextNodes()) {
         document.setFirstTextNodeId(textNode.getDbId());
       }
       document.addTextNode(textNode);
@@ -171,6 +172,7 @@ public class LMNLImporter {
       update(documentContext.document);
       if (!documentContext.openMarkupDeque.isEmpty()) {
         String openRanges = documentContext.openMarkupDeque.stream()//
+            .map(dto -> new TAGMarkup(tagStore, dto))
             .map(m -> "[" + m.getExtendedTag() + "}")//
             .collect(Collectors.joining(", "));
         errors.add("Unclosed LMNL range(s): " + openRanges);
@@ -307,7 +309,6 @@ public class LMNLImporter {
       }
     } while (token.getType() != Token.EOF);
   }
-
 
   private void handleOpenRange(ImporterContext context) {
     String methodName = "handleOpenRange";

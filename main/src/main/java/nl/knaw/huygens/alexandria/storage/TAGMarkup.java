@@ -227,6 +227,9 @@ public class TAGMarkup {
     return markupDTO.getLayers();
   }
 
+  public boolean hasTextNodes() {
+    return markupDTO.hasTextNodes();
+  }
   @Override
   public String toString() {
     return markupDTO.toString();

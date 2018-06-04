@@ -22,12 +22,8 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
@@ -186,4 +182,7 @@ public class TAGMarkupDTO implements TAGDTO {
         && getDbId().equals(((TAGMarkupDTO) other).getDbId());
   }
 
+  public boolean hasTextNodes() {
+    return !textNodeIds.isEmpty();
+  }
 }
