@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
@@ -154,6 +155,44 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         List<Long> parentMarkupList = getParentMarkupList(nodeId);
         parentMarkupList.removeAll(markupHandled);
         markupToProcess.addAll(parentMarkupList);
+        return nodeId;
+      }
+    });
+  }
+
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final Set<String> layerName) {
+    return stream(new Iterator<Long>() {
+      Deque<Long> markupToProcess = new ArrayDeque<>(singleton(markupId));
+      Optional<Long> nextTextNodeId = calcNextTextNodeId();
+      Set<Long> markupHandled = new HashSet<>();
+
+      private Optional<Long> calcNextTextNodeId() {
+        return markupToProcess.isEmpty()
+            ? Optional.empty()
+            : Optional.of(markupToProcess.pop());
+      }
+
+      private List<Long> getChildMarkupList(Long nodeId) {
+        return getIncomingEdges(nodeId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .map(e -> getSource(e))
+            .collect(toList());
+      }
+
+      @Override
+      public boolean hasNext() {
+        return nextTextNodeId.isPresent();
+      }
+
+      @Override
+      public Long next() {
+        Long nodeId = nextTextNodeId.get();
+        markupHandled.add(nodeId);
+        nextTextNodeId = calcNextTextNodeId();
+        List<Long> childMarkupList = getChildMarkupList(nodeId);
+        childMarkupList.removeAll(markupHandled);
+        markupToProcess.addAll(childMarkupList);
         return nodeId;
       }
     });

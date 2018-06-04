@@ -24,7 +24,6 @@ import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -51,35 +50,35 @@ public class TAGMarkup {
     return markupDTO.getTag();
   }
 
-  public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
-    markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
-    Long ownerId = markupDTO.getDocumentId();
-    new TAGDocument(store, store.getDocumentDTO(ownerId))//
-        .associateTextNodeWithMarkup(tagTextNode, this);
-    update();
-    return this;
-  }
+//  public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
+//    markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
+//    Long ownerId = markupDTO.getDocumentId();
+//    new TAGDocument(store, store.getDocumentDTO(ownerId))//
+//        .associateTextNodeWithMarkup(tagTextNode, this);
+//    update();
+//    return this;
+//  }
 
-  public TAGMarkup setOnlyTextNode(TAGTextNode tagTextNode) {
-    markupDTO.getTextNodeIds().clear();
-    addTextNode(tagTextNode);
-    return this;
-  }
+//  public TAGMarkup setOnlyTextNode(TAGTextNode tagTextNode) {
+//    markupDTO.getTextNodeIds().clear();
+//    addTextNode(tagTextNode);
+//    return this;
+//  }
 
-  public TAGMarkup setFirstAndLastTextNode(TAGTextNode first, TAGTextNode last) {
-    markupDTO.getTextNodeIds().clear();
-    addTextNode(first);
-    if (!first.getDbId().equals(last.getDbId())) {
-      TAGTextNode next = first.getNextTextNodes().get(0); // TODO: handle divergence
-      while (!next.getDbId().equals(last.getDbId())) {
-        addTextNode(next);
-        next = next.getNextTextNodes().get(0);// TODO: handle divergence
-      }
-      addTextNode(next);
-    }
-    update();
-    return this;
-  }
+//  public TAGMarkup setFirstAndLastTextNode(TAGTextNode first, TAGTextNode last) {
+//    markupDTO.getTextNodeIds().clear();
+//    addTextNode(first);
+//    if (!first.getDbId().equals(last.getDbId())) {
+//      TAGTextNode next = first.getNextTextNodes().get(0); // TODO: handle divergence
+//      while (!next.getDbId().equals(last.getDbId())) {
+//        addTextNode(next);
+//        next = next.getNextTextNodes().get(0);// TODO: handle divergence
+//      }
+//      addTextNode(next);
+//    }
+//    update();
+//    return this;
+//  }
 
   public TAGMarkup addAnnotation(TAGAnnotation annotation) {
     markupDTO.getAnnotationIds().add(annotation.getDbId());
@@ -93,20 +92,20 @@ public class TAGMarkup {
         .map(annotation -> new TAGAnnotation(store, annotation));
   }
 
-  public Stream<TAGTextNode> getTextNodeStream() {
-    return markupDTO.getTextNodeIds().stream()//
-        .map(store::getTextNodeDTO)//
-        .map(textNode -> new TAGTextNode(store, textNode));
-  }
+//  public Stream<TAGTextNode> getTextNodeStream() {
+//    return markupDTO.getTextNodeIds().stream()//
+//        .map(store::getTextNodeDTO)//
+//        .map(textNode -> new TAGTextNode(store, textNode));
+//  }
 
   private void update() {
     store.persist(markupDTO);
   }
 
-  public boolean isAnonymous() {
-    return markupDTO.getTextNodeIds().size() == 1//
-        && "".equals(getTextNodeStream().findFirst().map(TAGTextNode::getText).get());
-  }
+//  public boolean isAnonymous() {
+//    return markupDTO.getTextNodeIds().size() == 1//
+//        && "".equals(getTextNodeStream().findFirst().map(TAGTextNode::getText).get());
+//  }
 
   public TAGMarkupDTO getDTO() {
     return markupDTO;
@@ -155,34 +154,34 @@ public class TAGMarkup {
     return markupDTO.getSuffix();
   }
 
-  public Optional<TAGMarkup> getDominatedMarkup() {
-    return markupDTO.getDominatedMarkupId()
-        .map(store::getMarkupDTO)
-        .map(m -> new TAGMarkup(store, m));
-  }
-
-  public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
-    markupDTO.setDominatedMarkupId(dominatedMarkup.getDbId());
-    if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
-      dominatedMarkup.setDominatingMarkup(this);
-    }
-    update();
-  }
-
-  public Optional<TAGMarkup> getDominatingMarkup() {
-    return markupDTO.getDominatingMarkupId()
-        .map(store::getMarkupDTO)
-        .map(m -> new TAGMarkup(store, m));
-
-  }
-
-  private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
-    markupDTO.setDominatingMarkupId(dominatingMarkup.getDbId());
-    if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
-      dominatingMarkup.setDominatedMarkup(this);
-    }
-    update();
-  }
+//  public Optional<TAGMarkup> getDominatedMarkup() {
+//    return markupDTO.getDominatedMarkupId()
+//        .map(store::getMarkupDTO)
+//        .map(m -> new TAGMarkup(store, m));
+//  }
+//
+//  public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
+//    markupDTO.setDominatedMarkupId(dominatedMarkup.getDbId());
+//    if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
+//      dominatedMarkup.setDominatingMarkup(this);
+//    }
+//    update();
+//  }
+//
+//  public Optional<TAGMarkup> getDominatingMarkup() {
+//    return markupDTO.getDominatingMarkupId()
+//        .map(store::getMarkupDTO)
+//        .map(m -> new TAGMarkup(store, m));
+//
+//  }
+//
+//  private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
+//    markupDTO.setDominatingMarkupId(dominatingMarkup.getDbId());
+//    if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
+//      dominatingMarkup.setDominatedMarkup(this);
+//    }
+//    update();
+//  }
 
   public boolean hasMarkupId() {
     return markupDTO.getMarkupId() != null;
@@ -214,9 +213,9 @@ public class TAGMarkup {
     markupDTO.setSuffix(suffix);
   }
 
-  public int getTextNodeCount() {
-    return markupDTO.getTextNodeIds().size();
-  }
+//  public int getTextNodeCount() {
+//    return markupDTO.getTextNodeIds().size();
+//  }
 
   public TAGMarkup addAllLayers(final Set<String> layers) {
     markupDTO.addAllLayers(layers);
@@ -227,9 +226,9 @@ public class TAGMarkup {
     return markupDTO.getLayers();
   }
 
-  public boolean hasTextNodes() {
-    return markupDTO.hasTextNodes();
-  }
+//  public boolean hasTextNodes() {
+//    return markupDTO.hasTextNodes();
+//  }
 
   @Override
   public String toString() {

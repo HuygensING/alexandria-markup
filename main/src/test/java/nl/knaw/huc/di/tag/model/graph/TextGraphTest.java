@@ -129,5 +129,8 @@ public class TextGraphTest {
 
     List<Long> markupForJonn = tg.getMarkupIdStreamForTextNodeId(textJonn).collect(toList());
     assertThat(markupForJonn).containsExactlyInAnyOrder(markupA, markupName1, markupTagml);
+
+    List<Long> textForName = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, layerNames).collect(toList());
+    assertThat(textForName).containsExactly(textJonn, textOreos);
   }
 }

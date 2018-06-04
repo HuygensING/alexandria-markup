@@ -103,7 +103,7 @@ public class TexMECSImporter {
       TAGMarkup second = markupList.get(i + 1);
       if (first.getDTO().getTextNodeIds().equals(second.getDTO().getTextNodeIds())) {
         // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
-        first.setDominatedMarkup(second);
+//        first.setDominatedMarkup(second);
       }
     }
   }

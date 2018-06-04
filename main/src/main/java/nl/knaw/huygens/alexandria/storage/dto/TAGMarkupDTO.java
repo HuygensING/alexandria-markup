@@ -23,23 +23,26 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
-  @PrimaryKey(sequence = "textrange_pk_sequence")
+  @PrimaryKey(sequence = "tg_node_pk_sequence")
   private Long id;
 
   private String tag;
   private String markupId;
   private List<Long> annotationIds = new ArrayList<>();
-  private List<Long> textNodeIds = new ArrayList<>();
+//  private List<Long> textNodeIds = new ArrayList<>();
   private long documentId;
-  private boolean isAnonymous = true;
-  private boolean isContinuous = true;
+  //  private boolean isAnonymous = true;
+//  private boolean isContinuous = true;
   private String suffix;
-  private Long dominatedMarkupId;
-  private Long dominatingMarkupId;
+  //  private Long dominatedMarkupId;
+//  private Long dominatingMarkupId;
   private boolean optional = false;
   private boolean discontinuous = false;
   private Set<String> layers = new TreeSet<>();
@@ -81,17 +84,21 @@ public class TAGMarkupDTO implements TAGDTO {
     this.annotationIds = annotationIds;
   }
 
-  public List<Long> getTextNodeIds() {
-    return textNodeIds;
-  }
-
-  public void setTextNodeIds(List<Long> textNodeIds) {
-    this.textNodeIds = textNodeIds;
-  }
-
-  public void addTextNode(TAGTextNodeDTO textNode) {
-    textNodeIds.add(textNode.getDbId());
-  }
+//  public List<Long> getTextNodeIds() {
+//    return textNodeIds;
+//  }
+//
+//  public void setTextNodeIds(List<Long> textNodeIds) {
+//    this.textNodeIds = textNodeIds;
+//  }
+//
+//  public void addTextNode(TAGTextNodeDTO textNode) {
+//    textNodeIds.add(textNode.getDbId());
+//  }
+//
+//  public boolean hasTextNodes() {
+//    return !textNodeIds.isEmpty();
+//  }
 
   public TAGMarkupDTO addAnnotation(TAGAnnotationDTO annotation) {
     annotationIds.add(annotation.getDbId());
@@ -110,21 +117,21 @@ public class TAGMarkupDTO implements TAGDTO {
     this.suffix = suffix;
   }
 
-  public Optional<Long> getDominatedMarkupId() {
-    return Optional.ofNullable(dominatedMarkupId);
-  }
-
-  public void setDominatedMarkupId(Long dominatedMarkupId) {
-    this.dominatedMarkupId = dominatedMarkupId;
-  }
-
-  public Optional<Long> getDominatingMarkupId() {
-    return Optional.ofNullable(dominatingMarkupId);
-  }
-
-  public void setDominatingMarkupId(Long dominatingMarkupId) {
-    this.dominatingMarkupId = dominatingMarkupId;
-  }
+//  public Optional<Long> getDominatedMarkupId() {
+//    return Optional.ofNullable(dominatedMarkupId);
+//  }
+//
+//  public void setDominatedMarkupId(Long dominatedMarkupId) {
+//    this.dominatedMarkupId = dominatedMarkupId;
+//  }
+//
+//  public Optional<Long> getDominatingMarkupId() {
+//    return Optional.ofNullable(dominatingMarkupId);
+//  }
+//
+//  public void setDominatingMarkupId(Long dominatingMarkupId) {
+//    this.dominatingMarkupId = dominatingMarkupId;
+//  }
 
   public String getMarkupId() {
     return markupId;
@@ -135,7 +142,7 @@ public class TAGMarkupDTO implements TAGDTO {
     return this;
   }
 
-  public TAGMarkupDTO addLayers(final String layer) {
+  public TAGMarkupDTO addLayer(final String layer) {
     this.layers.add(layer);
     return this;
   }
@@ -180,9 +187,5 @@ public class TAGMarkupDTO implements TAGDTO {
   public boolean equals(Object other) {
     return other instanceof TAGMarkupDTO//
         && getDbId().equals(((TAGMarkupDTO) other).getDbId());
-  }
-
-  public boolean hasTextNodes() {
-    return !textNodeIds.isEmpty();
   }
 }

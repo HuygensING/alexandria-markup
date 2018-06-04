@@ -90,10 +90,14 @@ public class TAGDocumentDTO implements TAGDTO {
   public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
     int textNodeSize = textNodeIds.size();
     return textNodeSize > 2 //
-        && markup.getTextNodeIds().size() >= textNodeSize / 2d;
+        && getTextNodeIdsForMarkupId(markup.getDbId()).size() >= textNodeSize / 2d;
   }
 
-  public Set<Long> getMarkupIdsForTextNodeIds(Long textNodeId) {
+  private List<Long> getTextNodeIdsForMarkupId(final Long dbId) {
+    textGraph.getOutgoingEdges(dbId).stream().filter(e->)
+  }
+
+  public Set<Long> getMarkupIdsForTextNodeId(Long textNodeId) {
     Set<Long> markups = textNodeIdToMarkupIds.get(textNodeId);
     return markups == null ? new LinkedHashSet<>() : markups;
   }

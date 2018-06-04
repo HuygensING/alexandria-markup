@@ -31,7 +31,7 @@ import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.*;
 
 @Entity(version = 2)
 public class TAGTextNodeDTO implements TAGDTO {
-  @PrimaryKey(sequence = "textnode_pk_sequence")
+  @PrimaryKey(sequence = "tg_node_pk_sequence")
   private Long dbId;
 
   private TAGTextNodeType type;

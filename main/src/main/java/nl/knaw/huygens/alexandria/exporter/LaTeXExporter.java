@@ -296,7 +296,7 @@ public class LaTeXExporter {
   }
 
   // private void drawMarkupsAsSets(StringBuilder latexBuilder, DocumentWrapper document, ColorPicker colorPicker, Map<TextNodeWrapper, Integer> textNodeIndices) {
-  // document.getMarkupIdsForTextNodeIds().stream().map(store::getMarkupDTO).forEach.forEach(tr -> {
+  // document.getMarkupIdsForTextNodeId().stream().map(store::getMarkupDTO).forEach.forEach(tr -> {
   // String color = colorPicker.nextColor();
   // latexBuilder.append(" \\node[draw=").append(color).append(",shape=rectangle,fit=");
   // tr.textNodes.forEach(tn -> {

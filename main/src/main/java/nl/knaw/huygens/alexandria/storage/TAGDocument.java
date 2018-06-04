@@ -134,7 +134,7 @@ public class TAGDocument {
   }
 
   public Stream<TAGMarkup> getMarkupStreamForTextNode(TAGTextNode tn) {
-    return documentDTO.getMarkupIdsForTextNodeIds(tn.getDbId()).stream()//
+    return documentDTO.getMarkupIdsForTextNodeId(tn.getDbId()).stream()//
         .map(store::getMarkupDTO)//
         .map(m -> new TAGMarkup(store, m));
   }
