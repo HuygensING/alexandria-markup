@@ -93,25 +93,6 @@ public class TAGMarkupDTO implements TAGDTO {
     this.textNodeIds = textNodeIds;
   }
 
-  public String getExtendedTag() {
-    String layerPrefix = layerPrefix();
-    if (optional) {
-      return layerPrefix + TAGML.OPTIONAL_PREFIX + tag;
-    }
-    // TODO: this is output language dependent: move to language dependency
-    if (StringUtils.isNotEmpty(suffix)) {
-      return layerPrefix + tag + "~" + suffix;
-    }
-    return layerPrefix + tag;
-  }
-
-  private String layerPrefix() {
-    String layerPrefix = layers.stream()
-        .filter(l -> !l.isEmpty())
-        .collect(joining(","));
-    return layerPrefix.isEmpty() ? "" : layerPrefix + TAGML.DIVIDER;
-  }
-
   public void addTextNode(TAGTextNodeDTO textNode) {
     textNodeIds.add(textNode.getDbId());
   }

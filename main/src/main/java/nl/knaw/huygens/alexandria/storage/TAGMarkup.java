@@ -20,37 +20,40 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.joining;
 
 public class TAGMarkup {
   private final TAGStore store;
-  private final TAGMarkupDTO markup;
+  private final TAGMarkupDTO markupDTO;
 
-  public TAGMarkup(TAGStore store, TAGMarkupDTO markup) {
+  public TAGMarkup(TAGStore store, TAGMarkupDTO markupDTO) {
     checkNotNull(store);
-    checkNotNull(markup);
+    checkNotNull(markupDTO);
     this.store = store;
-    this.markup = markup;
+    this.markupDTO = markupDTO;
     update();
   }
 
   public Long getDbId() {
-    return markup.getDbId();
+    return markupDTO.getDbId();
   }
 
   public String getTag() {
-    return markup.getTag();
+    return markupDTO.getTag();
   }
 
   public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
-    markup.getTextNodeIds().add(tagTextNode.getDbId());
-    Long ownerId = markup.getDocumentId();
+    markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
+    Long ownerId = markupDTO.getDocumentId();
     new TAGDocument(store, store.getDocumentDTO(ownerId))//
         .associateTextNodeWithMarkup(tagTextNode, this);
     update();
@@ -58,13 +61,13 @@ public class TAGMarkup {
   }
 
   public TAGMarkup setOnlyTextNode(TAGTextNode tagTextNode) {
-    markup.getTextNodeIds().clear();
+    markupDTO.getTextNodeIds().clear();
     addTextNode(tagTextNode);
     return this;
   }
 
   public TAGMarkup setFirstAndLastTextNode(TAGTextNode first, TAGTextNode last) {
-    markup.getTextNodeIds().clear();
+    markupDTO.getTextNodeIds().clear();
     addTextNode(first);
     if (!first.getDbId().equals(last.getDbId())) {
       TAGTextNode next = first.getNextTextNodes().get(0); // TODO: handle divergence
@@ -79,50 +82,67 @@ public class TAGMarkup {
   }
 
   public TAGMarkup addAnnotation(TAGAnnotation annotation) {
-    markup.getAnnotationIds().add(annotation.getDbId());
+    markupDTO.getAnnotationIds().add(annotation.getDbId());
     update();
     return this;
   }
 
   public Stream<TAGAnnotation> getAnnotationStream() {
-    return markup.getAnnotationIds().stream()//
+    return markupDTO.getAnnotationIds().stream()//
         .map(store::getAnnotationDTO)//
         .map(annotation -> new TAGAnnotation(store, annotation));
   }
 
   public Stream<TAGTextNode> getTextNodeStream() {
-    return markup.getTextNodeIds().stream()//
+    return markupDTO.getTextNodeIds().stream()//
         .map(store::getTextNodeDTO)//
         .map(textNode -> new TAGTextNode(store, textNode));
   }
 
   private void update() {
-    store.persist(markup);
+    store.persist(markupDTO);
   }
 
   public boolean isAnonymous() {
-    return markup.getTextNodeIds().size() == 1//
+    return markupDTO.getTextNodeIds().size() == 1//
         && "".equals(getTextNodeStream().findFirst().map(TAGTextNode::getText).get());
   }
 
   public TAGMarkupDTO getDTO() {
-    return markup;
+    return markupDTO;
   }
 
   public void setIsDiscontinuous(final boolean b) {
-    markup.setDiscontinuous(b);
+    markupDTO.setDiscontinuous(b);
   }
 
   public boolean isDiscontinuous() {
-    return markup.isDiscontinuous();
+    return markupDTO.isDiscontinuous();
   }
 
   public boolean isContinuous() {
-    return !markup.isDiscontinuous();
+    return !markupDTO.isDiscontinuous();
   }
 
   public String getExtendedTag() {
-    return markup.getExtendedTag();
+    String layerPrefix = layerPrefix();
+    String tag = getTag();
+    if (isOptional()) {
+      return layerPrefix + TAGML.OPTIONAL_PREFIX + tag;
+    }
+    // TODO: this is output language dependent: move to language dependency
+    String suffix = getSuffix();
+    if (StringUtils.isNotEmpty(suffix)) {
+      return layerPrefix + tag + "~" + suffix;
+    }
+    return layerPrefix + tag;
+  }
+
+  private String layerPrefix() {
+    String layerPrefix = getLayers().stream()
+        .filter(l -> !l.isEmpty())
+        .collect(joining(","));
+    return layerPrefix.isEmpty() ? "" : layerPrefix + TAGML.DIVIDER;
   }
 
   public boolean hasN() {
@@ -132,17 +152,17 @@ public class TAGMarkup {
   }
 
   public String getSuffix() {
-    return markup.getSuffix();
+    return markupDTO.getSuffix();
   }
 
   public Optional<TAGMarkup> getDominatedMarkup() {
-    return markup.getDominatedMarkupId()
+    return markupDTO.getDominatedMarkupId()
         .map(store::getMarkupDTO)
         .map(m -> new TAGMarkup(store, m));
   }
 
   public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
-    markup.setDominatedMarkupId(dominatedMarkup.getDbId());
+    markupDTO.setDominatedMarkupId(dominatedMarkup.getDbId());
     if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
     }
@@ -150,14 +170,14 @@ public class TAGMarkup {
   }
 
   public Optional<TAGMarkup> getDominatingMarkup() {
-    return markup.getDominatingMarkupId()
+    return markupDTO.getDominatingMarkupId()
         .map(store::getMarkupDTO)
         .map(m -> new TAGMarkup(store, m));
 
   }
 
   private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
-    markup.setDominatingMarkupId(dominatingMarkup.getDbId());
+    markupDTO.setDominatingMarkupId(dominatingMarkup.getDbId());
     if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
     }
@@ -165,62 +185,62 @@ public class TAGMarkup {
   }
 
   public boolean hasMarkupId() {
-    return markup.getMarkupId() != null;
+    return markupDTO.getMarkupId() != null;
   }
 
   public String getMarkupId() {
-    return markup.getMarkupId();
+    return markupDTO.getMarkupId();
   }
 
   public boolean isOptional() {
-    return markup.isOptional();
+    return markupDTO.isOptional();
   }
 
   public TAGMarkup setOptional(boolean optional) {
-    markup.setOptional(optional);
+    markupDTO.setOptional(optional);
     return this;
   }
 
   public TAGMarkup setMarkupId(String id) {
-    markup.setMarkupId(id);
+    markupDTO.setMarkupId(id);
     return this;
   }
 
   public boolean hasTag(String tag) {
-    return tag.equals(markup.getTag());
+    return tag.equals(markupDTO.getTag());
   }
 
   public void setSuffix(String suffix) {
-    markup.setSuffix(suffix);
+    markupDTO.setSuffix(suffix);
   }
 
   public int getTextNodeCount() {
-    return markup.getTextNodeIds().size();
+    return markupDTO.getTextNodeIds().size();
   }
 
   public TAGMarkup addAllLayers(final Set<String> layers) {
-    markup.addAllLayers(layers);
+    markupDTO.addAllLayers(layers);
     return this;
   }
 
   public Set<String> getLayers() {
-    return markup.getLayers();
+    return markupDTO.getLayers();
   }
 
   @Override
   public String toString() {
-    return markup.toString();
+    return markupDTO.toString();
   }
 
   @Override
   public int hashCode() {
-    return markup.hashCode();
+    return markupDTO.hashCode();
   }
 
   @Override
   public boolean equals(Object other) {
     return other instanceof TAGMarkup //
-        && markup.equals(((TAGMarkup) other).getDTO());
+        && markupDTO.equals(((TAGMarkup) other).getDTO());
   }
 
   public boolean matches(TAGMarkup other) {
@@ -228,7 +248,7 @@ public class TAGMarkup {
       return false;
     }
 
-    int thisAnnotationCount = markup.getAnnotationIds().size();
+    int thisAnnotationCount = markupDTO.getAnnotationIds().size();
     int otherAnnotationCount = other.getDTO().getAnnotationIds().size();
     if (thisAnnotationCount != otherAnnotationCount) {
       return false;
