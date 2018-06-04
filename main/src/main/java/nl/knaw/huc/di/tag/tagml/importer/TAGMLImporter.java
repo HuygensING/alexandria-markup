@@ -87,7 +87,7 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    update(document.getDocument());
+    update(document.getDTO());
     return document;
   }
 
@@ -104,7 +104,7 @@ public class TAGMLImporter {
     TAGMLParser.DocumentContext documentContext = parser.document();
     TAGMLVisitor visitor = new TAGMLVisitor(tagStore, errorListener);
     visitor.visit(documentContext);
-    return visitor.getDocumentWrapper();
+    return visitor.getDocument();
   }
 
   private Long update(TAGDTO tagdto) {

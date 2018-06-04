@@ -247,7 +247,7 @@ public class LMNLImporter {
 
     ImporterContext context = new ImporterContext(lexer);
     TAGDocument document = tagStore.createDocument();
-    TAGDocumentDTO dto = document.getDocument();
+    TAGDocumentDTO dto = document.getDTO();
     update(dto);
     context.pushDocumentContext(dto);
     handleDefaultMode(context);
@@ -470,15 +470,15 @@ public class LMNLImporter {
           String key = tag + "-" + annotationText(annotation);
           if (markupsToJoin.containsKey(key)) {
             TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
-            markup.getMarkup().getAnnotationIds().remove(annotation.getDbId());
+            markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
             document.joinMarkup(originalMarkup, markup);
             markupIdsToRemove.add(markup.getDbId());
           } else {
-            markupsToJoin.put(key, markup.getMarkup());
+            markupsToJoin.put(key, markup.getDTO());
           }
         });
 
-    document.getDocument().getMarkupIds().removeAll(markupIdsToRemove);
+    document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
     document.getMarkupStream()//
         .map(TAGMarkup::getAnnotationStream)//
         .flatMap(Function.identity())//

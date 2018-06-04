@@ -59,7 +59,7 @@ public class TAGAnnotation {
         .map(store::getAnnotation);
   }
 
-  public TAGAnnotationDTO getAnnotation() {
+  public TAGAnnotationDTO getDTO() {
     return annotation;
   }
 

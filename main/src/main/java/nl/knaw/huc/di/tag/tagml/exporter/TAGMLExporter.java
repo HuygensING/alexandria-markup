@@ -22,12 +22,8 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,7 +185,7 @@ public class TAGMLExporter {
           stateRef.set(variationState.getStartState());
           variationState.incrementBranchesStarted();
         }
-        TAGTextNodeDTO textNode = nodeToProcess.getTextNode();
+        TAGTextNodeDTO textNode = nodeToProcess.getDTO();
         String content = nodeToProcess.getText();
         switch (textNode.getType()) {
           case plaintext:
@@ -266,11 +262,11 @@ public class TAGMLExporter {
     return closeTag;
   }
 
-  private boolean needsDivider(final TAGTextNode nodeWrapper) {
-    List<TAGTextNode> prevTextNodes = nodeWrapper.getPrevTextNodes();
+  private boolean needsDivider(final TAGTextNode textNode) {
+    List<TAGTextNode> prevTextNodes = textNode.getPrevTextNodes();
     return prevTextNodes.size() == 1
         && prevTextNodes.get(0).isDivergence()
-        && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(nodeWrapper);
+        && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(textNode);
   }
 
   private StringBuilder toCloseTag(TAGMarkup markup) {
@@ -291,15 +287,15 @@ public class TAGMLExporter {
     return new StringBuilder();// TODO
   }
 
-  private void logTextNode(final TAGTextNode nodeWrapper) {
-    TAGTextNodeDTO textNode = nodeWrapper.getTextNode();
+  private void logTextNode(final TAGTextNode textNode) {
+    TAGTextNodeDTO dto = textNode.getDTO();
     LOG.debug("\n");
     LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
-        nodeWrapper.getDbId(),
-        textNode.getType(),
-        textNode.getText(),
-        textNode.getPrevTextNodeIds(),
-        textNode.getNextTextNodeIds()
+        textNode.getDbId(),
+        dto.getType(),
+        dto.getText(),
+        dto.getPrevTextNodeIds(),
+        dto.getNextTextNodeIds()
     );
   }
 }

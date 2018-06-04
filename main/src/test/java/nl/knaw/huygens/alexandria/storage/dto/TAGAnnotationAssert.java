@@ -23,13 +23,13 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class AnnotationWrapperAssert extends AbstractObjectAssert<AnnotationWrapperAssert, TAGAnnotation> {
+public class TAGAnnotationAssert extends AbstractObjectAssert<TAGAnnotationAssert, TAGAnnotation> {
 
-  public AnnotationWrapperAssert(final TAGAnnotation actual) {
-    super(actual, AnnotationWrapperAssert.class);
+  public TAGAnnotationAssert(final TAGAnnotation actual) {
+    super(actual, TAGAnnotationAssert.class);
   }
 
-  public AnnotationWrapperAssert hasTag(final String tag) {
+  public TAGAnnotationAssert hasTag(final String tag) {
     isNotNull();
     if (!actual.getTag().equals(tag)) {
       failWithMessage("Expected annotation's tag to be <%s> but was <%s>", tag, actual.getTag());

@@ -551,8 +551,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     for (int i = 0; i < expectedTextNodeList.size(); i++) {
       TAGTextNode actualTextNode = actualTextNodeList.get(i);
       TAGTextNode expectedTextNode = expectedTextNodeList.get(i);
-      Comparator<TAGTextNode> textNodeWrapperComparator = Comparator.comparing(TAGTextNode::getText);
-      assertThat(actualTextNode).usingComparator(textNodeWrapperComparator).isEqualTo(expectedTextNode);
+      Comparator<TAGTextNode> textNodeComparator = Comparator.comparing(TAGTextNode::getText);
+      assertThat(actualTextNode).usingComparator(textNodeComparator).isEqualTo(expectedTextNode);
     }
 
     assertThat(actualMarkupList).hasSize(expectedMarkupList.size());

@@ -39,7 +39,7 @@ public class TAGDocument {
     this.document = document;
   }
 
-  public TAGDocumentDTO getDocument() {
+  public TAGDocumentDTO getDTO() {
     return document;
   }
 
@@ -67,7 +67,7 @@ public class TAGDocument {
   }
 
   public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup tagMarkup) {
-    return document.containsAtLeastHalfOfAllTextNodes(tagMarkup.getMarkup());
+    return document.containsAtLeastHalfOfAllTextNodes(tagMarkup.getDTO());
   }
 
   public void setOnlyTextNode(TAGTextNode annotationText) {
@@ -140,12 +140,12 @@ public class TAGDocument {
   }
 
   public void joinMarkup(TAGMarkupDTO markup1, TAGMarkup markup2) {
-    markup1.getTextNodeIds().addAll(markup2.getMarkup().getTextNodeIds());
+    markup1.getTextNodeIds().addAll(markup2.getDTO().getTextNodeIds());
     markup2.getTextNodeStream().forEach(tn -> {
       this.disAssociateTextNodeWithMarkup(tn, markup2);
       this.associateTextNodeWithMarkup(tn, markup1);
     });
-    markup1.getAnnotationIds().addAll(markup2.getMarkup().getAnnotationIds());
+    markup1.getAnnotationIds().addAll(markup2.getDTO().getAnnotationIds());
   }
 
   /* private methods */

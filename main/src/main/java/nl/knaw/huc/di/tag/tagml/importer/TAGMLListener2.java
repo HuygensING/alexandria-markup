@@ -109,7 +109,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
   @Override
   public void exitDocument(DocumentContext ctx) {
-    update(document.getDocument());
+    update(document.getDTO());
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
       String openRanges = state.openMarkup.values().stream().flatMap(Collection::stream)//
@@ -338,11 +338,11 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
             document.associateTextNodeWithMarkup(textNode, masterMarkup);
             textNodeIdsToAdd.add(textNode.getDbId());
           });
-          masterMarkup.getMarkup().getTextNodeIds().addAll(0, textNodeIdsToAdd);
-          document.getDocument().getMarkupIds().remove(otherMarkup.getDbId());
-          store.persist(document.getDocument());
-          store.persist(masterMarkup.getMarkup());
-          store.remove(otherMarkup.getMarkup());
+          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
+          document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
+          store.persist(document.getDTO());
+          store.persist(masterMarkup.getDTO());
+          store.remove(otherMarkup.getDTO());
         } else {
           errorListener.addError(
               "%s Markup %s found in branch %s, but not in branch %s.",
@@ -682,14 +682,14 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     return format("line %d:%d :", token.getLine(), token.getCharPositionInLine() + 1);
   }
 
-  private void logTextNode(final TAGTextNode nodeWrapper) {
-    TAGTextNodeDTO textNode = nodeWrapper.getTextNode();
+  private void logTextNode(final TAGTextNode textNode) {
+    TAGTextNodeDTO dto = textNode.getDTO();
     LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
-        nodeWrapper.getDbId(),
-        textNode.getType(),
-        textNode.getText(),
-        textNode.getPrevTextNodeIds(),
-        textNode.getNextTextNodeIds()
+        textNode.getDbId(),
+        dto.getType(),
+        dto.getText(),
+        dto.getPrevTextNodeIds(),
+        dto.getNextTextNodeIds()
     );
   }
 

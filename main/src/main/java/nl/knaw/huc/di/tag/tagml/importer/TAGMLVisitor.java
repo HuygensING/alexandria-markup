@@ -34,7 +34,7 @@ public class TAGMLVisitor extends TAGMLParserBaseVisitor {
     this.errorListener = errorListener;
   }
 
-  public TAGDocument getDocumentWrapper() {
+  public TAGDocument getDocument() {
     // TODO
     return null;
   }

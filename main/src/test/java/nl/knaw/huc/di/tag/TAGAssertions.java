@@ -31,48 +31,48 @@ import org.assertj.core.util.CheckReturnValue;
 public class TAGAssertions extends Assertions {
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.DocumentWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link TAGDocumentAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static DocumentWrapperAssert assertThat(TAGDocument actual) {
-    return new DocumentWrapperAssert(actual);
+  public static TAGDocumentAssert assertThat(TAGDocument actual) {
+    return new TAGDocumentAssert(actual);
   }
 
   /**
-   * Creates a new instance of <code>{@link MarkupWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link TAGMarkupAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
    */
   @CheckReturnValue
 
-  public static MarkupWrapperAssert assertThat(TAGMarkup actual) {
-    return new MarkupWrapperAssert(actual);
+  public static TAGMarkupAssert assertThat(TAGMarkup actual) {
+    return new TAGMarkupAssert(actual);
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.AnnotationWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link TAGAnnotationAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static AnnotationWrapperAssert assertThat(TAGAnnotation actual) {
-    return new AnnotationWrapperAssert(actual);
+  public static TAGAnnotationAssert assertThat(TAGAnnotation actual) {
+    return new TAGAnnotationAssert(actual);
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.alexandria.storage.dto.TextNodeWrapperAssert}</code>.
+   * Creates a new instance of <code>{@link TAGTextNodeAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static TextNodeWrapperAssert assertThat(TAGTextNode actual) {
-    return new TextNodeWrapperAssert(actual);
+  public static TAGTextNodeAssert assertThat(TAGTextNode actual) {
+    return new TAGTextNodeAssert(actual);
   }
 
 }

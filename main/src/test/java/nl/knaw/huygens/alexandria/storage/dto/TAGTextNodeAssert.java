@@ -23,13 +23,13 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class TextNodeWrapperAssert extends AbstractObjectAssert<TextNodeWrapperAssert, TAGTextNode> {
+public class TAGTextNodeAssert extends AbstractObjectAssert<TAGTextNodeAssert, TAGTextNode> {
 
-  public TextNodeWrapperAssert(final TAGTextNode actual) {
-    super(actual, TextNodeWrapperAssert.class);
+  public TAGTextNodeAssert(final TAGTextNode actual) {
+    super(actual, TAGTextNodeAssert.class);
   }
 
-  public TextNodeWrapperAssert hasText(final String expectedText) {
+  public TAGTextNodeAssert hasText(final String expectedText) {
     isNotNull();
     String errorMessage = "\nExpected text to be %s, but was %s";
     if (!actual.getText().equals(expectedText)) {

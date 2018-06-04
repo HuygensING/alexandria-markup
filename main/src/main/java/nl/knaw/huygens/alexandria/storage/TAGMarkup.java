@@ -105,7 +105,7 @@ public class TAGMarkup {
         && "".equals(getTextNodeStream().findFirst().map(TAGTextNode::getText).get());
   }
 
-  public TAGMarkupDTO getMarkup() {
+  public TAGMarkupDTO getDTO() {
     return markup;
   }
 
@@ -143,7 +143,7 @@ public class TAGMarkup {
 
   public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
     markup.setDominatedMarkupId(dominatedMarkup.getDbId());
-    if (!dominatedMarkup.getMarkup().getDominatingMarkupId().isPresent()) {
+    if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
     }
     update();
@@ -158,7 +158,7 @@ public class TAGMarkup {
 
   private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
     markup.setDominatingMarkupId(dominatingMarkup.getDbId());
-    if (!dominatingMarkup.getMarkup().getDominatedMarkupId().isPresent()) {
+    if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
     }
     update();
@@ -220,7 +220,7 @@ public class TAGMarkup {
   @Override
   public boolean equals(Object other) {
     return other instanceof TAGMarkup //
-        && markup.equals(((TAGMarkup) other).getMarkup());
+        && markup.equals(((TAGMarkup) other).getDTO());
   }
 
   public boolean matches(TAGMarkup other) {
@@ -229,7 +229,7 @@ public class TAGMarkup {
     }
 
     int thisAnnotationCount = markup.getAnnotationIds().size();
-    int otherAnnotationCount = other.getMarkup().getAnnotationIds().size();
+    int otherAnnotationCount = other.getDTO().getAnnotationIds().size();
     if (thisAnnotationCount != otherAnnotationCount) {
       return false;
     }

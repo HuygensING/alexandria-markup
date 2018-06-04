@@ -32,13 +32,13 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperAssert, TAGDocument> {
+public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, TAGDocument> {
 
-  public DocumentWrapperAssert(final TAGDocument actual) {
-    super(actual, DocumentWrapperAssert.class);
+  public TAGDocumentAssert(final TAGDocument actual) {
+    super(actual, TAGDocumentAssert.class);
   }
 
-  public DocumentWrapperAssert hasTextNodesMatching(final TextNodeSketch... textNodeSketches) {
+  public TAGDocumentAssert hasTextNodesMatching(final TextNodeSketch... textNodeSketches) {
     isNotNull();
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
@@ -51,7 +51,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return myself;
   }
 
-  public DocumentWrapperAssert hasMarkupMatching(final MarkupSketch... markupSketches) {
+  public TAGDocumentAssert hasMarkupMatching(final MarkupSketch... markupSketches) {
     isNotNull();
     Set<MarkupSketch> actualMarkupSketches = getActualMarkupSketches();
     Set<MarkupSketch> expectedMarkupSketches = new HashSet<>(Arrays.asList(markupSketches));
@@ -64,7 +64,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return myself;
   }
 
-  public MarkupWrapperAssert hasMarkupWithTag(String tag) {
+  public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
     List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
         .filter(m -> m.hasTag(tag))
@@ -74,7 +74,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     }
 
     TAGMarkup markup = relevantMarkup.get(0);
-    return new MarkupWrapperAssert(markup);
+    return new TAGMarkupAssert(markup);
   }
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {

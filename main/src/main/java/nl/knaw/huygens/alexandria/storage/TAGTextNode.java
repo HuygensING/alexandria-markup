@@ -47,7 +47,7 @@ public class TAGTextNode {
     return textNode.getText();
   }
 
-  public TAGTextNodeDTO getTextNode() {
+  public TAGTextNodeDTO getDTO() {
     return textNode;
   }
 

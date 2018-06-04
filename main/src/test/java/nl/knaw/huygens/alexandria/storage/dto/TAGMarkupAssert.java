@@ -29,13 +29,13 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
-public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAssert, TAGMarkup> {
+public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMarkup> {
 
-  public MarkupWrapperAssert(final TAGMarkup actual) {
-    super(actual, MarkupWrapperAssert.class);
+  public TAGMarkupAssert(final TAGMarkup actual) {
+    super(actual, TAGMarkupAssert.class);
   }
 
-  public MarkupWrapperAssert isOptional() {
+  public TAGMarkupAssert isOptional() {
     isNotNull();
     String errorMessage = "\nExpected markup %s to be optional, but it wasn't.";
     if (!actual.isOptional()) {
@@ -44,7 +44,7 @@ public class MarkupWrapperAssert extends AbstractObjectAssert<MarkupWrapperAsser
     return myself;
   }
 
-  public MarkupWrapperAssert withTextNodesWithText(String... text) {
+  public TAGMarkupAssert withTextNodesWithText(String... text) {
     isNotNull();
     List<String> actualTexts = actual.getTextNodeStream().map(TAGTextNode::getText).collect(toList());
     assertThat(actualTexts).containsExactly(text);

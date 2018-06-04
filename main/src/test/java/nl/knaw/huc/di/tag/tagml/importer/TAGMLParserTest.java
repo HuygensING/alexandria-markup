@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.storage.dto.DocumentWrapperAssert.*;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
 

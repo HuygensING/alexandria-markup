@@ -68,7 +68,7 @@ public class LaTeXExporter {
     StringBuilder latexBuilder = new StringBuilder();
     if (document != null) {
       document.getTextNodeStream().forEach(tn -> {
-        int size = document.getDocument().getMarkupIds().size();
+        int size = document.getDTO().getMarkupIds().size();
         addColoredTextNode(latexBuilder, tn, size);
       });
     }
@@ -243,8 +243,8 @@ public class LaTeXExporter {
   private Set<Integer> getLongMarkupIndexes() {
     if (longMarkupIndexes == null) {
       longMarkupIndexes = new HashSet<>();
-      for (int i = 0; i < document.getDocument().getMarkupIds().size(); i++) {
-        Long markupId = document.getDocument().getMarkupIds().get(i);
+      for (int i = 0; i < document.getDTO().getMarkupIds().size(); i++) {
+        Long markupId = document.getDTO().getMarkupIds().get(i);
         TAGMarkup markup = store.getMarkup(markupId);
         if (document.containsAtLeastHalfOfAllTextNodes(markup)) {
           longMarkupIndexes.add(i);
@@ -338,7 +338,7 @@ public class LaTeXExporter {
       float markupRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       if (tr.isContinuous()) {
-        List<Long> textNodeIds = tr.getMarkup().getTextNodeIds();
+        List<Long> textNodeIds = tr.getDTO().getTextNodeIds();
         TAGTextNode firstTextNode = store.getTextNode(textNodeIds.get(0));
         TAGTextNode lastTextNode = store.getTextNode(textNodeIds.get(textNodeIds.size() - 1));
         int first = textNodeIndices.get(firstTextNode);
@@ -445,10 +445,10 @@ public class LaTeXExporter {
       // LOG.info("markup={}", markup.getTag());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
-      int size = markup.getMarkup().getTextNodeIds().size();
+      int size = markup.getDTO().getTextNodeIds().size();
       maxMarkupSize = Math.max(maxMarkupSize, size);
       int lastIndex = size - 1;
-      TAGTextNode lastTextNode = store.getTextNode(markup.getMarkup().getTextNodeIds().get(lastIndex));
+      TAGTextNode lastTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(lastIndex));
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
@@ -473,7 +473,7 @@ public class LaTeXExporter {
       if (!tags.contains(nTag)) {
         return false;
       }
-      TAGTextNode firstTextNode = store.getTextNode(markup.getMarkup().getTextNodeIds().get(0));
+      TAGTextNode firstTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(0));
       int firstTextNodeIndex = textNodeIndex.get(firstTextNode);
       return (firstTextNodeIndex > lastTextNodeUsed);
     }
