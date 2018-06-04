@@ -54,20 +54,20 @@ public class TAGDocument {
 
   public Stream<TAGMarkup> getMarkupStream() {
     return document.getMarkupIds().stream()
-        .map(store::getMarkup)//
+        .map(store::getMarkupDTO)//
         .map(m -> new TAGMarkup(store, m));
   }
 
   public TAGTextNode getFirstTextNode() {
-    return store.getTextNodeWrapper(document.getFirstTextNodeId());
+    return store.getTextNode(document.getFirstTextNodeId());
   }
 
   public boolean hasTextNodes() {
     return document.getFirstTextNodeId() != null;
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup TAGMarkup) {
-    return document.containsAtLeastHalfOfAllTextNodes(TAGMarkup.getMarkup());
+  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup tagMarkup) {
+    return document.containsAtLeastHalfOfAllTextNodes(tagMarkup.getMarkup());
   }
 
   public void setOnlyTextNode(TAGTextNode annotationText) {
@@ -90,8 +90,8 @@ public class TAGDocument {
         .iterator();
   }
 
-  public void associateTextNodeWithMarkup(TAGTextNode TAGTextNode, TAGMarkup TAGMarkup) {
-    associateTextNodeWithMarkup(TAGTextNode, TAGMarkup.getDbId());
+  public void associateTextNodeWithMarkup(TAGTextNode tagTextNode, TAGMarkup tagMarkup) {
+    associateTextNodeWithMarkup(tagTextNode, tagMarkup.getDbId());
     update();
   }
 
@@ -125,7 +125,7 @@ public class TAGDocument {
 
     } else {
       Long textNodeId = textNodeIds.get(textNodeIds.size() - 2);
-      TAGTextNodeDTO prevTextNode = store.getTextNode(textNodeId);
+      TAGTextNodeDTO prevTextNode = store.getTextNodeDTO(textNodeId);
       TAGTextNode previousTextNode = new TAGTextNode(store, prevTextNode);
 //      textNode.addPreviousTextNode(previousTextNode);
     }
@@ -135,7 +135,7 @@ public class TAGDocument {
 
   public Stream<TAGMarkup> getMarkupStreamForTextNode(TAGTextNode tn) {
     return document.getMarkupIdsForTextNodeIds(tn.getDbId()).stream()//
-        .map(store::getMarkup)//
+        .map(store::getMarkupDTO)//
         .map(m -> new TAGMarkup(store, m));
   }
 
@@ -152,7 +152,7 @@ public class TAGDocument {
 
   private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
     return document.getTextNodeIds().stream()//
-        .map(store::getTextNode);
+        .map(store::getTextNodeDTO);
   }
 
   private void update() {
@@ -160,14 +160,14 @@ public class TAGDocument {
     store.persist(document);
   }
 
-  private void associateTextNodeWithMarkup(TAGTextNode TAGTextNode, TAGMarkupDTO markup) {
-    associateTextNodeWithMarkup(TAGTextNode, markup.getDbId());
+  private void associateTextNodeWithMarkup(TAGTextNode tagTextNode, TAGMarkupDTO markup) {
+    associateTextNodeWithMarkup(tagTextNode, markup.getDbId());
   }
 
-  private void associateTextNodeWithMarkup(TAGTextNode TAGTextNode, Long id) {
+  private void associateTextNodeWithMarkup(TAGTextNode tagTextNode, Long id) {
     document.getTextNodeIdToMarkupIds()
         .computeIfAbsent(
-            TAGTextNode.getDbId(),
+            tagTextNode.getDbId(),
             f -> new LinkedHashSet<>()).add(id);
     update();
   }

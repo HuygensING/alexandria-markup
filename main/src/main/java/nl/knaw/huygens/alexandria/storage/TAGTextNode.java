@@ -69,14 +69,14 @@ public class TAGTextNode {
   public List<TAGTextNode> getNextTextNodes() {
     return textNode.getNextTextNodeIds()
         .stream()
-        .map(store::getTextNodeWrapper)
+        .map(store::getTextNode)
         .collect(toList());
   }
 
   public List<TAGTextNode> getPrevTextNodes() {
     return textNode.getPrevTextNodeIds()
         .stream()
-        .map(store::getTextNodeWrapper)
+        .map(store::getTextNode)
         .collect(toList());
   }
 

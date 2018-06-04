@@ -37,7 +37,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   @Test
   public void testFilterRelevantMarkup() {
     store.runInTransaction(() -> {
-      TAGDocument document = store.createDocumentWrapper();
+      TAGDocument document = store.createDocument();
 
       String tag1 = "a";
       Long markupId1 = createNewMarkup(document, tag1);
@@ -85,7 +85,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   }
 
   private Long createNewMarkup(TAGDocument document, String tag1) {
-    TAGMarkup markup1 = store.createMarkupWrapper(document, tag1);
+    TAGMarkup markup1 = store.createMarkup(document, tag1);
     return markup1.getDbId();
   }
 

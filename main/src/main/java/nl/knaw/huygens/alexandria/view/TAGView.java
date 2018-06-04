@@ -103,8 +103,8 @@ public class TAGView {
     return exclude.equals(relevanceStyle);
   }
 
-  public boolean isIncluded(TAGMarkup TAGMarkup) {
-    String tag = TAGMarkup.getTag();
+  public boolean isIncluded(TAGMarkup tagMarkup) {
+    String tag = tagMarkup.getTag();
     if (include.equals(relevanceStyle)) {
       return markupToInclude.contains(tag);
     }
@@ -112,7 +112,7 @@ public class TAGView {
   }
 
   private String getTag(Long markupId) {
-    return store.getMarkupWrapper(markupId).getTag();
+    return store.getMarkup(markupId).getTag();
   }
 
 }

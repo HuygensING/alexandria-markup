@@ -62,11 +62,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       // - with one text node
       // - with one range on it
       // - with one annotation on it.
-      TAGDocument expected = store.createDocumentWrapper();
-      TAGMarkup r1 = store.createMarkupWrapper(expected, "l");
+      TAGDocument expected = store.createDocument();
+      TAGMarkup r1 = store.createMarkup(expected, "l");
       TAGAnnotation a1 = simpleAnnotation("n", "144");
       r1.addAnnotation(a1);
-      TAGTextNode t1 = store.createTextNodeWrapper("He manages to keep the upper hand");
+      TAGTextNode t1 = store.createTextNode("He manages to keep the upper hand");
       r1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(r1);
@@ -103,19 +103,19 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       LMNLImporter importer = new LMNLImporter(store);
       TAGDocument actual = importer.importLMNL(input);
 
-      TAGDocument expected = store.createDocumentWrapper();
+      TAGDocument expected = store.createDocument();
 
-      TAGTextNode tn00 = store.createTextNodeWrapper("\n");
-      TAGTextNode tn01 = store.createTextNodeWrapper("He manages to keep the upper hand").addPreviousTextNode(tn00);
-      TAGTextNode tn02 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn01);
-      TAGTextNode tn03 = store.createTextNodeWrapper("On his own farm.").addPreviousTextNode(tn02);
-      TAGTextNode tn04 = store.createTextNodeWrapper(" ").addPreviousTextNode(tn03);
-      TAGTextNode tn05 = store.createTextNodeWrapper("He's boss.").addPreviousTextNode(tn04);
-      TAGTextNode tn06 = store.createTextNodeWrapper(" ").addPreviousTextNode(tn05);
-      TAGTextNode tn07 = store.createTextNodeWrapper("But as to hens:").addPreviousTextNode(tn06);
-      TAGTextNode tn08 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn07);
-      TAGTextNode tn09 = store.createTextNodeWrapper("We fence our flowers in and the hens range.").addPreviousTextNode(tn08);
-      TAGTextNode tn10 = store.createTextNodeWrapper("\n").addPreviousTextNode(tn09);
+      TAGTextNode tn00 = store.createTextNode("\n");
+      TAGTextNode tn01 = store.createTextNode("He manages to keep the upper hand").addPreviousTextNode(tn00);
+      TAGTextNode tn02 = store.createTextNode("\n").addPreviousTextNode(tn01);
+      TAGTextNode tn03 = store.createTextNode("On his own farm.").addPreviousTextNode(tn02);
+      TAGTextNode tn04 = store.createTextNode(" ").addPreviousTextNode(tn03);
+      TAGTextNode tn05 = store.createTextNode("He's boss.").addPreviousTextNode(tn04);
+      TAGTextNode tn06 = store.createTextNode(" ").addPreviousTextNode(tn05);
+      TAGTextNode tn07 = store.createTextNode("But as to hens:").addPreviousTextNode(tn06);
+      TAGTextNode tn08 = store.createTextNode("\n").addPreviousTextNode(tn07);
+      TAGTextNode tn09 = store.createTextNode("We fence our flowers in and the hens range.").addPreviousTextNode(tn08);
+      TAGTextNode tn10 = store.createTextNode("\n").addPreviousTextNode(tn09);
 
       TAGAnnotation date = simpleAnnotation("date", "1915");
       TAGAnnotation title = simpleAnnotation("title", "The Housekeeper");
@@ -125,24 +125,24 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGAnnotation dates = simpleAnnotation("dates", "1874-1963");
       TAGAnnotation author = simpleAnnotation("author").addAnnotation(name).addAnnotation(dates);
 
-      TAGMarkup excerpt = store.createMarkupWrapper(expected, "excerpt")//
+      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")//
           .addAnnotation(source)//
           .addAnnotation(author)//
           .setFirstAndLastTextNode(tn00, tn10);
       // 3 sentences
-      TAGMarkup s1 = store.createMarkupWrapper(expected, "s").setFirstAndLastTextNode(tn01, tn03);
-      TAGMarkup s2 = store.createMarkupWrapper(expected, "s").setOnlyTextNode(tn05);
-      TAGMarkup s3 = store.createMarkupWrapper(expected, "s").setFirstAndLastTextNode(tn07, tn09);
+      TAGMarkup s1 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn01, tn03);
+      TAGMarkup s2 = store.createMarkup(expected, "s").setOnlyTextNode(tn05);
+      TAGMarkup s3 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn07, tn09);
 
       // 3 lines
       TAGAnnotation n144 = simpleAnnotation("n", "144");
-      TAGMarkup l1 = store.createMarkupWrapper(expected, "l").setOnlyTextNode(tn01).addAnnotation(n144);
+      TAGMarkup l1 = store.createMarkup(expected, "l").setOnlyTextNode(tn01).addAnnotation(n144);
 
       TAGAnnotation n145 = simpleAnnotation("n", "145");
-      TAGMarkup l2 = store.createMarkupWrapper(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+      TAGMarkup l2 = store.createMarkup(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
 
       TAGAnnotation n146 = simpleAnnotation("n", "146");
-      TAGMarkup l3 = store.createMarkupWrapper(expected, "l").setOnlyTextNode(tn09).addAnnotation(n146);
+      TAGMarkup l3 = store.createMarkup(expected, "l").setOnlyTextNode(tn09).addAnnotation(n146);
 
       expected.setFirstAndLastTextNode(tn00, tn10)//
           .addMarkup(excerpt)//
@@ -298,14 +298,14 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       // - with one range on it
       // - with one annotation on it.
       // - that has one range on it.
-      TAGDocument expected = store.createDocumentWrapper();
-      TAGMarkup m1 = store.createMarkupWrapper(expected, "lmnl");
+      TAGDocument expected = store.createDocument();
+      TAGMarkup m1 = store.createMarkup(expected, "lmnl");
       TAGAnnotation a1 = simpleAnnotation("a");
       TAGDocument annotationDocument = a1.getDocument();
-      TAGTextNode at1 = store.createTextNodeWrapper("This is the ");
-      TAGTextNode at2 = store.createTextNodeWrapper("annotation");
-      TAGMarkup am1 = store.createMarkupWrapper(annotationDocument, "type").addTextNode(at2);
-      TAGTextNode at3 = store.createTextNodeWrapper(" text");
+      TAGTextNode at1 = store.createTextNode("This is the ");
+      TAGTextNode at2 = store.createTextNode("annotation");
+      TAGMarkup am1 = store.createMarkup(annotationDocument, "type").addTextNode(at2);
+      TAGTextNode at3 = store.createTextNode(" text");
       annotationDocument//
           .addTextNode(at1)//
           .addTextNode(at2)//
@@ -314,7 +314,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       annotationDocument.associateTextNodeWithMarkup(at2, am1);
       m1.addAnnotation(a1);
 
-      TAGTextNode t1 = store.createTextNodeWrapper("This is the main text");
+      TAGTextNode t1 = store.createTextNode("This is the main text");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
@@ -342,14 +342,14 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocumentWrapper();
+      TAGDocument expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkupWrapper(expected, "range1");
+      TAGMarkup m1 = store.createMarkup(expected, "range1");
       TAGAnnotation a1 = simpleAnnotation("annotation1");
       TAGDocument annotationDocument = a1.getDocument();
-      TAGTextNode at1 = store.createTextNodeWrapper("");
-      TAGMarkup ar11 = store.createMarkupWrapper(annotationDocument, "ra11").addTextNode(at1);
-      TAGMarkup ar12 = store.createMarkupWrapper(annotationDocument, "ra12").addTextNode(at1);
+      TAGTextNode at1 = store.createTextNode("");
+      TAGMarkup ar11 = store.createMarkup(annotationDocument, "ra11").addTextNode(at1);
+      TAGMarkup ar12 = store.createMarkup(annotationDocument, "ra12").addTextNode(at1);
       annotationDocument//
           .addTextNode(at1)//
           .addMarkup(ar11)//
@@ -358,7 +358,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       annotationDocument.associateTextNodeWithMarkup(at1, ar11);
       annotationDocument.associateTextNodeWithMarkup(at1, ar12);
 
-      TAGTextNode t1 = store.createTextNodeWrapper("");
+      TAGTextNode t1 = store.createTextNode("");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
@@ -378,13 +378,13 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     store.runInTransaction(() -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocumentWrapper();
+      TAGDocument expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkupWrapper(expected, "range1");
+      TAGMarkup m1 = store.createMarkup(expected, "range1");
       TAGAnnotation a1 = simpleAnnotation("", "annotation text");
       m1.addAnnotation(a1);
 
-      TAGTextNode t1 = store.createTextNodeWrapper("bla");
+      TAGTextNode t1 = store.createTextNode("bla");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
@@ -404,10 +404,10 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       printTokens(input);
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocumentWrapper();
+      TAGDocument expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkupWrapper(expected, "r");
-      TAGTextNode t1 = store.createTextNodeWrapper("Splitting the .");
+      TAGMarkup m1 = store.createMarkup(expected, "r");
+      TAGTextNode t1 = store.createTextNode("Splitting the .");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
@@ -425,9 +425,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     printTokens(input);
     store.runInTransaction(() -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
-      TAGDocument expected = store.createDocumentWrapper();
-      TAGMarkup m1 = store.createMarkupWrapper(expected, "empty");
-      TAGTextNode t1 = store.createTextNodeWrapper("");
+      TAGDocument expected = store.createDocument();
+      TAGMarkup m1 = store.createMarkup(expected, "empty");
+      TAGTextNode t1 = store.createTextNode("");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
@@ -450,9 +450,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       // We expect a Document
       // - with one text node
       // - with one range on it
-      TAGDocument document = store.createDocumentWrapper();
-      TAGMarkup m1 = store.createMarkupWrapper(document, "foo");
-      TAGTextNode t1 = store.createTextNodeWrapper("FOOBAR");
+      TAGDocument document = store.createDocument();
+      TAGMarkup m1 = store.createMarkup(document, "foo");
+      TAGTextNode t1 = store.createTextNode("FOOBAR");
       m1.setOnlyTextNode(t1);
       document.setOnlyTextNode(t1);
       document.associateTextNodeWithMarkup(t1, m1);
@@ -529,13 +529,13 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   }
 
   private TAGAnnotation simpleAnnotation(String tag) {
-    return store.createAnnotationWrapper(tag);
+    return store.createAnnotation(tag);
   }
 
   private TAGAnnotation simpleAnnotation(String tag, String content) {
     TAGAnnotation a1 = simpleAnnotation(tag);
     TAGDocument annotationDocument = a1.getDocument();
-    TAGTextNode annotationText = store.createTextNodeWrapper(content);
+    TAGTextNode annotationText = store.createTextNode(content);
     annotationDocument.setOnlyTextNode(annotationText);
     return a1;
   }

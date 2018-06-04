@@ -107,8 +107,8 @@ public class TAGMLImporter {
     return visitor.getDocumentWrapper();
   }
 
-  private Long update(TAGDTO TAGDTO) {
-    return tagStore.persist(TAGDTO);
+  private Long update(TAGDTO tagdto) {
+    return tagStore.persist(tagdto);
   }
 
 }

@@ -49,7 +49,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   public TexMECSListener(TAGStore store) {
     this.store = store;
-    document = store.createDocumentWrapper();
+    document = store.createDocument();
   }
 
   public TAGDocument getDocument() {
@@ -71,7 +71,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitText(TextContext ctx) {
-    TAGTextNode tn = store.createTextNodeWrapper(ctx.getText());
+    TAGTextNode tn = store.createTextNode(ctx.getText());
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
   }
@@ -89,7 +89,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitSoleTag(SoleTagContext ctx) {
-    TAGTextNode tn = store.createTextNodeWrapper("");
+    TAGTextNode tn = store.createTextNode("");
     document.addTextNode(tn);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
@@ -126,7 +126,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
       TAGMarkup ref = identifiedMarkups.get(extendedTag);
       TAGMarkup markup = addMarkup(ref.getTag(), ctx.atts());
       ref.getTextNodeStream().forEach(tn -> {
-        TAGTextNode copy = store.createTextNodeWrapper(tn.getText());
+        TAGTextNode copy = store.createTextNode(tn.getText());
         document.addTextNode(copy);
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
@@ -171,7 +171,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
   }
 
   private TAGMarkup addMarkup(String extendedTag, AttsContext atts) {
-    TAGMarkup markup = store.createMarkupWrapper(document, extendedTag);
+    TAGMarkup markup = store.createMarkup(document, extendedTag);
     addAttributes(atts, markup);
     document.addMarkup(markup);
     if (markup.hasMarkupId()) {
@@ -191,7 +191,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
       String attrName = avs.NAME_O().getText();
       String quotedAttrValue = avs.STRING().getText();
       String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      TAGAnnotation annotation = store.createAnnotationWrapper(attrName, attrValue);
+      TAGAnnotation annotation = store.createAnnotation(attrName, attrValue);
       markup.addAnnotation(annotation);
     });
   }

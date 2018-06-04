@@ -247,7 +247,7 @@ public class TAGMLExporter {
       final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
-      TAGMarkup markup = store.getMarkupWrapper(markupId);
+      TAGMarkup markup = store.getMarkup(markupId);
       if (textNodesToHandle < markup.getTextNodeCount() - 1) {
         openTag = openTag.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX);
       }

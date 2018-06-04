@@ -134,12 +134,11 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       }
 
       private List<Long> getParentMarkupList(Long nodeId) {
-        List<Long> list = getIncomingEdges(nodeId).stream()
+        return getIncomingEdges(nodeId).stream()
             .filter(LayerEdge.class::isInstance)
             .map(LayerEdge.class::cast)
             .map(e -> getSource(e))
             .collect(toList());
-        return list;
       }
 
       @Override

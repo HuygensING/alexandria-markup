@@ -23,10 +23,6 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.*;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -132,7 +128,7 @@ public class LMNLImporter {
 
     TAGDocumentDTO currentAnnotationDocument() {
       Long value = annotationStack.peek().getDocumentId();
-      return tagStore.getDocument(value);
+      return tagStore.getDocumentDTO(value);
     }
 
     void closeAnnotation() {
@@ -250,7 +246,7 @@ public class LMNLImporter {
     lexer.addErrorListener(errorListener);
 
     ImporterContext context = new ImporterContext(lexer);
-    TAGDocument document = tagStore.createDocumentWrapper();
+    TAGDocument document = tagStore.createDocument();
     TAGDocumentDTO dto = document.getDocument();
     update(dto);
     context.pushDocumentContext(dto);
@@ -357,7 +353,7 @@ public class LMNLImporter {
 
   private void handleAnnotation(ImporterContext context) {
     String methodName = "handleAnnotation";
-    TAGAnnotationDTO annotation = tagStore.createAnnotation("");
+    TAGAnnotationDTO annotation = tagStore.createAnnotationDTO("");
     context.openAnnotation(annotation);
     boolean goOn = true;
     while (goOn) {
@@ -503,8 +499,8 @@ public class LMNLImporter {
     // ruleName, modeName);
   }
 
-  private static Long update(TAGDTO TAGDTO) {
-    return tagStore.persist(TAGDTO);
+  private static Long update(TAGDTO tagdto) {
+    return tagStore.persist(tagdto);
   }
 
 }

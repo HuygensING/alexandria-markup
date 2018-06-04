@@ -83,8 +83,8 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
         .collect(toSet());
   }
 
-  private TextNodeSketch toTextNodeSketch(final TAGTextNode TAGTextNode) {
-    return textNodeSketch(TAGTextNode.getText());
+  private TextNodeSketch toTextNodeSketch(final TAGTextNode textNode) {
+    return textNodeSketch(textNode.getText());
   }
 
 //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {

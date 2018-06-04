@@ -48,18 +48,18 @@ public class TAGMarkup {
     return markup.getTag();
   }
 
-  public TAGMarkup addTextNode(TAGTextNode TAGTextNode) {
-    markup.getTextNodeIds().add(TAGTextNode.getDbId());
+  public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
+    markup.getTextNodeIds().add(tagTextNode.getDbId());
     Long ownerId = markup.getDocumentId();
-    new TAGDocument(store, store.getDocument(ownerId))//
-        .associateTextNodeWithMarkup(TAGTextNode, this);
+    new TAGDocument(store, store.getDocumentDTO(ownerId))//
+        .associateTextNodeWithMarkup(tagTextNode, this);
     update();
     return this;
   }
 
-  public TAGMarkup setOnlyTextNode(TAGTextNode TAGTextNode) {
+  public TAGMarkup setOnlyTextNode(TAGTextNode tagTextNode) {
     markup.getTextNodeIds().clear();
-    addTextNode(TAGTextNode);
+    addTextNode(tagTextNode);
     return this;
   }
 
@@ -86,13 +86,13 @@ public class TAGMarkup {
 
   public Stream<TAGAnnotation> getAnnotationStream() {
     return markup.getAnnotationIds().stream()//
-        .map(store::getAnnotation)//
+        .map(store::getAnnotationDTO)//
         .map(annotation -> new TAGAnnotation(store, annotation));
   }
 
   public Stream<TAGTextNode> getTextNodeStream() {
     return markup.getTextNodeIds().stream()//
-        .map(store::getTextNode)//
+        .map(store::getTextNodeDTO)//
         .map(textNode -> new TAGTextNode(store, textNode));
   }
 
@@ -137,7 +137,7 @@ public class TAGMarkup {
 
   public Optional<TAGMarkup> getDominatedMarkup() {
     return markup.getDominatedMarkupId()
-        .map(store::getMarkup)
+        .map(store::getMarkupDTO)
         .map(m -> new TAGMarkup(store, m));
   }
 
@@ -151,7 +151,7 @@ public class TAGMarkup {
 
   public Optional<TAGMarkup> getDominatingMarkup() {
     return markup.getDominatingMarkupId()
-        .map(store::getMarkup)
+        .map(store::getMarkupDTO)
         .map(m -> new TAGMarkup(store, m));
 
   }

@@ -98,91 +98,91 @@ public class TAGStore implements AutoCloseable {
     }
   }
 
-  public Long persist(TAGDTO TAGDTO) {
-    checkNotNull(TAGDTO);
+  public Long persist(TAGDTO tagdto) {
+    checkNotNull(tagdto);
     assertInTransaction();
-    if (TAGDTO instanceof TAGDocumentDTO) {
-      da.documentById.put(tx, (TAGDocumentDTO) TAGDTO);
+    if (tagdto instanceof TAGDocumentDTO) {
+      da.documentById.put(tx, (TAGDocumentDTO) tagdto);
 
-    } else if (TAGDTO instanceof TAGTextNodeDTO) {
-      da.textNodeById.put(tx, (TAGTextNodeDTO) TAGDTO);
+    } else if (tagdto instanceof TAGTextNodeDTO) {
+      da.textNodeById.put(tx, (TAGTextNodeDTO) tagdto);
 
-    } else if (TAGDTO instanceof TAGMarkupDTO) {
-      da.markupById.put(tx, (TAGMarkupDTO) TAGDTO);
+    } else if (tagdto instanceof TAGMarkupDTO) {
+      da.markupById.put(tx, (TAGMarkupDTO) tagdto);
 
-    } else if (TAGDTO instanceof TAGAnnotationDTO) {
-      da.annotationById.put(tx, (TAGAnnotationDTO) TAGDTO);
+    } else if (tagdto instanceof TAGAnnotationDTO) {
+      da.annotationById.put(tx, (TAGAnnotationDTO) tagdto);
 
     } else {
-      throw new RuntimeException("unhandled class: " + TAGDTO.getClass());
+      throw new RuntimeException("unhandled class: " + tagdto.getClass());
     }
-    return TAGDTO.getDbId();
+    return tagdto.getDbId();
   }
 
-  public void remove(TAGDTO TAGDTO) {
+  public void remove(TAGDTO tagdto) {
     assertInTransaction();
-    if (TAGDTO instanceof TAGDocumentDTO) {
-      da.documentById.delete(tx, TAGDTO.getDbId());
+    if (tagdto instanceof TAGDocumentDTO) {
+      da.documentById.delete(tx, tagdto.getDbId());
 
-    } else if (TAGDTO instanceof TAGTextNodeDTO) {
-      da.textNodeById.delete(tx, TAGDTO.getDbId());
+    } else if (tagdto instanceof TAGTextNodeDTO) {
+      da.textNodeById.delete(tx, tagdto.getDbId());
 
-    } else if (TAGDTO instanceof TAGMarkupDTO) {
-      da.markupById.delete(tx, TAGDTO.getDbId());
+    } else if (tagdto instanceof TAGMarkupDTO) {
+      da.markupById.delete(tx, tagdto.getDbId());
 
-    } else if (TAGDTO instanceof TAGAnnotationDTO) {
-      da.annotationById.delete(tx, TAGDTO.getDbId());
+    } else if (tagdto instanceof TAGAnnotationDTO) {
+      da.annotationById.delete(tx, tagdto.getDbId());
 
     } else {
-      throw new RuntimeException("unhandled class: " + TAGDTO.getClass());
+      throw new RuntimeException("unhandled class: " + tagdto.getClass());
     }
   }
 
   // Document
-  public TAGDocumentDTO getDocument(Long documentId) {
+  public TAGDocumentDTO getDocumentDTO(Long documentId) {
     assertInTransaction();
     return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
-  public TAGDocument getDocumentWrapper(Long documentId) {
-    return new TAGDocument(this, getDocument(documentId));
+  public TAGDocument getDocument(Long documentId) {
+    return new TAGDocument(this, getDocumentDTO(documentId));
   }
 
-  public TAGDocument createDocumentWrapper() {
-    TAGDocumentDTO document = new TAGDocumentDTO();
-    persist(document);
-    return new TAGDocument(this, document);
+  public TAGDocument createDocument() {
+    TAGDocumentDTO documentDTO = new TAGDocumentDTO();
+    persist(documentDTO);
+    return new TAGDocument(this, documentDTO);
   }
 
   // TextNode
-  public TAGTextNodeDTO getTextNode(Long textNodeId) {
+  public TAGTextNodeDTO getTextNodeDTO(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(tx, textNodeId, LOCK_MODE);
   }
 
-  public TAGTextNode createTextNodeWrapper(String content) {
-    TAGTextNodeDTO textNode = new TAGTextNodeDTO(content);
-    persist(textNode);
-    return new TAGTextNode(this, textNode);
+  public TAGTextNode createTextNode(String content) {
+    TAGTextNodeDTO tagTextNodeDTO = new TAGTextNodeDTO(content);
+    persist(tagTextNodeDTO);
+    return new TAGTextNode(this, tagTextNodeDTO);
   }
 
-  public TAGTextNode createTextNodeWrapper(TAGTextNodeType type) {
-    TAGTextNodeDTO textNode = new TAGTextNodeDTO(type);
-    persist(textNode);
-    return new TAGTextNode(this, textNode);
+  public TAGTextNode createTextNode(TAGTextNodeType type) {
+    TAGTextNodeDTO tagTextNodeDTO = new TAGTextNodeDTO(type);
+    persist(tagTextNodeDTO);
+    return new TAGTextNode(this, tagTextNodeDTO);
   }
 
-  public TAGTextNode getTextNodeWrapper(Long textNodeId) {
-    return new TAGTextNode(this, getTextNode(textNodeId));
+  public TAGTextNode getTextNode(Long textNodeId) {
+    return new TAGTextNode(this, getTextNodeDTO(textNodeId));
   }
 
   // Markup
-  public TAGMarkupDTO getMarkup(Long markupId) {
+  public TAGMarkupDTO getMarkupDTO(Long markupId) {
     assertInTransaction();
     return da.markupById.get(tx, markupId, LOCK_MODE);
   }
 
-  public TAGMarkup createMarkupWrapper(TAGDocument document, String tagName) {
+  public TAGMarkup createMarkup(TAGDocument document, String tagName) {
     String tag;
     String suffix = null;
     String id = null;
@@ -208,25 +208,25 @@ public class TAGStore implements AutoCloseable {
       tag = tagName;
     }
 
-    TAGMarkupDTO markup = new TAGMarkupDTO(document.getDbId(), tag);
-    markup.setMarkupId(id);
-    markup.setSuffix(suffix);
-    persist(markup);
+    TAGMarkupDTO markupDTO = new TAGMarkupDTO(document.getDbId(), tag);
+    markupDTO.setMarkupId(id);
+    markupDTO.setSuffix(suffix);
+    persist(markupDTO);
     // document.addMarkup(markup);
-    return new TAGMarkup(this, markup);
+    return new TAGMarkup(this, markupDTO);
   }
 
-  public TAGMarkup getMarkupWrapper(Long markupId) {
-    return new TAGMarkup(this, getMarkup(markupId));
+  public TAGMarkup getMarkup(Long markupId) {
+    return new TAGMarkup(this, getMarkupDTO(markupId));
   }
 
   // Annotation
-  public TAGAnnotationDTO getAnnotation(Long annotationId) {
+  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
     assertInTransaction();
     return da.annotationById.get(tx, annotationId, LOCK_MODE);
   }
 
-  public TAGAnnotationDTO createAnnotation(String tag) {
+  public TAGAnnotationDTO createAnnotationDTO(String tag) {
     TAGDocumentDTO document = new TAGDocumentDTO();
     persist(document);
     TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
@@ -235,20 +235,20 @@ public class TAGStore implements AutoCloseable {
     return annotation;
   }
 
-  public TAGAnnotation createAnnotationWrapper(String tag) {
-    TAGAnnotationDTO annotation = createAnnotation(tag);
+  public TAGAnnotation createAnnotation(String tag) {
+    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
     return new TAGAnnotation(this, annotation);
   }
 
-  public TAGAnnotation createAnnotationWrapper(String tag, String value) {
-    TAGAnnotation TAGAnnotation = createAnnotationWrapper(tag);
-    TAGTextNode TAGTextNode = createTextNodeWrapper(value);
-    TAGAnnotation.getDocument().addTextNode(TAGTextNode);
-    return TAGAnnotation;
+  public TAGAnnotation createAnnotation(String tag, String value) {
+    TAGAnnotation tagAnnotation = createAnnotation(tag);
+    TAGTextNode tagTextNode = createTextNode(value);
+    tagAnnotation.getDocument().addTextNode(tagTextNode);
+    return tagAnnotation;
   }
 
-  public TAGAnnotation getAnnotationWrapper(Long annotationId) {
-    return new TAGAnnotation(this, getAnnotation(annotationId));
+  public TAGAnnotation getAnnotation(Long annotationId) {
+    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
   }
 
   // transaction

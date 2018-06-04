@@ -50,7 +50,7 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest{
     store.open();
 
     store.runInTransaction(() -> {
-      TAGDocumentDTO document = store.getDocument(documentId.get());
+      TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
       assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
     });
 

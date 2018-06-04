@@ -36,7 +36,7 @@ public class TAGAnnotation {
   }
 
   public TAGDocument getDocument() {
-    TAGDocumentDTO document = store.getDocument(annotation.getDocumentId());
+    TAGDocumentDTO document = store.getDocumentDTO(annotation.getDocumentId());
     return new TAGDocument(store, document);
   }
 
@@ -48,15 +48,15 @@ public class TAGAnnotation {
     return annotation.getTag();
   }
 
-  public TAGAnnotation addAnnotation(TAGAnnotation TAGAnnotation) {
-    annotation.getAnnotationIds().add(TAGAnnotation.getDbId());
+  public TAGAnnotation addAnnotation(TAGAnnotation tagAnnotation) {
+    annotation.getAnnotationIds().add(tagAnnotation.getDbId());
     update();
     return this;
   }
 
   public Stream<TAGAnnotation> getAnnotationStream() {
     return annotation.getAnnotationIds().stream()//
-        .map(store::getAnnotationWrapper);
+        .map(store::getAnnotation);
   }
 
   public TAGAnnotationDTO getAnnotation() {
