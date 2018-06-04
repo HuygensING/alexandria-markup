@@ -126,4 +126,7 @@ public class TAGDocumentDTO implements TAGDTO {
     modificationDate = new Date();
   }
 
+  public TextGraph geTextGraph() {
+    return textGraph;
+  }
 }

@@ -23,13 +23,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringUtils;
@@ -198,32 +194,23 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           : addMarkup(markupName, ctx.annotation(), ctx).setOptional(optional);
 
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
+      Set<String> layers = new HashSet<>();
       layerIds.forEach(layerId -> {
-//        if (!layerMap.containsKey(layerId)) {
-////          document.addLayer(layerId, markup);
-////          layerMap.put(layerId, document.getLayer(layerId));
-//        }
-//        LayerWrapper layer = layerMap.get(layerId);
-//        layer.layer.addDescendantMarkup();
+        if (layerId.equals("")) {
+          document.addLayer("", markup);
+          layers.add("");
 
+        } else if (layerId.contains("+")) {
+          String[] parts = layerId.split("\\+");
+          String newLayerId = parts[1];
+          document.addLayer(newLayerId, markup);
+          layers.add(newLayerId);
+
+        } else {
+          layers.add(layerId);
+        }
       });
-//      .forEach(li -> {
-//        if (li.equals("")) {
-//          document.addLayer("", markup);
-//        } else {
-//          if (li.contains("+")) {
-//            String[] parts = li.split("+");
-//            layers.add(parts[0]);
-//            String newLayerId = parts[1];
-//            document.addLayer(newLayerId, markup);
-//            layers.add(newLayerId);
-//          }
-//        }
-//      });
-//      if (layerIds.contains("") && !document.getLayerIds().contains("")) {
-//        document.addLayer("", markup);
-//      }
-      markup.addAllLayers(layerIds);
+      markup.addAllLayers(layers);
 
       if (markup != null) {
         SuffixContext suffix = markupNameContext.suffix();
@@ -237,6 +224,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
         });
 
         currentTextVariationState().addOpenMarkup(markup);
+        store.persist(markup.getDTO());
       }
     }
   }
@@ -506,10 +494,10 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     LayerInfoContext layerInfoContext = ctx.layerInfo();
     Set<String> layers = extractLayerInfo(layerInfoContext);
     TAGMarkup markup = null;
-    String foundLayerPrefix = layerInfoContext == null
+    String foundLayerSuffix = layerInfoContext == null
         ? ""
-        : extractLayerInfo(layerInfoContext).stream().sorted().collect(joining(",")) + TAGML.DIVIDER;
-    extendedMarkupName = foundLayerPrefix + extendedMarkupName;
+        : TAGML.DIVIDER + extractLayerInfo(layerInfoContext).stream().sorted().collect(joining(","));
+    extendedMarkupName = extendedMarkupName + foundLayerSuffix;
     for (String l : layers) {
       state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
       Deque<TAGMarkup> markupStack = state.openMarkup.get(l);
@@ -561,7 +549,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 
   private TAGMarkup removeFromMarkupStack(String extendedTag, Deque<TAGMarkup> markupStack) {
     final TAGMarkup expected = markupStack.peek();
-    if (expected.getExtendedTag().equals(extendedTag)) {
+    if (extendedTag.equals(expected.getExtendedTag())) {
       markupStack.pop();
       currentTextVariationState().removeOpenMarkup(expected);
       return expected;

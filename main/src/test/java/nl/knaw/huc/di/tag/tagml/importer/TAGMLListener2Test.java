@@ -90,7 +90,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   public void testOverlappingMarkupWithLayerInfo() {
     String input = "[tagml|+a,+b>" +
         "[a|a>a [b|b>b<a|a]<b|b]" +
-        "<tagml|a]";
+        "<tagml|a,b]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
     });
@@ -100,18 +100,18 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
   public void testLayerShouldBeHierarchical() {
     String input = "[tagml|+a,+b>" +
         "[page|b>" +
-        "[book|b>book title" +
+        "[book|a>book title" +
         "[chapter|a>chapter title" +
         "[para|a>paragraph text" +
         "<page|b]" +
         "<chapter|a]<book|a]" +
         "[! para should close before chapter !]<para|a]" +
-        "<tagml|a]";
+        "<tagml|a,b]";
 
-    String expectedSyntaxErrorMessage = "line 1:125 : Close tag <a|chapter] found, expected <a|para].\n" +
-        "line 1:136 : Close tag <a|book] found, expected <a|para].\n" +
-        "line 1:190 : Close tag <a|tagml] found, expected <a|chapter].\n" +
-        "Missing close tag(s) for: [a|chapter>, [a|book>, [a|tagml>";
+    String expectedSyntaxErrorMessage = "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" +
+        "line 1:106 : Close tag <book|a] found, expected <para|a].\n" +
+        "line 1:160 : Close tag <tagml|a,b] found, expected <chapter|a].\n" +
+        "Missing close tag(s) for: [chapter|a>, [book|a>, [tagml|a,b>";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
