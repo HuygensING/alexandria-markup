@@ -135,7 +135,7 @@ public class TAGMarkupDTO implements TAGDTO {
     return this;
   }
 
-  public TAGMarkupDTO addLayers(final String layer) {
+  public TAGMarkupDTO addLayer(final String layer) {
     this.layers.add(layer);
     return this;
   }

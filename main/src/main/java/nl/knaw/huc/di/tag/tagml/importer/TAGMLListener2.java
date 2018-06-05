@@ -157,7 +157,6 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       }
       previousTextNode = tn;
       document.addTextNode(tn);
-//      state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       logTextNode(tn);
     }
   }
@@ -207,6 +206,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           layers.add(newLayerId);
 
         } else {
+          document.addMarkupToLayer(markup, layerId);
           layers.add(layerId);
         }
       });
@@ -251,7 +251,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       logTextNode(tn);
 //      state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
-      linkTextToMarkup(tn, markup);
+      layers.forEach(layerName -> linkTextToMarkup(tn, markup, layerName));
     }
   }
 
@@ -323,7 +323,8 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
             document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
-            document.associateTextNodeWithMarkup(textNode, masterMarkup);
+            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkup(textNode, masterMarkup, layerName));
+
             textNodeIdsToAdd.add(textNode.getDbId());
           });
           masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
@@ -476,8 +477,8 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     });
   }
 
-  private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
-    document.associateTextNodeWithMarkup(tn, markup);
+  private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup, String layerName) {
+    document.associateTextNodeWithMarkup(tn, markup, layerName);
     markup.addTextNode(tn);
   }
 
@@ -510,6 +511,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
         );
         return null;
       }
+      document.closeMarkupInLayer(markup, l);
     }
 
     PrefixContext prefixNode = ctx.prefix();
@@ -575,7 +577,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -616,7 +618,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

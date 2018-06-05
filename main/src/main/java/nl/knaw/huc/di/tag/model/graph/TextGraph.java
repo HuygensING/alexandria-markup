@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag.model.graph;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.Edges;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import org.slf4j.Logger;
@@ -159,6 +160,10 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     });
   }
 
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layerName) {
+    return stream(new TextNodeIdIterator(markupId, layerName));
+  }
+
   class TextNodeIdChainIterator implements Iterator<Long> {
     Long next = firstTextNodeId;
 
@@ -176,6 +181,69 @@ public class TextGraph extends HyperGraph<Long, Edge> {
           .collect(toList());
       next = nextIds.isEmpty() ? null : nextIds.get(0);
       return currentNode;
+    }
+  }
+
+  class TextNodeIdIterator implements Iterator<Long> {
+    Deque<Long> markupToProcess = new ArrayDeque<>();
+    Deque<Long> textNodes = new ArrayDeque<>();
+    Optional<Long> nextTextNodeId;
+    Set<Long> textHandled = new HashSet<>();
+    private String layerName;
+
+    public TextNodeIdIterator(final Long markupId, final String layerName) {
+      this.layerName = layerName;
+      markupToProcess.push(markupId);
+      nextTextNodeId = calcNextTextNodeId();
+    }
+
+    private Optional<Long> calcNextTextNodeId() {
+      if (!textNodes.isEmpty()) {
+        return Optional.of(textNodes.pop());
+      } else {
+        if (markupToProcess.isEmpty()) {
+          return Optional.empty();
+        } else {
+          traverseMarkupTree();
+          return calcNextTextNodeId();
+        }
+      }
+    }
+
+    private void traverseMarkupTree() {
+      Long nextMarkupId = markupToProcess.pop();
+      List<Long> deeperMarkup = getOutgoingEdges(nextMarkupId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .filter(e -> e.hasType(EdgeType.hasMarkup))
+          .filter(e -> layerName.equals(e.getLayerName()))
+          .flatMap(e -> getTargets(e).stream())
+          .collect(toList());
+      if (!deeperMarkup.isEmpty()) {
+        deeperMarkup.forEach(m -> markupToProcess.add(m));
+      } else {
+        getOutgoingEdges(nextMarkupId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .filter(e -> e.hasType(EdgeType.hasText))
+            .filter(e -> layerName.equals(e.getLayerName()))
+            .flatMap(e -> getTargets(e).stream())
+            .filter(tn -> !textHandled.contains(tn))
+            .forEach(tn -> textNodes.add(tn));
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return nextTextNodeId.isPresent();
+    }
+
+    @Override
+    public Long next() {
+      Long nodeId = nextTextNodeId.get();
+      textHandled.add(nodeId);
+      nextTextNodeId = calcNextTextNodeId();
+      return nodeId;
     }
   }
 

@@ -23,13 +23,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringUtils;
@@ -283,7 +279,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
             document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
-            document.associateTextNodeWithMarkup(textNode, masterMarkup);
+            document.associateTextNodeWithMarkup(textNode, masterMarkup, "");
             textNodeIdsToAdd.add(textNode.getDbId());
           });
           masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
@@ -437,7 +433,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
-    document.associateTextNodeWithMarkup(tn, markup);
+    markup.getLayers()
+        .forEach(layerName -> document.associateTextNodeWithMarkup(tn, markup, layerName));
     markup.addTextNode(tn);
   }
 

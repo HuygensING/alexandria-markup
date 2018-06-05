@@ -19,8 +19,11 @@ package nl.knaw.huc.di.tag.model.graph;
  * limitations under the License.
  * #L%
  */
+
+import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 
+@Persistent
 public class TextChainEdge implements Edge {
   public String label() {
     return "next";

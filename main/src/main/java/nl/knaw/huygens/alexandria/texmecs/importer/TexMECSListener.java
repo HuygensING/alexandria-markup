@@ -20,11 +20,7 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
@@ -97,7 +93,8 @@ class TexMECSListener extends TexMECSParserBaseListener {
   }
 
   private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
-    document.associateTextNodeWithMarkup(tn, markup);
+    markup.getLayers()
+        .forEach(layerName -> document.associateTextNodeWithMarkup(tn, markup, layerName));
     markup.addTextNode(tn);
   }
 

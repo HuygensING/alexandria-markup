@@ -130,7 +130,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           .findFirst()
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-//      assertThat(markups).extracting("tag").containsExactly("root", "s");
+      assertThat(markups).extracting("tag").containsExactly("root", "s");
     });
   }
 

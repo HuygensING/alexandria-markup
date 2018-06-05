@@ -129,5 +129,17 @@ public class TextGraphTest {
 
     List<Long> markupForJonn = tg.getMarkupIdStreamForTextNodeId(textJonn).collect(toList());
     assertThat(markupForJonn).containsExactlyInAnyOrder(markupA, markupName1, markupTagml);
+
+    List<Long> textForDefault = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, "").collect(toList());
+    assertThat(textForDefault).containsExactly(textJonn, textSpace1, textCraves, textSpace2, textOreos);
+
+    List<Long> textForA = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, layerA).collect(toList());
+    assertThat(textForA).containsExactly(textJonn, textSpace1, textCraves);
+
+    List<Long> textForB = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, layerB).collect(toList());
+    assertThat(textForB).containsExactly(textCraves, textSpace2, textOreos);
+
+    List<Long> textForNER = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, layerNER).collect(toList());
+    assertThat(textForNER).containsExactly(textJonn, textOreos);
   }
 }

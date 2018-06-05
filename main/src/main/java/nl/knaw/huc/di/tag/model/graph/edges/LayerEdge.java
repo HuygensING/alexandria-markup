@@ -1,5 +1,7 @@
 package nl.knaw.huc.di.tag.model.graph.edges;
 
+import com.sleepycat.persist.model.Persistent;
+
 /*-
  * #%L
  * alexandria-markup
@@ -19,9 +21,15 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
+@Persistent
 public class LayerEdge implements Edge {
   private final EdgeType edgeType;
   private final String layerName;
+
+  public LayerEdge() {
+    edgeType = null;
+    layerName = "";
+  }
 
   public LayerEdge(final EdgeType edgeType, final String layerName) {
     this.edgeType = edgeType;
@@ -40,4 +48,7 @@ public class LayerEdge implements Edge {
     return edgeType.name() + ":" + layerName;
   }
 
+  public String getLayerName() {
+    return layerName;
+  }
 }

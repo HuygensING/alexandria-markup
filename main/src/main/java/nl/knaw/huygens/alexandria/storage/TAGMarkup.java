@@ -51,11 +51,12 @@ public class TAGMarkup {
     return markupDTO.getTag();
   }
 
+  @Deprecated
   public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
     markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
     Long ownerId = markupDTO.getDocumentId();
     new TAGDocument(store, store.getDocumentDTO(ownerId))//
-        .associateTextNodeWithMarkup(tagTextNode, this);
+        .associateTextNodeWithMarkup(tagTextNode, this, "");
     update();
     return this;
   }

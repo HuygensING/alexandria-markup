@@ -24,11 +24,11 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -70,7 +70,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       r1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(r1);
-      expected.associateTextNodeWithMarkup(t1, r1);
+      String layerName="";
+      expected.associateTextNodeWithMarkup(t1, r1, layerName);
 
       logTAGML(actual);
       assertThat(compareDocuments(expected, actual)).isTrue();
@@ -152,37 +153,38 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
           .addMarkup(s2)//
           .addMarkup(s3)//
           .addMarkup(l3);
-      expected.associateTextNodeWithMarkup(tn00, excerpt);
-      expected.associateTextNodeWithMarkup(tn01, excerpt);
-      expected.associateTextNodeWithMarkup(tn02, excerpt);
-      expected.associateTextNodeWithMarkup(tn03, excerpt);
-      expected.associateTextNodeWithMarkup(tn04, excerpt);
-      expected.associateTextNodeWithMarkup(tn05, excerpt);
-      expected.associateTextNodeWithMarkup(tn06, excerpt);
-      expected.associateTextNodeWithMarkup(tn07, excerpt);
-      expected.associateTextNodeWithMarkup(tn08, excerpt);
-      expected.associateTextNodeWithMarkup(tn09, excerpt);
-      expected.associateTextNodeWithMarkup(tn10, excerpt);
+      String layerName = "";
+      expected.associateTextNodeWithMarkup(tn00, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn01, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn02, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn03, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn04, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn05, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn06, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn07, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn08, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn09, excerpt, layerName);
+      expected.associateTextNodeWithMarkup(tn10, excerpt, layerName);
 
-      expected.associateTextNodeWithMarkup(tn01, s1);
-      expected.associateTextNodeWithMarkup(tn02, s1);
-      expected.associateTextNodeWithMarkup(tn03, s1);
+      expected.associateTextNodeWithMarkup(tn01, s1, layerName);
+      expected.associateTextNodeWithMarkup(tn02, s1, layerName);
+      expected.associateTextNodeWithMarkup(tn03, s1, layerName);
 
-      expected.associateTextNodeWithMarkup(tn05, s2);
+      expected.associateTextNodeWithMarkup(tn05, s2, layerName);
 
-      expected.associateTextNodeWithMarkup(tn07, s3);
-      expected.associateTextNodeWithMarkup(tn08, s3);
-      expected.associateTextNodeWithMarkup(tn09, s3);
+      expected.associateTextNodeWithMarkup(tn07, s3, layerName);
+      expected.associateTextNodeWithMarkup(tn08, s3, layerName);
+      expected.associateTextNodeWithMarkup(tn09, s3, layerName);
 
-      expected.associateTextNodeWithMarkup(tn01, l1);
+      expected.associateTextNodeWithMarkup(tn01, l1, layerName);
 
-      expected.associateTextNodeWithMarkup(tn03, l2);
-      expected.associateTextNodeWithMarkup(tn04, l2);
-      expected.associateTextNodeWithMarkup(tn05, l2);
-      expected.associateTextNodeWithMarkup(tn06, l2);
-      expected.associateTextNodeWithMarkup(tn07, l2);
+      expected.associateTextNodeWithMarkup(tn03, l2, layerName);
+      expected.associateTextNodeWithMarkup(tn04, l2, layerName);
+      expected.associateTextNodeWithMarkup(tn05, l2, layerName);
+      expected.associateTextNodeWithMarkup(tn06, l2, layerName);
+      expected.associateTextNodeWithMarkup(tn07, l2, layerName);
 
-      expected.associateTextNodeWithMarkup(tn09, l3);
+      expected.associateTextNodeWithMarkup(tn09, l3, layerName);
 
       assertActualMatchesExpected(actual, expected);
 
@@ -311,14 +313,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
           .addTextNode(at2)//
           .addTextNode(at3)//
           .addMarkup(am1);
-      annotationDocument.associateTextNodeWithMarkup(at2, am1);
+      String layerName = "";
+      annotationDocument.associateTextNodeWithMarkup(at2, am1, layerName);
       m1.addAnnotation(a1);
 
       TAGTextNode t1 = store.createTextNode("This is the main text");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1, m1);
+      expected.associateTextNodeWithMarkup(t1, m1, layerName);
 
       logTAGML(actual);
       compareTAGML(expected, actual);
@@ -355,14 +358,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
           .addMarkup(ar11)//
           .addMarkup(ar12);
       m1.addAnnotation(a1);
-      annotationDocument.associateTextNodeWithMarkup(at1, ar11);
-      annotationDocument.associateTextNodeWithMarkup(at1, ar12);
+      String layerName = "";
+      annotationDocument.associateTextNodeWithMarkup(at1, ar11, layerName);
+      annotationDocument.associateTextNodeWithMarkup(at1, ar12, layerName);
 
       TAGTextNode t1 = store.createTextNode("");
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1, m1);
+      expected.associateTextNodeWithMarkup(t1, m1, layerName);
 
       logTAGML(actual);
       compareTAGML(expected, actual);
@@ -388,7 +392,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1, m1);
+      String layerName="";
+      expected.associateTextNodeWithMarkup(t1, m1, layerName);
 
       logTAGML(actual);
       compareTAGML(expected, actual);
@@ -411,7 +416,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1, m1);
+
+      String layerName="";
+      expected.associateTextNodeWithMarkup(t1, m1, layerName);
 
       logTAGML(actual);
       compareTAGML(expected, actual);
@@ -431,7 +438,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       m1.setOnlyTextNode(t1);
       expected.setOnlyTextNode(t1);
       expected.addMarkup(m1);
-      expected.associateTextNodeWithMarkup(t1, m1);
+      String layerName="";
+      expected.associateTextNodeWithMarkup(t1, m1, layerName);
 
       logTAGML(actual);
       compareTAGML(expected, actual);
@@ -455,7 +463,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGTextNode t1 = store.createTextNode("FOOBAR");
       m1.setOnlyTextNode(t1);
       document.setOnlyTextNode(t1);
-      document.associateTextNodeWithMarkup(t1, m1);
+      String layerName="";
+      document.associateTextNodeWithMarkup(t1, m1, layerName);
       document.addMarkup(m1);
       logTAGML(actual);
       compareTAGML(document, actual);
