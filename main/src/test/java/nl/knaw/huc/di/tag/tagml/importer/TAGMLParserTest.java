@@ -55,7 +55,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasTextNodesMatching(
           textNodeSketch("simple text")
       );
-//      assertThat(documentWrapper.getLayerIds()).containsExactly("");
+      assertThat(document.getLayerNames()).containsExactly("");
     });
   }
 
@@ -73,7 +73,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("simple text"),
           textNodeSketch("epic epilog")
       );
-//      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
     });
   }
 
@@ -95,7 +95,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("― "),
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
-//      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
     });
   }
 
@@ -120,7 +120,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("― "),
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
-//      assertThat(documentWrapper.getLayerIds()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
     });
   }
 

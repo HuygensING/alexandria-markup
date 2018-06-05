@@ -89,7 +89,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
 //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
 //    isNotNull();
-//    List<String> actualLayerIds = actual.getLayerIds();
+//    List<String> actualLayerIds = actual.getLayerNames();
 //    return myself;
 //  }
 //

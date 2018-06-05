@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class TAGDocument {
@@ -179,6 +180,10 @@ public class TAGDocument {
   }
 
   public void addLayer(final String layerName, final TAGMarkup rootMarkup) {
-    documentDTO.geTextGraph().setLayerRootMarkup(layerName, rootMarkup.getDbId());
+    documentDTO.getTextGraph().setLayerRootMarkup(layerName, rootMarkup.getDbId());
+  }
+
+  public Set<String> getLayerNames() {
+    return documentDTO.getTextGraph().getLayerNames();
   }
 }
