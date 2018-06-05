@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,6 +37,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 
@@ -121,6 +125,12 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
       assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
+      TAGTextNode pleaded = document.getTextNodeStream()
+          .filter(tn -> tn.getText().equals("pleaded"))
+          .findFirst()
+          .get();
+      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
+//      assertThat(markups).extracting("tag").containsExactly("root", "s");
     });
   }
 
