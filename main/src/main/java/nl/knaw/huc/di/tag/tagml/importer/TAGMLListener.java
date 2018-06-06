@@ -206,8 +206,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           layers.add(newLayerId);
 
         } else {
-          document.addMarkupToLayer(markup, layerId);
-          layers.add(layerId);
+          if (state.openMarkup.get(layerId).isEmpty()) {
+            String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
+            errorListener.addBreakingError("%s %s cannot be used here, since the root markup of this layer has closed already.", errorPrefix(ctx), layer);
+          } else {
+            document.addMarkupToLayer(markup, layerId);
+            layers.add(layerId);
+          }
         }
       });
       markup.addAllLayers(layers);
@@ -290,7 +295,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
-    if (errorListener.hasErrors()) {
+    if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
       return;
     }
     mergeNewOpenMarkup(ctx);

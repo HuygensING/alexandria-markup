@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
@@ -96,7 +97,11 @@ public class TAGMLImporter {
     ParseTree parseTree = parser.document();
     LOG.info("parsetree: {}", parseTree.toStringTree(parser));
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
-    ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    try {
+      ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    }catch (TAGMLBreakingError e){
+
+    }
     return listener.getDocument();
   }
 

@@ -166,10 +166,11 @@ public class TAGDocument {
   }
 
   public void addMarkupToLayer(TAGMarkup markup, String layerName) {
-    Long parentMarkupId = openMarkupStackForLayer.get(layerName).peek().getDbId();
+    Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(layerName);
+    Long parentMarkupId = openMarkupStack.peek().getDbId();
     Long childMarkupId = markup.getDbId();
     documentDTO.textGraph.addChildMarkup(parentMarkupId, layerName, childMarkupId);
-    openMarkupStackForLayer.get(layerName).push(markup);
+    openMarkupStack.push(markup);
   }
 
   public void closeMarkupInLayer(TAGMarkup markup, String layerName) {
