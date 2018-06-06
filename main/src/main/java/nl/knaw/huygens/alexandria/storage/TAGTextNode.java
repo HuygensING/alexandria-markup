@@ -25,7 +25,6 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
@@ -51,34 +50,34 @@ public class TAGTextNode {
     return textNode;
   }
 
-  public TAGTextNode addPreviousTextNode(TAGTextNode previousTextNode) {
-    textNode.addPrevTextNodeId(previousTextNode.getDbId());
-    if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
-      previousTextNode.addNextTextNode(this);
-    }
-    update();
-    return this;
-  }
-
-  public void addNextTextNode(final TAGTextNode nextTextNode) {
-    Long id = nextTextNode.getDbId();
-    textNode.addNextTextNodeId(id);
-    update();
-  }
-
-  public List<TAGTextNode> getNextTextNodes() {
-    return textNode.getNextTextNodeIds()
-        .stream()
-        .map(store::getTextNode)
-        .collect(toList());
-  }
-
-  public List<TAGTextNode> getPrevTextNodes() {
-    return textNode.getPrevTextNodeIds()
-        .stream()
-        .map(store::getTextNode)
-        .collect(toList());
-  }
+//  public TAGTextNode addPreviousTextNode(TAGTextNode previousTextNode) {
+//    textNode.addPrevTextNodeId(previousTextNode.getDbId());
+//    if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
+//      previousTextNode.addNextTextNode(this);
+//    }
+//    update();
+//    return this;
+//  }
+//
+//  public void addNextTextNode(final TAGTextNode nextTextNode) {
+//    Long id = nextTextNode.getDbId();
+//    textNode.addNextTextNodeId(id);
+//    update();
+//  }
+//
+//  public List<TAGTextNode> getNextTextNodes() {
+//    return textNode.getNextTextNodeIds()
+//        .stream()
+//        .map(store::getTextNode)
+//        .collect(toList());
+//  }
+//
+//  public List<TAGTextNode> getPrevTextNodes() {
+//    return textNode.getPrevTextNodeIds()
+//        .stream()
+//        .map(store::getTextNode)
+//        .collect(toList());
+//  }
 
   public boolean isDivergence() {
     return divergence.equals(textNode.getType());
@@ -86,10 +85,6 @@ public class TAGTextNode {
 
   public boolean isConvergence() {
     return convergence.equals(textNode.getType());
-  }
-
-  private void update() {
-    store.persist(textNode);
   }
 
   @Override
@@ -113,5 +108,31 @@ public class TAGTextNode {
       return prefix + TAGML.CONVERGENCE;
     }
     return prefix + getText();
+  }
+
+  private void update() {
+    store.persist(textNode);
+  }
+
+  // TODO: refactor links to these dummy methods
+  @Deprecated
+  public List<TAGTextNode> getNextTextNodes() {
+    return null;
+  }
+
+  @Deprecated
+  public void addNextTextNode(final TAGTextNode tn) {
+
+  }
+
+  @Deprecated
+  public TAGTextNode addPreviousTextNode(final TAGTextNode n) {
+    return this;
+
+  }
+
+  @Deprecated
+  public List<TAGTextNode> getPrevTextNodes() {
+    return null;
   }
 }

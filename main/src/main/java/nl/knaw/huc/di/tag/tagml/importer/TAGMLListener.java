@@ -278,7 +278,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           List<Long> textNodeIdsToAdd = new ArrayList<>();
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
-            document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
+            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, "");
             document.associateTextNodeWithMarkup(textNode, masterMarkup, "");
             textNodeIdsToAdd.add(textNode.getDbId());
           });

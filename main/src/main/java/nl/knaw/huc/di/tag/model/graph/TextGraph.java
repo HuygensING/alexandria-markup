@@ -63,17 +63,48 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     if (firstTextNodeId == null) {
       firstTextNodeId = textNodeId;
     } else {
-      TextChainEdge edge = Edges.textChainEdge();
-      addDirectedHyperEdge(edge, edge.label(), lastTextNodeId, textNodeId);
+      linkTextNodes(lastTextNodeId, textNodeId);
     }
     lastTextNodeId = textNodeId;
     return this;
   }
 
-  public TextGraph linkMarkupToTextNode(final Long markupId, final String layerName, final Long textNodeId) {
-    final LayerEdge edge = Edges.markupToText(layerName);
-    addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
+  public TextGraph linkMarkupToTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
+    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
+    if (existingEdges.isEmpty()) {
+      final LayerEdge edge = Edges.markupToText(layerName);
+      addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
+
+    } else if (existingEdges.size() > 1) {
+      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
+
+    } else {
+      final LayerEdge existingEdge = existingEdges.get(0);
+      addTargetsToHyperEdge(existingEdge, textNodeId);
+    }
     return this;
+  }
+
+  private List<LayerEdge> existingMarkupToTextNodeEdgesForMarkupAndLayer(final Long markupId, final String layerName) {
+    return getOutgoingEdges(markupId).stream()
+        .filter(LayerEdge.class::isInstance)
+        .map(LayerEdge.class::cast)
+        .filter(e -> e.hasLayer(layerName))
+        .collect(toList());
+  }
+
+  public void unlinkMarkupFromTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
+    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
+    if (existingEdges.isEmpty()) {
+      throw new RuntimeException("No edge found to unlink!");
+
+    } else if (existingEdges.size() > 1) {
+      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
+
+    } else {
+      final LayerEdge existingEdge = existingEdges.get(0);
+      removeTargetsFromHyperEdge(existingEdge, textNodeId);
+    }
   }
 
   public Stream<Long> getTextNodeIdStream() {
@@ -162,6 +193,19 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layerName) {
     return stream(new TextNodeIdIterator(markupId, layerName));
+  }
+
+  public void setFirstTextNodeId(final Long firstTextNodeId) {
+    this.firstTextNodeId = firstTextNodeId;
+  }
+
+  public Long getFirstTextNodeId() {
+    return this.firstTextNodeId;
+  }
+
+  public void linkTextNodes(final Long textNode1, final Long textNode2) {
+    TextChainEdge edge = Edges.textChainEdge();
+    addDirectedHyperEdge(edge, edge.label(), textNode1, textNode2);
   }
 
   class TextNodeIdChainIterator implements Iterator<Long> {

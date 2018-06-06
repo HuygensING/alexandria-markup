@@ -74,7 +74,7 @@ public class LMNLImporter {
           .findFirst();
       if (findFirst.isPresent()) {
         TAGMarkup markup = findFirst.get();
-        if (!markup.hasTextNodes()) {
+        if (!document.markupHasTextNodes(markup)) {
           // every markup should have at least one textNode
           TAGTextNodeDTO emptyTextNode = new TAGTextNodeDTO("");
           update(emptyTextNode);
@@ -102,8 +102,8 @@ public class LMNLImporter {
     void addTextNode(TAGTextNodeDTO textNode) {
       openMarkupDeque.descendingIterator()//
           .forEachRemaining(m -> {
-            m.addTextNode(textNode);
-            document.associateTextWithMarkup(textNode, m);
+//            m.addTextNode(textNode);
+            document.associateTextWithMarkupForLayer(textNode, m, "");
           });
       if (!document.hasTextNodes()) {
         document.setFirstTextNodeId(textNode.getDbId());

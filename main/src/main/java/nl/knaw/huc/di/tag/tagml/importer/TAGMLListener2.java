@@ -152,10 +152,10 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {
       TAGTextNode tn = store.createTextNode(text);
-      if (previousTextNode != null) {
-        tn.addPreviousTextNode(previousTextNode);
-      }
-      previousTextNode = tn;
+//      if (previousTextNode != null) {
+//        tn.addPreviousTextNode(previousTextNode);
+//      }
+//      previousTextNode = tn;
       document.addTextNode(tn);
       logTextNode(tn);
     }
@@ -260,7 +260,8 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 //    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     TAGTextNode tn = store.createTextNode(divergence);
     if (previousTextNode != null) {
-      tn.addPreviousTextNode(previousTextNode);
+      document.linkTextNodes(previousTextNode,tn);
+//      tn.addPreviousTextNode(previousTextNode);
     }
     previousTextNode = tn;
     document.addTextNode(tn);
@@ -322,7 +323,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
           List<Long> textNodeIdsToAdd = new ArrayList<>();
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
-            document.disAssociateTextNodeWithMarkup(textNode, otherMarkup);
+            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, "");
             masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkup(textNode, masterMarkup, layerName));
 
             textNodeIdsToAdd.add(textNode.getDbId());

@@ -22,12 +22,13 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
 import com.sleepycat.persist.model.SecondaryKey;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
+import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
 
 @Entity(version = 1)
 public class TAGAnnotationDTO implements TAGDTO {
@@ -65,6 +66,14 @@ public class TAGAnnotationDTO implements TAGDTO {
     return tag;
   }
 
+  public void setDocumentId(long documentId) {
+    this.documentId = documentId;
+  }
+
+  public Long getDocumentId() {
+    return documentId;
+  }
+
   public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
     annotationIds.add(annotation.getDbId());
     return this;
@@ -72,14 +81,6 @@ public class TAGAnnotationDTO implements TAGDTO {
 
   public List<Long> getAnnotationIds() {
     return annotationIds;
-  }
-
-  public void setDocumentId(long documentId) {
-    this.documentId = documentId;
-  }
-
-  public Long getDocumentId() {
-    return documentId;
   }
 
 }

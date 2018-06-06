@@ -27,13 +27,12 @@ import java.util.*;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
-  @PrimaryKey(sequence = "textrange_pk_sequence")
+  @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 
   private String tag;
   private String markupId;
   private List<Long> annotationIds = new ArrayList<>();
-  private List<Long> textNodeIds = new ArrayList<>();
   private long documentId;
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
@@ -47,13 +46,12 @@ public class TAGMarkupDTO implements TAGDTO {
   private TAGMarkupDTO() {
   }
 
-  public TAGMarkupDTO(long documentId, String tagName) {
-    this.documentId = documentId;
-    this.tag = tagName;
+  public TAGMarkupDTO(TAGDocumentDTO document, String tagName) {
+    this(document.getDbId(), tagName);
   }
 
-  public TAGMarkupDTO(TAGDocumentDTO document, String tagName) {
-    this.documentId = document.getDbId();
+  public TAGMarkupDTO(Long documentId, String tagName) {
+    this.documentId = documentId;
     this.tag = tagName;
   }
 
@@ -73,24 +71,12 @@ public class TAGMarkupDTO implements TAGDTO {
     this.tag = tag;
   }
 
-  public List<Long> getAnnotationIds() {
-    return annotationIds;
-  }
-
   public void setAnnotationIds(List<Long> annotationIds) {
     this.annotationIds = annotationIds;
   }
 
-  public List<Long> getTextNodeIds() {
-    return textNodeIds;
-  }
-
-  public void setTextNodeIds(List<Long> textNodeIds) {
-    this.textNodeIds = textNodeIds;
-  }
-
-  public void addTextNode(TAGTextNodeDTO textNode) {
-    textNodeIds.add(textNode.getDbId());
+  public List<Long> getAnnotationIds() {
+    return annotationIds;
   }
 
   public TAGMarkupDTO addAnnotation(TAGAnnotationDTO annotation) {
@@ -182,7 +168,9 @@ public class TAGMarkupDTO implements TAGDTO {
         && getDbId().equals(((TAGMarkupDTO) other).getDbId());
   }
 
-  public boolean hasTextNodes() {
-    return !textNodeIds.isEmpty();
+  @Deprecated
+  public List<Long> getTextNodeIds() {
+    // TODO: remove dependency on this method
+    return null;
   }
 }

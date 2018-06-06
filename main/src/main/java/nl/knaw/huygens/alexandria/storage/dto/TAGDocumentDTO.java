@@ -24,8 +24,12 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
@@ -41,12 +45,9 @@ public class TAGDocumentDTO implements TAGDTO {
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkupDTO.class)
   private List<Long> markupIds = new ArrayList<>();
 
-  private final Map<Long, Set<Long>> textNodeIdToMarkupIds = new LinkedHashMap<>();
-
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
-  private Long firstTextNodeId;
-  private TextGraph textGraph = new TextGraph();
+  public TextGraph textGraph = new TextGraph();
 
   public TAGDocumentDTO() {
   }
@@ -55,72 +56,32 @@ public class TAGDocumentDTO implements TAGDTO {
     return id;
   }
 
-  public List<Long> getTextNodeIds() {
-    return textNodeIds;
-  }
-
   public void setTextNodeIds(List<Long> textNodeIds) {
     this.textNodeIds = textNodeIds;
-  }
-
-  public List<Long> getMarkupIds() {
-    return markupIds;
-  }
-
-  public void setMarkupIds(List<Long> markupIds) {
-    this.markupIds = markupIds;
   }
 
   public boolean hasTextNodes() {
     return !getTextNodeIds().isEmpty();
   }
 
-  public void setFirstTextNodeId(final Long firstTextNodeId) {
-    this.firstTextNodeId = firstTextNodeId;
+  public List<Long> getTextNodeIds() {
+    return textNodeIds;
   }
 
-  public Long getFirstTextNodeId() {
-    return firstTextNodeId;
+  public void setMarkupIds(List<Long> markupIds) {
+    this.markupIds = markupIds;
   }
 
-  public Map<Long, Set<Long>> getTextNodeIdToMarkupIds() {
-    return textNodeIdToMarkupIds;
-  }
-
-  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
-    int textNodeSize = textNodeIds.size();
-    return textNodeSize > 2 //
-        && getTextNodeIdsForMarkupId(markup.getDbId()).size() >= textNodeSize / 2d;
-  }
-
-  private List<Long> getTextNodeIdsForMarkupId(final Long dbId) {
-//    textGraph.getOutgoingEdges(dbId).stream().filter(e->)
-    return null;
-  }
-
-  public Set<Long> getMarkupIdsForTextNodeId(Long textNodeId) {
-    Set<Long> markups = textNodeIdToMarkupIds.get(textNodeId);
-    return markups == null ? new LinkedHashSet<>() : markups;
-  }
-
-  public void addTextNode(TAGTextNodeDTO textNode) {
-    textNodeIds.add(textNode.getDbId());
-  }
-
-  public void associateTextWithMarkup(TAGTextNodeDTO textNode, TAGMarkupDTO markup) {
-    textNodeIdToMarkupIds.computeIfAbsent(textNode.getDbId(), f -> new LinkedHashSet<>()).add(markup.getDbId());
-  }
-
-  public Date getCreationDate() {
-    return creationDate;
+  public List<Long> getMarkupIds() {
+    return markupIds;
   }
 
   public void setCreationDate(final Date creationDate) {
     this.creationDate = creationDate;
   }
 
-  public Date getModificationDate() {
-    return modificationDate;
+  public Date getCreationDate() {
+    return creationDate;
   }
 
   public void setModificationDate(final Date modificationDate) {
@@ -131,8 +92,42 @@ public class TAGDocumentDTO implements TAGDTO {
     modificationDate = new Date();
   }
 
-  public TextGraph getTextGraph() {
-    return textGraph;
+  public Date getModificationDate() {
+    return modificationDate;
   }
 
+  public void setFirstTextNodeId(final Long firstTextNodeId) {
+    textGraph.setFirstTextNodeId(firstTextNodeId);
+  }
+
+  public Long getFirstTextNodeId() {
+    return textGraph.getFirstTextNodeId();
+  }
+
+  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
+    int textNodeSize = textNodeIds.size();
+    return textNodeSize > 2 //
+        && getTextNodeIdStreamForMarkupId(markup.getDbId(), "").count() >= textNodeSize / 2d;
+  }
+
+  private Stream<Long> getTextNodeIdStreamForMarkupId(final Long markupId, final String layerName) {
+    return textGraph.getTextNodeIdStreamForMarkupIdInLayer(markupId, layerName);
+  }
+
+  public Stream<Long> getMarkupIdsForTextNodeId(Long textNodeId) {
+    return textGraph.getMarkupIdStreamForTextNodeId(textNodeId);
+  }
+
+  public void addTextNode(TAGTextNodeDTO textNode) {
+    textNodeIds.add(textNode.getDbId());
+  }
+
+  public void associateTextWithMarkupForLayer(TAGTextNodeDTO textNode, TAGMarkupDTO markup, final String layerName) {
+    textGraph.linkMarkupToTextNodeForLayer(markup.getDbId(), textNode.getDbId(), layerName);
+  }
+
+  public boolean markupHasTextNodes(final TAGMarkup markup) {
+    // TODO: layers
+    return getTextNodeIdStreamForMarkupId(markup.getDbId(), "").findAny().isPresent();
+  }
 }

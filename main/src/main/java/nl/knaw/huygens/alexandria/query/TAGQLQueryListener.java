@@ -26,6 +26,7 @@ import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -46,6 +47,11 @@ class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
   private final List<TAGQLStatement> statements = new ArrayList<>();
+  private TAGDocument document;
+
+  TAGQLQueryListener(TAGDocument document) {
+    this.document = document;
+  }
 
   public List<TAGQLStatement> getStatements() {
     return statements;
@@ -53,7 +59,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
   private String toText(TAGMarkup markup) {
     StringBuilder textBuilder = new StringBuilder();
-    markup.getTextNodeStream().forEach(textNode -> textBuilder.append(textNode.getText()));
+    document.getTextNodeStreamForMarkup(markup)
+        .forEach(textNode -> textBuilder.append(textNode.getText()));
     return textBuilder.toString();
   }
 
@@ -209,6 +216,5 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     AnnotationIdentifierContext annotationIdentifierContext = annotationValuePartContext.annotationIdentifier();
     return stringValue(annotationIdentifierContext);
   }
-
 
 }

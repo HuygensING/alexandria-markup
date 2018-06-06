@@ -116,6 +116,21 @@ public class HyperGraph<N, H> {
     }
   }
 
+  @SafeVarargs
+  protected final void removeTargetsFromHyperEdge(H edge, N... targets) {
+    if (!targetNodes.containsKey(edge)) {
+      throw new RuntimeException("unknown hyperedge " + edge);
+    }
+    Collection<N> collection = targetNodes.get(edge);
+    collection.removeAll(asList(targets));
+    for (N target : targets) {
+      incomingEdges.get(target).remove(edge);
+    }
+    if (collection.isEmpty()) {
+      removeHyperEdge(edge);
+    }
+  }
+
   public Collection<N> getTargets(H e) {
     return targetNodes.get(e);
   }
@@ -140,4 +155,10 @@ public class HyperGraph<N, H> {
     return nodes.contains(node);
   }
 
+  private void removeHyperEdge(final H edge) {
+    N sourceNode = this.sourceNode.get(edge);
+    outgoingEdges.get(sourceNode).remove(edge);
+    targetNodes.remove(edge);
+    edgeLabels.remove(edge);
+  }
 }

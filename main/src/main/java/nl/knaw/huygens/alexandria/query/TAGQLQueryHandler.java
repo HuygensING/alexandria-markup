@@ -52,7 +52,7 @@ public class TAGQLQueryHandler {
     tagqlParser.addErrorListener(errorListener);
     ParseTree parseTree = tagqlParser.query();
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TAGQLQueryListener listener = new TAGQLQueryListener();
+    TAGQLQueryListener listener = new TAGQLQueryListener(document);
     parseTreeWalker.walk(listener, parseTree);
     List<TAGQLStatement> statements = listener.getStatements();
 

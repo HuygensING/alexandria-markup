@@ -24,22 +24,16 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import nl.knaw.huygens.alexandria.storage.TAGTextNodeType;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.*;
+import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.plaintext;
 
 @Entity(version = 2)
 public class TAGTextNodeDTO implements TAGDTO {
-  @PrimaryKey(sequence = "textnode_pk_sequence")
+  @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long dbId;
 
   private TAGTextNodeType type;
 
   private String text;
-
-  private List<Long> prevTextNodeIds = new ArrayList<>();
-  private List<Long> nextTextNodeIds = new ArrayList<>();
 
   private TAGTextNodeDTO() {
   }
@@ -75,35 +69,13 @@ public class TAGTextNodeDTO implements TAGDTO {
     return text;
   }
 
-  // link to previous nodes
-  public void setPrevTextNodeIds(final List<Long> prevTextNodeIds) {
-    this.prevTextNodeIds = prevTextNodeIds;
+  @Deprecated
+  public Object getPrevTextNodeIds() {
+    return null;
   }
 
-  public void addPrevTextNodeId(final Long prevTextNodeId) {
-    if (!convergence.equals(type) && !prevTextNodeIds.isEmpty()) {
-      throw new RuntimeException(type + " nodes may have at most 1 prevTextNode.");
-    }
-    this.prevTextNodeIds.add(prevTextNodeId);
-  }
-
-  public List<Long> getPrevTextNodeIds() {
-    return prevTextNodeIds;
-  }
-
-  // link to next nodes
-  public void setNextTextNodeIds(final List<Long> nextTextNodeIds) {
-    this.nextTextNodeIds = nextTextNodeIds;
-  }
-
-  public void addNextTextNodeId(final Long nextTextNodeId) {
-    if (!divergence.equals(type) && !this.nextTextNodeIds.isEmpty()) {
-      throw new RuntimeException(type + " nodes may have at most 1 nextTextNode.");
-    }
-    this.nextTextNodeIds.add(nextTextNodeId);
-  }
-
-  public List<Long> getNextTextNodeIds() {
-    return nextTextNodeIds;
+  @Deprecated
+  public Object getNextTextNodeIds() {
+    return null;
   }
 }

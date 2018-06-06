@@ -333,21 +333,21 @@ public class LaTeXExporter {
     // AtomicInteger markupCounter = new AtomicInteger(0);
     latexBuilder.append("\n    % Markups");
     Map<TAGMarkup, Integer> layerIndex = calculateLayerIndex(document.getMarkupStream().collect(toList()), textNodeIndices);
-    document.getMarkupStream().forEach(tr -> {
-      int rangeLayerIndex = layerIndex.get(tr);
+    document.getMarkupStream().forEach(markup -> {
+      int rangeLayerIndex = layerIndex.get(markup);
       float markupRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
-      if (tr.isContinuous()) {
-        List<Long> textNodeIds = tr.getDTO().getTextNodeIds();
+      if (markup.isContinuous()) {
+        List<Long> textNodeIds = markup.getDTO().getTextNodeIds();
         TAGTextNode firstTextNode = store.getTextNode(textNodeIds.get(0));
         TAGTextNode lastTextNode = store.getTextNode(textNodeIds.get(textNodeIds.size() - 1));
         int first = textNodeIndices.get(firstTextNode);
         int last = textNodeIndices.get(lastTextNode);
 
-        appendMarkup(latexBuilder, tr, String.valueOf(rangeLayerIndex), markupRow, color, first, last);
+        appendMarkup(latexBuilder, markup, String.valueOf(rangeLayerIndex), markupRow, color, first, last);
 
       } else {
-        Iterator<TAGTextNode> textNodeIterator = tr.getTextNodeStream().iterator();
+        Iterator<TAGTextNode> textNodeIterator = markup.getTextNodeStream().iterator();
         TAGTextNode firstTextNode = textNodeIterator.next();
         TAGTextNode lastTextNode = firstTextNode;
         boolean finished = false;
@@ -363,7 +363,7 @@ public class LaTeXExporter {
               goOn = textNodeIterator.hasNext();
 
             } else {
-              appendMarkupPart(latexBuilder, textNodeIndices, tr, rangeLayerIndex, markupRow, color, firstTextNode, lastTextNode, partNo);
+              appendMarkupPart(latexBuilder, textNodeIndices, markup, rangeLayerIndex, markupRow, color, firstTextNode, lastTextNode, partNo);
               firstTextNode = nextTextNode;
               lastTextNode = firstTextNode;
               partNo++;
@@ -374,7 +374,7 @@ public class LaTeXExporter {
           finished = finished || !textNodeIterator.hasNext();
         }
 
-        appendMarkupPart(latexBuilder, textNodeIndices, tr, rangeLayerIndex, markupRow, color, firstTextNode, lastTextNode, partNo);
+        appendMarkupPart(latexBuilder, textNodeIndices, markup, rangeLayerIndex, markupRow, color, firstTextNode, lastTextNode, partNo);
 
         for (int i = 0; i < partNo; i++) {
           String leftNode = MessageFormat.format("tr{0}_{1}e", rangeLayerIndex, i);
