@@ -440,7 +440,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
 //    TAGMLListener listener = new TAGMLListener(store, errorListener);
-    TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
+    TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
@@ -472,7 +472,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
 //    TAGMLListener listener = new TAGMLListener(store, errorListener);
-    TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
+    TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());

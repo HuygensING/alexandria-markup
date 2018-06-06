@@ -42,9 +42,9 @@ import java.nio.charset.Charset;
 import static java.util.stream.Collectors.joining;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
-public class TAGMLListener2Test extends TAGBaseStoreTest {
+public class TAGMLListenerTest extends TAGBaseStoreTest {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TAGMLListener2Test.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TAGMLListenerTest.class);
   private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
 
   @Test
@@ -127,7 +127,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
-    TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
+    TAGMLListener listener = walkParseTree(errorListener, parseTree);
     assertThat(errorListener.hasErrors()).isFalse();
 
     TAGDocument document = listener.getDocument();
@@ -146,7 +146,7 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
       int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
       LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-      TAGMLListener2 listener = walkParseTree(errorListener, parseTree);
+      TAGMLListener listener = walkParseTree(errorListener, parseTree);
       assertThat(errorListener.hasErrors()).isTrue();
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
@@ -167,8 +167,8 @@ public class TAGMLListener2Test extends TAGBaseStoreTest {
     return parser;
   }
 
-  private TAGMLListener2 walkParseTree(final ErrorListener errorListener, final ParseTree parseTree) {
-    TAGMLListener2 listener = new TAGMLListener2(store, errorListener);
+  private TAGMLListener walkParseTree(final ErrorListener errorListener, final ParseTree parseTree) {
+    TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
