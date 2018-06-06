@@ -195,7 +195,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
       Set<String> layers = new HashSet<>();
       layerIds.forEach(layerId -> {
-        if (layerId.equals("")) {
+        if (layerId.equals("") && !document.getLayerNames().contains("")) {
           document.addLayer("", markup);
           layers.add("");
 
@@ -260,7 +260,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
 //    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     TAGTextNode tn = store.createTextNode(divergence);
     if (previousTextNode != null) {
-      document.linkTextNodes(previousTextNode,tn);
+      document.linkTextNodes(previousTextNode, tn);
 //      tn.addPreviousTextNode(previousTextNode);
     }
     previousTextNode = tn;
@@ -578,7 +578,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -619,7 +619,7 @@ public class TAGMLListener2 extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

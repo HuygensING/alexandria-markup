@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 @Persistent
@@ -89,6 +90,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return getOutgoingEdges(markupId).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
+        .filter(e -> e.hasType(hasText))
         .filter(e -> e.hasLayer(layerName))
         .collect(toList());
   }
@@ -269,7 +271,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         getOutgoingEdges(nextMarkupId).stream()
             .filter(LayerEdge.class::isInstance)
             .map(LayerEdge.class::cast)
-            .filter(e -> e.hasType(EdgeType.hasText))
+            .filter(e -> e.hasType(hasText))
             .filter(e -> layerName.equals(e.getLayerName()))
             .flatMap(e -> getTargets(e).stream())
             .filter(tn -> !textHandled.contains(tn))
