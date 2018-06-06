@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -70,9 +71,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[a>a [b>b<a]<b]" +
         "<tagml]";
-    String expectedSyntaxErrorMessage = "line 1:18 : Close tag <a] found, expected <b].\n" +
-        "line 1:24 : Close tag <tagml] found, expected <a].\n" +
-        "Missing close tag(s) for: [a>, [tagml>";
+    String expectedSyntaxErrorMessage = "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n" +
+        "parsing aborted!";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
@@ -109,9 +109,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         "<tagml|a,b]";
 
     String expectedSyntaxErrorMessage = "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" +
-        "line 1:106 : Close tag <book|a] found, expected <para|a].\n" +
-        "line 1:160 : Close tag <tagml|a,b] found, expected <chapter|a].\n" +
-        "Missing close tag(s) for: [chapter|a>, [book|a>, [tagml|a,b>";
+        "parsing aborted!";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
@@ -146,7 +144,11 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
       LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-      TAGMLListener listener = walkParseTree(errorListener, parseTree);
+      try {
+        TAGMLListener listener = walkParseTree(errorListener, parseTree);
+      } catch (TAGMLBreakingError e){
+
+      }
       assertThat(errorListener.hasErrors()).isTrue();
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);

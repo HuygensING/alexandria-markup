@@ -511,9 +511,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       markup = removeFromMarkupStack(extendedMarkupName, markupStack);
       if (markup == null) {
         TAGMarkup expected = markupStack.peek();
-        errorListener.addError(
-            "%s Close tag <%s] found, expected %s.",
-            errorPrefix(ctx), extendedMarkupName, closeTag(expected)
+        String hint = l.isEmpty() ? " Use separate layers to allow for overlap." : "";
+        errorListener.addBreakingError(
+            "%s Close tag <%s] found, expected %s.%s",
+            errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint
         );
         return null;
       }
@@ -556,6 +557,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private TAGMarkup removeFromMarkupStack(String extendedTag, Deque<TAGMarkup> markupStack) {
+    if (markupStack.isEmpty()) {
+      return null;
+    }
     final TAGMarkup expected = markupStack.peek();
     if (extendedTag.equals(expected.getExtendedTag())) {
       markupStack.pop();

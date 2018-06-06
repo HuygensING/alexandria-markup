@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.storage;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
+import java.util.Collections;
 import java.util.List;
 
 import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
@@ -117,7 +118,7 @@ public class TAGTextNode {
   // TODO: refactor links to these dummy methods
   @Deprecated
   public List<TAGTextNode> getNextTextNodes() {
-    return null;
+    return Collections.emptyList();
   }
 
   @Deprecated
@@ -133,6 +134,6 @@ public class TAGTextNode {
 
   @Deprecated
   public List<TAGTextNode> getPrevTextNodes() {
-    return null;
+    return Collections.emptyList();
   }
 }

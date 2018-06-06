@@ -304,7 +304,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testDiscontinuity() {
-    String tagML = "[t>This is<-t], he said, [+t>a test!<t]";
+    String tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -339,7 +339,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testFalseDiscontinuityLeadsToError() {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
-    String tagML = "[markup>Cookie <-markup][+markup> Monster<markup]";
+    String tagML = "[x>[markup>Cookie <-markup][+markup> Monster<markup]<x]";
     String expectedErrors = "line 1:25 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -439,7 +439,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCorrectOverlapNonLinearityCombination1() {
     String tagML = "[text>It is a truth universally acknowledged that every " +
-        "<|[add>young [b>woman<add]<b]" +
+        "<|[add>young [b>woman<b]<add]" +
         "|[b>[del>rich<del]|>" +
         " man <b] is in need of a maid.<text]";
     store.runInTransaction(() -> {
@@ -465,7 +465,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCorrectOverlapNonLinearityCombination2() {
     String tagML = "[text>It is a truth universally acknowledged that every " +
-        "<|[add>young [b>woman<add]<b]" +
+        "<|[add>young [b>woman<b]<add]" +
         "|[b>[del>rich<del]<b]|>" +
         " [b>man<b] is in need of a maid.<text]";
     store.runInTransaction(() -> {
@@ -489,10 +489,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testIncorrectDiscontinuityNonLinearityCombination() {
-    String tagML = "[q>and what is the use of a " +
+    String tagML = "[x>[q>and what is the use of a " +
         "<|[del>book,<-q]<del]" +
         "| [add>thought Alice<add]|>" +
-        " [+q>without pictures or conversation?<q]";
+        " [+q>without pictures or conversation?<q]<x]";
     String expectedErrors = "line 1:75 : There is a discrepancy in suspended markup between branches:\n" +
         "\tbranch 1 has suspended markup [<-q]].\n" +
         "\tbranch 2 has no suspended markup.\n" +
@@ -502,10 +502,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
-    String tagML = "[q>and what is the use of a " +
+    String tagML = "[x>[q>and what is the use of a " +
         "<|[del>book,<del]" +
         "|<-q][add>thought Alice<add][+q>|>" +
-        "without pictures or conversation?<q] ";
+        "without pictures or conversation?<q]<x]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();

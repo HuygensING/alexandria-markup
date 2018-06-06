@@ -99,7 +99,8 @@ public class ErrorListener implements ANTLRErrorListener {
 
   public void addBreakingError(String messageTemplate, Object... messageArgs) {
     addError(messageTemplate, messageArgs);
-    throw new TAGMLBreakingError("");
+    addError("parsing aborted!");
+    throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
   }
 
 }
