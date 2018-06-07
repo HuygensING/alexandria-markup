@@ -31,32 +31,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TextGraphTest {
 
+  AtomicLong nodeIds = new AtomicLong();
+
   @Test
   public void testConstruction() {
     // [tagml>[a|+a>[name|+ner>J'onn<name|ner] [b|+b>craves<a|a] [name|ner>Oreos<name|ner]<b|b]<tagml]
 
-    AtomicLong nodeIds = new AtomicLong();
     TextGraph tg = new TextGraph();
 
     // [tagml>
-    Long markupTagml = nodeIds.getAndIncrement();
+    Long markupTagml = newNode();
     String layerDefault = "";
     tg.setLayerRootMarkup(layerDefault, markupTagml);
 
     // [a|+a>
-    Long markupA = nodeIds.getAndIncrement();
+    Long markupA = newNode();
     String layerA = "a";
     tg.setLayerRootMarkup(layerA, markupTagml)
         .addChildMarkup(markupTagml, layerA, markupA); // (tagml) -[a]-> (a)
 
     // [name|+ner>
-    Long markupName1 = nodeIds.getAndIncrement();
+    Long markupName1 = newNode();
     String layerNER = "ner";
     tg.setLayerRootMarkup(layerNER, markupTagml)
         .addChildMarkup(markupTagml, layerNER, markupName1); // (tagml) -[ner]-> (name)
 
     // J'onn
-    Long textJonn = nodeIds.getAndIncrement();
+    Long textJonn = newNode();
     tg.appendTextNode(textJonn) // () -> (J'onn)
         .linkMarkupToTextNodeForLayer(markupTagml, textJonn, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textJonn, layerA)
@@ -65,19 +66,19 @@ public class TextGraphTest {
     // <name|ner]
 
     // _
-    Long textSpace1 = nodeIds.getAndIncrement();
+    Long textSpace1 = newNode();
     tg.appendTextNode(textSpace1) // (J'onn) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace1, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textSpace1, layerA);
 
     // [b|+b>
-    Long markupB = nodeIds.getAndIncrement();
+    Long markupB = newNode();
     String layerB = "b";
     tg.setLayerRootMarkup(layerB, markupTagml);
     tg.addChildMarkup(markupTagml, layerB, markupB); // (tagml) -[b]-> (b)
 
     // craves
-    Long textCraves = nodeIds.getAndIncrement();
+    Long textCraves = newNode();
     tg.appendTextNode(textCraves) // ( ) -> (craves)
         .linkMarkupToTextNodeForLayer(markupTagml, textCraves, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textCraves, layerA)
@@ -86,17 +87,17 @@ public class TextGraphTest {
     // <a|a]
 
     // _
-    Long textSpace2 = nodeIds.getAndIncrement();
+    Long textSpace2 = newNode();
     tg.appendTextNode(textSpace2) // (craves) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace2, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textSpace2, layerB);
 
     // [name|ner>
-    Long markupName2 = nodeIds.getAndIncrement();
+    Long markupName2 = newNode();
     tg.addChildMarkup(markupTagml, layerNER, markupName2);
 
     // Oreos
-    Long textOreos = nodeIds.getAndIncrement();
+    Long textOreos = newNode();
     tg.appendTextNode(textOreos) // ( ) -> (Oreos)
         .linkMarkupToTextNodeForLayer(markupTagml, textOreos, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textOreos, layerB)
@@ -141,5 +142,59 @@ public class TextGraphTest {
 
     List<Long> textForNER = tg.getTextNodeIdStreamForMarkupIdInLayer(markupTagml, layerNER).collect(toList());
     assertThat(textForNER).containsExactly(textJonn, textOreos);
+  }
+
+  @Test
+  public void testNesting() {
+    // [l>He said: [phr>That's what she said: [phr>Too much!<phr]<phr]<line]
+    TextGraph tg = new TextGraph();
+
+    // [l>
+    Long markupL = newNode();
+    String layerDefault = "";
+    tg.setLayerRootMarkup(layerDefault, markupL);
+
+    // He said:
+    Long textHeSaid = newNode();
+    tg.appendTextNode(textHeSaid)
+        .linkMarkupToTextNodeForLayer(markupL, textHeSaid, layerDefault);
+
+    // [phr>
+    Long markupPhr1 = newNode();
+    tg.addChildMarkup(markupL, layerDefault, markupPhr1);
+
+    // That's what she said:
+    Long textSheSaid = newNode();
+    tg.appendTextNode(textSheSaid)
+        .linkMarkupToTextNodeForLayer(markupPhr1, textSheSaid, layerDefault);
+
+    // [phr>
+    Long markupPhr2 = newNode();
+    tg.addChildMarkup(markupPhr1, layerDefault, markupPhr2);
+
+    // Too much!
+    Long textTooMuch = newNode();
+    tg.appendTextNode(textTooMuch)
+        .linkMarkupToTextNodeForLayer(markupPhr2, textTooMuch, layerDefault);
+    // <phr]
+    // <phr]
+    // <line]
+
+    List<Long> textIds = tg.getTextNodeIdStream().collect(toList());
+    assertThat(textIds).containsExactly(textHeSaid, textSheSaid, textTooMuch);
+
+    Set<String> layerNames = tg.getLayerNames();
+    assertThat(layerNames).containsOnly(layerDefault);
+
+    List<Long> defaultTextIds = tg.getTextNodeIdStreamForLayer(layerDefault).collect(toList());
+    assertThat(defaultTextIds).containsExactly(textHeSaid, textSheSaid, textTooMuch);
+
+    List<Long> markupForTooMuch = tg.getMarkupIdStreamForTextNodeId(textTooMuch).collect(toList());
+    assertThat(markupForTooMuch).containsExactlyInAnyOrder(markupPhr2, markupPhr1, markupL);
+
+  }
+
+  private Long newNode() {
+    return nodeIds.getAndIncrement();
   }
 }

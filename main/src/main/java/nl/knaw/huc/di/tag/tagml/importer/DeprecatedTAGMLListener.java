@@ -280,7 +280,7 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
             document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, "");
-            document.associateTextNodeWithMarkup(textNode, masterMarkup, "");
+            document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, "");
             textNodeIdsToAdd.add(textNode.getDbId());
           });
           masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
@@ -435,8 +435,8 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
 
   private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
     markup.getLayers()
-        .forEach(layerName -> document.associateTextNodeWithMarkup(tn, markup, layerName));
-    markup.addTextNode(tn);
+        .forEach(layerName -> document.associateTextNodeWithMarkupForLayer(tn, markup, layerName));
+//    markup.addTextNode(tn);
   }
 
   private Long update(TAGDTO tagdto) {

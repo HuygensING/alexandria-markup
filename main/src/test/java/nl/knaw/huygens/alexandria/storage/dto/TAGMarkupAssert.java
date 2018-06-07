@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
@@ -30,6 +31,8 @@ import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMarkup> {
+
+  private String layerName = TAGML.DEFAULT_LAYER;
 
   public TAGMarkupAssert(final TAGMarkup actual) {
     super(actual, TAGMarkupAssert.class);
@@ -46,18 +49,35 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
 
   public TAGMarkupAssert withTextNodesWithText(String... text) {
     isNotNull();
-    List<String> actualTexts = actual.getTextNodeStream().map(TAGTextNode::getText).collect(toList());
+    List<String> actualTexts = actual.getTextNodeStreamForLayer(layerName)
+        .map(TAGTextNode::getText)
+        .collect(toList());
     assertThat(actualTexts).containsExactly(text);
     return myself;
   }
 
-  public void hasMarkupId(String markupId) {
+  public TAGMarkupAssert hasMarkupId(String markupId) {
     isNotNull();
     String actualMarkupId = actual.getMarkupId();
     if (!markupId.equals(actualMarkupId)) {
       failWithMessage("\nExpected markup %s to have markupId %s, but was %s.",
           actual, markupId, actualMarkupId);
     }
+    return myself;
+  }
 
+  public TAGMarkupAssert hasTag(final String tag) {
+    isNotNull();
+    String actualTag = actual.getTag();
+    if (!tag.equals(actualTag)) {
+      failWithMessage("\nExpected markup %s to have tag %s, but was %s.",
+          actual, tag, actualTag);
+    }
+    return myself;
+  }
+
+  public TAGMarkupAssert inLayer(final String layerName) {
+    this.layerName = layerName;
+    return myself;
   }
 }

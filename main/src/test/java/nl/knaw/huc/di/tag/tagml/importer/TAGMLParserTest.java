@@ -100,6 +100,14 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
       assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
+
+      List<TAGMarkup> markups = document.getMarkupStream().filter(m -> m.hasTag("q")).collect(toList());
+      assertThat(markups).hasSize(1);
+      final TAGMarkup q = markups.get(0);
+
+      List<TAGTextNode> qTextNodes = document.getTextNodeStreamForMarkupInLayer(q, "L1").collect(toList());
+      assertThat(qTextNodes).extracting("text")
+          .containsExactly("“Man,\"", "\"how ignorant art thou in thy pride of wisdom!”");
     });
   }
 
@@ -131,6 +139,18 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
       assertThat(markups).extracting("tag").containsExactly("root", "s");
+
+      List<TAGMarkup> rootMarkups = document.getMarkupStream().filter(m -> m.hasTag("root")).collect(toList());
+      assertThat(rootMarkups).hasSize(1);
+      final TAGMarkup rootMarkup = rootMarkups.get(0);
+
+      List<TAGTextNode> rootTextNodes = document.getTextNodeStreamForMarkupInLayer(rootMarkup, "").collect(toList());
+      assertThat(rootTextNodes).extracting("text")
+          .containsExactly(
+              "“Man,\"",
+              " I ", "cried", "pleaded", ", ",
+              "\"how ignorant art thou in thy pride of wisdom!”"
+          );
     });
   }
 

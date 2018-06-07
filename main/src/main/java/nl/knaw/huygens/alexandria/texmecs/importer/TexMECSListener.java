@@ -94,8 +94,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
     markup.getLayers()
-        .forEach(layerName -> document.associateTextNodeWithMarkup(tn, markup, layerName));
-    markup.addTextNode(tn);
+        .forEach(layerName -> document.associateTextNodeWithMarkupForLayer(tn, markup, layerName));
   }
 
   @Override

@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -152,10 +153,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     if (!atDocumentStart) {
       TAGTextNode tn = store.createTextNode(text);
-//      if (previousTextNode != null) {
-//        tn.addPreviousTextNode(previousTextNode);
-//      }
-//      previousTextNode = tn;
       document.addTextNode(tn);
       logTextNode(tn);
     }
@@ -163,11 +160,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
-    // determine layer
-    // open markup in layer
-    // add markup to layer tree as child of layer.openmarkupstack.peek()
-    // push markup to layer.openmarkupstack()
-
     if (tagNameIsValid(ctx)) {
       MarkupNameContext markupNameContext = ctx.markupName();
       String markupName = markupNameContext.name().getText();
@@ -195,9 +187,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
       Set<String> layers = new HashSet<>();
       layerIds.forEach(layerId -> {
-        if (layerId.equals("") && !document.getLayerNames().contains("")) {
-          document.addLayer("", markup);
-          layers.add("");
+        if (layerId.equals("") && !document.getLayerNames().contains(TAGML.DEFAULT_LAYER)) {
+          addDefaultLayer(markup, layers);
 
         } else if (layerId.contains("+")) {
           String[] parts = layerId.split("\\+");
@@ -208,7 +199,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         } else {
           if (state.openMarkup.get(layerId).isEmpty()) {
             String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
-            errorListener.addBreakingError("%s %s cannot be used here, since the root markup of this layer has closed already.", errorPrefix(ctx), layer);
+            errorListener.addBreakingError(
+                "%s %s cannot be used here, since the root markup of this layer has closed already.",
+                errorPrefix(ctx), layer);
           } else {
             document.addMarkupToLayer(markup, layerId);
             layers.add(layerId);
@@ -234,6 +227,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
+  private void addDefaultLayer(final TAGMarkup markup, final Set<String> layers) {
+    document.addLayer(TAGML.DEFAULT_LAYER, markup);
+    layers.add(TAGML.DEFAULT_LAYER);
+  }
+
   @Override
   public void exitEndTag(EndTagContext ctx) {
     if (tagNameIsValid(ctx)) {
@@ -246,17 +244,16 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
     if (tagNameIsValid(ctx)) {
-//    String markupName = ctx.name().getText();
-//    LOG.debug("milestone.markupName=<{}>", markupName);
-//    ctx.annotation()
-//        .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
+      String markupName = ctx.name().getText();
+      LOG.debug("milestone.markupName=<{}>", markupName);
+      ctx.annotation()
+          .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
       Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TAGTextNode tn = store.createTextNode("");
       document.addTextNode(tn);
       logTextNode(tn);
-//      state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
-      layers.forEach(layerName -> linkTextToMarkup(tn, markup, layerName));
+      layers.forEach(layerName -> linkTextToMarkupForLayer(tn, markup, layerName));
     }
   }
 
@@ -266,11 +263,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     TAGTextNode tn = store.createTextNode(divergence);
     if (previousTextNode != null) {
       document.linkTextNodes(previousTextNode, tn);
-//      tn.addPreviousTextNode(previousTextNode);
     }
     previousTextNode = tn;
     document.addTextNode(tn);
-//    state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startNode = tn;
     textVariationState.startState = state.copy();
@@ -303,11 +299,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     TAGTextNode tn = store.createTextNode(convergence);
     previousTextNode = tn;
     document.addTextNode(tn);
-//    state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
+//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
     textVariationStateStack.pop().endNodes.forEach(n -> {
 //      logTextNode(n);
-      n.addNextTextNode(tn);
-      tn.addPreviousTextNode(n);
+      document.linkTextNodes(n, tn);
     });
 //    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
     logTextNode(tn);
@@ -328,8 +323,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           List<Long> textNodeIdsToAdd = new ArrayList<>();
           TAGMarkup masterMarkup = masterMarkupOptional.get();
           otherMarkup.getTextNodeStream().forEach(textNode -> {
-            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, "");
-            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkup(textNode, masterMarkup, layerName));
+            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, TAGML.DEFAULT_LAYER);
+            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, layerName));
 
             textNodeIdsToAdd.add(textNode.getDbId());
           });
@@ -483,9 +478,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     });
   }
 
-  private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup, String layerName) {
-    document.associateTextNodeWithMarkup(tn, markup, layerName);
-    markup.addTextNode(tn);
+  private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
+    document.associateTextNodeWithMarkupForLayer(tn, markup, layerName);
   }
 
   private Long update(TAGDTO tagdto) {
@@ -501,21 +495,34 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     LayerInfoContext layerInfoContext = ctx.layerInfo();
     Set<String> layers = extractLayerInfo(layerInfoContext);
     TAGMarkup markup = null;
+
     String foundLayerSuffix = layerInfoContext == null
         ? ""
         : TAGML.DIVIDER + extractLayerInfo(layerInfoContext).stream().sorted().collect(joining(","));
+
     extendedMarkupName = extendedMarkupName + foundLayerSuffix;
     for (String l : layers) {
       state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
       Deque<TAGMarkup> markupStack = state.openMarkup.get(l);
       markup = removeFromMarkupStack(extendedMarkupName, markupStack);
       if (markup == null) {
-        TAGMarkup expected = markupStack.peek();
-        String hint = l.isEmpty() ? " Use separate layers to allow for overlap." : "";
-        errorListener.addBreakingError(
-            "%s Close tag <%s] found, expected %s.%s",
-            errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint
-        );
+        AtomicReference<String> emn = new AtomicReference<>(extendedMarkupName);
+        boolean markupIsOpen = markupStack.stream()
+            .map(m -> m.getExtendedTag())
+            .anyMatch(et -> emn.get().equals(et));
+        if (!markupIsOpen) {
+          errorListener.addError(
+              "%s Close tag <%s] found without corresponding open tag.",
+              errorPrefix(ctx), extendedMarkupName
+          );
+        } else {
+          TAGMarkup expected = markupStack.peek();
+          String hint = l.isEmpty() ? " Use separate layers to allow for overlap." : "";
+          errorListener.addBreakingError(
+              "%s Close tag <%s] found, expected %s.%s",
+              errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint
+          );
+        }
         return null;
       }
       document.closeMarkupInLayer(markup, l);
@@ -703,7 +710,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       layers.addAll(explicitLayers);
     }
     if (layers.isEmpty()) {
-      layers.add("");
+      layers.add(TAGML.DEFAULT_LAYER);
     }
     return layers;
   }

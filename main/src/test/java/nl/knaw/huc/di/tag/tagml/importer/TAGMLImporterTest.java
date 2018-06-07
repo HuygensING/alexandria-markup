@@ -130,17 +130,17 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testOverlap() {
-    String tagML = "[a>J'onn J'onzz [b>likes<a] Oreos<b]";
+    String tagML = "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
-      assertThat(document).hasMarkupWithTag("a").withTextNodesWithText("J'onn J'onzz ", "likes");
-      assertThat(document).hasMarkupWithTag("b").withTextNodesWithText("likes", " Oreos");
+      assertThat(document).hasMarkupWithTag("a").inLayer("la").withTextNodesWithText("J'onn J'onzz ", "likes");
+      assertThat(document).hasMarkupWithTag("b").inLayer("lb").withTextNodesWithText("likes", " Oreos");
     });
   }
 
   @Test
   public void testTAGML2() {
-    String tagML = "[line>[a>The rain in [country>Spain<country] [b>falls<a] mainly on the plain.<b]<line]";
+    String tagML = "[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]<line|a,b]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -166,7 +166,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(3);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("line", "a", "country");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("country", "a", "line");
     });
   }
 
@@ -222,7 +222,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMultipleNamespaces() {
-    String tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<a:a]<b:b]";
+    String tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<b:b]<a:a]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -321,9 +321,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(textNodes).hasSize(3);
 
       List<TAGMarkup> markups = document.getMarkupStream().collect(toList());
-      assertThat(markups).hasSize(1);
+      assertThat(markups).hasSize(2);
 
-      TAGMarkup t = markups.get(0);
+      TAGMarkup t = markups.get(1);
+      assertThat(t).hasTag("t");
       List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
       assertThat(tTAGTextNodes).extracting("text").containsExactly("This is", "a test!");
     });
@@ -568,7 +569,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testContainmentIsDefault() {
-    String tagML = "word1 [phr>word2 [phr>word3<phr] word4<phr] word5";
+    String tagML = "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -587,12 +588,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(TAGTextNodes).hasSize(5);
 
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
-      TAGMarkup phr0 = TAGMarkups.get(0);
+      TAGMarkup phr0 = TAGMarkups.get(1);
+      assertThat(phr0).hasTag("phr");
       List<TAGTextNode> textNodes0 = phr0.getTextNodeStream().collect(toList());
       assertThat(textNodes0).extracting("text")
           .containsExactly("word2 ", "word3", " word4");
 
-      TAGMarkup phr1 = TAGMarkups.get(1);
+      TAGMarkup phr1 = TAGMarkups.get(2);
+      assertThat(phr1).hasTag("phr");
       List<TAGTextNode> textNodes1 = phr1.getTextNodeStream().collect(toList());
       assertThat(textNodes1).extracting("text")
           .containsExactly("word3");
@@ -601,7 +604,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testUseSuffixForSelfOverlap() {
-    String tagML = "word1 [phr~1>word2 [phr~2>word3<phr~1] word4<phr~2] word5";
+    String tagML = "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -620,13 +623,15 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(TAGTextNodes).hasSize(5);
 
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
-      TAGMarkup phr0 = TAGMarkups.get(0);
-      List<TAGTextNode> textNodes0 = phr0.getTextNodeStream().collect(toList());
+      TAGMarkup phr0 = TAGMarkups.get(1);
+      assertThat(phr0).hasTag("phr");
+      List<TAGTextNode> textNodes0 = document.getTextNodeStreamForMarkupInLayer(phr0, "p1").collect(toList());
       assertThat(textNodes0).extracting("text")
           .containsExactly("word2 ", "word3");
 
-      TAGMarkup phr1 = TAGMarkups.get(1);
-      List<TAGTextNode> textNodes1 = phr1.getTextNodeStream().collect(toList());
+      TAGMarkup phr1 = TAGMarkups.get(2);
+      assertThat(phr0).hasTag("phr");
+      List<TAGTextNode> textNodes1 = document.getTextNodeStreamForMarkupInLayer(phr1, "p2").collect(toList());
       assertThat(textNodes1).extracting("text")
           .containsExactly("word3", " word4");
     });

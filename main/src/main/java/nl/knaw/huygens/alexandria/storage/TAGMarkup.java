@@ -60,7 +60,7 @@ public class TAGMarkup {
 //    markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
 //    Long ownerId = markupDTO.getDocumentId();
 //    new TAGDocument(store, store.getDocumentDTO(ownerId))//
-//        .associateTextNodeWithMarkup(tagTextNode, this, "");
+//        .associateTextNodeWithMarkupForLayer(tagTextNode, this, "");
 //    update();
 //    return this;
 //  }
@@ -98,11 +98,13 @@ public class TAGMarkup {
         .map(annotation -> new TAGAnnotation(store, annotation));
   }
 
-//  public Stream<TAGTextNode> getTextNodeStream() {
-//    return markupDTO.getTextNodeIds().stream()//
-//        .map(store::getTextNodeDTO)//
-//        .map(textNode -> new TAGTextNode(store, textNode));
-//  }
+  public Stream<TAGTextNode> getTextNodeStream() {
+    return document.getTextNodeStreamForMarkup(this);
+  }
+
+  public Stream<TAGTextNode> getTextNodeStreamForLayer(String layerName) {
+    return document.getTextNodeStreamForMarkupInLayer(this, layerName);
+  }
 
   public TAGMarkupDTO getDTO() {
     return markupDTO;
@@ -271,18 +273,8 @@ public class TAGMarkup {
 
   // TODO: refactor links to these dummy methods
   @Deprecated
-  public Stream<TAGTextNode> getTextNodeStream() {
-    return null;
-  }
-
-  @Deprecated
   public int getTextNodeCount() {
     return 0;
-  }
-
-  @Deprecated
-  public TAGMarkup addTextNode(final TAGTextNode tn) {
-    return this;
   }
 
   @Deprecated

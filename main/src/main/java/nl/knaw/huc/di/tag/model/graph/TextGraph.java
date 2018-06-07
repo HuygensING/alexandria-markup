@@ -184,10 +184,10 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       public Long next() {
         Long nodeId = next.get();
         markupHandled.add(nodeId);
-        next = calcNext();
         List<Long> parentMarkupList = getParentMarkupList(nodeId);
         parentMarkupList.removeAll(markupHandled);
         markupToProcess.addAll(parentMarkupList);
+        next = calcNext();
         return nodeId;
       }
     });

@@ -31,6 +31,7 @@ import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+@Ignore
 public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
