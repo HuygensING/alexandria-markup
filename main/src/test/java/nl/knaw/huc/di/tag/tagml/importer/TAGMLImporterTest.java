@@ -242,7 +242,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a", "b:b");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("b:b", "a:a");
     });
   }
 

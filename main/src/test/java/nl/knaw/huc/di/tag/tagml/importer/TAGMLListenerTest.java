@@ -129,6 +129,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     assertThat(errorListener.hasErrors()).isFalse();
 
     TAGDocument document = listener.getDocument();
+    logDocumentGraph(document, input);
     String lmnl = LMNL_EXPORTER.toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;

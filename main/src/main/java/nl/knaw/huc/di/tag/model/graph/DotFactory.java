@@ -1,0 +1,97 @@
+package nl.knaw.huc.di.tag.model.graph;
+
+/*-
+ * #%L
+ * alexandria-markup
+ * =======
+ * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
+import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import org.apache.commons.lang3.StringEscapeUtils;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+
+public class DotFactory {
+
+  public String toDot(TAGDocument document, final String label) {
+    StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
+        .append("  node [style=\"filled\";fillcolor=\"white\"]\n")
+        .append("  subgraph{\n");
+    document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
+    String sameRank = document.getTextNodeStream()
+        .map(TAGTextNode::getDbId)
+        .map(i -> "t" + i)
+        .collect(joining(";"));
+    dotBuilder.append("    rank=same;" + sameRank + ";\n");
+
+    TextGraph textGraph = document.getDTO().textGraph;
+    document.getTextNodeStream()
+        .map(TAGTextNode::getDbId)
+        .flatMap(id -> textGraph
+            .getOutgoingEdges(id).stream()
+            .filter(TextChainEdge.class::isInstance)
+            .map(TextChainEdge.class::cast))
+        .map(e -> toNextEdgeLine(e, textGraph))
+        .forEach(dotBuilder::append);
+    dotBuilder.append("  }\n");
+
+    document.getMarkupStream().map(this::toMarkupNodeLine).forEach(dotBuilder::append);
+    document.getMarkupStream()
+        .map(TAGMarkup::getDbId)
+        .flatMap(id -> textGraph
+            .getOutgoingEdges(id).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast))
+        .map(e -> toOutgoingEdgeLine(e, textGraph))
+        .forEach(dotBuilder::append);
+
+    String graphLabel = escape(label);
+    dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
+    dotBuilder.append("}");
+    return dotBuilder.toString();
+  }
+
+  private String escape(final String label) {
+    return StringEscapeUtils.escapeHtml4(label).replaceAll("\n","<br/>");
+  }
+
+  private String toTextNodeLine(final TAGTextNode textNode) {
+    return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+  }
+
+  private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {
+    Long source = textGraph.getSource(edge);
+    String targets = textGraph.getTargets(edge).stream().map(i -> "t" + i).collect(joining(","));
+    return format("    t%d->{%s}[color=blue;label=<%s>]\n", source, targets, "");
+  }
+
+  private String toMarkupNodeLine(final TAGMarkup markup) {
+    return format("  m%d [color=red;label=<%s>]\n", markup.getDbId(), markup.getExtendedTag());
+  }
+
+  private String toOutgoingEdgeLine(LayerEdge edge, TextGraph textGraph) {
+    Long source = textGraph.getSource(edge);
+    String targetPrefix = edge.hasType(EdgeType.hasText) ? "t" : "m";
+    String targets = textGraph.getTargets(edge).stream().map(i -> targetPrefix + i).collect(joining(","));
+    return format("  m%d->{%s}[color=red;label=<<font point-size=\"8\">%s</font>>]\n", source, targets, edge.getLayerName());
+  }
+
+}

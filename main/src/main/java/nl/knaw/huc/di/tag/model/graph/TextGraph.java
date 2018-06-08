@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -258,9 +260,31 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
     private void traverseMarkupTree() {
       Long nextMarkupId = markupToProcess.pop();
-      List<Long> deeperMarkup = getOutgoingEdges(nextMarkupId).stream()
+      Predicate<LayerEdge> layerNamePredicate = e -> layerName.equals(e.getLayerName());
+      Function<LayerEdge, Stream<Long>> mapper = e -> getTargets(e).stream();
+      getOutgoingLayerEdgeStream(nextMarkupId)
+          .filter(e -> e.hasType(EdgeType.hasMarkup))
+          .filter(layerNamePredicate)
+          .flatMap(mapper)
+          .forEach(m -> markupToProcess.add(m));
+      getOutgoingLayerEdgeStream(nextMarkupId)
+          .filter(e -> e.hasType(hasText))
+          .filter(layerNamePredicate)
+          .flatMap(mapper)
+          .filter(tn -> !textHandled.contains(tn))
+          .forEach(tn -> textNodes.add(tn));
+    }
+
+    private Stream<LayerEdge> getOutgoingLayerEdgeStream(final Long markupId) {
+      return getOutgoingEdges(markupId).stream()
           .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast)
+          .map(LayerEdge.class::cast);
+    }
+
+    // Only use textnodes of markup that doesn't have child markup
+    private void traverseMarkupTree2() {
+      Long nextMarkupId = markupToProcess.pop();
+      List<Long> deeperMarkup = getOutgoingLayerEdgeStream(nextMarkupId)
           .filter(e -> e.hasType(EdgeType.hasMarkup))
           .filter(e -> layerName.equals(e.getLayerName()))
           .flatMap(e -> getTargets(e).stream())
@@ -268,9 +292,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       if (!deeperMarkup.isEmpty()) {
         deeperMarkup.forEach(m -> markupToProcess.add(m));
       } else {
-        getOutgoingEdges(nextMarkupId).stream()
-            .filter(LayerEdge.class::isInstance)
-            .map(LayerEdge.class::cast)
+        getOutgoingLayerEdgeStream(nextMarkupId)
             .filter(e -> e.hasType(hasText))
             .filter(e -> layerName.equals(e.getLayerName()))
             .flatMap(e -> getTargets(e).stream())

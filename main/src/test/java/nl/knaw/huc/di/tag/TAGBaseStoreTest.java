@@ -21,8 +21,10 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.DotFactory;
 import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,6 +38,7 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
   protected static TAGStore store;
   protected static LMNLExporter lmnlExporter;
   private static Path tmpDir;
+  DotFactory dotFactory = new DotFactory();
 
   @BeforeClass
   public static void beforeClass() throws IOException {
@@ -50,6 +53,12 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
   public static void afterClass() {
     store.close();
     tmpDir.toFile().delete();
+  }
+
+  protected void logDocumentGraph(final TAGDocument document, final String input) {
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(dotFactory.toDot(document, input));
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
   }
 
 }

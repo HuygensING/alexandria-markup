@@ -192,6 +192,8 @@ public class TextGraphTest {
     List<Long> markupForTooMuch = tg.getMarkupIdStreamForTextNodeId(textTooMuch).collect(toList());
     assertThat(markupForTooMuch).containsExactlyInAnyOrder(markupPhr2, markupPhr1, markupL);
 
+    List<Long> textForPhr1 = tg.getTextNodeIdStreamForMarkupIdInLayer(markupPhr1,layerDefault).collect(toList());
+    assertThat(textForPhr1).containsExactly(textSheSaid, textTooMuch);
   }
 
   private Long newNode() {

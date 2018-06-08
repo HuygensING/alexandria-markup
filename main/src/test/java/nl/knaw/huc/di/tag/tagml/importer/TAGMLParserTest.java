@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.model.graph.DotFactory;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -116,6 +117,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[root|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I <|cried|pleaded|>, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
+
       assertThat(document).hasMarkupMatching(
           markupSketch("root"),
           markupSketch("q"),
@@ -468,6 +470,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     assertThat(errorListener.hasErrors()).isFalse();
 
     TAGDocument document = listener.getDocument();
+    logDocumentGraph(document, input);
+
     String lmnl = LMNL_EXPORTER.toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;
