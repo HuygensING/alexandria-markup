@@ -43,11 +43,11 @@ public class DotFactory {
         .append("  subgraph{\n");
     document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
 
-    String sameRank = document.getTextNodeStream()
-        .map(TAGTextNode::getDbId)
-        .map(i -> "t" + i)
-        .collect(joining(";"));
-    dotBuilder.append("    rank=same;" + sameRank + ";\n");
+//    String sameRank = document.getTextNodeStream()
+//        .map(TAGTextNode::getDbId)
+//        .map(i -> "t" + i)
+//        .collect(joining(";"));
+    dotBuilder.append("    rank=same\n");
 
     TextGraph textGraph = document.getDTO().textGraph;
     document.getTextNodeStream()
@@ -86,7 +86,11 @@ public class DotFactory {
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
-    return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+    if (textNode.isDivergence() || textNode.isConvergence()) {
+      return format("    t%d [shape=point;color=blue;label=\"\"]\n", textNode.getDbId());
+    } else {
+      return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+    }
   }
 
   private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {

@@ -38,4 +38,22 @@ public class TAGTextNodeAssert extends AbstractObjectAssert<TAGTextNodeAssert, T
     return myself;
 
   }
+
+  public TAGTextNodeAssert isDivergence() {
+    isNotNull();
+    String errorMessage = "\nExpected isDivergence() to be true, but was false";
+    if (!actual.isDivergence()) {
+      failWithMessage(errorMessage);
+    }
+    return myself;
+  }
+
+  public TAGTextNodeAssert isConvergence() {
+    isNotNull();
+    String errorMessage = "\nExpected isConvergence() to be true, but was false";
+    if (!actual.isConvergence()) {
+      failWithMessage(errorMessage);
+    }
+    return myself;
+  }
 }

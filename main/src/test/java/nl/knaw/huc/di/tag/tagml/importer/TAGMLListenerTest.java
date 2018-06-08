@@ -27,6 +27,7 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -39,8 +40,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGMLListenerTest extends TAGBaseStoreTest {
@@ -111,6 +114,40 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     String expectedSyntaxErrorMessage = "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" +
         "parsing aborted!";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
+
+  @Test
+  public void testNonlinearText() {
+    String input = "[o>Icecream is <|tasty|cold|sweet|>!<o]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      logDocumentGraph(document, input);
+
+      List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
+      assertThat(textNodes).hasSize(7);
+
+      TAGTextNode textNode1 = textNodes.get(0);
+      assertThat(textNode1).hasText("Icecream is ");
+
+      TAGTextNode textNode2 = textNodes.get(1);
+      assertThat(textNode2).isDivergence();
+
+      TAGTextNode textNode3 = textNodes.get(2);
+      assertThat(textNode3).hasText("tasty");
+
+      TAGTextNode textNode4 = textNodes.get(3);
+      assertThat(textNode4).hasText("cold");
+
+      TAGTextNode textNode5 = textNodes.get(4);
+      assertThat(textNode5).hasText("sweet");
+
+      TAGTextNode textNode6 = textNodes.get(5);
+      assertThat(textNode6).isConvergence();
+
+      TAGTextNode textNode7 = textNodes.get(6);
+      assertThat(textNode7).hasText("!");
+
+    });
   }
 
   // private methods
