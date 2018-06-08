@@ -147,8 +147,9 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
       try {
         TAGMLListener listener = walkParseTree(errorListener, parseTree);
-      } catch (TAGMLBreakingError e){
-
+        TAGDocument document = listener.getDocument();
+        logDocumentGraph(document, input);
+      } catch (TAGMLBreakingError e) {
       }
       assertThat(errorListener.hasErrors()).isTrue();
       String errors = errorListener.getErrors().stream().collect(joining("\n"));

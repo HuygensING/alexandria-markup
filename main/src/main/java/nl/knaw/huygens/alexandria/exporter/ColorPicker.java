@@ -24,7 +24,7 @@ package nl.knaw.huygens.alexandria.exporter;
 /**
  * Created by bramb on 24/02/2017.
  */
-class ColorPicker {
+public class ColorPicker {
   private final String[] colors;
   private int i = 0;
 

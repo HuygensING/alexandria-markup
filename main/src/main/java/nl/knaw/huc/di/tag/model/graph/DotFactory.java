@@ -19,23 +19,30 @@ package nl.knaw.huc.di.tag.model.graph;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huygens.alexandria.exporter.ColorPicker;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.util.Collection;
+
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 public class DotFactory {
+  private ColorPicker colorPicker = new ColorPicker("brown", "cyan", "darkgray", "gray", "green", "lightgray", //
+      "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
 
   public String toDot(TAGDocument document, final String label) {
     StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
         .append("  node [style=\"filled\";fillcolor=\"white\"]\n")
         .append("  subgraph{\n");
     document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
+
     String sameRank = document.getTextNodeStream()
         .map(TAGTextNode::getDbId)
         .map(i -> "t" + i)
@@ -51,9 +58,11 @@ public class DotFactory {
             .map(TextChainEdge.class::cast))
         .map(e -> toNextEdgeLine(e, textGraph))
         .forEach(dotBuilder::append);
+
     dotBuilder.append("  }\n");
 
     document.getMarkupStream().map(this::toMarkupNodeLine).forEach(dotBuilder::append);
+
     document.getMarkupStream()
         .map(TAGMarkup::getDbId)
         .flatMap(id -> textGraph
@@ -64,13 +73,16 @@ public class DotFactory {
         .forEach(dotBuilder::append);
 
     String graphLabel = escape(label);
-    dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
+    if (!graphLabel.isEmpty()) {
+      dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
+    }
+
     dotBuilder.append("}");
     return dotBuilder.toString();
   }
 
   private String escape(final String label) {
-    return StringEscapeUtils.escapeHtml4(label).replaceAll("\n","<br/>");
+    return StringEscapeUtils.escapeHtml4(label).replaceAll("\n", "<br/>");
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
@@ -90,8 +102,25 @@ public class DotFactory {
   private String toOutgoingEdgeLine(LayerEdge edge, TextGraph textGraph) {
     Long source = textGraph.getSource(edge);
     String targetPrefix = edge.hasType(EdgeType.hasText) ? "t" : "m";
-    String targets = textGraph.getTargets(edge).stream().map(i -> targetPrefix + i).collect(joining(","));
-    return format("  m%d->{%s}[color=red;label=<<font point-size=\"8\">%s</font>>]\n", source, targets, edge.getLayerName());
+    Collection<Long> edgeTargets = textGraph.getTargets(edge);
+    String targets = edgeTargets.stream().map(i -> targetPrefix + i).collect(joining(","));
+    String layerName = edge.getLayerName();
+    String label = layerName.isEmpty()
+        ? ""
+        : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
+    if (edgeTargets.size() == 1) {
+
+      return format("  m%d->%s[color=red]\n", source, targets, label);
+    } else {
+      String color = colorPicker.nextColor();
+      String hyperId = "h" + source + layerName;
+      return format("  %s [shape=point;color=%s;label=\"\"]\n" +
+              "  m%d->%s [color=%s;arrowhead=none%s]\n" +
+              "  %s->{%s}[color=%s]\n",
+          hyperId, color,
+          source, hyperId, color, label,
+          hyperId, targets, color);
+    }
   }
 
 }

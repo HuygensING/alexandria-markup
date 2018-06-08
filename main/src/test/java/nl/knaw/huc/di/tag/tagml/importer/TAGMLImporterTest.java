@@ -592,7 +592,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(phr0).hasTag("phr");
       List<TAGTextNode> textNodes0 = phr0.getTextNodeStream().collect(toList());
       assertThat(textNodes0).extracting("text")
-          .containsExactly("word2 ", "word3", " word4");
+          .containsExactlyInAnyOrder("word2 ", "word3", " word4");
 
       TAGMarkup phr1 = TAGMarkups.get(2);
       assertThat(phr1).hasTag("phr");

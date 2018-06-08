@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.DotFactory;
 import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
@@ -84,6 +85,7 @@ public class TAGMLImporter {
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
+      logDocumentGraph(document,"");
       String errors = errorListener.getErrors().stream().collect(joining("\n"));
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
@@ -99,7 +101,7 @@ public class TAGMLImporter {
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
-    }catch (TAGMLBreakingError e){
+    } catch (TAGMLBreakingError e) {
 
     }
     return listener.getDocument();
@@ -114,6 +116,12 @@ public class TAGMLImporter {
 
   private Long update(TAGDTO tagdto) {
     return tagStore.persist(tagdto);
+  }
+
+  protected void logDocumentGraph(final TAGDocument document, final String input) {
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(new DotFactory().toDot(document, input));
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
   }
 
 }
