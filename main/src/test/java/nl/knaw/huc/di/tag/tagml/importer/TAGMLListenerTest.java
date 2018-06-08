@@ -21,6 +21,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.model.graph.TextChainEdge;
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
@@ -123,6 +126,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       TAGDocument document = assertTAGMLParses(input);
       logDocumentGraph(document, input);
 
+      TextGraph textGraph = document.getDTO().textGraph;
+
       List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
       assertThat(textNodes).hasSize(7);
 
@@ -131,6 +136,9 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
       TAGTextNode textNode2 = textNodes.get(1);
       assertThat(textNode2).isDivergence();
+      Long divergenceNode = textNode2.getDbId();
+      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
+      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
 
       TAGTextNode textNode3 = textNodes.get(2);
       assertThat(textNode3).hasText("tasty");
@@ -143,14 +151,27 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
       TAGTextNode textNode6 = textNodes.get(5);
       assertThat(textNode6).isConvergence();
+      Long convergenceNode = textNode6.getDbId();
+      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
+      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
 
       TAGTextNode textNode7 = textNodes.get(6);
       assertThat(textNode7).hasText("!");
-
     });
   }
 
   // private methods
+  private List<Edge> incomingTextEdges(TextGraph textGraph, Long textNode) {
+    return textGraph.getIncomingEdges(textNode).stream()
+        .filter(TextChainEdge.class::isInstance)
+        .collect(toList());
+  }
+
+  private List<Edge> outgoingTextEdges(TextGraph textGraph, Long textNode) {
+    return textGraph.getOutgoingEdges(textNode).stream()
+        .filter(TextChainEdge.class::isInstance)
+        .collect(toList());
+  }
 
   private TAGDocument assertTAGMLParses(final String input) {
     ErrorListener errorListener = new ErrorListener();

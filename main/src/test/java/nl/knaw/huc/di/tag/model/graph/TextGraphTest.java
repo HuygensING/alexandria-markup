@@ -58,7 +58,7 @@ public class TextGraphTest {
 
     // J'onn
     Long textJonn = newNode();
-    tg.appendTextNode(textJonn) // () -> (J'onn)
+    tg.setFirstTextNodeId(textJonn) // () -> (J'onn)
         .linkMarkupToTextNodeForLayer(markupTagml, textJonn, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textJonn, layerA)
         .linkMarkupToTextNodeForLayer(markupName1, textJonn, layerNER);
@@ -67,7 +67,7 @@ public class TextGraphTest {
 
     // _
     Long textSpace1 = newNode();
-    tg.appendTextNode(textSpace1) // (J'onn) -> ( )
+    tg.linkTextNodes(textJonn, textSpace1) // (J'onn) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace1, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textSpace1, layerA);
 
@@ -79,7 +79,7 @@ public class TextGraphTest {
 
     // craves
     Long textCraves = newNode();
-    tg.appendTextNode(textCraves) // ( ) -> (craves)
+    tg.linkTextNodes(textSpace1, textCraves) // ( ) -> (craves)
         .linkMarkupToTextNodeForLayer(markupTagml, textCraves, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textCraves, layerA)
         .linkMarkupToTextNodeForLayer(markupB, textCraves, layerB);
@@ -88,7 +88,7 @@ public class TextGraphTest {
 
     // _
     Long textSpace2 = newNode();
-    tg.appendTextNode(textSpace2) // (craves) -> ( )
+    tg.linkTextNodes(textCraves, textSpace2) // (craves) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace2, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textSpace2, layerB);
 
@@ -98,7 +98,7 @@ public class TextGraphTest {
 
     // Oreos
     Long textOreos = newNode();
-    tg.appendTextNode(textOreos) // ( ) -> (Oreos)
+    tg.linkTextNodes(textSpace2, textOreos) // ( ) -> (Oreos)
         .linkMarkupToTextNodeForLayer(markupTagml, textOreos, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textOreos, layerB)
         .linkMarkupToTextNodeForLayer(markupName2, textOreos, layerNER);
@@ -156,7 +156,7 @@ public class TextGraphTest {
 
     // He said:
     Long textHeSaid = newNode();
-    tg.appendTextNode(textHeSaid)
+    tg.setFirstTextNodeId(textHeSaid)
         .linkMarkupToTextNodeForLayer(markupL, textHeSaid, layerDefault);
 
     // [phr>
@@ -165,7 +165,7 @@ public class TextGraphTest {
 
     // That's what she said:
     Long textSheSaid = newNode();
-    tg.appendTextNode(textSheSaid)
+    tg.linkTextNodes(textHeSaid, textSheSaid)
         .linkMarkupToTextNodeForLayer(markupPhr1, textSheSaid, layerDefault);
 
     // [phr>
@@ -174,7 +174,7 @@ public class TextGraphTest {
 
     // Too much!
     Long textTooMuch = newNode();
-    tg.appendTextNode(textTooMuch)
+    tg.linkTextNodes(textSheSaid, textTooMuch)
         .linkMarkupToTextNodeForLayer(markupPhr2, textTooMuch, layerDefault);
     // <phr]
     // <phr]
@@ -192,7 +192,7 @@ public class TextGraphTest {
     List<Long> markupForTooMuch = tg.getMarkupIdStreamForTextNodeId(textTooMuch).collect(toList());
     assertThat(markupForTooMuch).containsExactlyInAnyOrder(markupPhr2, markupPhr1, markupL);
 
-    List<Long> textForPhr1 = tg.getTextNodeIdStreamForMarkupIdInLayer(markupPhr1,layerDefault).collect(toList());
+    List<Long> textForPhr1 = tg.getTextNodeIdStreamForMarkupIdInLayer(markupPhr1, layerDefault).collect(toList());
     assertThat(textForPhr1).containsExactly(textSheSaid, textTooMuch);
   }
 

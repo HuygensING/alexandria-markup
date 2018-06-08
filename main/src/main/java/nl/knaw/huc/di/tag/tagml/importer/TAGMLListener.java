@@ -154,6 +154,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (!atDocumentStart) {
       TAGTextNode tn = store.createTextNode(text);
       document.addTextNode(tn);
+      if (previousTextNode != null) {
+        document.linkTextNodes(previousTextNode, tn);
+      }
+      previousTextNode = tn;
       logTextNode(tn);
     }
   }
@@ -251,6 +255,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TAGTextNode tn = store.createTextNode("");
       document.addTextNode(tn);
+      document.linkTextNodes(previousTextNode, tn);
+      previousTextNode = tn;
       logTextNode(tn);
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
       layers.forEach(layerName -> linkTextToMarkupForLayer(tn, markup, layerName));
@@ -260,18 +266,19 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void enterTextVariation(final TextVariationContext ctx) {
 //    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
-    TAGTextNode tn = store.createTextNode(divergence);
+    TAGTextNode divergence = store.createTextNode(TAGTextNodeType.divergence);
+    document.addTextNode(divergence);
     if (previousTextNode != null) {
-      document.linkTextNodes(previousTextNode, tn);
+      document.linkTextNodes(previousTextNode, divergence);
     }
-    previousTextNode = tn;
-    document.addTextNode(tn);
-//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
+    previousTextNode = divergence;
+
+//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(divergence, m));
     TextVariationState textVariationState = new TextVariationState();
-    textVariationState.startNode = tn;
+    textVariationState.startNode = divergence;
     textVariationState.startState = state.copy();
     textVariationState.branch = 0;
-    logTextNode(tn);
+    logTextNode(divergence);
     textVariationStateStack.push(textVariationState);
   }
 
@@ -296,16 +303,16 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
     mergeNewOpenMarkup(ctx);
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
-    TAGTextNode tn = store.createTextNode(convergence);
-    previousTextNode = tn;
-    document.addTextNode(tn);
+    TAGTextNode convergence = store.createTextNode(TAGTextNodeType.convergence);
+    previousTextNode = convergence;
+    document.addTextNode(convergence);
 //    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
     textVariationStateStack.pop().endNodes.forEach(n -> {
 //      logTextNode(n);
-      document.linkTextNodes(n, tn);
+      document.linkTextNodes(n, convergence);
     });
 //    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
-    logTextNode(tn);
+    logTextNode(convergence);
   }
 
   private void mergeNewOpenMarkup(ParserRuleContext ctx) {

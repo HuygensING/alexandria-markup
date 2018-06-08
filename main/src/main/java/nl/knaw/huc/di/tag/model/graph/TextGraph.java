@@ -62,16 +62,6 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return this;
   }
 
-  public TextGraph appendTextNode(final Long textNodeId) {
-    if (firstTextNodeId == null) {
-      firstTextNodeId = textNodeId;
-    } else {
-      linkTextNodes(lastTextNodeId, textNodeId);
-    }
-    lastTextNodeId = textNodeId;
-    return this;
-  }
-
   public TextGraph linkMarkupToTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
     List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
     if (existingEdges.isEmpty()) {
@@ -199,17 +189,19 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return stream(new TextNodeIdIterator(markupId, layerName));
   }
 
-  public void setFirstTextNodeId(final Long firstTextNodeId) {
+  public TextGraph setFirstTextNodeId(final Long firstTextNodeId) {
     this.firstTextNodeId = firstTextNodeId;
+    return this;
   }
 
   public Long getFirstTextNodeId() {
     return this.firstTextNodeId;
   }
 
-  public void linkTextNodes(final Long textNode1, final Long textNode2) {
+  public TextGraph linkTextNodes(final Long textNode1, final Long textNode2) {
     TextChainEdge edge = Edges.textChainEdge();
     addDirectedHyperEdge(edge, edge.label(), textNode1, textNode2);
+    return this;
   }
 
   class TextNodeIdChainIterator implements Iterator<Long> {

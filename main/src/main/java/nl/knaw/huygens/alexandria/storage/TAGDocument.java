@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
@@ -53,7 +54,7 @@ public class TAGDocument {
     if (textNodeIds.size() == 1) {
       documentDTO.setFirstTextNodeId(textNodeDbId);
     }
-    documentDTO.textGraph.appendTextNode(textNodeDbId);
+//    documentDTO.textGraph.appendTextNode(textNodeDbId);
     openMarkupStackForLayer.forEach((layerName, stack) -> {
           if (!stack.isEmpty()) {
             Long markupId = stack.peek().getDbId();
@@ -64,6 +65,12 @@ public class TAGDocument {
     );
     update();
     return this;
+  }
+
+  public void linkTextNodes(final TAGTextNode textNode1, final TAGTextNode textNode2) {
+    Preconditions.checkNotNull(textNode1);
+    Preconditions.checkNotNull(textNode2);
+    documentDTO.textGraph.linkTextNodes(textNode1.getDbId(), textNode2.getDbId());
   }
 
   public Stream<TAGTextNode> getTextNodeStream() {
@@ -206,8 +213,4 @@ public class TAGDocument {
     return this;
   }
 
-  public void linkTextNodes(final TAGTextNode textNode1, final TAGTextNode textNode2) {
-    documentDTO.textGraph.linkTextNodes(textNode1.getDbId(), textNode2.getDbId());
-
-  }
 }
