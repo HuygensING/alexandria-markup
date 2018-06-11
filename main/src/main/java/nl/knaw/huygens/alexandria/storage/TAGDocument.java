@@ -21,15 +21,20 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import com.google.common.base.Preconditions;
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 public class TAGDocument {
+  Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
   private final TAGStore store;
   private final TAGDocumentDTO documentDTO;
   private Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
@@ -141,10 +146,34 @@ public class TAGDocument {
     markup1.getAnnotationIds().addAll(markup2.getDTO().getAnnotationIds());
   }
 
-  public void addLayer(final String layerName, final TAGMarkup rootMarkup) {
+  public void addLayer(final String layerName, final TAGMarkup rootMarkup, final String parentLayer) {
     documentDTO.textGraph.setLayerRootMarkup(layerName, rootMarkup.getDbId());
     openMarkupStackForLayer.put(layerName, new ArrayDeque<>());
     openMarkupStackForLayer.get(layerName).push(rootMarkup);
+    if (parentLayer != null) {
+      Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(parentLayer);
+      linkToParentMarkup(rootMarkup, parentLayer, openMarkupStack);
+    }
+  }
+
+  private void linkToParentMarkup(final TAGMarkup rootMarkup, final String parentLayer, final Deque<TAGMarkup> openMarkupStack) {
+    if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
+      Long parentMarkupId = openMarkupStack.peek().getDbId();
+      Long childMarkupId = rootMarkup.getDbId();
+      TextGraph textGraph = documentDTO.textGraph;
+      boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
+          .stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .filter(e -> e.hasLayer(parentLayer))
+          .anyMatch(e -> {
+            Collection<Long> targets = textGraph.getTargets(e);
+            return targets.size() == 1 && targets.contains(childMarkupId);
+          });
+      if (!edgeExists) {
+        textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
+      }
+    }
   }
 
   public Set<String> getLayerNames() {
@@ -152,10 +181,9 @@ public class TAGDocument {
   }
 
   public void addMarkupToLayer(TAGMarkup markup, String layerName) {
+    LOG.debug("layer={}", layerName);
     Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(layerName);
-    Long parentMarkupId = openMarkupStack.peek().getDbId();
-    Long childMarkupId = markup.getDbId();
-    documentDTO.textGraph.addChildMarkup(parentMarkupId, layerName, childMarkupId);
+    linkToParentMarkup(markup, layerName, openMarkupStack);
     openMarkupStack.push(markup);
   }
 

@@ -195,8 +195,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
         } else if (layerId.contains("+")) {
           String[] parts = layerId.split("\\+");
+          String parentLayer = parts[0];
           String newLayerId = parts[1];
-          document.addLayer(newLayerId, markup);
+          document.addLayer(newLayerId, markup, parentLayer);
           layers.add(newLayerId);
 
         } else {
@@ -231,7 +232,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void addDefaultLayer(final TAGMarkup markup, final Set<String> layers) {
-    document.addLayer(TAGML.DEFAULT_LAYER, markup);
+    document.addLayer(TAGML.DEFAULT_LAYER, markup, null);
     layers.add(TAGML.DEFAULT_LAYER);
   }
 
