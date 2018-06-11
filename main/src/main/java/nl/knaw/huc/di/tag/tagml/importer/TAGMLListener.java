@@ -39,12 +39,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 import static nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
 
 public class TAGMLListener extends TAGMLParserBaseListener {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLListener.class);
@@ -79,8 +76,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     public State copy() {
       State copy = new State();
-      copy.openMarkup = new HashMap<>(openMarkup);
-      copy.suspendedMarkup = new HashMap<>(suspendedMarkup);
+      copy.openMarkup = new HashMap<>();
+      openMarkup.forEach((k, v) -> copy.openMarkup.put(k, new ArrayDeque<>(v)));
+      copy.suspendedMarkup = new HashMap<>();
+      suspendedMarkup.forEach((k, v) -> copy.suspendedMarkup.put(k, new ArrayDeque<>(v)));
       return copy;
     }
   }
@@ -284,13 +283,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
-    List<TAGTextNode> TAGTextNodes = document.getTextNodeStream().collect(toList());
-    TAGTextNode lastTextNode = TAGTextNodes.get(TAGTextNodes.size() - 1);
-    currentTextVariationState().endNodes.add(lastTextNode);
-    previousTextNode = currentTextVariationState().startNode;
+    currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
-    state = currentTextVariationState().startState.copy();
     currentTextVariationState().branch += 1;
+    previousTextNode = currentTextVariationState().startNode;
+    state = currentTextVariationState().startState.copy();
   }
 
   @Override
@@ -335,7 +332,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
             textNodeIdsToAdd.add(textNode.getDbId());
           });
-          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
+//          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
           document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
           store.persist(document.getDTO());
           store.persist(masterMarkup.getDTO());
@@ -362,9 +359,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     List<List<String>> closedMarkupInBranch = new ArrayList<>();
 
     State startState = currentTextVariationState().startState;
-//    Deque<MarkupWrapper> suspendedMarkupBeforeDivergence = startState.suspendedMarkup;
-//    Deque<MarkupWrapper> openMarkupBeforeDivergence = startState.openMarkup;
-//
+    Map<String, Deque<TAGMarkup>> suspendedMarkupBeforeDivergence = startState.suspendedMarkup;
+    Map<String, Deque<TAGMarkup>> openMarkupBeforeDivergence = startState.openMarkup;
+
 //    currentTextVariationState().endStates.forEach(state -> {
 //      List<String> suspendedMarkup = state.suspendedMarkup.stream()
 //          .filter(m -> !suspendedMarkupBeforeDivergence.contains(m))
@@ -404,7 +401,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             .append(" has ")
             .append(has);
       }
-      errorListener.addError(
+      errorListener.addBreakingError(
           "%s There is a discrepancy in suspended markup between branches:%s",
           errorPrefix, branchLines);
     }
@@ -435,7 +432,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             .append(" to be closed after the ")
             .append(CONVERGENCE);
       }
-      errorListener.addError(
+      errorListener.addBreakingError(
           "%s There is an open markup discrepancy between the branches:%s",
           errorPrefix, branchLines);
     }
@@ -585,42 +582,35 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private TAGMarkup resumeMarkup(StartTagContext ctx) {
     String tag = ctx.markupName().getText().replace(RESUME_PREFIX, "");
-    TAGMarkup markup = null;
+    TAGMarkup suspendedMarkup = null;
     Set<String> layers = extractLayerInfo(ctx.markupName().layerInfo());
     for (String layer : layers) {
-      markup = removeFromMarkupStack(tag, state.suspendedMarkup.get(layer));
-      checkForCorrespondingSuspendTag(ctx, tag, markup);
-      if (!errorListener.hasErrors()) {
-        checkForTextBetweenSuspendAndResumeTags(markup, ctx);
-        if (!errorListener.hasErrors()) {
-          markup.setIsDiscontinuous(true);
-        }
-      }
+      suspendedMarkup = removeFromMarkupStack(tag, state.suspendedMarkup.get(layer));
+      checkForCorrespondingSuspendTag(ctx, tag, suspendedMarkup);
+      checkForTextBetweenSuspendAndResumeTags(suspendedMarkup, ctx);
+      suspendedMarkup.setIsDiscontinuous(true);
     }
-    return markup;
+    return suspendedMarkup;
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
       final TAGMarkup markup) {
     if (markup == null) {
-      errorListener.addError(
+      errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
           errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag
       );
     }
   }
 
-  private void checkForTextBetweenSuspendAndResumeTags(final TAGMarkup markup, final StartTagContext ctx) {
-//    List<Long> markupTextNodeIds = markup.getMarkupDTO().getTextNodeIds();
-//    Long lastMarkupTextNodeId = markupTextNodeIds.get(markupTextNodeIds.size() - 1);
-//    List<Long> documentTextNodeIds = document.getDocumentDTO().getTextNodeIds();
-//    Long lastDocumentTextNodeId = documentTextNodeIds.get(documentTextNodeIds.size() - 1);
-//    if (lastDocumentTextNodeId.equals(lastMarkupTextNodeId)) {
-//      errorListener.addError(
-//          "%s There is no text between this resume tag %s and it's corresponding suspend tag %s. This is not allowed.",
-//          errorPrefix(ctx), resumeTag(markup), suspendTag(markup)
-//      );
-//    }
+  private void checkForTextBetweenSuspendAndResumeTags(final TAGMarkup suspendedMarkup, final StartTagContext ctx) {
+    Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
+    if (previousMarkup.contains(suspendedMarkup)) {
+      errorListener.addBreakingError(
+          "%s There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
+          errorPrefix(ctx), resumeTag(suspendedMarkup), suspendTag(suspendedMarkup)
+      );
+    }
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {

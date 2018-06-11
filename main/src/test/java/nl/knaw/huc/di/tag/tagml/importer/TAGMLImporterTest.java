@@ -341,7 +341,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testFalseDiscontinuityLeadsToError() {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
     String tagML = "[x>[markup>Cookie <-markup][+markup> Monster<markup]<x]";
-    String expectedErrors = "line 1:25 : There is no text between this resume tag [+markup> and it's corresponding suspend tag <-markup]. This is not allowed.";
+    String expectedErrors = "line 1:28 : There is no text between this resume tag: [+markup> and its corresponding suspend tag: <-markup]. This is not allowed.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -358,7 +359,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   //  @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
-    String tagML = "[t>This [x>is <|a<x] [y>failing|an<x] [y>excellent|> test<y]<t]";
+    String tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -368,12 +369,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
           "This ",
           "is ",
           "", // <|
-          "a",
-          " ",
-          "failing",
-          "an",
-          " ",
-          "excellent",
+          "a failing",
+          "an excellent",
           "", // |>
           " test"
       );
@@ -381,26 +378,20 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       assertThat(TAGMarkups)
           .extracting("tag")
-          .containsExactly("t", "x", "y");
+          .containsExactly("t", "x");
 
       TAGMarkup t = TAGMarkups.get(0);
       assertThat(t.getTag()).isEqualTo("t");
       List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
-      assertThat(tTAGTextNodes).hasSize(11);
+      assertThat(tTAGTextNodes).hasSize(7);
 
       TAGMarkup x = TAGMarkups.get(1);
       assertThat(x.getTag()).isEqualTo("x");
       List<TAGTextNode> xTAGTextNodes = x.getTextNodeStream().collect(toList());
       assertThat(xTAGTextNodes)
           .extracting("text")
-          .containsExactly("is ", "", "a", "an");
+          .containsExactly("is ", "", "a failing", "an excellent", "");
 
-      TAGMarkup y = TAGMarkups.get(2);
-      assertThat(y.getTag()).isEqualTo("y");
-      List<TAGTextNode> yTAGTextNodes = y.getTextNodeStream().collect(toList());
-      assertThat(yTAGTextNodes)
-          .extracting("text")
-          .containsExactly("failing", "excellent", "", " test");
     });
   }
 
@@ -415,7 +406,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
-    String tagML = "[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]";
+    String tagML = "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
     String expectedErrors = "line 1:38 : There is an open markup discrepancy between the branches:\n" +
         "\tbranch 1 closed markup <l] that was opened before the <| and opened markup [l> to be closed after the |>\n" +
         "\tbranch 2 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>\n" +
@@ -491,7 +482,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIncorrectDiscontinuityNonLinearityCombination() {
     String tagML = "[x>[q>and what is the use of a " +
-        "<|[del>book,<-q]<del]" +
+        "<|[del>book,<del]<-q]" +
         "| [add>thought Alice<add]|>" +
         " [+q>without pictures or conversation?<q]<x]";
     String expectedErrors = "line 1:75 : There is a discrepancy in suspended markup between branches:\n" +
