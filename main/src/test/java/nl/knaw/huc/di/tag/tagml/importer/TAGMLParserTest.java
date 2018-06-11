@@ -21,7 +21,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
-import nl.knaw.huc.di.tag.model.graph.DotFactory;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -66,29 +66,35 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-132
   public void testTextWithMultipleLayersOfMarkup() {
-    String input = "[root|+L1,+L2>[post|+L3>simple text<root|L1,L2]epic epilog<post|L3]";
+    String input = "[text>[some|+L1>[all|+L2>word1<some|L1] word2<all|L2]<text]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
-          markupSketch("root"),
-          markupSketch("post")
+          markupSketch("text"),
+          markupSketch("some"),
+          markupSketch("all")
 
       );
       assertThat(document).hasTextNodesMatching(
-          textNodeSketch("simple text"),
-          textNodeSketch("epic epilog")
+          textNodeSketch("word1"),
+          textNodeSketch(" word2")
       );
-      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly("", "L1", "L2");
     });
   }
 
   @Test // RD-133
   public void testTextWithMultipleLayersAndDiscontinuity() {
-    String input = "[root|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
+    String input = "[tagml>" +
+        "[pre|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<pre|L1,L2]" +
+        "― " +
+        "[post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]" +
+        "<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
-          markupSketch("root"),
+          markupSketch("tagml"),
+          markupSketch("pre"),
           markupSketch("q"),
           markupSketch("s"),
           markupSketch("post")
@@ -100,7 +106,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("― "),
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
-      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly(TAGML.DEFAULT_LAYER, "L1", "L2", "L3");
 
       List<TAGMarkup> markups = document.getMarkupStream().filter(m -> m.hasTag("q")).collect(toList());
       assertThat(markups).hasSize(1);
@@ -114,16 +120,17 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
-    String input = "[root|+L1,+L2>" +
+    String input = "[tagml>[pre|+L1,+L2>" +
         "[q|L1>“Man,\"<-q|L1][s|L2> I " +
         "<|cried|pleaded|>" +
         ", <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]" +
-        "<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
+        "<pre|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
 
       assertThat(document).hasMarkupMatching(
-          markupSketch("root"),
+          markupSketch("tagml"),
+          markupSketch("pre"),
           markupSketch("q"),
           markupSketch("s"),
           markupSketch("post")
@@ -138,23 +145,25 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("― "),
           textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
       );
-      assertThat(document.getLayerNames()).containsExactly("L1", "L2", "L3");
+      assertThat(document.getLayerNames()).containsExactly("", "L1", "L2", "L3");
       TAGTextNode pleaded = document.getTextNodeStream()
           .filter(tn -> tn.getText().equals("pleaded"))
           .findFirst()
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-      assertThat(markups).extracting("tag").containsExactly("root", "s");
+      assertThat(markups).extracting("tag").containsExactly("tagml", "pre", "s");
 
-      List<TAGMarkup> rootMarkups = document.getMarkupStream().filter(m -> m.hasTag("root")).collect(toList());
-      assertThat(rootMarkups).hasSize(1);
-      final TAGMarkup rootMarkup = rootMarkups.get(0);
+      List<TAGMarkup> preMarkups = document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
+      assertThat(preMarkups).hasSize(1);
+      final TAGMarkup l1RootMarkup = preMarkups.get(0);
 
-      List<TAGTextNode> rootTextNodes = document.getTextNodeStreamForMarkupInLayer(rootMarkup, "").collect(toList());
-      assertThat(rootTextNodes).extracting("text")
-          .containsExactly(
+      List<TAGTextNode> l1TextNodes = document.getTextNodeStreamForMarkupInLayer(l1RootMarkup, "L1").collect(toList());
+      assertThat(l1TextNodes).extracting("text")
+          .containsExactlyInAnyOrder(
               "“Man,\"",
-              " I ", "cried", "pleaded", ", ",
+              " I ",
+              "", "cried", "pleaded", "",
+              ", ",
               "\"how ignorant art thou in thy pride of wisdom!”"
           );
     });
