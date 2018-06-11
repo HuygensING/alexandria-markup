@@ -29,6 +29,8 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -36,8 +38,10 @@ import static java.util.stream.Collectors.joining;
 public class DotFactory {
   private ColorPicker colorPicker = new ColorPicker("brown", "cyan", "darkgray", "gray", "green", "lightgray", //
       "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
+  Map<String, String> layerColor = new HashMap<>();
 
   public String toDot(TAGDocument document, final String label) {
+    layerColor.clear();
     StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
         .append("  node [style=\"filled\";fillcolor=\"white\"]\n")
         .append("  subgraph{\n");
@@ -112,11 +116,11 @@ public class DotFactory {
     String label = layerName.isEmpty()
         ? ""
         : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
+    String color = getLayerColor(layerName);
     if (edgeTargets.size() == 1) {
+      return format("  m%d->%s[color=%s%s]\n", source, targets, color, label);
 
-      return format("  m%d->%s[color=red]\n", source, targets, label);
     } else {
-      String color = colorPicker.nextColor();
       String hyperId = "h" + source + layerName;
       return format("  %s [shape=point;color=%s;label=\"\"]\n" +
               "  m%d->%s [color=%s;arrowhead=none%s]\n" +
@@ -125,6 +129,10 @@ public class DotFactory {
           source, hyperId, color, label,
           hyperId, targets, color);
     }
+  }
+
+  private String getLayerColor(final String layerName) {
+    return layerColor.computeIfAbsent(layerName, k -> colorPicker.nextColor());
   }
 
 }
