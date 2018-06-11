@@ -114,7 +114,11 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
-    String input = "[root|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I <|cried|pleaded|>, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
+    String input = "[root|+L1,+L2>" +
+        "[q|L1>“Man,\"<-q|L1][s|L2> I " +
+        "<|cried|pleaded|>" +
+        ", <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]" +
+        "<root|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
 

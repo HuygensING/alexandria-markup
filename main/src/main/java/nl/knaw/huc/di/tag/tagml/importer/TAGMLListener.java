@@ -283,6 +283,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
+    checkForOpenMarkupInBranch(ctx);
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     currentTextVariationState().branch += 1;
@@ -290,8 +291,36 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     state = currentTextVariationState().startState.copy();
   }
 
+  private void checkForOpenMarkupInBranch(final ParserRuleContext ctx) {
+    int branch = currentTextVariationState().branch + 1;
+    Map<String, Deque<TAGMarkup>> openMarkupAtStart = currentTextVariationState().startState.openMarkup;
+    Map<String, Deque<TAGMarkup>> currentOpenMarkup = state.openMarkup;
+    for (final String layerName : openMarkupAtStart.keySet()) {
+      Deque<TAGMarkup> openMarkupAtStartInLayer = openMarkupAtStart.get(layerName);
+      Deque<TAGMarkup> currentOpenMarkupInLayer = currentOpenMarkup.get(layerName);
+      List<TAGMarkup> closedInBranch = new ArrayList<>(openMarkupAtStartInLayer);
+      closedInBranch.removeAll(currentOpenMarkupInLayer);
+      if (!closedInBranch.isEmpty()) {
+        String openTags = closedInBranch.stream().map(this::openTag).collect(joining(","));
+        errorListener.addBreakingError(
+            "%s Markup %s opened before branch %s, should not be closed in a branch.",
+            errorPrefix(ctx), openTags, branch);
+      }
+      List<TAGMarkup> openedInBranch = new ArrayList<>(currentOpenMarkupInLayer);
+      openedInBranch.removeAll(openMarkupAtStartInLayer);
+      if (!openedInBranch.isEmpty()) {
+        String openTags = openedInBranch.stream().map(this::openTag).collect(joining(","));
+        errorListener.addBreakingError(
+            "%s Markup %s opened in branch %s must be closed before starting a new branch.",
+            errorPrefix(ctx), openTags, branch);
+      }
+
+    }
+  }
+
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
+    checkForOpenMarkupInBranch(ctx);
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
@@ -338,7 +367,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           store.persist(masterMarkup.getDTO());
           store.remove(otherMarkup.getDTO());
         } else {
-          errorListener.addError(
+          errorListener.addBreakingError(
               "%s Markup %s found in branch %s, but not in branch %s.",
               errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
           );

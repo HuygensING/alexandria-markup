@@ -398,61 +398,58 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
-    String expectedErrors = "line 1:48 : There is an open markup discrepancy between the branches:\n" +
-        "\tbranch 1 didn't close any markup that was opened before the <| and opened markup [y> to be closed after the |>\n" +
-        "\tbranch 2 closed markup <x] that was opened before the <| and opened markup [y> to be closed after the |>";
+    String expectedErrors = "line 1:29 : Markup [y> opened in branch 1 must be closed before starting a new branch.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
     String tagML = "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
-    String expectedErrors = "line 1:38 : There is an open markup discrepancy between the branches:\n" +
-        "\tbranch 1 closed markup <l] that was opened before the <| and opened markup [l> to be closed after the |>\n" +
-        "\tbranch 2 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>\n" +
-        "\tbranch 3 didn't close any markup that was opened before the <| and didn't open any new markup to be closed after the |>";
+    String expectedErrors = "line 1:24 : Markup [l> opened before branch 1, should not be closed in a branch.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testIncorrectOverlapNonLinearityCombination() {
-    String tagML = "[text>It is a truth universally acknowledged that every " +
+    String tagML = "[text|+w>It is a truth universally acknowledged that every " +
         "<|" +
-        "[add>young [b>woman<add]" +
+        "[add>young [b|w>woman<add]" +
         "|" +
         "[del>rich<del]" +
         "|>" +
-        " man<b] is in need of a maid.<text] ";
-    String expectedErrors = "line 1:98 : Markup [b> found in branch 1, but not in branch 2.\n" +
-        "line 1:105 : Close tag <b] found without corresponding open tag.";
+        " man<b|w] is in need of a maid.<text] ";
+    String expectedErrors = "line 1:88 : Markup [b|w> opened in branch 1 must be closed before starting a new branch.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Test
-  public void testCorrectOverlapNonLinearityCombination1() {
-    String tagML = "[text>It is a truth universally acknowledged that every " +
-        "<|[add>young [b>woman<b]<add]" +
-        "|[b>[del>rich<del]|>" +
-        " man <b] is in need of a maid.<text]";
-    store.runInTransaction(() -> {
-      TAGDocument document = parseTAGML(tagML);
-      assertThat(document).isNotNull();
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("It is a truth universally acknowledged that every "),
-          textNodeSketch("young "),
-          textNodeSketch("woman"),
-          textNodeSketch("rich"),
-          textNodeSketch(" man "),
-          textNodeSketch(" is in need of a maid.")
-      );
-      assertThat(document).hasMarkupMatching(
-          markupSketch("text"),
-          markupSketch("add"),
-          markupSketch("del"),
-          markupSketch("b")
-      );
-    });
-  }
+//  @Test
+//  public void testCorrectOverlapNonLinearityCombination1() {
+//    String tagML = "[text>It is a truth universally acknowledged that every " +
+//        "<|[add>young [b>woman<b]<add]" +
+//        "|[b>[del>rich<del]|>" +
+//        " man <b] is in need of a maid.<text]";
+//    store.runInTransaction(() -> {
+//      TAGDocument document = parseTAGML(tagML);
+//      assertThat(document).isNotNull();
+//      assertThat(document).hasTextNodesMatching(
+//          textNodeSketch("It is a truth universally acknowledged that every "),
+//          textNodeSketch("young "),
+//          textNodeSketch("woman"),
+//          textNodeSketch("rich"),
+//          textNodeSketch(" man "),
+//          textNodeSketch(" is in need of a maid.")
+//      );
+//      assertThat(document).hasMarkupMatching(
+//          markupSketch("text"),
+//          markupSketch("add"),
+//          markupSketch("del"),
+//          markupSketch("b")
+//      );
+//    });
+//  }
 
   @Test
   public void testCorrectOverlapNonLinearityCombination2() {
@@ -485,10 +482,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<|[del>book,<del]<-q]" +
         "| [add>thought Alice<add]|>" +
         " [+q>without pictures or conversation?<q]<x]";
-    String expectedErrors = "line 1:75 : There is a discrepancy in suspended markup between branches:\n" +
-        "\tbranch 1 has suspended markup [<-q]].\n" +
-        "\tbranch 2 has no suspended markup.\n" +
-        "line 1:78 : Resume tag [+q> found, which has no corresponding earlier suspend tag <-q].";
+    String expectedErrors = "line 1:53 : Markup [q> opened before branch 1, should not be closed in a branch.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -688,7 +683,9 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUnclosedTextVariationThrowsSyntaxError() {
     String tagML = "[t>This is <|good|bad.<t]";
-    String expectedErrors = "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}";
+    String expectedErrors = "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n" +
+        "line 1:12 : Markup [t> opened before branch 2, should not be closed in a branch.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
