@@ -90,8 +90,10 @@ public class DotFactory {
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
-    if (textNode.isDivergence() || textNode.isConvergence()) {
-      return format("    t%d [shape=point;color=blue;label=\"\"]\n", textNode.getDbId());
+    if (textNode.isDivergence()) {
+      return format("    t%d [shape=diamond;color=blue;label=\"<\"]\n", textNode.getDbId());
+    } else if (textNode.isConvergence()) {
+      return format("    t%d [shape=diamond;color=blue;label=\">\"]\n", textNode.getDbId());
     } else {
       return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
     }
