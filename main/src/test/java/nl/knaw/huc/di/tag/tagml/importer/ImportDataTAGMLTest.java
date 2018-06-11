@@ -101,6 +101,7 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
         LOG.info("testing data/tagml/{}.tagml", basename);
         LOG.info("importTAGML\n");
         TAGDocument document = new TAGMLImporter(store).importTAGML(input);
+        logDocumentGraph(document, "");
 //        generateLaTeX(basename, document);
       } catch (IOException e) {
         e.printStackTrace();

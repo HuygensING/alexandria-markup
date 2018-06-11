@@ -1,1 +1,1 @@
-[s>[a~1>Cookie Monster [a~2>likes<a~1] cookies.<a~2]<s]
+[s|+A1,+A2>[a~1|A1>Cookie Monster [a~2|A2>likes<a~1|A1] cookies.<a~2|A2]<s|A1,A2]
