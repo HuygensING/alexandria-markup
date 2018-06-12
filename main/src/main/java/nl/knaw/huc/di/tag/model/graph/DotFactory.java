@@ -91,18 +91,18 @@ public class DotFactory {
 
   private String toTextNodeLine(final TAGTextNode textNode) {
     if (textNode.isDivergence()) {
-      return format("    t%d [shape=diamond;color=blue;label=\"<\"]\n", textNode.getDbId());
+      return format("    t%d [shape=diamond;color=blue;arrowhead=none;label=\"<\"]\n", textNode.getDbId());
     } else if (textNode.isConvergence()) {
-      return format("    t%d [shape=diamond;color=blue;label=\">\"]\n", textNode.getDbId());
+      return format("    t%d [shape=diamond;color=blue;arrowhead=none;label=\">\"]\n", textNode.getDbId());
     } else {
-      return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+      return format("    t%d [shape=box;color=blue;arrowhead=none;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
     }
   }
 
   private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {
     Long source = textGraph.getSource(edge);
     String targets = textGraph.getTargets(edge).stream().map(i -> "t" + i).collect(joining(","));
-    return format("    t%d->{%s}[color=blue;label=<%s>]\n", source, targets, "");
+    return format("    t%d->{%s}[color=white;arrowhead=none;label=<%s>]\n", source, targets, "");
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
@@ -120,13 +120,13 @@ public class DotFactory {
         : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
     String color = getLayerColor(layerName);
     if (edgeTargets.size() == 1) {
-      return format("  m%d->%s[color=%s%s]\n", source, targets, color, label);
+      return format("  m%d->%s[color=%s;arrowhead=none%s]\n", source, targets, color, label);
 
     } else {
       String hyperId = "h" + source + layerName;
       return format("  %s [shape=point;color=%s;label=\"\"]\n" +
               "  m%d->%s [color=%s;arrowhead=none%s]\n" +
-              "  %s->{%s}[color=%s]\n",
+              "  %s->{%s}[color=%s;arrowhead=none]\n",
           hyperId, color,
           source, hyperId, color, label,
           hyperId, targets, color);

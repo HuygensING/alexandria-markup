@@ -68,7 +68,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGAnnotation a1 = simpleAnnotation("n", "144");
       r1.addAnnotation(a1);
       TAGTextNode t1 = store.createTextNode("He manages to keep the upper hand");
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(r1);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, r1, layerName);
@@ -146,17 +146,17 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGAnnotation n146 = simpleAnnotation("n", "146");
       TAGMarkup l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
 
-      expected.addTextNode(tn00)//
-          .addTextNode(tn01)//
-          .addTextNode(tn02)//
-          .addTextNode(tn03)//
-          .addTextNode(tn04)//
-          .addTextNode(tn05)//
-          .addTextNode(tn06)//
-          .addTextNode(tn07)//
-          .addTextNode(tn08)//
-          .addTextNode(tn09)//
-          .addTextNode(tn10)//
+      expected.addTextNode(tn00, null)//
+          .addTextNode(tn01, null)//
+          .addTextNode(tn02, null)//
+          .addTextNode(tn03, null)//
+          .addTextNode(tn04, null)//
+          .addTextNode(tn05, null)//
+          .addTextNode(tn06, null)//
+          .addTextNode(tn07, null)//
+          .addTextNode(tn08, null)//
+          .addTextNode(tn09, null)//
+          .addTextNode(tn10, null)//
           .addMarkup(excerpt)//
           .addMarkup(s1)//
           .addMarkup(l1)//
@@ -320,9 +320,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup am1 = store.createMarkup(annotationDocument, "type")/*.addTextNode(at2)*/;
       TAGTextNode at3 = store.createTextNode(" text");
       annotationDocument//
-          .addTextNode(at1)//
-          .addTextNode(at2)//
-          .addTextNode(at3)//
+          .addTextNode(at1, null)//
+          .addTextNode(at2, null)//
+          .addTextNode(at3, null)//
           .addMarkup(am1);
       String layerName = "";
       annotationDocument.associateTextNodeWithMarkupForLayer(at2, am1, layerName);
@@ -330,7 +330,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       TAGTextNode t1 = store.createTextNode("This is the main text");
 //      m1.addTextNode(t1);
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
 
@@ -365,7 +365,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup ar11 = store.createMarkup(annotationDocument, "ra11")/*.addTextNode(at1)*/;
       TAGMarkup ar12 = store.createMarkup(annotationDocument, "ra12")/*.addTextNode(at1)*/;
       annotationDocument//
-          .addTextNode(at1)//
+          .addTextNode(at1, null)//
           .addMarkup(ar11)//
           .addMarkup(ar12);
       m1.addAnnotation(a1);
@@ -375,7 +375,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       TAGTextNode t1 = store.createTextNode("");
 //      m1.addTextNode(t1);
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(m1);
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
 
@@ -401,7 +401,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       TAGTextNode t1 = store.createTextNode("bla");
 //      m1.addTextNode(t1);
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(m1);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
@@ -425,7 +425,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup m1 = store.createMarkup(expected, "r");
       TAGTextNode t1 = store.createTextNode("Splitting the .");
 //      m1.addTextNode(t1);
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(m1);
 
       String layerName = "";
@@ -447,7 +447,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup m1 = store.createMarkup(expected, "empty");
       TAGTextNode t1 = store.createTextNode("");
 //      m1.addTextNode(t1);
-      expected.addTextNode(t1);
+      expected.addTextNode(t1, null);
       expected.addMarkup(m1);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
@@ -473,7 +473,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup m1 = store.createMarkup(document, "foo");
       TAGTextNode t1 = store.createTextNode("FOOBAR");
 //      m1.addTextNode(t1);
-      document.addTextNode(t1);
+      document.addTextNode(t1, null);
       String layerName = "";
       document.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
       document.addMarkup(m1);
@@ -556,7 +556,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     TAGAnnotation a1 = simpleAnnotation(tag);
     TAGDocument annotationDocument = a1.getDocument();
     TAGTextNode annotationText = store.createTextNode(content);
-    annotationDocument.addTextNode(annotationText);
+    annotationDocument.addTextNode(annotationText, null);
     return a1;
   }
 

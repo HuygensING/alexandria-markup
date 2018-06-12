@@ -52,7 +52,7 @@ public class TAGDocument {
     return documentDTO.getDbId();
   }
 
-  public TAGDocument addTextNode(TAGTextNode textNode) {
+  public TAGDocument addTextNode(TAGTextNode textNode, TAGMarkup lastOpenedMarkup) {
     List<Long> textNodeIds = documentDTO.getTextNodeIds();
     Long textNodeDbId = textNode.getDbId();
     textNodeIds.add(textNodeDbId);
@@ -60,14 +60,26 @@ public class TAGDocument {
       documentDTO.setFirstTextNodeId(textNodeDbId);
     }
 //    documentDTO.textGraph.appendTextNode(textNodeDbId);
-    openMarkupStackForLayer.forEach((layerName, stack) -> {
-          if (!stack.isEmpty()) {
-            Long markupId = stack.peek().getDbId();
-            documentDTO.textGraph
-                .linkMarkupToTextNodeForLayer(markupId, textNodeDbId, layerName);
-          }
-        }
-    );
+//    List<String> bottomLayers = new ArrayList<>(getLayerNames());
+//    Set<String> notBottom = bottomLayers.stream()
+//        .map(l -> documentDTO.textGraph.getParentLayerMap().get(l))
+//        .collect(toSet());
+//    bottomLayers.removeAll(notBottom);
+
+//    bottomLayers.forEach(layerName -> {
+//          Deque<TAGMarkup> stack = openMarkupStackForLayer.get(layerName);
+//          if (!stack.isEmpty()) {
+//            Long markupId = stack.peek().getDbId();
+//            documentDTO.textGraph
+//                .linkMarkupToTextNodeForLayer(markupId, textNodeDbId, layerName);
+//          }
+//        }
+//
+//    );
+    if (lastOpenedMarkup != null) {
+      documentDTO.textGraph
+          .linkMarkupToTextNodeForLayer(lastOpenedMarkup.getDbId(), textNodeDbId, lastOpenedMarkup.getLayers().iterator().next());
+    }
     update();
     return this;
   }
@@ -153,6 +165,7 @@ public class TAGDocument {
     if (parentLayer != null) {
       Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(parentLayer);
       linkToParentMarkup(rootMarkup, parentLayer, openMarkupStack);
+      documentDTO.textGraph.getParentLayerMap().put(layerName, parentLayer);
     }
   }
 

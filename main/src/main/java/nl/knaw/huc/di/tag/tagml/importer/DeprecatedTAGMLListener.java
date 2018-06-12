@@ -142,7 +142,7 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
         tn.addPreviousTextNode(previousTextNode);
       }
       previousTextNode = tn;
-      document.addTextNode(tn);
+      document.addTextNode(tn, null);
       state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       logTextNode(tn);
     }
@@ -204,7 +204,7 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
 //    ctx.annotation()
 //        .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
       TAGTextNode tn = store.createTextNode("");
-      document.addTextNode(tn);
+      document.addTextNode(tn, null);
       logTextNode(tn);
       state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
@@ -220,7 +220,7 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
       tn.addPreviousTextNode(previousTextNode);
     }
     previousTextNode = tn;
-    document.addTextNode(tn);
+    document.addTextNode(tn, null);
     state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startNode = tn;
@@ -253,7 +253,7 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
     TAGTextNode tn = store.createTextNode(convergence);
     previousTextNode = tn;
-    document.addTextNode(tn);
+    document.addTextNode(tn, null);
     state.openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     textVariationStateStack.pop().endNodes.forEach(n -> {
 //      logTextNode(n);
