@@ -159,7 +159,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
       List<TAGTextNode> l1TextNodes = document.getTextNodeStreamForMarkupInLayer(l1RootMarkup, "L1").collect(toList());
       assertThat(l1TextNodes).extracting("text")
-          .containsExactlyInAnyOrder(
+          .containsExactly(
               "“Man,\"",
               " I ",
               "", "cried", "pleaded", "",

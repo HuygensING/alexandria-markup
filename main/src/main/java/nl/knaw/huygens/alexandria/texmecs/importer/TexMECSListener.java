@@ -68,7 +68,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
   @Override
   public void exitText(TextContext ctx) {
     TAGTextNode tn = store.createTextNode(ctx.getText());
-    document.addTextNode(tn);
+    document.addTextNode(tn, null);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
   }
 
@@ -86,7 +86,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
   @Override
   public void exitSoleTag(SoleTagContext ctx) {
     TAGTextNode tn = store.createTextNode("");
-    document.addTextNode(tn);
+    document.addTextNode(tn, null);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
     TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
     linkTextToMarkup(tn, markup);
@@ -123,7 +123,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
       TAGMarkup markup = addMarkup(ref.getTag(), ctx.atts());
       ref.getTextNodeStream().forEach(tn -> {
         TAGTextNode copy = store.createTextNode(tn.getText());
-        document.addTextNode(copy);
+        document.addTextNode(copy, null);
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
       });

@@ -243,7 +243,7 @@ public class TAGStore implements AutoCloseable {
   public TAGAnnotation createAnnotation(String tag, String value) {
     TAGAnnotation tagAnnotation = createAnnotation(tag);
     TAGTextNode tagTextNode = createTextNode(value);
-    tagAnnotation.getDocument().addTextNode(tagTextNode);
+    tagAnnotation.getDocument().addTextNode(tagTextNode, null);
     return tagAnnotation;
   }
 
