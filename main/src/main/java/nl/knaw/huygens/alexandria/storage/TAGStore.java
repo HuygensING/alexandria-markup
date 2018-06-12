@@ -227,25 +227,49 @@ public class TAGStore implements AutoCloseable {
   }
 
   public TAGAnnotationDTO createAnnotationDTO(String tag) {
-    TAGDocumentDTO document = new TAGDocumentDTO();
-    persist(document);
+//    TAGDocumentDTO document = new TAGDocumentDTO();
+//    persist(document);
     TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
-    annotation.setDocumentId(document.getDbId());
+//    annotation.setDocumentId(document.getDbId());
     persist(annotation);
     return annotation;
   }
 
+  public TAGAnnotation createStringAnnotation(String aName, String value) {
+    return createAnnotation(aName, value, AnnotationType.String);
+  }
+
+  public TAGAnnotation createBooleanAnnotation(String aName, Boolean value) {
+    return createAnnotation(aName, value, AnnotationType.Boolean);
+  }
+
+  public TAGAnnotation createNumberAnnotation(String aName, Float value) {
+    return createAnnotation(aName, value, AnnotationType.Number);
+  }
+  public TAGAnnotation createRefAnxnotation(String aName, String refId) {
+    return createAnnotation(aName, refId, AnnotationType.Reference);
+  }
+
+  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
+    TAGAnnotationDTO dto = createAnnotationDTO(aName);
+    dto.setType(type);
+    dto.setValue(value);
+    persist(dto);
+    return new TAGAnnotation(this, dto);
+  }
+
   public TAGAnnotation createAnnotation(String tag) {
+    assertInTransaction();
     TAGAnnotationDTO annotation = createAnnotationDTO(tag);
     return new TAGAnnotation(this, annotation);
   }
 
-  public TAGAnnotation createAnnotation(String tag, String value) {
-    TAGAnnotation tagAnnotation = createAnnotation(tag);
-    TAGTextNode tagTextNode = createTextNode(value);
-    tagAnnotation.getDocument().addTextNode(tagTextNode);
-    return tagAnnotation;
-  }
+//  public TAGAnnotation createAnnotation(String tag, String value) {
+//    TAGAnnotation tagAnnotation = createAnnotation(tag);
+//    TAGTextNode tagTextNode = createTextNode(value);
+//    tagAnnotation.getDocument().addTextNode(tagTextNode);
+//    return tagAnnotation;
+//  }
 
   public TAGAnnotation getAnnotation(Long annotationId) {
     return new TAGAnnotation(this, getAnnotationDTO(annotationId));

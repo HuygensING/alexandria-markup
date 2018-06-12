@@ -229,6 +229,21 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testStringAnnotation() {
+    String input = "[text author='somebody'>some text.<text]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("some text.")
+      );
+      assertThat(document).hasMarkupWithTag("text").withStringAnnotation("author", "somebody");
+    });
+  }
+
+  @Test
   public void testStringAnnotation1() {
     String input = "[tagml>" +
         "[m s=\"string\">text<m]" +
@@ -239,6 +254,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
     });
   }
 
@@ -253,20 +269,37 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
     });
   }
 
   @Test
   public void testNumberAnnotation() {
-    String input = "[tagml>\n" +
-        "[markup pi=3.1415>text<markup]\n" +
-        "<tagml]";
+    String input = "[text pi=3.1415926>some text.<text]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("markup")
+          markupSketch("text")
       );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("some text.")
+      );
+      assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926f);
+    });
+  }
+
+  @Test
+  public void testBooleanAnnotation() {
+    String input = "[text test=true>some text.<text]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("some text.")
+      );
+      assertThat(document).hasMarkupWithTag("text").withBooleanAnnotation("test", true);
     });
   }
 
@@ -281,6 +314,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true);
     });
   }
 
@@ -295,6 +329,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false);
     });
   }
 

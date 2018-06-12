@@ -28,7 +28,6 @@ import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 class TAGQLQueryListener extends TAGQLBaseListener {
@@ -102,7 +100,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
         String filterTag = annotationTags.get(depth);
         annotationsToFilter = annotationsToFilter.stream()//
             .filter(hasTag(filterTag))//
-            .flatMap(TAGAnnotation::getAnnotationStream)//
+//            .flatMap(TAGAnnotation::getAnnotationStream)//
             .collect(toList());
         depth += 1;
       }
@@ -206,9 +204,10 @@ class TAGQLQueryListener extends TAGQLBaseListener {
   }
 
   private String toAnnotationText(TAGAnnotation annotation) {
-    return annotation.getDocument().getTextNodeStream()//
-        .map(TAGTextNode::getText)//
-        .collect(joining());
+    return annotation.getDTO().getValue().toString();
+//    return annotation.getDocument().getTextNodeStream()//
+//        .map(TAGTextNode::getText)//
+//        .collect(joining());
   }
 
   private String getAnnotationName(PartContext partContext) {

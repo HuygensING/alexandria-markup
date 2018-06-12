@@ -21,13 +21,11 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-
-import java.util.stream.Stream;
 
 public class TAGAnnotation {
   private final TAGStore store;
   private final TAGAnnotationDTO annotation;
+  private AnnotationType type;
 
   public TAGAnnotation(TAGStore store, TAGAnnotationDTO annotation) {
     this.store = store;
@@ -35,29 +33,41 @@ public class TAGAnnotation {
     update();
   }
 
-  public TAGDocument getDocument() {
-    TAGDocumentDTO document = store.getDocumentDTO(annotation.getDocumentId());
-    return new TAGDocument(store, document);
-  }
+//  public TAGDocument getDocument() {
+//    TAGDocumentDTO document = store.getDocumentDTO(annotation.getDocumentId());
+//    return new TAGDocument(store, document);
+//  }
 
   public Long getDbId() {
     return annotation.getDbId();
   }
 
   public String getTag() {
-    return annotation.getTag();
+    return annotation.getKey();
   }
 
-  public TAGAnnotation addAnnotation(TAGAnnotation tagAnnotation) {
-    annotation.getAnnotationIds().add(tagAnnotation.getDbId());
-    update();
-    return this;
+  public boolean hasTag(String tag) {
+    return annotation.getKey().equals(tag);
   }
 
-  public Stream<TAGAnnotation> getAnnotationStream() {
-    return annotation.getAnnotationIds().stream()//
-        .map(store::getAnnotation);
+  public AnnotationType getType() {
+    return type;
   }
+
+  public void setType(AnnotationType type) {
+    this.type = type;
+  }
+
+//  public TAGAnnotation addAnnotation(TAGAnnotation tagAnnotation) {
+//    annotation.getAnnotationIds().add(tagAnnotation.getDbId());
+//    update();
+//    return this;
+//  }
+//
+//  public Stream<TAGAnnotation> getAnnotationStream() {
+//    return annotation.getAnnotationIds().stream()//
+//        .map(store::getAnnotation);
+//  }
 
   public TAGAnnotationDTO getDTO() {
     return annotation;
@@ -70,6 +80,7 @@ public class TAGAnnotation {
   @Override
   public String toString() {
     // TODO process different annotation types
-    return annotation.getTag() + '=';
+    return annotation.getKey() + '=';
   }
+
 }

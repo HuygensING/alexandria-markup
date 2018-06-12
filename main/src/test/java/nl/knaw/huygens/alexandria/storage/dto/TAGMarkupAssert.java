@@ -21,12 +21,15 @@ package nl.knaw.huygens.alexandria.storage.dto;
  */
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
@@ -77,7 +80,34 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
   }
 
   public TAGMarkupAssert inLayer(final String layerName) {
+    isNotNull();
     this.layerName = layerName;
     return myself;
+  }
+
+  public TAGMarkupAssert withStringAnnotation(String key, String value) {
+    isNotNull();
+    if (!actual.hasAnnotation(key)) {
+      String annotationKeys = actual.getAnnotationStream().map(TAGAnnotation::getTag).collect(joining(","));
+      failWithMessage(
+          "\nExpected markup %s to have annotation %s, but no such annotation was found. Available annotations: %s",
+          actual, actual.getDbId(), key, annotationKeys);
+    }
+
+    TAGAnnotation stringAnnotation = actual.getAnnotation("key");
+    if (!stringAnnotation.getType().equals(AnnotationType.String)) {
+      failWithMessage(
+          "\nExpected annotation %s of markup %s to be a string annotation, but was %s",
+          actual, key, actual.getDbId(), stringAnnotation.getType());
+    }
+    return myself;
+  }
+
+  public void withBooleanAnnotation(String key, boolean value) {
+
+  }
+
+  public void withNumberAnnotation(String key, float value) {
+
   }
 }

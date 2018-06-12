@@ -414,8 +414,8 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
         String quotedAttrValue = basicAnnotationContext.annotationValue().getText();
         // TODO: handle recursion, value types
 //      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-        TAGAnnotation annotation = store.createAnnotation(aName, quotedAttrValue);
-        markup.addAnnotation(annotation);
+//        TAGAnnotation annotation = store.createAnnotation(aName, quotedAttrValue);
+//        markup.addAnnotation(annotation);
 
       } else if (actx instanceof IdentifyingAnnotationContext) {
         IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
@@ -427,8 +427,8 @@ public class DeprecatedTAGMLListener extends TAGMLParserBaseListener {
         String aName = refAnnotationContext.annotationName().getText();
         String refId = refAnnotationContext.refValue().getText();
         // TODO add ref to model
-        TAGAnnotation annotation = store.createAnnotation(aName, refId);
-        markup.addAnnotation(annotation);
+//        TAGAnnotation annotation = store.createAnnotation(aName, refId);
+//        markup.addAnnotation(annotation);
       }
     });
   }

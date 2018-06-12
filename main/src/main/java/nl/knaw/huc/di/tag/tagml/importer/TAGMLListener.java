@@ -488,12 +488,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private void addAnnotations(List<AnnotationContext> annotationContexts, TAGMarkup markup) {
     annotationContexts.forEach(actx -> {
       if (actx instanceof BasicAnnotationContext) {
-        BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) actx;
-        String aName = basicAnnotationContext.annotationName().getText();
-        String quotedAttrValue = basicAnnotationContext.annotationValue().getText();
-        // TODO: handle recursion, value types
-//      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-        TAGAnnotation annotation = store.createAnnotation(aName, quotedAttrValue);
+        TAGAnnotation annotation = makeAnnotation((BasicAnnotationContext) actx);
         markup.addAnnotation(annotation);
 
       } else if (actx instanceof IdentifyingAnnotationContext) {
@@ -506,10 +501,35 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String aName = refAnnotationContext.annotationName().getText();
         String refId = refAnnotationContext.refValue().getText();
         // TODO add ref to model
-        TAGAnnotation annotation = store.createAnnotation(aName, refId);
+        TAGAnnotation annotation = store.createRefAnxnotation(aName, refId);
         markup.addAnnotation(annotation);
       }
     });
+  }
+
+  private TAGAnnotation makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
+    String aName = basicAnnotationContext.annotationName().getText();
+    AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+    if (annotationValueContext.AV_StringValue() != null) {
+      String value = annotationValueContext.AV_StringValue().getText();
+      return store.createStringAnnotation(aName, value);
+
+    } else if (annotationValueContext.booleanValue() != null) {
+      Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
+      return store.createBooleanAnnotation(aName, value);
+
+    } else if (annotationValueContext.AV_StringValue() != null) {
+      Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
+      return store.createNumberAnnotation(aName, value);
+    }
+    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
+    return null;
+//    String quotedAttrValue = annotationValueContext.getText();
+////        basicAnnotationContext.annotationValue().
+//    // TODO: handle recursion, value types
+////      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
+//    return store.createAnnotation(aName, quotedAttrValue);
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
@@ -624,7 +644,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -662,7 +682,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

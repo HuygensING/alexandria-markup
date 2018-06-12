@@ -116,20 +116,20 @@ public class LMNLExporter {
 
   public StringBuilder toLMNL(TAGAnnotation annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotationStream()
-        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
-    TAGDocument document = annotation.getDocument();
-    if (document.hasTextNodes()) {
-      annotationBuilder.append("}");
-      appendLimen(annotationBuilder, document);
-      if (useShorthand) {
-        annotationBuilder.append("{]");
-      } else {
-        annotationBuilder.append("{").append(annotation.getTag()).append("]");
-      }
-    } else {
-      annotationBuilder.append("]");
-    }
+//    annotation.getAnnotationStream()
+//        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
+//    TAGDocument document = annotation.getDocument();
+//    if (document.hasTextNodes()) {
+//      annotationBuilder.append("}");
+//      appendLimen(annotationBuilder, document);
+//      if (useShorthand) {
+//        annotationBuilder.append("{]");
+//      } else {
+//        annotationBuilder.append("{").append(annotation.getTag()).append("]");
+//      }
+//    } else {
+//      annotationBuilder.append("]");
+//    }
     return annotationBuilder;
   }
 
