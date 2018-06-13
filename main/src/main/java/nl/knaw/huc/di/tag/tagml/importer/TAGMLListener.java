@@ -204,6 +204,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           layers.add(newLayerId);
 
         } else {
+          if (!state.openMarkup.containsKey(layerId)) {
+            errorListener.addBreakingError(
+                "%s Layer %s has not been added at this point, use +%s to add a layer.",
+                errorPrefix(ctx, true), layerId, layerId);
+          }
           if (state.openMarkup.get(layerId).isEmpty()) {
             String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
             errorListener.addBreakingError(
@@ -645,7 +650,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -683,7 +688,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
