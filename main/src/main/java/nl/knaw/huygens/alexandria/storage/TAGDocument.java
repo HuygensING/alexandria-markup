@@ -193,8 +193,9 @@ public class TAGDocument {
     return documentDTO.textGraph.getLayerNames();
   }
 
-  public void addMarkupToLayer(TAGMarkup markup, String layerName) {
+  public void openMarkupInLayer(TAGMarkup markup, String layerName) {
     LOG.debug("layer={}", layerName);
+    openMarkupStackForLayer.putIfAbsent(layerName, new ArrayDeque<>());
     Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(layerName);
     linkToParentMarkup(markup, layerName, openMarkupStack);
     openMarkupStack.push(markup);

@@ -215,7 +215,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
                 "%s %s cannot be used here, since the root markup of this layer has closed already.",
                 errorPrefix(ctx), layer);
           } else {
-            document.addMarkupToLayer(markup, layerId);
+            document.openMarkupInLayer(markup, layerId);
             layers.add(layerId);
           }
         }
@@ -263,11 +263,20 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TAGTextNode tn = store.createTextNode("");
       document.addTextNode(tn, state.allOpenMarkup.peek());
-      document.linkTextNodes(previousTextNode, tn);
+      if (!atDocumentStart) {
+        document.linkTextNodes(previousTextNode, tn);
+      }
       previousTextNode = tn;
       logTextNode(tn);
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
-      layers.forEach(layerName -> linkTextToMarkupForLayer(tn, markup, layerName));
+      markup.addAllLayers(layers);
+      layers.forEach(layerName -> {
+        linkTextToMarkupForLayer(tn, markup, layerName);
+        document.openMarkupInLayer(markup, layerName);
+        document.closeMarkupInLayer(markup, layerName);
+
+      });
+      store.persist(markup.getDTO());
     }
   }
 

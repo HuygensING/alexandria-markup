@@ -86,17 +86,31 @@ public class DotFactory {
   }
 
   private String escape(final String label) {
-    return StringEscapeUtils.escapeHtml4(label).replaceAll("\n", "<br/>");
+    return StringEscapeUtils.escapeHtml4(label)
+        .replaceAll("\n", "\\\\n")
+        .replace(" ","_");
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
+    String shape = (textNode.isConvergence() || textNode.isDivergence())
+        ? "diamond"
+        : "box";
+    String label;
+    String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
+    String templateEnd = "]\n";
     if (textNode.isDivergence()) {
-      return format("    t%d [shape=diamond;color=blue;arrowhead=none;label=\"<\"]\n", textNode.getDbId());
+      return format(templateStart + "\"<\"" + templateEnd, textNode.getDbId(), shape);
+
     } else if (textNode.isConvergence()) {
-      return format("    t%d [shape=diamond;color=blue;arrowhead=none;label=\">\"]\n", textNode.getDbId());
+      return format(templateStart + "\">\"" + templateEnd, textNode.getDbId(), shape);
+
+    } else if (textNode.getText().isEmpty()) {
+      return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);
+
     } else {
-      return format("    t%d [shape=box;color=blue;arrowhead=none;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+      return format(templateStart + "<%s>" + templateEnd, textNode.getDbId(), shape, escape(textNode.getText()));
     }
+
   }
 
   private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {
