@@ -169,15 +169,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       MarkupNameContext markupNameContext = ctx.markupName();
       String markupName = markupNameContext.name().getText();
       LOG.debug("startTag.markupName=<{}>", markupName);
-      if (markupName.contains(":")) {
-        String namespace = markupName.split(":", 2)[0];
-        if (!namespaces.containsKey(namespace)) {
-          errorListener.addError(
-              "%s Namespace %s has not been defined.",
-              errorPrefix(ctx), namespace
-          );
-        }
-      }
+      checkNameSpace(ctx, markupName);
       ctx.annotation()
           .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
 
@@ -204,37 +196,58 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           layers.add(newLayerId);
 
         } else {
-          if (!state.openMarkup.containsKey(layerId)) {
-            errorListener.addBreakingError(
-                "%s Layer %s has not been added at this point, use +%s to add a layer.",
-                errorPrefix(ctx, true), layerId, layerId);
-          }
-          if (state.openMarkup.get(layerId).isEmpty()) {
-            String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
-            errorListener.addBreakingError(
-                "%s %s cannot be used here, since the root markup of this layer has closed already.",
-                errorPrefix(ctx), layer);
-          } else {
-            document.openMarkupInLayer(markup, layerId);
-            layers.add(layerId);
-          }
+          checkLayerWasAdded(ctx, layerId);
+          checkLayerIsOpen(ctx, layerId);
+          document.openMarkupInLayer(markup, layerId);
+          layers.add(layerId);
         }
       });
       markup.addAllLayers(layers);
 
-      if (markup != null) {
-        SuffixContext suffix = markupNameContext.suffix();
-        if (suffix != null) {
-          String id = suffix.getText().replace(TILDE, "");
-          markup.setSuffix(id);
-        }
-        markup.getLayers().forEach(l -> {
-          state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
-          state.openMarkup.get(l).push(markup);
-        });
+      addSuffix(markupNameContext, markup);
+      markup.getLayers().forEach(l -> {
+        state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
+        state.openMarkup.get(l).push(markup);
+      });
 
-        currentTextVariationState().addOpenMarkup(markup);
-        store.persist(markup.getDTO());
+      currentTextVariationState().addOpenMarkup(markup);
+      store.persist(markup.getDTO());
+    }
+  }
+
+  private void addSuffix(final MarkupNameContext markupNameContext, final TAGMarkup markup) {
+    SuffixContext suffix = markupNameContext.suffix();
+    if (suffix != null) {
+      String id = suffix.getText().replace(TILDE, "");
+      markup.setSuffix(id);
+    }
+  }
+
+  private void checkLayerIsOpen(final StartTagContext ctx, final String layerId) {
+    if (state.openMarkup.get(layerId).isEmpty()) {
+      String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
+      errorListener.addBreakingError(
+          "%s %s cannot be used here, since the root markup of this layer has closed already.",
+          errorPrefix(ctx), layer);
+    }
+  }
+
+  private void checkLayerWasAdded(final StartTagContext ctx, final String layerId) {
+    if (!state.openMarkup.containsKey(layerId)) {
+      errorListener.addBreakingError(
+          "%s Layer %s has not been added at this point, use +%s to add a layer.",
+          errorPrefix(ctx, true), layerId, layerId);
+    }
+  }
+
+  private void checkNameSpace(final StartTagContext ctx, final String markupName) {
+    if (markupName.contains(":")) {
+      String namespace = markupName.split(":", 2)[0];
+      if (!namespaces.containsKey(namespace)) {
+        errorListener.addError(
+            "%s Namespace %s has not been defined.",
+            errorPrefix(ctx), namespace
+        );
       }
     }
   }
@@ -629,10 +642,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private TAGMarkup removeFromMarkupStack2(String extendedTag, Deque<TAGMarkup> markupStack) {
-    Iterator<TAGMarkup> descendingIterator = markupStack.descendingIterator();
+    Iterator<TAGMarkup> iterator = markupStack.iterator();
     TAGMarkup markup = null;
-    while (descendingIterator.hasNext()) {
-      markup = descendingIterator.next();
+    while (iterator.hasNext()) {
+      markup = iterator.next();
       if (markup.getExtendedTag().equals(extendedTag)) {
         break;
       }

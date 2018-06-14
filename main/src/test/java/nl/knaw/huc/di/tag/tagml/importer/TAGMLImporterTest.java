@@ -695,6 +695,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> {
       try {
         TAGDocument document = parseTAGML(tagML);
+        logDocumentGraph(document, tagML);
         fail("TAGMLSyntaxError expected!");
       } catch (TAGMLSyntaxError e) {
         assertThat(e).hasMessage("Parsing errors:\n" +
@@ -707,6 +708,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 //    LOG.info("TAGML=\n{}\n", tagML);
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
+    logDocumentGraph(document, tagML);
     TAGMLExporter tagmlExporter = new TAGMLExporter(store);
     String tagml = tagmlExporter.asTAGML(document);
     LOG.info("\n\nTAGML:\n{}\n", tagml);
