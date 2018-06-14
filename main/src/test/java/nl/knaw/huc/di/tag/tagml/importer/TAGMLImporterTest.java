@@ -141,6 +141,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testTAGML2() {
     String tagML = "[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]<line|a,b]";
+//    String tagML = "[line|+A,+B,+N>[a|A>[name|N>Trump<name|N] [b|B>likes<a|A] [name|N>Kim<name|N]<b|B]<line|A,B,N]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -590,7 +591,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testUseSuffixForSelfOverlap() {
+  public void testUseLayersForSelfOverlap() {
     String tagML = "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);

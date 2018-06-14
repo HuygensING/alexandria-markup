@@ -52,7 +52,7 @@ public class TAGDocument {
     return documentDTO.getDbId();
   }
 
-  public TAGDocument addTextNode(TAGTextNode textNode, TAGMarkup lastOpenedMarkup) {
+  public TAGDocument addTextNode(TAGTextNode textNode, List<TAGMarkup> lastOpenedMarkup) {
     List<Long> textNodeIds = documentDTO.getTextNodeIds();
     Long textNodeDbId = textNode.getDbId();
     textNodeIds.add(textNodeDbId);
@@ -77,8 +77,9 @@ public class TAGDocument {
 //
 //    );
     if (lastOpenedMarkup != null) {
-      documentDTO.textGraph
-          .linkMarkupToTextNodeForLayer(lastOpenedMarkup.getDbId(), textNodeDbId, lastOpenedMarkup.getLayers().iterator().next());
+      lastOpenedMarkup.forEach(m -> documentDTO.textGraph
+          .linkMarkupToTextNodeForLayer(m.getDbId(), textNodeDbId, m.getLayers().iterator().next())
+      );
     }
     update();
     return this;
