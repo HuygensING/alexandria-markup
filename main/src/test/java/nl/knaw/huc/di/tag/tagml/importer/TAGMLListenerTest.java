@@ -129,33 +129,33 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       TextGraph textGraph = document.getDTO().textGraph;
 
       List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
-      assertThat(textNodes).hasSize(7);
+      assertThat(textNodes).hasSize(5);
 
       TAGTextNode textNode1 = textNodes.get(0);
       assertThat(textNode1).hasText("Icecream is ");
 
-      TAGTextNode textNode2 = textNodes.get(1);
-      assertThat(textNode2).isDivergence();
-      Long divergenceNode = textNode2.getDbId();
-      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
-      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
+//      TAGTextNode textNode2 = textNodes.get(1);
+//      assertThat(textNode2).isDivergence();
+//      Long divergenceNode = textNode2.getDbId();
+//      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
+//      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
 
-      TAGTextNode textNode3 = textNodes.get(2);
+      TAGTextNode textNode3 = textNodes.get(1);
       assertThat(textNode3).hasText("tasty");
 
-      TAGTextNode textNode4 = textNodes.get(3);
+      TAGTextNode textNode4 = textNodes.get(2);
       assertThat(textNode4).hasText("cold");
 
-      TAGTextNode textNode5 = textNodes.get(4);
+      TAGTextNode textNode5 = textNodes.get(3);
       assertThat(textNode5).hasText("sweet");
 
-      TAGTextNode textNode6 = textNodes.get(5);
-      assertThat(textNode6).isConvergence();
-      Long convergenceNode = textNode6.getDbId();
-      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
-      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
+//      TAGTextNode textNode6 = textNodes.get(5);
+//      assertThat(textNode6).isConvergence();
+//      Long convergenceNode = textNode6.getDbId();
+//      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
+//      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
 
-      TAGTextNode textNode7 = textNodes.get(6);
+      TAGTextNode textNode7 = textNodes.get(4);
       assertThat(textNode7).hasText("!");
     });
   }

@@ -79,7 +79,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCharacterEscapingInTextVariation() {
-    String tagML = "In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.";
+    String tagML = "[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.<t]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -93,7 +93,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       );
 
       List<TAGTextNode> TAGTextNodes = document.getTextNodeStream().collect(toList());
-      assertThat(TAGTextNodes).hasSize(6);
+      assertThat(TAGTextNodes).hasSize(4);
     });
   }
 
@@ -264,7 +264,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       );
 
       List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
-      assertThat(textNodes).hasSize(6);
+      assertThat(textNodes).hasSize(4);
 
       TAGTextNode textNode = textNodes.get(0);
       assertThat(textNode).hasText("This is a ");
@@ -369,29 +369,29 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(TAGTextNodes).extracting("text").containsExactly(
           "This ",
           "is ",
-          "", // <|
+//          "", // <|
           "a failing",
           "an excellent",
-          "", // |>
+//          "", // |>
           " test"
       );
 
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       assertThat(TAGMarkups)
           .extracting("tag")
-          .containsExactly("t", "x");
+          .containsExactly("t", "x", ":branches", ":branch", ":branch");
 
       TAGMarkup t = TAGMarkups.get(0);
       assertThat(t.getTag()).isEqualTo("t");
       List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
-      assertThat(tTAGTextNodes).hasSize(7);
+      assertThat(tTAGTextNodes).hasSize(5);
 
       TAGMarkup x = TAGMarkups.get(1);
       assertThat(x.getTag()).isEqualTo("x");
       List<TAGTextNode> xTAGTextNodes = x.getTextNodeStream().collect(toList());
       assertThat(xTAGTextNodes)
           .extracting("text")
-          .containsExactly("is ", "", "a failing", "an excellent", "");
+          .containsExactly("is ", "a failing", "an excellent");
 
     });
   }
@@ -407,7 +407,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
     String tagML = "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
-    String expectedErrors = "line 1:24 : Markup [l> opened before branch 1, should not be closed in a branch.\n" +
+    String expectedErrors = "line 1:19 : Markup [l> opened before branch 1, should not be closed in a branch.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -483,7 +483,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<|[del>book,<del]<-q]" +
         "| [add>thought Alice<add]|>" +
         " [+q>without pictures or conversation?<q]<x]";
-    String expectedErrors = "line 1:53 : Markup [q> opened before branch 1, should not be closed in a branch.\n" +
+    String expectedErrors = "line 1:50 : Markup [q> opened before branch 1, should not be closed in a branch.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -685,7 +685,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testUnclosedTextVariationThrowsSyntaxError() {
     String tagML = "[t>This is <|good|bad.<t]";
     String expectedErrors = "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n" +
-        "line 1:12 : Markup [t> opened before branch 2, should not be closed in a branch.\n" +
+        "line 1:24 : Markup [t> opened before branch 2, should not be closed in a branch.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }

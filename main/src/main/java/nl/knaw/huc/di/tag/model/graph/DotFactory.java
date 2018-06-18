@@ -88,7 +88,7 @@ public class DotFactory {
   private String escape(final String label) {
     return StringEscapeUtils.escapeHtml4(label)
         .replaceAll("\n", "\\\\n")
-        .replace(" ","_");
+        .replace(" ", "_");
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
@@ -120,6 +120,13 @@ public class DotFactory {
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
+    if (markup.getExtendedTag().equals(":branches")) {
+      return format("  m%d [shape=triangle;color=red;label=\"\"]\n", markup.getDbId());
+
+    } else if (markup.getExtendedTag().equals(":branch")) {
+      return format("  m%d [shape=point;color=red]\n", markup.getDbId());
+
+    }
     return format("  m%d [color=red;label=<%s>]\n", markup.getDbId(), markup.getExtendedTag());
   }
 
