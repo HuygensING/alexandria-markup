@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -425,27 +424,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     final Set<String> layers = getOpenLayers();
     closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
-    closeSystemMarkup(":branches",layers);
-//    closeTextVariationMarkup(":branches", layers);
+    closeSystemMarkup(":branches", layers);
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
     if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
       return;
     }
-//    mergeNewOpenMarkup(ctx);
-//    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
-//    TAGTextNode convergence = store.createTextNode(TAGTextNodeType.convergence);
-//    previousTextNode = convergence;
-
-//    addAndConnectToMarkup(convergence);
-//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
-//    textVariationStateStack.pop().endNodes.forEach(n -> {
-////      logTextNode(n);
-//      document.linkTextNodes(n, convergence);
-//    });
-////    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
-//    logTextNode(convergence);
     textVariationStateStack.pop();
   }
 
@@ -461,51 +446,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private Set<String> getOpenLayers() {
-    //    layers.add(TAGML.DEFAULT_LAYER);
     return getRelevantOpenMarkup().stream()
         .map(TAGMarkup::getLayers)
         .flatMap(Collection::stream)
         .collect(toSet());
   }
 
-//  private void mergeNewOpenMarkup(ParserRuleContext ctx) {
-//    /// TODO: refactor!
-//    TextVariationState textVariationState = currentTextVariationState();
-//    if (textVariationState.openMarkup.isEmpty()) {
-//      return;
-//    }
-//    List<TAGMarkup> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
-//    for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
-//      List<TAGMarkup> markupToMerge = textVariationState.openMarkup.get(branch);
-//      for (TAGMarkup otherMarkup : markupToMerge) {
-//        Optional<TAGMarkup> masterMarkupOptional = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
-//        if (masterMarkupOptional.isPresent()) {
-//          List<Long> textNodeIdsToAdd = new ArrayList<>();
-//          TAGMarkup masterMarkup = masterMarkupOptional.get();
-//          otherMarkup.getTextNodeStream().forEach(textNode -> {
-//            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, TAGML.DEFAULT_LAYER);
-//            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, layerName));
-//
-//            textNodeIdsToAdd.add(textNode.getDbId());
-//          });
-////          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
-//          document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
-//          store.persist(document.getDTO());
-//          store.persist(masterMarkup.getDTO());
-//          store.remove(otherMarkup.getDTO());
-//        } else {
-//          errorListener.addBreakingError(
-//              "%s Markup %s found in branch %s, but not in branch %s.",
-//              errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
-//          );
-//        }
-//      }
-//    }
-//  }
-
-  private Optional<TAGMarkup> findMatchingMarkup(List<TAGMarkup> markupOpenedInBranch0, TAGMarkup m) {
-    return markupOpenedInBranch0.stream().filter(m::matches).findFirst();
-  }
 
   private void checkEndStates(final TextVariationContext ctx) {
     List<List<String>> suspendedMarkupInBranch = new ArrayList<>();
