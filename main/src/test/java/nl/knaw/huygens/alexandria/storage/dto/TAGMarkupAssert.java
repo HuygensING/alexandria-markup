@@ -86,28 +86,55 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
   }
 
   public TAGMarkupAssert withStringAnnotation(String key, String value) {
+    basicAnnotationAssertions(key, value, AnnotationType.String);
+    return myself;
+  }
+
+  public TAGMarkupAssert withBooleanAnnotation(String key, Boolean value) {
+    basicAnnotationAssertions(key, value, AnnotationType.Boolean);
+    return myself;
+  }
+
+  public TAGMarkupAssert withNumberAnnotation(String key, Float value) {
+    basicAnnotationAssertions(key, value, AnnotationType.Number);
+    return myself;
+  }
+
+  private void basicAnnotationAssertions(String key, Object value, AnnotationType number) {
     isNotNull();
+    assertAnnotationExists(key);
+    assertAnnotationHasType(key, number);
+    assertAnnotationHasValue(key, value);
+  }
+
+  private void assertAnnotationExists(String key) {
     if (!actual.hasAnnotation(key)) {
-      String annotationKeys = actual.getAnnotationStream().map(TAGAnnotation::getTag).collect(joining(","));
+      String annotationKeys = actual.getAnnotationStream()
+          .map(TAGAnnotation::getTag)
+          .collect(joining(","));
       failWithMessage(
           "\nExpected markup %s to have annotation %s, but no such annotation was found. Available annotations: %s",
           actual, actual.getDbId(), key, annotationKeys);
     }
+  }
 
-    TAGAnnotation stringAnnotation = actual.getAnnotation("key");
-    if (!stringAnnotation.getType().equals(AnnotationType.String)) {
+  private void assertAnnotationHasType(String key, AnnotationType expectedAnnotationType) {
+    TAGAnnotation actualAnnotation = actual.getAnnotation(key);
+    if (!expectedAnnotationType.equals(actualAnnotation.getType())) {
       failWithMessage(
-          "\nExpected annotation %s of markup %s to be a string annotation, but was %s",
-          actual, key, actual.getDbId(), stringAnnotation.getType());
+          "\nExpected annotation %s of markup %s to be a %s annotation, but was %s",
+          key, actual, expectedAnnotationType.name(), actualAnnotation.getType());
     }
-    return myself;
   }
 
-  public void withBooleanAnnotation(String key, boolean value) {
-
+  private void assertAnnotationHasValue(String key, Object expectedValue) {
+    TAGAnnotation actualAnnotation = actual.getAnnotation(key);
+    Object actualValue = actualAnnotation.getValue();
+    if (!expectedValue.equals(actualValue)) {
+      failWithMessage(
+          "\nExpected annotation %s of markup %s to have value %s, but was %s",
+          key, actual, expectedValue, actualValue);
+    }
   }
 
-  public void withNumberAnnotation(String key, float value) {
-
-  }
 }

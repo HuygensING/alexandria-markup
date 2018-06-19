@@ -76,7 +76,7 @@ public class DotFactory {
         .map(e -> toOutgoingEdgeLine(e, textGraph))
         .forEach(dotBuilder::append);
 
-    String graphLabel = escape(label);
+    String graphLabel = escape(label).replace("_", "");
     if (!graphLabel.isEmpty()) {
       dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
     }
@@ -95,7 +95,6 @@ public class DotFactory {
     String shape = (textNode.isConvergence() || textNode.isDivergence())
         ? "diamond"
         : "box";
-    String label;
     String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
     String templateEnd = "]\n";
     if (textNode.isDivergence()) {

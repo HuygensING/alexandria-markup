@@ -425,7 +425,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     final Set<String> layers = getOpenLayers();
     closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
-    closeSystemMarkup(":branches",layers);
+    closeSystemMarkup(":branches", layers);
 //    closeTextVariationMarkup(":branches", layers);
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
@@ -637,14 +637,16 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     String aName = basicAnnotationContext.annotationName().getText();
     AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
     if (annotationValueContext.AV_StringValue() != null) {
-      String value = annotationValueContext.AV_StringValue().getText();
+      String value = annotationValueContext.AV_StringValue().getText()
+          .replaceFirst("^.", "")
+          .replaceFirst(".$", "");
       return store.createStringAnnotation(aName, value);
 
     } else if (annotationValueContext.booleanValue() != null) {
       Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
       return store.createBooleanAnnotation(aName, value);
 
-    } else if (annotationValueContext.AV_StringValue() != null) {
+    } else if (annotationValueContext.AV_NumberValue() != null) {
       Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
       return store.createNumberAnnotation(aName, value);
     }

@@ -25,7 +25,6 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
 public class TAGAnnotation {
   private final TAGStore store;
   private final TAGAnnotationDTO annotation;
-  private AnnotationType type;
 
   public TAGAnnotation(TAGStore store, TAGAnnotationDTO annotation) {
     this.store = store;
@@ -51,13 +50,16 @@ public class TAGAnnotation {
   }
 
   public AnnotationType getType() {
-    return type;
+    return annotation.getType();
   }
 
   public void setType(AnnotationType type) {
-    this.type = type;
+    annotation.setType(type);
   }
 
+  public Object getValue() {
+    return annotation.getValue();
+  }
 //  public TAGAnnotation addAnnotation(TAGAnnotation tagAnnotation) {
 //    annotation.getAnnotationIds().add(tagAnnotation.getDbId());
 //    update();
