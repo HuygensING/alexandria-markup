@@ -264,13 +264,6 @@ public class TAGStore implements AutoCloseable {
     return new TAGAnnotation(this, annotation);
   }
 
-//  public TAGAnnotation createAnnotation(String tag, String value) {
-//    TAGAnnotation tagAnnotation = createAnnotation(tag);
-//    TAGTextNode tagTextNode = createTextNode(value);
-//    tagAnnotation.getDocument().addTextNode(tagTextNode);
-//    return tagAnnotation;
-//  }
-
   public TAGAnnotation getAnnotation(Long annotationId) {
     return new TAGAnnotation(this, getAnnotationDTO(annotationId));
   }

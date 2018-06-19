@@ -1,12 +1,8 @@
-[!ns b http://example.com/body]
-[!ns t http://example.com/timing]
-[!ns c http://example.com/chords]
-[b:body>[t:timing>[c:chords>
-[b:div class='stanza' title=4>[b:p>[t:screenful~68 starts=68>[t:main~68>[c:em>Bright are the<c:em] [c:bm>stars that shine<c:bm]<t:main~68]<b:p]
-[b:p>[t:next~68>[t:screenful~72 starts=72>[t:main~72>[c:em>Dark is the<c:em] [c:bm>sky<c:bm]<t:main~72]<t:next~68]<t:screenful~68]<b:p]
-[b:p>[t:next~72>[t:screenful~76 starts=76>[t:main~76>[c:em>I know [lyrics popup={fact=[>[p>Paul McCartney wrote this about his girlfriend, an actress named Jane Asher<p]<]}>this<c:em] [c:bm>love of mine<c:bm]<t:main~76]<t:next~72]<t:screenful~72]<b:p]
-[b:p>[t:next~76>[t:screenful~80 starts=80>[t:main~80>[c:g>Will never<c:g] [c:a>die<lyrics]<t:main~80]<t:next~76]<t:screenful~76]<b:p]<b:div]
-[b:div class='refrain'>[b:p>[t:next~80>[t:screenful~84 starts=84>[t:main~84>And I<c:a] [c:d>love her<c:d]<t:next~80]<t:screenful~80]<t:main~84]<t:screenful~84]<b:p]<b:div]
-<c:chords]<t:timing]<b:body]
-[! the ids in the t:main and t:next markup are nog strictly necessary, since there is no self-overlap, but it's a way to make it clear to which t:screenful it belongs.
-   an alternative way would be to define seperate namespaces for the different screenfuls (since that's where the hierarchies self-overlap) !]
+[tag|+L,+B,+T,+C>
+[body|B>[timing|T>[chords|C>
+[div|B class='stanza' title=4>[p|B>[screenful|T+S68 starts=68>[main|S68>[em|C>Bright are the<em|C] [bm|C>stars that shine<bm|C]<main|S68]<p|B]
+[p|B>[next|S68>[screenful|T+S72 starts=72>[main|S72>[em|C>Dark is the<em|C] [bm|C>sky<bm|C]<main|S72]<next|S68]<screenful|S68]<p|B]
+[p|B>[next|S72>[screenful|T+S76 starts=76>[main|S76>[em|C>I know [lyrics|L popup={fact=[>[p>Paul McCartney wrote this about his girlfriend, an actress named Jane Asher<p]<]}>this<em|C] [bm|C>love of mine<bm|C]<main|S76]<next|S72]<screenful|S72]<p|B]
+[p|B>[next|S76>[screenful|T+S80 starts=80>[main|S80>[g|C>Will never<g|C] [a|C>die<lyrics|L]<main|S80]<next|S76]<screenful|S76]<p|B]<div|B]
+[div|B class='refrain'>[p|B>[next|S80>[screenful|T+S84 starts=84>[main|S84>And I<a|C] [d|C>love her<d|C]<next|S80]<screenful|S80]<main|S84]<screenful|S84]<p|B]<div|B]
+<chords|C]<timing|T]<body|B]<tag|L,C,T,B]

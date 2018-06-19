@@ -44,6 +44,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   Logger LOG = LoggerFactory.getLogger(getClass());
   String id = "";
   Map<String, Long> layerRootMap = new HashMap<>();
+  Map<String,String> parentLayerMap = new HashMap<>();
   Long firstTextNodeId;
   Long lastTextNodeId;
 
@@ -202,6 +203,10 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     TextChainEdge edge = Edges.textChainEdge();
     addDirectedHyperEdge(edge, edge.label(), textNode1, textNode2);
     return this;
+  }
+
+  public Map<String, String> getParentLayerMap() {
+    return parentLayerMap;
   }
 
   class TextNodeIdChainIterator implements Iterator<Long> {

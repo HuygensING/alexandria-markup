@@ -86,26 +86,47 @@ public class DotFactory {
   }
 
   private String escape(final String label) {
-    return StringEscapeUtils.escapeHtml4(label).replaceAll("\n", "<br/>");
+    return StringEscapeUtils.escapeHtml4(label)
+        .replaceAll("\n", "\\\\n")
+        .replace(" ", "_");
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
+    String shape = (textNode.isConvergence() || textNode.isDivergence())
+        ? "diamond"
+        : "box";
+    String label;
+    String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
+    String templateEnd = "]\n";
     if (textNode.isDivergence()) {
-      return format("    t%d [shape=diamond;color=blue;label=\"<\"]\n", textNode.getDbId());
+      return format(templateStart + "\"<\"" + templateEnd, textNode.getDbId(), shape);
+
     } else if (textNode.isConvergence()) {
-      return format("    t%d [shape=diamond;color=blue;label=\">\"]\n", textNode.getDbId());
+      return format(templateStart + "\">\"" + templateEnd, textNode.getDbId(), shape);
+
+    } else if (textNode.getText().isEmpty()) {
+      return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);
+
     } else {
-      return format("    t%d [shape=box;color=blue;label=<%s>]\n", textNode.getDbId(), escape(textNode.getText()));
+      return format(templateStart + "<%s>" + templateEnd, textNode.getDbId(), shape, escape(textNode.getText()));
     }
+
   }
 
   private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {
     Long source = textGraph.getSource(edge);
     String targets = textGraph.getTargets(edge).stream().map(i -> "t" + i).collect(joining(","));
-    return format("    t%d->{%s}[color=blue;label=<%s>]\n", source, targets, "");
+    return format("    t%d->{%s}[color=white;arrowhead=none;label=<%s>]\n", source, targets, "");
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
+    if (markup.getExtendedTag().startsWith(":branches")) {
+      return format("  m%d [shape=triangle;color=red;label=\"\"]\n", markup.getDbId());
+
+    } else if (markup.getExtendedTag().startsWith(":branch")) {
+      return format("  m%d [shape=point;color=red]\n", markup.getDbId());
+
+    }
     return format("  m%d [color=red;label=<%s>]\n", markup.getDbId(), markup.getExtendedTag());
   }
 
@@ -120,13 +141,13 @@ public class DotFactory {
         : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
     String color = getLayerColor(layerName);
     if (edgeTargets.size() == 1) {
-      return format("  m%d->%s[color=%s%s]\n", source, targets, color, label);
+      return format("  m%d->%s[color=%s;arrowhead=none%s]\n", source, targets, color, label);
 
     } else {
       String hyperId = "h" + source + layerName;
       return format("  %s [shape=point;color=%s;label=\"\"]\n" +
               "  m%d->%s [color=%s;arrowhead=none%s]\n" +
-              "  %s->{%s}[color=%s]\n",
+              "  %s->{%s}[color=%s;arrowhead=none]\n",
           hyperId, color,
           source, hyperId, color, label,
           hyperId, targets, color);
