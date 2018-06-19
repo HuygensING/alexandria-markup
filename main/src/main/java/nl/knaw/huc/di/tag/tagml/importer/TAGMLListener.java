@@ -433,7 +433,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
       return;
     }
-    mergeNewOpenMarkup(ctx);
+//    mergeNewOpenMarkup(ctx);
 //    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
 //    TAGTextNode convergence = store.createTextNode(TAGTextNodeType.convergence);
 //    previousTextNode = convergence;
@@ -468,40 +468,40 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         .collect(toSet());
   }
 
-  private void mergeNewOpenMarkup(ParserRuleContext ctx) {
-    /// TODO: refactor!
-    TextVariationState textVariationState = currentTextVariationState();
-    if (textVariationState.openMarkup.isEmpty()) {
-      return;
-    }
-    List<TAGMarkup> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
-    for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
-      List<TAGMarkup> markupToMerge = textVariationState.openMarkup.get(branch);
-      for (TAGMarkup otherMarkup : markupToMerge) {
-        Optional<TAGMarkup> masterMarkupOptional = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
-        if (masterMarkupOptional.isPresent()) {
-          List<Long> textNodeIdsToAdd = new ArrayList<>();
-          TAGMarkup masterMarkup = masterMarkupOptional.get();
-          otherMarkup.getTextNodeStream().forEach(textNode -> {
-            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, TAGML.DEFAULT_LAYER);
-            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, layerName));
-
-            textNodeIdsToAdd.add(textNode.getDbId());
-          });
-//          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
-          document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
-          store.persist(document.getDTO());
-          store.persist(masterMarkup.getDTO());
-          store.remove(otherMarkup.getDTO());
-        } else {
-          errorListener.addBreakingError(
-              "%s Markup %s found in branch %s, but not in branch %s.",
-              errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
-          );
-        }
-      }
-    }
-  }
+//  private void mergeNewOpenMarkup(ParserRuleContext ctx) {
+//    /// TODO: refactor!
+//    TextVariationState textVariationState = currentTextVariationState();
+//    if (textVariationState.openMarkup.isEmpty()) {
+//      return;
+//    }
+//    List<TAGMarkup> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
+//    for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
+//      List<TAGMarkup> markupToMerge = textVariationState.openMarkup.get(branch);
+//      for (TAGMarkup otherMarkup : markupToMerge) {
+//        Optional<TAGMarkup> masterMarkupOptional = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
+//        if (masterMarkupOptional.isPresent()) {
+//          List<Long> textNodeIdsToAdd = new ArrayList<>();
+//          TAGMarkup masterMarkup = masterMarkupOptional.get();
+//          otherMarkup.getTextNodeStream().forEach(textNode -> {
+//            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, TAGML.DEFAULT_LAYER);
+//            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, layerName));
+//
+//            textNodeIdsToAdd.add(textNode.getDbId());
+//          });
+////          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
+//          document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
+//          store.persist(document.getDTO());
+//          store.persist(masterMarkup.getDTO());
+//          store.remove(otherMarkup.getDTO());
+//        } else {
+//          errorListener.addBreakingError(
+//              "%s Markup %s found in branch %s, but not in branch %s.",
+//              errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
+//          );
+//        }
+//      }
+//    }
+//  }
 
   private Optional<TAGMarkup> findMatchingMarkup(List<TAGMarkup> markupOpenedInBranch0, TAGMarkup m) {
     return markupOpenedInBranch0.stream().filter(m::matches).findFirst();
