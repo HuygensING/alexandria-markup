@@ -151,7 +151,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           .findFirst()
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-      assertThat(markups).extracting("tag").containsExactly("tagml", "pre", "s");
+      assertThat(markups).extracting("tag").containsExactly(":branch", ":branches", "s", "pre", "tagml");
 
       List<TAGMarkup> preMarkups = document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
       assertThat(preMarkups).hasSize(1);
@@ -161,9 +161,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(l1TextNodes).extracting("text")
           .containsExactly(
               "“Man,\"",
-              " I ",
-              "", "cried", "pleaded", "",
-              ", ",
               "\"how ignorant art thou in thy pride of wisdom!”"
           );
     });

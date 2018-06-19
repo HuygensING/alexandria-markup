@@ -367,7 +367,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
     final Set<String> layers = getOpenLayers();
-    closeTextVariationMarkup(":branch", layers);
+    closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
 
     currentTextVariationState().endNodes.add(previousTextNode);
@@ -407,11 +407,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       }
       List<TAGMarkup> openedInBranch = new ArrayList<>(currentOpenMarkupInLayer);
       openedInBranch.removeAll(openMarkupAtStartInLayer);
-      if (!openedInBranch.isEmpty()) {
-        String openTags = openedInBranch.stream()
-            .filter(m -> !m.getTag().startsWith(":"))
-            .map(this::openTag)
-            .collect(joining(","));
+      String openTags = openedInBranch.stream()
+          .filter(m -> !m.getTag().startsWith(":"))
+          .map(this::openTag)
+          .collect(joining(","));
+      if (!openTags.isEmpty()) {
         errorListener.addBreakingError(
             "%s Markup %s opened in branch %s must be closed before starting a new branch.",
             errorPrefix(ctx), openTags, branch);
@@ -423,9 +423,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
     final Set<String> layers = getOpenLayers();
-    closeTextVariationMarkup(":branch", layers);
+    closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
-    closeTextVariationMarkup(":branches", layers);
+    closeSystemMarkup(":branches",layers);
+//    closeTextVariationMarkup(":branches", layers);
     currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
@@ -446,6 +447,17 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 ////    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
 //    logTextNode(convergence);
     textVariationStateStack.pop();
+  }
+
+  private void closeSystemMarkup(String tag, Set<String> layers) {
+    for (String l : layers) {
+      String suffix = TAGML.DEFAULT_LAYER.equals(l)
+          ? ""
+          : "|" + l;
+      Set<String> layer = new HashSet<>();
+      layer.add(l);
+      closeTextVariationMarkup(tag + suffix, layer);
+    }
   }
 
   private Set<String> getOpenLayers() {
@@ -763,7 +775,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -801,7 +813,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
