@@ -120,10 +120,10 @@ public class DotFactory {
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
-    if (markup.getExtendedTag().equals(":branches")) {
+    if (markup.getExtendedTag().startsWith(":branches")) {
       return format("  m%d [shape=triangle;color=red;label=\"\"]\n", markup.getDbId());
 
-    } else if (markup.getExtendedTag().equals(":branch")) {
+    } else if (markup.getExtendedTag().startsWith(":branch")) {
       return format("  m%d [shape=point;color=red]\n", markup.getDbId());
 
     }
