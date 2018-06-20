@@ -187,41 +187,14 @@ public class TAGMLExporter {
         }
         TAGTextNodeDTO textNode = nodeToProcess.getDTO();
         String content = nodeToProcess.getText();
-        switch (textNode.getType()) {
-          case plaintext:
-            String escapedText = variationState.inVariation()
-                ? TAGML.escapeVariantText(content)
-                : TAGML.escapeRegularText(content);
-            tagmlBuilder.append(escapedText);
-            if (!nextTextNodes.isEmpty()) {
-              nodesToProcess.push(nextTextNodes.get(0));
-            }
-            break;
-
-          case divergence: // This node will be visited only once
-            tagmlBuilder.append(DIVERGENCE);
-            textVariationStates.push(new TextVariationState());
-            TextVariationState textVariationState = textVariationStates.peek();
-            textVariationState.setStartState(state.copy())
-                .setBranchStartNodes(nextTextNodes);
-            List<TAGTextNode> tmp = new ArrayList<>(nextTextNodes);
-            Collections.reverse(tmp);
-            tmp.forEach(nodesToProcess::push);
-            break;
-
-          case convergence: // this node will be visited for every textvariation branch
-            textVariationState = textVariationStates.peek();
-            if (!nextTextNodes.isEmpty()) {
-              textVariationState.setConvergenceSucceedingNodeId(nextTextNodes.get(0).getDbId());
-              if (textVariationState.allBranchesTraversed()) {
-                nodesToProcess.push(nextTextNodes.get(0));
-              }
-            }
-            break;
+        String escapedText = variationState.inVariation()
+            ? TAGML.escapeVariantText(content)
+            : TAGML.escapeRegularText(content);
+        tagmlBuilder.append(escapedText);
+        if (!nextTextNodes.isEmpty()) {
+          nodesToProcess.push(nextTextNodes.get(0));
         }
-        if (!nodeToProcess.isConvergence()) {
-          processedNodes.add(nodeToProcess);
-        }
+        processedNodes.add(nodeToProcess);
         state.lastTextNodeId = nodeToProcess.getDbId();
         LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TAGTextNode::getDbId).collect(toList()));
         LOG.info("TAGML={}\n", tagmlBuilder);
@@ -263,10 +236,12 @@ public class TAGMLExporter {
   }
 
   private boolean needsDivider(final TAGTextNode textNode) {
-    List<TAGTextNode> prevTextNodes = textNode.getPrevTextNodes();
-    return prevTextNodes.size() == 1
-        && prevTextNodes.get(0).isDivergence()
-        && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(textNode);
+    // TODO: refactor
+//    List<TAGTextNode> prevTextNodes = textNode.getPrevTextNodes();
+//    return prevTextNodes.size() == 1
+//        && prevTextNodes.get(0).isDivergence()
+//        && !prevTextNodes.get(0).getNextTextNodes().get(0).equals(textNode);
+    return false;
   }
 
   private StringBuilder toCloseTag(TAGMarkup markup) {
@@ -290,12 +265,9 @@ public class TAGMLExporter {
   private void logTextNode(final TAGTextNode textNode) {
     TAGTextNodeDTO dto = textNode.getDTO();
     LOG.debug("\n");
-    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
+    LOG.debug("TextNode(id={}, text=<{}>)",
         textNode.getDbId(),
-        dto.getType(),
-        dto.getText(),
-        dto.getPrevTextNodeIds(),
-        dto.getNextTextNodeIds()
+        dto.getText()
     );
   }
 }

@@ -21,9 +21,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
-import nl.knaw.huc.di.tag.model.graph.TextChainEdge;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
-import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
@@ -161,17 +159,6 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   }
 
   // private methods
-  private List<Edge> incomingTextEdges(TextGraph textGraph, Long textNode) {
-    return textGraph.getIncomingEdges(textNode).stream()
-        .filter(TextChainEdge.class::isInstance)
-        .collect(toList());
-  }
-
-  private List<Edge> outgoingTextEdges(TextGraph textGraph, Long textNode) {
-    return textGraph.getOutgoingEdges(textNode).stream()
-        .filter(TextChainEdge.class::isInstance)
-        .collect(toList());
-  }
 
   private TAGDocument assertTAGMLParses(final String input) {
     ErrorListener errorListener = new ErrorListener();

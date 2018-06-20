@@ -26,6 +26,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.Edges;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +43,12 @@ import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 public class TextGraph extends HyperGraph<Long, Edge> {
   @NotPersistent
   Logger LOG = LoggerFactory.getLogger(getClass());
+
   String id = "";
+  Long documentNode;
   Map<String, Long> layerRootMap = new HashMap<>();
-  Map<String,String> parentLayerMap = new HashMap<>();
+  Map<String, String> parentLayerMap = new HashMap<>();
   Long firstTextNodeId;
-  Long lastTextNodeId;
 
   public TextGraph() {
     super(GraphType.ORDERED);
@@ -54,6 +56,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public TextGraph setLayerRootMarkup(final String layerName, final Long markupNodeId) {
     layerRootMap.put(layerName, markupNodeId);
+    addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, markupNodeId);
     return this;
   }
 
@@ -64,18 +67,18 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public TextGraph linkMarkupToTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
-    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
-    if (existingEdges.isEmpty()) {
-      final LayerEdge edge = Edges.markupToText(layerName);
-      addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
+//    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
+//    if (existingEdges.isEmpty()) {
+    final LayerEdge edge = Edges.markupToText(layerName);
+    addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
 
-    } else if (existingEdges.size() > 1) {
-      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
-
-    } else {
-      final LayerEdge existingEdge = existingEdges.get(0);
-      addTargetsToHyperEdge(existingEdge, textNodeId);
-    }
+//    } else if (existingEdges.size() > 1) {
+//      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
+//
+//    } else {
+//      final LayerEdge existingEdge = existingEdges.get(0);
+//      addTargetsToHyperEdge(existingEdge, textNodeId);
+//    }
     return this;
   }
 
@@ -103,11 +106,15 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public Stream<Long> getTextNodeIdStream() {
-    return stream(new TextNodeIdChainIterator());
+    return stream(new TextNodeIdChainIterator(documentNode));
   }
 
   public Set<String> getLayerNames() {
     return layerRootMap.keySet();
+  }
+
+  public Map<String, Long> getLayerRootMap() {
+    return layerRootMap;
   }
 
   public Stream<Long> getTextNodeIdStreamForLayer(final String layerName) {
@@ -152,7 +159,13 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return stream(new Iterator<Long>() {
       Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
       Optional<Long> next = calcNext();
-      Set<Long> markupHandled = new HashSet<>();
+      Set<Long> markupHandled = initializeMarkupHandled();
+
+      private Set<Long> initializeMarkupHandled() {
+        HashSet<Long> set = new HashSet<>();
+        set.add(documentNode);
+        return set;
+      }
 
       private Optional<Long> calcNext() {
         return markupToProcess.isEmpty()
@@ -199,34 +212,94 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return this.firstTextNodeId;
   }
 
-  public TextGraph linkTextNodes(final Long textNode1, final Long textNode2) {
-    TextChainEdge edge = Edges.textChainEdge();
-    addDirectedHyperEdge(edge, edge.label(), textNode1, textNode2);
-    return this;
-  }
-
   public Map<String, String> getParentLayerMap() {
     return parentLayerMap;
   }
 
+  public void setDocumentRoot(final Long node) {
+    documentNode = node;
+  }
+
+  enum NodeType {markup, text}
+
   class TextNodeIdChainIterator implements Iterator<Long> {
-    Long next = firstTextNodeId;
+
+    class TypedNode {
+      private final NodeType type;
+      private final Long id;
+
+      TypedNode(NodeType type, Long id) {
+        this.type = type;
+        this.id = id;
+      }
+
+      public boolean isText() {
+        return type.equals(NodeType.text);
+      }
+    }
+
+    List<TypedNode> nodesToProcess = new ArrayList<>();
+    Optional<Long> nextTextNodeId;
+    Set<Long> textHandled = new HashSet<>();
+
+    public TextNodeIdChainIterator(Long rootNode) {
+      nodesToProcess.add(0, new TypedNode(NodeType.markup, rootNode));
+      nextTextNodeId = calcNextTextNodeId();
+    }
 
     @Override
     public boolean hasNext() {
-      return next != null;
+      return nextTextNodeId.isPresent();
     }
 
     @Override
     public Long next() {
-      Long currentNode = next;
-      List<Long> nextIds = getOutgoingEdges(currentNode).stream()
-          .map(TextGraph.this::getTargets)
-          .flatMap(Collection::stream)
-          .collect(toList());
-      next = nextIds.isEmpty() ? null : nextIds.get(0);
-      return currentNode;
+      Long nodeId = nextTextNodeId.get();
+      textHandled.add(nodeId);
+      nextTextNodeId = calcNextTextNodeId();
+      return nodeId;
     }
+
+    private Optional<Long> calcNextTextNodeId() {
+      Optional<Long> nextTextNodeId = null;
+      if (nodesToProcess.isEmpty()) {
+        nextTextNodeId = Optional.empty();
+
+      } else {
+        TypedNode nextTypedNode = nodesToProcess.remove(0);
+        Long nextId = nextTypedNode.id;
+        if (nextTypedNode.isText()) {
+          if (textHandled.contains(nextId)) {
+            nextTextNodeId = calcNextTextNodeId();
+          } else {
+            textHandled.add(nextId);
+            nextTextNodeId = Optional.of(nextId);
+          }
+        } else {
+          List<TypedNode> children = getChildren(nextId);
+          nodesToProcess.addAll(0, children);
+          nextTextNodeId = calcNextTextNodeId();
+        }
+      }
+      return nextTextNodeId;
+    }
+
+    private List<TypedNode> getChildren(final Long id) {
+      return getOutgoingEdges(id).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .flatMap(this::toTypedNodeStream)
+          .collect(toList());
+    }
+
+    private Stream<TypedNode> toTypedNodeStream(final LayerEdge layerEdge) {
+      NodeType targetType = layerEdge.hasType(EdgeType.hasText)
+          ? NodeType.text
+          : NodeType.markup;
+      return getTargets(layerEdge).stream()
+          .map(id -> new TypedNode(targetType, id));
+    }
+
   }
 
   class TextNodeIdIterator implements Iterator<Long> {
@@ -276,26 +349,6 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       return getOutgoingEdges(markupId).stream()
           .filter(LayerEdge.class::isInstance)
           .map(LayerEdge.class::cast);
-    }
-
-    // Only use textnodes of markup that doesn't have child markup
-    private void traverseMarkupTree2() {
-      Long nextMarkupId = markupToProcess.pop();
-      List<Long> deeperMarkup = getOutgoingLayerEdgeStream(nextMarkupId)
-          .filter(e -> e.hasType(EdgeType.hasMarkup))
-          .filter(e -> layerName.equals(e.getLayerName()))
-          .flatMap(e -> getTargets(e).stream())
-          .collect(toList());
-      if (!deeperMarkup.isEmpty()) {
-        deeperMarkup.forEach(m -> markupToProcess.add(m));
-      } else {
-        getOutgoingLayerEdgeStream(nextMarkupId)
-            .filter(e -> e.hasType(hasText))
-            .filter(e -> layerName.equals(e.getLayerName()))
-            .flatMap(e -> getTargets(e).stream())
-            .filter(tn -> !textHandled.contains(tn))
-            .forEach(tn -> textNodes.add(tn));
-      }
     }
 
     @Override

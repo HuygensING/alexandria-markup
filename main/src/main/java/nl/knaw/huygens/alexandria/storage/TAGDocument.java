@@ -85,12 +85,6 @@ public class TAGDocument {
     return this;
   }
 
-  public void linkTextNodes(final TAGTextNode textNode1, final TAGTextNode textNode2) {
-    Preconditions.checkNotNull(textNode1);
-    Preconditions.checkNotNull(textNode2);
-    documentDTO.textGraph.linkTextNodes(textNode1.getDbId(), textNode2.getDbId());
-  }
-
   public Stream<TAGTextNode> getTextNodeStream() {
     return documentDTO.getTextNodeIds().stream()
         .map(store::getTextNode);
