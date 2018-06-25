@@ -128,7 +128,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
-
   @Override
   public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
     String ns = ctx.IN_NamespaceIdentifier().getText();
@@ -541,7 +540,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String aName = refAnnotationContext.annotationName().getText();
         String refId = refAnnotationContext.refValue().getText();
         // TODO add ref to model
-        TAGAnnotation annotation = store.createRefAnxnotation(aName, refId);
+        TAGAnnotation annotation = store.createRefAnnotation(aName, refId);
         markup.addAnnotation(annotation);
       }
     });
@@ -550,28 +549,54 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private TAGAnnotation makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
     String aName = basicAnnotationContext.annotationName().getText();
     AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+    Object value = annotationValue(annotationValueContext);
+    if (annotationValueContext.AV_StringValue() != null) {
+      return store.createStringAnnotation(aName, (String) value);
+
+    } else if (annotationValueContext.booleanValue() != null) {
+      return store.createBooleanAnnotation(aName, (Boolean) value);
+
+    } else if (annotationValueContext.AV_NumberValue() != null) {
+      return store.createNumberAnnotation(aName, (Float) value);
+
+    } else if (annotationValueContext.listValue() != null) {
+      Set<String> valueTypes = ((List<Object>) value).stream()
+          .map(v -> ((Object) v).getClass().getName())
+          .collect(toSet());
+      if (valueTypes.size() > 1) {
+        errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
+            errorPrefix(annotationValueContext), aName);
+      }
+      return store.createListAnnotation(aName, (List<?>) value);
+    }
+    return null;
+  }
+
+  private Object annotationValue(final AnnotationValueContext annotationValueContext) {
     if (annotationValueContext.AV_StringValue() != null) {
       String value = annotationValueContext.AV_StringValue().getText()
           .replaceFirst("^.", "")
           .replaceFirst(".$", "");
-      return store.createStringAnnotation(aName, value);
+      return value;
 
     } else if (annotationValueContext.booleanValue() != null) {
       Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
-      return store.createBooleanAnnotation(aName, value);
+      return value;
 
     } else if (annotationValueContext.AV_NumberValue() != null) {
       Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
-      return store.createNumberAnnotation(aName, value);
+      return value;
+
+    } else if (annotationValueContext.listValue() != null) {
+      List<?> value = annotationValueContext.listValue()
+          .annotationValue().stream()
+          .map(this::annotationValue)
+          .collect(toList());
+      return value;
     }
     errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
+        errorPrefix(annotationValueContext), annotationValueContext.getText());
     return null;
-//    String quotedAttrValue = annotationValueContext.getText();
-////        basicAnnotationContext.annotationValue().
-//    // TODO: handle recursion, value types
-////      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-//    return store.createAnnotation(aName, quotedAttrValue);
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {

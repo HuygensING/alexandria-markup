@@ -32,11 +32,6 @@ public class TAGAnnotation {
     update();
   }
 
-//  public TAGDocument getDocument() {
-//    TAGDocumentDTO document = store.getDocumentDTO(annotation.getDocumentId());
-//    return new TAGDocument(store, document);
-//  }
-
   public Long getDbId() {
     return annotation.getDbId();
   }
@@ -60,16 +55,10 @@ public class TAGAnnotation {
   public Object getValue() {
     return annotation.getValue();
   }
-//  public TAGAnnotation addAnnotation(TAGAnnotation tagAnnotation) {
-//    annotation.getAnnotationIds().add(tagAnnotation.getDbId());
-//    update();
-//    return this;
-//  }
-//
-//  public Stream<TAGAnnotation> getAnnotationStream() {
-//    return annotation.getAnnotationIds().stream()//
-//        .map(store::getAnnotation);
-//  }
+
+  public <T extends Object> T getTypedValue(Class<T> typeClass) {
+    return (T) getValue();
+  }
 
   public TAGAnnotationDTO getDTO() {
     return annotation;
@@ -82,7 +71,7 @@ public class TAGAnnotation {
   @Override
   public String toString() {
     // TODO process different annotation types
-    return annotation.getKey() + '=';
+    return annotation.getKey() + '=' + getValue();
   }
 
 }

@@ -100,6 +100,13 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
     return myself;
   }
 
+  public void withListAnnotation(final String key, final List<? extends Object> value) {
+    isNotNull();
+    assertAnnotationExists(key);
+    assertAnnotationHasType(key, AnnotationType.List);
+    assertAnnotationHasValue(key, value);
+  }
+
   private void basicAnnotationAssertions(String key, Object value, AnnotationType number) {
     isNotNull();
     assertAnnotationExists(key);

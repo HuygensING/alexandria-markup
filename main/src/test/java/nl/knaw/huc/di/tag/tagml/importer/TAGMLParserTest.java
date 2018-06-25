@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
@@ -327,6 +328,50 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("m")
       );
       assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false);
+    });
+  }
+
+  @Test // NLA-468
+  public void testStringListAnnotation() {
+    String input = "[tagml>" +
+        "[m l=['a','b','c']>text<m]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+      List<String> expected = Lists.newArrayList("a", "b", "c");
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+    });
+  }
+
+  @Test // NLA-468
+  public void testNumberListAnnotation1() {
+    String input = "[tagml>" +
+        "[m l=[3,5,7,11]>text<m]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+      List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+    });
+  }
+
+  @Test // NLA-468
+  public void testListAnnotationEntriesShouldAllBeOfTheSameType() {
+    String input = "[tagml>" +
+        "[m l=[3,true,'string']>text<m]" +
+        "<tagml]";
+
+    final String expectedError = "line 1:13 : All elements of ListAnnotation l should be of the same type.";
+    store.runInTransaction(() -> {
+      assertTAGMLParsesWithSyntaxError(input, expectedError);
     });
   }
 
