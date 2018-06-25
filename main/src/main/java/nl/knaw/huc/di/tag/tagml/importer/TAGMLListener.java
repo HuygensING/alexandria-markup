@@ -311,19 +311,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     TAGMarkup branches = openTextVariationMarkup(":branches", layers);
 
-//    TAGTextNode divergence = store.createTextNode(TAGTextNodeType.divergence);
-//    addAndConnectToMarkup(divergence);
-//    if (previousTextNode != null) {
-//      document.linkTextNodes(previousTextNode, divergence);
-//    }
-//    previousTextNode = divergence;
-
-//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(divergence, m));
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startMarkup = branches;
     textVariationState.startState = state.copy();
     textVariationState.branch = 0;
-//    logTextNode(divergence);
     textVariationStateStack.push(textVariationState);
     openTextVariationMarkup(":branch", layers);
   }
@@ -353,10 +344,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     currentTextVariationState().endStates.add(state.copy());
     currentTextVariationState().branch += 1;
-//    previousTextNode = currentTextVariationState().startNode;
     state = currentTextVariationState().startState.copy();
     openTextVariationMarkup(":branch", layers);
-
   }
 
   private void closeTextVariationMarkup(final String extendedMarkupName, final Set<String> layers) {
@@ -406,7 +395,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
     closeSystemMarkup(":branches", layers);
-//    currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
     if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
@@ -540,12 +528,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private void addAnnotations(List<AnnotationContext> annotationContexts, TAGMarkup markup) {
     annotationContexts.forEach(actx -> {
       if (actx instanceof BasicAnnotationContext) {
-        BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) actx;
-        String aName = basicAnnotationContext.annotationName().getText();
-        String quotedAttrValue = basicAnnotationContext.annotationValue().getText();
-        // TODO: handle recursion, value types
-//      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-        TAGAnnotation annotation = store.createAnnotation(aName, quotedAttrValue);
+        TAGAnnotation annotation = makeAnnotation((BasicAnnotationContext) actx);
         markup.addAnnotation(annotation);
 
       } else if (actx instanceof IdentifyingAnnotationContext) {
@@ -558,10 +541,37 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String aName = refAnnotationContext.annotationName().getText();
         String refId = refAnnotationContext.refValue().getText();
         // TODO add ref to model
-        TAGAnnotation annotation = store.createAnnotation(aName, refId);
+        TAGAnnotation annotation = store.createRefAnxnotation(aName, refId);
         markup.addAnnotation(annotation);
       }
     });
+  }
+
+  private TAGAnnotation makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
+    String aName = basicAnnotationContext.annotationName().getText();
+    AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+    if (annotationValueContext.AV_StringValue() != null) {
+      String value = annotationValueContext.AV_StringValue().getText()
+          .replaceFirst("^.", "")
+          .replaceFirst(".$", "");
+      return store.createStringAnnotation(aName, value);
+
+    } else if (annotationValueContext.booleanValue() != null) {
+      Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
+      return store.createBooleanAnnotation(aName, value);
+
+    } else if (annotationValueContext.AV_NumberValue() != null) {
+      Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
+      return store.createNumberAnnotation(aName, value);
+    }
+    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
+    return null;
+//    String quotedAttrValue = annotationValueContext.getText();
+////        basicAnnotationContext.annotationValue().
+//    // TODO: handle recursion, value types
+////      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
+//    return store.createAnnotation(aName, quotedAttrValue);
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {

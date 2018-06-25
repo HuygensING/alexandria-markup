@@ -228,6 +228,18 @@ public class TAGMarkup {
     return thisAnnotationString.equals(otherAnnotationString);
   }
 
+  public boolean hasAnnotation(String key) {
+    return getAnnotationStream()
+        .map(TAGAnnotation::getTag)
+        .anyMatch(key::equals);
+  }
+
+  public TAGAnnotation getAnnotation(String key) {
+    return getAnnotationStream()
+        .filter(a -> a.hasTag(key))
+        .findAny().get();
+  }
+
   @Override
   public String toString() {
     return markupDTO.toString();
@@ -286,4 +298,5 @@ public class TAGMarkup {
   public TAGMarkup setFirstAndLastTextNode(final TAGTextNode tn00, final TAGTextNode tn10) {
     return this;
   }
+
 }
