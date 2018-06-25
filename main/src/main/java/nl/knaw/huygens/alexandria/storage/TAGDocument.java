@@ -250,4 +250,7 @@ public class TAGDocument {
     return this;
   }
 
+  public void linkParentlessLayerRootsToDocument() {
+    documentDTO.textGraph.linkParentlessLayerRootsToDocument();
+  }
 }

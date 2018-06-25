@@ -79,9 +79,11 @@ public class DotFactory {
         .map(e -> toOutgoingEdgeLine(e, textGraph))
         .forEach(dotBuilder::append);
 
-    for (final Long root : document.getDTO().getLayerRootNodeIds()) {
-      dotBuilder.append("  d->m" + root + " [arrowhead=none]\n");
-    }
+    textGraph.getOutgoingEdges(textGraph.documentNode)
+        .stream()
+        .flatMap(e -> textGraph.getTargets(e).stream())
+        .map(root -> "  d->m" + root + " [arrowhead=none]\n")
+        .forEach(dotBuilder::append);
 
     String graphLabel = escape(label);
     if (!graphLabel.isEmpty()) {
