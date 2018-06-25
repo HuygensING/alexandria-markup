@@ -22,42 +22,24 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huygens.alexandria.storage.TAGTextNodeType;
-
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.plaintext;
 
 @Entity(version = 2)
 public class TAGTextNodeDTO implements TAGDTO {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long dbId;
 
-  private TAGTextNodeType type;
-
   private String text;
-
-  private TAGTextNodeDTO() {
-  }
 
   public TAGTextNodeDTO(String text) {
     this.text = text;
-    this.type = plaintext;
   }
 
-  public TAGTextNodeDTO(TAGTextNodeType type) {
-    this.text = "";
-    this.type = type;
+  public TAGTextNodeDTO() {
+    this("");
   }
 
   public Long getDbId() {
     return dbId;
-  }
-
-  public void setType(final TAGTextNodeType type) {
-    this.type = type;
-  }
-
-  public TAGTextNodeType getType() {
-    return type;
   }
 
   public TAGTextNodeDTO setText(String text) {
@@ -69,13 +51,4 @@ public class TAGTextNodeDTO implements TAGDTO {
     return text;
   }
 
-  @Deprecated
-  public Object getPrevTextNodeIds() {
-    return null;
-  }
-
-  @Deprecated
-  public Object getNextTextNodeIds() {
-    return null;
-  }
 }

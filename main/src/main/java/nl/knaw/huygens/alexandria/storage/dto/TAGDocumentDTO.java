@@ -26,17 +26,14 @@ import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 3)
 public class TAGDocumentDTO implements TAGDTO {
-  // previously: Limen
-  @PrimaryKey(sequence = "document_pk_sequence")
+  @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNodeDTO.class)
@@ -50,6 +47,13 @@ public class TAGDocumentDTO implements TAGDTO {
   public TextGraph textGraph = new TextGraph();
 
   public TAGDocumentDTO() {
+  }
+
+  public void initialize() {
+    if (id == null) {
+      throw new RuntimeException("TAGDocumentDTO needs to be persisted before it can be initialized.");
+    }
+    textGraph.setDocumentRoot(id);
   }
 
   public Long getDbId() {
@@ -104,6 +108,10 @@ public class TAGDocumentDTO implements TAGDTO {
     return textGraph.getFirstTextNodeId();
   }
 
+  public Set<Long> getLayerRootNodeIds() {
+    return new HashSet<>(textGraph.getLayerRootMap().values());
+  }
+
   public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
     int textNodeSize = textNodeIds.size();
     return textNodeSize > 2 //
@@ -130,4 +138,5 @@ public class TAGDocumentDTO implements TAGDTO {
     // TODO: layers
     return getTextNodeIdStreamForMarkupId(markup.getDbId(), "").findAny().isPresent();
   }
+
 }

@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -57,7 +56,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
 
   private boolean atDocumentStart = true;
-  private TAGTextNode previousTextNode = null;
 
   public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
     this.store = store;
@@ -90,7 +88,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     public State startState;
     public List<State> endStates = new ArrayList<>();
     public TAGMarkup startMarkup;
-    public List<TAGTextNode> endNodes = new ArrayList<>();
+    //    public List<TAGTextNode> endNodes = new ArrayList<>();
     public Map<Integer, List<TAGMarkup>> openMarkup = new HashMap<>();
     public int branch = 0;
 
@@ -107,6 +105,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitDocument(DocumentContext ctx) {
+    document.linkParentlessLayerRootsToDocument();
     update(document.getDTO());
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
@@ -129,23 +128,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
+
   @Override
   public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
     String ns = ctx.IN_NamespaceIdentifier().getText();
     String url = ctx.IN_NamespaceURI().getText();
     namespaces.put(ns, url);
   }
-
-//  @Override
-//  public void exitLayerDefinition(LayerDefinitionContext ctx) {
-//    String id = ctx.ILD_LayerIdentifier().getText();
-//    String description = ctx.ILD_QuotedLayerDescription().getText()
-//        .replaceFirst("^\"", "")
-//        .replaceFirst("\"$", "")
-//        .replaceAll("\\\"", "\"");
-//    layerInfo.put(id, description);
-//    document.addLayerId(id);
-//  }
 
   @Override
   public void exitText(TextContext ctx) {
@@ -155,10 +144,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (!atDocumentStart) {
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
-      if (previousTextNode != null) {
-        document.linkTextNodes(previousTextNode, tn);
-      }
-      previousTextNode = tn;
       logTextNode(tn);
     }
   }
@@ -306,10 +291,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TAGTextNode tn = store.createTextNode("");
       addAndConnectToMarkup(tn);
-      if (!atDocumentStart) {
-        document.linkTextNodes(previousTextNode, tn);
-      }
-      previousTextNode = tn;
       logTextNode(tn);
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
       markup.addAllLayers(layers);
@@ -330,19 +311,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     TAGMarkup branches = openTextVariationMarkup(":branches", layers);
 
-//    TAGTextNode divergence = store.createTextNode(TAGTextNodeType.divergence);
-//    addAndConnectToMarkup(divergence);
-//    if (previousTextNode != null) {
-//      document.linkTextNodes(previousTextNode, divergence);
-//    }
-//    previousTextNode = divergence;
-
-//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(divergence, m));
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startMarkup = branches;
     textVariationState.startState = state.copy();
     textVariationState.branch = 0;
-//    logTextNode(divergence);
     textVariationStateStack.push(textVariationState);
     openTextVariationMarkup(":branch", layers);
   }
@@ -370,13 +342,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
 
-    currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     currentTextVariationState().branch += 1;
-//    previousTextNode = currentTextVariationState().startNode;
     state = currentTextVariationState().startState.copy();
     openTextVariationMarkup(":branch", layers);
-
   }
 
   private void closeTextVariationMarkup(final String extendedMarkupName, final Set<String> layers) {
@@ -426,26 +395,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     closeSystemMarkup(":branch", layers);
     checkForOpenMarkupInBranch(ctx);
     closeSystemMarkup(":branches", layers);
-//    closeTextVariationMarkup(":branches", layers);
-    currentTextVariationState().endNodes.add(previousTextNode);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
     if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
       return;
     }
-    mergeNewOpenMarkup(ctx);
-//    LOG.debug("lastTextNodeInTextVariationStack.peek()={}", lastTextNodeInTextVariationStack.peek().stream().map(TextNodeWrapper::getDbId).collect(toList()));
-//    TAGTextNode convergence = store.createTextNode(TAGTextNodeType.convergence);
-//    previousTextNode = convergence;
-
-//    addAndConnectToMarkup(convergence);
-//    state.openMarkup.forEach(m -> linkTextToMarkupForLayer(tn, m));
-//    textVariationStateStack.pop().endNodes.forEach(n -> {
-////      logTextNode(n);
-//      document.linkTextNodes(n, convergence);
-//    });
-////    LOG.debug("|> lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
-//    logTextNode(convergence);
     textVariationStateStack.pop();
   }
 
@@ -461,50 +415,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private Set<String> getOpenLayers() {
-    //    layers.add(TAGML.DEFAULT_LAYER);
     return getRelevantOpenMarkup().stream()
         .map(TAGMarkup::getLayers)
         .flatMap(Collection::stream)
         .collect(toSet());
-  }
-
-  private void mergeNewOpenMarkup(ParserRuleContext ctx) {
-    /// TODO: refactor!
-    TextVariationState textVariationState = currentTextVariationState();
-    if (textVariationState.openMarkup.isEmpty()) {
-      return;
-    }
-    List<TAGMarkup> markupOpenedInFinalBranch = textVariationState.openMarkup.get(textVariationState.branch);
-    for (int branch = textVariationState.branch - 1; branch >= 0; branch--) {
-      List<TAGMarkup> markupToMerge = textVariationState.openMarkup.get(branch);
-      for (TAGMarkup otherMarkup : markupToMerge) {
-        Optional<TAGMarkup> masterMarkupOptional = findMatchingMarkup(markupOpenedInFinalBranch, otherMarkup);
-        if (masterMarkupOptional.isPresent()) {
-          List<Long> textNodeIdsToAdd = new ArrayList<>();
-          TAGMarkup masterMarkup = masterMarkupOptional.get();
-          otherMarkup.getTextNodeStream().forEach(textNode -> {
-            document.disassociateTextNodeFromMarkupForLayer(textNode, otherMarkup, TAGML.DEFAULT_LAYER);
-            masterMarkup.getLayers().forEach(layerName -> document.associateTextNodeWithMarkupForLayer(textNode, masterMarkup, layerName));
-
-            textNodeIdsToAdd.add(textNode.getDbId());
-          });
-//          masterMarkup.getDTO().getTextNodeIds().addAll(0, textNodeIdsToAdd);
-          document.getDTO().getMarkupIds().remove(otherMarkup.getDbId());
-          store.persist(document.getDTO());
-          store.persist(masterMarkup.getDTO());
-          store.remove(otherMarkup.getDTO());
-        } else {
-          errorListener.addBreakingError(
-              "%s Markup %s found in branch %s, but not in branch %s.",
-              errorPrefix(ctx, true), openTag(otherMarkup), branch + 1, textVariationState.branch + 1
-          );
-        }
-      }
-    }
-  }
-
-  private Optional<TAGMarkup> findMatchingMarkup(List<TAGMarkup> markupOpenedInBranch0, TAGMarkup m) {
-    return markupOpenedInBranch0.stream().filter(m::matches).findFirst();
   }
 
   private void checkEndStates(final TextVariationContext ctx) {
@@ -797,7 +711,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -807,13 +721,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForTextBetweenSuspendAndResumeTags(final TAGMarkup suspendedMarkup, final StartTagContext ctx) {
-    Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
-    if (previousMarkup.contains(suspendedMarkup)) {
-      errorListener.addBreakingError(
-          "%s There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
-          errorPrefix(ctx), resumeTag(suspendedMarkup), suspendTag(suspendedMarkup)
-      );
-    }
+//    Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
+//    if (previousMarkup.contains(suspendedMarkup)) {
+//      errorListener.addBreakingError(
+//          "%s There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
+//          errorPrefix(ctx), resumeTag(suspendedMarkup), suspendTag(suspendedMarkup)
+//      );
+//    }
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {
@@ -835,7 +749,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
@@ -891,12 +805,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private void logTextNode(final TAGTextNode textNode) {
     TAGTextNodeDTO dto = textNode.getDTO();
-    LOG.debug("TextNode(id={}, type={}, text=<{}>, prev={}, next={})",
+    LOG.debug("TextNode(id={}, text=<{}>)",
         textNode.getDbId(),
-        dto.getType(),
-        dto.getText(),
-        dto.getPrevTextNodeIds(),
-        dto.getNextTextNodeIds()
+        dto.getText()
     );
   }
 

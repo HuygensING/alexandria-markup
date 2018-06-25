@@ -168,6 +168,15 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(3);
       assertThat(markupForTextNode).extracting("tag").containsExactly("country", "a", "line");
+
+      List<String> textSegments = document.getDTO().textGraph
+          .getTextNodeIdStream()
+          .map(id -> store.getTextNodeDTO(id))
+          .map(t -> t.getText())
+          .collect(toList());
+
+      assertThat(textSegments).containsExactly("The rain in ", "Spain", " ", "falls", " mainly on the plain.");
+
     });
   }
 

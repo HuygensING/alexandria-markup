@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -44,24 +45,20 @@ public class DotFactory {
     layerColor.clear();
     StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
         .append("  node [style=\"filled\";fillcolor=\"white\"]\n")
+        .append("  d [shape=doublecircle;label=\"\"]\n")
         .append("  subgraph{\n");
     document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
 
-//    String sameRank = document.getTextNodeStream()
-//        .map(TAGTextNode::getDbId)
-//        .map(i -> "t" + i)
-//        .collect(joining(";"));
     dotBuilder.append("    rank=same\n");
 
     TextGraph textGraph = document.getDTO().textGraph;
-    document.getTextNodeStream()
-        .map(TAGTextNode::getDbId)
-        .flatMap(id -> textGraph
-            .getOutgoingEdges(id).stream()
-            .filter(TextChainEdge.class::isInstance)
-            .map(TextChainEdge.class::cast))
-        .map(e -> toNextEdgeLine(e, textGraph))
-        .forEach(dotBuilder::append);
+    AtomicLong prevNode = new AtomicLong(-1);
+    textGraph.getTextNodeIdStream().forEach(id -> {
+      if (prevNode.get() != -1) {
+        dotBuilder.append(toNextEdgeLine(prevNode.get(), id));
+      }
+      prevNode.set(id);
+    });
 
     dotBuilder.append("  }\n");
 
@@ -76,7 +73,13 @@ public class DotFactory {
         .map(e -> toOutgoingEdgeLine(e, textGraph))
         .forEach(dotBuilder::append);
 
-    String graphLabel = escape(label).replace("_", "");
+    textGraph.getOutgoingEdges(textGraph.documentNode)
+        .stream()
+        .flatMap(e -> textGraph.getTargets(e).stream())
+        .map(root -> "  d->m" + root + " [arrowhead=none]\n")
+        .forEach(dotBuilder::append);
+
+    String graphLabel = escape(label);
     if (!graphLabel.isEmpty()) {
       dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
     }
@@ -92,30 +95,20 @@ public class DotFactory {
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
-    String shape = (textNode.isConvergence() || textNode.isDivergence())
-        ? "diamond"
-        : "box";
+    String shape = "box";
     String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
     String templateEnd = "]\n";
-    if (textNode.isDivergence()) {
-      return format(templateStart + "\"<\"" + templateEnd, textNode.getDbId(), shape);
 
-    } else if (textNode.isConvergence()) {
-      return format(templateStart + "\">\"" + templateEnd, textNode.getDbId(), shape);
-
-    } else if (textNode.getText().isEmpty()) {
+    if (textNode.getText().isEmpty()) {
       return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);
 
     } else {
       return format(templateStart + "<%s>" + templateEnd, textNode.getDbId(), shape, escape(textNode.getText()));
     }
-
   }
 
-  private String toNextEdgeLine(final TextChainEdge edge, TextGraph textGraph) {
-    Long source = textGraph.getSource(edge);
-    String targets = textGraph.getTargets(edge).stream().map(i -> "t" + i).collect(joining(","));
-    return format("    t%d->{%s}[color=white;arrowhead=none;label=<%s>]\n", source, targets, "");
+  private String toNextEdgeLine(final Long textNode0, Long textNode1) {
+    return format("    t%d->t%d [color=white;arrowhead=none;label=\"\"]\n", textNode0, textNode1);
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {

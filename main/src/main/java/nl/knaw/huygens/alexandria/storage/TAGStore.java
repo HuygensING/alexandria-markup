@@ -151,6 +151,7 @@ public class TAGStore implements AutoCloseable {
   public TAGDocument createDocument() {
     TAGDocumentDTO documentDTO = new TAGDocumentDTO();
     persist(documentDTO);
+    documentDTO.initialize();
     return new TAGDocument(this, documentDTO);
   }
 
@@ -166,10 +167,8 @@ public class TAGStore implements AutoCloseable {
     return new TAGTextNode(this, tagTextNodeDTO);
   }
 
-  public TAGTextNode createTextNode(TAGTextNodeType type) {
-    TAGTextNodeDTO tagTextNodeDTO = new TAGTextNodeDTO(type);
-    persist(tagTextNodeDTO);
-    return new TAGTextNode(this, tagTextNodeDTO);
+  public TAGTextNode createTextNode() {
+    return createTextNode("");
   }
 
   public TAGTextNode getTextNode(Long textNodeId) {

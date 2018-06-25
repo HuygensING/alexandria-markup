@@ -19,19 +19,13 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huc.di.tag.model.graph.TextChainEdge;
 
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasMarkup;
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
 
 public class Edges {
-
   public static LayerEdge parentMarkupToChildMarkup(String layerName) {
     return new LayerEdge(hasMarkup, layerName);
-  }
-
-  public static TextChainEdge textChainEdge() {
-    return new TextChainEdge();
   }
 
   public static LayerEdge markupToText(final String layerName) {

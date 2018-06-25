@@ -36,8 +36,10 @@ public class TextGraphTest {
   @Test
   public void testConstruction() {
     // [tagml>[a|+a>[name|+ner>J'onn<name|ner] [b|+b>craves<a|a] [name|ner>Oreos<name|ner]<b|b]<tagml]
+    Long root = newNode();
 
     TextGraph tg = new TextGraph();
+    tg.documentNode = root;
 
     // [tagml>
     Long markupTagml = newNode();
@@ -67,7 +69,7 @@ public class TextGraphTest {
 
     // _
     Long textSpace1 = newNode();
-    tg.linkTextNodes(textJonn, textSpace1) // (J'onn) -> ( )
+    tg//.linkTextNodes(textJonn, textSpace1) // (J'onn) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace1, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textSpace1, layerA);
 
@@ -79,7 +81,7 @@ public class TextGraphTest {
 
     // craves
     Long textCraves = newNode();
-    tg.linkTextNodes(textSpace1, textCraves) // ( ) -> (craves)
+    tg//.linkTextNodes(textSpace1, textCraves) // ( ) -> (craves)
         .linkMarkupToTextNodeForLayer(markupTagml, textCraves, layerDefault)
         .linkMarkupToTextNodeForLayer(markupA, textCraves, layerA)
         .linkMarkupToTextNodeForLayer(markupB, textCraves, layerB);
@@ -88,7 +90,7 @@ public class TextGraphTest {
 
     // _
     Long textSpace2 = newNode();
-    tg.linkTextNodes(textCraves, textSpace2) // (craves) -> ( )
+    tg//.linkTextNodes(textCraves, textSpace2) // (craves) -> ( )
         .linkMarkupToTextNodeForLayer(markupTagml, textSpace2, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textSpace2, layerB);
 
@@ -98,10 +100,12 @@ public class TextGraphTest {
 
     // Oreos
     Long textOreos = newNode();
-    tg.linkTextNodes(textSpace2, textOreos) // ( ) -> (Oreos)
+    tg//.linkTextNodes(textSpace2, textOreos) // ( ) -> (Oreos)
         .linkMarkupToTextNodeForLayer(markupTagml, textOreos, layerDefault)
         .linkMarkupToTextNodeForLayer(markupB, textOreos, layerB)
         .linkMarkupToTextNodeForLayer(markupName2, textOreos, layerNER);
+
+    tg.linkParentlessLayerRootsToDocument();
 
     // <name|ner]
     // <b|b]
@@ -147,7 +151,9 @@ public class TextGraphTest {
   @Test
   public void testNesting() {
     // [l>He said: [phr>That's what she said: [phr>Too much!<phr]<phr]<line]
+    final Long documentNode = newNode();
     TextGraph tg = new TextGraph();
+    tg.documentNode = documentNode;
 
     // [l>
     Long markupL = newNode();
@@ -165,7 +171,7 @@ public class TextGraphTest {
 
     // That's what she said:
     Long textSheSaid = newNode();
-    tg.linkTextNodes(textHeSaid, textSheSaid)
+    tg//.linkTextNodes(textHeSaid, textSheSaid)
         .linkMarkupToTextNodeForLayer(markupPhr1, textSheSaid, layerDefault);
 
     // [phr>
@@ -174,11 +180,12 @@ public class TextGraphTest {
 
     // Too much!
     Long textTooMuch = newNode();
-    tg.linkTextNodes(textSheSaid, textTooMuch)
+    tg//.linkTextNodes(textSheSaid, textTooMuch)
         .linkMarkupToTextNodeForLayer(markupPhr2, textTooMuch, layerDefault);
     // <phr]
     // <phr]
     // <line]
+    tg.linkParentlessLayerRootsToDocument();
 
     List<Long> textIds = tg.getTextNodeIdStream().collect(toList());
     assertThat(textIds).containsExactly(textHeSaid, textSheSaid, textTooMuch);

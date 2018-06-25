@@ -20,14 +20,12 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.convergence;
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.divergence;
+import static java.lang.String.format;
 
 public class TAGTextNode {
   private final TAGStore store;
@@ -43,49 +41,17 @@ public class TAGTextNode {
     return textNode.getDbId();
   }
 
-  public String getText() {
-    return textNode.getText();
-  }
-
   public TAGTextNodeDTO getDTO() {
     return textNode;
   }
 
-//  public TAGTextNode addPreviousTextNode(TAGTextNode previousTextNode) {
-//    textNode.addPrevTextNodeId(previousTextNode.getDbId());
-//    if (previousTextNode.getNextTextNodes().isEmpty() || previousTextNode.isDivergence()) {
-//      previousTextNode.addNextTextNode(this);
-//    }
-//    update();
-//    return this;
-//  }
-//
-//  public void addNextTextNode(final TAGTextNode nextTextNode) {
-//    Long id = nextTextNode.getDbId();
-//    textNode.addNextTextNodeId(id);
-//    update();
-//  }
-//
-//  public List<TAGTextNode> getNextTextNodes() {
-//    return textNode.getNextTextNodeIds()
-//        .stream()
-//        .map(store::getTextNode)
-//        .collect(toList());
-//  }
-//
-//  public List<TAGTextNode> getPrevTextNodes() {
-//    return textNode.getPrevTextNodeIds()
-//        .stream()
-//        .map(store::getTextNode)
-//        .collect(toList());
-//  }
-
-  public boolean isDivergence() {
-    return divergence.equals(textNode.getType());
+  public String getText() {
+    return textNode.getText();
   }
 
-  public boolean isConvergence() {
-    return convergence.equals(textNode.getType());
+  public List<TAGTextNode> getNextTextNodes() {
+    // TODO: implement here or in TAGDocument
+    return new ArrayList<>();
   }
 
   @Override
@@ -101,39 +67,11 @@ public class TAGTextNode {
 
   @Override
   public String toString() {
-    String prefix = getDbId() + ":";
-    if (isDivergence()) {
-      return prefix + TAGML.DIVERGENCE;
-    }
-    if (isConvergence()) {
-      return prefix + TAGML.CONVERGENCE;
-    }
-    return prefix + getText();
+    return format("%d:%s", getDbId(), getText());
   }
 
   private void update() {
     store.persist(textNode);
   }
 
-  // TODO: refactor links to these dummy methods
-  @Deprecated
-  public List<TAGTextNode> getNextTextNodes() {
-    return Collections.emptyList();
-  }
-
-  @Deprecated
-  public void addNextTextNode(final TAGTextNode tn) {
-
-  }
-
-  @Deprecated
-  public TAGTextNode addPreviousTextNode(final TAGTextNode n) {
-    return this;
-
-  }
-
-  @Deprecated
-  public List<TAGTextNode> getPrevTextNodes() {
-    return Collections.emptyList();
-  }
 }
