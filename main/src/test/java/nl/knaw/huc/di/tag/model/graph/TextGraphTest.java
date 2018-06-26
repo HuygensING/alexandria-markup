@@ -105,6 +105,8 @@ public class TextGraphTest {
         .linkMarkupToTextNodeForLayer(markupB, textOreos, layerB)
         .linkMarkupToTextNodeForLayer(markupName2, textOreos, layerNER);
 
+    tg.linkParentlessLayerRootsToDocument();
+
     // <name|ner]
     // <b|b]
     // <tagml]
@@ -183,6 +185,7 @@ public class TextGraphTest {
     // <phr]
     // <phr]
     // <line]
+    tg.linkParentlessLayerRootsToDocument();
 
     List<Long> textIds = tg.getTextNodeIdStream().collect(toList());
     assertThat(textIds).containsExactly(textHeSaid, textSheSaid, textTooMuch);

@@ -46,7 +46,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   String id = "";
   Long documentNode;
-  Map<String, Long> layerRootMap = new HashMap<>();
+  Map<String, Long> layerRootMap = new LinkedHashMap<>();
   Map<String, String> parentLayerMap = new HashMap<>();
   Long firstTextNodeId;
 
@@ -56,7 +56,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public TextGraph setLayerRootMarkup(final String layerName, final Long markupNodeId) {
     layerRootMap.put(layerName, markupNodeId);
-    addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, markupNodeId);
+//    addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, markupNodeId);
     return this;
   }
 
@@ -218,6 +218,12 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public void setDocumentRoot(final Long node) {
     documentNode = node;
+  }
+
+  public void linkParentlessLayerRootsToDocument() {
+    layerRootMap.values().stream()
+        .filter(r -> getIncomingEdges(r).isEmpty())
+        .forEach(n -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, n));
   }
 
   enum NodeType {markup, text}
