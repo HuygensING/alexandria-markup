@@ -251,6 +251,10 @@ public class TAGStore implements AutoCloseable {
     return createAnnotation(key, value, AnnotationType.List);
   }
 
+  public TAGAnnotation createObjectAnnotation(String key, Object value) {
+    return createAnnotation(key, value, AnnotationType.Object);
+  }
+
   public TAGAnnotation createRefAnnotation(String aName, String refId) {
     return createAnnotation(aName, refId, AnnotationType.Reference);
   }

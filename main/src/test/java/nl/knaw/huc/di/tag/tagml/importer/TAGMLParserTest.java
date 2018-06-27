@@ -39,7 +39,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
@@ -386,6 +388,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      Map<String, Object> expected = new HashMap();
+      expected.put("valid", false);
+      assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
     });
   }
 
@@ -400,6 +405,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      Map<String, Object> expected = new HashMap();
+      expected.put("x", 1F);
+      expected.put("y", 2F);
+      assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
     });
   }
 
@@ -420,6 +429,12 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("title"),
           markupSketch("author")
       );
+      Map<String, Object> ch = new HashMap<>();
+      ch.put(":id", "huyg001");
+      ch.put("name", "Constantijn Huygens");
+
+      List<Map<String, Object>> expected = Lists.newArrayList(ch);
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("persons", expected);
     });
   }
 

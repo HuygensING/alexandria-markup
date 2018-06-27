@@ -28,6 +28,8 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.*;
@@ -123,7 +124,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String suspendedMarkupString = state.suspendedMarkup.values().stream().flatMap(Collection::stream)//
           .map(this::suspendTag)//
           .distinct()
-          .collect(Collectors.joining(", "));
+          .collect(joining(", "));
       errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
   }
@@ -140,7 +141,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
-    if (!atDocumentStart) {
+    // TODO: smarter whitespace handling
+    if (!atDocumentStart /*&& !StringUtils.isBlank(text)*/) {
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
       logTextNode(tn);
@@ -559,6 +561,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     } else if (annotationValueContext.AV_NumberValue() != null) {
       return store.createNumberAnnotation(aName, (Float) value);
 
+    } else if (annotationValueContext.objectValue() != null) {
+      return store.createObjectAnnotation(aName, value);
+
     } else if (annotationValueContext.listValue() != null) {
       Set<String> valueTypes = ((List<Object>) value).stream()
           .map(v -> ((Object) v).getClass().getName())
@@ -593,10 +598,43 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           .map(this::annotationValue)
           .collect(toList());
       return value;
+
+    } else if (annotationValueContext.objectValue() != null) {
+      Map<String, Object> value = readObject(annotationValueContext.objectValue());
+      return value;
     }
     errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
         errorPrefix(annotationValueContext), annotationValueContext.getText());
     return null;
+  }
+
+  private Map<String, Object> readObject(ObjectValueContext objectValueContext) {
+    Map<String, Object> objectMap = objectValueContext.children.stream()
+        .filter(c -> !(c instanceof TerminalNode))
+        .map(this::parseAttribute)
+        .collect(toMap(KeyValue::getKey, KeyValue::getValue, (a, b) -> b));
+    return objectMap;
+  }
+
+  private KeyValue parseAttribute(ParseTree parseTree) {
+    if (parseTree instanceof BasicAnnotationContext) {
+      BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) parseTree;
+      String aName = basicAnnotationContext.annotationName().getText();
+      AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+      Object value = annotationValue(annotationValueContext);
+      return new KeyValue(aName, value);
+
+    } else if (parseTree instanceof IdentifyingAnnotationContext) {
+//TODO
+    } else {
+      throw new RuntimeException("unhandled type " + parseTree.getClass().getName());
+//      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+//          errorPrefix(parseTree.), parseTree.getText());
+
+    }
+
+    KeyValue kv = null;
+    return kv;
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
@@ -736,7 +774,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -774,7 +812,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
@@ -849,5 +887,31 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       layers.add(TAGML.DEFAULT_LAYER);
     }
     return layers;
+  }
+
+  private class KeyValue {
+    private String key;
+    private Object value;
+
+    public KeyValue(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public void setKey(String key) {
+      this.key = key;
+    }
+
+    public Object getValue() {
+      return value;
+    }
+
+    public void setValue(Object value) {
+      this.value = value;
+    }
   }
 }

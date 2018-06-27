@@ -28,6 +28,7 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -104,6 +105,13 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
     isNotNull();
     assertAnnotationExists(key);
     assertAnnotationHasType(key, AnnotationType.List);
+    assertAnnotationHasValue(key, value);
+  }
+
+  public void withObjectAnnotation(String key, Map<String, Object> value) {
+    isNotNull();
+    assertAnnotationExists(key);
+    assertAnnotationHasType(key, AnnotationType.Object);
     assertAnnotationHasValue(key, value);
   }
 

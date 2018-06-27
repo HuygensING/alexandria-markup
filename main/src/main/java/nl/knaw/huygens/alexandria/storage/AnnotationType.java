@@ -20,5 +20,5 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 public enum AnnotationType {
-  String, Number, Boolean, Reference, List
+  String, Number, Boolean, Reference, List, Object
 }
