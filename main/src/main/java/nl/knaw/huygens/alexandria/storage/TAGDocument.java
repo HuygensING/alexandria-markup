@@ -36,7 +36,7 @@ public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
   private final TAGStore store;
   private final TAGDocumentDTO documentDTO;
-  private Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
+  private final Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
 
   public TAGDocument(TAGStore store, TAGDocumentDTO documentDTO) {
     this.store = store;

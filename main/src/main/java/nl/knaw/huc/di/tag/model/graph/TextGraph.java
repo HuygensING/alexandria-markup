@@ -22,15 +22,16 @@ package nl.knaw.huc.di.tag.model.graph;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-import nl.knaw.huc.di.tag.model.graph.edges.*;
+import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.edges.Edges;
+import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -105,7 +106,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public Stream<Long> getTextNodeIdStream() {
-    return stream(new TextNodeIdChainIterator(documentNode));
+    return stream(new TextNodeIdChainIterator(this, documentNode));
   }
 
   public Set<String> getLayerNames() {
@@ -199,7 +200,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layerName) {
-    return stream(new TextNodeIdIterator(markupId, layerName));
+    return stream(new TextNodeIdIterator(this, markupId, layerName));
   }
 
   public TextGraph setFirstTextNodeId(final Long firstTextNodeId) {
@@ -230,149 +231,12 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     addDirectedHyperEdge(edge, edge.getLabel(), suspendedMarkup.getDbId(), resumedMarkup.getDbId());
   }
 
-  enum NodeType {markup, text}
-
-  class TextNodeIdChainIterator implements Iterator<Long> {
-
-    class TypedNode {
-      private final NodeType type;
-      private final Long id;
-
-      TypedNode(NodeType type, Long id) {
-        this.type = type;
-        this.id = id;
-      }
-
-      public boolean isText() {
-        return type.equals(NodeType.text);
-      }
-    }
-
-    List<TypedNode> nodesToProcess = new ArrayList<>();
-    Optional<Long> nextTextNodeId;
-    Set<Long> textHandled = new HashSet<>();
-
-    public TextNodeIdChainIterator(Long rootNode) {
-      nodesToProcess.add(0, new TypedNode(NodeType.markup, rootNode));
-      nextTextNodeId = calcNextTextNodeId();
-    }
-
-    @Override
-    public boolean hasNext() {
-      return nextTextNodeId.isPresent();
-    }
-
-    @Override
-    public Long next() {
-      Long nodeId = nextTextNodeId.get();
-      textHandled.add(nodeId);
-      nextTextNodeId = calcNextTextNodeId();
-      return nodeId;
-    }
-
-    private Optional<Long> calcNextTextNodeId() {
-      Optional<Long> nextTextNodeId = null;
-      if (nodesToProcess.isEmpty()) {
-        nextTextNodeId = Optional.empty();
-
-      } else {
-        TypedNode nextTypedNode = nodesToProcess.remove(0);
-        Long nextId = nextTypedNode.id;
-        if (nextTypedNode.isText()) {
-          if (textHandled.contains(nextId)) {
-            nextTextNodeId = calcNextTextNodeId();
-          } else {
-            textHandled.add(nextId);
-            nextTextNodeId = Optional.of(nextId);
-          }
-        } else {
-          List<TypedNode> children = getChildren(nextId);
-          nodesToProcess.addAll(0, children);
-          nextTextNodeId = calcNextTextNodeId();
-        }
-      }
-      return nextTextNodeId;
-    }
-
-    private List<TypedNode> getChildren(final Long id) {
-      return getOutgoingEdges(id).stream()
-          .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast)
-          .flatMap(this::toTypedNodeStream)
-          .collect(toList());
-    }
-
-    private Stream<TypedNode> toTypedNodeStream(final LayerEdge layerEdge) {
-      NodeType targetType = layerEdge.hasType(EdgeType.hasText)
-          ? NodeType.text
-          : NodeType.markup;
-      return getTargets(layerEdge).stream()
-          .map(id -> new TypedNode(targetType, id));
-    }
-
-  }
-
-  class TextNodeIdIterator implements Iterator<Long> {
-    Deque<Long> markupToProcess = new ArrayDeque<>();
-    Deque<Long> textNodes = new ArrayDeque<>();
-    Optional<Long> nextTextNodeId;
-    Set<Long> textHandled = new HashSet<>();
-    private String layerName;
-
-    public TextNodeIdIterator(final Long markupId, final String layerName) {
-      this.layerName = layerName;
-      markupToProcess.push(markupId);
-      nextTextNodeId = calcNextTextNodeId();
-    }
-
-    private Optional<Long> calcNextTextNodeId() {
-      if (!textNodes.isEmpty()) {
-        return Optional.of(textNodes.pop());
-      } else {
-        if (markupToProcess.isEmpty()) {
-          return Optional.empty();
-        } else {
-          traverseMarkupTree();
-          return calcNextTextNodeId();
-        }
-      }
-    }
-
-    private void traverseMarkupTree() {
-      Long nextMarkupId = markupToProcess.pop();
-      Predicate<LayerEdge> layerNamePredicate = e -> layerName.equals(e.getLayerName());
-      Function<LayerEdge, Stream<Long>> mapper = e -> getTargets(e).stream();
-      getOutgoingLayerEdgeStream(nextMarkupId)
-          .filter(e -> e.hasType(EdgeType.hasMarkup))
-          .filter(layerNamePredicate)
-          .flatMap(mapper)
-          .forEach(m -> markupToProcess.add(m));
-      getOutgoingLayerEdgeStream(nextMarkupId)
-          .filter(e -> e.hasType(hasText))
-          .filter(layerNamePredicate)
-          .flatMap(mapper)
-          .filter(tn -> !textHandled.contains(tn))
-          .forEach(tn -> textNodes.add(tn));
-    }
-
-    private Stream<LayerEdge> getOutgoingLayerEdgeStream(final Long markupId) {
-      return getOutgoingEdges(markupId).stream()
-          .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast);
-    }
-
-    @Override
-    public boolean hasNext() {
-      return nextTextNodeId.isPresent();
-    }
-
-    @Override
-    public Long next() {
-      Long nodeId = nextTextNodeId.get();
-      textHandled.add(nodeId);
-      nextTextNodeId = calcNextTextNodeId();
-      return nodeId;
-    }
+  public Optional<Long> getContinuedMarkupId(final Long id) {
+    return getOutgoingEdges(id).stream()
+        .filter(ContinuationEdge.class::isInstance)
+        .map(e -> getTargets(e))
+        .flatMap(Collection::stream)
+        .findFirst();
   }
 
 }

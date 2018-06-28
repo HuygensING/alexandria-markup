@@ -109,7 +109,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document.getLayerNames()).containsExactly(TAGML.DEFAULT_LAYER, "L1", "L2", "L3");
 
       List<TAGMarkup> markups = document.getMarkupStream().filter(m -> m.hasTag("q")).collect(toList());
-      assertThat(markups).hasSize(1);
+      assertThat(markups).hasSize(2);
       final TAGMarkup q = markups.get(0);
 
       List<TAGTextNode> qTextNodes = document.getTextNodeStreamForMarkupInLayer(q, "L1").collect(toList());

@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
@@ -40,6 +41,7 @@ public class DotFactory {
   private ColorPicker colorPicker = new ColorPicker("brown", "cyan", "darkgray", "gray", "green", "lightgray", //
       "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
   Map<String, String> layerColor = new HashMap<>();
+  private TextGraph textGraph;
 
   public String toDot(TAGDocument document, final String label) {
     layerColor.clear();
@@ -51,7 +53,7 @@ public class DotFactory {
 
     dotBuilder.append("    rank=same\n");
 
-    TextGraph textGraph = document.getDTO().textGraph;
+    textGraph = document.getDTO().textGraph;
     AtomicLong prevNode = new AtomicLong(-1);
     textGraph.getTextNodeIdStream().forEach(id -> {
       if (prevNode.get() != -1) {
@@ -63,6 +65,8 @@ public class DotFactory {
     dotBuilder.append("  }\n");
 
     document.getMarkupStream().map(this::toMarkupNodeLine).forEach(dotBuilder::append);
+
+    document.getMarkupStream().map(this::toMarkupContinuationLine).forEach(dotBuilder::append);
 
     document.getMarkupStream()
         .map(TAGMarkup::getDbId)
@@ -120,6 +124,14 @@ public class DotFactory {
 
     }
     return format("  m%d [color=red;label=<%s>]\n", markup.getDbId(), markup.getExtendedTag());
+  }
+
+  private String toMarkupContinuationLine(final TAGMarkup tagMarkup) {
+    Optional<Long> continuedMarkup = textGraph.getContinuedMarkupId(tagMarkup.getDbId());
+    if (continuedMarkup.isPresent()) {
+      return format("  m%d->m%d [color=red;style=dashed;arrowhead=none]\n", tagMarkup.getDbId(), continuedMarkup.get());
+    }
+    return "";
   }
 
   private String toOutgoingEdgeLine(LayerEdge edge, TextGraph textGraph) {

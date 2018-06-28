@@ -562,10 +562,17 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     } else if (annotationValueContext.AV_NumberValue() != null) {
       Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
       return store.createNumberAnnotation(aName, value);
+
+    } else {
+      // TODO: implement annotations as nodes/edges in textgraph
+      String value = annotationValueContext.getText();
+      return store.createStringAnnotation(aName, value);
     }
-    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
-    return null;
+
+//    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+//        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
+//    return null;
+
 //    String quotedAttrValue = annotationValueContext.getText();
 ////        basicAnnotationContext.annotationValue().
 //    // TODO: handle recursion, value types
@@ -708,13 +715,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
     TextGraph textGraph = document.getDTO().textGraph;
     TAGMarkup resumedMarkup = store.createMarkup(document, suspendedMarkup.getTag()).addAllLayers(layers);
+    document.addMarkup(resumedMarkup);
     update(resumedMarkup.getDTO());
     textGraph.continueMarkup(suspendedMarkup, resumedMarkup);
     return resumedMarkup;
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -752,7 +760,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
