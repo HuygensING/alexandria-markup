@@ -142,15 +142,15 @@ public class TAGDocument {
         .map(store::getMarkup);
   }
 
-  public void joinMarkup(TAGMarkupDTO markup1, TAGMarkup markup2) {
-    // TODO
-//    markup1.getTextNodeIds().addAll(markup2.getDTO().getTextNodeIds());
-//    markup2.getTextNodeStream().forEach(tn -> {
-//      this.disassociateTextNodeFromMarkupForLayer(tn, markup2, layerName);
-//      this.associateTextNodeWithMarkupForLayer(tn, markup1, "");
-//    });
-    markup1.getAnnotationIds().addAll(markup2.getDTO().getAnnotationIds());
-  }
+//  public void joinMarkup(TAGMarkupDTO markup1, TAGMarkup markup2) {
+//    // TODO
+////    markup1.getTextNodeIds().addAll(markup2.getDTO().getTextNodeIds());
+////    markup2.getTextNodeStream().forEach(tn -> {
+////      this.disassociateTextNodeFromMarkupForLayer(tn, markup2, layerName);
+////      this.associateTextNodeWithMarkupForLayer(tn, markup1, "");
+////    });
+//    markup1.getAnnotationIds().addAll(markup2.getDTO().getAnnotationIds());
+//  }
 
   public void addLayer(final String layerName, final TAGMarkup rootMarkup, final String parentLayer) {
     documentDTO.textGraph.setLayerRootMarkup(layerName, rootMarkup.getDbId());

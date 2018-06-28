@@ -22,7 +22,10 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
 
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.dto.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -34,10 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.joining;
 
 public class LMNLImporter {
   private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter.class);
@@ -122,14 +122,15 @@ public class LMNLImporter {
           markup.addAnnotation(annotation);
         }
       } else {
-        annotationStack.peek().addAnnotation(annotation);
+//        annotationStack.peek().addAnnotation(annotation);
       }
       annotationStack.push(annotation);
     }
 
     TAGDocumentDTO currentAnnotationDocument() {
-      Long value = annotationStack.peek().getDocumentId();
-      return tagStore.getDocumentDTO(value);
+      return null;
+//      Long value = annotationStack.peek().getDocumentId();
+//      return tagStore.getDocumentDTO(value);
     }
 
     void closeAnnotation() {
@@ -364,7 +365,7 @@ public class LMNLImporter {
       log(methodName, ruleName, modeName, token, context);
       switch (token.getType()) {
         case LMNLLexer.Name_Open_Annotation:
-          annotation.setTag(token.getText());
+          annotation.setKey(token.getText());
           break;
         case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
         case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
@@ -472,7 +473,7 @@ public class LMNLImporter {
           if (markupsToJoin.containsKey(key)) {
             TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
             markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
-            document.joinMarkup(originalMarkup, markup);
+//            document.joinMarkup(originalMarkup, markup);
             markupIdsToRemove.add(markup.getDbId());
           } else {
             markupsToJoin.put(key, markup.getDTO());
@@ -480,17 +481,18 @@ public class LMNLImporter {
         });
 
     document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
-    document.getMarkupStream()//
-        .map(TAGMarkup::getAnnotationStream)//
-        .flatMap(Function.identity())//
-        .map(TAGAnnotation::getDocument)//
-        .forEach(LMNLImporter::joinDiscontinuedRanges);
+//    document.getMarkupStream()//
+//        .map(TAGMarkup::getAnnotationStream)//
+//        .flatMap(Function.identity())//
+//        .map(TAGAnnotation::getDocument)//
+//        .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
   private static String annotationText(TAGAnnotation annotation) {
-    return annotation.getDocument().getTextNodeStream()//
-        .map(TAGTextNode::getText)//
-        .collect(joining());
+    return "TODO";
+//    return annotation.getDocument().getTextNodeStream()//
+//        .map(TAGTextNode::getText)//
+//        .collect(joining());
   }
 
   private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {

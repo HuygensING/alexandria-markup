@@ -21,12 +21,15 @@ package nl.knaw.huygens.alexandria.storage.dto;
  */
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
@@ -77,7 +80,61 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
   }
 
   public TAGMarkupAssert inLayer(final String layerName) {
+    isNotNull();
     this.layerName = layerName;
     return myself;
   }
+
+  public TAGMarkupAssert withStringAnnotation(String key, String value) {
+    basicAnnotationAssertions(key, value, AnnotationType.String);
+    return myself;
+  }
+
+  public TAGMarkupAssert withBooleanAnnotation(String key, Boolean value) {
+    basicAnnotationAssertions(key, value, AnnotationType.Boolean);
+    return myself;
+  }
+
+  public TAGMarkupAssert withNumberAnnotation(String key, Float value) {
+    basicAnnotationAssertions(key, value, AnnotationType.Number);
+    return myself;
+  }
+
+  private void basicAnnotationAssertions(String key, Object value, AnnotationType number) {
+    isNotNull();
+    assertAnnotationExists(key);
+    assertAnnotationHasType(key, number);
+    assertAnnotationHasValue(key, value);
+  }
+
+  private void assertAnnotationExists(String key) {
+    if (!actual.hasAnnotation(key)) {
+      String annotationKeys = actual.getAnnotationStream()
+          .map(TAGAnnotation::getTag)
+          .collect(joining(","));
+      failWithMessage(
+          "\nExpected markup %s to have annotation %s, but no such annotation was found. Available annotations: %s",
+          actual, actual.getDbId(), key, annotationKeys);
+    }
+  }
+
+  private void assertAnnotationHasType(String key, AnnotationType expectedAnnotationType) {
+    TAGAnnotation actualAnnotation = actual.getAnnotation(key);
+    if (!expectedAnnotationType.equals(actualAnnotation.getType())) {
+      failWithMessage(
+          "\nExpected annotation %s of markup %s to be a %s annotation, but was %s",
+          key, actual, expectedAnnotationType.name(), actualAnnotation.getType());
+    }
+  }
+
+  private void assertAnnotationHasValue(String key, Object expectedValue) {
+    TAGAnnotation actualAnnotation = actual.getAnnotation(key);
+    Object actualValue = actualAnnotation.getValue();
+    if (!expectedValue.equals(actualValue)) {
+      failWithMessage(
+          "\nExpected annotation %s of markup %s to have value %s, but was %s",
+          key, actual, expectedValue, actualValue);
+    }
+  }
+
 }

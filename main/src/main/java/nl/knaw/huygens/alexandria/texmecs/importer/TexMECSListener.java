@@ -187,7 +187,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
       String attrName = avs.NAME_O().getText();
       String quotedAttrValue = avs.STRING().getText();
       String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      TAGAnnotation annotation = store.createAnnotation(attrName, attrValue);
+      TAGAnnotation annotation = store.createStringAnnotation(attrName, attrValue);
       markup.addAnnotation(annotation);
     });
   }

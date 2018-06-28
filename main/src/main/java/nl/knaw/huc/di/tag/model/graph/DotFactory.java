@@ -59,12 +59,6 @@ public class DotFactory {
       }
       prevNode.set(id);
     });
-//        .flatMap(id -> textGraph
-//            .getOutgoingEdges(id).stream()
-//            .filter(TextChainEdge.class::isInstance)
-//            .map(TextChainEdge.class::cast))
-//        .map(e -> toNextEdgeLine(e, textGraph))
-//        .forEach(dotBuilder::append);
 
     dotBuilder.append("  }\n");
 
@@ -101,18 +95,9 @@ public class DotFactory {
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
-//    String shape = (textNode.isConvergence() || textNode.isDivergence())
-//        ? "diamond"
-//        : "box";
-    String label;
     String shape = "box";
     String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
     String templateEnd = "]\n";
-//    if (textNode.isDivergence()) {
-//      return format(templateStart + "\"<\"" + templateEnd, textNode.getDbId(), shape);
-//
-//    } else if (textNode.isConvergence()) {
-//      return format(templateStart + "\">\"" + templateEnd, textNode.getDbId(), shape);
 
     if (textNode.getText().isEmpty()) {
       return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);

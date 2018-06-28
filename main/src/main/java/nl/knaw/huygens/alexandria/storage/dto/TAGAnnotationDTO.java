@@ -22,32 +22,28 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.SecondaryKey;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
-
-@Entity(version = 1)
+@Entity(version = 2)
 public class TAGAnnotationDTO implements TAGDTO {
   @PrimaryKey(sequence = "annotation_pk_sequence")
   private Long id;
 
-  private String tag;
+  private String key;
+  private Object value;
+  private AnnotationType type;
 
-  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
-  private Long documentId;
-
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
-  private final List<Long> annotationIds = new ArrayList<>();
+//  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
+//  private Long documentId;
+//
+//  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
+//  private final List<Long> annotationIds = new ArrayList<>();
 
   private TAGAnnotationDTO() {
   }
 
-  public TAGAnnotationDTO(String tag) {
-    this.tag = tag;
+  public TAGAnnotationDTO(String key) {
+    this.key = key;
   }
 
   public void setId(long id) {
@@ -58,29 +54,45 @@ public class TAGAnnotationDTO implements TAGDTO {
     return id;
   }
 
-  public void setTag(String tag) {
-    this.tag = tag;
+  public void setKey(String key) {
+    this.key = key;
   }
 
-  public String getTag() {
-    return tag;
+  public String getKey() {
+    return key;
   }
 
-  public void setDocumentId(long documentId) {
-    this.documentId = documentId;
+  public Object getValue() {
+    return value;
   }
 
-  public Long getDocumentId() {
-    return documentId;
+  public void setValue(Object value) {
+    this.value = value;
   }
 
-  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
-    annotationIds.add(annotation.getDbId());
-    return this;
+  public AnnotationType getType() {
+    return type;
   }
 
-  public List<Long> getAnnotationIds() {
-    return annotationIds;
+  public void setType(AnnotationType type) {
+    this.type = type;
   }
+
+//  public void setDocumentId(long documentId) {
+//    this.documentId = documentId;
+//  }
+//
+//  public Long getDocumentId() {
+//    return documentId;
+//  }
+
+//  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
+//    annotationIds.add(annotation.getDbId());
+//    return this;
+//  }
+//
+//  public List<Long> getAnnotationIds() {
+//    return annotationIds;
+//  }
 
 }
