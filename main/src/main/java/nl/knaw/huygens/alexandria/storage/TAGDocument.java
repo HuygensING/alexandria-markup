@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
