@@ -108,6 +108,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testTAGQLQuery3() throws LMNLSyntaxError {
     String lmnl = "[excerpt [source [book}1 Kings{book] [chapter}12{chapter]]}\n"
@@ -145,6 +146,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
 
   }
 
+  @Ignore
   @Test
   public void testTAGQLQuery4() throws LMNLSyntaxError {
     String lmnl = "[text}\n"//
@@ -175,6 +177,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testLuminescentQuery1() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
@@ -239,6 +242,5 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
     assertThat(result).isNotNull();
     assertThat(result.isOk()).isTrue();
   }
-
 
 }

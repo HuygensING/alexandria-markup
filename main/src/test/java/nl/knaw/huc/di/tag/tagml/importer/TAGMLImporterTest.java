@@ -331,7 +331,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(textNodes).hasSize(3);
 
       List<TAGMarkup> markups = document.getMarkupStream().collect(toList());
-      assertThat(markups).hasSize(2);
+      assertThat(markups).hasSize(3);
 
       TAGMarkup t = markups.get(1);
       assertThat(t).hasTag("t");
