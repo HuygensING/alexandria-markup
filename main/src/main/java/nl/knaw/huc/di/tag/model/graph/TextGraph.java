@@ -22,11 +22,9 @@ package nl.knaw.huc.di.tag.model.graph;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-import nl.knaw.huc.di.tag.model.graph.edges.Edge;
-import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
-import nl.knaw.huc.di.tag.model.graph.edges.Edges;
-import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.*;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +35,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
+import static nl.knaw.huc.di.tag.model.graph.edges.Edges.markupContinuation;
 import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 @Persistent
@@ -224,6 +223,11 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     layerRootMap.values().stream()
         .filter(r -> getIncomingEdges(r).isEmpty())
         .forEach(n -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, n));
+  }
+
+  public void continueMarkup(TAGMarkup suspendedMarkup, TAGMarkup resumedMarkup) {
+    ContinuationEdge edge = markupContinuation();
+    addDirectedHyperEdge(edge, edge.getLabel(), suspendedMarkup.getDbId(), resumedMarkup.getDbId());
   }
 
   enum NodeType {markup, text}

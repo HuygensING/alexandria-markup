@@ -31,4 +31,8 @@ public class Edges {
   public static LayerEdge markupToText(final String layerName) {
     return new LayerEdge(hasText, layerName);
   }
+
+  public static ContinuationEdge markupContinuation() {
+    return new ContinuationEdge();
+  }
 }

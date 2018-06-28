@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.*;
@@ -123,11 +123,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       String suspendedMarkupString = state.suspendedMarkup.values().stream().flatMap(Collection::stream)//
           .map(this::suspendTag)//
           .distinct()
-          .collect(Collectors.joining(", "));
+          .collect(joining(", "));
       errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
   }
-
 
   @Override
   public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
@@ -441,8 +440,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     List<List<String>> closedMarkupInBranch = new ArrayList<>();
 
     State startState = currentTextVariationState().startState;
-    Map<String, Deque<TAGMarkup>> suspendedMarkupBeforeDivergence = startState.suspendedMarkup;
-    Map<String, Deque<TAGMarkup>> openMarkupBeforeDivergence = startState.openMarkup;
+//    Map<String, Deque<TAGMarkup>> suspendedMarkupBeforeDivergence = startState.suspendedMarkup;
+//    Map<String, Deque<TAGMarkup>> openMarkupBeforeDivergence = startState.openMarkup;
 
 //    currentTextVariationState().endStates.forEach(state -> {
 //      List<String> suspendedMarkup = state.suspendedMarkup.stream()
@@ -697,11 +696,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       checkForTextBetweenSuspendAndResumeTags(suspendedMarkup, ctx);
       suspendedMarkup.setIsDiscontinuous(true);
     }
-    return suspendedMarkup;
+    TextGraph textGraph = document.getDTO().textGraph;
+    TAGMarkup resumedMarkup = store.createMarkup(document, suspendedMarkup.getTag()).addAllLayers(layers);
+    update(resumedMarkup.getDTO());
+    textGraph.continueMarkup(suspendedMarkup, resumedMarkup);
+    return resumedMarkup;
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -739,7 +742,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

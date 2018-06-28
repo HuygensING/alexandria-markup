@@ -1,5 +1,7 @@
 package nl.knaw.huc.di.tag.model.graph.edges;
 
+import com.sleepycat.persist.model.Persistent;
+
 /*-
  * #%L
  * alexandria-markup
@@ -19,6 +21,13 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
-public enum EdgeType {
-  hasMarkup, hasText, continuesIn
+@Persistent
+public class ContinuationEdge implements Edge {
+
+  public ContinuationEdge() {
+  }
+
+  public String getLabel() {
+    return EdgeType.continuesIn.name();
+  }
 }
