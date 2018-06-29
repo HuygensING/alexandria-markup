@@ -95,7 +95,8 @@ public class DotFactory {
   private String escape(final String label) {
     return StringEscapeUtils.escapeHtml4(label)
         .replaceAll("\n", "\\\\n")
-        .replace(" ", "_");
+//        .replace(" ", "_")
+        ;
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {

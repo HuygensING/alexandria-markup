@@ -44,6 +44,79 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
 
   @Test
+  public void testCMLHTS18() {
+    String tagML = "[tagml>\n" +
+        "[page>\n" +
+        "[p>\n" +
+        "[line>1st. Voice from the Springs<line]\n" +
+        "[line>Thrice three hundred thousand years<line]\n" +
+        "[line>We had been stained with bitter blood<line]\n" +
+        "<p]\n" +
+        "<page]\n" +
+        "[page>\n" +
+        "[p>\n" +
+        "[line>And had ran mute 'mid shrieks of slaugter<line]\n" +
+        "[line>Thro' a city and a multitude<line]\n" +
+        "<p]\n" +
+        "<page]\n" +
+        "<tagml]\n";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
+  public void testCMLHTS19() {
+    String tagML = "[tagml>\n" +
+        "[text|+A,+B>\n" +
+        "[page|A>\n" +
+        "[p|B>\n" +
+        "[line>1st. Voice from the Springs<line]\n" +
+        "[line>Thrice three hundred thousand years<line]\n" +
+        "[line>We had been stained with bitter blood<line]\n" +
+        "<page|A]\n" +
+        "[page|A>\n" +
+        "[line>And had ran mute 'mid shrieks of slaugter\\[sic]<line]\n" +
+        "[line>Thro' a city & a multitude<line]\n" +
+        "<p|B]\n" +
+        "<page|A]\n" +
+        "<text|A,B]\n" +
+        "<tagml]\n";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
+  public void testCMLHTS20() {
+    String tagML = "[tagml>\n" +
+        "[text|+A,+B,+C>\n" +
+        "[page|A>\n" +
+        "[p|B>\n" +
+        "[p|C>\n" +
+        "[line>1st. Voice from the Springs<line]\n" +
+        "[line>Thrice three hundred thousand years<line]\n" +
+        "[line>We had been stained with bitter blood<line]\n" +
+        "<p|C]\n" +
+        "<page|A]\n" +
+        "[page|A>\n" +
+        "[p|C>\n" +
+        "[line>And had ran mute 'mid shrieks of slaugter<line]\n" +
+        "[line>Thro' a city and a multitude<line]\n" +
+        "<p|B]\n" +
+        "<p|C]\n" +
+        "<page|A]\n" +
+        "<text|A,B,C]\n" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
   public void testSimpleTAGML() {
     String tagML = "[line>The rain in Spain falls mainly on the plain.<line]";
     store.runInTransaction(() -> {

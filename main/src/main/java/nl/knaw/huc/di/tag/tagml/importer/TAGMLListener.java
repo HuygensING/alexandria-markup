@@ -140,7 +140,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
-    if (!atDocumentStart) {
+    boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
+    if (useText) {
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
       logTextNode(tn);
@@ -207,6 +208,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           String parentLayer = parts[0];
           String newLayerId = parts[1];
           document.addLayer(newLayerId, markup, parentLayer);
+//          layers.add(parentLayer);
           layers.add(newLayerId);
 
         } else {
