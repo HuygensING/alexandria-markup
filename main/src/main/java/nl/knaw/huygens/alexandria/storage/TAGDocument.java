@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+
 public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
   private final TAGStore store;
@@ -96,6 +98,16 @@ public class TAGDocument {
 
   public TAGTextNode getFirstTextNode() {
     return store.getTextNode(documentDTO.getFirstTextNodeId());
+  }
+
+  public TAGTextNode getLastTextNode() {
+//    TextGraph textGraph = documentDTO.textGraph;
+//    Long rootMarkup = textGraph.getLayerRootMap().get(TAGML.DEFAULT_LAYER);
+//    List<Edge> outgoingEdges = (List<Edge>) textGraph.getOutgoingEdges(rootMarkup);
+//    final Edge last = outgoingEdges.get(outgoingEdges.size() - 1);
+    // TODO: make this more efficient
+    List<TAGTextNode> textNodes = getTextNodeStream().collect(toList());
+    return textNodes.get(textNodes.size() - 1);
   }
 
   public boolean hasTextNodes() {
@@ -252,4 +264,5 @@ public class TAGDocument {
   public void linkParentlessLayerRootsToDocument() {
     documentDTO.textGraph.linkParentlessLayerRootsToDocument();
   }
+
 }

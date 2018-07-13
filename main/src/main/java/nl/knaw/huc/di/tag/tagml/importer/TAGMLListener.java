@@ -734,13 +734,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForTextBetweenSuspendAndResumeTags(final TAGMarkup suspendedMarkup, final StartTagContext ctx) {
-//    Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
-//    if (previousMarkup.contains(suspendedMarkup)) {
-//      errorListener.addBreakingError(
-//          "%s There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
-//          errorPrefix(ctx), resumeTag(suspendedMarkup), suspendTag(suspendedMarkup)
-//      );
-//    }
+    final TAGTextNode previousTextNode=document.getLastTextNode();
+    Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
+    if (previousMarkup.contains(suspendedMarkup)) {
+      errorListener.addBreakingError(
+          "%s There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
+          errorPrefix(ctx), resumeTag(suspendedMarkup), suspendTag(suspendedMarkup)
+      );
+    }
   }
 
   private boolean tagNameIsValid(final StartTagContext ctx) {
