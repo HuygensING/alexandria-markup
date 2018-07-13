@@ -572,17 +572,19 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
-    String tagML = "[x>[q>and what is the use of a " +
-        "<|[del>book,<del]" +
-        "|<-q][add>thought Alice<add][+q>|>" +
+    String tagML = "[x>[q>and what is the use of a book" +
+        "<|[del>, really,<del]" +
+        "|[add|+A>\"<-q] thought Alice [+q>\"<add|A]|>" +
         "without pictures or conversation?<q]<x]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
       assertThat(document).hasTextNodesMatching(
-          textNodeSketch("and what is the use of a "),
-          textNodeSketch("book,"),
-          textNodeSketch("thought Alice"),
+          textNodeSketch("and what is the use of a book"),
+          textNodeSketch(", really,"),
+          textNodeSketch("\""),
+          textNodeSketch(" thought Alice "),
+          textNodeSketch("\""),
           textNodeSketch("without pictures or conversation?")
       );
       assertThat(document).hasMarkupMatching(

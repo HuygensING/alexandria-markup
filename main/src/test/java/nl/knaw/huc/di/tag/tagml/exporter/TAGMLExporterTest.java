@@ -20,16 +20,22 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGStoreTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
-public class TAGMLExporterTest extends TAGStoreTest {
+//@Ignore
+public class TAGMLExporterTest extends TAGBaseStoreTest {
+
+  @Test
+  public void testSimpleExampleWithMarkupAndTwoLayers() {
+    String tagmlIn = "[x|+P,+T>[a|T>Donald [b|P>likes<a|T] Vladimir<b|P]<x|P,T]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
 
   @Test
   public void testEscapedCharacters() {
@@ -125,6 +131,7 @@ public class TAGMLExporterTest extends TAGStoreTest {
   private void assertTAGMLOutIsIn(final String tagmlIn) {
     store.runInTransaction(() -> {
       TAGDocument document = new TAGMLImporter(store).importTAGML(tagmlIn);
+      logDocumentGraph(document, tagmlIn);
       String tagmlOut = new TAGMLExporter(store).asTAGML(document);
       System.out.println(tagmlOut);
       assertThat(tagmlOut).isEqualTo(tagmlIn);

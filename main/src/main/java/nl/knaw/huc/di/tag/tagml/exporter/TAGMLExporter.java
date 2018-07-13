@@ -127,22 +127,25 @@ public class TAGMLExporter {
     Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
     textVariationStates.push(new TextVariationState());
 
-    Deque<TAGTextNode> nodesToProcess = new LinkedList<>();
-    nodesToProcess.push(document.getFirstTextNode());
+    Set<String> openLayers = new HashSet<>();
+    openLayers.add(TAGML.DEFAULT_LAYER);
+
     Set<TAGTextNode> processedNodes = new HashSet<>();
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
-    while (!nodesToProcess.isEmpty()) {
-      final TAGTextNode nodeToProcess = nodesToProcess.pop();
-      List<TAGTextNode> nextTextNodes = nodeToProcess.getNextTextNodes();
+    document.getTextNodeStream().forEach(nodeToProcess -> {
       logTextNode(nodeToProcess);
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
         Set<Long> markupIds = new HashSet<>();
-        document.getMarkupStreamForTextNode(nodeToProcess).forEach(mw -> {
+        List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
+            .collect(toList());
+        Collections.reverse(markupStreamForTextNode);
+        markupStreamForTextNode.forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);
-          state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
+          state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw, openLayers));
           state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+          openLayers.addAll(mw.getLayers());
           if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
             discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
           }
@@ -191,15 +194,11 @@ public class TAGMLExporter {
             ? TAGML.escapeVariantText(content)
             : TAGML.escapeRegularText(content);
         tagmlBuilder.append(escapedText);
-        if (!nextTextNodes.isEmpty()) {
-          nodesToProcess.push(nextTextNodes.get(0));
-        }
         processedNodes.add(nodeToProcess);
         state.lastTextNodeId = nodeToProcess.getDbId();
-        LOG.info("nodesToProcess:{}", nodesToProcess.stream().map(TAGTextNode::getDbId).collect(toList()));
-        LOG.info("TAGML={}\n", tagmlBuilder);
+        LOG.debug("TAGML={}\n", tagmlBuilder);
       }
-    }
+    });
     while (!textVariationStates.isEmpty()) {
       TextVariationState textVariationState = textVariationStates.pop();
       if (textVariationState.inVariation()) {
@@ -250,8 +249,10 @@ public class TAGMLExporter {
         : new StringBuilder(CLOSE_TAG_STARTCHAR).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup) {
-    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR).append(markup.getExtendedTag());
+  private StringBuilder toOpenTag(TAGMarkup markup, Set<String> openLayers) {
+    Set<String> newLayers = new HashSet<>(markup.getLayers());
+    newLayers.removeAll(openLayers);
+    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR).append(markup.getExtendedTag(newLayers));
     markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toTAGML(a)));
     return markup.isAnonymous()//
         ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//

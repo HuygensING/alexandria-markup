@@ -24,6 +24,7 @@ import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -123,7 +124,11 @@ public class TAGMarkup {
   }
 
   public String getExtendedTag() {
-    String layerSuffix = layerSuffix();
+    return getExtendedTag(Collections.emptySet());
+  }
+
+  public String getExtendedTag(final Set<String> newLayers) {
+    String layerSuffix = layerSuffix(newLayers);
     String tag = getTag();
     if (isOptional()) {
       return layerSuffix + TAGML.OPTIONAL_PREFIX + tag;
@@ -276,9 +281,10 @@ public class TAGMarkup {
     return annotationsString.toString();
   }
 
-  private String layerSuffix() {
+  private String layerSuffix(final Set<String> newLayers) {
     String layerSuffix = getLayers().stream()
         .filter(l -> !l.isEmpty())
+        .map(l -> newLayers.contains(l) ? "+" + l : l)
         .collect(joining(","));
     return layerSuffix.isEmpty() ? "" : TAGML.DIVIDER + layerSuffix;
   }
