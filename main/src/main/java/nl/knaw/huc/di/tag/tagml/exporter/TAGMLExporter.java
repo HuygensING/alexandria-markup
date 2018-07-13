@@ -208,7 +208,11 @@ public class TAGMLExporter {
     final ExporterState state = stateRef.get();
     state.openMarkupIds.descendingIterator()//
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
-    return tagmlBuilder.toString();
+    return tagmlBuilder.toString()
+        .replace("[:branches>[:branch>", TAGML.DIVERGENCE)
+        .replace("<:branch][:branch>", TAGML.DIVIDER)
+        .replace("<:branch]<:branches]", TAGML.CONVERGENCE)
+        ;
   }
 
   private String addResumePrefixIfRequired(String openTag, Long markupId,

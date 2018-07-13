@@ -57,7 +57,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNonLinearAnnotatedText() {
-    String tagmlIn = "[a>I've got a <|very [b>bad<b]|exceptionally good|> feeling about [c>this<c].<a]";
+    String tagmlIn = "[a>I've got a <|[sic>very [b>bad<b]<sic]|[corr>exceptionally good<corr]|> feeling about [c>this<c].<a]";
     assertTAGMLOutIsIn(tagmlIn);
   }
 
