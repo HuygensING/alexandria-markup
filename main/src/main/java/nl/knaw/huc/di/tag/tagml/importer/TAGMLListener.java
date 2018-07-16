@@ -622,7 +622,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
               "%s Close tag <%s] found without corresponding open tag.",
               errorPrefix(ctx), extendedMarkupName
           );
-        } else {
+          return null;
+        } else if (!isSuspend) {
           TAGMarkup expected = markupStack.peek();
           if (expected.hasTag(":branch")) {
             errorListener.addBreakingError(
@@ -634,8 +635,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
               "%s Close tag <%s] found, expected %s.%s",
               errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint
           );
+          return null;
+        } else {
+          markup = removeFromMarkupStack2(extendedMarkupName, markupStack);
         }
-        return null;
       }
       document.closeMarkupInLayer(markup, l);
     }
@@ -734,7 +737,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForTextBetweenSuspendAndResumeTags(final TAGMarkup suspendedMarkup, final StartTagContext ctx) {
-    final TAGTextNode previousTextNode=document.getLastTextNode();
+    final TAGTextNode previousTextNode = document.getLastTextNode();
     Set<TAGMarkup> previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
     if (previousMarkup.contains(suspendedMarkup)) {
       errorListener.addBreakingError(
