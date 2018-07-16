@@ -52,8 +52,8 @@ public class TAGMLExporter {
 
   class ExporterState {
     Deque<Long> openMarkupIds = new ArrayDeque<>();
-    Map<Long, StringBuilder> openTags = new HashMap<>();
-    Map<Long, StringBuilder> closeTags = new HashMap<>();
+    Map<Long, StringBuilder> openTags = new LinkedHashMap<>();
+    Map<Long, StringBuilder> closeTags = new LinkedHashMap<>();
     Long lastTextNodeId = null;
 
     public ExporterState copy() {
@@ -136,7 +136,7 @@ public class TAGMLExporter {
       logTextNode(nodeToProcess);
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
-        Set<Long> markupIds = new HashSet<>();
+        Set<Long> markupIds = new LinkedHashSet<>();
         List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
         Collections.reverse(markupStreamForTextNode);
