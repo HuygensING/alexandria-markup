@@ -20,8 +20,8 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -36,8 +36,11 @@ public class TAGView {
 
   enum RelevanceStyle {include, exclude, undefined}
 
-  private RelevanceStyle relevanceStyle = undefined;
+  private RelevanceStyle layerRelevance = undefined;
+  private RelevanceStyle markupRelevance = undefined;
 
+  private Set<String> layersToInclude = new HashSet<>();
+  private Set<String> layersToExclude = new HashSet<>();
   private Set<String> markupToInclude = new HashSet<>();
   private Set<String> markupToExclude = new HashSet<>();
 
@@ -47,13 +50,26 @@ public class TAGView {
 
   public Set<Long> filterRelevantMarkup(Set<Long> markupIds) {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
-    if (include.equals(relevanceStyle)) {
+    if (include.equals(layerRelevance)) {
+      List<Long> retain = markupIds.stream()//
+          .filter(m -> hasOverlap(layersToInclude, getLayers(m)))//
+          .collect(toList());
+      relevantMarkupIds.retainAll(retain);
+
+    } else if (exclude.equals(markupRelevance)) {
+      List<Long> remove = markupIds.stream()//
+          .filter(m -> hasOverlap(markupToExclude, getLayers(m)))//
+          .collect(toList());
+
+      relevantMarkupIds.removeAll(remove);
+    }
+    if (include.equals(markupRelevance)) {
       List<Long> retain = markupIds.stream()//
           .filter(m -> markupToInclude.contains(getTag(m)))//
           .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
-    } else if (exclude.equals(relevanceStyle)) {
+    } else if (exclude.equals(markupRelevance)) {
       List<Long> remove = markupIds.stream()//
           .filter(m -> markupToExclude.contains(getTag(m)))//
           .collect(toList());
@@ -63,12 +79,46 @@ public class TAGView {
     return relevantMarkupIds;
   }
 
+  private boolean hasOverlap(Set<String> layersToInclude, Set<String> layers) {
+    return true;
+  }
+
+  private Set<String> getLayers(Long markupId) {
+    return store.getMarkup(markupId).getLayers();
+  }
+
+  public TAGView setLayersToInclude(Set<String> layersToInclude) {
+    if (exclude.equals(layerRelevance)) {
+      throw new RuntimeException("This TAGView already has set layersToExclude");
+    }
+    this.layersToInclude = layersToInclude;
+    layerRelevance = include;
+    return this;
+  }
+
+  public Set<String> getLayersToInclude() {
+    return layersToInclude;
+  }
+
+  public TAGView setLayersToExclude(Set<String> layersToExclude) {
+    if (include.equals(layerRelevance)) {
+      throw new RuntimeException("This TAGView already has set layersToInclude");
+    }
+    this.layersToExclude = layersToExclude;
+    layerRelevance = exclude;
+    return this;
+  }
+
+  public Set<String> getLayersToExclude() {
+    return layersToExclude;
+  }
+
   public TAGView setMarkupToInclude(Set<String> markupToInclude) {
-    if (exclude.equals(relevanceStyle)) {
+    if (exclude.equals(markupRelevance)) {
       throw new RuntimeException("This TAGView already has set markupToExclude");
     }
     this.markupToInclude = markupToInclude;
-    relevanceStyle = include;
+    markupRelevance = include;
     return this;
   }
 
@@ -77,11 +127,11 @@ public class TAGView {
   }
 
   public TAGView setMarkupToExclude(Set<String> markupToExclude) {
-    if (include.equals(relevanceStyle)) {
+    if (include.equals(markupRelevance)) {
       throw new RuntimeException("This TAGView already has set markupToInclude");
     }
     this.markupToExclude = markupToExclude;
-    relevanceStyle = exclude;
+    markupRelevance = exclude;
     return this;
   }
 
@@ -95,20 +145,20 @@ public class TAGView {
         .setExclude(markupToExclude);
   }
 
-  public boolean styleIsInclude() {
-    return include.equals(relevanceStyle);
+  public boolean markupStyleIsInclude() {
+    return include.equals(markupRelevance);
   }
 
-  public boolean styleIsExclude() {
-    return exclude.equals(relevanceStyle);
+  public boolean markupStyleIsExclude() {
+    return exclude.equals(markupRelevance);
   }
 
   public boolean isIncluded(TAGMarkup tagMarkup) {
     String tag = tagMarkup.getTag();
-    if (include.equals(relevanceStyle)) {
+    if (include.equals(markupRelevance)) {
       return markupToInclude.contains(tag);
     }
-    return exclude.equals(relevanceStyle) && !markupToExclude.contains(tag);
+    return exclude.equals(markupRelevance) && !markupToExclude.contains(tag);
   }
 
   private String getTag(Long markupId) {

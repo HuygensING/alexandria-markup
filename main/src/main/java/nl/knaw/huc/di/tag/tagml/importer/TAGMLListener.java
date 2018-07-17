@@ -679,7 +679,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private TAGMarkup removeFromMarkupStack(String extendedTag, Deque<TAGMarkup> markupStack) {
-    if (markupStack.isEmpty()) {
+    if (markupStack == null || markupStack.isEmpty()) {
       return null;
     }
     final TAGMarkup expected = markupStack.peek();
@@ -727,7 +727,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -766,7 +766,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

@@ -572,10 +572,25 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
-    String tagML = "[x>[q>and what is the use of a book" +
-        "<|[del>, really,<del]" +
-        "|[add|+A>\"<-q] thought Alice [+q>\"<add|A]|>" +
-        "without pictures or conversation?<q]<x]";
+//    String tagML = "[x>[q>and what is the use of a book" +
+//        "<|[del>, really,<del]" +
+//        "|[add|+A>,\"<-q] thought Alice [+q>\"<add|A]|>" +
+//        "without pictures or conversation?<q]<x]";
+//    String tagML = "[x>[q>and what is the use of a book<q]" +
+//        "<|[q>[del>, really,<del]<q]" +
+//        "|[add|+A>[q>,\"<q] thought Alice [q>\"<add|A]<q]|>" +
+//        "[q>without pictures or conversation?<q]<x]";
+
+    String tagML = "[x>[q>and what is the use of a book<-q]" +
+        "<|[+q>[del>, really,<del]<-q]" +
+        "|[add|+A>[+q>,\"<-q] thought Alice [+q>\"<add|A]<-q]|>" +
+        "[+q>without pictures or conversation?<q]<x]";
+
+    //    String tagML = "[x>[q>and what is the use of a book" +
+//        "[del>, really,<del]" +
+//        "[add|+A>,\"<q] thought Alice [q>\"<add|A]" +
+//        "without pictures or conversation?<q]<x]";
+//    String tagML = "[x>[q>and what is the use of a book[del>, really,<del][add|+A>,\"<q] thought Alice [q>\"<add|A]without pictures or conversation?<q]<x]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
