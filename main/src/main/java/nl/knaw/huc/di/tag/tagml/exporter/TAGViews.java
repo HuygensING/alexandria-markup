@@ -19,17 +19,22 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
-import java.util.HashSet;
+import static java.util.Collections.emptySet;
 
 public class TAGViews {
   public static TAGView getShowAllMarkupView(final TAGStore store) {
-    return new TAGView(store).setMarkupToExclude(new HashSet<>());
+    return new TAGView(store)
+        .setLayersToExclude(emptySet())
+        .setMarkupToExclude(emptySet());
   }
 
   public static TAGView getShowNoMarkupView(final TAGStore store) {
-    return new TAGView(store).setMarkupToInclude(new HashSet<>());
+    return new TAGView(store)
+        .setLayersToInclude(emptySet())
+        .setMarkupToInclude(emptySet());
   }
 }
