@@ -80,7 +80,9 @@ public class TAGView {
   }
 
   private boolean hasOverlap(Set<String> layersToInclude, Set<String> layers) {
-    return true;
+    Set<String> overlap = new HashSet<>(layers);
+    overlap.retainAll(layersToInclude);
+    return !overlap.isEmpty();
   }
 
   private Set<String> getLayers(Long markupId) {
