@@ -110,9 +110,58 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<page]\n" +
         "<text]\n" +
         "<tagml]";
-    final String expectedErrors = "something about missing layer identification";
+    final String expectedErrors = "line 9:2 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n" +
+        "parsing aborted!";
     store.runInTransaction(() -> {
       parseWithExpectedErrors(tagML, expectedErrors);
+    });
+  }
+
+  @Test
+  public void testMissingOpenTagLeadsToError() {
+    String tagML = "[tagml>Some text<t]<tagml]";
+    String expectedErrors = "line 1:18 : Close tag <t] found without corresponding open tag.\n" +
+        "parsing aborted!";
+    store.runInTransaction(() -> {
+      parseWithExpectedErrors(tagML, expectedErrors);
+    });
+  }
+
+  @Test
+  public void testLayerIdentifiersAreOptionalInEndTagWhenNotAmbiguous() {
+    String tagML = "[tagml|+A>Some text<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
+  public void testNoLayerInfoOnEndTagWithMultipleStartTagsWithoutLayerInfo() {
+    String tagML = "[tagml>[x>[x>Some text<x]<x]<tagml]";
+    String expectedErrors = "line 1:24 : There are multiple start-tags that can correspond with end-tag <x]; use layers to solve this ambiguity.\n" +
+        "parsing aborted!";
+    store.runInTransaction(() -> {
+      parseWithExpectedErrors(tagML, expectedErrors);
+    });
+  }
+
+  @Test
+  public void testNoLayerInfoOnEndTagWithMultipleStartTagsInDifferentLayers() {
+    String tagML = "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
+    String expectedErrors = "line 1:34 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n" +
+        "parsing aborted!";
+    store.runInTransaction(() -> {
+      parseWithExpectedErrors(tagML, expectedErrors);
+    });
+  }
+
+  @Test
+  public void testNoLayerInfoOnEndTagWithMultipleStartTagsInSameLayers() {
+    String tagML = "[tagml|+A>[p|A>[p|A>Some text<p]<p]<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
     });
   }
 
@@ -180,7 +229,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
     String tagML = "on the plain.<line]";
-    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.";
+    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -188,7 +238,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
     String tagML = "[line>The Spanish rain.<paragraph]";
     String expectedErrors = "line 1:25 : Close tag <paragraph] found without corresponding open tag.\n" +
-        "Missing close tag(s) for: [line>";
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -565,7 +615,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<|[del>book,<del]<-q]" +
         "| [add>thought Alice<add]|>" +
         " [+q>without pictures or conversation?<q]<x]";
-    String expectedErrors = "line 1:50 : Markup [q> opened before branch 1, should not be closed in a branch.\n" +
+    String expectedErrors = "line 1:53 : Markup [q> opened before branch 1, should not be closed in a branch.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -660,7 +710,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testContainmentIsDefault() {
-    String tagML = "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]";
+    String tagML = "[tag|+A>word1 [phr|A>word2 [phr|A>word3<phr] word4<phr] word5<tag]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();

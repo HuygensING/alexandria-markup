@@ -591,23 +591,26 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private TAGMarkup removeFromOpenMarkup(MarkupNameContext ctx) {
-    String extendedMarkupName = ctx.name().getText();
+    String markupName = ctx.name().getText();
+    String extendedMarkupName = markupName;
 
     extendedMarkupName = withPrefix(ctx, extendedMarkupName);
     extendedMarkupName = withSuffix(ctx, extendedMarkupName);
 
     boolean isSuspend = ctx.prefix() != null && ctx.prefix().getText().equals(TAGML.SUSPEND_PREFIX);
 
-    LayerInfoContext layerInfoContext = ctx.layerInfo();
-    Set<String> layers = extractLayerInfo(layerInfoContext);
-    TAGMarkup markup = null;
+    Set<String> layers = deduceLayers(ctx, markupName, extendedMarkupName);
 
-    String foundLayerSuffix = layerInfoContext == null
-        ? ""
-        : TAGML.DIVIDER + extractLayerInfo(layerInfoContext).stream().sorted().collect(joining(","));
+    boolean layerSuffixNeeded = !(layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER));
+    String foundLayerSuffix = layerSuffixNeeded
+        ? TAGML.DIVIDER + layers.stream()
+        .sorted()
+        .collect(joining(","))
+        : "";
 
     extendedMarkupName = extendedMarkupName + foundLayerSuffix;
     removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup);
+    TAGMarkup markup = null;
     for (String l : layers) {
       state.openMarkup.putIfAbsent(l, new ArrayDeque<>());
       Deque<TAGMarkup> markupStack = state.openMarkup.get(l);
@@ -660,6 +663,57 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
 
     return markup;
+  }
+
+  private Set<String> deduceLayers(final MarkupNameContext ctx, final String markupName, final String extendedMarkupName) {
+    LayerInfoContext layerInfoContext = ctx.layerInfo();
+    Set<String> layers = extractLayerInfo(layerInfoContext);
+    boolean hasLayerInfo = (layerInfoContext != null);
+    if (!hasLayerInfo) {
+      List<TAGMarkup> correspondingOpenMarkupList = state.allOpenMarkup.stream()
+          .filter(m -> m.hasTag(markupName))
+          .collect(toList());
+      if (correspondingOpenMarkupList.isEmpty()) {
+        // nothing found? error!
+        errorListener.addBreakingError(
+            "%s Close tag <%s] found without corresponding open tag.",
+            errorPrefix(ctx), extendedMarkupName);
+
+      } else if (correspondingOpenMarkupList.size() == 1) {
+        // only one? then we found our corresponding start tag, and we can get the layer info from this tag
+        layers = correspondingOpenMarkupList.get(0).getLayers();
+
+      } else {
+        // multiple open tags found? compare their layers
+        List<Set<String>> correspondingLayers = correspondingOpenMarkupList.stream()
+            .map(TAGMarkup::getLayers)
+            .distinct()
+            .collect(toList());
+        if (correspondingLayers.size() == 1) {
+          // all open tags have the same layer set (which could be empty (just the default layer))
+          Set<String> firstCorrespondingLayers = correspondingLayers.get(0);
+          if (firstCorrespondingLayers.size() == 1
+              && firstCorrespondingLayers.iterator().next().equals(TAGML.DEFAULT_LAYER)) {
+            // no explicit layers on the start tags: ambiguous situation
+            errorListener.addBreakingError(
+                "%s There are multiple start-tags that can correspond with end-tag <%s]; use layers to solve this ambiguity.",
+                errorPrefix(ctx), extendedMarkupName);
+
+          } else {
+            // same layer(s) used, so we can assume these tags are nested
+            layers = firstCorrespondingLayers;
+          }
+
+        } else {
+          // not all open tags belong to the same sets of layers: ambiguous situation
+          errorListener.addBreakingError(
+              "%s There are multiple start-tags that can correspond with end-tag <%s]; add layer information to the end-tag to solve this ambiguity.",
+              errorPrefix(ctx), extendedMarkupName);
+        }
+      }
+    }
+
+    return layers;
   }
 
   private String withSuffix(final MarkupNameContext ctx, String extendedMarkupName) {
@@ -727,7 +781,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -766,13 +820,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
           .map(LayerNameContext::getText)
           .forEach(lid -> {
-//            if (!layerInfo.containsKey(lid)) {
+//            if (!document.getLayerNames().contains(lid)) {
 //              valid.set(false);
 //              errorListener.addError(
 //                  "%s Layer %s is undefined at this point.",
