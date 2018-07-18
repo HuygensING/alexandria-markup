@@ -67,7 +67,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testCMLHTS19() {
+  public void testLayerIdentifiersAreOptionalInEndTags() {
     String tagML = "[tagml>\n" +
         "[text|+A,+B>\n" +
         "[page|A>\n" +
@@ -75,13 +75,13 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "[line>1st. Voice from the Springs<line]\n" +
         "[line>Thrice three hundred thousand years<line]\n" +
         "[line>We had been stained with bitter blood<line]\n" +
-        "<page|A]\n" +
+        "<page]\n" +
         "[page|A>\n" +
         "[line>And had ran mute 'mid shrieks of slaugter\\[sic]<line]\n" +
         "[line>Thro' a city & a multitude<line]\n" +
-        "<p|B]\n" +
-        "<page|A]\n" +
-        "<text|A,B]\n" +
+        "<p]\n" +
+        "<page]\n" +
+        "<text]\n" +
         "<tagml]\n";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
@@ -90,7 +90,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testCMLHTS20() {
+  public void testLayerIdentifiersAreRequiredInEndTagsWhenThereIsAmbiguity() {
     String tagML = "[tagml>\n" +
         "[text|+A,+B,+C>\n" +
         "[page|A>\n" +
@@ -99,20 +99,20 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "[line>1st. Voice from the Springs<line]\n" +
         "[line>Thrice three hundred thousand years<line]\n" +
         "[line>We had been stained with bitter blood<line]\n" +
-        "<p|C]\n" +
-        "<page|A]\n" +
+        "<p]\n" + // to remove ambiguity, layer identification is required here
+        "<page]\n" +
         "[page|A>\n" +
         "[p|C>\n" +
         "[line>And had ran mute 'mid shrieks of slaugter<line]\n" +
         "[line>Thro' a city and a multitude<line]\n" +
-        "<p|B]\n" +
-        "<p|C]\n" +
-        "<page|A]\n" +
-        "<text|A,B,C]\n" +
+        "<p]\n" + // and here
+        "<p]\n" + // and here
+        "<page]\n" +
+        "<text]\n" +
         "<tagml]";
+    final String expectedErrors = "something about missing layer identification";
     store.runInTransaction(() -> {
-      TAGDocument document = parseTAGML(tagML);
-      assertThat(document).isNotNull();
+      parseWithExpectedErrors(tagML, expectedErrors);
     });
   }
 
@@ -572,19 +572,23 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
-//    String tagML = "[x>[q>and what is the use of a book" +
-//        "<|[del>, really,<del]" +
-//        "|[add|+A>,\"<-q] thought Alice [+q>\"<add|A]|>" +
-//        "without pictures or conversation?<q]<x]";
+    String tagML = "[x>[q>and what is the use of a book" +
+        "<|[del>, really,<del]" +
+        "|[add|+A>,\"<-q] thought Alice [+q>\"<add|A]|>" +
+        "without pictures or conversation?<q]<x]";
 //    String tagML = "[x>[q>and what is the use of a book<q]" +
 //        "<|[q>[del>, really,<del]<q]" +
 //        "|[add|+A>[q>,\"<q] thought Alice [q>\"<add|A]<q]|>" +
 //        "[q>without pictures or conversation?<q]<x]";
 
-    String tagML = "[x>[q>and what is the use of a book<-q]" +
-        "<|[+q>[del>, really,<del]<-q]" +
-        "|[add|+A>[+q>,\"<-q] thought Alice [+q>\"<add|A]<-q]|>" +
-        "[+q>without pictures or conversation?<q]<x]";
+//    String tagML = "[tagml|+Q>" +
+//        "[s>[q|Q>\"And what is the use of a book, without pictures or conversation?\"<q|Q]<s]" +
+//        "<tagml|Q]";
+
+//    String tagML = "[x>[q>and what is the use of a book<-q]" +
+//        "<|[+q>[del>, really,<del]<-q]" +
+//        "|[add|+A>[+q>,\"<-q] thought Alice [+q>\"<add|A]<-q]|>" +
+//        "[+q>without pictures or conversation?<q]<x]";
 
     //    String tagML = "[x>[q>and what is the use of a book" +
 //        "[del>, really,<del]" +
