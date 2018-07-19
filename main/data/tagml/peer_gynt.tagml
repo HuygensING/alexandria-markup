@@ -1,0 +1,13 @@
+[act>
+[head>ACT FIRST<head]
+[scene|+V,+D>
+[head|V,D>SCENE FIRST<head|V,D]
+[sp|D who="Åse">[l|V>Peer, you're lying!<sp|D]
+[sp|D who="Peer">[stage|V,D>without stopping.<stage|V,D]
+No, I am not!<l|V]<sp|D]
+[sp|D who="Åse">[l|V>Well then, swear that it is true!<l|V]<sp|D]
+[sp|D who="Peer">[l|V>Swear? Why should I?<sp|D]
+[sp|D who="Åse">See, you dare not!<l|V]
+[l|V>It's a lie from first to last.<l|V]<sp|D] ...
+<scene|V,D]
+<act]

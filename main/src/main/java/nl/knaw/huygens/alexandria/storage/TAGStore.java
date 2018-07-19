@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -234,18 +235,27 @@ public class TAGStore implements AutoCloseable {
     return annotation;
   }
 
-  public TAGAnnotation createStringAnnotation(String aName, String value) {
-    return createAnnotation(aName, value, AnnotationType.String);
+  public TAGAnnotation createStringAnnotation(String key, String value) {
+    return createAnnotation(key, value, AnnotationType.String);
   }
 
-  public TAGAnnotation createBooleanAnnotation(String aName, Boolean value) {
-    return createAnnotation(aName, value, AnnotationType.Boolean);
+  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
+    return createAnnotation(key, value, AnnotationType.Boolean);
   }
 
-  public TAGAnnotation createNumberAnnotation(String aName, Float value) {
-    return createAnnotation(aName, value, AnnotationType.Number);
+  public TAGAnnotation createNumberAnnotation(String key, Float value) {
+    return createAnnotation(key, value, AnnotationType.Number);
   }
-  public TAGAnnotation createRefAnxnotation(String aName, String refId) {
+
+  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
+    return createAnnotation(key, value, AnnotationType.List);
+  }
+
+  public TAGAnnotation createObjectAnnotation(String key, Object value) {
+    return createAnnotation(key, value, AnnotationType.Object);
+  }
+
+  public TAGAnnotation createRefAnnotation(String aName, String refId) {
     return createAnnotation(aName, refId, AnnotationType.Reference);
   }
 

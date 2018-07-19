@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,8 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +142,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
+    // TODO: smarter whitespace handling
     boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
     if (useText) {
       TAGTextNode tn = store.createTextNode(text);
@@ -542,7 +545,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         String aName = refAnnotationContext.annotationName().getText();
         String refId = refAnnotationContext.refValue().getText();
         // TODO add ref to model
-        TAGAnnotation annotation = store.createRefAnxnotation(aName, refId);
+        TAGAnnotation annotation = store.createRefAnnotation(aName, refId);
         markup.addAnnotation(annotation);
       }
     });
@@ -551,35 +554,90 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private TAGAnnotation makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
     String aName = basicAnnotationContext.annotationName().getText();
     AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+    Object value = annotationValue(annotationValueContext);
+    if (annotationValueContext.AV_StringValue() != null) {
+      return store.createStringAnnotation(aName, (String) value);
+
+    } else if (annotationValueContext.booleanValue() != null) {
+      return store.createBooleanAnnotation(aName, (Boolean) value);
+
+    } else if (annotationValueContext.AV_NumberValue() != null) {
+      return store.createNumberAnnotation(aName, (Float) value);
+
+    } else if (annotationValueContext.objectValue() != null) {
+      return store.createObjectAnnotation(aName, value);
+
+    } else if (annotationValueContext.listValue() != null) {
+      Set<String> valueTypes = ((List<Object>) value).stream()
+          .map(v -> ((Object) v).getClass().getName())
+          .collect(toSet());
+      if (valueTypes.size() > 1) {
+        errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
+            errorPrefix(annotationValueContext), aName);
+      }
+      return store.createListAnnotation(aName, (List<?>) value);
+    }
+    return null;
+  }
+
+  private Object annotationValue(final AnnotationValueContext annotationValueContext) {
     if (annotationValueContext.AV_StringValue() != null) {
       String value = annotationValueContext.AV_StringValue().getText()
           .replaceFirst("^.", "")
           .replaceFirst(".$", "");
-      return store.createStringAnnotation(aName, value);
+      return value;
 
     } else if (annotationValueContext.booleanValue() != null) {
       Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
-      return store.createBooleanAnnotation(aName, value);
+      return value;
 
     } else if (annotationValueContext.AV_NumberValue() != null) {
       Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
-      return store.createNumberAnnotation(aName, value);
+      return value;
 
+    } else if (annotationValueContext.listValue() != null) {
+      List<?> value = annotationValueContext.listValue()
+          .annotationValue().stream()
+          .map(this::annotationValue)
+          .collect(toList());
+      return value;
+
+    } else if (annotationValueContext.objectValue() != null) {
+      Map<String, Object> value = readObject(annotationValueContext.objectValue());
+      return value;
+    }
+    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+        errorPrefix(annotationValueContext), annotationValueContext.getText());
+    return null;
+  }
+
+  private Map<String, Object> readObject(ObjectValueContext objectValueContext) {
+    Map<String, Object> objectMap = objectValueContext.children.stream()
+        .filter(c -> !(c instanceof TerminalNode))
+        .map(this::parseAttribute)
+        .collect(toMap(KeyValue::getKey, KeyValue::getValue, (a, b) -> b));
+    return objectMap;
+  }
+
+  private KeyValue parseAttribute(ParseTree parseTree) {
+    if (parseTree instanceof BasicAnnotationContext) {
+      BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) parseTree;
+      String aName = basicAnnotationContext.annotationName().getText();
+      AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
+      Object value = annotationValue(annotationValueContext);
+      return new KeyValue(aName, value);
+
+    } else if (parseTree instanceof IdentifyingAnnotationContext) {
+//TODO
     } else {
-      // TODO: implement annotations as nodes/edges in textgraph
-      String value = annotationValueContext.getText();
-      return store.createStringAnnotation(aName, value);
+      throw new RuntimeException("unhandled type " + parseTree.getClass().getName());
+//      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+//          errorPrefix(parseTree.), parseTree.getText());
+
     }
 
-//    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-//        errorPrefix(basicAnnotationContext), annotationValueContext.getText());
-//    return null;
-
-//    String quotedAttrValue = annotationValueContext.getText();
-////        basicAnnotationContext.annotationValue().
-//    // TODO: handle recursion, value types
-////      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-//    return store.createAnnotation(aName, quotedAttrValue);
+    KeyValue kv = null;
+    return kv;
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
@@ -884,5 +942,31 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       layers.add(TAGML.DEFAULT_LAYER);
     }
     return layers;
+  }
+
+  private class KeyValue {
+    private String key;
+    private Object value;
+
+    public KeyValue(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public void setKey(String key) {
+      this.key = key;
+    }
+
+    public Object getValue() {
+      return value;
+    }
+
+    public void setValue(Object value) {
+      this.value = value;
+    }
   }
 }

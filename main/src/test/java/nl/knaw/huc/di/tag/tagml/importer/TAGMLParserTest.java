@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
@@ -38,7 +39,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
@@ -330,6 +333,50 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Test // NLA-468
+  public void testStringListAnnotation() {
+    String input = "[tagml>" +
+        "[m l=['a','b','c']>text<m]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+      List<String> expected = Lists.newArrayList("a", "b", "c");
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+    });
+  }
+
+  @Test // NLA-468
+  public void testNumberListAnnotation1() {
+    String input = "[tagml>" +
+        "[m l=[3,5,7,11]>text<m]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+      List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+    });
+  }
+
+  @Test // NLA-468
+  public void testListAnnotationEntriesShouldAllBeOfTheSameType() {
+    String input = "[tagml>" +
+        "[m l=[3,true,'string']>text<m]" +
+        "<tagml]";
+
+    final String expectedError = "line 1:13 : All elements of ListAnnotation l should be of the same type.";
+    store.runInTransaction(() -> {
+      assertTAGMLParsesWithSyntaxError(input, expectedError);
+    });
+  }
+
   @Test
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
@@ -341,6 +388,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      Map<String, Object> expected = new HashMap();
+      expected.put("valid", false);
+      assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
     });
   }
 
@@ -355,6 +405,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("tagml"),
           markupSketch("m")
       );
+      Map<String, Object> expected = new HashMap();
+      expected.put("x", 1F);
+      expected.put("y", 2F);
+      assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
     });
   }
 
@@ -375,6 +429,12 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           markupSketch("title"),
           markupSketch("author")
       );
+      Map<String, Object> ch = new HashMap<>();
+      ch.put(":id", "huyg001");
+      ch.put("name", "Constantijn Huygens");
+
+      List<Map<String, Object>> expected = Lists.newArrayList(ch);
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("persons", expected);
     });
   }
 
