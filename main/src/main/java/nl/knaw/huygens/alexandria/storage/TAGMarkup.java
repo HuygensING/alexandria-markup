@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -215,6 +216,20 @@ public class TAGMarkup {
         .collect(toList());
     return textNodesForMarkup.size() == 1 // markup has just 1 textnode
         && textNodesForMarkup.get(0).getText().isEmpty();  // and it's empty
+  }
+
+  public boolean isSuspended() {
+    return document.getDTO().textGraph
+        .getOutgoingEdges(getDbId())
+        .stream()
+        .anyMatch(ContinuationEdge.class::isInstance);
+  }
+
+  public boolean isResumed() {
+    return document.getDTO().textGraph
+        .getIncomingEdges(getDbId())
+        .stream()
+        .anyMatch(ContinuationEdge.class::isInstance);
   }
 
   public boolean matches(TAGMarkup other) {

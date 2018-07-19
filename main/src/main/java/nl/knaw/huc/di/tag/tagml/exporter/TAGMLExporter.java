@@ -248,15 +248,24 @@ public class TAGMLExporter {
   }
 
   private StringBuilder toCloseTag(TAGMarkup markup) {
+    String suspend = markup.isSuspended()
+        ? TAGML.SUSPEND_PREFIX
+        : "";
+
     return markup.isAnonymous()//
         ? new StringBuilder()//
-        : new StringBuilder(CLOSE_TAG_STARTCHAR).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
+        : new StringBuilder(CLOSE_TAG_STARTCHAR).append(suspend).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
   private StringBuilder toOpenTag(TAGMarkup markup, Set<String> openLayers) {
+    String resume = markup.isResumed()
+        ? TAGML.RESUME_PREFIX
+        : "";
+
     Set<String> newLayers = new HashSet<>(markup.getLayers());
     newLayers.removeAll(openLayers);
-    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR).append(markup.getExtendedTag(newLayers));
+    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR)
+        .append(resume).append(markup.getExtendedTag(newLayers));
     markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toTAGML(a)));
     return markup.isAnonymous()//
         ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
