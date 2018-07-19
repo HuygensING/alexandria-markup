@@ -75,10 +75,6 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
 
       TAGView viewL1 = new TAGView(store).setLayersToInclude(l1);
 
-      TAGView viewL1NoC = new TAGView(store)
-          .setLayersToInclude(l1)
-          .setMarkupToExclude(Sets.newLinkedHashSet(tag3));
-
       Set<Long> filteredMarkupIds3 = viewL1.filterRelevantMarkup(allMarkupIds);
       assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3);
 
@@ -93,9 +89,20 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       String tagmlAC = exporter2.asTAGML(document1);
       assertThat(tagmlAC).isEqualTo("[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]");
 
+      TAGView viewL1NoC = new TAGView(store)
+          .setLayersToInclude(l1)
+          .setMarkupToExclude(Sets.newLinkedHashSet(tag3));
       TAGMLExporter exporter3 = new TAGMLExporter(store, viewL1NoC);
       String tagmlA = exporter3.asTAGML(document1);
       assertThat(tagmlA).isEqualTo("[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]");
+
+      TAGView viewNoL1B = new TAGView(store)
+          .setLayersToExclude(l1)
+          .setMarkupToInclude(Sets.newLinkedHashSet(tag2));
+      TAGMLExporter exporter4 = new TAGMLExporter(store, viewNoL1B);
+      String tagmlB = exporter4.asTAGML(document1);
+      assertThat(tagmlB).isEqualTo("a[b|L2>bcdabcd<b|L2]");
+
     });
   }
 
