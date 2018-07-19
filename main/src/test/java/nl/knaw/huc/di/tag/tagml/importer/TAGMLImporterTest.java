@@ -137,16 +137,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testNoLayerInfoOnEndTagWithMultipleStartTagsWithoutLayerInfo() {
-    String tagML = "[tagml>[x>[x>Some text<x]<x]<tagml]";
-    String expectedErrors = "line 1:24 : There are multiple start-tags that can correspond with end-tag <x]; use layers to solve this ambiguity.\n" +
-        "parsing aborted!";
-    store.runInTransaction(() -> {
-      parseWithExpectedErrors(tagML, expectedErrors);
-    });
-  }
-
-  @Test
   public void testNoLayerInfoOnEndTagWithMultipleStartTagsInDifferentLayers() {
     String tagML = "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
     String expectedErrors = "line 1:34 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n" +
@@ -710,7 +700,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testContainmentIsDefault() {
-    String tagML = "[tag|+A>word1 [phr|A>word2 [phr|A>word3<phr] word4<phr] word5<tag]";
+    String tagML = "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();

@@ -691,18 +691,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             .collect(toList());
         if (correspondingLayers.size() == 1) {
           // all open tags have the same layer set (which could be empty (just the default layer))
-          Set<String> firstCorrespondingLayers = correspondingLayers.get(0);
-          if (firstCorrespondingLayers.size() == 1
-              && firstCorrespondingLayers.iterator().next().equals(TAGML.DEFAULT_LAYER)) {
-            // no explicit layers on the start tags: ambiguous situation
-            errorListener.addBreakingError(
-                "%s There are multiple start-tags that can correspond with end-tag <%s]; use layers to solve this ambiguity.",
-                errorPrefix(ctx), extendedMarkupName);
-
-          } else {
-            // same layer(s) used, so we can assume these tags are nested
-            layers = firstCorrespondingLayers;
-          }
+          layers = correspondingLayers.get(0);
 
         } else {
           // not all open tags belong to the same sets of layers: ambiguous situation
