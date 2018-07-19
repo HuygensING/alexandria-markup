@@ -56,9 +56,9 @@ public class TAGView {
           .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
-    } else if (exclude.equals(markupRelevance)) {
+    } else if (exclude.equals(layerRelevance)) {
       List<Long> remove = markupIds.stream()//
-          .filter(m -> hasOverlap(markupToExclude, getLayers(m)))//
+          .filter(m -> hasOverlap(layersToExclude, getLayers(m)))//
           .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
@@ -143,8 +143,10 @@ public class TAGView {
 
   public TAGViewDefinition getDefinition() {
     return new TAGViewDefinition()
-        .setInclude(markupToInclude)
-        .setExclude(markupToExclude);
+        .setIncludeLayers(layersToInclude)
+        .setExcludeLayers(layersToExclude)
+        .setIncludeMarkup(markupToInclude)
+        .setExcludeMarkup(markupToExclude);
   }
 
   public boolean markupStyleIsInclude() {

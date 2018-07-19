@@ -20,19 +20,84 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import static java.util.Arrays.asList;
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class TAGViewTest extends AlexandriaBaseStoreTest {
+
+  @Test
+  public void testFilterRelevantMarkup0() {
+    store.runInTransaction(() -> {
+      TAGDocument document = store.createDocument();
+
+      String layer1 = "L1";
+      String layer2 = "L2";
+
+      String tag1 = "a";
+      Long markupId1 = createNewMarkup(document, tag1, layer1);
+
+      String tag2 = "b";
+      Long markupId2 = createNewMarkup(document, tag2, layer2);
+
+      String tag3 = "c";
+      Long markupId3 = createNewMarkup(document, tag3, layer1);
+
+      String tag4 = "d";
+      Long markupId4 = createNewMarkup(document, tag4, layer2);
+
+      Set<Long> allMarkupIds = new HashSet<>(asList(markupId1, markupId2, markupId3, markupId4));
+
+      Set<String> l1 = new HashSet<>(asList(layer1));
+      Set<String> l2 = new HashSet<>(asList(layer2));
+
+      TAGView viewNoL1 = new TAGView(store).setLayersToExclude(l1);
+
+      Set<Long> filteredMarkupIds = viewNoL1.filterRelevantMarkup(allMarkupIds);
+      assertThat(filteredMarkupIds).containsExactlyInAnyOrder(markupId2, markupId4);
+
+      TAGView viewL2 = new TAGView(store).setLayersToInclude(l2);
+
+      Set<Long> filteredMarkupIds2 = viewL2.filterRelevantMarkup(allMarkupIds);
+      assertThat(filteredMarkupIds2).containsExactlyInAnyOrder(markupId2, markupId4);
+
+      TAGView viewL1 = new TAGView(store).setLayersToInclude(l1);
+
+      TAGView viewL1NoC = new TAGView(store)
+          .setLayersToInclude(l1)
+          .setMarkupToExclude(Sets.newLinkedHashSet(tag3));
+
+      Set<Long> filteredMarkupIds3 = viewL1.filterRelevantMarkup(allMarkupIds);
+      assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3);
+
+      TAGMLImporter importer = new TAGMLImporter(store);
+      TAGDocument document1 = importer.importTAGML("[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]");
+
+      TAGMLExporter exporter1 = new TAGMLExporter(store, viewNoL1);
+      String tagmlBD = exporter1.asTAGML(document1);
+      assertThat(tagmlBD).isEqualTo("a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]");
+
+      TAGMLExporter exporter2 = new TAGMLExporter(store, viewL1);
+      String tagmlAC = exporter2.asTAGML(document1);
+      assertThat(tagmlAC).isEqualTo("[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]");
+
+      TAGMLExporter exporter3 = new TAGMLExporter(store, viewL1NoC);
+      String tagmlA = exporter3.asTAGML(document1);
+      assertThat(tagmlA).isEqualTo("[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]");
+    });
+  }
 
   @Test
   public void testFilterRelevantMarkup() {
@@ -87,6 +152,13 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   private Long createNewMarkup(TAGDocument document, String tag1) {
     TAGMarkup markup1 = store.createMarkup(document, tag1);
     return markup1.getDbId();
+  }
+
+  private Long createNewMarkup(TAGDocument document, String tag1, String layer) {
+    TAGMarkup markup = store.createMarkup(document, tag1);
+    markup.getLayers().add(layer);
+    store.persist(markup.getDTO());
+    return markup.getDbId();
   }
 
 }

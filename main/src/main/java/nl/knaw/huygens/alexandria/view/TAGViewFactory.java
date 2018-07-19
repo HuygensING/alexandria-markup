@@ -29,6 +29,10 @@ import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 
 public class TAGViewFactory {
+  public static final String INCLUDE_LAYERS = "includeLayers";
+  public static final String EXCLUDE_LAYERS = "excludeLayers";
+  public static final String INCLUDE_MARKUP = "includeMarkup";
+  public static final String EXCLUDE_MARKUP = "excludeMarkup";
   private final TAGStore store;
 
   public TAGViewFactory(TAGStore store) {
@@ -36,7 +40,10 @@ public class TAGViewFactory {
   }
 
   public TAGView fromDefinition(TAGViewDefinition definition) {
-    return createTAGView(definition.getInclude(), definition.getExclude());
+    return createTAGView(
+        definition.getIncludeLayers(), definition.getExcludeLayers(),
+        definition.getIncludeMarkup(), definition.getExcludeMarkup()
+    );
   }
 
   public TAGView fromJsonString(String json) {
@@ -48,34 +55,56 @@ public class TAGViewFactory {
   }
 
   private TAGView toTagView(JsonObject jsonObject) {
-    JsonArray includeArray = jsonObject.getJsonArray("include");
-    JsonArray excludeArray = jsonObject.getJsonArray("exclude");
-    Set<String> include = null;
-    Set<String> exclude = null;
+    JsonArray includeLayerArray = jsonObject.getJsonArray(INCLUDE_LAYERS);
+    JsonArray excludeLayerArray = jsonObject.getJsonArray(EXCLUDE_LAYERS);
+    JsonArray includeMarkupArray = jsonObject.getJsonArray(INCLUDE_MARKUP);
+    JsonArray excludeMarkupArray = jsonObject.getJsonArray(EXCLUDE_MARKUP);
+    Set<String> includeLayers = null;
+    Set<String> excludeLayers = null;
+    Set<String> includeMarkup = null;
+    Set<String> excludeMarkup = null;
 
-    if (includeArray != null) {
-      include = getMarkupTags(includeArray);
+    if (includeLayerArray != null) {
+      includeLayers = getElements(includeLayerArray);
     }
 
-    if (excludeArray != null) {
-      exclude = getMarkupTags(excludeArray);
+    if (excludeLayerArray != null) {
+      excludeLayers = getElements(excludeLayerArray);
     }
 
-    return createTAGView(include, exclude);
+    if (includeMarkupArray != null) {
+      includeMarkup = getElements(includeMarkupArray);
+    }
+
+    if (excludeMarkupArray != null) {
+      excludeMarkup = getElements(excludeMarkupArray);
+    }
+
+    return createTAGView(includeLayers, excludeLayers, includeMarkup, excludeMarkup);
   }
 
-  private TAGView createTAGView(Set<String> include, Set<String> exclude) {
+  private TAGView createTAGView(final Set<String> includeLayers, final Set<String> excludeLayers, Set<String> includeMarkup, Set<String> excludeMarkup) {
     TAGView tagView = new TAGView(store);
-    if (include != null && !include.isEmpty()) {
-      tagView.setMarkupToInclude(include);
+    if (notEmpty(includeLayers)) {
+      tagView.setLayersToInclude(includeLayers);
     }
-    if (exclude != null && !exclude.isEmpty()) {
-      tagView.setMarkupToExclude(exclude);
+    if (notEmpty(excludeLayers)) {
+      tagView.setLayersToExclude(excludeLayers);
+    }
+    if (notEmpty(includeMarkup)) {
+      tagView.setMarkupToInclude(includeMarkup);
+    }
+    if (notEmpty(excludeMarkup)) {
+      tagView.setMarkupToExclude(excludeMarkup);
     }
     return tagView;
   }
 
-  private static Set<String> getMarkupTags(JsonArray jsonArray) {
+  private boolean notEmpty(final Set<String> stringSet) {
+    return stringSet != null && !stringSet.isEmpty();
+  }
+
+  private static Set<String> getElements(JsonArray jsonArray) {
     return jsonArray.getValuesAs(JsonString.class)//
         .stream()//
         .map(JsonString::getString)//
