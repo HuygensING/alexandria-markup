@@ -52,6 +52,7 @@ public class TAGStore implements AutoCloseable {
   private Transaction tx;
 
   public TAGStore(String dbDir, boolean readOnly) {
+    LOG.debug("db dir={}", dbDir);
     this.dbDir = dbDir;
     this.readOnly = readOnly;
     open();
@@ -243,7 +244,7 @@ public class TAGStore implements AutoCloseable {
     return createAnnotation(key, value, AnnotationType.Boolean);
   }
 
-  public TAGAnnotation createNumberAnnotation(String key, Float value) {
+  public TAGAnnotation createNumberAnnotation(String key, Double value) {
     return createAnnotation(key, value, AnnotationType.Number);
   }
 

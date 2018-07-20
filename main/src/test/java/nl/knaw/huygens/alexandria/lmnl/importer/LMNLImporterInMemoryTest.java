@@ -100,15 +100,15 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     // assertThat(getDocumentId.markupList).hasSize(7);
     // List<Markup> markupList = getDocumentId.markupList;
     //
-    // markupList.stream().map(Markup::getTag).map(t -> "[" + t + "}").forEach(System.out::print);
+    // markupList.stream().map(Markup::getKey).map(t -> "[" + t + "}").forEach(System.out::print);
     // Markup markup1 = markupList.get(0);
-    // assertThat(markup1.getTag()).isEqualTo("excerpt");
+    // assertThat(markup1.getKey()).isEqualTo("excerpt");
     //
     // Markup markup2 = markupList.get(1);
-    // assertThat(markup2.getTag()).isEqualTo("s");
+    // assertThat(markup2.getKey()).isEqualTo("s");
     //
     // Markup markup3 = markupList.get(2);
-    // assertThat(markup3.getTag()).isEqualTo("l");
+    // assertThat(markup3.getKey()).isEqualTo("l");
 
     Document expected = new Document();
     Limen limen = expected.value();

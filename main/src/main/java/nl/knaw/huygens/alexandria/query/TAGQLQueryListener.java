@@ -114,7 +114,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
   }
 
   private Predicate<? super TAGAnnotation> hasTag(String filterTag) {
-    return a -> filterTag.equals(a.getTag());
+    return a -> filterTag.equals(a.getKey());
   }
 
   private void handleSource(TAGQLSelectStatement statement, TAGQLParser.SourceContext source) {
@@ -158,7 +158,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       } else if (extendedIdentifier.part() instanceof AnnotationValuePartContext) {
         String annotationIdentifier = getAnnotationName(extendedIdentifier.part());
         filter = markup -> markup.getAnnotationStream()
-            .anyMatch(a -> annotationIdentifier.equals(a.getTag()) && value.equals(toAnnotationText(a)));
+            .anyMatch(a -> annotationIdentifier.equals(a.getKey()) && value.equals(toAnnotationText(a)));
 
       } else {
         unhandled(extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()", extendedIdentifier.part().getText());

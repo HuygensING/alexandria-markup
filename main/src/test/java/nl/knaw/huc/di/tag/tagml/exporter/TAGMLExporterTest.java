@@ -126,15 +126,43 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
         "without pictures or conversation?<q]<x]";
     assertTAGMLOutIsIn(tagML);
   }
+
+  @Test
+  public void testSingleQuotedStringAnnotation() {
+    String tagML = "[tagml author='me'>test<tagml]";
+    String out = parseAndExport(tagML);
+    assertThat(out).isEqualTo(tagML);
+  }
+
+  @Test
+  public void testDoubleQuotedStringAnnotation() {
+    String tagML = "[tagml author=\"you\">test<tagml]";
+    String out = parseAndExport(tagML);
+    String expected = "[tagml author='you'>test<tagml]";
+    assertThat(out).isEqualTo(expected);
+  }
+
+  @Test
+  public void testStringAnnotationWithEscapedQuotes() {
+    String tagML = "[tagml author=\"John \\\"Nickname\\\" O'Neill\">test<tagml]";
+    String out = parseAndExport(tagML);
+    String expected = "[tagml author='John \"Nickname\" O\\'Neill'>test<tagml]";
+    assertThat(out).isEqualTo(expected);
+  }
+
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {
-    store.runInTransaction(() -> {
+    String tagmlOut = parseAndExport(tagmlIn);
+    System.out.println(tagmlOut);
+    assertThat(tagmlOut).isEqualTo(tagmlIn);
+  }
+
+  private String parseAndExport(final String tagmlIn) {
+    return store.runInTransaction(() -> {
       TAGDocument document = new TAGMLImporter(store).importTAGML(tagmlIn);
       logDocumentGraph(document, tagmlIn);
-      String tagmlOut = new TAGMLExporter(store).asTAGML(document);
-      System.out.println(tagmlOut);
-      assertThat(tagmlOut).isEqualTo(tagmlIn);
+      return new TAGMLExporter(store).asTAGML(document);
     });
   }
 

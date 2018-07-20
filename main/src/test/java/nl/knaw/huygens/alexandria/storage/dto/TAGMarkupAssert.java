@@ -96,7 +96,7 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
     return myself;
   }
 
-  public TAGMarkupAssert withNumberAnnotation(String key, Float value) {
+  public TAGMarkupAssert withNumberAnnotation(String key, Double value) {
     basicAnnotationAssertions(key, value, AnnotationType.Number);
     return myself;
   }
@@ -125,7 +125,7 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
   private void assertAnnotationExists(String key) {
     if (!actual.hasAnnotation(key)) {
       String annotationKeys = actual.getAnnotationStream()
-          .map(TAGAnnotation::getTag)
+          .map(TAGAnnotation::getKey)
           .collect(joining(","));
       failWithMessage(
           "\nExpected markup %s to have annotation %s, but no such annotation was found. Available annotations: %s",

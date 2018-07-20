@@ -68,7 +68,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup markup0 = document.getMarkupStream().findFirst().get();
       assertThat(markup0.getTag()).isEqualTo("s");
       TAGAnnotation annotation = markup0.getAnnotationStream().findFirst().get();
-      assertThat(annotation.getTag()).isEqualTo("type");
+      assertThat(annotation.getKey()).isEqualTo("type");
 //      List<TAGTextNode> textNodeList = annotation.getDocument().getTextNodeStream().collect(toList());
 //      assertThat(textNodeList).hasSize(1);
 //      assertThat(textNodeList.get(0).getText()).isEqualTo("test");

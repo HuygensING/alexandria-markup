@@ -273,7 +273,32 @@ public class TAGMLExporter {
   }
 
   public StringBuilder toTAGML(final TAGAnnotation a) {
-    return new StringBuilder();// TODO
+    StringBuilder stringBuilder = new StringBuilder()
+        .append(a.getKey())
+        .append("=");
+    switch (a.getType()) {
+      case String:
+        String stringValue = a.getTypedValue(String.class).replace("'", "\\'");
+        stringBuilder.append("'")
+            .append(stringValue)
+            .append("'");
+        break;
+
+      case Number:
+        Double numberValue = a.getTypedValue(Double.class);
+        stringBuilder.append(numberValue);
+        break;
+
+      case Boolean:
+        Boolean booleanValue = a.getTypedValue(Boolean.class);
+        stringBuilder.append(booleanValue);
+        break;
+
+      default:
+        throw new RuntimeException("unhandled annotation type:" + a.getType());
+
+    }
+    return stringBuilder;
   }
 
   private void logTextNode(final TAGTextNode textNode) {

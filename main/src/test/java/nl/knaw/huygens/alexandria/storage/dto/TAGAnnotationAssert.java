@@ -31,8 +31,8 @@ public class TAGAnnotationAssert extends AbstractObjectAssert<TAGAnnotationAsser
 
   public TAGAnnotationAssert hasTag(final String tag) {
     isNotNull();
-    if (!actual.getTag().equals(tag)) {
-      failWithMessage("Expected annotation's tag to be <%s> but was <%s>", tag, actual.getTag());
+    if (!actual.getKey().equals(tag)) {
+      failWithMessage("Expected annotation's tag to be <%s> but was <%s>", tag, actual.getKey());
     }
     return myself;
   }

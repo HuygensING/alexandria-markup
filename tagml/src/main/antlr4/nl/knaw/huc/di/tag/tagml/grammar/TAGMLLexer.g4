@@ -135,7 +135,8 @@ AV_WS
   ;
 
 AV_StringValue
-  : ( '"' ( ~["] | SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '"' | '\'' ( ~['] | DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '\'' ) -> popMode
+  : ( '"' ( ~["] | DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '"'
+  | '\'' ( ~['] | SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '\'' ) -> popMode
   ;
 
 AV_NumberValue

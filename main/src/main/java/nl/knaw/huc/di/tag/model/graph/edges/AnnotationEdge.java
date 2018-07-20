@@ -1,5 +1,7 @@
 package nl.knaw.huc.di.tag.model.graph.edges;
 
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
+
 /*-
  * #%L
  * alexandria-markup
@@ -19,6 +21,33 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
-public enum EdgeType {
-  hasMarkup, hasText, continuesIn, hasAnnotation, hasItem
+public class AnnotationEdge implements Edge {
+  AnnotationType annotationType;
+  String field;
+
+  public AnnotationEdge(AnnotationType type, String field) {
+    annotationType = type;
+    this.field = field;
+  }
+
+  public AnnotationType getAnnotationType() {
+    return annotationType;
+  }
+
+  public String getField() {
+    return field;
+  }
+
+  public boolean hasField(String field) {
+    return this.field.equals(field);
+  }
+
+  public boolean hasType(AnnotationType type) {
+    return annotationType.equals(type);
+  }
+
+  public String getLabel() {
+    return EdgeType.hasAnnotation.name();
+  }
+
 }

@@ -23,10 +23,10 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import com.google.common.collect.Lists;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -50,7 +50,7 @@ import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 public class TAGMLParserTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
-  private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
+  private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
   @Test // RD-131
   public void testSimpleTextWithRoot() {
@@ -284,7 +284,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasTextNodesMatching(
           textNodeSketch("some text.")
       );
-      assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926f);
+      assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926);
     });
   }
 
@@ -574,8 +574,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
 
-    String lmnl = LMNL_EXPORTER.toLMNL(document);
-    LOG.info("\nLMNL:\n{}\n", lmnl);
+    String tagml = TAGML_EXPORTER.asTAGML(document);
+    LOG.info("\nTAGML:\n{}\n", tagml);
     return document;
   }
 

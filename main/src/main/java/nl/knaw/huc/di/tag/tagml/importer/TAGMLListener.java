@@ -562,7 +562,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       return store.createBooleanAnnotation(aName, (Boolean) value);
 
     } else if (annotationValueContext.AV_NumberValue() != null) {
-      return store.createNumberAnnotation(aName, (Float) value);
+      return store.createNumberAnnotation(aName, (Double) value);
 
     } else if (annotationValueContext.objectValue() != null) {
       return store.createObjectAnnotation(aName, value);
@@ -584,13 +584,16 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (annotationValueContext.AV_StringValue() != null) {
       return annotationValueContext.AV_StringValue().getText()
           .replaceFirst("^.", "")
-          .replaceFirst(".$", "");
+          .replaceFirst(".$", "")
+          .replace("\\\"", "\"")
+          .replace("\\'", "'")
+          ;
 
     } else if (annotationValueContext.booleanValue() != null) {
       return Boolean.valueOf(annotationValueContext.booleanValue().getText());
 
     } else if (annotationValueContext.AV_NumberValue() != null) {
-      return Float.valueOf(annotationValueContext.AV_NumberValue().getText());
+      return Double.valueOf(annotationValueContext.AV_NumberValue().getText());
 
     } else if (annotationValueContext.listValue() != null) {
       return annotationValueContext.listValue()

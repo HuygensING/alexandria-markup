@@ -19,10 +19,15 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * limitations under the License.
  * #L%
  */
-public class AnnotationNode implements Node {
-  private final String propertyName;
+public class StringAnnotationNode extends AnnotationNode {
+  private String value;
 
-  public AnnotationNode(String name) {
-    this.propertyName = name;
+  public StringAnnotationNode(String name, String value) {
+    super(name);
+    this.value = value;
+  }
+
+  public String getValue() {
+    return value;
   }
 }

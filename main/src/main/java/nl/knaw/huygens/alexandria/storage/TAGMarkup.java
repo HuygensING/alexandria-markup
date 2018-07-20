@@ -144,7 +144,7 @@ public class TAGMarkup {
 
   public boolean hasN() {
     return getAnnotationStream()//
-        .map(TAGAnnotation::getTag) //
+        .map(TAGAnnotation::getKey) //
         .anyMatch("n"::equals);
   }
 
@@ -250,13 +250,13 @@ public class TAGMarkup {
 
   public boolean hasAnnotation(String key) {
     return getAnnotationStream()
-        .map(TAGAnnotation::getTag)
+        .map(TAGAnnotation::getKey)
         .anyMatch(key::equals);
   }
 
   public TAGAnnotation getAnnotation(String key) {
     return getAnnotationStream()
-        .filter(a -> a.hasTag(key))
+        .filter(a -> a.hasKey(key))
         .findAny().get();
   }
 

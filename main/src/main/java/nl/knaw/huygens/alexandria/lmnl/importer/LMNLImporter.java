@@ -67,7 +67,7 @@ public class LMNLImporter {
     }
 
     void pushOpenMarkup(String rangeName) {
-      // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getTag).collect(Collectors.toList()));
+      // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
       Optional<TAGMarkup> findFirst = openMarkupDeque.stream()//
           .map(dto -> new TAGMarkup(tagStore, dto))
           .filter(m -> m.getExtendedTag().equals(rangeName))//
@@ -466,7 +466,7 @@ public class LMNLImporter {
         .forEach(markup -> {
           String tag = markup.getTag();
           TAGAnnotation annotation = markup.getAnnotationStream()//
-              .filter(a -> a.getTag().equals("n"))//
+              .filter(a -> a.getKey().equals("n"))//
               .findFirst()//
               .get();
           String key = tag + "-" + annotationText(annotation);

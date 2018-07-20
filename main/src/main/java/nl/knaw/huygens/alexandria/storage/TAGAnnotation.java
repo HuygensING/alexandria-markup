@@ -36,12 +36,12 @@ public class TAGAnnotation {
     return annotation.getDbId();
   }
 
-  public String getTag() {
+  public String getKey() {
     return annotation.getKey();
   }
 
-  public boolean hasTag(String tag) {
-    return annotation.getKey().equals(tag);
+  public boolean hasKey(String key) {
+    return annotation.getKey().equals(key);
   }
 
   public AnnotationType getType() {
