@@ -130,8 +130,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   @Test
   public void testSingleQuotedStringAnnotation() {
     String tagML = "[tagml author='me'>test<tagml]";
-    String out = parseAndExport(tagML);
-    assertThat(out).isEqualTo(tagML);
+    assertTAGMLOutIsIn(tagML);
   }
 
   @Test
@@ -150,6 +149,23 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertThat(out).isEqualTo(expected);
   }
 
+  @Test
+  public void testStringListAnnotation() {
+    String tagML = "[tagml author=['me','you']>test<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
+  public void testNumberListAnnotation() {
+    String tagML = "[tagml odd=[1,3,5]>test<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
+  public void testBooleanListAnnotation() {
+    String tagML = "[tagml b=[true,false]>test<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {

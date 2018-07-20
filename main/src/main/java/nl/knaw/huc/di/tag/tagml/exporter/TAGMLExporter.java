@@ -32,8 +32,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGMLExporter {
@@ -294,11 +293,24 @@ public class TAGMLExporter {
         stringBuilder.append(booleanValue);
         break;
 
+      case List:
+        List<?> valueList = a.getTypedValue(List.class);
+        String value = valueList.stream().map(this::asValueString).collect(joining(","));
+        stringBuilder.append("[").append(value).append("]");
+        break;
+
       default:
         throw new RuntimeException("unhandled annotation type:" + a.getType());
 
     }
     return stringBuilder;
+  }
+
+  private String asValueString(final Object o) {
+    if (o instanceof String) {
+      return "'" + o + "'";
+    }
+    return o.toString();
   }
 
   private void logTextNode(final TAGTextNode textNode) {
