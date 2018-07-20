@@ -234,7 +234,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   public Optional<Long> getContinuedMarkupId(final Long id) {
     return getOutgoingEdges(id).stream()
         .filter(ContinuationEdge.class::isInstance)
-        .map(e -> getTargets(e))
+        .map(this::getTargets)
         .flatMap(Collection::stream)
         .findFirst();
   }

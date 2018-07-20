@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -112,9 +113,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<tagml]";
     final String expectedErrors = "line 9:2 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n" +
         "parsing aborted!";
-    store.runInTransaction(() -> {
-      parseWithExpectedErrors(tagML, expectedErrors);
-    });
+    store.runInTransaction(() -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
@@ -122,9 +121,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[tagml>Some text<t]<tagml]";
     String expectedErrors = "line 1:18 : Close tag <t] found without corresponding open tag.\n" +
         "parsing aborted!";
-    store.runInTransaction(() -> {
-      parseWithExpectedErrors(tagML, expectedErrors);
-    });
+    store.runInTransaction(() -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
@@ -141,9 +138,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
     String expectedErrors = "line 1:34 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n" +
         "parsing aborted!";
-    store.runInTransaction(() -> {
-      parseWithExpectedErrors(tagML, expectedErrors);
-    });
+    store.runInTransaction(() -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
@@ -285,7 +280,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<String> textSegments = document.getDTO().textGraph
           .getTextNodeIdStream()
           .map(id -> store.getTextNodeDTO(id))
-          .map(t -> t.getText())
+          .map(TAGTextNodeDTO::getText)
           .collect(toList());
 
       assertThat(textSegments).containsExactly("The rain in ", "Spain", " ", "falls", " mainly on the plain.");

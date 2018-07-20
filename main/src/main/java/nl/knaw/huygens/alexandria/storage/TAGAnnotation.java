@@ -56,7 +56,7 @@ public class TAGAnnotation {
     return annotation.getValue();
   }
 
-  public <T extends Object> T getTypedValue(Class<T> typeClass) {
+  public <T> T getTypedValue(Class<T> typeClass) {
     return (T) getValue();
   }
 

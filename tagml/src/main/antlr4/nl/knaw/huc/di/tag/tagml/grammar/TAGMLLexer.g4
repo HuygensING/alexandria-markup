@@ -154,8 +154,8 @@ AV_IdValue
   : NAME -> popMode
   ;
 
-AV_MixedContentOpener
-  : '[>' -> pushMode(INSIDE_MIXED_CONTENT)
+AV_RichTextOpener
+  : '[>' -> pushMode(INSIDE_RICH_TEXT)
   ;
 
 AV_ObjectOpener
@@ -174,29 +174,29 @@ RV_RefValue
   ;
 
 // ----------------- Everything INSIDE of [><] -------------
-mode INSIDE_MIXED_CONTENT;
+mode INSIDE_RICH_TEXT;
 
-IMX_Comment
+IRT_Comment
   : Comment -> skip
   ;
 
-IMX_BeginOpenMarkup // [ moves into markup tag
+IRT_BeginOpenMarkup // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
-IMX_BeginTextVariation
+IRT_BeginTextVariation
   : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
   ;
 
-IMX_BeginCloseMarkup
+IRT_BeginCloseMarkup
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
-IMX_Text
+IRT_Text
   : ( ~[[<\\] | REGULAR_TEXT_ESCAPE_CHARACTER )+
   ;
 
-IMX_MixedContentCloser
+IRT_RichTextCloser
   : '<]' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 

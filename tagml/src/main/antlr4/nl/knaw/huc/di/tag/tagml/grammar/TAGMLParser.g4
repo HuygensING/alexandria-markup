@@ -25,7 +25,7 @@ startTag
 beginOpenMarkup
   : DEFAULT_BeginOpenMarkup
   | ITV_BeginOpenMarkup
-  | IMX_BeginOpenMarkup
+  | IRT_BeginOpenMarkup
   ;
 
 endOpenMarkup
@@ -77,7 +77,7 @@ endTag
 beginCloseMarkup
   : DEFAULT_BeginCloseMarkup
   | ITV_BeginCloseMarkup
-  | IMX_BeginCloseMarkup
+  | IRT_BeginCloseMarkup
   ;
 
 milestoneTag
@@ -114,7 +114,7 @@ annotationValue
   : AV_StringValue
   | booleanValue
   | AV_NumberValue
-  | mixedContentValue
+  | richTextValue
   | listValue
   | objectValue
   ;
@@ -136,8 +136,8 @@ booleanValue
   | AV_FALSE
   ;
 
-mixedContentValue
-  : AV_MixedContentOpener chunk* IMX_MixedContentCloser // recursion!
+richTextValue
+  : AV_RichTextOpener chunk* IRT_RichTextCloser // recursion!
   ;
 
 listValue
@@ -155,7 +155,7 @@ textVariation
 beginTextVariation
   : DEFAULT_BeginTextVariation
   | ITV_BeginTextVariation
-  | IMX_BeginTextVariation
+  | IRT_BeginTextVariation
   ;
 
 textVariationSeparator
@@ -169,5 +169,5 @@ variantText
 text
   : DEFAULT_Text
   | ITV_Text
-  | IMX_Text
+  | IRT_Text
   ;

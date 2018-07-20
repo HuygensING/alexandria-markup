@@ -101,7 +101,7 @@ public class TAGMLImporter {
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
-    } catch (TAGMLBreakingError e) {
+    } catch (TAGMLBreakingError ignored) {
 
     }
     return listener.getDocument();

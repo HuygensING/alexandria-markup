@@ -372,9 +372,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         "<tagml]";
 
     final String expectedError = "line 1:13 : All elements of ListAnnotation l should be of the same type.";
-    store.runInTransaction(() -> {
-      assertTAGMLParsesWithSyntaxError(input, expectedError);
-    });
+    store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
   @Test
@@ -513,7 +511,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testMixedContentAnnotation1() {
+  public void testRichTextAnnotation1() {
     String input = "[t note=[>This is a [n>note<n] about this text<]>main text<t]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
@@ -566,7 +564,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
-//    TAGMLListener listener = new TAGMLListener(store, errorListener);
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {

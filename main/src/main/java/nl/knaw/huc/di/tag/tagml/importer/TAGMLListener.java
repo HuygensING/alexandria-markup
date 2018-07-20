@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -582,29 +582,27 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   private Object annotationValue(final AnnotationValueContext annotationValueContext) {
     if (annotationValueContext.AV_StringValue() != null) {
-      String value = annotationValueContext.AV_StringValue().getText()
+      return annotationValueContext.AV_StringValue().getText()
           .replaceFirst("^.", "")
           .replaceFirst(".$", "");
-      return value;
 
     } else if (annotationValueContext.booleanValue() != null) {
-      Boolean value = Boolean.valueOf(annotationValueContext.booleanValue().getText());
-      return value;
+      return Boolean.valueOf(annotationValueContext.booleanValue().getText());
 
     } else if (annotationValueContext.AV_NumberValue() != null) {
-      Float value = Float.valueOf(annotationValueContext.AV_NumberValue().getText());
-      return value;
+      return Float.valueOf(annotationValueContext.AV_NumberValue().getText());
 
     } else if (annotationValueContext.listValue() != null) {
-      List<?> value = annotationValueContext.listValue()
+      return annotationValueContext.listValue()
           .annotationValue().stream()
           .map(this::annotationValue)
           .collect(toList());
-      return value;
 
     } else if (annotationValueContext.objectValue() != null) {
-      Map<String, Object> value = readObject(annotationValueContext.objectValue());
-      return value;
+      return readObject(annotationValueContext.objectValue());
+
+    } else if (annotationValueContext.richTextValue() != null) {
+      return annotationValueContext.richTextValue().getText();
     }
     errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
         errorPrefix(annotationValueContext), annotationValueContext.getText());
@@ -612,11 +610,10 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private Map<String, Object> readObject(ObjectValueContext objectValueContext) {
-    Map<String, Object> objectMap = objectValueContext.children.stream()
+    return objectValueContext.children.stream()
         .filter(c -> !(c instanceof TerminalNode))
         .map(this::parseAttribute)
         .collect(toMap(KeyValue::getKey, KeyValue::getValue, (a, b) -> b));
-    return objectMap;
   }
 
   private KeyValue parseAttribute(ParseTree parseTree) {
@@ -636,8 +633,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
     }
 
-    KeyValue kv = null;
-    return kv;
+    return null;
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
@@ -676,7 +672,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       if (markup == null) {
         AtomicReference<String> emn = new AtomicReference<>(extendedMarkupName);
         boolean markupIsOpen = markupStack.stream()
-            .map(m -> m.getExtendedTag())
+            .map(TAGMarkup::getExtendedTag)
             .anyMatch(et -> emn.get().equals(et));
         if (!markupIsOpen) {
           errorListener.addError(

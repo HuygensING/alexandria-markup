@@ -553,11 +553,10 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   }
 
   private TAGAnnotation simpleAnnotation(String tag, String content) {
-    TAGAnnotation a1 = simpleAnnotation(tag);
-//    TAGDocument annotationDocument = a1.getDocument();
+    //    TAGDocument annotationDocument = a1.getDocument();
 //    TAGTextNode annotationText = store.createTextNode(content);
 //    annotationDocument.addTextNode(annotationText);
-    return a1;
+    return simpleAnnotation(tag);
   }
 
   private void assertActualMatchesExpected(TAGDocument actual, TAGDocument expected) {

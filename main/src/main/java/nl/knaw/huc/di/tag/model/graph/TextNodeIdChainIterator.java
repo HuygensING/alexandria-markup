@@ -53,7 +53,7 @@ class TextNodeIdChainIterator implements Iterator<Long> {
   }
 
   private Optional<Long> calcNextTextNodeId() {
-    Optional<Long> nextTextNodeId = null;
+    Optional<Long> nextTextNodeId = Optional.empty();
     if (nodesToProcess.isEmpty()) {
       nextTextNodeId = Optional.empty();
 

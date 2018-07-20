@@ -19,7 +19,6 @@ package nl.knaw.huc.di.tag.model.graph;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 
@@ -57,7 +56,7 @@ class TextNodeIdIterator implements Iterator<Long> {
   }
 
   private Optional<Long> calcNextTextNodeId() {
-    Optional<Long> nextTextNodeId = null;
+    Optional<Long> nextTextNodeId = Optional.empty();
     if (nodesToProcess.isEmpty()) {
       nextTextNodeId = Optional.empty();
 

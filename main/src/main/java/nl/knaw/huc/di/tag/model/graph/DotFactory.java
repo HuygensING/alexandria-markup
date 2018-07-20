@@ -85,7 +85,7 @@ public class DotFactory {
 
     String graphLabel = escape(label);
     if (!graphLabel.isEmpty()) {
-      dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>" + graphLabel + "</i></font>>\n");
+      dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>").append(graphLabel).append("</i></font>>\n");
     }
 
     dotBuilder.append("}");

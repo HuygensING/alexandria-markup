@@ -30,6 +30,7 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.assertj.core.util.Sets;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,8 +61,8 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
 
       Set<Long> allMarkupIds = new HashSet<>(asList(markupId1, markupId2, markupId3, markupId4));
 
-      Set<String> l1 = new HashSet<>(asList(layer1));
-      Set<String> l2 = new HashSet<>(asList(layer2));
+      Set<String> l1 = new HashSet<>(Collections.singletonList(layer1));
+      Set<String> l2 = new HashSet<>(Collections.singletonList(layer2));
 
       TAGView viewNoL1 = new TAGView(store).setLayersToExclude(l1);
 
