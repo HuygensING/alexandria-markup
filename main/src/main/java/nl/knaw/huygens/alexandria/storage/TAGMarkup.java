@@ -20,15 +20,14 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -88,16 +87,25 @@ public class TAGMarkup {
 //    return this;
 //  }
 
-  public TAGMarkup addAnnotation(TAGAnnotation annotation) {
-    markupDTO.getAnnotationIds().add(annotation.getDbId());
-    update();
+  public TAGMarkup addAnnotation(AnnotationInfo annotation) {
+//    markupDTO.getAnnotationIds().add(annotation.getDbId());
+//    update();
     return this;
   }
 
-  public Stream<TAGAnnotation> getAnnotationStream() {
-    return markupDTO.getAnnotationIds().stream()//
-        .map(store::getAnnotationDTO)//
-        .map(annotation -> new TAGAnnotation(store, annotation));
+  public Stream<AnnotationInfo> getAnnotationStream() {
+    Long markupNode = getDbId();
+    return document.getDTO().textGraph
+        .getOutgoingEdges(markupNode).stream()
+        .filter(AnnotationEdge.class::isInstance)
+        .map(AnnotationEdge.class::cast)
+        .map(this::toAnnotationInfo);
+  }
+
+  private AnnotationInfo toAnnotationInfo(final AnnotationEdge annotationEdge) {
+    Collection<Long> targets = document.getDTO().textGraph.getTargets(annotationEdge);
+    final Long valueNode = targets.iterator().next();
+    return new AnnotationInfo(valueNode, annotationEdge.getAnnotationType(), annotationEdge.getField());
   }
 
   public Stream<TAGTextNode> getTextNodeStream() {
@@ -144,7 +152,7 @@ public class TAGMarkup {
 
   public boolean hasN() {
     return getAnnotationStream()//
-        .map(TAGAnnotation::getKey) //
+        .map(AnnotationInfo::getName) //
         .anyMatch("n"::equals);
   }
 
@@ -237,11 +245,11 @@ public class TAGMarkup {
       return false;
     }
 
-    int thisAnnotationCount = markupDTO.getAnnotationIds().size();
-    int otherAnnotationCount = other.getDTO().getAnnotationIds().size();
-    if (thisAnnotationCount != otherAnnotationCount) {
-      return false;
-    }
+//    int thisAnnotationCount = markupDTO.getAnnotationIds().size();
+//    int otherAnnotationCount = other.getDTO().getAnnotationIds().size();
+//    if (thisAnnotationCount != otherAnnotationCount) {
+//      return false;
+//    }
 
     String thisAnnotationString = annotationsString();
     String otherAnnotationString = other.annotationsString();
@@ -250,13 +258,13 @@ public class TAGMarkup {
 
   public boolean hasAnnotation(String key) {
     return getAnnotationStream()
-        .map(TAGAnnotation::getKey)
+        .map(AnnotationInfo::getName)
         .anyMatch(key::equals);
   }
 
-  public TAGAnnotation getAnnotation(String key) {
+  public AnnotationInfo getAnnotation(String key) {
     return getAnnotationStream()
-        .filter(a -> a.hasKey(key))
+        .filter(a -> a.hasName(key))
         .findAny().get();
   }
 

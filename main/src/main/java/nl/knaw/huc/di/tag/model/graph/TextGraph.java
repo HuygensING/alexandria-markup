@@ -22,11 +22,9 @@ package nl.knaw.huc.di.tag.model.graph;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
-import nl.knaw.huc.di.tag.model.graph.edges.Edge;
-import nl.knaw.huc.di.tag.model.graph.edges.Edges;
-import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.*;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,4 +237,9 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         .findFirst();
   }
 
+  public void addAnnotationEdge(final Long sourceNode, final AnnotationInfo targetAnnotation) {
+    AnnotationEdge edge = new AnnotationEdge(targetAnnotation.getType(), targetAnnotation.getName());
+    Long annotationValueNode = targetAnnotation.getNodeId();
+    addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
+  }
 }

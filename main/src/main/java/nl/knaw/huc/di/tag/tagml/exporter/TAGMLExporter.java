@@ -22,7 +22,12 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
@@ -39,6 +44,7 @@ public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
   private final TAGView view;
   private final TAGStore store;
+  private final AnnotationFactory annotationFactory;
 
   public TAGMLExporter(TAGStore store) {
     this(store, TAGViews.getShowAllMarkupView(store));
@@ -47,6 +53,7 @@ public class TAGMLExporter {
   public TAGMLExporter(TAGStore store, TAGView view) {
     this.store = store;
     this.view = view;
+    this.annotationFactory = new AnnotationFactory(store);
   }
 
   class ExporterState {
@@ -271,33 +278,33 @@ public class TAGMLExporter {
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 
-  public StringBuilder toTAGML(final TAGAnnotation a) {
+  public StringBuilder toTAGML(final AnnotationInfo a) {
     StringBuilder stringBuilder = new StringBuilder()
-        .append(a.getKey())
+        .append(a.getName())
         .append("=");
     switch (a.getType()) {
       case String:
-        String stringValue = a.getTypedValue(String.class).replace("'", "\\'");
+        String stringValue = annotationFactory.getStringValue(a).replace("'", "\\'");
         stringBuilder.append("'")
             .append(stringValue)
             .append("'");
         break;
 
       case Number:
-        Double numberValue = a.getTypedValue(Double.class);
+        Double numberValue = annotationFactory.getNumberValue(a);
         stringBuilder.append(numberValue);
         break;
 
       case Boolean:
-        Boolean booleanValue = a.getTypedValue(Boolean.class);
+        Boolean booleanValue = annotationFactory.getBooleanValue(a);
         stringBuilder.append(booleanValue);
         break;
 
-      case List:
-        List<?> valueList = a.getTypedValue(List.class);
-        String value = valueList.stream().map(this::asValueString).collect(joining(","));
-        stringBuilder.append("[").append(value).append("]");
-        break;
+//      case List:
+//        List<?> valueList = a.getTypedValue(List.class);
+//        String value = valueList.stream().map(this::asValueString).collect(joining(","));
+//        stringBuilder.append("[").append(value).append("]");
+//        break;
 
       default:
         throw new RuntimeException("unhandled annotation type:" + a.getType());

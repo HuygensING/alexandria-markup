@@ -23,7 +23,10 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
@@ -32,7 +35,6 @@ public class TAGMarkupDTO implements TAGDTO {
 
   private String tag;
   private String markupId;
-  private List<Long> annotationIds = new ArrayList<>();
   private long documentId;
   private boolean isAnonymous = true;
   private boolean isContinuous = true;
@@ -69,19 +71,6 @@ public class TAGMarkupDTO implements TAGDTO {
 
   public void setTag(String tag) {
     this.tag = tag;
-  }
-
-  public void setAnnotationIds(List<Long> annotationIds) {
-    this.annotationIds = annotationIds;
-  }
-
-  public List<Long> getAnnotationIds() {
-    return annotationIds;
-  }
-
-  public TAGMarkupDTO addAnnotation(TAGAnnotationDTO annotation) {
-    annotationIds.add(annotation.getDbId());
-    return this;
   }
 
   public Long getDocumentId() {

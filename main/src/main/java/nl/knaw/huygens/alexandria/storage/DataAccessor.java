@@ -23,22 +23,42 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
-import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+
+import java.util.HashMap;
+import java.util.Map;
 
 class DataAccessor {
   final PrimaryIndex<Long, TAGDocumentDTO> documentById;
   final PrimaryIndex<Long, TAGTextNodeDTO> textNodeById;
   final PrimaryIndex<Long, TAGMarkupDTO> markupById;
-  final PrimaryIndex<Long, TAGAnnotationDTO> annotationById;
+
+  final PrimaryIndex<Long, StringAnnotationValue> stringAnnotationValueById;
+  final PrimaryIndex<Long, BooleanAnnotationValue> booleanAnnotationValueById;
+  final PrimaryIndex<Long, NumberAnnotationValue> numberAnnotationValueById;
+  final PrimaryIndex<Long, ListAnnotationValue> listAnnotationValueById;
+
+  Map<Class, PrimaryIndex> indexMap = new HashMap<>();
 
   public DataAccessor(EntityStore store) throws DatabaseException {
-    documentById = store.getPrimaryIndex(Long.class, TAGDocumentDTO.class);
-    textNodeById = store.getPrimaryIndex(Long.class, TAGTextNodeDTO.class);
-    markupById = store.getPrimaryIndex(Long.class, TAGMarkupDTO.class);
-    annotationById = store.getPrimaryIndex(Long.class, TAGAnnotationDTO.class);
+    documentById = initIndex(store, TAGDocumentDTO.class);
+    textNodeById = initIndex(store, TAGTextNodeDTO.class);
+    markupById = initIndex(store, TAGMarkupDTO.class);
+    stringAnnotationValueById = initIndex(store, StringAnnotationValue.class);
+    booleanAnnotationValueById = initIndex(store, BooleanAnnotationValue.class);
+    numberAnnotationValueById = initIndex(store, NumberAnnotationValue.class);
+    listAnnotationValueById = initIndex(store, ListAnnotationValue.class);
   }
 
+  public <T> PrimaryIndex<Long, T> getPrimaryIndexForClass(final Class<T> dtoClass) {
+    return indexMap.get(dtoClass);
+  }
+
+  public PrimaryIndex initIndex(EntityStore store, Class dtoClass) {
+    PrimaryIndex primaryIndex = store.getPrimaryIndex(Long.class, dtoClass);
+    indexMap.put(dtoClass, primaryIndex);
+    return primaryIndex;
+  }
 }

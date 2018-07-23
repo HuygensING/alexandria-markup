@@ -23,7 +23,6 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -780,13 +779,13 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       TAGMarkup markup = TAGMarkups.get(0);
-      List<TAGAnnotation> TAGAnnotations = markup.getAnnotationStream().collect(toList());
-      assertThat(TAGAnnotations).hasSize(2);
+      List<AnnotationInfo> annotationInfos = markup.getAnnotationStream().collect(toList());
+      assertThat(annotationInfos).hasSize(2);
 
-      TAGAnnotation annotationA = TAGAnnotations.get(0);
+      AnnotationInfo annotationA = annotationInfos.get(0);
       assertThat(annotationA).hasTag("a");
 
-      TAGAnnotation annotationB = TAGAnnotations.get(1);
+      AnnotationInfo annotationB = annotationInfos.get(1);
       assertThat(annotationB).hasTag("b");
     });
   }
@@ -808,10 +807,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       TAGMarkup markup = TAGMarkups.get(0);
-      List<TAGAnnotation> TAGAnnotations = markup.getAnnotationStream().collect(toList());
-      assertThat(TAGAnnotations).hasSize(1);
+      List<AnnotationInfo> annotationInfos = markup.getAnnotationStream().collect(toList());
+      assertThat(annotationInfos).hasSize(1);
 
-      TAGAnnotation annotationPrimes = TAGAnnotations.get(0);
+      AnnotationInfo annotationPrimes = annotationInfos.get(0);
       assertThat(annotationPrimes).hasTag("primes");
 //      List<TAGTextNode> annotationTextNodes = annotationPrimes.getDocument().getTextNodeStream().collect(toList());
 //      assertThat(annotationTextNodes).hasSize(1);

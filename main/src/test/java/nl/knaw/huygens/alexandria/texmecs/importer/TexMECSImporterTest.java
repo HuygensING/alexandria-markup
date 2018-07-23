@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.AntlrUtils;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
@@ -67,8 +68,8 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
       assertThat(document).isNotNull();
       TAGMarkup markup0 = document.getMarkupStream().findFirst().get();
       assertThat(markup0.getTag()).isEqualTo("s");
-      TAGAnnotation annotation = markup0.getAnnotationStream().findFirst().get();
-      assertThat(annotation.getKey()).isEqualTo("type");
+      AnnotationInfo annotation = markup0.getAnnotationStream().findFirst().get();
+      assertThat(annotation.getName()).isEqualTo("type");
 //      List<TAGTextNode> textNodeList = annotation.getDocument().getTextNodeStream().collect(toList());
 //      assertThat(textNodeList).hasSize(1);
 //      assertThat(textNodeList.get(0).getText()).isEqualTo("test");

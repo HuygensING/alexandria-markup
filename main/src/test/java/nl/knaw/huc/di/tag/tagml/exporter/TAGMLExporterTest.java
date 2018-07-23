@@ -157,7 +157,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNumberListAnnotation() {
-    String tagML = "[tagml odd=[1,3,5]>test<tagml]";
+    String tagML = "[tagml odd=[1.0,3.0,5.0]>test<tagml]";
     assertTAGMLOutIsIn(tagML);
   }
 

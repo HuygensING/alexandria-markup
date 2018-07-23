@@ -23,16 +23,19 @@ package nl.knaw.huygens.alexandria.storage;
 import com.google.common.base.Preconditions;
 import com.sleepycat.je.*;
 import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
-import nl.knaw.huygens.alexandria.storage.dto.*;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -46,7 +49,7 @@ public class TAGStore implements AutoCloseable {
   private final boolean readOnly;
 
   private Environment bdbEnvironment;
-  private DataAccessor da;
+  public DataAccessor da;
   private EntityStore store;
   private ThreadLocal<Boolean> transactionOpen;
   private Transaction tx;
@@ -103,17 +106,10 @@ public class TAGStore implements AutoCloseable {
   public Long persist(TAGDTO tagdto) {
     checkNotNull(tagdto);
     assertInTransaction();
-    if (tagdto instanceof TAGDocumentDTO) {
-      da.documentById.put(tx, (TAGDocumentDTO) tagdto);
-
-    } else if (tagdto instanceof TAGTextNodeDTO) {
-      da.textNodeById.put(tx, (TAGTextNodeDTO) tagdto);
-
-    } else if (tagdto instanceof TAGMarkupDTO) {
-      da.markupById.put(tx, (TAGMarkupDTO) tagdto);
-
-    } else if (tagdto instanceof TAGAnnotationDTO) {
-      da.annotationById.put(tx, (TAGAnnotationDTO) tagdto);
+    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
+    if (index != null) {
+      index.put(tx, tagdto);
 
     } else {
       throw new RuntimeException("unhandled class: " + tagdto.getClass());
@@ -122,18 +118,12 @@ public class TAGStore implements AutoCloseable {
   }
 
   public void remove(TAGDTO tagdto) {
+    checkNotNull(tagdto);
     assertInTransaction();
-    if (tagdto instanceof TAGDocumentDTO) {
-      da.documentById.delete(tx, tagdto.getDbId());
-
-    } else if (tagdto instanceof TAGTextNodeDTO) {
-      da.textNodeById.delete(tx, tagdto.getDbId());
-
-    } else if (tagdto instanceof TAGMarkupDTO) {
-      da.markupById.delete(tx, tagdto.getDbId());
-
-    } else if (tagdto instanceof TAGAnnotationDTO) {
-      da.annotationById.delete(tx, tagdto.getDbId());
+    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
+    if (index != null) {
+      index.delete(tx, tagdto.getDbId());
 
     } else {
       throw new RuntimeException("unhandled class: " + tagdto.getClass());
@@ -222,61 +212,61 @@ public class TAGStore implements AutoCloseable {
   }
 
   // Annotation
-  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
-    assertInTransaction();
-    return da.annotationById.get(tx, annotationId, LOCK_MODE);
-  }
+//  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
+//    assertInTransaction();
+//    return da.annotationById.get(tx, annotationId, LOCK_MODE);
+//  }
+//
+//  public TAGAnnotationDTO createAnnotationDTO(String tag) {
+////    TAGDocumentDTO document = new TAGDocumentDTO();
+////    persist(document);
+//    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
+////    annotation.setDocumentId(document.getDbId());
+//    persist(annotation);
+//    return annotation;
+//  }
 
-  public TAGAnnotationDTO createAnnotationDTO(String tag) {
-//    TAGDocumentDTO document = new TAGDocumentDTO();
-//    persist(document);
-    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
-//    annotation.setDocumentId(document.getDbId());
-    persist(annotation);
-    return annotation;
-  }
+//  public TAGAnnotation createStringAnnotation(String key, String value) {
+//    return createAnnotation(key, value, AnnotationType.String);
+//  }
+//
+//  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
+//    return createAnnotation(key, value, AnnotationType.Boolean);
+//  }
+//
+//  public TAGAnnotation createNumberAnnotation(String key, Double value) {
+//    return createAnnotation(key, value, AnnotationType.Number);
+//  }
+//
+//  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
+//    return createAnnotation(key, value, AnnotationType.List);
+//  }
+//
+//  public TAGAnnotation createObjectAnnotation(String key, Object value) {
+//    return createAnnotation(key, value, AnnotationType.Object);
+//  }
+//
+//  public TAGAnnotation createRefAnnotation(String aName, String refId) {
+//    return createAnnotation(aName, refId, AnnotationType.Reference);
+//  }
 
-  public TAGAnnotation createStringAnnotation(String key, String value) {
-    return createAnnotation(key, value, AnnotationType.String);
-  }
-
-  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
-    return createAnnotation(key, value, AnnotationType.Boolean);
-  }
-
-  public TAGAnnotation createNumberAnnotation(String key, Double value) {
-    return createAnnotation(key, value, AnnotationType.Number);
-  }
-
-  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
-    return createAnnotation(key, value, AnnotationType.List);
-  }
-
-  public TAGAnnotation createObjectAnnotation(String key, Object value) {
-    return createAnnotation(key, value, AnnotationType.Object);
-  }
-
-  public TAGAnnotation createRefAnnotation(String aName, String refId) {
-    return createAnnotation(aName, refId, AnnotationType.Reference);
-  }
-
-  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
-    TAGAnnotationDTO dto = createAnnotationDTO(aName);
-    dto.setType(type);
-    dto.setValue(value);
-    persist(dto);
-    return new TAGAnnotation(this, dto);
-  }
-
-  public TAGAnnotation createAnnotation(String tag) {
-    assertInTransaction();
-    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
-    return new TAGAnnotation(this, annotation);
-  }
-
-  public TAGAnnotation getAnnotation(Long annotationId) {
-    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
-  }
+//  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
+//    TAGAnnotationDTO dto = createAnnotationDTO(aName);
+//    dto.setType(type);
+//    dto.setValue(value);
+//    persist(dto);
+//    return new TAGAnnotation(this, dto);
+//  }
+//
+//  public TAGAnnotation createAnnotation(String tag) {
+//    assertInTransaction();
+//    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
+//    return new TAGAnnotation(this, annotation);
+//  }
+//
+//  public TAGAnnotation getAnnotation(Long annotationId) {
+//    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
+//  }
 
   // transaction
   public void runInTransaction(Runnable runner) {
@@ -388,4 +378,29 @@ public class TAGStore implements AutoCloseable {
         "We're not in an open transaction!");
   }
 
+  public Long createStringAnnotationValue(final String value) {
+    assertInTransaction();
+    StringAnnotationValue sav = new StringAnnotationValue(value);
+    persist(sav);
+    return sav.getDbId();
+  }
+
+  public Long createBooleanAnnotationValue(final Boolean value) {
+    assertInTransaction();
+    BooleanAnnotationValue sav = new BooleanAnnotationValue(value);
+    persist(sav);
+    return sav.getDbId();
+  }
+
+  public StringAnnotationValue getStringAnnotationValue(final Long id) {
+    return da.stringAnnotationValueById.get(id);
+  }
+
+  public NumberAnnotationValue getNumberAnnotationValue(final Long id) {
+    return da.numberAnnotationValueById.get(id);
+  }
+
+  public BooleanAnnotationValue getBooleanAnnotationValue(final Long id) {
+    return da.booleanAnnotationValueById.get(id);
+  }
 }

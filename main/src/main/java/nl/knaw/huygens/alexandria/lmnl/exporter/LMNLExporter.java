@@ -21,10 +21,10 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.slf4j.Logger;
@@ -107,11 +107,12 @@ public class LMNLExporter {
   }
 
   private StringBuilder toOpenTag(TAGMarkup markup) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
-    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-    return markup.isAnonymous()//
-        ? tagBuilder.append("]")//
-        : tagBuilder.append("}");
+    return new StringBuilder("TODO");
+//    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+//    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+//    return markup.isAnonymous()//
+//        ? tagBuilder.append("]")//
+//        : tagBuilder.append("}");
   }
 
   public StringBuilder toLMNL(TAGAnnotation annotation) {

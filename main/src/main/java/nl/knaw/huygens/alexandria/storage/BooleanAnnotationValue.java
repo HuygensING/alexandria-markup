@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.dto;
+package nl.knaw.huygens.alexandria.storage;
 
 /*-
  * #%L
@@ -19,22 +19,27 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * limitations under the License.
  * #L%
  */
+import com.sleepycat.persist.model.Entity;
 
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import org.assertj.core.api.AbstractObjectAssert;
+@Entity(version = 1)
+public class BooleanAnnotationValue extends AnnotationValue {
 
-public class TAGAnnotationAssert extends AbstractObjectAssert<TAGAnnotationAssert, TAGAnnotation> {
+  Boolean value;
 
-  public TAGAnnotationAssert(final TAGAnnotation actual) {
-    super(actual, TAGAnnotationAssert.class);
+  private BooleanAnnotationValue() {
   }
 
-  public TAGAnnotationAssert hasTag(final String tag) {
-    isNotNull();
-    if (!actual.getKey().equals(tag)) {
-      failWithMessage("Expected annotation's tag to be <%s> but was <%s>", tag, actual.getKey());
-    }
-    return myself;
+  ;
+
+  BooleanAnnotationValue(final Boolean value) {
+    setValue(value);
   }
 
+  public void setValue(final Boolean value) {
+    this.value = value;
+  }
+
+  public Boolean getValue() {
+    return value;
+  }
 }

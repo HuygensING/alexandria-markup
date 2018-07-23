@@ -20,11 +20,11 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -65,7 +65,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       // - with one annotation on it.
       TAGDocument expected = store.createDocument();
       TAGMarkup r1 = store.createMarkup(expected, "l");
-      TAGAnnotation a1 = simpleAnnotation("n", "144");
+      AnnotationInfo a1 = simpleAnnotation("n", "144");
       r1.addAnnotation(a1);
       TAGTextNode t1 = store.createTextNode("He manages to keep the upper hand");
       expected.addTextNode(t1, null);
@@ -118,13 +118,13 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGTextNode tn09 = store.createTextNode("We fence our flowers in and the hens range.");
       TAGTextNode tn10 = store.createTextNode("\n");
 
-      TAGAnnotation date = simpleAnnotation("date", "1915");
-      TAGAnnotation title = simpleAnnotation("title", "The Housekeeper");
-      TAGAnnotation source = simpleAnnotation("source")/*.addAnnotation(date).addAnnotation(title)*/;
+      AnnotationInfo date = simpleAnnotation("date", "1915");
+      AnnotationInfo title = simpleAnnotation("title", "The Housekeeper");
+      AnnotationInfo source = simpleAnnotation("source")/*.addAnnotation(date).addAnnotation(title)*/;
 
-      TAGAnnotation name = simpleAnnotation("name", "Robert Frost");
-      TAGAnnotation dates = simpleAnnotation("dates", "1874-1963");
-      TAGAnnotation author = simpleAnnotation("author")/*.addAnnotation(name).addAnnotation(dates)*/;
+      AnnotationInfo name = simpleAnnotation("name", "Robert Frost");
+      AnnotationInfo dates = simpleAnnotation("dates", "1874-1963");
+      AnnotationInfo author = simpleAnnotation("author")/*.addAnnotation(name).addAnnotation(dates)*/;
 
       TAGMarkup excerpt = store.createMarkup(expected, "excerpt")//
           .addAnnotation(source)//
@@ -137,13 +137,13 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup s3 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn07, tn09);
 
       // 3 lines
-      TAGAnnotation n144 = simpleAnnotation("n", "144");
+      AnnotationInfo n144 = simpleAnnotation("n", "144");
       TAGMarkup l1 = store.createMarkup(expected, "l")/*.addTextNode(tn01)*/.addAnnotation(n144);
 
-      TAGAnnotation n145 = simpleAnnotation("n", "145");
+      AnnotationInfo n145 = simpleAnnotation("n", "145");
       TAGMarkup l2 = store.createMarkup(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
 
-      TAGAnnotation n146 = simpleAnnotation("n", "146");
+      AnnotationInfo n146 = simpleAnnotation("n", "146");
       TAGMarkup l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
 
       expected.addTextNode(tn00, null)//
@@ -223,13 +223,13 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGMarkup excerpt = actualMarkupList.get(0);
       assertThat(excerpt.getTag()).isEqualTo("excerpt");
 
-      List<TAGAnnotation> annotations = excerpt.getAnnotationStream().collect(toList());
+      List<AnnotationInfo> annotations = excerpt.getAnnotationStream().collect(toList());
       assertThat(annotations).hasSize(1); // just the soutce annotation;
 
-      TAGAnnotation source = simpleAnnotation("source");
-      TAGAnnotation book = simpleAnnotation("book", "1 Kings");
+      AnnotationInfo source = simpleAnnotation("source");
+      AnnotationInfo book = simpleAnnotation("book", "1 Kings");
 //      source.addAnnotation(book);
-      TAGAnnotation chapter = simpleAnnotation("chapter", "12");
+      AnnotationInfo chapter = simpleAnnotation("chapter", "12");
 //      source.addAnnotation(chapter);
       String actualSourceTAGML = tagmlExporter.toTAGML(annotations.get(0)).toString();
       String expectedSourceTAGML = tagmlExporter.toTAGML(source).toString();
@@ -313,7 +313,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       // - that has one range on it.
 //      TAGDocument expected = store.createDocument();
 //      TAGMarkup m1 = store.createMarkup(expected, "lmnl");
-//      TAGAnnotation a1 = simpleAnnotation("a");
+//      AnnotationInfo a1 = simpleAnnotation("a");
 //      TAGDocument annotationDocument = a1.getDocument();
 //      TAGTextNode at1 = store.createTextNode("This is the ");
 //      TAGTextNode at2 = store.createTextNode("annotation");
@@ -359,7 +359,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGDocument expected = store.createDocument();
 
       TAGMarkup m1 = store.createMarkup(expected, "range1");
-      TAGAnnotation a1 = simpleAnnotation("annotation1");
+      AnnotationInfo a1 = simpleAnnotation("annotation1");
 //      TAGDocument annotationDocument = a1.getDocument();
 //      TAGTextNode at1 = store.createTextNode("");
 //      TAGMarkup ar11 = store.createMarkup(annotationDocument, "ra11")/*.addTextNode(at1)*/;
@@ -396,7 +396,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       TAGDocument expected = store.createDocument();
 
       TAGMarkup m1 = store.createMarkup(expected, "range1");
-      TAGAnnotation a1 = simpleAnnotation("", "annotation text");
+      AnnotationInfo a1 = simpleAnnotation("", "annotation text");
       m1.addAnnotation(a1);
 
       TAGTextNode t1 = store.createTextNode("bla");
@@ -548,11 +548,12 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     assertThat(actualTAGML).isEqualTo(expectedTAGML);
   }
 
-  private TAGAnnotation simpleAnnotation(String tag) {
-    return store.createAnnotation(tag);
+  private AnnotationInfo simpleAnnotation(String tag) {
+    return null;
+//    return store.createAnnotation(tag);
   }
 
-  private TAGAnnotation simpleAnnotation(String tag, String content) {
+  private AnnotationInfo simpleAnnotation(String tag, String content) {
     //    TAGDocument annotationDocument = a1.getDocument();
 //    TAGTextNode annotationText = store.createTextNode(content);
 //    annotationDocument.addTextNode(annotationText);

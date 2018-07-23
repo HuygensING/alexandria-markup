@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
@@ -54,14 +55,14 @@ public class TAGAssertions extends Assertions {
   }
 
   /**
-   * Creates a new instance of <code>{@link TAGAnnotationAssert}</code>.
+   * Creates a new instance of <code>{@link AnnotationInfoAssert}</code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static TAGAnnotationAssert assertThat(TAGAnnotation actual) {
-    return new TAGAnnotationAssert(actual);
+  public static AnnotationInfoAssert assertThat(AnnotationInfo actual) {
+    return new AnnotationInfoAssert(actual);
   }
 
   /**

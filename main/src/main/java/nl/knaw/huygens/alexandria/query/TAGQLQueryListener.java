@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.query;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huc.di.tag.tagql.TAGQLSelectStatement;
 import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener;
@@ -95,7 +96,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     return (TAGMarkup markup) -> {
       List<String> annotationTexts = new ArrayList<>();
       int depth = 0;
-      List<TAGAnnotation> annotationsToFilter = markup.getAnnotationStream().collect(toList());
+      List<AnnotationInfo> annotationsToFilter = markup.getAnnotationStream().collect(toList());
       while (depth < annotationTags.size() - 1) {
         String filterTag = annotationTags.get(depth);
         annotationsToFilter = annotationsToFilter.stream()//
@@ -113,8 +114,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     };
   }
 
-  private Predicate<? super TAGAnnotation> hasTag(String filterTag) {
-    return a -> filterTag.equals(a.getKey());
+  private Predicate<AnnotationInfo> hasTag(String filterTag) {
+    return a -> filterTag.equals(a.getName());
   }
 
   private void handleSource(TAGQLSelectStatement statement, TAGQLParser.SourceContext source) {
@@ -158,7 +159,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       } else if (extendedIdentifier.part() instanceof AnnotationValuePartContext) {
         String annotationIdentifier = getAnnotationName(extendedIdentifier.part());
         filter = markup -> markup.getAnnotationStream()
-            .anyMatch(a -> annotationIdentifier.equals(a.getKey()) && value.equals(toAnnotationText(a)));
+            .anyMatch(a -> annotationIdentifier.equals(a.getName()) && value.equals(toAnnotationText(a)));
 
       } else {
         unhandled(extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()", extendedIdentifier.part().getText());
@@ -203,8 +204,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     return parseTree.getText().replaceAll("'", "");
   }
 
-  private String toAnnotationText(TAGAnnotation annotation) {
-    return annotation.getDTO().getValue().toString();
+  private String toAnnotationText(AnnotationInfo annotation) {
+    return "TODO";
 //    return annotation.getDocument().getTextNodeStream()//
 //        .map(TAGTextNode::getText)//
 //        .collect(joining());

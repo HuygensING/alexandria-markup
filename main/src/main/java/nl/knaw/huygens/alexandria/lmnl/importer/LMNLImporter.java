@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
@@ -119,7 +120,7 @@ public class LMNLImporter {
       if (annotationStack.isEmpty()) {
         TAGMarkupDTO markup = currentMarkup();
         if (markup != null) {
-          markup.addAnnotation(annotation);
+//          markup.addAnnotation(annotation);
         }
       } else {
 //        annotationStack.peek().addAnnotation(annotation);
@@ -355,62 +356,62 @@ public class LMNLImporter {
 
   private void handleAnnotation(ImporterContext context) {
     String methodName = "handleAnnotation";
-    TAGAnnotationDTO annotation = tagStore.createAnnotationDTO("");
-    context.openAnnotation(annotation);
-    boolean goOn = true;
-    while (goOn) {
-      Token token = context.nextToken();
-      String ruleName = context.getRuleName();
-      String modeName = context.getModeName();
-      log(methodName, ruleName, modeName, token, context);
-      switch (token.getType()) {
-        case LMNLLexer.Name_Open_Annotation:
-          annotation.setKey(token.getText());
-          break;
-        case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
-        case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
-          handleAnnotation(context);
-          break;
-        case LMNLLexer.END_OPEN_ANNO:
-          context.pushDocumentContext(context.currentAnnotationDocument());
-          break;
-
-        case LMNLLexer.ANNO_TEXT:
-          TAGTextNodeDTO textNode = new TAGTextNodeDTO(token.getText());
-          update(textNode);
-          context.addTextNode(textNode);
-          break;
-
-        case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
-          handleOpenRange(context);
-          break;
-
-        case LMNLLexer.BEGIN_ANNO_CLOSE_RANGE:
-          handleCloseRange(context);
-          break;
-
-        case LMNLLexer.BEGIN_CLOSE_ANNO:
-        case LMNLLexer.Name_Close_Annotation:
-          break;
-        case LMNLLexer.END_CLOSE_ANNO:
-          context.popDocumentContext();
-        case LMNLLexer.END_EMPTY_ANNO:
-          context.closeAnnotation();
-          goOn = false;
-          break;
-
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
-
-        default:
-          handleUnexpectedToken(methodName, token, ruleName, modeName);
-          break;
-      }
-      goOn = goOn && token.getType() != Token.EOF;
-    }
+//    TAGAnnotationDTO annotation = tagStore.createAnnotationDTO("");
+//    context.openAnnotation(annotation);
+//    boolean goOn = true;
+//    while (goOn) {
+//      Token token = context.nextToken();
+//      String ruleName = context.getRuleName();
+//      String modeName = context.getModeName();
+//      log(methodName, ruleName, modeName, token, context);
+//      switch (token.getType()) {
+//        case LMNLLexer.Name_Open_Annotation:
+//          annotation.setKey(token.getText());
+//          break;
+//        case LMNLLexer.OPEN_ANNO_IN_ANNO_OPENER:
+//        case LMNLLexer.OPEN_ANNO_IN_ANNO_CLOSER:
+//          handleAnnotation(context);
+//          break;
+//        case LMNLLexer.END_OPEN_ANNO:
+//          context.pushDocumentContext(context.currentAnnotationDocument());
+//          break;
+//
+//        case LMNLLexer.ANNO_TEXT:
+//          TAGTextNodeDTO textNode = new TAGTextNodeDTO(token.getText());
+//          update(textNode);
+//          context.addTextNode(textNode);
+//          break;
+//
+//        case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
+//          handleOpenRange(context);
+//          break;
+//
+//        case LMNLLexer.BEGIN_ANNO_CLOSE_RANGE:
+//          handleCloseRange(context);
+//          break;
+//
+//        case LMNLLexer.BEGIN_CLOSE_ANNO:
+//        case LMNLLexer.Name_Close_Annotation:
+//          break;
+//        case LMNLLexer.END_CLOSE_ANNO:
+//          context.popDocumentContext();
+//        case LMNLLexer.END_EMPTY_ANNO:
+//          context.closeAnnotation();
+//          goOn = false;
+//          break;
+//
+//        // case LMNLLexer.TagOpenStartChar:
+//        // case LMNLLexer.TagOpenEndChar:
+//        // case LMNLLexer.TagCloseStartChar:
+//        // case LMNLLexer.TagCloseEndChar:
+//        // break;
+//
+//        default:
+//          handleUnexpectedToken(methodName, token, ruleName, modeName);
+//          break;
+//      }
+//      goOn = goOn && token.getType() != Token.EOF;
+//    }
   }
 
   private void handleCloseRange(ImporterContext context) {
@@ -459,33 +460,33 @@ public class LMNLImporter {
 //  }
 
   private static void joinDiscontinuedRanges(TAGDocument document) {
-    Map<String, TAGMarkupDTO> markupsToJoin = new HashMap<>();
-    List<Long> markupIdsToRemove = new ArrayList<>();
-    document.getMarkupStream()//
-        .filter(TAGMarkup::hasN)//
-        .forEach(markup -> {
-          String tag = markup.getTag();
-          TAGAnnotation annotation = markup.getAnnotationStream()//
-              .filter(a -> a.getKey().equals("n"))//
-              .findFirst()//
-              .get();
-          String key = tag + "-" + annotationText(annotation);
-          if (markupsToJoin.containsKey(key)) {
-            TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
-            markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
-//            document.joinMarkup(originalMarkup, markup);
-            markupIdsToRemove.add(markup.getDbId());
-          } else {
-            markupsToJoin.put(key, markup.getDTO());
-          }
-        });
-
-    document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
+//    Map<String, TAGMarkupDTO> markupsToJoin = new HashMap<>();
+//    List<Long> markupIdsToRemove = new ArrayList<>();
 //    document.getMarkupStream()//
-//        .map(TAGMarkup::getAnnotationStream)//
-//        .flatMap(Function.identity())//
-//        .map(TAGAnnotation::getDocument)//
-//        .forEach(LMNLImporter::joinDiscontinuedRanges);
+//        .filter(TAGMarkup::hasN)//
+//        .forEach(markup -> {
+//          String tag = markup.getTag();
+//          AnnotationInfo annotation = markup.getAnnotationStream()//
+//              .filter(a -> a.getName().equals("n"))//
+//              .findFirst()//
+//              .get();
+//          String key = tag + "-" + annotationText(annotation);
+//          if (markupsToJoin.containsKey(key)) {
+//            TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
+//            markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
+////            document.joinMarkup(originalMarkup, markup);
+//            markupIdsToRemove.add(markup.getDbId());
+//          } else {
+//            markupsToJoin.put(key, markup.getDTO());
+//          }
+//        });
+//
+//    document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
+////    document.getMarkupStream()//
+////        .map(TAGMarkup::getAnnotationStream)//
+////        .flatMap(Function.identity())//
+////        .map(TAGAnnotation::getDocument)//
+////        .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
   private static String annotationText(TAGAnnotation annotation) {

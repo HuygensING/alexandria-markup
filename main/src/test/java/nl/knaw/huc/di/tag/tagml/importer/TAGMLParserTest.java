@@ -231,7 +231,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testStringAnnotation() {
     String input = "[text author='somebody'>some text.<text]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("text")
@@ -240,7 +240,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("some text.")
       );
       assertThat(document).hasMarkupWithTag("text").withStringAnnotation("author", "somebody");
+      return document;
     });
+    String tagml = export(doc);
+    assertThat(tagml).isEqualTo(input);
   }
 
   @Test
@@ -248,14 +251,17 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m s=\"string\">text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    final TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
           markupSketch("m")
       );
       assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
+      return document;
     });
+    String tagml = export(doc);
+    assertThat(tagml).isEqualTo(input);
   }
 
   @Test
@@ -574,8 +580,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
 
-    String tagml = TAGML_EXPORTER.asTAGML(document);
-    LOG.info("\nTAGML:\n{}\n", tagml);
     return document;
   }
 
@@ -604,6 +608,14 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       LOG.error("errors: {}", errorListener.getErrors());
     }
     assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
+  }
+
+  private String export(final TAGDocument document) {
+    String tagml = store.runInTransaction(() -> {
+      return TAGML_EXPORTER.asTAGML(document);
+    });
+    LOG.info("\nTAGML:\n{}\n", tagml);
+    return tagml;
   }
 
 }
