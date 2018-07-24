@@ -44,7 +44,7 @@ public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
   private final TAGView view;
   private final TAGStore store;
-  private final AnnotationFactory annotationFactory;
+  private AnnotationFactory annotationFactory;
 
   public TAGMLExporter(TAGStore store) {
     this(store, TAGViews.getShowAllMarkupView(store));
@@ -53,7 +53,6 @@ public class TAGMLExporter {
   public TAGMLExporter(TAGStore store, TAGView view) {
     this.store = store;
     this.view = view;
-    this.annotationFactory = new AnnotationFactory(store);
   }
 
   class ExporterState {
@@ -123,6 +122,7 @@ public class TAGMLExporter {
   }
 
   public String asTAGML(TAGDocument document) {
+    annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
     document.getMarkupStream()
         .filter(TAGMarkup::isDiscontinuous)
@@ -222,7 +222,7 @@ public class TAGMLExporter {
   }
 
   private String addResumePrefixIfRequired(String openTag, Long markupId,
-      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+                                           final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       TAGMarkup markup = store.getMarkup(markupId);
@@ -234,7 +234,7 @@ public class TAGMLExporter {
   }
 
   private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
-      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+                                            final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       if (textNodesToHandle > 0) {
@@ -279,9 +279,12 @@ public class TAGMLExporter {
   }
 
   public StringBuilder toTAGML(final AnnotationInfo a) {
-    StringBuilder stringBuilder = new StringBuilder()
-        .append(a.getName())
-        .append("=");
+    StringBuilder stringBuilder = new StringBuilder();
+    if (a.hasName()) {
+      stringBuilder
+          .append(a.getName())
+          .append("=");
+    }
     switch (a.getType()) {
       case String:
         String stringValue = annotationFactory.getStringValue(a).replace("'", "\\'");
@@ -300,11 +303,14 @@ public class TAGMLExporter {
         stringBuilder.append(booleanValue);
         break;
 
-//      case List:
-//        List<?> valueList = a.getTypedValue(List.class);
-//        String value = valueList.stream().map(this::asValueString).collect(joining(","));
-//        stringBuilder.append("[").append(value).append("]");
-//        break;
+      case List:
+        stringBuilder.append("[");
+        List<AnnotationInfo> listValue = annotationFactory.getListValue(a);
+        stringBuilder.append(listValue.stream()
+            .map(this::toTAGML)
+            .collect(joining(",")));
+        stringBuilder.append("]");
+        break;
 
       default:
         throw new RuntimeException("unhandled annotation type:" + a.getType());

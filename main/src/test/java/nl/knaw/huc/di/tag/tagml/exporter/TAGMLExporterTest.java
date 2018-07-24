@@ -166,6 +166,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML = "[tagml b=[true,false]>test<tagml]";
     assertTAGMLOutIsIn(tagML);
   }
+
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {
@@ -175,8 +176,10 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   private String parseAndExport(final String tagmlIn) {
+    TAGDocument document = store.runInTransaction(
+        () -> new TAGMLImporter(store).importTAGML(tagmlIn)
+    );
     return store.runInTransaction(() -> {
-      TAGDocument document = new TAGMLImporter(store).importTAGML(tagmlIn);
       logDocumentGraph(document, tagmlIn);
       return new TAGMLExporter(store).asTAGML(document);
     });

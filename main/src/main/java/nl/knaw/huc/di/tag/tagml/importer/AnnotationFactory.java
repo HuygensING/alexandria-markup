@@ -19,6 +19,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
+
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
@@ -27,61 +30,77 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 public class AnnotationFactory {
 
   private TAGStore store;
   private ErrorListener errorListener;
+  private TextGraph textGraph;
 
-  public AnnotationFactory(TAGStore store, ErrorListener errorListener) {
+  public AnnotationFactory(TAGStore store, TextGraph textGraph, ErrorListener errorListener) {
     this.store = store;
     this.errorListener = errorListener;
+    this.textGraph = textGraph;
   }
 
-  public AnnotationFactory(final TAGStore store) {
-    this(store, null);
+  public AnnotationFactory(final TAGStore store, TextGraph textGraph) {
+    this(store, textGraph, null);
   }
 
   public AnnotationInfo makeAnnotation(TAGMLParser.BasicAnnotationContext basicAnnotationContext) {
     String aName = basicAnnotationContext.annotationName().getText();
     TAGMLParser.AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
     Object value = annotationValue(annotationValueContext);
-    AnnotationInfo annotationInfo = null;
-    if (annotationValueContext.AV_StringValue() != null) {
-      Long id = store.createStringAnnotationValue((String) value);
-      annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
-
-    } else if (annotationValueContext.booleanValue() != null) {
-      Long id = store.createBooleanAnnotationValue((Boolean) value);
-      annotationInfo = new AnnotationInfo(id, AnnotationType.Boolean, aName);
-
-    } else if (annotationValueContext.AV_NumberValue() != null) {
-      Long id = store.createNumberAnnotationValue((Double) value);
-      annotationInfo = new AnnotationInfo(id, AnnotationType.Number, aName);
-//
-//    } else if (annotationValueContext.objectValue() != null) {
-//      annotationInfo = store.createObjectAnnotation(aName, value);
-//
-//    } else if (annotationValueContext.listValue() != null) {
-//      Set<String> valueTypes = ((List<Object>) value).stream()
-//          .map(v -> ((Object) v).getClass().getName())
-//          .collect(toSet());
-//      if (valueTypes.size() > 1) {
-//        errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
-//            errorPrefix(annotationValueContext), aName);
-//      }
-//      annotationInfo = store.createListAnnotation(aName, (List<?>) value);
-    }
+    AnnotationInfo annotationInfo = makeAnnotation(aName, annotationValueContext, value);
 
     if (annotationInfo == null) {
       throw new RuntimeException("unhandled basic annotation " + basicAnnotationContext.getText());
     }
 
+    return annotationInfo;
+  }
+
+  private AnnotationInfo makeAnnotation(String aName, TAGMLParser.AnnotationValueContext annotationValueContext, Object value) {
+    AnnotationInfo annotationInfo = null;
+    if (value instanceof String) {
+      Long id = store.createStringAnnotationValue((String) value);
+      annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
+
+    } else if (value instanceof Boolean) {
+      Long id = store.createBooleanAnnotationValue((Boolean) value);
+      annotationInfo = new AnnotationInfo(id, AnnotationType.Boolean, aName);
+
+    } else if (value instanceof Double) {
+      Long id = store.createNumberAnnotationValue((Double) value);
+      annotationInfo = new AnnotationInfo(id, AnnotationType.Number, aName);
+
+    } else if (value instanceof List) {
+      List<Object> list = (List<Object>) value;
+      Set<String> valueTypes = list.stream()
+          .map(v -> ((Object) v).getClass().getName())
+          .collect(toSet());
+      if (valueTypes.size() > 1) {
+        errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
+            errorPrefix(annotationValueContext), aName);
+      }
+      Long id = store.createListAnnotationValue();
+      annotationInfo = new AnnotationInfo(id, AnnotationType.List, aName);
+      list.forEach(e -> {
+        AnnotationInfo listElement = makeAnnotation("", annotationValueContext, e);
+        textGraph.addListItem(id, listElement);
+      });
+
+    } else {
+      String placeholder = annotationValueContext.getText();
+      Long id = store.createStringAnnotationValue(placeholder);
+      annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
+    }
     return annotationInfo;
   }
 
@@ -162,6 +181,21 @@ public class AnnotationFactory {
   public Boolean getBooleanValue(final AnnotationInfo annotationInfo) {
     BooleanAnnotationValue booleanAnnotationValue = store.getBooleanAnnotationValue(annotationInfo.getNodeId());
     return booleanAnnotationValue.getValue();
+  }
+
+  public List<AnnotationInfo> getListValue(AnnotationInfo annotationInfo) {
+    Long nodeId = annotationInfo.getNodeId();
+    return textGraph.getOutgoingEdges(nodeId).stream()
+        .filter(ListItemEdge.class::isInstance)
+        .map(ListItemEdge.class::cast)
+        .map(this::toAnnotationInfo)
+        .collect(toList());
+  }
+
+  private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {
+    Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
+    AnnotationType type = listItemEdge.getAnnotationType();
+    return new AnnotationInfo(nodeId, type, "");
   }
 
   private class KeyValue {

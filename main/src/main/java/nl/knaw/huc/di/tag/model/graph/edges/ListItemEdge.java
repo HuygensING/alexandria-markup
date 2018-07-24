@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.model.graph.edges;
 
 /*-
  * #%L
@@ -19,38 +19,31 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
-
+import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
-import org.apache.commons.lang3.StringUtils;
 
-public class AnnotationInfo {
-  Long nodeId;
-  AnnotationType type;
-  String name;
+@Persistent
+public class ListItemEdge implements Edge {
+  AnnotationType annotationType;
 
-  public AnnotationInfo(Long nodeId, AnnotationType type, String name) {
-    this.nodeId = nodeId;
-    this.type = type;
-    this.name = name;
+  private ListItemEdge() {
   }
 
-  public Long getNodeId() {
-    return nodeId;
+  public ListItemEdge(AnnotationType type) {
+    annotationType = type;
   }
 
-  public AnnotationType getType() {
-    return type;
+  public AnnotationType getAnnotationType() {
+    return annotationType;
   }
 
-  public String getName() {
-    return name;
+
+  public boolean hasType(AnnotationType type) {
+    return annotationType.equals(type);
   }
 
-  public boolean hasName(final String name) {
-    return this.name.equals(name);
+  public String getLabel() {
+    return EdgeType.hasItem.name();
   }
 
-  public boolean hasName() {
-    return StringUtils.isNotEmpty(name);
-  }
 }

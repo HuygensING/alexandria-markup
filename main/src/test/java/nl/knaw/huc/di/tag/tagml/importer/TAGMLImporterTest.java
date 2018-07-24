@@ -847,10 +847,17 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     logDocumentGraph(document, tagML);
-    TAGMLExporter tagmlExporter = new TAGMLExporter(store);
-    String tagml = tagmlExporter.asTAGML(document);
-    LOG.info("\n\nTAGML:\n{}\n", tagml);
+//    export(document);
     return document;
+  }
+
+  private String export(TAGDocument document) {
+    String tagml = store.runInTransaction(() -> {
+      TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      return tagmlExporter.asTAGML(document);
+    });
+    LOG.info("\n\nTAGML:\n{}\n", tagml);
+    return tagml;
   }
 
 }

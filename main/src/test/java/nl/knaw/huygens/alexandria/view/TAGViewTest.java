@@ -28,6 +28,7 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.assertj.core.util.Sets;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -107,6 +108,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testFilterRelevantMarkup() {
     store.runInTransaction(() -> {

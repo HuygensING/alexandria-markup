@@ -242,4 +242,10 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
+
+  public void addListItem(Long sourceNode, AnnotationInfo targetAnnotation) {
+    ListItemEdge edge = new ListItemEdge(targetAnnotation.getType());
+    Long annotationValueNode = targetAnnotation.getNodeId();
+    addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
+  }
 }

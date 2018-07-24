@@ -396,6 +396,12 @@ public class TAGStore implements AutoCloseable {
     return persist(av);
   }
 
+  public Long createListAnnotationValue() {
+    assertInTransaction();
+    ListAnnotationValue av = new ListAnnotationValue();
+    return persist(av);
+  }
+
   public StringAnnotationValue getStringAnnotationValue(final Long id) {
     return da.stringAnnotationValueById.get(id);
   }

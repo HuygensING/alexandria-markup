@@ -260,7 +260,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
       return document;
     });
-    assertExportEqualsInput(input.replace("\"","'"), doc);
+    assertExportEqualsInput(input.replace("\"", "'"), doc);
   }
 
   @Test
@@ -294,7 +294,24 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926);
       return document;
     });
-    assertExportEqualsInput(input,doc);
+    assertExportEqualsInput(input, doc);
+  }
+
+  @Test
+  public void testNumberAnnotation1() {
+    String input = "[text n=1>some text.<text]";
+    TAGDocument doc = store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("text")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("some text.")
+      );
+      assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("n", 1.0);
+      return document;
+    });
+    assertExportEqualsInput(input.replace("1", "1.0"), doc);
   }
 
   @Test
@@ -353,7 +370,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m l=['a','b','c']>text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
@@ -361,15 +378,17 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       );
       List<String> expected = Lists.newArrayList("a", "b", "c");
       assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+      return document;
     });
+    assertExportEqualsInput(input, doc);
   }
 
   @Test // NLA-468
-  public void testNumberListAnnotation1() {
+  public void testNumberListAnnotation() {
     String input = "[tagml>" +
-        "[m l=[3,5,7,11]>text<m]" +
+        "[m l=[3.0,5.0,7.0,11.0]>text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
@@ -377,7 +396,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       );
       List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
       assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+      return document;
     });
+    assertExportEqualsInput(input, doc);
   }
 
   @Test // NLA-468

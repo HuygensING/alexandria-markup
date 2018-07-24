@@ -66,7 +66,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     this.document = store.createDocument();
     this.errorListener = errorListener;
     this.textVariationStateStack.push(new TextVariationState());
-    this.annotationFactory = new AnnotationFactory(store, errorListener);
+    this.annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph, errorListener);
   }
 
   public TAGDocument getDocument() {
@@ -773,7 +773,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -812,7 +812,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
