@@ -60,9 +60,9 @@ public class AnnotationFactory {
       Long id = store.createBooleanAnnotationValue((Boolean) value);
       annotationInfo = new AnnotationInfo(id, AnnotationType.Boolean, aName);
 
-//    } else if (annotationValueContext.AV_NumberValue() != null) {
-//      Long id = store.createNumberAnnotationValue((Double) value);
-//      annotationInfo = new AnnotationInfo(id, AnnotationType.Number, aName);
+    } else if (annotationValueContext.AV_NumberValue() != null) {
+      Long id = store.createNumberAnnotationValue((Double) value);
+      annotationInfo = new AnnotationInfo(id, AnnotationType.Number, aName);
 //
 //    } else if (annotationValueContext.objectValue() != null) {
 //      annotationInfo = store.createObjectAnnotation(aName, value);

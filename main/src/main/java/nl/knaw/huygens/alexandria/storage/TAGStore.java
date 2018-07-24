@@ -380,16 +380,20 @@ public class TAGStore implements AutoCloseable {
 
   public Long createStringAnnotationValue(final String value) {
     assertInTransaction();
-    StringAnnotationValue sav = new StringAnnotationValue(value);
-    persist(sav);
-    return sav.getDbId();
+    StringAnnotationValue av = new StringAnnotationValue(value);
+    return persist(av);
   }
 
   public Long createBooleanAnnotationValue(final Boolean value) {
     assertInTransaction();
-    BooleanAnnotationValue sav = new BooleanAnnotationValue(value);
-    persist(sav);
-    return sav.getDbId();
+    BooleanAnnotationValue av = new BooleanAnnotationValue(value);
+    return persist(av);
+  }
+
+  public Long createNumberAnnotationValue(Double value) {
+    assertInTransaction();
+    NumberAnnotationValue av = new NumberAnnotationValue(value);
+    return persist(av);
   }
 
   public StringAnnotationValue getStringAnnotationValue(final Long id) {
@@ -403,4 +407,5 @@ public class TAGStore implements AutoCloseable {
   public BooleanAnnotationValue getBooleanAnnotationValue(final Long id) {
     return da.booleanAnnotationValueById.get(id);
   }
+
 }

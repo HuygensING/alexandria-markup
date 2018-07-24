@@ -242,9 +242,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasMarkupWithTag("text").withStringAnnotation("author", "somebody");
       return document;
     });
-    String tagml = export(doc);
-    assertThat(tagml).isEqualTo(input);
+    assertExportEqualsInput(input, doc);
   }
+
 
   @Test
   public void testStringAnnotation1() {
@@ -260,8 +260,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
       assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
       return document;
     });
-    String tagml = export(doc);
-    assertThat(tagml).isEqualTo(input);
+    assertExportEqualsInput(input.replace("\"","'"), doc);
   }
 
   @Test
@@ -269,20 +268,22 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m s='string'>text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    final TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
           markupSketch("m")
       );
       assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
+      return document;
     });
+    assertExportEqualsInput(input, doc);
   }
 
   @Test
   public void testNumberAnnotation() {
     String input = "[text pi=3.1415926>some text.<text]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("text")
@@ -291,13 +292,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("some text.")
       );
       assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926);
+      return document;
     });
+    assertExportEqualsInput(input,doc);
   }
 
   @Test
   public void testBooleanAnnotation() {
     String input = "[text test=true>some text.<text]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("text")
@@ -306,7 +309,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch("some text.")
       );
       assertThat(document).hasMarkupWithTag("text").withBooleanAnnotation("test", true);
+      return document;
     });
+    assertExportEqualsInput(input, doc);
   }
 
   @Test
@@ -314,14 +319,16 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m b=true>text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
           markupSketch("m")
       );
       assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true);
+      return document;
     });
+    assertExportEqualsInput(input, doc);
   }
 
   @Test
@@ -329,14 +336,16 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" +
         "[m b=FALSE>text<m]" +
         "<tagml]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(
           markupSketch("tagml"),
           markupSketch("m")
       );
       assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false);
+      return document;
     });
+    assertExportEqualsInput(input.replace("FALSE", "false"), doc);
   }
 
   @Test // NLA-468
@@ -580,6 +589,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
 
+//    export(document);
+
     return document;
   }
 
@@ -618,4 +629,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     return tagml;
   }
 
+  private void assertExportEqualsInput(String input, TAGDocument doc) {
+    String tagml = export(doc);
+    assertThat(tagml).isEqualTo(input);
+  }
 }
