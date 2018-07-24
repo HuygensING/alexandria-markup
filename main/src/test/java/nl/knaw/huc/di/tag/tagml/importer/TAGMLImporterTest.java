@@ -793,7 +793,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testListAnnotations() {
     String tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]";
-    store.runInTransaction(() -> {
+    TAGDocument doc = store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
       assertThat(document).hasTextNodesMatching(
@@ -815,7 +815,11 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 //      List<TAGTextNode> annotationTextNodes = annotationPrimes.getDocument().getTextNodeStream().collect(toList());
 //      assertThat(annotationTextNodes).hasSize(1);
 //      assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
+
+      return document;
     });
+    String export = export(doc);
+    assertThat(export.replace(".0", "")).isEqualTo(tagML);
   }
 
   @Test
