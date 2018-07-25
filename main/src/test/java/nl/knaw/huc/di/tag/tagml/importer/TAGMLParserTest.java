@@ -411,7 +411,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
-  @Test
+  @Test // NLA-467
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
         "[m p={valid=false}>text<m]" +
@@ -430,7 +430,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     assertExportEqualsInput(input, doc);
   }
 
-  @Test
+  @Test // NLA-467
   public void testObjectAnnotation1() {
     String input = "[tagml>" +
         "[m p={x=1 y=2}>text<m]" +
@@ -450,7 +450,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     assertExportEqualsInput(input, doc);
   }
 
-  @Test
+  @Test // NLA-467
   public void testNestedObjectAnnotation() {
     String input = "[text meta={\n" +
         "    persons=[\n" +
