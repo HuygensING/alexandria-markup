@@ -21,8 +21,11 @@ package nl.knaw.huc.di.tag.tagml.importer;
  */
 
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.BasicAnnotationContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.IdentifyingAnnotationContext;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -30,6 +33,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +57,7 @@ public class AnnotationFactory {
     this(store, textGraph, null);
   }
 
-  public AnnotationInfo makeAnnotation(TAGMLParser.BasicAnnotationContext basicAnnotationContext) {
+  public AnnotationInfo makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
     String aName = basicAnnotationContext.annotationName().getText();
     TAGMLParser.AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
     Object value = annotationValue(annotationValueContext);
@@ -94,6 +98,15 @@ public class AnnotationFactory {
       list.forEach(e -> {
         AnnotationInfo listElement = makeAnnotation("", annotationValueContext, e);
         textGraph.addListItem(id, listElement);
+      });
+
+    } else if (value instanceof HashMap) {
+      Long id = store.createMapAnnotationValue();
+      annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
+      HashMap<String, Object> map = (HashMap<String, Object>) value;
+      map.forEach((k, v) -> {
+        final AnnotationInfo aInfo = makeAnnotation(k, annotationValueContext, v);
+        textGraph.addAnnotationEdge(id, aInfo);
       });
 
     } else {
@@ -140,27 +153,30 @@ public class AnnotationFactory {
     return objectValueContext.children.stream()
         .filter(c -> !(c instanceof TerminalNode))
         .map(this::parseAttribute)
+        .peek(System.out::println)
         .collect(toMap(KeyValue::getKey, KeyValue::getValue, (a, b) -> b));
   }
 
   private KeyValue parseAttribute(ParseTree parseTree) {
-    if (parseTree instanceof TAGMLParser.BasicAnnotationContext) {
-      TAGMLParser.BasicAnnotationContext basicAnnotationContext = (TAGMLParser.BasicAnnotationContext) parseTree;
+    if (parseTree instanceof BasicAnnotationContext) {
+      BasicAnnotationContext basicAnnotationContext = (BasicAnnotationContext) parseTree;
       String aName = basicAnnotationContext.annotationName().getText();
       TAGMLParser.AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
       Object value = annotationValue(annotationValueContext);
       return new KeyValue(aName, value);
 
-    } else if (parseTree instanceof TAGMLParser.IdentifyingAnnotationContext) {
-//TODO
+    } else if (parseTree instanceof IdentifyingAnnotationContext) {
+      //TODO: deal with this identifier
+      IdentifyingAnnotationContext identifyingAnnotationContext = (IdentifyingAnnotationContext) parseTree;
+      String value = identifyingAnnotationContext.idValue().getText();
+      return new KeyValue(":id", value);
+
     } else {
       throw new RuntimeException("unhandled type " + parseTree.getClass().getName());
 //      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
 //          errorPrefix(parseTree.), parseTree.getText());
 
     }
-
-    return null;
   }
 
   private String errorPrefix(ParserRuleContext ctx) {
@@ -192,10 +208,26 @@ public class AnnotationFactory {
         .collect(toList());
   }
 
+  public List<AnnotationInfo> getMapValue(final AnnotationInfo annotationInfo) {
+    Long nodeId = annotationInfo.getNodeId();
+    return textGraph.getOutgoingEdges(nodeId).stream()
+        .filter(AnnotationEdge.class::isInstance)
+        .map(AnnotationEdge.class::cast)
+        .map(this::toAnnotationInfo)
+        .collect(toList());
+  }
+
   private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {
     Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
     AnnotationType type = listItemEdge.getAnnotationType();
     return new AnnotationInfo(nodeId, type, "");
+  }
+
+  private AnnotationInfo toAnnotationInfo(AnnotationEdge annotationEdge) {
+    Long nodeId = textGraph.getTargets(annotationEdge).iterator().next();
+    AnnotationType type = annotationEdge.getAnnotationType();
+    String name = annotationEdge.getField();
+    return new AnnotationInfo(nodeId, type, name);
   }
 
   private class KeyValue {

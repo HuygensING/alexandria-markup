@@ -67,6 +67,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
     List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
+//        .peek(System.out::println)
         .filter(m -> m.hasTag(tag))
         .collect(toList());
     if (relevantMarkup.isEmpty()) {
@@ -87,7 +88,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return textNodeSketch(textNode.getText());
   }
 
-//  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
+  //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
 //    isNotNull();
 //    List<String> actualLayerIds = actual.getLayerNames();
 //    return myself;

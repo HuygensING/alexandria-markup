@@ -551,7 +551,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private void addAnnotations(List<AnnotationContext> annotationContexts, TAGMarkup markup) {
     annotationContexts.forEach(actx -> {
       if (actx instanceof BasicAnnotationContext) {
-//        TAGAnnotation annotation = makeAnnotation((BasicAnnotationContext) actx);
         AnnotationInfo aInfo = annotationFactory.makeAnnotation((BasicAnnotationContext) actx);
         Long markupNode = markup.getDbId();
         document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);

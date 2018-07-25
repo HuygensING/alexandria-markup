@@ -23,7 +23,6 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
@@ -112,7 +111,7 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
   public void withObjectAnnotation(String key, Map<String, Object> value) {
     isNotNull();
     assertAnnotationExists(key);
-    assertAnnotationHasType(key, AnnotationType.Object);
+    assertAnnotationHasType(key, AnnotationType.Map);
     assertAnnotationHasValue(key, value);
   }
 

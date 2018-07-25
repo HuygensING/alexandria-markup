@@ -222,7 +222,7 @@ public class TAGMLExporter {
   }
 
   private String addResumePrefixIfRequired(String openTag, Long markupId,
-                                           final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       TAGMarkup markup = store.getMarkup(markupId);
@@ -234,7 +234,7 @@ public class TAGMLExporter {
   }
 
   private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
-                                            final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       if (textNodesToHandle > 0) {
@@ -295,7 +295,8 @@ public class TAGMLExporter {
 
       case Number:
         Double numberValue = annotationFactory.getNumberValue(a);
-        stringBuilder.append(numberValue);
+        String asString = String.valueOf(numberValue).replaceFirst(".0$", "");
+        stringBuilder.append(asString);
         break;
 
       case Boolean:
@@ -310,6 +311,15 @@ public class TAGMLExporter {
             .map(this::toTAGML)
             .collect(joining(",")));
         stringBuilder.append("]");
+        break;
+
+      case Map:
+        stringBuilder.append("{");
+        List<AnnotationInfo> mapValue = annotationFactory.getMapValue(a);
+        stringBuilder.append(mapValue.stream()
+            .map(this::toTAGML)
+            .collect(joining(" ")));
+        stringBuilder.append("}");
         break;
 
       default:

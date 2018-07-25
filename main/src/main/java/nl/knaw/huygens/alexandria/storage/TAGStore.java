@@ -280,7 +280,7 @@ public class TAGStore implements AutoCloseable {
         commitTransaction();
       }
 
-    } catch (Exception e) {
+    } catch (Throwable e) {
       if (getTransactionIsOpen()) {
         rollbackTransaction();
       }
@@ -300,8 +300,7 @@ public class TAGStore implements AutoCloseable {
       }
       return result;
 
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (Throwable e) {
       if (getTransactionIsOpen()) {
         rollbackTransaction();
       }
@@ -399,6 +398,12 @@ public class TAGStore implements AutoCloseable {
   public Long createListAnnotationValue() {
     assertInTransaction();
     ListAnnotationValue av = new ListAnnotationValue();
+    return persist(av);
+  }
+
+  public Long createMapAnnotationValue() {
+    assertInTransaction();
+    MapAnnotationValue av = new MapAnnotationValue();
     return persist(av);
   }
 

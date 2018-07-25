@@ -19,6 +19,12 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-public enum AnnotationType {
-  String, Number, Boolean, Reference, List, Map, RichText
+import com.sleepycat.persist.model.Entity;
+
+@Entity(version = 1)
+public class MapAnnotationValue extends AnnotationValue {
+
+  MapAnnotationValue() {
+  }
+
 }
