@@ -463,13 +463,13 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore("TODO: Handle richText annotations first")
   @Test
   public void testResumeInInnerDocumentLeadsToError() {
     String tagML = "[text> [q>Hello my name is " +
         "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
         "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
-    String expectedErrors = "some error";
+    String expectedErrors = "line 1:53 : Close tag <q] found without corresponding open tag.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
