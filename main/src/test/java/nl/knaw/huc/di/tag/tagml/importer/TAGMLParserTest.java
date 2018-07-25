@@ -35,6 +35,7 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,7 +246,6 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     assertExportEqualsInput(input, doc);
   }
 
-
   @Test
   public void testStringAnnotation1() {
     String input = "[tagml>" +
@@ -411,6 +411,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
+  @Ignore
   @Test
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
@@ -428,6 +429,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testObjectAnnotation1() {
     String input = "[tagml>" +
@@ -446,6 +448,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testNestedObjectAnnotation() {
     String input = "[text meta={\n" +
@@ -519,6 +522,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testElementLinking() {
     String input = "[tagml meta={:id=meta01 name='test'}>" +
@@ -533,6 +537,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testNestedObjectAnnotation2() {
     String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" +

@@ -50,13 +50,14 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public static final String TILDE = "~";
 
   private final TAGStore store;
-  private final TAGDocument document;
+  private TAGDocument document;
   private final ErrorListener errorListener;
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final Map<String, String> namespaces = new HashMap<>();
   private final AnnotationFactory annotationFactory;
   private State state = new State();
-
+  private final Deque<State> stateStack = new ArrayDeque<>();
+  private final Deque<TAGDocument> documentStack = new ArrayDeque<>(); // TODO: move to state
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
 
   private boolean atDocumentStart = true;
@@ -237,6 +238,22 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     }
   }
 
+  @Override
+  public void enterRichTextValue(final RichTextValueContext ctx) {
+    stateStack.push(state);
+    state = new State();
+    documentStack.push(document);
+    document = store.createDocument();
+    super.enterRichTextValue(ctx);
+  }
+
+  @Override
+  public void exitRichTextValue(final RichTextValueContext ctx) {
+    super.exitRichTextValue(ctx);
+    state = stateStack.pop();
+    document = documentStack.pop();
+  }
+
   private void addSuffix(final MarkupNameContext markupNameContext, final TAGMarkup markup) {
     SuffixContext suffix = markupNameContext.suffix();
     if (suffix != null) {
@@ -392,7 +409,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             "%s Markup %s opened in branch %s must be closed before starting a new branch.",
             errorPrefix(ctx), openTags, branch);
       }
-
     }
   }
 
@@ -773,7 +789,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-                                               final TAGMarkup markup) {
+      final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -812,7 +828,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()

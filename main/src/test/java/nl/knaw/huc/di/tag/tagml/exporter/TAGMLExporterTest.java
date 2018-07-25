@@ -118,6 +118,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
+  @Ignore
   @Test
   public void testCombiningDiscontinuityAndNonLinearity1() {
     String tagML = "[x>[q>and what is the use of a " +

@@ -604,6 +604,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
+  @Ignore
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
     String tagML = "[x>[q>and what is the use of a book" +
