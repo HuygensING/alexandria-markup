@@ -28,7 +28,7 @@
     <antlr.version>4.7.1</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
     <assertj.version>3.10.0</assertj.version><!-- 3.6.2 - 3.9.1 makes isEqualToComparingFieldByFieldRecursively give StackOverflowError -->
-    <berkeleydb.version>7.4.5</berkeleydb.version>
+    <berkeleydb.version>18.3.1</berkeleydb.version>
     <commons-io.version>2.6</commons-io.version>
     <commons-lang3.version>3.7</commons-lang3.version>
     <freemarker.version>2.3.28</freemarker.version>
