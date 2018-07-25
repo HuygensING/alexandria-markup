@@ -37,6 +37,8 @@ public class TAGML {
   public static final String SUSPEND_PREFIX = "-";
   public static final String RESUME_PREFIX = "+";
 
+  public static final String DEFAULT_LAYER = "";
+
   public static String escapeRegularText(final String content) {
     return content
         .replace("\\", "\\\\")

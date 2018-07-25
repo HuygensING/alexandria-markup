@@ -28,13 +28,18 @@ package nl.knaw.huc.di.tag.model.graph;
  * @author: Ronald Haentjens Dekker
  */
 
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
+
 import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 
+@Persistent
 public class HyperGraph<N, H> {
   private final GraphType graphType;
+  @NotPersistent
   private final Function<N, Collection<H>> mappingFunction;
   private final Set<N> nodes;
   private final Map<N, Collection<H>> incomingEdges;
@@ -43,6 +48,10 @@ public class HyperGraph<N, H> {
   private final Map<H, Collection<N>> targetNodes;
   private final Map<H, String> edgeLabels;
   private final Map<N, String> nodeLabels;
+
+  protected HyperGraph() {
+    this(GraphType.ORDERED);
+  }
 
   protected HyperGraph(GraphType graphType) {
     this.graphType = graphType;
@@ -107,6 +116,21 @@ public class HyperGraph<N, H> {
     }
   }
 
+  @SafeVarargs
+  protected final void removeTargetsFromHyperEdge(H edge, N... targets) {
+    if (!targetNodes.containsKey(edge)) {
+      throw new RuntimeException("unknown hyperedge " + edge);
+    }
+    Collection<N> collection = targetNodes.get(edge);
+    collection.removeAll(asList(targets));
+    for (N target : targets) {
+      incomingEdges.get(target).remove(edge);
+    }
+    if (collection.isEmpty()) {
+      removeHyperEdge(edge);
+    }
+  }
+
   public Collection<N> getTargets(H e) {
     return targetNodes.get(e);
   }
@@ -125,5 +149,16 @@ public class HyperGraph<N, H> {
 
   public enum GraphType {
     ORDERED, UNORDERED
+  }
+
+  protected boolean nodeExists(N node) {
+    return nodes.contains(node);
+  }
+
+  private void removeHyperEdge(final H edge) {
+    N sourceNode = this.sourceNode.get(edge);
+    outgoingEdges.get(sourceNode).remove(edge);
+    targetNodes.remove(edge);
+    edgeLabels.remove(edge);
   }
 }

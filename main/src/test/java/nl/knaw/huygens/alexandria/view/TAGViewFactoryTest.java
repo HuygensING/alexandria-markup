@@ -33,44 +33,87 @@ public class TAGViewFactoryTest extends AlexandriaBaseStoreTest {
   private final TAGViewFactory tagViewFactory = new TAGViewFactory(store);
 
   @Test
-  public void fromJsonWithInclusion() {
-    Set<String> included = new HashSet<>(asList("chapter", "p"));
-    TAGView expected = new TAGView(store).setMarkupToInclude(included);
+  public void fromJsonWithLayersInclusion() {
+    Set<String> included = new HashSet<>(asList("A", "B"));
+    TAGView expected = new TAGView(store).setLayersToInclude(included);
 
-    String json = "{'include':['chapter','p']}".replace("'", "\"");
+    String json = "{'includeLayers':['A','B']}".replace("'", "\"");
     TAGView view = tagViewFactory.fromJsonString(json);
 
     assertThat(view).isEqualToComparingFieldByField(expected);
   }
 
   @Test
-  public void fromJsonWithExclusion() {
+  public void fromJsonWithLayersExclusion() {
+    Set<String> excluded = new HashSet<>(asList("A", "B"));
+    TAGView expected = new TAGView(store).setLayersToExclude(excluded);
+
+    String json = "{'excludeLayers':['A','B']}".replace("'", "\"");
+    TAGView view = tagViewFactory.fromJsonString(json);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+
+  @Test
+  public void fromJsonWithMarkupInclusion() {
+    Set<String> included = new HashSet<>(asList("chapter", "p"));
+    TAGView expected = new TAGView(store).setMarkupToInclude(included);
+
+    String json = "{'includeMarkup':['chapter','p']}".replace("'", "\"");
+    TAGView view = tagViewFactory.fromJsonString(json);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+
+  @Test
+  public void fromJsonWithMarkupExclusion() {
     Set<String> excluded = new HashSet<>(asList("verse", "l"));
     TAGView expected = new TAGView(store).setMarkupToExclude(excluded);
 
-    String json = "{'exclude':['verse','l']}".replace("'", "\"");
+    String json = "{'excludeMarkup':['verse','l']}".replace("'", "\"");
     TAGView view = tagViewFactory.fromJsonString(json);
 
     assertThat(view).isEqualToComparingFieldByField(expected);
   }
 
   @Test
-  public void fromDefinitionWithInclusion() {
+  public void fromDefinitionWithMarkupInclusion() {
     Set<String> included = new HashSet<>(asList("chapter", "p"));
     TAGView expected = new TAGView(store).setMarkupToInclude(included);
 
-    TAGViewDefinition def = new TAGViewDefinition().setInclude(included);
+    TAGViewDefinition def = new TAGViewDefinition().setIncludeMarkup(included);
     TAGView view = tagViewFactory.fromDefinition(def);
 
     assertThat(view).isEqualToComparingFieldByField(expected);
   }
 
   @Test
-  public void fromDefinitionWithExclusion() {
+  public void fromDefinitionWithMarkupExclusion() {
     Set<String> excluded = new HashSet<>(asList("verse", "l"));
     TAGView expected = new TAGView(store).setMarkupToExclude(excluded);
 
-    TAGViewDefinition def = new TAGViewDefinition().setExclude(excluded);
+    TAGViewDefinition def = new TAGViewDefinition().setExcludeMarkup(excluded);
+    TAGView view = tagViewFactory.fromDefinition(def);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+  @Test
+  public void fromDefinitionWithLayersInclusion() {
+    Set<String> included = new HashSet<>(asList("L1", "L2"));
+    TAGView expected = new TAGView(store).setLayersToInclude(included);
+
+    TAGViewDefinition def = new TAGViewDefinition().setIncludeLayers(included);
+    TAGView view = tagViewFactory.fromDefinition(def);
+
+    assertThat(view).isEqualToComparingFieldByField(expected);
+  }
+
+  @Test
+  public void fromDefinitionWithLayersExclusion() {
+    Set<String> excluded = new HashSet<>(asList("L3", "L4"));
+    TAGView expected = new TAGView(store).setLayersToExclude(excluded);
+
+    TAGViewDefinition def = new TAGViewDefinition().setExcludeLayers(excluded);
     TAGView view = tagViewFactory.fromDefinition(def);
 
     assertThat(view).isEqualToComparingFieldByField(expected);

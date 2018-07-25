@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*-
  * #%L
@@ -22,6 +22,9 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.*;
@@ -29,13 +32,13 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperAssert, DocumentWrapper> {
+public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, TAGDocument> {
 
-  public DocumentWrapperAssert(final DocumentWrapper actual) {
-    super(actual, DocumentWrapperAssert.class);
+  public TAGDocumentAssert(final TAGDocument actual) {
+    super(actual, TAGDocumentAssert.class);
   }
 
-  public DocumentWrapperAssert hasTextNodesMatching(final TextNodeSketch... textNodeSketches) {
+  public TAGDocumentAssert hasTextNodesMatching(final TextNodeSketch... textNodeSketches) {
     isNotNull();
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
@@ -48,7 +51,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return myself;
   }
 
-  public DocumentWrapperAssert hasMarkupMatching(final MarkupSketch... markupSketches) {
+  public TAGDocumentAssert hasMarkupMatching(final MarkupSketch... markupSketches) {
     isNotNull();
     Set<MarkupSketch> actualMarkupSketches = getActualMarkupSketches();
     Set<MarkupSketch> expectedMarkupSketches = new HashSet<>(Arrays.asList(markupSketches));
@@ -61,17 +64,17 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
     return myself;
   }
 
-  public MarkupWrapperAssert hasMarkupWithTag(String tag) {
+  public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
-    List<MarkupWrapper> relevantMarkup = actual.getMarkupStream()
+    List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
         .filter(m -> m.hasTag(tag))
         .collect(toList());
     if (relevantMarkup.isEmpty()) {
       failWithMessage("No markup found with tag %s", tag);
     }
 
-    MarkupWrapper markup = relevantMarkup.get(0);
-    return new MarkupWrapperAssert(markup);
+    TAGMarkup markup = relevantMarkup.get(0);
+    return new TAGMarkupAssert(markup);
   }
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {
@@ -80,10 +83,16 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
         .collect(toSet());
   }
 
-  private TextNodeSketch toTextNodeSketch(final TextNodeWrapper textNodeWrapper) {
-    return textNodeSketch(textNodeWrapper.getText());
+  private TextNodeSketch toTextNodeSketch(final TAGTextNode textNode) {
+    return textNodeSketch(textNode.getText());
   }
 
+//  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
+//    isNotNull();
+//    List<String> actualLayerIds = actual.getLayerNames();
+//    return myself;
+//  }
+//
   public static class TextNodeSketch {
 
     private final String text;
@@ -180,7 +189,7 @@ public class DocumentWrapperAssert extends AbstractObjectAssert<DocumentWrapperA
         .collect(toSet());
   }
 
-  public MarkupSketch toMarkupSketch(MarkupWrapper markup) {
+  public MarkupSketch toMarkupSketch(TAGMarkup markup) {
     return markupSketch(markup.getTag(), markup.isOptional());
   }
 

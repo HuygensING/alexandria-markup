@@ -45,16 +45,39 @@ public class HyperGraphTest {
     assertThat(hg).isNotNull();
 
     final DocumentNode documentNode = new DocumentNode();
-    hg.addNode(documentNode,DocumentNode.LABEL);
+    hg.addNode(documentNode, DocumentNode.LABEL);
 
     TextNode textNode = new TextNode("text1");
-    hg.addNode(textNode,textNode.getLabel());
+    hg.addNode(textNode, textNode.getLabel());
 
     final DocumentToTextEdge firstTextEdge = new DocumentToTextEdge();
-    hg.addDirectedHyperEdge(firstTextEdge, DocumentToTextEdge.LABEL, documentNode,textNode);
-
+    hg.addDirectedHyperEdge(firstTextEdge, DocumentToTextEdge.LABEL, documentNode, textNode);
   }
 
+  @Test
+  public void testRemoveTargetsFromHyperEdge() {
+    HyperGraph<String, String> hg = new HyperGraph<>(HyperGraph.GraphType.UNORDERED);
 
+    String dogs = "branch1";
+    String dog = "dog";
+    String poodle = "poodle";
+    String labrador = "labrador";
+    String mammals = "branch2";
+    String mammal = "mammal";
+    hg.addDirectedHyperEdge(mammals, "contains", mammal, dog);
+    hg.addDirectedHyperEdge(dogs, "contains", dog, poodle, labrador);
+
+    String husky = "husky";
+    hg.addTargetsToHyperEdge(dogs, husky);
+
+    assertThat(hg.getOutgoingEdges(dog)).containsExactly(dogs);
+
+    assertThat(hg.getTargets(dogs)).containsExactlyInAnyOrder(poodle, labrador, husky);
+
+    hg.removeTargetsFromHyperEdge(dogs,poodle, labrador, husky);
+
+    assertThat(hg.getOutgoingEdges(dog)).isEmpty();
+
+  }
 
 }

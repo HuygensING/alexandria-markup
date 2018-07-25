@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage.wrappers;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,22 +19,15 @@ package nl.knaw.huygens.alexandria.storage.wrappers;
  * limitations under the License.
  * #L%
  */
+public class BooleanAnnotationNode extends AnnotationNode {
+  private Boolean value;
 
-import org.assertj.core.api.AbstractObjectAssert;
-
-public class TextNodeWrapperAssert extends AbstractObjectAssert<TextNodeWrapperAssert, TextNodeWrapper> {
-
-  public TextNodeWrapperAssert(final TextNodeWrapper actual) {
-    super(actual, TextNodeWrapperAssert.class);
+  public BooleanAnnotationNode(String name, Boolean value) {
+    super(name);
+    this.value = value;
   }
 
-  public TextNodeWrapperAssert hasText(final String expectedText) {
-    isNotNull();
-    String errorMessage = "\nExpected text to be %s, but was %s";
-    if (!actual.getText().equals(expectedText)) {
-      failWithMessage(errorMessage, expectedText, actual.getText());
-    }
-    return myself;
-
+  public Boolean getValue() {
+    return value;
   }
 }

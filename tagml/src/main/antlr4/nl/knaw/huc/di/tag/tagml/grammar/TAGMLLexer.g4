@@ -10,7 +10,6 @@ lexer grammar TAGMLLexer;
 // default mode
 
 DEFAULT_NamespaceOpener
-//  : '[!ns ' NamespaceIdentifier WS NamespaceURI ']'
   : '[!ns ' -> pushMode(INSIDE_NAMESPACE)
   ;
 
@@ -38,7 +37,7 @@ NAME
   : NameStartChar NameChar*
   ;
 
-// ----------------- Everything INSIDE of a MARKUP OPENER ---------------------
+// ----------------- Everything INSIDE of a NAMESPACE ---------------------
 mode INSIDE_NAMESPACE;
 
 IN_NamespaceIdentifier
@@ -69,12 +68,20 @@ IMO_Prefix
   | Resume
   ;
 
-IMO_Suffix
-  : TILDE ( NAME | DIGIT+ )
+IMO_Comma
+  : COMMA
   ;
 
-IMO_NameOpenMarkup
+IMO_Divider
+  : PIPE
+  ;
+
+IMO_Name
   : NAME
+  ;
+
+IMO_Suffix
+  : TILDE ( NAME | DIGIT+ )
   ;
 
 IMO_WS
@@ -128,7 +135,8 @@ AV_WS
   ;
 
 AV_StringValue
-  : ( '"' ( ~["] | SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '"' | '\'' ( ~['] | DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '\'' ) -> popMode
+  : ( '"' ( ~["] | DOUBLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '"'
+  | '\'' ( ~['] | SINGLE_QUOTED_TEXT_ESCAPE_CHARACTER )+ '\'' ) -> popMode
   ;
 
 AV_NumberValue
@@ -147,8 +155,8 @@ AV_IdValue
   : NAME -> popMode
   ;
 
-AV_MixedContentOpener
-  : '[>' -> pushMode(INSIDE_MIXED_CONTENT)
+AV_RichTextOpener
+  : '[>' -> pushMode(INSIDE_RICH_TEXT)
   ;
 
 AV_ObjectOpener
@@ -166,30 +174,30 @@ RV_RefValue
   : NAME -> popMode
   ;
 
-// ----------------- Everything INSIDE of | | -------------
-mode INSIDE_MIXED_CONTENT;
+// ----------------- Everything INSIDE of [><] -------------
+mode INSIDE_RICH_TEXT;
 
-IMX_Comment
+IRT_Comment
   : Comment -> skip
   ;
 
-IMX_BeginOpenMarkup // [ moves into markup tag
+IRT_BeginOpenMarkup // [ moves into markup tag
   : LEFT_SQUARE_BRACKET  -> pushMode(INSIDE_MARKUP_OPENER)
   ;
 
-IMX_BeginTextVariation
+IRT_BeginTextVariation
   : TextVariationStartTag  -> pushMode(INSIDE_TEXT_VARIATION)
   ;
 
-IMX_BeginCloseMarkup
+IRT_BeginCloseMarkup
   : TagCloseStartChar  -> pushMode(INSIDE_MARKUP_CLOSER)
   ;
 
-IMX_Text
+IRT_Text
   : ( ~[[<\\] | REGULAR_TEXT_ESCAPE_CHARACTER )+
   ;
 
-IMX_MixedContentCloser
+IRT_RichTextCloser
   : '<]' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
@@ -239,8 +247,16 @@ IMC_Prefix
   | Suspend
   ;
 
-IMC_NameCloseMarkup
+IMC_Name
   : NAME
+  ;
+
+IMC_Divider
+  : PIPE
+  ;
+
+IMC_Comma
+  : COMMA
   ;
 
 IMC_Suffix
@@ -415,6 +431,7 @@ fragment
 NameChar
   : NameStartChar
   | '_' | DIGIT
+//  | '.'
   | '\u00B7'
   | '\u0300'..'\u036F'
   | '\u203F'..'\u2040'

@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,9 +35,9 @@ import java.util.List;
 
 public class TAGQLQueryHandler {
 
-  private final DocumentWrapper document;
+  private final TAGDocument document;
 
-  public TAGQLQueryHandler(DocumentWrapper document) {
+  public TAGQLQueryHandler(TAGDocument document) {
     this.document = document;
   }
 
@@ -52,7 +52,7 @@ public class TAGQLQueryHandler {
     tagqlParser.addErrorListener(errorListener);
     ParseTree parseTree = tagqlParser.query();
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TAGQLQueryListener listener = new TAGQLQueryListener();
+    TAGQLQueryListener listener = new TAGQLQueryListener(document);
     parseTreeWalker.walk(listener, parseTree);
     List<TAGQLStatement> statements = listener.getStatements();
 

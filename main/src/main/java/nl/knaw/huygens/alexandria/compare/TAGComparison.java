@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import prioritised_xml_collation.*;
 
@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.joining;
 public class TAGComparison {
   private final List<String> diffLines = new ArrayList<>();
 
-  public TAGComparison(DocumentWrapper originalDocument, TAGView tagView, DocumentWrapper otherDocument) {
+  public TAGComparison(TAGDocument originalDocument, TAGView tagView, TAGDocument otherDocument) {
     List<TAGToken> originalTokens = new Tokenizer(originalDocument, tagView).getTAGTokens();
     List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
     SegmenterInterface segmenter = new AlignedNonAlignedSegmenter();

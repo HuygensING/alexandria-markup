@@ -22,8 +22,8 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
 
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import org.antlr.v4.runtime.CharStream;
@@ -48,12 +48,12 @@ public class TexMECSImporter {
     this.store = store;
   }
 
-  public DocumentWrapper importTexMECS(String input) throws TexMECSSyntaxError {
+  public TAGDocument importTexMECS(String input) throws TexMECSSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTexMECS(antlrInputStream);
   }
 
-  public DocumentWrapper importTexMECS(InputStream input) throws TexMECSSyntaxError {
+  public TAGDocument importTexMECS(InputStream input) throws TexMECSSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTexMECS(antlrInputStream);
@@ -63,7 +63,7 @@ public class TexMECSImporter {
     }
   }
 
-  private DocumentWrapper importTexMECS(CharStream antlrInputStream) {
+  private TAGDocument importTexMECS(CharStream antlrInputStream) {
     TexMECSLexer lexer = new TexMECSLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
@@ -78,7 +78,7 @@ public class TexMECSImporter {
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TexMECSListener listener = new TexMECSListener(store);
     parseTreeWalker.walk(listener, parseTree);
-    DocumentWrapper document = listener.getDocument();
+    TAGDocument document = listener.getDocument();
     handleMarkupDominance(document);
 
     String errorMsg = "";
@@ -96,12 +96,12 @@ public class TexMECSImporter {
     return document;
   }
 
-  private void handleMarkupDominance(DocumentWrapper document) {
-    List<MarkupWrapper> markupList = document.getMarkupStream().collect(Collectors.toList());
+  private void handleMarkupDominance(TAGDocument document) {
+    List<TAGMarkup> markupList = document.getMarkupStream().collect(Collectors.toList());
     for (int i = 0; i < markupList.size() - 1; i++) {
-      MarkupWrapper first = markupList.get(i);
-      MarkupWrapper second = markupList.get(i + 1);
-      if (first.getMarkup().getTextNodeIds().equals(second.getMarkup().getTextNodeIds())) {
+      TAGMarkup first = markupList.get(i);
+      TAGMarkup second = markupList.get(i + 1);
+      if (first.getDTO().getTextNodeIds().equals(second.getDTO().getTextNodeIds())) {
         // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
         first.setDominatedMarkup(second);
       }

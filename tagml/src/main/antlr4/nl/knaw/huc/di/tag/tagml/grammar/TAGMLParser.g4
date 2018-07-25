@@ -25,7 +25,7 @@ startTag
 beginOpenMarkup
   : DEFAULT_BeginOpenMarkup
   | ITV_BeginOpenMarkup
-  | IMX_BeginOpenMarkup
+  | IRT_BeginOpenMarkup
   ;
 
 endOpenMarkup
@@ -34,8 +34,40 @@ endOpenMarkup
   ;
 
 markupName
-  : IMO_Prefix? name IMO_Suffix?
-  | IMC_Prefix? name IMC_Suffix?
+  : prefix? name suffix? layerInfo?
+  ;
+
+prefix
+  : IMO_Prefix
+  | IMC_Prefix
+  ;
+
+layerInfo
+  : divider layerName ( comma layerName )*
+  ;
+
+comma
+  : IMO_Comma
+  | IMC_Comma
+  ;
+
+divider
+  : IMO_Divider
+  | IMC_Divider
+  ;
+
+layerName
+  : name? IMO_Prefix? name
+  ;
+
+name
+  : IMO_Name
+  | IMC_Name
+  ;
+
+suffix
+  : IMO_Suffix
+  | IMC_Suffix
   ;
 
 endTag
@@ -45,16 +77,11 @@ endTag
 beginCloseMarkup
   : DEFAULT_BeginCloseMarkup
   | ITV_BeginCloseMarkup
-  | IMX_BeginCloseMarkup
-  ;
-
-name
-  : IMO_NameOpenMarkup
-  | IMC_NameCloseMarkup
+  | IRT_BeginCloseMarkup
   ;
 
 milestoneTag
-  : beginOpenMarkup name annotation+ endMilestoneTag // possible recursion
+  : beginOpenMarkup name layerInfo? annotation* endMilestoneTag // possible recursion
   ;
 
 endMilestoneTag
@@ -87,7 +114,7 @@ annotationValue
   : AV_StringValue
   | booleanValue
   | AV_NumberValue
-  | mixedContentValue
+  | richTextValue
   | listValue
   | objectValue
   ;
@@ -109,8 +136,8 @@ booleanValue
   | AV_FALSE
   ;
 
-mixedContentValue
-  : AV_MixedContentOpener chunk* IMX_MixedContentCloser // recursion!
+richTextValue
+  : AV_RichTextOpener chunk* IRT_RichTextCloser // recursion!
   ;
 
 listValue
@@ -128,7 +155,7 @@ textVariation
 beginTextVariation
   : DEFAULT_BeginTextVariation
   | ITV_BeginTextVariation
-  | IMX_BeginTextVariation
+  | IRT_BeginTextVariation
   ;
 
 textVariationSeparator
@@ -142,5 +169,5 @@ variantText
 text
   : DEFAULT_Text
   | ITV_Text
-  | IMX_Text
+  | IRT_Text
   ;

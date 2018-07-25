@@ -21,10 +21,10 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 import com.google.common.base.Preconditions;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.slf4j.Logger;
@@ -59,14 +59,14 @@ public class LMNLExporter {
     return this;
   }
 
-  public String toLMNL(DocumentWrapper document) {
+  public String toLMNL(TAGDocument document) {
     StringBuilder lmnlBuilder = new StringBuilder();
     store.runInTransaction(() -> appendLimen(lmnlBuilder, document));
     // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
-  private void appendLimen(StringBuilder lmnlBuilder, DocumentWrapper document) {
+  private void appendLimen(StringBuilder lmnlBuilder, TAGDocument document) {
     if (document != null) {
       Deque<Long> openMarkupIds = new ArrayDeque<>();
       Map<Long, StringBuilder> openTags = new HashMap<>();
@@ -100,36 +100,37 @@ public class LMNLExporter {
 
   }
 
-  private StringBuilder toCloseTag(MarkupWrapper markup) {
+  private StringBuilder toCloseTag(TAGMarkup markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(MarkupWrapper markup) {
-    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
-    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-    return markup.isAnonymous()//
-        ? tagBuilder.append("]")//
-        : tagBuilder.append("}");
+  private StringBuilder toOpenTag(TAGMarkup markup) {
+    return new StringBuilder("TODO");
+//    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+//    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
+//    return markup.isAnonymous()//
+//        ? tagBuilder.append("]")//
+//        : tagBuilder.append("}");
   }
 
-  public StringBuilder toLMNL(AnnotationWrapper annotation) {
-    StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getTag());
-    annotation.getAnnotationStream()
-        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
-    DocumentWrapper document = annotation.getDocument();
-    if (document.hasTextNodes()) {
-      annotationBuilder.append("}");
-      appendLimen(annotationBuilder, document);
-      if (useShorthand) {
-        annotationBuilder.append("{]");
-      } else {
-        annotationBuilder.append("{").append(annotation.getTag()).append("]");
-      }
-    } else {
-      annotationBuilder.append("]");
-    }
+  public StringBuilder toLMNL(TAGAnnotation annotation) {
+    StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getKey());
+//    annotation.getAnnotationStream()
+//        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
+//    TAGDocument document = annotation.getDocument();
+//    if (document.hasTextNodes()) {
+//      annotationBuilder.append("}");
+//      appendLimen(annotationBuilder, document);
+//      if (useShorthand) {
+//        annotationBuilder.append("{]");
+//      } else {
+//        annotationBuilder.append("{").append(annotation.getKey()).append("]");
+//      }
+//    } else {
+//      annotationBuilder.append("]");
+//    }
     return annotationBuilder;
   }
 

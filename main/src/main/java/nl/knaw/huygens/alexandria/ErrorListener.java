@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
@@ -95,4 +96,11 @@ public class ErrorListener implements ANTLRErrorListener {
   public void addError(String messageTemplate, Object... messageArgs) {
     errors.add(format(messageTemplate, messageArgs));
   }
+
+  public void addBreakingError(String messageTemplate, Object... messageArgs) {
+    addError(messageTemplate, messageArgs);
+    addError("parsing aborted!");
+    throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
+  }
+
 }

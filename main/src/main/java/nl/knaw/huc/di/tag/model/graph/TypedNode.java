@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huc.di.tag.model.graph;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,7 +19,16 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
+class TypedNode {
+  private final NodeType type;
+  final Long id;
 
-public interface TAGObject {
-  Long getDbId();
+  TypedNode(NodeType type, Long id) {
+    this.type = type;
+    this.id = id;
+  }
+
+  public boolean isText() {
+    return type.equals(NodeType.text);
+  }
 }

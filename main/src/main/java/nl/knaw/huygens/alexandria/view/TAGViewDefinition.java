@@ -24,24 +24,45 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TAGViewDefinition {
-  private Set<String> include = new HashSet<>();
-  private Set<String> exclude = new HashSet<>();
+  private Set<String> includeLayers = new HashSet<>();
+  private Set<String> excludeLayers = new HashSet<>();
+  private Set<String> includeMarkup = new HashSet<>();
+  private Set<String> excludeMarkup = new HashSet<>();
 
-  public Set<String> getInclude() {
-    return include;
+  public Set<String> getIncludeLayers() {
+    return includeLayers;
   }
 
-  public TAGViewDefinition setInclude(Set<String> include) {
-    this.include = include;
+  public TAGViewDefinition setIncludeLayers(final Set<String> includeLayers) {
+    this.includeLayers = includeLayers;
     return this;
   }
 
-  public Set<String> getExclude() {
-    return exclude;
+  public Set<String> getExcludeLayers() {
+    return excludeLayers;
   }
 
-  public TAGViewDefinition setExclude(Set<String> exclude) {
-    this.exclude = exclude;
+  public TAGViewDefinition setExcludeLayers(final Set<String> excludeLayers) {
+    this.excludeLayers = excludeLayers;
     return this;
   }
+
+  public Set<String> getIncludeMarkup() {
+    return includeMarkup;
+  }
+
+  public TAGViewDefinition setIncludeMarkup(Set<String> includeMarkup) {
+    this.includeMarkup = includeMarkup;
+    return this;
+  }
+
+  public Set<String> getExcludeMarkup() {
+    return excludeMarkup;
+  }
+
+  public TAGViewDefinition setExcludeMarkup(Set<String> excludeMarkup) {
+    this.excludeMarkup = excludeMarkup;
+    return this;
+  }
+
 }

@@ -23,14 +23,15 @@ package nl.knaw.huygens.alexandria.storage;
 import com.google.common.base.Preconditions;
 import com.sleepycat.je.*;
 import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
-import nl.knaw.huygens.alexandria.storage.wrappers.AnnotationWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.MarkupWrapper;
-import nl.knaw.huygens.alexandria.storage.wrappers.TextNodeWrapper;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +49,13 @@ public class TAGStore implements AutoCloseable {
   private final boolean readOnly;
 
   private Environment bdbEnvironment;
-  private DataAccessor da;
+  public DataAccessor da;
   private EntityStore store;
   private ThreadLocal<Boolean> transactionOpen;
   private Transaction tx;
 
   public TAGStore(String dbDir, boolean readOnly) {
+    LOG.debug("db dir={}", dbDir);
     this.dbDir = dbDir;
     this.readOnly = readOnly;
     open();
@@ -101,91 +103,77 @@ public class TAGStore implements AutoCloseable {
     }
   }
 
-  public Long persist(TAGObject tagObject) {
-    checkNotNull(tagObject);
+  public Long persist(TAGDTO tagdto) {
+    checkNotNull(tagdto);
     assertInTransaction();
-    if (tagObject instanceof TAGDocument) {
-      da.documentById.put(tx, (TAGDocument) tagObject);
-
-    } else if (tagObject instanceof TAGTextNode) {
-      da.textNodeById.put(tx, (TAGTextNode) tagObject);
-
-    } else if (tagObject instanceof TAGMarkup) {
-      da.markupById.put(tx, (TAGMarkup) tagObject);
-
-    } else if (tagObject instanceof TAGAnnotation) {
-      da.annotationById.put(tx, (TAGAnnotation) tagObject);
+    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
+    if (index != null) {
+      index.put(tx, tagdto);
 
     } else {
-      throw new RuntimeException("unhandled class: " + tagObject.getClass());
+      throw new RuntimeException("unhandled class: " + tagdto.getClass());
     }
-    return tagObject.getDbId();
+    return tagdto.getDbId();
   }
 
-  public void remove(TAGObject tagObject) {
+  public void remove(TAGDTO tagdto) {
+    checkNotNull(tagdto);
     assertInTransaction();
-    if (tagObject instanceof TAGDocument) {
-      da.documentById.delete(tx, tagObject.getDbId());
-
-    } else if (tagObject instanceof TAGTextNode) {
-      da.textNodeById.delete(tx, tagObject.getDbId());
-
-    } else if (tagObject instanceof TAGMarkup) {
-      da.markupById.delete(tx, tagObject.getDbId());
-
-    } else if (tagObject instanceof TAGAnnotation) {
-      da.annotationById.delete(tx, tagObject.getDbId());
+    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
+    if (index != null) {
+      index.delete(tx, tagdto.getDbId());
 
     } else {
-      throw new RuntimeException("unhandled class: " + tagObject.getClass());
+      throw new RuntimeException("unhandled class: " + tagdto.getClass());
     }
   }
 
   // Document
-  public TAGDocument getDocument(Long documentId) {
+  public TAGDocumentDTO getDocumentDTO(Long documentId) {
     assertInTransaction();
     return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
-  public DocumentWrapper getDocumentWrapper(Long documentId) {
-    return new DocumentWrapper(this, getDocument(documentId));
+  public TAGDocument getDocument(Long documentId) {
+    return new TAGDocument(this, getDocumentDTO(documentId));
   }
 
-  public DocumentWrapper createDocumentWrapper() {
-    TAGDocument document = new TAGDocument();
-    persist(document);
-    return new DocumentWrapper(this, document);
+  public TAGDocument createDocument() {
+    TAGDocumentDTO documentDTO = new TAGDocumentDTO();
+    persist(documentDTO);
+    documentDTO.initialize();
+    return new TAGDocument(this, documentDTO);
   }
 
   // TextNode
-  public TAGTextNode getTextNode(Long textNodeId) {
+  public TAGTextNodeDTO getTextNodeDTO(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(tx, textNodeId, LOCK_MODE);
   }
 
-  public TextNodeWrapper createTextNodeWrapper(String content) {
-    TAGTextNode textNode = new TAGTextNode(content);
-    persist(textNode);
-    return new TextNodeWrapper(this, textNode);
+  public TAGTextNode createTextNode(String content) {
+    TAGTextNodeDTO tagTextNodeDTO = new TAGTextNodeDTO(content);
+    persist(tagTextNodeDTO);
+    return new TAGTextNode(this, tagTextNodeDTO);
   }
 
-  public TextNodeWrapper createTextNodeWrapper(TAGTextNodeType type) {
-    TAGTextNode textNode = new TAGTextNode(type);
-    persist(textNode);
-    return new TextNodeWrapper(this, textNode);
+  public TAGTextNode createTextNode() {
+    return createTextNode("");
   }
 
-  public TextNodeWrapper getTextNodeWrapper(Long textNodeId) {
-    return new TextNodeWrapper(this, getTextNode(textNodeId));
+  public TAGTextNode getTextNode(Long textNodeId) {
+    return new TAGTextNode(this, getTextNodeDTO(textNodeId));
   }
 
   // Markup
-  public TAGMarkup getMarkup(Long markupId) {
+  public TAGMarkupDTO getMarkupDTO(Long markupId) {
     assertInTransaction();
     return da.markupById.get(tx, markupId, LOCK_MODE);
   }
 
-  public MarkupWrapper createMarkupWrapper(DocumentWrapper document, String tagName) {
+  public TAGMarkup createMarkup(TAGDocument document, String tagName) {
     String tag;
     String suffix = null;
     String id = null;
@@ -211,48 +199,74 @@ public class TAGStore implements AutoCloseable {
       tag = tagName;
     }
 
-    TAGMarkup markup = new TAGMarkup(document.getDbId(), tag);
-    markup.setMarkupId(id);
-    markup.setSuffix(suffix);
-    persist(markup);
+    TAGMarkupDTO markupDTO = new TAGMarkupDTO(document.getDbId(), tag);
+    markupDTO.setMarkupId(id);
+    markupDTO.setSuffix(suffix);
+    persist(markupDTO);
     // document.addMarkup(markup);
-    return new MarkupWrapper(this, markup);
+    return new TAGMarkup(this, markupDTO);
   }
 
-  public MarkupWrapper getMarkupWrapper(Long markupId) {
-    return new MarkupWrapper(this, getMarkup(markupId));
+  public TAGMarkup getMarkup(Long markupId) {
+    return new TAGMarkup(this, getMarkupDTO(markupId));
   }
 
   // Annotation
-  public TAGAnnotation getAnnotation(Long annotationId) {
-    assertInTransaction();
-    return da.annotationById.get(tx, annotationId, LOCK_MODE);
-  }
+//  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
+//    assertInTransaction();
+//    return da.annotationById.get(tx, annotationId, LOCK_MODE);
+//  }
+//
+//  public TAGAnnotationDTO createAnnotationDTO(String tag) {
+////    TAGDocumentDTO document = new TAGDocumentDTO();
+////    persist(document);
+//    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
+////    annotation.setDocumentId(document.getDbId());
+//    persist(annotation);
+//    return annotation;
+//  }
 
-  public TAGAnnotation createAnnotation(String tag) {
-    TAGDocument document = new TAGDocument();
-    persist(document);
-    TAGAnnotation annotation = new TAGAnnotation(tag);
-    annotation.setDocumentId(document.getDbId());
-    persist(annotation);
-    return annotation;
-  }
+//  public TAGAnnotation createStringAnnotation(String key, String value) {
+//    return createAnnotation(key, value, AnnotationType.String);
+//  }
+//
+//  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
+//    return createAnnotation(key, value, AnnotationType.Boolean);
+//  }
+//
+//  public TAGAnnotation createNumberAnnotation(String key, Double value) {
+//    return createAnnotation(key, value, AnnotationType.Number);
+//  }
+//
+//  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
+//    return createAnnotation(key, value, AnnotationType.List);
+//  }
+//
+//  public TAGAnnotation createObjectAnnotation(String key, Object value) {
+//    return createAnnotation(key, value, AnnotationType.Object);
+//  }
+//
+//  public TAGAnnotation createRefAnnotation(String aName, String refId) {
+//    return createAnnotation(aName, refId, AnnotationType.Reference);
+//  }
 
-  public AnnotationWrapper createAnnotationWrapper(String tag) {
-    TAGAnnotation annotation = createAnnotation(tag);
-    return new AnnotationWrapper(this, annotation);
-  }
-
-  public AnnotationWrapper createAnnotationWrapper(String tag, String value) {
-    AnnotationWrapper annotationWrapper = createAnnotationWrapper(tag);
-    TextNodeWrapper textNodeWrapper = createTextNodeWrapper(value);
-    annotationWrapper.getDocument().addTextNode(textNodeWrapper);
-    return annotationWrapper;
-  }
-
-  public AnnotationWrapper getAnnotationWrapper(Long annotationId) {
-    return new AnnotationWrapper(this, getAnnotation(annotationId));
-  }
+//  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
+//    TAGAnnotationDTO dto = createAnnotationDTO(aName);
+//    dto.setType(type);
+//    dto.setValue(value);
+//    persist(dto);
+//    return new TAGAnnotation(this, dto);
+//  }
+//
+//  public TAGAnnotation createAnnotation(String tag) {
+//    assertInTransaction();
+//    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
+//    return new TAGAnnotation(this, annotation);
+//  }
+//
+//  public TAGAnnotation getAnnotation(Long annotationId) {
+//    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
+//  }
 
   // transaction
   public void runInTransaction(Runnable runner) {
@@ -362,6 +376,42 @@ public class TAGStore implements AutoCloseable {
   private void assertTransactionIsOpen() {
     Preconditions.checkState(getTransactionIsOpen(),
         "We're not in an open transaction!");
+  }
+
+  public Long createStringAnnotationValue(final String value) {
+    assertInTransaction();
+    StringAnnotationValue av = new StringAnnotationValue(value);
+    return persist(av);
+  }
+
+  public Long createBooleanAnnotationValue(final Boolean value) {
+    assertInTransaction();
+    BooleanAnnotationValue av = new BooleanAnnotationValue(value);
+    return persist(av);
+  }
+
+  public Long createNumberAnnotationValue(Double value) {
+    assertInTransaction();
+    NumberAnnotationValue av = new NumberAnnotationValue(value);
+    return persist(av);
+  }
+
+  public Long createListAnnotationValue() {
+    assertInTransaction();
+    ListAnnotationValue av = new ListAnnotationValue();
+    return persist(av);
+  }
+
+  public StringAnnotationValue getStringAnnotationValue(final Long id) {
+    return da.stringAnnotationValueById.get(id);
+  }
+
+  public NumberAnnotationValue getNumberAnnotationValue(final Long id) {
+    return da.numberAnnotationValueById.get(id);
+  }
+
+  public BooleanAnnotationValue getBooleanAnnotationValue(final Long id) {
+    return da.booleanAnnotationValueById.get(id);
   }
 
 }

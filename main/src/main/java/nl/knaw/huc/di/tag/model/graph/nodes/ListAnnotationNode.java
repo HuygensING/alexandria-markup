@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model.graph.edges;
+package nl.knaw.huc.di.tag.model.graph.nodes;
 
 /*-
  * #%L
@@ -19,5 +19,10 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
-public class MarkupToAnnotationHyperEdge implements Edge {
+public class ListAnnotationNode extends AnnotationNode {
+
+  public ListAnnotationNode(String name) {
+    super(name);
+  }
+
 }

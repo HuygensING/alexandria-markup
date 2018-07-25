@@ -20,89 +20,58 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static nl.knaw.huygens.alexandria.storage.TAGTextNodeType.*;
+import static java.lang.String.format;
 
-@Entity(version = 2)
-public class TAGTextNode implements TAGObject {
-  @PrimaryKey(sequence = "textnode_pk_sequence")
-  private Long dbId;
+public class TAGTextNode {
+  private final TAGStore store;
+  private final TAGTextNodeDTO textNode;
 
-  private TAGTextNodeType type;
-
-  private String text;
-
-  private List<Long> prevTextNodeIds = new ArrayList<>();
-  private List<Long> nextTextNodeIds = new ArrayList<>();
-
-  private TAGTextNode() {
-  }
-
-  public TAGTextNode(String text) {
-    this.text = text;
-    this.type = plaintext;
-  }
-
-  public TAGTextNode(TAGTextNodeType type) {
-    this.text = "";
-    this.type = type;
+  public TAGTextNode(TAGStore store, TAGTextNodeDTO textNode) {
+    this.store = store;
+    this.textNode = textNode;
+    update();
   }
 
   public Long getDbId() {
-    return dbId;
+    return textNode.getDbId();
   }
 
-  public void setType(final TAGTextNodeType type) {
-    this.type = type;
-  }
-
-  public TAGTextNodeType getType() {
-    return type;
-  }
-
-  public TAGTextNode setText(String text) {
-    this.text = text;
-    return this;
+  public TAGTextNodeDTO getDTO() {
+    return textNode;
   }
 
   public String getText() {
-    return text;
+    return textNode.getText();
   }
 
-  // link to previous nodes
-  public void setPrevTextNodeIds(final List<Long> prevTextNodeIds) {
-    this.prevTextNodeIds = prevTextNodeIds;
+  public List<TAGTextNode> getNextTextNodes() {
+    // TODO: implement here or in TAGDocument
+    return new ArrayList<>();
   }
 
-  public void addPrevTextNodeId(final Long prevTextNodeId) {
-    if (!convergence.equals(type) && !prevTextNodeIds.isEmpty()) {
-      throw new RuntimeException(type + " nodes may have at most 1 prevTextNode.");
-    }
-    this.prevTextNodeIds.add(prevTextNodeId);
+  @Override
+  public int hashCode() {
+    return textNode.getDbId().hashCode();
   }
 
-  public List<Long> getPrevTextNodeIds() {
-    return prevTextNodeIds;
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof TAGTextNode//
+        && ((TAGTextNode) other).getDbId().equals(getDbId());
   }
 
-  // link to next nodes
-  public void setNextTextNodeIds(final List<Long> nextTextNodeIds) {
-    this.nextTextNodeIds = nextTextNodeIds;
+  @Override
+  public String toString() {
+    return format("%d:%s", getDbId(), getText());
   }
 
-  public void addNextTextNodeId(final Long nextTextNodeId) {
-    if (!divergence.equals(type) && !this.nextTextNodeIds.isEmpty()) {
-      throw new RuntimeException(type + " nodes may have at most 1 nextTextNode.");
-    }
-    this.nextTextNodeIds.add(nextTextNodeId);
+  private void update() {
+    store.persist(textNode);
   }
 
-  public List<Long> getNextTextNodeIds() {
-    return nextTextNodeIds;
-  }
 }

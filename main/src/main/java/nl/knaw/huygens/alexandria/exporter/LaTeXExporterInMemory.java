@@ -282,7 +282,7 @@ public class LaTeXExporterInMemory {
   // int i = textNodeIndices.get(tn);
   // latexBuilder.append("(tn").append(i).append(")");
   // });
-  // latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getTag()).append("$}]{};\n");
+  // latexBuilder.append(",label={[").append(color).append("]below:$").append(tr.getKey()).append("$}]{};\n");
   // });
   // }
 
@@ -420,7 +420,7 @@ public class LaTeXExporterInMemory {
     }
 
     void addMarkup(Markup markup) {
-      // LOG.info("markup={}", markup.getTag());
+      // LOG.info("markup={}", markup.getKey());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
       int size = markup.textNodes.size();

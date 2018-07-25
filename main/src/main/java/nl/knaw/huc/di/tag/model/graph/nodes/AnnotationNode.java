@@ -21,10 +21,8 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  */
 public class AnnotationNode implements Node {
   private final String propertyName;
-  private final Object propertyValue;
 
-  public AnnotationNode(String name, Object value) {
+  public AnnotationNode(String name) {
     this.propertyName = name;
-    this.propertyValue = value;
   }
 }

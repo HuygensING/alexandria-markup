@@ -20,66 +20,58 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
-import static com.sleepycat.persist.model.Relationship.ONE_TO_ONE;
-import com.sleepycat.persist.model.SecondaryKey;
+import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
 
-import java.util.ArrayList;
-import java.util.List;
+public class TAGAnnotation {
+  private final TAGStore store;
+  private final TAGAnnotationDTO annotation;
 
-@Entity(version = 1)
-public class TAGAnnotation implements TAGObject {
-  @PrimaryKey(sequence = "annotation_pk_sequence")
-  private Long id;
-
-  private String tag;
-
-  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocument.class)
-  private Long documentId;
-
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotation.class)
-  private final List<Long> annotationIds = new ArrayList<>();
-
-  private TAGAnnotation() {
-  }
-
-  public TAGAnnotation(String tag) {
-    this.tag = tag;
-  }
-
-  public void setId(long id) {
-    this.id = id;
+  public TAGAnnotation(TAGStore store, TAGAnnotationDTO annotation) {
+    this.store = store;
+    this.annotation = annotation;
+    update();
   }
 
   public Long getDbId() {
-    return id;
+    return annotation.getDbId();
   }
 
-  public void setTag(String tag) {
-    this.tag = tag;
+  public String getKey() {
+    return annotation.getKey();
   }
 
-  public String getTag() {
-    return tag;
+  public boolean hasKey(String key) {
+    return annotation.getKey().equals(key);
   }
 
-  public TAGAnnotation addAnnotation(TAGAnnotation annotation) {
-    annotationIds.add(annotation.getDbId());
-    return this;
+  public AnnotationType getType() {
+    return annotation.getType();
   }
 
-  public List<Long> getAnnotationIds() {
-    return annotationIds;
+  public void setType(AnnotationType type) {
+    annotation.setType(type);
   }
 
-  public void setDocumentId(long documentId) {
-    this.documentId = documentId;
+  public Object getValue() {
+    return annotation.getValue();
   }
 
-  public Long getDocumentId() {
-    return documentId;
+  public <T> T getTypedValue(Class<T> typeClass) {
+    return (T) getValue();
+  }
+
+  public TAGAnnotationDTO getDTO() {
+    return annotation;
+  }
+
+  private void update() {
+    store.persist(annotation);
+  }
+
+  @Override
+  public String toString() {
+    // TODO process different annotation types
+    return annotation.getKey() + '=' + getValue();
   }
 
 }

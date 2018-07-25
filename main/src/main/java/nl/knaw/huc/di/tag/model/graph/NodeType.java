@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
@@ -19,6 +19,4 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-public enum TAGTextNodeType {
-  plaintext, divergence, convergence
-}
+enum NodeType {markup, text}

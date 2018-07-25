@@ -98,7 +98,7 @@ class LMNLModifier {
 
           } else {
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
-            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkupForLayer(cursor.getCurrentTextNode(), newMarkup);
             throw new RuntimeException("tail=empty!");
           }
         }
@@ -148,7 +148,7 @@ class LMNLModifier {
             limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
 
           } else {
-            // limen.associateTextNodeWithMarkup(cursor.getCurrentTextNode(), newMarkup);
+            // limen.associateTextNodeWithMarkupForLayer(cursor.getCurrentTextNode(), newMarkup);
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
             throw new RuntimeException("head=empty!");
           }

@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.storage.wrappers.DocumentWrapper;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 import prioritised_xml_collation.TAGToken;
@@ -86,7 +86,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTokenizer() {
     store.runInTransaction(() -> {
-      DocumentWrapper doc = new LMNLImporter(store).importLMNL("[l}[phr}Alas,{phr] [phr}poor Yorick!{phr]{l]");
+      TAGDocument doc = new LMNLImporter(store).importLMNL("[l}[phr}Alas,{phr] [phr}poor Yorick!{phr]{l]");
       TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();
