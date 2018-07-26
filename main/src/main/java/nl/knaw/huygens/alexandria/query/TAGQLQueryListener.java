@@ -26,7 +26,6 @@ import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.antlr.v4.runtime.ParserRuleContext;

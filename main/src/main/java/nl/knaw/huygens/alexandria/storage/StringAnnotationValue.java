@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.Entity;
 public class StringAnnotationValue extends AnnotationValue {
   String value;
 
-  private StringAnnotationValue(){};
+  private StringAnnotationValue(){}
 
   StringAnnotationValue(final String value) {
     setValue(value);

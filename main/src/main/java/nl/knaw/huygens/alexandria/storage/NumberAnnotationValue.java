@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.Entity;
 public class NumberAnnotationValue extends AnnotationValue {
   Double value;
 
-  private NumberAnnotationValue(){};
+  private NumberAnnotationValue(){}
 
   NumberAnnotationValue(final Double value) {
     setValue(value);

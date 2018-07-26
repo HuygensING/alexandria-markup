@@ -38,15 +38,15 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 public class DotFactory {
-  private ColorPicker colorPicker = new ColorPicker("brown", "cyan", "darkgray", "gray", "green", "lightgray", //
-      "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
+  private ColorPicker colorPicker = new ColorPicker("red", "blue", "darkgray", "gray", "green", "lightgray", //
+      "lime", "magenta", "olive", "orange", "pink", "purple", "brown", "cyan", "teal", "violet", "black");
   Map<String, String> layerColor = new HashMap<>();
   private TextGraph textGraph;
 
   public String toDot(TAGDocument document, final String label) {
     layerColor.clear();
     StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
-        .append("  node [style=\"filled\";fillcolor=\"white\"]\n")
+        .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
         .append("  d [shape=doublecircle;label=\"\"]\n")
         .append("  subgraph{\n");
     document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
@@ -101,14 +101,15 @@ public class DotFactory {
 
   private String toTextNodeLine(final TAGTextNode textNode) {
     String shape = "box";
-    String templateStart = "    t%d [shape=%s;color=blue;arrowhead=none;label=";
+    String templateStart = "    t%d [shape=%s;arrowhead=none;label=";
     String templateEnd = "]\n";
 
     if (textNode.getText().isEmpty()) {
       return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);
 
     } else {
-      return format(templateStart + "<%s>" + templateEnd, textNode.getDbId(), shape, escape(textNode.getText()));
+      String textPrefix = "#PCDATA<br/>";
+      return format(templateStart + "<%s%s>" + templateEnd, textNode.getDbId(), shape, textPrefix, escape(textNode.getText()));
     }
   }
 

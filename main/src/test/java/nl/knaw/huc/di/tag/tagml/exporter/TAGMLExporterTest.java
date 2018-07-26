@@ -168,6 +168,47 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagML);
   }
 
+  @Test
+  public void testNestedAnnotation() {
+    String tagML = "[tagml author={first='John' last='Doe' alias=[{first='Jack' last='White'},{first='Ano' last='Nymous'}]}>test<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Ignore
+  @Test
+  public void balisageSlide4() {
+    String tagML =
+        "[ex|+B,+M>[q|B who=\"Brandy\">You can't destroy this love I found<-q]\n" +
+            "[q|M who=\"Monica\">Your silly games I won't allow<-q]\n" +
+            "[+q|B>The boy is mine without a doubt<q]\n" +
+            "[+q|M>You might as well throw in the towel<q]<ex]";
+    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+  }
+
+  @Test
+  public void balisageSelfOverlap1() {
+    String tagML = "[phrase>[phrase>Oscar the Grouch is<phrase] a trash can-dwelling creature.<phrase]";
+    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+  }
+
+  @Test
+  public void balisageSelfOverlap1a() {
+    String tagML = "[phrase>Oscar the Grouch [phrase>is<phrase] a trash can-dwelling creature.<phrase]";
+    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+  }
+
+  @Test
+  public void balisageSelfOverlap2() {
+    String tagML = "[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]";
+    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+  }
+
+  @Test
+  public void balisageSelfOverlap2a() {
+    String tagML = "[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]";
+    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+  }
+
   // --- private methods ---
 
   private void assertTAGMLOutIsIn(final String tagmlIn) {

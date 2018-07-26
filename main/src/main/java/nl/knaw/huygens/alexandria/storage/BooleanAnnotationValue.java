@@ -29,8 +29,6 @@ public class BooleanAnnotationValue extends AnnotationValue {
   private BooleanAnnotationValue() {
   }
 
-  ;
-
   BooleanAnnotationValue(final Boolean value) {
     setValue(value);
   }

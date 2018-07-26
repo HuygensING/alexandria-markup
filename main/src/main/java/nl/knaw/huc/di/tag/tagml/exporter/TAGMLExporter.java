@@ -139,7 +139,7 @@ public class TAGMLExporter {
     Set<TAGTextNode> processedNodes = new HashSet<>();
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
     document.getTextNodeStream().forEach(nodeToProcess -> {
-      logTextNode(nodeToProcess);
+//      logTextNode(nodeToProcess);
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
         Set<Long> markupIds = new LinkedHashSet<>();
@@ -202,7 +202,7 @@ public class TAGMLExporter {
         tagmlBuilder.append(escapedText);
         processedNodes.add(nodeToProcess);
         state.lastTextNodeId = nodeToProcess.getDbId();
-        LOG.debug("TAGML={}\n", tagmlBuilder);
+//        LOG.debug("TAGML={}\n", tagmlBuilder);
       }
     });
     while (!textVariationStates.isEmpty()) {

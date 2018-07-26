@@ -33,13 +33,11 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class AnnotationFactory {
 
@@ -150,11 +148,13 @@ public class AnnotationFactory {
   }
 
   private Map<String, Object> readObject(TAGMLParser.ObjectValueContext objectValueContext) {
-    return objectValueContext.children.stream()
+    Map<String, Object> map = new LinkedHashMap<>();
+    objectValueContext.children.stream()
         .filter(c -> !(c instanceof TerminalNode))
         .map(this::parseAttribute)
         .peek(System.out::println)
-        .collect(toMap(KeyValue::getKey, KeyValue::getValue, (a, b) -> b));
+        .forEach(kv -> map.put(kv.key, kv.value));
+    return map;
   }
 
   private KeyValue parseAttribute(ParseTree parseTree) {

@@ -151,7 +151,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (useText) {
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
-      logTextNode(tn);
+//      logTextNode(tn);
     }
   }
 
@@ -190,7 +190,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (tagNameIsValid(ctx)) {
       MarkupNameContext markupNameContext = ctx.markupName();
       String markupName = markupNameContext.name().getText();
-      LOG.debug("startTag.markupName=<{}>", markupName);
+//      LOG.debug("startTag.markupName=<{}>", markupName);
       checkNameSpace(ctx, markupName);
       ctx.annotation()
           .forEach(annotation -> LOG.debug("  startTag.annotation={{}}", annotation.getText()));
@@ -300,7 +300,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public void exitEndTag(EndTagContext ctx) {
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.markupName().name().getText();
-      LOG.debug("endTag.markupName=<{}>", markupName);
+//      LOG.debug("endTag.markupName=<{}>", markupName);
       removeFromOpenMarkup(ctx.markupName());
     }
   }
@@ -309,13 +309,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   public void exitMilestoneTag(MilestoneTagContext ctx) {
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.name().getText();
-      LOG.debug("milestone.markupName=<{}>", markupName);
+//      LOG.debug("milestone.markupName=<{}>", markupName);
       ctx.annotation()
           .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
       Set<String> layers = extractLayerInfo(ctx.layerInfo());
       TAGTextNode tn = store.createTextNode("");
       addAndConnectToMarkup(tn);
-      logTextNode(tn);
+//      logTextNode(tn);
       TAGMarkup markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
       markup.addAllLayers(layers);
       layers.forEach(layerName -> {
@@ -570,35 +570,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       }
     });
   }
-
-//  private TAGAnnotation makeAnnotation(BasicAnnotationContext basicAnnotationContext) {
-//    String aName = basicAnnotationContext.annotationName().getText();
-//    AnnotationValueContext annotationValueContext = basicAnnotationContext.annotationValue();
-//    Object value = annotationValue(annotationValueContext);
-//    if (annotationValueContext.AV_StringValue() != null) {
-//      return store.createStringAnnotation(aName, (String) value);
-//
-//    } else if (annotationValueContext.booleanValue() != null) {
-//      return store.createBooleanAnnotation(aName, (Boolean) value);
-//
-//    } else if (annotationValueContext.AV_NumberValue() != null) {
-//      return store.createNumberAnnotation(aName, (Double) value);
-//
-//    } else if (annotationValueContext.objectValue() != null) {
-//      return store.createObjectAnnotation(aName, value);
-//
-//    } else if (annotationValueContext.listValue() != null) {
-//      Set<String> valueTypes = ((List<Object>) value).stream()
-//          .map(v -> ((Object) v).getClass().getName())
-//          .collect(toSet());
-//      if (valueTypes.size() > 1) {
-//        errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
-//            errorPrefix(annotationValueContext), aName);
-//      }
-//      return store.createListAnnotation(aName, (List<?>) value);
-//    }
-//    return null;
-//  }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
     document.associateTextNodeWithMarkupForLayer(tn, markup, layerName);

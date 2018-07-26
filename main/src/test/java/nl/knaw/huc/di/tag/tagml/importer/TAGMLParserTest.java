@@ -652,9 +652,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   }
 
   private String export(final TAGDocument document) {
-    String tagml = store.runInTransaction(() -> {
-      return TAGML_EXPORTER.asTAGML(document);
-    });
+    String tagml = store.runInTransaction(() -> TAGML_EXPORTER.asTAGML(document));
     LOG.info("\nTAGML:\n{}\n", tagml);
     return tagml;
   }
