@@ -53,6 +53,14 @@ public class TAGDocument {
     return documentDTO.getDbId();
   }
 
+  public Date getCreationDate() {
+    return documentDTO.getCreationDate();
+  }
+
+  public Date getModificationDate() {
+    return documentDTO.getModificationDate();
+  }
+
   public TAGDocument addTextNode(TAGTextNode textNode, List<TAGMarkup> lastOpenedMarkup) {
     List<Long> textNodeIds = documentDTO.getTextNodeIds();
     Long textNodeDbId = textNode.getDbId();
@@ -60,23 +68,6 @@ public class TAGDocument {
     if (textNodeIds.size() == 1) {
       documentDTO.setFirstTextNodeId(textNodeDbId);
     }
-//    documentDTO.textGraph.appendTextNode(textNodeDbId);
-//    List<String> bottomLayers = new ArrayList<>(getLayerNames());
-//    Set<String> notBottom = bottomLayers.stream()
-//        .map(l -> documentDTO.textGraph.getParentLayerMap().get(l))
-//        .collect(toSet());
-//    bottomLayers.removeAll(notBottom);
-
-//    bottomLayers.forEach(layerName -> {
-//          Deque<TAGMarkup> stack = openMarkupStackForLayer.get(layerName);
-//          if (!stack.isEmpty()) {
-//            Long markupId = stack.peek().getDbId();
-//            documentDTO.textGraph
-//                .linkMarkupToTextNodeForLayer(markupId, textNodeDbId, layerName);
-//          }
-//        }
-//
-//    );
     if (lastOpenedMarkup != null) {
       lastOpenedMarkup.forEach(m -> documentDTO.textGraph
           .linkMarkupToTextNodeForLayer(m.getDbId(), textNodeDbId, m.getLayers().iterator().next())
@@ -221,6 +212,10 @@ public class TAGDocument {
         .map(store::getTextNode);
   }
 
+  public void linkParentlessLayerRootsToDocument() {
+    documentDTO.textGraph.linkParentlessLayerRootsToDocument();
+  }
+
   /* private methods */
 
   private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
@@ -259,10 +254,6 @@ public class TAGDocument {
     documentDTO.getMarkupIds().add(id);
     update();
     return this;
-  }
-
-  public void linkParentlessLayerRootsToDocument() {
-    documentDTO.textGraph.linkParentlessLayerRootsToDocument();
   }
 
 }
