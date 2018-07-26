@@ -74,7 +74,7 @@ public class TexMECSImporter {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    LOG.debug("parsed with {} syntax errors", numberOfSyntaxErrors);
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TexMECSListener listener = new TexMECSListener(store);
     parseTreeWalker.walk(listener, parseTree);

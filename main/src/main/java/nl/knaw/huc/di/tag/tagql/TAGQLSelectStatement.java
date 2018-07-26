@@ -66,7 +66,7 @@ public class TAGQLSelectStatement implements TAGQLStatement {
   }
 
   private void logger(Object o) {
-    LOG.info("object={}, class={}", o, o.getClass().getName());
+    LOG.debug("object={}, class={}", o, o.getClass().getName());
   }
 
   public void setIndex(int index) {

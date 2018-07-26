@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
-
+// TODO: only output layer info on end-tag when needed
+// TODO: only show layer info as defined in view
 public class TAGMLExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
   private final TAGView view;

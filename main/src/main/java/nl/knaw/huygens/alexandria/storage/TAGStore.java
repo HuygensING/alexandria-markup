@@ -55,7 +55,7 @@ public class TAGStore implements AutoCloseable {
   private Transaction tx;
 
   public TAGStore(String dbDir, boolean readOnly) {
-    LOG.debug("db dir={}", dbDir);
+//    LOG.debug("db dir={}", dbDir);
     this.dbDir = dbDir;
     this.readOnly = readOnly;
     open();

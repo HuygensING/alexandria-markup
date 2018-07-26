@@ -69,7 +69,7 @@ class TexMECSImporterInMemory {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+    LOG.debug("parsed with {} syntax errors", numberOfSyntaxErrors);
     ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
     TexMECSListenerInMemory listener = new TexMECSListenerInMemory();
     parseTreeWalker.walk(listener, parseTree);

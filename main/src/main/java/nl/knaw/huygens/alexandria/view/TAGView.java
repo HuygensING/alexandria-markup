@@ -157,6 +157,14 @@ public class TAGView {
     return exclude.equals(markupRelevance);
   }
 
+  public boolean layerStyleIsInclude() {
+    return include.equals(layerRelevance);
+  }
+
+  public boolean layerStyleIsExclude() {
+    return exclude.equals(layerRelevance);
+  }
+
   public boolean isIncluded(TAGMarkup tagMarkup) {
     String tag = tagMarkup.getTag();
     if (include.equals(markupRelevance)) {

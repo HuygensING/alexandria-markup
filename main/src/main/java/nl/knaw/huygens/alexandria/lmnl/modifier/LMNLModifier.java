@@ -163,7 +163,7 @@ class LMNLModifier {
       throw new RuntimeException("Markup " + newMarkup.getTag() + " should have an id.");
     }
     positions.forEach(position -> {
-      LOG.info("position={}", position);
+      LOG.debug("position={}", position);
       logTextNodes(limen.textNodeList);
       logMarkups(limen.markupList);
       addMarkup(newMarkup, position);
@@ -186,7 +186,7 @@ class LMNLModifier {
       }
       textnodes.append("\n");
     });
-    LOG.info("\nTextNodes:\n{}", textnodes);
+    LOG.debug("\nTextNodes:\n{}", textnodes);
   }
 
   private void logMarkups(List<Markup> list) {
@@ -195,7 +195,7 @@ class LMNLModifier {
       markups.append("[").append(tr.getTag()).append("}\n");
       tr.textNodes.forEach(tn -> markups.append("  \"").append(tn.getContent()).append("\"\n"));
     });
-    LOG.info("\nMarkups:\n{}", markups);
+    LOG.debug("\nMarkups:\n{}", markups);
   }
 
   class TextNodeCursor {

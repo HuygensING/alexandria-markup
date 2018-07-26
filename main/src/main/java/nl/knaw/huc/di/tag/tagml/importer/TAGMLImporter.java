@@ -97,7 +97,7 @@ public class TAGMLImporter {
   private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
-    LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
