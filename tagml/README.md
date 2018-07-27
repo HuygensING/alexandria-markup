@@ -10,7 +10,7 @@ add this dependency to your `pom.xml`
 <dependency>
   <groupId>nl.knaw.huygens.alexandria</groupId>
   <artifactId>tagml</artifactId>
-  <version>1.3-SNAPSHOT</version>
+  <version>2.0</version>
 </dependency>
 ```
 
