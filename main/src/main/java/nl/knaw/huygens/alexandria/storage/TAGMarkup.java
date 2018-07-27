@@ -140,9 +140,8 @@ public class TAGMarkup {
     String layerSuffix = layerSuffix(newLayers);
     String tag = getTag();
     if (isOptional()) {
-      return layerSuffix + TAGML.OPTIONAL_PREFIX + tag;
+      return TAGML.OPTIONAL_PREFIX + tag + layerSuffix;
     }
-    // TODO: this is output language dependent: move to language dependency
     String suffix = getSuffix();
     if (StringUtils.isNotEmpty(suffix)) {
       return tag + "~" + suffix + layerSuffix;
