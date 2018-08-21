@@ -220,8 +220,9 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public void linkParentlessLayerRootsToDocument() {
     layerRootMap.values().stream()
-        .filter(r -> getIncomingEdges(r).isEmpty())
-        .forEach(n -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, n));
+        .distinct()
+        .filter(r -> getIncomingEdges(r).stream().noneMatch(e -> e instanceof LayerEdge && ((LayerEdge) e).hasType(EdgeType.hasMarkup)))
+        .forEach(r -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, r));
   }
 
   public void continueMarkup(TAGMarkup suspendedMarkup, TAGMarkup resumedMarkup) {
