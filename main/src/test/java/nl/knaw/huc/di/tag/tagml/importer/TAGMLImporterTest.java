@@ -44,6 +44,19 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
 
   @Test
+  public void testFrostQuote() {
+    String tagML = "[excerpt|+S,+L source=\"The Housekeeper\" author=\"Robert Frost\">\n" +
+        "[s|S>[l|L n=144>He manages to keep the upper hand<l]\n" +
+        "[l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]\n" +
+        "[l|L n=146>We fence our flowers in and the hens range.<l]<s]\n" +
+        "<excerpt]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
   public void testCMLHTS18() {
     String tagML = "[tagml>\n" +
         "[page>\n" +
