@@ -49,6 +49,12 @@
       <version>${berkeleydb.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.xmlcalabash</groupId>
+      <artifactId>xmlcalabash</artifactId>
+      <version>1.1.21-98</version>
+    </dependency>
+
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
