@@ -19,5 +19,27 @@ package nl.knaw.huc.di.tag;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+
 public interface TAGVisitor {
+  void enterDocument(TAGDocument document);
+
+  void exitDocument(TAGDocument document);
+
+  void enterOpenTag(TAGMarkup markup);
+
+  void addAnnotation(AnnotationInfo annotationInfo);
+
+  void exitOpenTag(TAGMarkup markup);
+
+  void exitCloseTag(TAGMarkup markup);
+
+  void exitText(String escapedText, final boolean inVariation);
+
+  void enterTextVariation();
+
+  void exitTextVariation();
+
 }

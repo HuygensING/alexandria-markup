@@ -256,4 +256,11 @@ public class TAGDocument {
     return this;
   }
 
+  public void setNamespaces(final Map<String, String> namespaces) {
+    documentDTO.setNamespaces(namespaces);
+  }
+
+  public Map<String, String> getNamespaces() {
+    return documentDTO.getNamespaces();
+  }
 }

@@ -20,12 +20,16 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  * <p>
  * A document contains a Limen.
+ *</p>
+ * @deprecated use {@link TAGDocument} instead.
  */
+@Deprecated
 public class Document {
   private final Limen value;
 

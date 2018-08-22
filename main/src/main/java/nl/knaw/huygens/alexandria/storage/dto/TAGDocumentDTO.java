@@ -45,6 +45,7 @@ public class TAGDocumentDTO implements TAGDTO {
   private Date creationDate = new Date();
   private Date modificationDate = new Date();
   public TextGraph textGraph = new TextGraph();
+  private Map<String, String> namespaces;
 
   public TAGDocumentDTO() {
   }
@@ -139,4 +140,11 @@ public class TAGDocumentDTO implements TAGDTO {
     return getTextNodeIdStreamForMarkupId(markup.getDbId(), "").findAny().isPresent();
   }
 
+  public void setNamespaces(final Map<String, String> namespaces) {
+    this.namespaces = namespaces;
+  }
+
+  public Map<String, String> getNamespaces() {
+    return namespaces;
+  }
 }

@@ -112,6 +112,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitDocument(DocumentContext ctx) {
     document.linkParentlessLayerRootsToDocument();
+    document.setNamespaces(namespaces);
     update(document.getDTO());
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
