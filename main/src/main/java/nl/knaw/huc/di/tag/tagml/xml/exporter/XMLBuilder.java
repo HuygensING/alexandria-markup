@@ -84,7 +84,7 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public void addAnnotation(final AnnotationInfo annotationInfo) {
-    xmlBuilder.append(" ").append(annotationInfo.getName()).append("='").append("'");
+    xmlBuilder.append(" ").append(annotationInfo.getName()).append("=\"").append("\"");
   }
 
   @Override
