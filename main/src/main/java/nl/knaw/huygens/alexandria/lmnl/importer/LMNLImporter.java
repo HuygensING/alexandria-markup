@@ -259,11 +259,11 @@ public class LMNLImporter {
 
     String errorMsg = "";
     if (context.hasErrors()) {
-      String errors = context.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = String.join("\n", context.getErrors());
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (errorListener.hasErrors()) {
-      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = String.join("\n", errorListener.getErrors());
       errorMsg += "\n\nTokenizing errors:\n" + errors;
     }
     if (!errorMsg.isEmpty()) {

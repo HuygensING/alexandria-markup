@@ -92,7 +92,7 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
       try {
         InputStream input = getInputStream(basename);
         List<String> lines = IOUtils.readLines(input, Charset.defaultCharset());
-        LOG.info("\nTAGML:\n{}\n", lines.stream().collect(joining("\n")));
+        LOG.info("\nTAGML:\n{}\n", String.join("\n", lines));
 
         input = getInputStream(basename);
         printTokens(input);

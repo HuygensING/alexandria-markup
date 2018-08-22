@@ -167,8 +167,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testCharacterEscapingInTextVariation() {
     String tagML = "[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.<t]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<t>In text in between textVariation tags, <:branches><:branch>&lt;, [, | and \\ need to be escaped</:branch><:branch>!, &quot; and &apos; don&apos;t</:branch></:branches>.</t>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<t>In text in between textVariation tags, <tag:branches><tag:branch>&lt;, [, | and \\ need to be escaped</tag:branch><tag:branch>!, &quot; and &apos; don&apos;t</tag:branch></tag:branches>.</t>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -227,8 +227,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testTextVariation() {
     String tagML = "[t>This is a <|lame|dope|> test!<t]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<t>This is a <:branches><:branch>lame</:branch><:branch>dope</:branch></:branches> test!</t>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<t>This is a <tag:branches><tag:branch>lame</tag:branch><tag:branch>dope</tag:branch></tag:branches> test!</t>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -248,7 +248,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     String tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<xml>\n" +
-        "<x><t>This is</t>, he said, <t>a test!</t></x>\n" +
+        "<x><t id=\"t1\" next=\"t2\">This is</t>, he said, <t id=\"t2\" prev=\"t1\">a test!</t></x>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -257,8 +257,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testAcceptedMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<t>This <x>is <:branches><:branch>a failing</:branch><:branch>an excellent</:branch></:branches></x> test</t>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<t>This <x>is <tag:branches><tag:branch>a failing</tag:branch><tag:branch>an excellent</tag:branch></tag:branches></x> test</t>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -270,8 +270,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "|[b>[del>rich<del]<b]|>" +
         " [b>man<b] is in need of a maid.<text]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<text>It is a truth universally acknowledged that every <:branches><:branch><add>young <b>woman</b></add></:branch><:branch><b><del>rich</del></b></:branch></:branches> <b>man</b> is in need of a maid.</text>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<text>It is a truth universally acknowledged that every <tag:branches><tag:branch><add>young <b>woman</b></add></tag:branch><tag:branch><b><del>rich</del></b></tag:branch></tag:branches> <b>man</b> is in need of a maid.</text>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -283,7 +283,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "<|[del>, really,<del]" +
         "|[add|+A>,\"<-q] thought Alice [+q>\"<add|A]|>" +
         "without pictures or conversation?<q]<x]";
-    String expectedXML = "";
+    String expectedXML = "TODO!";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
@@ -291,8 +291,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testEscapeSpecialCharactersInTextVariation() {
     String tagML = "[t>bla <|\\||!|> bla<t]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<t>bla <:branches><:branch>|</:branch><:branch>!</:branch></:branches> bla</t>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<t>bla <tag:branches><tag:branch>|</tag:branch><tag:branch>!</tag:branch></tag:branches> bla</t>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -301,8 +301,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testOptionalMarkup() {
     String tagML = "[t>this is [?del>always<?del] optional<t]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<t>this is <del>always</del> optional</t>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<t>this is <del tag:optional=\"true\">always</del> optional</t>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -350,23 +350,18 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   private TAGDocument parseTAGML(final String tagML) {
     LOG.info("TAGML=\n\n{}\n", tagML);
 //    printTokens(tagML);
-    TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
-//    logDocumentGraph(document, tagML);
-    return document;
+    //    logDocumentGraph(document, tagML);
+    return new TAGMLImporter(store).importTAGML(tagML);
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) {
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
-      String xml = asXML(document);
+      String xml = new XMLExporter(store).asXML(document);
       LOG.info("XML=\n\n{}\n", xml);
       assertThat(xml).isEqualTo(expectedXML);
     });
   }
 
-  private String asXML(final TAGDocument document) {
-    XMLExporter xmlExporter = new XMLExporter(store);
-    return xmlExporter.asXML(document);
-  }
 }

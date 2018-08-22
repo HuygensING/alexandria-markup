@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.TAGExporter;
 import nl.knaw.huc.di.tag.TAGTraverser;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -39,9 +40,8 @@ public class XMLExporter extends TAGExporter {
   }
 
   public String asXML(TAGDocument document) {
-    TAGTraverser traverser = new TAGTraverser(store, view, document);
     XMLBuilder xmlBuilder = new XMLBuilder();
-    traverser.accept(xmlBuilder);
+    new TAGTraverser(store, view, document).accept(xmlBuilder);
     return xmlBuilder.getResult();
   }
 

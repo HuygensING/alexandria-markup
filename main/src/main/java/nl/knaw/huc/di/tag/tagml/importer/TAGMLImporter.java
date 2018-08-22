@@ -86,7 +86,7 @@ public class TAGMLImporter {
     String errorMsg = "";
     if (errorListener.hasErrors()) {
       logDocumentGraph(document,"");
-      String errors = errorListener.getErrors().stream().collect(joining("\n"));
+      String errors = String.join("\n", errorListener.getErrors());
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }

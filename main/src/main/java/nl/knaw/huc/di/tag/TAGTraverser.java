@@ -39,21 +39,18 @@ import static java.util.stream.Collectors.toSet;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGTraverser {
-  private final AnnotationFactory annotationFactory;
   private TAGStore store;
   private TAGView view;
   private final TAGDocument document;
   private final Set<TAGTextNode> processedNodes = new HashSet<>();
   private final HashMap<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
-  ;
   private final Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
-  ;
 
   public TAGTraverser(final TAGStore store, final TAGView view, final TAGDocument document) {
     this.store = store;
     this.view = view;
     this.document = document;
-    annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
+    final AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     document.getMarkupStream()
         .filter(TAGMarkup::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
@@ -237,7 +234,7 @@ public class TAGTraverser {
     newLayers.removeAll(openLayers);
     StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR)
         .append(resume).append(markup.getExtendedTag(newLayers));
-    markup.getAnnotationStream().forEach(a -> tagVisitor.addAnnotation(a)/*tagBuilder.append(" ").append(toTAGML(a))*/);
+    markup.getAnnotationStream().forEach(tagVisitor::addAnnotation/*tagBuilder.append(" ").append(toTAGML(a))*/);
     return markup.isAnonymous()//
         ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
         : tagBuilder.append(OPEN_TAG_ENDCHAR);

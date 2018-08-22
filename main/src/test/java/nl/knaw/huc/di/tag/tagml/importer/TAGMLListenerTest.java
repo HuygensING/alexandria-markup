@@ -197,7 +197,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       } catch (TAGMLBreakingError e) {
       }
       assertThat(errorListener.hasErrors()).isTrue();
-      String errors = errorListener.getErrors().stream().collect(joining("\n"));
+      String errors = String.join("\n", errorListener.getErrors());
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
     });
   }

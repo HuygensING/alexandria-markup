@@ -34,14 +34,17 @@ import static java.util.stream.Collectors.joining;
 
 public class XMLBuilder implements TAGVisitor {
   public static final String TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\"";
+  public static final String TAG_NAMESPACE = "xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\"";
 
   final StringBuilder xmlBuilder = new StringBuilder();
   final Map<Object, String> thIds = new HashMap<>();
   final AtomicInteger thIdCounter = new AtomicInteger();
   final List<String> namespaceDefinitions = new ArrayList<>();
+  boolean useTagNamespace = false;
+  private String result;
 
   public String getResult() {
-    return xmlBuilder.toString();
+    return result;
   }
 
   @Override
@@ -52,12 +55,10 @@ public class XMLBuilder implements TAGVisitor {
         (numberOfHierarchies == 1 && !document.getLayerNames().iterator().next().equals(TAGML.DEFAULT_LAYER))) {
       namespaceDefinitions.add(TH_NAMESPACE);
     }
-    document.getNamespaces().forEach((ns, url) -> {
-      namespaceDefinitions.add("xmlns:" + ns + "=\"" + url + "\"");
-    });
+    document.getNamespaces().forEach((ns, url) -> namespaceDefinitions.add("xmlns:" + ns + "=\"" + url + "\""));
     xmlBuilder.append("<xml");
     if (!namespaceDefinitions.isEmpty()) {
-      xmlBuilder.append(" ").append(namespaceDefinitions.stream().collect(joining(" ")));
+      xmlBuilder.append(" ").append(String.join(" ", namespaceDefinitions));
     }
     Set<String> layerNames = document.getLayerNames();
     if (!justDefaultLayer(layerNames)) {
@@ -67,19 +68,33 @@ public class XMLBuilder implements TAGVisitor {
     xmlBuilder.append(">\n");
   }
 
-  private String getThDoc(final Set<String> layerNames) {
-    return layerNames.stream().collect(joining(" "));
-  }
-
   @Override
   public void exitDocument(final TAGDocument document) {
     xmlBuilder.append("\n</xml>");
+    result = xmlBuilder.toString();
+    if (useTagNamespace) {
+      result = result.replaceFirst("<xml", "<xml " + TAG_NAMESPACE);
+    }
+
   }
 
   @Override
   public void enterOpenTag(final TAGMarkup markup) {
-    final String markupName = markup.getTag();
+    String markupName = getMarkupName(markup);
     xmlBuilder.append("<").append(markupName);
+    if (markup.isOptional()) {
+      useTagNamespace = true;
+      xmlBuilder.append(" tag:optional=\"true\"");
+    }
+  }
+
+  private String getMarkupName(final TAGMarkup markup) {
+    String markupName = markup.getTag();
+    if (markupName.startsWith(":")) {
+      markupName = "tag" + markupName;
+      useTagNamespace = true;
+    }
+    return markupName;
   }
 
   @Override
@@ -104,13 +119,9 @@ public class XMLBuilder implements TAGVisitor {
     xmlBuilder.append(">");
   }
 
-  private boolean justDefaultLayer(final Set<String> layers) {
-    return layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
-  }
-
   @Override
   public void exitCloseTag(final TAGMarkup markup) {
-    final String markupName = markup.getTag();
+    String markupName = getMarkupName(markup);
     Set<String> layers = markup.getLayers();
     final boolean inDefaultLayer = justDefaultLayer(layers);
     if (inDefaultLayer && markup.isAnonymous()) {
@@ -138,12 +149,19 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public void enterTextVariation() {
-
+    useTagNamespace = true;
   }
 
   @Override
   public void exitTextVariation() {
+  }
 
+  private String getThDoc(final Set<String> layerNames) {
+    return String.join(" ", layerNames);
+  }
+
+  private boolean justDefaultLayer(final Set<String> layers) {
+    return layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
   }
 
 }
