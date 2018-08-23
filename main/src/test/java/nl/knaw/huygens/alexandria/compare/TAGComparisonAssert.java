@@ -19,7 +19,6 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.joining;
 import org.assertj.core.api.AbstractAssert;
 
 import java.util.List;

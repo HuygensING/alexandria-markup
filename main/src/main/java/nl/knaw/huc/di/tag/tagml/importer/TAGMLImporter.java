@@ -41,8 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-import static java.util.stream.Collectors.joining;
-
 public class TAGMLImporter {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);

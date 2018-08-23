@@ -43,7 +43,6 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 

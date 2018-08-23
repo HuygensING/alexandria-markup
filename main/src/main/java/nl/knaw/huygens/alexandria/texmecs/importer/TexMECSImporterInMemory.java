@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class TexMECSImporterInMemory {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
