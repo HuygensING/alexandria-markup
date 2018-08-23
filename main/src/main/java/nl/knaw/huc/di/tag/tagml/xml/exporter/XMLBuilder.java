@@ -22,15 +22,12 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter;
 
 import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static java.util.stream.Collectors.joining;
 
 public class XMLBuilder implements TAGVisitor {
   public static final String TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\"";
@@ -98,9 +95,10 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void addAnnotation(final AnnotationInfo annotationInfo) {
-    xmlBuilder.append(" ").append(annotationInfo.getName()).append("=\"").append("\"");
+  public void addAnnotation(String serializedAnnotation) {
+    xmlBuilder.append(" ").append(serializedAnnotation);
   }
+
 
   @Override
   public void exitOpenTag(final TAGMarkup markup) {
@@ -154,6 +152,36 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public void exitTextVariation() {
+  }
+
+  @Override
+  public String serializeStringAnnotationValue(String stringValue) {
+    return "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\"";
+  }
+
+  @Override
+  public String serializeNumberAnnotationValue(Double numberValue) {
+    return serializeStringAnnotationValue(String.valueOf(numberValue).replaceFirst(".0$", ""));
+  }
+
+  @Override
+  public String serializeBooleanAnnotationValue(Boolean booleanValue) {
+    return serializeStringAnnotationValue(booleanValue.toString());
+  }
+
+  @Override
+  public String serializeListAnnotationValue(List<String> serializedItems) {
+    return serializeStringAnnotationValue("[" + String.join(",", serializedItems) + "]");
+  }
+
+  @Override
+  public String serializeMapAnnotationValue(List<String> serializedMapItems) {
+    return serializeStringAnnotationValue("{" + String.join(",", serializedMapItems) + "}");
+  }
+
+  @Override
+  public String serializeAnnotationAssigner(String name) {
+    return name + "=";
   }
 
   private String getThDoc(final Set<String> layerNames) {

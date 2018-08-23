@@ -19,9 +19,11 @@ package nl.knaw.huc.di.tag;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+
+import java.util.List;
 
 public interface TAGVisitor {
   void enterDocument(TAGDocument document);
@@ -30,7 +32,19 @@ public interface TAGVisitor {
 
   void enterOpenTag(TAGMarkup markup);
 
-  void addAnnotation(AnnotationInfo annotationInfo);
+  void addAnnotation(String serializedAnnotation);
+
+  String serializeAnnotationAssigner(String name);
+
+  String serializeStringAnnotationValue(String stringValue);
+
+  String serializeNumberAnnotationValue(Double numberValue);
+
+  String serializeBooleanAnnotationValue(Boolean booleanValue);
+
+  String serializeListAnnotationValue(List<String> serializedItems);
+
+  String serializeMapAnnotationValue(List<String> serializedMapItems);
 
   void exitOpenTag(TAGMarkup markup);
 
@@ -41,5 +55,6 @@ public interface TAGVisitor {
   void enterTextVariation();
 
   void exitTextVariation();
+
 
 }

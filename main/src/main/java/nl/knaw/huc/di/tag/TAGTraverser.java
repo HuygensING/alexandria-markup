@@ -23,6 +23,7 @@ package nl.knaw.huc.di.tag;
 import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -58,6 +59,7 @@ public class TAGTraverser {
   }
 
   public void accept(final TAGVisitor tagVisitor) {
+    AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     tagVisitor.enterDocument(document);
     Set<String> openLayers = new HashSet<>();
     openLayers.add(TAGML.DEFAULT_LAYER);
@@ -112,6 +114,10 @@ public class TAGTraverser {
           tagVisitor.enterOpenTag(markup);
           String openTag = state.openTags.get(markupId).toString();
           openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle);
+          markup.getAnnotationStream().forEach(a -> {
+            String value = serializeAnnotation(annotationFactory, a, tagVisitor);
+            tagVisitor.addAnnotation(value);
+          });
           tagVisitor.exitOpenTag(markup);
 //          tagmlBuilder.append(openTag);
         });
@@ -147,6 +153,52 @@ public class TAGTraverser {
         .forEachRemaining(markupId -> tagVisitor.exitCloseTag(store.getMarkup(markupId)));
 //        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     tagVisitor.exitDocument(document);
+  }
+
+  private String serializeAnnotation(AnnotationFactory annotationFactory, AnnotationInfo a, TAGVisitor tagVisitor) {
+    StringBuilder stringBuilder = new StringBuilder();
+    if (a.hasName()) {
+      String annotationAssigner = tagVisitor.serializeAnnotationAssigner(a.getName());
+      stringBuilder.append(annotationAssigner);
+    }
+    String value;
+    switch (a.getType()) {
+      case String:
+        String stringValue = annotationFactory.getStringValue(a);
+        value = tagVisitor.serializeStringAnnotationValue(stringValue);
+        break;
+
+      case Number:
+        Double numberValue = annotationFactory.getNumberValue(a);
+        value = tagVisitor.serializeNumberAnnotationValue(numberValue);
+        break;
+
+      case Boolean:
+        Boolean booleanValue = annotationFactory.getBooleanValue(a);
+        value = tagVisitor.serializeBooleanAnnotationValue(booleanValue);
+        break;
+
+      case List:
+        List<AnnotationInfo> listValue = annotationFactory.getListValue(a);
+        List<String> serializedItems = listValue.stream()
+            .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
+            .collect(toList());
+        value = tagVisitor.serializeListAnnotationValue(serializedItems);
+        break;
+
+      case Map:
+        List<AnnotationInfo> mapValue = annotationFactory.getMapValue(a);
+        List<String> serializedMapItems = mapValue.stream()
+            .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
+            .collect(toList());
+        value = tagVisitor.serializeMapAnnotationValue(serializedMapItems);
+        break;
+
+      default:
+        throw new RuntimeException("unhandled annotation type:" + a.getType());
+
+    }
+    return stringBuilder.append(value).toString();
   }
 
   class ExporterState {
@@ -234,14 +286,13 @@ public class TAGTraverser {
     newLayers.removeAll(openLayers);
     StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR)
         .append(resume).append(markup.getExtendedTag(newLayers));
-    markup.getAnnotationStream().forEach(tagVisitor::addAnnotation/*tagBuilder.append(" ").append(toTAGML(a))*/);
     return markup.isAnonymous()//
         ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 
   private String addResumePrefixIfRequired(String openTag, Long markupId,
-      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+                                           final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       TAGMarkup markup = store.getMarkup(markupId);
@@ -253,7 +304,7 @@ public class TAGTraverser {
   }
 
   private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
-      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+                                            final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       if (textNodesToHandle > 0) {

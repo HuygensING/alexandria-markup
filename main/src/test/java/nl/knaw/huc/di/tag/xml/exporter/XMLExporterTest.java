@@ -243,6 +243,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
+  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
@@ -338,11 +339,41 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testBooleanAnnotations() {
+    String tagML = "[markup a=TRUE b=false>text<markup]";
+    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<xml>\n" +
+        "<markup a=\"true\" b=\"false\">text</markup>\n" +
+        "</xml>";
+    assertXMLExportIsAsExpected(tagML, expectedXML);
+  }
+
+  @Test
+  public void testNumberAnnotations() {
+    String tagML = "[markup a=1 b=3.14>text<markup]";
+    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<xml>\n" +
+        "<markup a=\"1\" b=\"3.14\">text</markup>\n" +
+        "</xml>";
+    assertXMLExportIsAsExpected(tagML, expectedXML);
+  }
+
+  @Test
   public void testListAnnotations() {
     String tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<xml>\n" +
-        "<markup primes=\"[1,2,3,5,7,11]\">text</markup>\n" +
+        "<markup primes=\"[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;5&quot;,&quot;7&quot;,&quot;11&quot;]\">text</markup>\n" +
+        "</xml>";
+    assertXMLExportIsAsExpected(tagML, expectedXML);
+  }
+
+  @Test
+  public void testMapAnnotations() {
+    String tagML = "[markup author={first='Harley' last='Quinn'}>text<markup]";
+    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<xml>\n" +
+        "<markup author=\"{first=&quot;Harley&quot;,last=&quot;Quinn&quot;}\">text</markup>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -355,13 +386,12 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) {
-    store.runInTransaction(() -> {
-      TAGDocument document = parseTAGML(tagML);
-      assertThat(document).isNotNull();
-      String xml = new XMLExporter(store).asXML(document);
-      LOG.info("XML=\n\n{}\n", xml);
-      assertThat(xml).isEqualTo(expectedXML);
-    });
+    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML));
+    assertThat(document).isNotNull();
+
+    String xml = store.runInTransaction(() -> new XMLExporter(store).asXML(document));
+    LOG.info("XML=\n\n{}\n", xml);
+    assertThat(xml).isEqualTo(expectedXML);
   }
 
 }

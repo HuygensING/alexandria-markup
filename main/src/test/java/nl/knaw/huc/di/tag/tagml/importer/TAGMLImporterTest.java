@@ -23,7 +23,6 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
-import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -866,8 +865,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     logDocumentGraph(document, tagML);
-    logXML(document);
-//    export(document);
     return document;
   }
 
@@ -880,9 +877,4 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     return tagml;
   }
 
-  private void logXML(final TAGDocument document) {
-    XMLExporter xmlExporter = new XMLExporter(store);
-    String xml = xmlExporter.asXML(document);
-    LOG.info("xml =\n{}", xml);
-  }
 }

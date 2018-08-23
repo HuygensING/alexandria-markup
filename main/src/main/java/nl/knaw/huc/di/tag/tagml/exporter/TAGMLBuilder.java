@@ -22,9 +22,10 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+
+import java.util.List;
 
 public class TAGMLBuilder implements TAGVisitor {
   String result = "";
@@ -50,8 +51,13 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void addAnnotation(final AnnotationInfo annotationInfo) {
+  public void addAnnotation(String serializedAnnotation) {
 
+  }
+
+  @Override
+  public String serializeAnnotationAssigner(String name) {
+    return null;
   }
 
   @Override
@@ -80,5 +86,30 @@ public class TAGMLBuilder implements TAGVisitor {
   @Override
   public void exitTextVariation() {
 
+  }
+
+  @Override
+  public String serializeStringAnnotationValue(String stringValue) {
+    return null;
+  }
+
+  @Override
+  public String serializeNumberAnnotationValue(Double numberValue) {
+    return null;
+  }
+
+  @Override
+  public String serializeBooleanAnnotationValue(Boolean booleanValue) {
+    return null;
+  }
+
+  @Override
+  public String serializeListAnnotationValue(List<String> serializedItems) {
+    return null;
+  }
+
+  @Override
+  public String serializeMapAnnotationValue(List<String> serializedMapItems) {
+    return null;
   }
 }
