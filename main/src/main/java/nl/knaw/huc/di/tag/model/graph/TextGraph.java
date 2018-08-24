@@ -155,49 +155,49 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     });
   }
 
-//  public Stream<Long> getMarkupIdStreamForTextNodeId0(final Long textNodeId) {
-//    return stream(new Iterator<Long>() {
-//      Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
-//      Optional<Long> next = calcNext();
-//      Set<Long> markupHandled = initializeMarkupHandled();
-//
-//      private Set<Long> initializeMarkupHandled() {
-//        HashSet<Long> set = new HashSet<>();
-//        set.add(documentNode);
-//        return set;
-//      }
-//
-//      private Optional<Long> calcNext() {
-//        return markupToProcess.isEmpty()
-//            ? Optional.empty()
-//            : Optional.of(markupToProcess.pop());
-//      }
-//
-//      private List<Long> getParentMarkupList(Long nodeId) {
-//        return getIncomingEdges(nodeId).stream()
-//            .filter(LayerEdge.class::isInstance)
-//            .map(LayerEdge.class::cast)
-//            .map(e -> getSource(e))
-//            .collect(toList());
-//      }
-//
-//      @Override
-//      public boolean hasNext() {
-//        return next.isPresent();
-//      }
-//
-//      @Override
-//      public Long next() {
-//        Long nodeId = next.get();
-//        markupHandled.add(nodeId);
-//        List<Long> parentMarkupList = getParentMarkupList(nodeId);
-//        parentMarkupList.removeAll(markupHandled);
-//        markupToProcess.addAll(parentMarkupList);
-//        next = calcNext();
-//        return nodeId;
-//      }
-//    });
-//  }
+  public Stream<Long> getMarkupIdStreamForTextNodeId0(final Long textNodeId) {
+    return stream(new Iterator<Long>() {
+      Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
+      Optional<Long> next = calcNext();
+      Set<Long> markupHandled = initializeMarkupHandled();
+
+      private Set<Long> initializeMarkupHandled() {
+        HashSet<Long> set = new HashSet<>();
+        set.add(documentNode);
+        return set;
+      }
+
+      private Optional<Long> calcNext() {
+        return markupToProcess.isEmpty()
+            ? Optional.empty()
+            : Optional.of(markupToProcess.pop());
+      }
+
+      private List<Long> getParentMarkupList(Long nodeId) {
+        return getIncomingEdges(nodeId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .map(e -> getSource(e))
+            .collect(toList());
+      }
+
+      @Override
+      public boolean hasNext() {
+        return next.isPresent();
+      }
+
+      @Override
+      public Long next() {
+        Long nodeId = next.get();
+        markupHandled.add(nodeId);
+        List<Long> parentMarkupList = getParentMarkupList(nodeId);
+        parentMarkupList.removeAll(markupHandled);
+        markupToProcess.addAll(parentMarkupList);
+        next = calcNext();
+        return nodeId;
+      }
+    });
+  }
 
   public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
     // TODO: This traversal revisits markup nodes because the maxDistance might have changed.
