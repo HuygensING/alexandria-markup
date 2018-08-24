@@ -203,12 +203,18 @@ public class TAGDocument {
   }
 
   public Stream<TAGTextNode> getTextNodeStreamForMarkup(final TAGMarkup markup) {
-    return getTextNodeStreamForMarkupInLayer(markup, TAGML.DEFAULT_LAYER);
+    return getTextNodeStreamForMarkupInLayers(markup, getLayerNames());
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayer(final TAGMarkup markup, String layerName) {
+  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayer(final TAGMarkup markup, final String layer) {
+    Set<String> layers = new HashSet<>();
+    layers.add(layer);
+    return getTextNodeStreamForMarkupInLayers(markup, layers);
+  }
+
+  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayers(final TAGMarkup markup, Set<String> layers) {
     return documentDTO.textGraph
-        .getTextNodeIdStreamForMarkupIdInLayer(markup.getDbId(), layerName)
+        .getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)
         .map(store::getTextNode);
   }
 
@@ -263,4 +269,5 @@ public class TAGDocument {
   public Map<String, String> getNamespaces() {
     return documentDTO.getNamespaces();
   }
+
 }

@@ -122,8 +122,9 @@ public class XMLBuilder implements TAGVisitor {
       thIds.put(markup, thId);
       final String thDoc = getThDoc(layers);
 
+      String id = markup.isAnonymous() ? "soleId" : "sId";
       xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"")
-          .append(" th:sId=\"").append(thId).append("\"/");
+          .append(" th:").append(id).append("=\"").append(thId).append("\"/");
     } else if (markup.isAnonymous()) {
       xmlBuilder.append("/");
     }

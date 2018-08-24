@@ -27,8 +27,10 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -53,7 +55,9 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
 
   public TAGMarkupAssert withTextNodesWithText(String... text) {
     isNotNull();
-    List<String> actualTexts = actual.getTextNodeStreamForLayer(layerName)
+    final Set<String> layers = new HashSet<>();
+    layers.add(layerName);
+    List<String> actualTexts = actual.getTextNodeStreamForLayers(layers)
         .map(TAGTextNode::getText)
         .collect(toList());
     assertThat(actualTexts).containsExactly(text);

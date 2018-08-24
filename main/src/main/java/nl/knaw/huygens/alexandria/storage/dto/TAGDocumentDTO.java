@@ -24,6 +24,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 import java.util.*;
@@ -115,12 +116,14 @@ public class TAGDocumentDTO implements TAGDTO {
 
   public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
     int textNodeSize = textNodeIds.size();
+    final Set<String> layers = new HashSet<>();
+    layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
     return textNodeSize > 2 //
-        && getTextNodeIdStreamForMarkupId(markup.getDbId(), "").count() >= textNodeSize / 2d;
+        && getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).count() >= textNodeSize / 2d;
   }
 
-  private Stream<Long> getTextNodeIdStreamForMarkupId(final Long markupId, final String layerName) {
-    return textGraph.getTextNodeIdStreamForMarkupIdInLayer(markupId, layerName);
+  private Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(final Long markupId, final Set<String> layers) {
+    return textGraph.getTextNodeIdStreamForMarkupIdInLayers(markupId, layers);
   }
 
   public Stream<Long> getMarkupIdsForTextNodeId(Long textNodeId) {
@@ -136,8 +139,11 @@ public class TAGDocumentDTO implements TAGDTO {
   }
 
   public boolean markupHasTextNodes(final TAGMarkup markup) {
-    // TODO: layers
-    return getTextNodeIdStreamForMarkupId(markup.getDbId(), "").findAny().isPresent();
+    final Set<String> layers = new HashSet<>();
+    layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
+    return getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)
+        .findAny()
+        .isPresent();
   }
 
   public void setNamespaces(final Map<String, String> namespaces) {

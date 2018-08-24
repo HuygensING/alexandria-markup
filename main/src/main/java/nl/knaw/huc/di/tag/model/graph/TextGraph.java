@@ -197,8 +197,14 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     });
   }
 
-  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layerName) {
-    return stream(new TextNodeIdIterator(this, markupId, layerName));
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layer) {
+    Set<String> layers = new HashSet<>();
+    layers.add(layer);
+    return getTextNodeIdStreamForMarkupIdInLayers(markupId, layers);
+  }
+
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(final Long markupId, final Set<String> layers) {
+    return stream(new TextNodeIdIterator(this, markupId, layers));
   }
 
   public TextGraph setFirstTextNodeId(final Long firstTextNodeId) {
@@ -249,4 +255,5 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
+
 }

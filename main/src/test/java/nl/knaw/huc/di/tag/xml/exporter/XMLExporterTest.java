@@ -41,6 +41,26 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(XMLExporterTest.class);
 
   @Test
+  public void testMilestonesShouldGetSoleIdInTrojanHorse() {
+    String tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] [bookmark|B user='Jane']cookies<phr|B]<tagml]";
+    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A B\">\n" +
+        "<tagml th:doc=\"A B\" th:sId=\"tagml0\"/>" +
+        "<phr th:doc=\"A\" th:sId=\"phr1\"/>" +
+        "Cookie Monster " +
+        "<phr th:doc=\"B\" th:sId=\"phr2\"/>" +
+        "likes" +
+        "<phr th:doc=\"A\" th:eId=\"phr1\"/>" +
+        " " +
+        "<bookmark user=\"Jane\" th:doc=\"B\" th:soleId=\"bookmark3\"/>" +
+        "cookies" +
+        "<phr th:doc=\"B\" th:eId=\"phr2\"/>" +
+        "<tagml th:doc=\"A B\" th:eId=\"tagml0\"/>\n" +
+        "</xml>";
+    assertXMLExportIsAsExpected(tagML, expectedXML);
+  }
+
+  @Test
   public void testXMLExportWithView() {
     String tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]";
     final Set<String> a = new HashSet<>();
