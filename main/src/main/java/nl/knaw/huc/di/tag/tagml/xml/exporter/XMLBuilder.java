@@ -30,6 +30,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
 
 public class XMLBuilder implements TAGVisitor {
@@ -39,13 +40,15 @@ public class XMLBuilder implements TAGVisitor {
 
   final StringBuilder xmlBuilder = new StringBuilder();
   final Map<Object, String> thIds = new HashMap<>();
-  final AtomicInteger thIdCounter = new AtomicInteger();
+  final AtomicInteger thIdCounter = new AtomicInteger(0);
   final List<String> namespaceDefinitions = new ArrayList<>();
   boolean useTagNamespace = false;
   boolean useTrojanHorse = false;
   private Set<String> relevantLayers;
   private String result;
   private TAGView tagView;
+  private final AtomicInteger discontinuityCounter = new AtomicInteger(1);
+  private final Map<String, Integer> discontinuityNumber = new HashMap<>();
 
   public String getResult() {
     return result;
@@ -71,7 +74,7 @@ public class XMLBuilder implements TAGVisitor {
     document.getNamespaces().forEach((ns, url) -> namespaceDefinitions.add("xmlns:" + ns + "=\"" + url + "\""));
     xmlBuilder.append("<xml");
     if (!namespaceDefinitions.isEmpty()) {
-      xmlBuilder.append(" ").append(String.join(" ", namespaceDefinitions));
+      xmlBuilder.append(" ").append(join(" ", namespaceDefinitions));
     }
     if (useTrojanHorse) {
       final String thDoc = getThDoc(relevantLayers);
@@ -97,6 +100,23 @@ public class XMLBuilder implements TAGVisitor {
       useTagNamespace = true;
       xmlBuilder.append(" tag:optional=\"true\"");
     }
+    String discontinuityKey = discontinuityKey(markup, markupName);
+    if (markup.isSuspended()) {
+      useTagNamespace = true;
+      final Integer n = discontinuityCounter.getAndIncrement();
+      discontinuityNumber.put(discontinuityKey, n);
+      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
+
+    } else if (markup.isResumed()) {
+      final Integer n = discontinuityNumber.get(discontinuityKey);
+      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
+    }
+  }
+
+  private String discontinuityKey(final TAGMarkup markup, final String markupName) {
+    return markup.getLayers().stream()
+            .sorted()
+            .collect(joining(",", markupName + "|", ""));
   }
 
   private String getMarkupName(final TAGMarkup markup) {
@@ -125,6 +145,7 @@ public class XMLBuilder implements TAGVisitor {
       String id = markup.isAnonymous() ? "soleId" : "sId";
       xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"")
           .append(" th:").append(id).append("=\"").append(thId).append("\"/");
+
     } else if (markup.isAnonymous()) {
       xmlBuilder.append("/");
     }
@@ -185,12 +206,14 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public String serializeListAnnotationValue(List<String> serializedItems) {
-    return serializeStringAnnotationValue("[" + String.join(",", serializedItems) + "]");
+    return serializeStringAnnotationValue(serializedItems.stream()
+        .collect(joining(",", "[", "]")));
   }
 
   @Override
   public String serializeMapAnnotationValue(List<String> serializedMapItems) {
-    return serializeStringAnnotationValue("{" + String.join(",", serializedMapItems) + "}");
+    return serializeStringAnnotationValue(serializedMapItems.stream()
+        .collect(joining(",", "{", "}")));
   }
 
   @Override
@@ -204,5 +227,4 @@ public class XMLBuilder implements TAGVisitor {
         .sorted()
         .collect(joining(" "));
   }
-
 }

@@ -41,8 +41,8 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGTraverser {
   private final Set<String> relevantLayers;
-  private TAGStore store;
-  private TAGView view;
+  private final TAGStore store;
+  private final TAGView view;
   private final TAGDocument document;
   private final Set<TAGTextNode> processedNodes = new HashSet<>();
   private final HashMap<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
@@ -52,7 +52,7 @@ public class TAGTraverser {
     this.store = store;
     this.view = view;
     this.document = document;
-    final AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
+//    final AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     document.getMarkupStream()
         .filter(TAGMarkup::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));

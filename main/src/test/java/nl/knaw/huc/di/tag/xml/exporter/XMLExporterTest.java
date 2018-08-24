@@ -280,13 +280,12 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
-  @Ignore
   @Test
   public void testDiscontinuity() {
     String tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<x><t id=\"t1\" next=\"t2\">This is</t>, he said, <t id=\"t2\" prev=\"t1\">a test!</t></x>\n" +
+        "<xml xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\">\n" +
+        "<x><t tag:n=\"1\">This is</t>, he said, <t tag:n=\"1\">a test!</t></x>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
