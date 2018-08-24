@@ -142,7 +142,8 @@ public class TAGDocument {
     return documentDTO.textGraph
         .getMarkupIdStreamForTextNodeId(tn.getDbId())
         .distinct()
-        .map(store::getMarkup);
+        .map(store::getMarkup)
+        ;
   }
 
 //  public void joinMarkup(TAGMarkupDTO markup1, TAGMarkup markup2) {
