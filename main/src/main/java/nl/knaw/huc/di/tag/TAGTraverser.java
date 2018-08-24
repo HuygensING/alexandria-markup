@@ -40,6 +40,7 @@ import static java.util.stream.Collectors.toSet;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGTraverser {
+  private final Set<String> relevantLayers;
   private TAGStore store;
   private TAGView view;
   private final TAGDocument document;
@@ -56,10 +57,13 @@ public class TAGTraverser {
         .filter(TAGMarkup::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
     textVariationStates.push(new TextVariationState());
+    Set<String> layerNames = document.getLayerNames();
+    relevantLayers = view.filterRelevantLayers(layerNames);
   }
 
   public void accept(final TAGVisitor tagVisitor) {
     AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
+    tagVisitor.setRelevantLayers(relevantLayers);
     tagVisitor.enterDocument(document);
     Set<String> openLayers = new HashSet<>();
     openLayers.add(TAGML.DEFAULT_LAYER);
@@ -292,7 +296,7 @@ public class TAGTraverser {
   }
 
   private String addResumePrefixIfRequired(String openTag, Long markupId,
-                                           final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       TAGMarkup markup = store.getMarkup(markupId);
@@ -304,7 +308,7 @@ public class TAGTraverser {
   }
 
   private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
-                                            final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
+      final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
       if (textNodesToHandle > 0) {

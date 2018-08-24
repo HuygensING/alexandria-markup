@@ -22,10 +22,14 @@ package nl.knaw.huc.di.tag;
 
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TAGVisitor {
+  void setView(TAGView tagView);
+
   void enterDocument(TAGDocument document);
 
   void exitDocument(TAGDocument document);
@@ -56,5 +60,5 @@ public interface TAGVisitor {
 
   void exitTextVariation();
 
-
+  void setRelevantLayers(Set<String> relevantLayers);
 }

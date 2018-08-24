@@ -24,12 +24,19 @@ import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.List;
+import java.util.Set;
 
 public class TAGMLBuilder implements TAGVisitor {
   String result = "";
   StringBuilder tagmlBuilder = new StringBuilder();
+
+  @Override
+  public void setView(final TAGView tagView) {
+
+  }
 
   @Override
   public void enterDocument(final TAGDocument document) {
@@ -85,6 +92,11 @@ public class TAGMLBuilder implements TAGVisitor {
 
   @Override
   public void exitTextVariation() {
+
+  }
+
+  @Override
+  public void setRelevantLayers(final Set<String> relevantLayers) {
 
   }
 

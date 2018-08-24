@@ -21,19 +21,37 @@ package nl.knaw.huc.di.tag.xml.exporter;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.TAGViews;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class XMLExporterTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(XMLExporterTest.class);
+
+  @Test
+  public void testXMLExportWithView() {
+    String tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]";
+    final Set<String> a = new HashSet<>();
+    a.add("A");
+    TAGView justA = new TAGView(store).setLayersToInclude(a);
+    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<xml>\n" +
+        "<tagml><phr>Cookie Monster likes</phr> cookies</tagml>\n" +
+        "</xml>";
+    assertXMLExportIsAsExpected(tagML, justA, expectedXML);
+  }
 
   @Test
   public void testFrostQuote() {
@@ -104,21 +122,20 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "<p]\n" +
         "<page]\n" +
         "<text]\n" +
-        "<tagml]\n";
+        "<tagml]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\" A B\">\n" +
-        "<text th:doc=\"A B\" th:sId=\"text0\"/><tagml><page th:doc=\"A\" th:sId=\"page1\"/><p th:doc=\"B\" th:sId=\"p2\"/><line>1st. Voice from the Springs</line>\n" +
-        "<line>Thrice three hundred thousand years</line>\n" +
-        "<line>We had been stained with bitter blood</line>\n" +
-        "<page th:doc=\"A\" th:eId=\"page1\"/>\n" +
-        "<page th:doc=\"A\" th:sId=\"page3\"/>\n" +
-        "<line>And had ran mute &apos;mid shrieks of slaugter[sic]</line>\n" +
-        "<line>Thro&apos; a city &amp; a multitude</line>\n" +
-        "<p th:doc=\"B\" th:eId=\"p2\"/>\n" +
-        "<page th:doc=\"A\" th:eId=\"page3\"/>\n" +
+        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A B _default\">\n" +
+        "<text th:doc=\"A B\" th:sId=\"text0\"/><tagml th:doc=\"_default\" th:sId=\"tagml1\"/><page th:doc=\"A\" th:sId=\"page2\"/><p th:doc=\"B\" th:sId=\"p3\"/><line th:doc=\"_default\" th:sId=\"line4\"/>1st. Voice from the Springs<line th:doc=\"_default\" th:eId=\"line4\"/>\n" +
+        "<line th:doc=\"_default\" th:sId=\"line5\"/>Thrice three hundred thousand years<line th:doc=\"_default\" th:eId=\"line5\"/>\n" +
+        "<line th:doc=\"_default\" th:sId=\"line6\"/>We had been stained with bitter blood<line th:doc=\"_default\" th:eId=\"line6\"/>\n" +
+        "<page th:doc=\"A\" th:eId=\"page2\"/>\n" +
+        "<page th:doc=\"A\" th:sId=\"page7\"/>\n" +
+        "<line th:doc=\"_default\" th:sId=\"line8\"/>And had ran mute &apos;mid shrieks of slaugter[sic]<line th:doc=\"_default\" th:eId=\"line8\"/>\n" +
+        "<line th:doc=\"_default\" th:sId=\"line9\"/>Thro&apos; a city &amp; a multitude<line th:doc=\"_default\" th:eId=\"line9\"/>\n" +
+        "<p th:doc=\"B\" th:eId=\"p3\"/>\n" +
+        "<page th:doc=\"A\" th:eId=\"page7\"/>\n" +
         "<text th:doc=\"A B\" th:eId=\"text0\"/>\n" +
-        "</tagml>\n" +
-        "\n" +
+        "<tagml th:doc=\"_default\" th:eId=\"tagml1\"/>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -127,18 +144,18 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testLayerIdentifiersAreOptionalInEndTagWhenNotAmbiguous() {
     String tagML = "[tagml|+A>Some text<tagml]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A\">\n" +
-        "<tagml th:doc=\"A\" th:sId=\"tagml0\"/>Some text<tagml th:doc=\"A\" th:eId=\"tagml0\"/>\n" +
+        "<xml>\n" +
+        "<tagml>Some text</tagml>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
   @Test
   public void testNoLayerInfoOnEndTagWithMultipleStartTagsInSameLayers() {
-    String tagML = "[tagml|+A>[p|A>[p|A>Some text<p]<p]<tagml]";
+    String tagML = "[tagml|+A>[p|A>Paragraph starts [p|A>Nested Paragraph<p] paragraph ends<p]<tagml]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A\">\n" +
-        "<tagml th:doc=\"A\" th:sId=\"tagml0\"/><p th:doc=\"A\" th:sId=\"p1\"/><p th:doc=\"A\" th:sId=\"p2\"/>Some text<p th:doc=\"A\" th:eId=\"p2\"/><p th:doc=\"A\" th:eId=\"p1\"/><tagml th:doc=\"A\" th:eId=\"tagml0\"/>\n" +
+        "<xml>\n" +
+        "<tagml><p>Paragraph starts <p>Nested Paragraph</p> paragraph ends</p></tagml>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -157,7 +174,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testCharacterEscapingInRegularText() {
     String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml th:doc=\"\">\n" +
+        "<xml>\n" +
         "In regular text, &lt;, [ and \\ need to be escaped, |, !, &quot;, and &apos; don&apos;t.\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
@@ -187,8 +204,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   public void testTAGML2() {
     String tagML = "[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]<line|a,b]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"a b \">\n" +
-        "<line th:doc=\"a b\" th:sId=\"line0\"/><a th:doc=\"a\" th:sId=\"a1\"/>The rain in <country>Spain</country> <b th:doc=\"b\" th:sId=\"b2\"/>falls<a th:doc=\"a\" th:eId=\"a1\"/> mainly on the plain.<b th:doc=\"b\" th:eId=\"b2\"/><line th:doc=\"a b\" th:eId=\"line0\"/>\n" +
+        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"_default a b\">\n" +
+        "<line th:doc=\"a b\" th:sId=\"line0\"/><a th:doc=\"a\" th:sId=\"a1\"/>The rain in <country th:doc=\"_default\" th:sId=\"country2\"/>Spain<country th:doc=\"_default\" th:eId=\"country2\"/> <b th:doc=\"b\" th:sId=\"b3\"/>falls<a th:doc=\"a\" th:eId=\"a1\"/> mainly on the plain.<b th:doc=\"b\" th:eId=\"b3\"/><line th:doc=\"a b\" th:eId=\"line0\"/>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -386,10 +403,14 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) {
+    assertXMLExportIsAsExpected(tagML, TAGViews.getShowAllMarkupView(store), expectedXML);
+  }
+
+  private void assertXMLExportIsAsExpected(final String tagML, TAGView view, final String expectedXML) {
     TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML));
     assertThat(document).isNotNull();
 
-    String xml = store.runInTransaction(() -> new XMLExporter(store).asXML(document));
+    String xml = store.runInTransaction(() -> new XMLExporter(store, view).asXML(document));
     LOG.info("XML=\n\n{}\n", xml);
     assertThat(xml).isEqualTo(expectedXML);
   }

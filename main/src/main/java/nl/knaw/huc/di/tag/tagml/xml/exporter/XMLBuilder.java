@@ -24,32 +24,48 @@ import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.stream.Collectors.joining;
+
 public class XMLBuilder implements TAGVisitor {
   public static final String TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\"";
   public static final String TAG_NAMESPACE = "xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\"";
+  public static final String DEFAULT_DOC = "_default";
 
   final StringBuilder xmlBuilder = new StringBuilder();
   final Map<Object, String> thIds = new HashMap<>();
   final AtomicInteger thIdCounter = new AtomicInteger();
   final List<String> namespaceDefinitions = new ArrayList<>();
   boolean useTagNamespace = false;
+  boolean useTrojanHorse = false;
+  private Set<String> relevantLayers;
   private String result;
+  private TAGView tagView;
 
   public String getResult() {
     return result;
   }
 
   @Override
+  public void setView(final TAGView tagView) {
+    this.tagView = tagView;
+  }
+
+  @Override
+  public void setRelevantLayers(final Set<String> relevantLayers) {
+    useTrojanHorse = relevantLayers.size() > 1;
+    this.relevantLayers = relevantLayers;
+  }
+
+  @Override
   public void enterDocument(TAGDocument document) {
     xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    final int numberOfHierarchies = document.getLayerNames().size();
-    if (numberOfHierarchies > 1 ||
-        (numberOfHierarchies == 1 && !document.getLayerNames().iterator().next().equals(TAGML.DEFAULT_LAYER))) {
+    if (relevantLayers.size() > 1) {
       namespaceDefinitions.add(TH_NAMESPACE);
     }
     document.getNamespaces().forEach((ns, url) -> namespaceDefinitions.add("xmlns:" + ns + "=\"" + url + "\""));
@@ -57,9 +73,8 @@ public class XMLBuilder implements TAGVisitor {
     if (!namespaceDefinitions.isEmpty()) {
       xmlBuilder.append(" ").append(String.join(" ", namespaceDefinitions));
     }
-    Set<String> layerNames = document.getLayerNames();
-    if (!justDefaultLayer(layerNames)) {
-      final String thDoc = getThDoc(layerNames);
+    if (useTrojanHorse) {
+      final String thDoc = getThDoc(relevantLayers);
       xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"");
     }
     xmlBuilder.append(">\n");
@@ -72,7 +87,6 @@ public class XMLBuilder implements TAGVisitor {
     if (useTagNamespace) {
       result = result.replaceFirst("<xml", "<xml " + TAG_NAMESPACE);
     }
-
   }
 
   @Override
@@ -99,12 +113,11 @@ public class XMLBuilder implements TAGVisitor {
     xmlBuilder.append(" ").append(serializedAnnotation);
   }
 
-
   @Override
   public void exitOpenTag(final TAGMarkup markup) {
     Set<String> layers = markup.getLayers();
-    final boolean inDefaultLayer = justDefaultLayer(layers);
-    if (!inDefaultLayer) {
+    layers.retainAll(relevantLayers);
+    if (useTrojanHorse) {
       String thId = markup.getTag() + thIdCounter.getAndIncrement();
       thIds.put(markup, thId);
       final String thDoc = getThDoc(layers);
@@ -121,16 +134,16 @@ public class XMLBuilder implements TAGVisitor {
   public void exitCloseTag(final TAGMarkup markup) {
     String markupName = getMarkupName(markup);
     Set<String> layers = markup.getLayers();
-    final boolean inDefaultLayer = justDefaultLayer(layers);
-    if (inDefaultLayer && markup.isAnonymous()) {
+    layers.retainAll(relevantLayers);
+    if (markup.isAnonymous()) {
       return;
     }
     xmlBuilder.append("<");
-    if (inDefaultLayer) {
+    if (!useTrojanHorse) {
       xmlBuilder.append("/");
     }
     xmlBuilder.append(markupName);
-    if (!inDefaultLayer) {
+    if (useTrojanHorse) {
       final String thDoc = getThDoc(layers);
       String thId = thIds.remove(markup);
       xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"")
@@ -185,11 +198,10 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   private String getThDoc(final Set<String> layerNames) {
-    return String.join(" ", layerNames);
-  }
-
-  private boolean justDefaultLayer(final Set<String> layers) {
-    return layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
+    return layerNames.stream()
+        .map(l -> TAGML.DEFAULT_LAYER.equals(l) ? DEFAULT_DOC : l)
+        .sorted()
+        .collect(joining(" "));
   }
 
 }
