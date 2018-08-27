@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class TexMECSImporterInMemory {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -78,11 +77,11 @@ class TexMECSImporterInMemory {
 
     String errorMsg = "";
     if (listener.hasErrors()) {
-      String errors = listener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = String.join("\n", listener.getErrors());
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (numberOfSyntaxErrors > 0) {
-      String errors = errorListener.getErrors().stream().collect(Collectors.joining("\n"));
+      String errors = String.join("\n", errorListener.getErrors());
       errorMsg += "\n\nTokenizing errors:\n" + errors;
     }
     if (!errorMsg.isEmpty()) {

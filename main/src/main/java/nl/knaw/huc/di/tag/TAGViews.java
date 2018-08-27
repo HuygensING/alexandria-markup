@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.data_model;
+package nl.knaw.huc.di.tag;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -20,24 +20,21 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
-/**
- * Created by Ronald Haentjens Dekker on 29/12/16.
- * <p>
- * A document contains a Limen.
- *</p>
- * @deprecated use {@link TAGDocument} instead.
- */
-@Deprecated
-public class Document {
-  private final Limen value;
+import static java.util.Collections.emptySet;
 
-  public Document() {
-    this.value = new Limen();
+public class TAGViews {
+  public static TAGView getShowAllMarkupView(final TAGStore store) {
+    return new TAGView(store)
+        .setLayersToExclude(emptySet())
+        .setMarkupToExclude(emptySet());
   }
 
-  public Limen value() {
-    return value;
+  public static TAGView getShowNoMarkupView(final TAGStore store) {
+    return new TAGView(store)
+        .setLayersToInclude(emptySet())
+        .setMarkupToInclude(emptySet());
   }
 }

@@ -19,7 +19,6 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.joining;
 import org.assertj.core.api.AbstractAssert;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class TAGComparisonAssert extends AbstractAssert<TAGComparisonAssert, TAG
     List<String> diffLines = actual.getDiffLines();
     if (!diffLines.isEmpty()) {
       failWithMessage("Expected there to be no differences, but found diff lines: %n%s",//
-          diffLines.stream().collect(joining("\n")));
+          String.join("\n", diffLines));
     }
     return this;
 

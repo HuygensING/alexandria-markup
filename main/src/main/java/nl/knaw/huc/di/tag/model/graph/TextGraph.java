@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
 import static nl.knaw.huc.di.tag.model.graph.edges.Edges.markupContinuation;
@@ -153,7 +155,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     });
   }
 
-  public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
+  public Stream<Long> getMarkupIdStreamForTextNodeId0(final Long textNodeId) {
     return stream(new Iterator<Long>() {
       Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
       Optional<Long> next = calcNext();
@@ -197,8 +199,53 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     });
   }
 
-  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layerName) {
-    return stream(new TextNodeIdIterator(this, markupId, layerName));
+  public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
+    // TODO: This traversal revisits markup nodes because the maxDistance might have changed.
+    //       The maxDistance is needed for the ordering, to get the markupIds back ordered by the maximum distance from the textnode, closest first
+    Set<Long> markupIds = new HashSet<>();
+    Map<Long, Integer> maxDistance = new HashMap<>();
+    List<Long> parentMarkupIds = getIncomingEdges(textNodeId).stream()
+        .filter(LayerEdge.class::isInstance)
+        .map(LayerEdge.class::cast)
+        .map(e -> getSource(e))
+        .collect(toList());
+    parentMarkupIds.remove(documentNode);
+    parentMarkupIds.forEach(m -> maxDistance.put(m, 1));
+    Set<Long> markupHandled = new HashSet<>();
+    markupHandled.add(documentNode);
+    Deque<Long> markupToProcess = new ArrayDeque<>(parentMarkupIds);
+    while (!markupToProcess.isEmpty()) {
+      Long nodeId = markupToProcess.pop();
+      markupIds.add(nodeId);
+      markupHandled.add(nodeId);
+      List<Long> parentMarkupList = getIncomingEdges(nodeId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .map(e -> getSource(e))
+          .collect(toList());
+      parentMarkupList.remove(documentNode);
+      int currentDistance = maxDistance.get(nodeId);
+      int newMaxParentDistance = currentDistance + 1;
+      parentMarkupList.forEach(m -> {
+        if (!maxDistance.containsKey(m) || maxDistance.get(m) < newMaxParentDistance) {
+          maxDistance.put(m, newMaxParentDistance);
+        }
+      });
+      markupToProcess.addAll(parentMarkupList);
+    }
+    final Comparator<Long> maxDistanceComparator = comparing(maxDistance::get);
+    Comparator<Long> comparator = maxDistanceComparator.thenComparing(reverseOrder());
+    return markupIds.stream().sorted(comparator);
+  }
+
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layer) {
+    Set<String> layers = new HashSet<>();
+    layers.add(layer);
+    return getTextNodeIdStreamForMarkupIdInLayers(markupId, layers);
+  }
+
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(final Long markupId, final Set<String> layers) {
+    return stream(new TextNodeIdIterator(this, markupId, layers));
   }
 
   public TextGraph setFirstTextNodeId(final Long firstTextNodeId) {
@@ -220,8 +267,9 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public void linkParentlessLayerRootsToDocument() {
     layerRootMap.values().stream()
-        .filter(r -> getIncomingEdges(r).isEmpty())
-        .forEach(n -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, n));
+        .distinct()
+        .filter(r -> getIncomingEdges(r).stream().noneMatch(e -> e instanceof LayerEdge && ((LayerEdge) e).hasType(EdgeType.hasMarkup)))
+        .forEach(r -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, r));
   }
 
   public void continueMarkup(TAGMarkup suspendedMarkup, TAGMarkup resumedMarkup) {
@@ -248,4 +296,5 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
+
 }

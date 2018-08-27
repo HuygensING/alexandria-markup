@@ -112,8 +112,8 @@ public class TAGMarkup {
     return document.getTextNodeStreamForMarkup(this);
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForLayer(String layerName) {
-    return document.getTextNodeStreamForMarkupInLayer(this, layerName);
+  public Stream<TAGTextNode> getTextNodeStreamForLayers(Set<String> layers) {
+    return document.getTextNodeStreamForMarkupInLayers(this, layers);
   }
 
   public TAGMarkupDTO getDTO() {

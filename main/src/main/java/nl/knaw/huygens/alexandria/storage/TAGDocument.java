@@ -142,7 +142,8 @@ public class TAGDocument {
     return documentDTO.textGraph
         .getMarkupIdStreamForTextNodeId(tn.getDbId())
         .distinct()
-        .map(store::getMarkup);
+        .map(store::getMarkup)
+        ;
   }
 
 //  public void joinMarkup(TAGMarkupDTO markup1, TAGMarkup markup2) {
@@ -191,7 +192,7 @@ public class TAGDocument {
   }
 
   public void openMarkupInLayer(TAGMarkup markup, String layerName) {
-    LOG.debug("layer={}", layerName);
+//    LOG.debug("layer={}", layerName);
     openMarkupStackForLayer.putIfAbsent(layerName, new ArrayDeque<>());
     Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(layerName);
     linkToParentMarkup(markup, layerName, openMarkupStack);
@@ -203,12 +204,18 @@ public class TAGDocument {
   }
 
   public Stream<TAGTextNode> getTextNodeStreamForMarkup(final TAGMarkup markup) {
-    return getTextNodeStreamForMarkupInLayer(markup, TAGML.DEFAULT_LAYER);
+    return getTextNodeStreamForMarkupInLayers(markup, getLayerNames());
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayer(final TAGMarkup markup, String layerName) {
+  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayer(final TAGMarkup markup, final String layer) {
+    Set<String> layers = new HashSet<>();
+    layers.add(layer);
+    return getTextNodeStreamForMarkupInLayers(markup, layers);
+  }
+
+  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayers(final TAGMarkup markup, Set<String> layers) {
     return documentDTO.textGraph
-        .getTextNodeIdStreamForMarkupIdInLayer(markup.getDbId(), layerName)
+        .getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)
         .map(store::getTextNode);
   }
 
@@ -254,6 +261,14 @@ public class TAGDocument {
     documentDTO.getMarkupIds().add(id);
     update();
     return this;
+  }
+
+  public void setNamespaces(final Map<String, String> namespaces) {
+    documentDTO.setNamespaces(namespaces);
+  }
+
+  public Map<String, String> getNamespaces() {
+    return documentDTO.getNamespaces();
   }
 
 }

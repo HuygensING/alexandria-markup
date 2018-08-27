@@ -43,7 +43,6 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
@@ -197,7 +196,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       } catch (TAGMLBreakingError e) {
       }
       assertThat(errorListener.hasErrors()).isTrue();
-      String errors = errorListener.getErrors().stream().collect(joining("\n"));
+      String errors = String.join("\n", errorListener.getErrors());
       assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
     });
   }

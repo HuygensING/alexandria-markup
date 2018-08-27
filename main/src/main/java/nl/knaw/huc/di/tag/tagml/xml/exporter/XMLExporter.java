@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.exporter;
+package nl.knaw.huc.di.tag.tagml.xml.exporter;
 
 /*-
  * #%L
@@ -20,21 +20,29 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.TAGExporter;
+import nl.knaw.huc.di.tag.TAGTraverser;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.util.Collections.emptySet;
+public class XMLExporter extends TAGExporter {
+  private static final Logger LOG = LoggerFactory.getLogger(XMLExporter.class);
 
-public class TAGViews {
-  public static TAGView getShowAllMarkupView(final TAGStore store) {
-    return new TAGView(store)
-        .setLayersToExclude(emptySet())
-        .setMarkupToExclude(emptySet());
+  public XMLExporter(TAGStore store) {
+    super(store);
   }
 
-  public static TAGView getShowNoMarkupView(final TAGStore store) {
-    return new TAGView(store)
-        .setLayersToInclude(emptySet())
-        .setMarkupToInclude(emptySet());
+  public XMLExporter(TAGStore store, TAGView view) {
+    super(store, view);
   }
+
+  public String asXML(TAGDocument document) {
+    XMLBuilder xmlBuilder = new XMLBuilder();
+    new TAGTraverser(store, view, document).accept(xmlBuilder);
+    return xmlBuilder.getResult();
+  }
+
 }

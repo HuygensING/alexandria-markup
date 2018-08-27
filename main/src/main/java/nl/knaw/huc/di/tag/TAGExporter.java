@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.data_model;
+package nl.knaw.huc.di.tag;
 
-/*
+/*-
  * #%L
  * alexandria-markup
  * =======
@@ -19,25 +19,20 @@ package nl.knaw.huygens.alexandria.data_model;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+public class TAGExporter {
+  protected final TAGView view;
+  protected final TAGStore store;
 
-/**
- * Created by Ronald Haentjens Dekker on 29/12/16.
- * <p>
- * A document contains a Limen.
- *</p>
- * @deprecated use {@link TAGDocument} instead.
- */
-@Deprecated
-public class Document {
-  private final Limen value;
-
-  public Document() {
-    this.value = new Limen();
+  public TAGExporter(TAGStore store) {
+    this(store, TAGViews.getShowAllMarkupView(store));
   }
 
-  public Limen value() {
-    return value;
+  public TAGExporter(TAGStore store, TAGView view) {
+    this.store = store;
+    this.view = view;
   }
+
 }

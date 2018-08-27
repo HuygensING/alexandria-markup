@@ -68,6 +68,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test
   public void testTAGQLQuery2() throws LMNLSyntaxError {
     String lmnl = "[text}\n"//

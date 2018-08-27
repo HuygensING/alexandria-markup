@@ -44,6 +44,19 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
 
   @Test
+  public void testFrostQuote() {
+    String tagML = "[excerpt|+S,+L source=\"The Housekeeper\" author=\"Robert Frost\">\n" +
+        "[s|S>[l|L n=144>He manages to keep the upper hand<l]\n" +
+        "[l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]\n" +
+        "[l|L n=146>We fence our flowers in and the hens range.<l]<s]\n" +
+        "<excerpt]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test
   public void testCMLHTS18() {
     String tagML = "[tagml>\n" +
         "[page>\n" +
@@ -393,6 +406,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMilestone() {
+    // TODO: check the graph: has an extra edge between <t> and the milestone content text node
     String tagML = "[t>This is a [space chars=10] test!<t]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
@@ -415,7 +429,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("space", "t");
     });
   }
 
@@ -852,7 +866,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     logDocumentGraph(document, tagML);
-//    export(document);
     return document;
   }
 

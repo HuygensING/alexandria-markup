@@ -48,6 +48,19 @@ public class TAGView {
     this.store = store;
   }
 
+  public Set<String> filterRelevantLayers(final Set<String> layerNames) {
+    Set<String> relevantLayers = new HashSet<>();
+    relevantLayers.addAll(layerNames);
+    if (layerRelevance.equals(RelevanceStyle.include)) {
+      relevantLayers.clear();
+      relevantLayers.addAll(layersToInclude);
+
+    } else if (layerRelevance.equals(RelevanceStyle.exclude)) {
+      relevantLayers.removeAll(layersToExclude);
+    }
+    return relevantLayers;
+  }
+
   public Set<Long> filterRelevantMarkup(Set<Long> markupIds) {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
