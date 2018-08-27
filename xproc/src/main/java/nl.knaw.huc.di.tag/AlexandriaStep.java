@@ -2,7 +2,7 @@ package nl.knaw.huc.di.tag;
 
 /*-
  * #%L
- * alexandria-markup
+ * xproc
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
