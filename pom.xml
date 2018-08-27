@@ -14,7 +14,7 @@
         <module>texmecs</module>
         <module>tagml</module>
         <module>tagql</module>
-        <module>xproc</module>
+        <module>alexandria-calabash</module>
     </modules>
 
     <properties>

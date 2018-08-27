@@ -2,7 +2,7 @@ package nl.knaw.huc.di.tag;
 
 /*-
  * #%L
- * xproc
+ * alexandria-calabash
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag;
  * limitations under the License.
  * #L%
  */
+
 import com.xmlcalabash.core.XMLCalabash;
 import com.xmlcalabash.core.XProcConstants;
 import com.xmlcalabash.core.XProcRuntime;
@@ -58,7 +59,8 @@ public class AlexandriaStep extends DefaultStep {
     tree.startDocument(step.getNode().getBaseURI());
     tree.addStartElement(XProcConstants.c_result);
     tree.startContent();
-    tree.addText("Hello World");
+    tree.addText("This is my code");
+    tree.addText("tagmlfile=" + string);
     tree.addEndElement();
     tree.endDocument();
     result.write(tree.getResult());
