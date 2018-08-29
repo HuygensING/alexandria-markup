@@ -25,7 +25,6 @@
       <groupId>nl.knaw.huygens.alexandria</groupId>
       <artifactId>alexandria-markup</artifactId>
       <version>2.1-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -52,9 +51,14 @@
                 <exclude>META-INF/*.DSA</exclude>
                 <exclude>META-INF/*.RSA</exclude>
                 <exclude>org/slf4j/impl/**</exclude>
-                <exclude>com/xmlcalabash/**:*</exclude>
-                <exclude>net/sf/saxon/**:*</exclude>
+                <exclude>com/xmlcalabash/**</exclude>
+                <exclude>net/sf/saxon/**</exclude>
                 <exclude>org/xml/sax/**</exclude>
+                <exclude>ch/qos/logback/**</exclude>
+                <exclude>etc/**</exclude>
+                <exclude>docs/**</exclude>
+                <exclude>junit/**</exclude>
+                <exclude>org/junit/**</exclude>
               </excludes>
             </filter>
           </filters>
