@@ -29,9 +29,12 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
@@ -42,23 +45,45 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException {
-    tmpDir = Files.createTempDirectory("tmpDir");
-    tmpDir.toFile().deleteOnExit();
+    tmpDir = mkTmpDir();
     store = new TAGStore(tmpDir.toString(), false);
     store.open();
     lmnlExporter = new LMNLExporter(store).useShorthand();
   }
 
   @AfterClass
-  public static void afterClass() {
+  public static void afterClass() throws IOException {
     store.close();
-    tmpDir.toFile().delete();
+    rmTmpDir(tmpDir);
   }
 
   protected void logDocumentGraph(final TAGDocument document, final String input) {
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
     System.out.println(dotFactory.toDot(document, input));
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+  }
+
+  private static Path mkTmpDir() throws IOException {
+    String sysTmp = System.getProperty("java.io.tmpdir");
+    Path tmpPath = Paths.get(sysTmp, ".alexandria");
+    if (tmpPath.toFile().exists()) {
+      Files.walk(tmpPath)
+          .sorted(Comparator.reverseOrder())
+          .map(Path::toFile)
+          .filter(File::isFile)
+          .forEach(File::delete);
+
+    } else {
+      tmpPath = Files.createDirectory(tmpPath);
+    }
+//    System.out.println("tmpDir=" + tmpPath.toAbsolutePath().toString());
+    return tmpPath;
+  }
+
+  private static void rmTmpDir(final Path tmpPath) throws IOException {
+    Files.walk(tmpPath)
+        .map(Path::toFile)
+        .forEach(File::deleteOnExit);
   }
 
 }
