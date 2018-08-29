@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag;
  */
 
 import com.xmlcalabash.core.XMLCalabash;
+import com.xmlcalabash.core.XProcException;
 import com.xmlcalabash.core.XProcRuntime;
 import com.xmlcalabash.io.WritablePipe;
 import com.xmlcalabash.library.DefaultStep;
@@ -29,6 +30,7 @@ import com.xmlcalabash.util.XProcURIResolver;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
+import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -87,7 +89,15 @@ public class AlexandriaStep extends DefaultStep {
       Path tmpPath = mkTmpDir();
       TAGStore store = new TAGStore(tmpPath.toString(), false);
       store.open();
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(stream));
+      TAGDocument document = store.runInTransaction(() -> {
+        try {
+          TAGDocument doc = new TAGMLImporter(store).importTAGML(stream);
+          return doc;
+        } catch (TAGMLSyntaxError se) {
+//          runtime.error(se);
+          throw new XProcException(se.getMessage());
+        }
+      });
       String xml = store.runInTransaction(() -> new XMLExporter(store).asXML(document));
       store.close();
       rmTmpDir(tmpPath);
