@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
@@ -67,16 +66,8 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     String sysTmp = System.getProperty("java.io.tmpdir");
     Path tmpPath = Paths.get(sysTmp, ".alexandria");
     if (!tmpPath.toFile().exists()) {
-//      Files.walk(tmpPath)
-//          .sorted(Comparator.reverseOrder())
-//          .map(Path::toFile)
-//          .filter(File::isFile)
-//          .forEach(File::delete);
-//
-//    } else {
       tmpPath = Files.createDirectory(tmpPath);
     }
-//    System.out.println("tmpDir=" + tmpPath.toAbsolutePath().toString());
     return tmpPath;
   }
 

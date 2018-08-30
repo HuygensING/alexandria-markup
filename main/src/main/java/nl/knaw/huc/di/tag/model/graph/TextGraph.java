@@ -207,7 +207,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     List<Long> parentMarkupIds = getIncomingEdges(textNodeId).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
-        .map(e -> getSource(e))
+        .map(this::getSource)
         .collect(toList());
     parentMarkupIds.remove(documentNode);
     parentMarkupIds.forEach(m -> maxDistance.put(m, 1));
@@ -221,7 +221,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       List<Long> parentMarkupList = getIncomingEdges(nodeId).stream()
           .filter(LayerEdge.class::isInstance)
           .map(LayerEdge.class::cast)
-          .map(e -> getSource(e))
+          .map(this::getSource)
           .collect(toList());
       parentMarkupList.remove(documentNode);
       int currentDistance = maxDistance.get(nodeId);
