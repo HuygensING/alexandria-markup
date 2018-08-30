@@ -66,14 +66,14 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
   private static Path mkTmpDir() throws IOException {
     String sysTmp = System.getProperty("java.io.tmpdir");
     Path tmpPath = Paths.get(sysTmp, ".alexandria");
-    if (tmpPath.toFile().exists()) {
-      Files.walk(tmpPath)
-          .sorted(Comparator.reverseOrder())
-          .map(Path::toFile)
-          .filter(File::isFile)
-          .forEach(File::delete);
-
-    } else {
+    if (!tmpPath.toFile().exists()) {
+//      Files.walk(tmpPath)
+//          .sorted(Comparator.reverseOrder())
+//          .map(Path::toFile)
+//          .filter(File::isFile)
+//          .forEach(File::delete);
+//
+//    } else {
       tmpPath = Files.createDirectory(tmpPath);
     }
 //    System.out.println("tmpDir=" + tmpPath.toAbsolutePath().toString());
