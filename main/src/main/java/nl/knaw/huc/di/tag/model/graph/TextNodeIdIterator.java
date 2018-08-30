@@ -31,13 +31,13 @@ class TextNodeIdIterator implements Iterator<Long> {
   private final TextGraph textGraph;
   private final List<TypedNode> nodesToProcess = new ArrayList<>();
   private final Set<Long> textHandled = new HashSet<>();
-  private final String layerName;
+  private final Set<String> layers;
 
   private Optional<Long> nextTextNodeId;
 
-  public TextNodeIdIterator(final TextGraph textGraph, final Long markupId, final String layerName) {
+  public TextNodeIdIterator(final TextGraph textGraph, final Long markupId, final Set<String> layers) {
     this.textGraph = textGraph;
-    this.layerName = layerName;
+    this.layers = layers;
     this.nodesToProcess.add(0, new TypedNode(NodeType.markup, markupId));
     this.nextTextNodeId = calcNextTextNodeId();
   }
@@ -83,7 +83,7 @@ class TextNodeIdIterator implements Iterator<Long> {
     List<TypedNode> childNodes = textGraph.getOutgoingEdges(id).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
-        .filter(e -> e.hasLayer(layerName))
+        .filter(e -> e.hasAnyLayerFrom(layers))
         .flatMap(this::toTypedNodeStream)
         .collect(toList());
     childNodes.addAll(getContinuationChildren(id));

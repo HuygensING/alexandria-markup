@@ -90,7 +90,7 @@ public class LaTeXExporter {
         }
         colorboxes.add("\\TextNode{" + depth + "}{" + part.replaceAll("&", "\\\\&") + "}");
       }
-      latexBuilder.append(colorboxes.stream().collect(Collectors.joining("\\\\\n")));
+      latexBuilder.append(String.join("\\\\\n", colorboxes));
     }
   }
 
@@ -185,7 +185,7 @@ public class LaTeXExporter {
         }
         String content = escapedContent(allTextNodes.get(i));
         row.add(content);
-        latexBuilder.append(row.stream().collect(Collectors.joining(" & "))).append("\\\\ \\hline\n");
+        latexBuilder.append(String.join(" & ", row)).append("\\\\ \\hline\n");
       }
     }
 

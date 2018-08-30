@@ -406,6 +406,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMilestone() {
+    // TODO: check the graph: has an extra edge between <t> and the milestone content text node
     String tagML = "[t>This is a [space chars=10] test!<t]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
@@ -428,7 +429,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("space", "t");
     });
   }
 
@@ -865,7 +866,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     logDocumentGraph(document, tagML);
-//    export(document);
     return document;
   }
 

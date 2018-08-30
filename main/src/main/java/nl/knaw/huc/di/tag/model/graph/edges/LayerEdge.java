@@ -2,6 +2,8 @@ package nl.knaw.huc.di.tag.model.graph.edges;
 
 import com.sleepycat.persist.model.Persistent;
 
+import java.util.Set;
+
 /*-
  * #%L
  * alexandria-markup
@@ -44,6 +46,10 @@ public class LayerEdge implements Edge {
     return this.layerName.equals(layerName);
   }
 
+  public boolean hasAnyLayerFrom(final Set<String> layers) {
+    return layers.contains(this.layerName);
+  }
+
   public String label() {
     return edgeType.name() + ":" + layerName;
   }
@@ -51,4 +57,5 @@ public class LayerEdge implements Edge {
   public String getLayerName() {
     return layerName;
   }
+
 }

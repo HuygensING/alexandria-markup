@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  */
 
 import com.google.common.base.Preconditions;
+import nl.knaw.huc.di.tag.TAGExporter;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
@@ -39,21 +40,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+
 // TODO: only output layer info on end-tag when needed
 // TODO: only show layer info as defined in view
-public class TAGMLExporter {
+public class TAGMLExporter extends TAGExporter {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLExporter.class);
-  private final TAGView view;
-  private final TAGStore store;
   private AnnotationFactory annotationFactory;
 
   public TAGMLExporter(TAGStore store) {
-    this(store, TAGViews.getShowAllMarkupView(store));
+    super(store);
   }
 
   public TAGMLExporter(TAGStore store, TAGView view) {
-    this.store = store;
-    this.view = view;
+    super(store, view);
   }
 
   class ExporterState {
@@ -129,8 +128,6 @@ public class TAGMLExporter {
         .filter(TAGMarkup::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
 
-    StringBuilder tagmlBuilder = new StringBuilder();
-
     Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
     textVariationStates.push(new TextVariationState());
 
@@ -139,6 +136,7 @@ public class TAGMLExporter {
 
     Set<TAGTextNode> processedNodes = new HashSet<>();
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
+    StringBuilder tagmlBuilder = new StringBuilder();
     document.getTextNodeStream().forEach(nodeToProcess -> {
 //      logTextNode(nodeToProcess);
       if (!processedNodes.contains(nodeToProcess)) {
