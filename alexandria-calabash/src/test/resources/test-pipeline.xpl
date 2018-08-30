@@ -7,8 +7,7 @@
 
   <p:import href="https://huygensing.github.io/TAG/TAGML/calabash-steps.xpl"/>
 
-  <tag:load name="importTAGML">
-  </tag:load>
+  <tag:load name="importTAGML" tagmlfile="example.tagml"/>
 
   <p:identity/>
 
