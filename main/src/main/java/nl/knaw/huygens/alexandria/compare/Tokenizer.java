@@ -89,11 +89,11 @@ class Tokenizer {
   }
 
   private MarkupOpenToken toMarkupOpenToken(TAGMarkup tagMarkup) {
-    return new MarkupOpenToken(tagMarkup.getTag());
+    return new MarkupOpenToken(tagMarkup.getTag(), tagMarkup.getDbId());
   }
 
   private MarkupCloseToken toMarkupCloseToken(TAGMarkup tagMarkup) {
-    return new MarkupCloseToken("/" + tagMarkup.getTag());
+    return new MarkupCloseToken("/" + tagMarkup.getTag(), tagMarkup.getDbId());
   }
 
   private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
