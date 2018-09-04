@@ -28,8 +28,7 @@
 
     <antlr.version>4.7.1</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
-    <assertj.version>3.11.0
-    </assertj.version><!-- 3.6.2 - 3.9.1 makes isEqualToComparingFieldByFieldRecursively give StackOverflowError -->
+    <assertj.version>3.11.1</assertj.version>
     <berkeleydb.version>18.3.1</berkeleydb.version>
     <commons-io.version>2.6</commons-io.version>
     <commons-lang3.version>3.8</commons-lang3.version>
@@ -45,11 +44,11 @@
     <maven-compiler.version>3.7.0</maven-compiler.version>
     <maven-jar.version>3.0.2</maven-jar.version>
     <maven-license.version>1.14</maven-license.version>
-    <maven-shade.version>2.4.3</maven-shade.version>
+    <maven-shade.version>3.1.0</maven-shade.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
     <asciitable.version>0.3.2</asciitable.version>
     <maven-resources.version>3.0.2</maven-resources.version>
-    <xmlcalabash.version>1.1.21-98</xmlcalabash.version>
+    <xmlcalabash.version>1.1.22-98</xmlcalabash.version>
   </properties>
 
   <organization>
