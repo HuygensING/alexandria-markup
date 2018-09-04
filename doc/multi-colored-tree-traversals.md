@@ -10,7 +10,8 @@
 
 - from text node *t<sub>1</sub>*, find all incoming markup - text edges *e<sub>1..n</sub>*
 
-- for edges *e<sub>1</sub>* .. *e<sub>n</sub>*, add the source nodes *m<sub>1</sub>* .. *m<sub>n</sub>* of the edges to *ntp*
+- for edges *e<sub>1</sub>* .. *e<sub>n</sub>*,
+  - add the source nodes *m<sub>1</sub>* .. *m<sub>n</sub>* of the edges to *ntp*
 
 - while *ntp* is not empty : 
   - remove the first markup node *m<sub>1</sub>* from *ntp*
@@ -41,3 +42,21 @@
     - add *n<sub>1</sub>* to *ts*
      
 - *ts* now contains all text nodes for the given markup node. 
+
+
+# Find all child nodes of a given markup node
+
+- initialize node set *ns*
+
+- initialize nodes-to-process list *ntp*
+
+- add the given markup node *m<sub>i</sub>* to *ntp*
+
+- if *m<sub>i</sub>* has incoming *continuation-edge* *e<sub>i</sub>*  
+
+- for *e<sub>i</sub>* in all outgoing edges *e<sub>1</sub>* .. *e<sub>n</sub>*,
+  - add target nodes *n<sub>1</sub>* .. *n<sub>n</sub>* to *ns*
+
+- if the given markup node is part of a discontinued markup, add all child nodes of the continued markup node to *ns*
+
+- *ns* now contains all child nodes for the given markup node. 

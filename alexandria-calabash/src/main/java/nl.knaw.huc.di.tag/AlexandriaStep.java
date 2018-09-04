@@ -91,8 +91,7 @@ public class AlexandriaStep extends DefaultStep {
       store.open();
       TAGDocument document = store.runInTransaction(() -> {
         try {
-          TAGDocument doc = new TAGMLImporter(store).importTAGML(stream);
-          return doc;
+          return new TAGMLImporter(store).importTAGML(stream);
         } catch (TAGMLSyntaxError se) {
 //          runtime.error(se);
           throw new XProcException(se.getMessage());
@@ -138,8 +137,7 @@ public class AlexandriaStep extends DefaultStep {
           logger.debug("Reading library.xpl for " + STEP_NAME + " from " + url);
           InputStream s = alexandriaStepClass.getResourceAsStream(library_url);
           if (s != null) {
-            SAXSource source = new SAXSource(new InputSource(s));
-            return source;
+            return new SAXSource(new InputSource(s));
           } else {
             logger.info("Failed to read " + library_url + " for " + STEP_NAME);
           }

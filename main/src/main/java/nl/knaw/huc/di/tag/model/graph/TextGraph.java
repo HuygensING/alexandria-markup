@@ -285,6 +285,13 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         .findFirst();
   }
 
+  public Optional<Long> getPrecedingMarkupId(final Long id) {
+    return getIncomingEdges(id).stream()
+        .filter(ContinuationEdge.class::isInstance)
+        .map(this::getSource)
+        .findFirst();
+  }
+
   public void addAnnotationEdge(final Long sourceNode, final AnnotationInfo targetAnnotation) {
     AnnotationEdge edge = new AnnotationEdge(targetAnnotation.getType(), targetAnnotation.getName());
     Long annotationValueNode = targetAnnotation.getNodeId();
