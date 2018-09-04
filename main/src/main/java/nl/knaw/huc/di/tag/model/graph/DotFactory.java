@@ -28,10 +28,7 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.lang3.StringEscapeUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
@@ -114,7 +111,7 @@ public class DotFactory {
   }
 
   private String toNextEdgeLine(final Long textNode0, Long textNode1) {
-    return format("    t%d->t%d [color=white;arrowhead=none;label=\"\"]\n", textNode0, textNode1);
+    return format("    t%d->t%d [color=invis;arrowhead=none;label=\"\"]\n", textNode0, textNode1);
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
@@ -125,7 +122,19 @@ public class DotFactory {
       return format("  m%d [shape=point;color=red]\n", markup.getDbId());
 
     }
-    return format("  m%d [color=red;label=<%s>]\n", markup.getDbId(), markup.getExtendedTag());
+    StringBuilder pre = new StringBuilder();
+    StringBuilder post = new StringBuilder();
+    Iterator<String> layerIterator = markup.getLayers().iterator();
+    String layerName = layerIterator.next();
+    String color = getLayerColor(layerName);
+    while (layerIterator.hasNext()){
+      String otherLayer = layerIterator.next();
+      String otherColor = getLayerColor(otherLayer);
+      pre.append("  subgraph cluster_").append(markup.getDbId()).append(otherLayer).append("{\n")
+          .append("    style=rounded\n    color=").append(otherColor).append("\n  ");
+      post.append("  }\n");
+    }
+    return format("%s  m%d [color=%s;label=<%s>]\n%s", pre, markup.getDbId(), color, markup.getExtendedTag(),post);
   }
 
   private String toMarkupContinuationLine(final TAGMarkup tagMarkup) {
