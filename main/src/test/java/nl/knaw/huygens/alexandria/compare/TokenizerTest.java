@@ -84,6 +84,13 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   }
 
   @Test
+  public void testTokenizeText7() {
+    List<TextToken> textTokens = Tokenizer.tokenizeText("main de femme, élégante et fine");
+    assertThat(textTokens).extracting("content")
+        .containsExactly("main ", "de ", "femme", ", ", "élégante ", "et ", "fine");
+  }
+
+  @Test
   public void testTokenizer() {
     store.runInTransaction(() -> {
       TAGDocument doc = new LMNLImporter(store).importLMNL("[l}[phr}Alas,{phr] [phr}poor Yorick!{phr]{l]");

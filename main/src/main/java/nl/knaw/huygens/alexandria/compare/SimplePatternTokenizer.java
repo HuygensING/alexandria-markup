@@ -35,8 +35,9 @@ import static java.lang.String.format;
  */
 public class SimplePatternTokenizer {
 
-  static final String PUNCT = Pattern.quote("\\W+");
-//  static final String PUNCT = Pattern.quote(".,;:¿?¡!‘’“”'\"");
+  static final String PUNCT_REGEX = "\\W+";
+//  static final String PUNCT_REGEX = ".,;:¿?¡!‘’“”'\"()";
+  static final String PUNCT = Pattern.quote(PUNCT_REGEX);
 
   static Function<String, Stream<String>> tokenizer(Pattern pattern) {
     return input -> {
@@ -54,9 +55,13 @@ public class SimplePatternTokenizer {
   public static final Function<String, Stream<String>> BY_WS_AND_PUNCT = tokenizer(Pattern.compile(format(
       "[\\s%s]*?[^\\s%s]+[\\s%s]*", PUNCT, PUNCT, PUNCT)));
 
-  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(
-      "\\s*\\W+[\\s]*|\\s*[^\\W\\s]+[\\s]*"));
-//  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(format(
-//      "\\s*[%s]+[\\s]*|\\s*[^%s\\s]+[\\s]*", PUNCT, PUNCT)));
+  //  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(
+//      "\\s*\\W+[\\s]*|\\s*[^\\W\\s]+[\\s]*"));
+  static final String TEMPLATE = //
+      "\\s*[%s]+[\\s]*"+
+      "|"+
+      "\\s*[^%s\\s]+[\\s]*";
+  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(format(
+      TEMPLATE, PUNCT_REGEX, PUNCT_REGEX), Pattern.UNICODE_CHARACTER_CLASS));
 
 }

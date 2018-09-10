@@ -20,8 +20,8 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
@@ -41,6 +41,45 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   // TODO: change the lmnl examples to TAGML examples
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
+
+
+  @Test
+  public void testSplitCase() {
+    String originText = "[TAGML|+M>\n" +
+        "[text|M>\n" +
+        "[l|M>\n" +
+        "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M>malgré l'agrandissement du close-up.\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+    String editedText = "[TAGML|+M,+N>\n" +
+        "[text|M,N>\n" +
+        "[l|M>\n" +
+        "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n" +
+        "<s]\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+
+    TAGComparison comparison = compare(originText, editedText);
+
+    List<String> expected = new ArrayList<>(asList(//
+        "+[s>",
+        " [l>[text>[TAGML>",
+        " Une [add>[del>jolie<del]<add][add>belle<add] main de femme, élégante et fine",
+        "+.",
+        " <l]",
+        "+<s]",
+        "  ",
+        "+[s>",
+        " [l>",
+        "-malgré ",
+        "+Malgré ",
+        " l'agrandissement du close-up.",
+        "+<s]",
+        " <l]",
+        " <TAGML]<text]"//
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
 
   @Test
   public void testNoChanges() {
@@ -190,9 +229,9 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
 
   private TAGComparison compare(String originText, String editedText) {
     return store.runInTransaction(() -> {
-      LMNLImporter importer = new LMNLImporter(store);
-      TAGDocument original = importer.importLMNL(originText);
-      TAGDocument edited = importer.importLMNL(editedText);
+      TAGMLImporter importer = new TAGMLImporter(store);
+      TAGDocument original = importer.importTAGML(originText);
+      TAGDocument edited = importer.importTAGML(editedText);
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
