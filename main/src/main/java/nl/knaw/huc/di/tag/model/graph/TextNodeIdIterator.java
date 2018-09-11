@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.model.graph;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 
@@ -31,13 +32,13 @@ class TextNodeIdIterator implements Iterator<Long> {
   private final TextGraph textGraph;
   private final List<TypedNode> nodesToProcess = new ArrayList<>();
   private final Set<Long> textHandled = new HashSet<>();
-  private final String layerName;
+  private final Set<String> layers;
 
   private Optional<Long> nextTextNodeId;
 
-  public TextNodeIdIterator(final TextGraph textGraph, final Long markupId, final String layerName) {
+  public TextNodeIdIterator(final TextGraph textGraph, final Long markupId, final Set<String> layers) {
     this.textGraph = textGraph;
-    this.layerName = layerName;
+    this.layers = layers;
     this.nodesToProcess.add(0, new TypedNode(NodeType.markup, markupId));
     this.nextTextNodeId = calcNextTextNodeId();
   }
@@ -80,14 +81,44 @@ class TextNodeIdIterator implements Iterator<Long> {
   }
 
   private List<TypedNode> getChildren(final Long id) {
-    List<TypedNode> childNodes = textGraph.getOutgoingEdges(id).stream()
-        .filter(LayerEdge.class::isInstance)
-        .map(LayerEdge.class::cast)
-        .filter(e -> e.hasLayer(layerName))
-        .flatMap(this::toTypedNodeStream)
-        .collect(toList());
-    childNodes.addAll(getContinuationChildren(id));
-    return childNodes;
+    return getContinuedMarkupIds(id).stream()
+        .flatMap(markupId ->
+            textGraph.getOutgoingEdges(markupId).stream()
+                .filter(LayerEdge.class::isInstance)
+                .map(LayerEdge.class::cast)
+                .filter(e -> e.hasAnyLayerFrom(layers))
+                .flatMap(this::toTypedNodeStream)
+        ).collect(toList());
+  }
+
+  private List<Long> getContinuedMarkupIds(final Long id) {
+    List<Long> continuedMarkupIds = new ArrayList<>();
+    List<Long> precedingMarkupIds = getPrecedingMarkupIds(id);
+    continuedMarkupIds.addAll(precedingMarkupIds);
+    continuedMarkupIds.add(id);
+    List<Long> succeedingMarkupIds = getSucceedingMarkupIds(id);
+    continuedMarkupIds.addAll(succeedingMarkupIds);
+    return continuedMarkupIds;
+  }
+
+  private List<Long> getPrecedingMarkupIds(final Long id) {
+    List<Long> precedingMarkupIds = new ArrayList<>();
+    textGraph.getPrecedingMarkupId(id)
+        .ifPresent(precedingMarkupId -> {
+          precedingMarkupIds.add(0, precedingMarkupId);
+          precedingMarkupIds.addAll(0, getPrecedingMarkupIds(precedingMarkupId));
+        });
+    return precedingMarkupIds;
+  }
+
+  private List<Long> getSucceedingMarkupIds(final Long id) {
+    List<Long> succeedingMarkupIds = new ArrayList<>();
+    textGraph.getContinuedMarkupId(id)
+        .ifPresent(continuedMarkupId -> {
+          succeedingMarkupIds.add(continuedMarkupId);
+          succeedingMarkupIds.addAll(getSucceedingMarkupIds(continuedMarkupId));
+        });
+    return succeedingMarkupIds;
   }
 
   private List<TypedNode> getContinuationChildren(final Long id) {

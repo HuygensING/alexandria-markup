@@ -20,8 +20,8 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
@@ -39,13 +39,52 @@ import static java.util.stream.Collectors.joining;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
-
+  // TODO: change the lmnl examples to TAGML examples
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
+
+
+  @Test
+  public void testSplitCase() {
+    String originText = "[TAGML|+M>\n" +
+        "[text|M>\n" +
+        "[l|M>\n" +
+        "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M>malgré l'agrandissement du close-up.\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+    String editedText = "[TAGML|+M,+N>\n" +
+        "[text|M,N>\n" +
+        "[l|M>\n" +
+        "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n" +
+        "<s]\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+
+    TAGComparison comparison = compare(originText, editedText);
+
+    List<String> expected = new ArrayList<>(asList(//
+        "+[s>",
+        " [l>[text>[TAGML>",
+        " Une [add>[del>jolie<del]<add][add>belle<add] main de femme, élégante et fine",
+        "+.",
+        " <l]",
+        "+<s]",
+        "  ",
+        "+[s>",
+        " [l>",
+        "-malgré ",
+        "+Malgré ",
+        " l'agrandissement du close-up.",
+        "+<s]",
+        " <l]",
+        " <TAGML]<text]"//
+    ));
+    assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
+  }
 
   @Test
   public void testNoChanges() {
-    String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
+    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
@@ -54,115 +93,121 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testOmission() {
-    String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[quote}Any sufficiently advanced technology is magic.{quote]";
+    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText = "[quote>Any sufficiently advanced technology is magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
-        " [quote}Any sufficiently advanced technology is ",//
+        " [quote>Any sufficiently advanced technology is ",//
         "-indistinguishable from ",//
-        " magic.{quote]"//
+        " magic.<quote]"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  //@Ignore("change to TAGML first")
   @Test
   public void testAddition() {
-    String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[quote}Any sufficiently advanced technology is virtually indistinguishable from magic.{quote]";
+    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText = "[quote>Any sufficiently advanced technology is virtually indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
-        " [quote}Any sufficiently advanced technology is ",//
+        " [quote>Any sufficiently advanced technology is ",//
         "+virtually ",//
-        " indistinguishable from magic.{quote]"//
+        " indistinguishable from magic.<quote]"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement() {
-    String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[quote}Any sufficiently advanced code is indistinguishable from magic.{quote]";
+    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText = "[quote>Any sufficiently advanced code is indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
-        " [quote}Any sufficiently advanced ",//
+        " [quote>Any sufficiently advanced ",//
         "-technology ",//
         "+code ",//
-        " is indistinguishable from magic.{quote]"//
+        " is indistinguishable from magic.<quote]"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement2() {
-    String originText = "[quote}Any sufficiently advanced technology is indistinguishable from magic.{quote]";
-    String editedText = "[s}Any sufficiently advanced code is indistinguishable from magic.{s]";
+    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText = "[s>Any sufficiently advanced code is indistinguishable from magic.<s]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
-        "-[quote}",//
-        "+[s}",//
+        "-[quote>",//
+        "+[s>",//
         " Any sufficiently advanced ",//
         "-technology ",//
         "+code ",//
         " is indistinguishable from magic.",//
-        "-{quote]",//
-        "+{s]"//
+        "-<quote]",//
+        "+<s]"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  @Ignore("change to TAGML first")
   @Test
   public void testJoin() {
-    String originText = "[t}[l}one two{l]\n[l}three four{l]{t]";
-    String editedText = "[t}[l}one two three four{l]{t]";
+    String originText = "[t>[l>one two<l]\n[l>three four<l]<t]";
+    String editedText = "[t>[l>one two three four<l]<t]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
-        " [t}[l}one two",
-        "-{l]",
-        "-[l}",
-        " three four{l]{t]"
+        " [t>[l>one two",
+        "-<l]",
+        "-[l>",
+        " three four<l]<t]"
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  @Ignore("change to TAGML first")
   @Test
   public void testSplit() {
-    String originText = "[t}[l}one two three four{l]{t]";
-    String editedText = "[t}[l}one two{l]\n[l}five three four{l]{t]";
+    String originText = "[t>[l>one two three four<l]<t]";
+    String editedText = "[t>[l>one two<l]\n[l>five three four<l]<t]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
-        " [t}[l}one two ",
-        "+{l]",
-        "+[l}five ",
-        " three four{l]{t]"
+        " [t>[l>one two ",
+        "+<l]",
+        "+[l>five ",
+        " three four<l]<t]"
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
+  //@Ignore("change to TAGML first")
   @Test
   public void testAddedNewlines() {
-    String originText = "[t}one two three four{t]";
-    String editedText = "[t}one two three four{t]\n";
+    String originText = "[t>one two three four<t]";
+    String editedText = "[t>one two three four<t]\n";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(Collections.singletonList(//
-        " [t}one two three four{t]"
+        " [t>one two three four<t]"
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
@@ -171,26 +216,26 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testNewlinesInText() {
-    String originText = "[l}line 1{l]\n[l}line 2{l]\n[l}line 3{l]";
-    String editedText = "[l}line 1{l]\n[l}line 1a{l]\n[l}line 2{l]\n[l}line 3{l]";
+    String originText = "[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]";
+    String editedText = "[l>line 1<l]\n[l>line 1a<l]\n[l>line 2<l]\n[l>line 3<l]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
     List<String> expected = new ArrayList<>(asList(//
-        " [l}line 1{l]\n",//
-        "+[l}line 1a{l]\n",//
-        " [l}line 2{l]\n",//
-        " [l}line 3{l]\n"//
+        " [l>line 1<l]\n",//
+        "+[l>line 1a<l]\n",//
+        " [l>line 2<l]\n",//
+        " [l>line 3<l]\n"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   private TAGComparison compare(String originText, String editedText) {
     return store.runInTransaction(() -> {
-      LMNLImporter importer = new LMNLImporter(store);
-      TAGDocument original = importer.importLMNL(originText);
-      TAGDocument edited = importer.importLMNL(editedText);
+      TAGMLImporter importer = new TAGMLImporter(store);
+      TAGDocument original = importer.importTAGML(originText);
+      TAGDocument edited = importer.importTAGML(editedText);
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 

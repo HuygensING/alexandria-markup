@@ -112,6 +112,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitDocument(DocumentContext ctx) {
     document.linkParentlessLayerRootsToDocument();
+    document.setNamespaces(namespaces);
     update(document.getDTO());
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
@@ -166,7 +167,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> handledLayers = new HashSet<>();
       for (TAGMarkup m : state.allOpenMarkup) {
         Set<String> layers = m.getLayers();
-        boolean markupHasNoHandledLayer = !layers.stream().anyMatch(handledLayers::contains);
+        boolean markupHasNoHandledLayer = layers.stream().noneMatch(handledLayers::contains);
         if (markupHasNoHandledLayer) {
           relevantMarkup.add(m);
           handledLayers.addAll(layers);
@@ -506,11 +507,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     if (branchMarkupSet.size() > 2) {
       StringBuilder branchLines = new StringBuilder();
       for (int i = 0; i < openedMarkupInBranch.size(); i++) {
-        String closed = closedMarkupInBranch.get(i).stream().collect(joining(", "));
+        String closed = String.join(", ", closedMarkupInBranch.get(i));
         String closedStatement = closed.isEmpty()
             ? "didn't close any markup"
             : "closed markup " + closed;
-        String opened = openedMarkupInBranch.get(i).stream().collect(joining(", "));
+        String opened = String.join(", ", openedMarkupInBranch.get(i));
         String openedStatement = opened.isEmpty()
             ? "didn't open any new markup"
             : "opened markup " + opened;

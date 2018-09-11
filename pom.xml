@@ -4,7 +4,7 @@
 
   <groupId>nl.knaw.huygens.alexandria</groupId>
   <artifactId>alexandria</artifactId>
-  <version>2.0</version>
+  <version>2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <inceptionYear>2016</inceptionYear>
 
@@ -14,6 +14,7 @@
     <module>texmecs</module>
     <module>tagml</module>
     <module>tagql</module>
+    <module>alexandria-calabash</module>
   </modules>
 
   <properties>
@@ -27,12 +28,13 @@
 
     <antlr.version>4.7.1</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
-    <assertj.version>3.10.0</assertj.version><!-- 3.6.2 - 3.9.1 makes isEqualToComparingFieldByFieldRecursively give StackOverflowError -->
+    <assertj.version>3.11.1</assertj.version>
     <berkeleydb.version>18.3.1</berkeleydb.version>
     <commons-io.version>2.6</commons-io.version>
-    <commons-lang3.version>3.7</commons-lang3.version>
+    <commons-lang3.version>3.8</commons-lang3.version>
+    <commons-text.version>1.4</commons-text.version>
     <freemarker.version>2.3.28</freemarker.version>
-    <guava.version>25.1-jre</guava.version>
+    <guava.version>26.0-jre</guava.version>
     <jacoco.version>0.7.9</jacoco.version>
     <junit.version>4.12</junit.version>
     <logback.version>1.3.0-alpha4</logback.version>
@@ -42,9 +44,11 @@
     <maven-compiler.version>3.7.0</maven-compiler.version>
     <maven-jar.version>3.0.2</maven-jar.version>
     <maven-license.version>1.14</maven-license.version>
+    <maven-shade.version>3.1.0</maven-shade.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
     <asciitable.version>0.3.2</asciitable.version>
     <maven-resources.version>3.0.2</maven-resources.version>
+    <xmlcalabash.version>1.1.22-98</xmlcalabash.version>
   </properties>
 
   <organization>
@@ -202,6 +206,15 @@
 
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>huygens</id>
       <url>http://maven.huygens.knaw.nl/repository/</url>
       <releases>
@@ -221,6 +234,16 @@
       <url>http://download.oracle.com/maven</url>
       <layout>default</layout>
     </repository>
+    <repository>
+      <id>restlet</id>
+      <name>Maven Restlet</name>
+      <layout>default</layout>
+      <url>http://maven.restlet.com/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
   </repositories>
 
   <prerequisites>

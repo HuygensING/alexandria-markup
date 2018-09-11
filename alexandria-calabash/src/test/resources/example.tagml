@@ -1,0 +1,33 @@
+[poem|+p title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
+[text|+l,+pr title='The Hunting of the Snark (An Agony in 8 Fits)'>
+[canto|p title='The Vanishing'>
+[page|+m n=81>
+[line|m>[phr|l type='NP'>[w|l type='D'>The<w|l] [w|l type='N'>Vanishing<w|l]<phr|l]
+[page_nr|m>81<page_nr|m]<line|m]
+[p|m>
+[stanza|p>
+[sentence|pr>
+[line|m>[l|p>[s|l>[phr|l type='NP'>(As if stung<phr|l][phr|l type='PP'>by a spasm)<phr|l][phr|l type='VP'>plunge into a chasm,<phr|l]<l|p]<line|m]
+[line|m>[l|p>[phr|l type='VP'>While they waited [w|l type='contr'>and<w|l] listened in awe.<phr|l]<s|l]<l|p]<line|m]<sentence|pr]
+<p|m]<stanza|p]
+[el|m]
+[el|m]
+[stanza|p>[p|m>
+[sentence~a|pr>[line|m>[l|p>[sentence~b|pr voice='Baker'>[s|l>[phr|l type='NP'>"It's a Snark!"<phr|l]<sentence~b|pr] [phr|l type='VP'>was the sound that first came<phr|l]<line|m]
+[line|m>[phr|l type='PP'>to their ears,<phr|l]<l|p]<line|m]
+[line|m>[l|p>[phr|l type='VP'>And seemed almost too [w|l type='A'>good<w|l] to be true.<phr|l]<s|l]<l|p]<line|m]<sentence~a|pr]
+[line|m>[l|p>[sentence~c|pr>[s|l>[phr|l type='VP'>Then followed<phr|l][phr|l type='NP'>a torrent of laughter and cheers:<phr|l]<l|p]<line|m]
+[line|m>[l|p>[phr~a|l type='NP'>Then the ominous words [sentence~d|pr voice='Baker'>[phr~b|l type='VP'>"It's a Boo--"<phr~b|l]<phr~a|l]<sentence~d|pr]<l|p]<line|m]
+<p|m]<stanza|p]
+[el|m]
+[el|m]
+[stanza|p>[p|m>
+[line|m>[l|p>[phr|l type='NP'>Then, silence.<phr|l]<s|l]<sentence~c|pr] [sentence~e|pr>[s|l>[phr|l type='NP'>Some fancied<phr|l][phr|l type='VP'>they heard in the <line|m][line|m>air<phr|l]<l|p]<line|m]
+[line|m>[l|p>[phr|l type='NP'>A weary and wandering sigh<phr|l]<l|p]<line|m]
+[line|m>[l|p>[phr~a|l type='VP'>That sounded like [sentence~f|pr voice='Baker'>[phr~b|l type='N'>"--jum!"<phr~b|l]<sentence~f|pr] but the others de-<line|m][line|m>clare<phr~a|l]<l|p]<line|m]
+[line|m>[l|p>[phr|l type='NP'>It was only a breeze that went by.<phr|l]<s|l]<l|p]<line|m]<sentence~e|pr]
+<p|m]<stanza|p]
+<canto|p]
+<page|m]
+<text|pr,l]
+<poem|p]

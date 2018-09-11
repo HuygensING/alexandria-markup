@@ -41,8 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-import static java.util.stream.Collectors.joining;
-
 public class TAGMLImporter {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
@@ -85,8 +83,8 @@ public class TAGMLImporter {
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
-      logDocumentGraph(document,"");
-      String errors = errorListener.getErrors().stream().collect(joining("\n"));
+//      logDocumentGraph(document,"");
+      String errors = String.join("\n", errorListener.getErrors());
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
@@ -97,7 +95,7 @@ public class TAGMLImporter {
   private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
-    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
+//    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);

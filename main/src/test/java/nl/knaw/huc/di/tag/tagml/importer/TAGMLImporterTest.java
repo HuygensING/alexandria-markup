@@ -406,6 +406,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMilestone() {
+    // TODO: check the graph: has an extra edge between <t> and the milestone content text node
     String tagML = "[t>This is a [space chars=10] test!<t]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
@@ -428,7 +429,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("space", "t");
     });
   }
 
@@ -457,6 +458,33 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(t).hasTag("t");
       List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
       assertThat(tTAGTextNodes).extracting("text").containsExactly("This is", "a test!");
+
+      TAGMarkup t2 = markups.get(2);
+      assertThat(t2).hasTag("t");
+      List<TAGTextNode> t2TAGTextNodes = t2.getTextNodeStream().collect(toList());
+      assertThat(t2TAGTextNodes).extracting("text").containsExactly("This is", "a test!");
+    });
+  }
+
+  @Test
+  public void testDiscontinuity2() {
+    String tagML = "[x>When [t>Could<-t] can [+t>you<-t] I [+t>stop<-t] say [+t>interrupting<-t] something? [+t>me?<t]<x]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+      assertThat(document).hasMarkupMatching(
+          markupSketch("t")
+      );
+
+      List<TAGMarkup> markups = document.getMarkupStream().collect(toList());
+      assertThat(markups).hasSize(6);
+
+      for (int i : new int[]{1, 2, 3, 4, 5}) {
+        TAGMarkup t = markups.get(i);
+        assertThat(t).hasTag("t");
+        List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
+        assertThat(tTAGTextNodes).extracting("text").containsExactly("Could", "you", "stop", "interrupting", "me?");
+      }
     });
   }
 
@@ -865,7 +893,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     printTokens(tagML);
     TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
     logDocumentGraph(document, tagML);
-//    export(document);
     return document;
   }
 
