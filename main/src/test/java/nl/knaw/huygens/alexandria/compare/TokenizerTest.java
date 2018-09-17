@@ -36,56 +36,56 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTokenizeText() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("a b c");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("a b c", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("a ", "b ", "c");
   }
 
   @Test
   public void testLeadingWhitespaceIsPreserved() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText(" a b c");
+    List<TextToken> textTokens = Tokenizer.tokenizeText(" a b c", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly(" ", "a ", "b ", "c");
   }
 
   @Test
   public void testTokenizeText2() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("\n");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("\n", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("\n");
   }
 
   @Test
   public void testTokenizeText3() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText(" ");
+    List<TextToken> textTokens = Tokenizer.tokenizeText(" ", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly(" ");
   }
 
   @Test
   public void testTokenizeText4() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("! ");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("! ", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("! ");
   }
 
   @Test
   public void testTokenizeText5() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("(Alas, poor Yorick!)");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("(Alas, poor Yorick!)", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("(", "Alas", ", ", "poor ", "Yorick", "!)");
   }
 
   @Test
   public void testTokenizeText6() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("Lucy, for you the snowdrop and the bay");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("Lucy, for you the snowdrop and the bay", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("Lucy", ", ", "for ", "you ", "the ", "snowdrop ", "and ", "the ", "bay");
   }
 
   @Test
   public void testTokenizeText7() {
-    List<TextToken> textTokens = Tokenizer.tokenizeText("main de femme, élégante et fine");
+    List<TextToken> textTokens = Tokenizer.tokenizeText("main de femme, élégante et fine", textNodeId);
     assertThat(textTokens).extracting("content")
         .containsExactly("main ", "de ", "femme", ", ", "élégante ", "et ", "fine");
   }

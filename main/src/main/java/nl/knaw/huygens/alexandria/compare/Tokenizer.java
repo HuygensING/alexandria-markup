@@ -51,6 +51,7 @@ class Tokenizer {
     Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
     StringBuilder textBuilder = new StringBuilder();
     document.getTextNodeStream().forEach(tn -> {
+      Long textNodeId = tn.getDbId();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
           .filter(tagView::isIncluded)//
           .collect(toList());
@@ -66,7 +67,7 @@ class Tokenizer {
       openMarkup.addAll(toOpen);
 
       if (!toClose.isEmpty() || !toOpen.isEmpty()) {
-        tokens.addAll(tokenizeText(textBuilder.toString()));
+        tokens.addAll(tokenizeText(textBuilder.toString(), textNodeId));
         textBuilder.delete(0, textBuilder.length());
       }
       toClose.stream()//
@@ -80,7 +81,8 @@ class Tokenizer {
       String text = tn.getText();
       textBuilder.append(text);
     });
-    tokens.addAll(tokenizeText(textBuilder.toString()));
+    Long textNodeId = 0L; // TODO
+    tokens.addAll(tokenizeText(textBuilder.toString(), textNodeId));
     stream(openMarkup.descendingIterator())//
         .map(this::toMarkupCloseToken)//
         .forEach(tokens::add);
@@ -98,13 +100,13 @@ class Tokenizer {
 
   private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
 
-  static List<TextToken> tokenizeText(String text) {
+  static List<TextToken> tokenizeText(String text, Long textNodeId) {
     if (WS_OR_PUNCT.matcher(text).matches()) {
-      return new ArrayList<>(singletonList(new TextToken(text)));
+      return new ArrayList<>(singletonList(new ExtendedTextToken(text, textNodeId)));
     }
     return SimplePatternTokenizer.BY_WS_OR_PUNCT//
         .apply(text)//
-        .map(TextToken::new)//
+        .map(t -> new ExtendedTextToken(t, textNodeId))//
         .collect(toList());
   }
 
