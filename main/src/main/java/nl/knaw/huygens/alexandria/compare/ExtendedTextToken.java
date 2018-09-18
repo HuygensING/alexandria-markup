@@ -19,13 +19,37 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import prioritised_xml_collation.TextToken;
 
-public class ExtendedTextToken extends TextToken {
-  private Long textNodeId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-  public ExtendedTextToken(String content, Long textNodeId) {
+public class ExtendedTextToken extends TextToken {
+  private final List<Long> textNodeIds = new ArrayList<>();
+
+  public ExtendedTextToken(String content) {
     super(content);
-    this.textNodeId = textNodeId;
+  }
+
+  public ExtendedTextToken addTextNodeId(Long textNodeId) {
+    textNodeIds.add(textNodeId);
+    return this;
+  }
+
+  public ExtendedTextToken addTextNodeIds(Collection<Long> textNodeIds) {
+    this.textNodeIds.addAll(textNodeIds);
+    return this;
+  }
+
+  public ExtendedTextToken addTextNodeIds(Long... textNodeIds) {
+    Collections.addAll(this.textNodeIds, textNodeIds);
+    return this;
+  }
+
+  public List<Long> getTextNodeIds() {
+    return textNodeIds;
   }
 }

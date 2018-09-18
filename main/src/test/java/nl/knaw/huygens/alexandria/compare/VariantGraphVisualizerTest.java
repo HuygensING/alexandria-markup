@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -56,9 +57,11 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
-      VariantGraphVisualizer vgv = new VariantGraphVisualizer();
-      String dot = vgv.visualizeVariation(original, edited, allTags);
-      LOG.info("dot=\n{}\n", dot);
+      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+      new VariantGraphVisualizer(visualizer)
+          .visualizeVariation(original, edited, allTags);
+      String result = visualizer.getResult();
+      LOG.info("result=\n{}\n", result);
     });
 
   }
