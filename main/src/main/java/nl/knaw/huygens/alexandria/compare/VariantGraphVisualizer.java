@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class VariantGraphVisualizer {
 
-  private DiffVisualizer visualizer;
+  private final DiffVisualizer visualizer;
 
   VariantGraphVisualizer(DiffVisualizer visualizer) {
     this.visualizer = visualizer;
@@ -46,7 +46,7 @@ public class VariantGraphVisualizer {
         .stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
-    SegmenterInterface segmenter = new AlignedNonAlignedSegmenter();
+    SegmenterInterface segmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
     List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, segmenter);
 
     visualizer.startVisualization();
@@ -60,7 +60,7 @@ public class VariantGraphVisualizer {
       switch (segment.type) {
         case aligned:
           visualizer.startAligned();
-          segment.tokensWa.forEach(visualizer::alignedTextToken);
+          visualizer.alignedTextTokens(segment.tokensWa, segment.tokensWb);
           visualizer.endAligned();
           break;
 

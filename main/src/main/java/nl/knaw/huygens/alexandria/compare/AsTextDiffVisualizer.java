@@ -19,8 +19,11 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import prioritised_xml_collation.TAGToken;
+
+import java.util.List;
 
 public class AsTextDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
@@ -55,10 +58,12 @@ public class AsTextDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void alignedTextToken(final TAGToken t) {
-    resultBuilder.append("[")
-        .append(escapedContent(t))
-        .append("]");
+  public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
+    tokensWa.forEach(t ->
+        resultBuilder.append("[")
+            .append(escapedContent(t))
+            .append("]")
+    );
   }
 
   @Override

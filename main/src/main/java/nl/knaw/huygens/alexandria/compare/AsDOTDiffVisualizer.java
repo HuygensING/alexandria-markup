@@ -19,34 +19,50 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.text.StringEscapeUtils;
 import prioritised_xml_collation.TAGToken;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsDOTDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
-  private AtomicInteger nodeCounter = new AtomicInteger();
+  private final AtomicInteger nodeCounter = new AtomicInteger();
   private int startIndex;
+  private final Map<Long, String> textNodeVariables = new HashMap<>();
+  private final SetMultimap<Long, String> edges = MultimapBuilder.hashKeys().hashSetValues().build();
+  private String lastNode;
+  private final Stack<List<String>> replacements = new Stack();
 
   @Override
   public void startVisualization() {
-    resultBuilder.append("digraph G{\n  rankdir=LR\n  node [shape=box]\n");
+    resultBuilder
+        .append("digraph G{\n")
+        .append("  rankdir=LR\n")
+        .append("  edge [arrowhead=none]\n")
+        .append("  node [shape=box]\n");
   }
 
   @Override
   public void startOriginal() {
     startIndex = nodeCounter.get();
-    resultBuilder.append("  subgraph cluster_original{\n    rank=same\n    style=invis\n");
+    resultBuilder
+        .append("  subgraph cluster_original{\n")
+        .append("    node[color=red]\n")
+        .append("    edge[color=red]\n")
+        .append("    style=invis\n");
   }
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
-    resultBuilder.append("    tn")
-        .append(nodeCounter.getAndIncrement())
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    textNodeVariables.put(t.getDbId(), nodeVariable);
+    resultBuilder.append("    ")
+        .append(nodeVariable)
         .append(" [label=<")
         .append(escapedText(t.getText()))
         .append(">]\n");
@@ -60,101 +76,162 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
     }
     String originalTextEdges = String.join("->", originalNodes);
     resultBuilder
-        .append("    ").append(originalTextEdges).append("\n")
+        .append("    ").append(originalTextEdges).append(" \n")
         .append("  }\n");
   }
 
   @Override
   public void startDiff() {
     startIndex = nodeCounter.get();
-    resultBuilder.append("  subgraph cluster_diff{\n    rank=same\n    style=invis\n");
+    resultBuilder
+        .append("  subgraph cluster_diff{\n")
+        .append("    node[color=brown]\n")
+        .append("    edge[color=brown]\n")
+        .append("    style=invis\n");
+    lastNode = "";
   }
 
   @Override
   public void startAligned() {
-    resultBuilder.append("    tn")
-        .append(nodeCounter.getAndIncrement())
+    String nodeVariable = "tn" + nodeCounter.get();
+    resultBuilder.append("    ")
+        .append(nodeVariable)
         .append(" [label=<");
   }
 
   @Override
-  public void alignedTextToken(final TAGToken t) {
-    resultBuilder
-        .append(escapedContent(t));
+  public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
+    String nodeVariable = "tn" + nodeCounter.get();
+    for (TAGToken t : tokensWa) {
+      resultBuilder.append(escapedContent(t));
+      ExtendedTextToken tt = (ExtendedTextToken) t;
+      for (Long textNodeId : tt.getTextNodeIds()) {
+        edges.put(textNodeId, nodeVariable);
+      }
+    }
+    for (TAGToken t : tokensWb) {
+      ExtendedTextToken tt = (ExtendedTextToken) t;
+      for (Long textNodeId : tt.getTextNodeIds()) {
+        edges.put(textNodeId, nodeVariable);
+      }
+    }
   }
 
   @Override
   public void endAligned() {
     resultBuilder.append(">]\n");
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    addEdge(lastNode, nodeVariable);
+    lastNode = nodeVariable;
   }
 
   @Override
   public void startAddition() {
-    resultBuilder
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [label=<");
+    String startAdditionNode = "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(startAdditionNode).append(" [shape=point]\n");
+    addEdge(lastNode, startAdditionNode);
+    lastNode = startAdditionNode;
+    resultBuilder.append("    tn").append(nodeCounter.get()).append(" [label=<");
   }
 
   @Override
   public void addedTextToken(final TAGToken t) {
     resultBuilder.append(escapedContent(t));
+    addEdges(t);
   }
 
   @Override
   public void endAddition() {
-    resultBuilder
-        .append(">]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n");
+    String startAdditionNode = lastNode;
+    resultBuilder.append(">]\n");
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    addEdge(startAdditionNode, nodeVariable);
+
+    String endAdditionNode = "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(endAdditionNode).append(" [shape=point]\n");
+    addEdge(startAdditionNode, endAdditionNode);
+    addEdge(nodeVariable, endAdditionNode);
+    lastNode = endAdditionNode;
   }
 
   @Override
   public void startOmission() {
-    resultBuilder
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [label=<");
+    String startOmissionNode = "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(startOmissionNode).append(" [shape=point]\n");
+    addEdge(lastNode, startOmissionNode);
+    lastNode = startOmissionNode;
+    resultBuilder.append("    tn").append(nodeCounter.get()).append(" [label=<");
   }
 
   @Override
   public void omittedTextToken(final TAGToken t) {
     resultBuilder.append(escapedContent(t));
+    addEdges(t);
   }
 
   @Override
   public void endOmission() {
+    String startOmissionNode = lastNode;
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     resultBuilder
-        .append(">]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n");
+        .append(">]\n");
+    addEdge(startOmissionNode, nodeVariable);
+
+    String endOmissionNodeVariable = "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(endOmissionNodeVariable).append(" [shape=point]\n");
+    addEdge(startOmissionNode, endOmissionNodeVariable);
+    addEdge(nodeVariable, endOmissionNodeVariable);
+    lastNode = endOmissionNodeVariable;
   }
 
   @Override
   public void startReplacement() {
-    resultBuilder
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [label=<");
+    replacements.push(new ArrayList<>());
+    String startReplacementNode = "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(startReplacementNode).append(" [shape=point]\n");
+    addEdge(lastNode, startReplacementNode);
+    lastNode = startReplacementNode;
+    resultBuilder.append("    tn").append(nodeCounter.get()).append(" [label=<");
   }
 
   @Override
   public void originalTextToken(final TAGToken t) {
     resultBuilder.append(escapedContent(t));
+    addEdges(t);
   }
 
   @Override
   public void replacementSeparator() {
-    resultBuilder
-        .append(">]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [label=<");
+    resultBuilder.append(">]\n");
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    replacements.peek().add(nodeVariable);
+
+    nodeVariable = "tn" + nodeCounter.get();
+    resultBuilder.append("    ").append(nodeVariable).append(" [label=<");
   }
 
   @Override
   public void editedTextToken(final TAGToken t) {
     resultBuilder.append(escapedContent(t));
+    addEdges(t);
   }
 
   @Override
   public void endReplacement() {
-    resultBuilder
-        .append(">]\n")
-        .append("    tn").append(nodeCounter.getAndIncrement()).append(" [shape=point]\n");
+    resultBuilder.append(">]\n");
+    String startReplacementNode = lastNode;
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    replacements.peek().add(nodeVariable);
+
+    String endReplacementNode= "tn" + nodeCounter.getAndIncrement();
+    resultBuilder.append("    ").append(endReplacementNode).append(" [shape=point]\n");
+
+    List<String> options = replacements.pop();
+    options.forEach(option -> {
+      addEdge(startReplacementNode, option);
+      addEdge(option, endReplacementNode);
+    });
+    lastNode = endReplacementNode;
   }
 
   @Override
@@ -165,13 +242,19 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   @Override
   public void startEdited() {
     startIndex = nodeCounter.get();
-    resultBuilder.append("  subgraph cluster_edited{\n    rank=same\n    style=invis\n");
+    resultBuilder
+        .append("  subgraph cluster_edited{\n")
+        .append("    node[color=blue]\n")
+        .append("    edge[color=blue]\n")
+        .append("    style=invis\n");
   }
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
-    resultBuilder.append("    tn")
-        .append(nodeCounter.getAndIncrement())
+    String nodeVariable = "tn" + nodeCounter.getAndIncrement();
+    textNodeVariables.put(t.getDbId(), nodeVariable);
+    resultBuilder.append("    ")
+        .append(nodeVariable)
         .append(" [label=<")
         .append(escapedText(t.getText()))
         .append(">]\n");
@@ -191,6 +274,13 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void endVisualization() {
+    edges.forEach((textNodeId, nodeVariable) -> {
+      String leftNodeVariable = textNodeVariables.get(textNodeId);
+      resultBuilder
+//          .append("  rank=same{").append(leftNodeVariable).append(" ").append(nodeVariable).append("}\n")
+          .append("  ").append(leftNodeVariable).append("->").append(nodeVariable).append(" [style=dashed;arrowhead=none]\n");
+
+    });
     resultBuilder.append("}\n");
   }
 
@@ -207,5 +297,19 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
     String normalized = text.replace("\n", "\\n");
     return StringEscapeUtils.escapeHtml3(normalized)
         .replace(" ", "&nbsp;");
+  }
+
+  private void addEdge(final String leftNode, final String rightNode) {
+    if (!leftNode.isEmpty()) {
+      resultBuilder.append("    ").append(leftNode).append("->").append(rightNode).append("\n");
+    }
+  }
+
+  private void addEdges(final TAGToken t) {
+    String nodeVariable = "tn" + nodeCounter.get();
+    ExtendedTextToken tt = (ExtendedTextToken) t;
+    for (Long textNodeId : tt.getTextNodeIds()) {
+      edges.put(textNodeId, nodeVariable);
+    }
   }
 }
