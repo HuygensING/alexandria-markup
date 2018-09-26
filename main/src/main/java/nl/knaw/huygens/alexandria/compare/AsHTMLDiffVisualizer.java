@@ -35,7 +35,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startOriginal() {
+  public void startOriginal(final String witness1) {
     resultBuilder.append("  <tr>\n    <th>Original</th>\n");
   }
 
@@ -52,7 +52,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startDiff() {
+  public void startDiff(final String witness1, final String witness2) {
     resultBuilder.append("  <tr>\n    <th>Diff</th>\n");
   }
 
@@ -133,7 +133,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startEdited() {
+  public void startEdited(final String witness2) {
     resultBuilder.append("  <tr>\n    <th>Edited</th>\n");
   }
 

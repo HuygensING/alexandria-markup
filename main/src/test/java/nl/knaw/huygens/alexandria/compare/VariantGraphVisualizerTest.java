@@ -35,35 +35,73 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(VariantGraphVisualizerTest.class);
 
   @Test
-  public void test() {
+  public void test1() {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
         "[l|M>\n" +
-        "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M>malgré l'agrandissement du close-up.\n" +
+        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
         "<l]\n" +
-        "<text]<TAGML]";
-    String editedText = "[TAGML|+M,+N>\n" +
-        "[text|M,N>\n" +
-        "[l|M>\n" +
-        "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n" +
+        "<text]<TAGML]\n";
+    String editedText = "[TAGML|+N>\n" +
+        "[text|N>\n" +
+        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
         "<s]\n" +
-        "<l]\n" +
-        "<text]<TAGML]";
+        "<text]<TAGML]\n";
 
+    visualizeDiff("A-1", originText, "B-1", editedText);
+  }
+
+  @Test
+  public void test2() {
+    String originText = "[TAGML|+M>\n" +
+        "[text|M>\n" +
+        "[l|M>\n" +
+        "Une belle<l|M][l|M>main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
+        "<l]\n" +
+        "<text]<TAGML]\n";
+    String editedText = "[TAGML|+N>\n" +
+        "[text|N>\n" +
+        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
+        "<s]\n" +
+        "<text]<TAGML]\n";
+
+    visualizeDiff("A-2", originText, "B-2", editedText);
+  }
+
+  @Test
+  public void test3() {
+    String originText = "[TAGML|+M>\n" +
+        "[body|M>\n" +
+        "[s|M>Une belle main de femme, élégante et fine, malgré [del|M>l'agrandissement du<del] close-up.\n" +
+        "<s]\n" +
+        "<body]\n" +
+        "<TAGML]\n";
+    String editedText = "[TAGML|+M>\n" +
+        "[body|M>\n" +
+        "[s|M>Une [add|M>belle<add] main de femme, élégante et fine.<s]\n" +
+        "[s|M>Malgré l'agrandissement du close-up.<s]\n" +
+        "<body]\n" +
+        "<TAGML]\n";
+
+    visualizeDiff("A-3", originText, "B-3", editedText);
+  }
+
+  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
     store.runInTransaction(() -> {
       TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(originText);
-      TAGDocument edited = importer.importTAGML(editedText);
+      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
       DiffVisualizer visualizer = new AsDOTDiffVisualizer();
       new VariantGraphVisualizer(visualizer)
-          .visualizeVariation(original, edited, allTags);
+          .visualizeVariation(witness1, original, witness2, edited, allTags);
       String result = visualizer.getResult();
-      LOG.info("result=\n{}\n", result);
+      LOG.info("result=\n" +
+          "------8<---------------------------------------\n" +
+          "{}\n" +
+          "------8<---------------------------------------\n", result);
     });
-
   }
-
 }

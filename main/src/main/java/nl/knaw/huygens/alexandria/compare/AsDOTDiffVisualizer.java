@@ -48,13 +48,15 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startOriginal() {
+  public void startOriginal(final String witness1) {
     startIndex = nodeCounter.get();
     resultBuilder
         .append("  subgraph cluster_original{\n")
         .append("    node[color=red]\n")
         .append("    edge[color=red]\n")
-        .append("    style=invis\n");
+        .append("    style=invis\n")
+        .append("    O [shape=ellipse;style=bold;label=<").append(witness1).append(">]\n")
+        .append("    O -> tn").append(startIndex).append("\n");
   }
 
   @Override
@@ -81,13 +83,15 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startDiff() {
+  public void startDiff(final String witness1, final String witness2) {
     startIndex = nodeCounter.get();
     resultBuilder
         .append("  subgraph cluster_diff{\n")
         .append("    node[color=brown]\n")
         .append("    edge[color=brown]\n")
-        .append("    style=invis\n");
+        .append("    style=invis\n")
+        .append("    OE [shape=ellipse;style=bold;label=<").append(witness1).append("/").append(witness2).append(">]\n")
+        .append("    OE -> tn").append(startIndex).append("\n");
     lastNode = "";
   }
 
@@ -223,7 +227,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     replacements.peek().add(nodeVariable);
 
-    String endReplacementNode= "tn" + nodeCounter.getAndIncrement();
+    String endReplacementNode = "tn" + nodeCounter.getAndIncrement();
     resultBuilder.append("    ").append(endReplacementNode).append(" [shape=point]\n");
 
     List<String> options = replacements.pop();
@@ -240,13 +244,15 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startEdited() {
+  public void startEdited(final String witness2) {
     startIndex = nodeCounter.get();
     resultBuilder
         .append("  subgraph cluster_edited{\n")
         .append("    node[color=blue]\n")
         .append("    edge[color=blue]\n")
-        .append("    style=invis\n");
+        .append("    style=invis\n")
+        .append("    E [shape=ellipse;style=bold;label=<").append(witness2).append(">]\n")
+        .append("    E -> tn").append(startIndex).append("\n");
   }
 
   @Override
@@ -279,9 +285,9 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
       resultBuilder
 //          .append("  rank=same{").append(leftNodeVariable).append(" ").append(nodeVariable).append("}\n")
           .append("  ").append(leftNodeVariable).append("->").append(nodeVariable).append(" [style=dashed;arrowhead=none]\n");
-
     });
-    resultBuilder.append("}\n");
+    resultBuilder.append("rank=same{O OE E}\n")
+        .append("}\n");
   }
 
   @Override

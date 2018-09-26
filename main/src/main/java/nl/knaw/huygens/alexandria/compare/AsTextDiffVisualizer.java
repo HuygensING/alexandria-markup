@@ -33,7 +33,7 @@ public class AsTextDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startOriginal() {
+  public void startOriginal(final String witness1) {
   }
 
   @Override
@@ -49,7 +49,7 @@ public class AsTextDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startDiff() {
+  public void startDiff(final String witness1, final String witness2) {
   }
 
   @Override
@@ -130,7 +130,7 @@ public class AsTextDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void startEdited() {
+  public void startEdited(final String witness2) {
   }
 
   @Override

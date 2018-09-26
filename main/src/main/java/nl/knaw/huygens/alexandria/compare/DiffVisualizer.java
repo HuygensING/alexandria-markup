@@ -28,13 +28,13 @@ import java.util.List;
 interface DiffVisualizer {
   void startVisualization();
 
-  void startOriginal();
+  void startOriginal(final String witness1);
 
   void originalTextNode(TAGTextNode t);
 
   void endOriginal();
 
-  void startDiff();
+  void startDiff(final String witness1, final String witness2);
 
   void startAligned();
 
@@ -66,7 +66,7 @@ interface DiffVisualizer {
 
   void endDiff();
 
-  void startEdited();
+  void startEdited(final String witness2);
 
   void editedTextNode(TAGTextNode t);
 

@@ -35,7 +35,10 @@ public class VariantGraphVisualizer {
     this.visualizer = visualizer;
   }
 
-  public void visualizeVariation(TAGDocument document1, TAGDocument document2, TAGView tagView) {
+  public void visualizeVariation(
+      final String witness1, TAGDocument document1,
+      final String witness2, TAGDocument document2,
+      TAGView tagView) {
     List<TAGToken> originalTextTokens = new Tokenizer(document1, tagView)
         .getTAGTokens()
         .stream()
@@ -51,11 +54,11 @@ public class VariantGraphVisualizer {
 
     visualizer.startVisualization();
 
-    visualizer.startOriginal();
+    visualizer.startOriginal(witness1);
     document1.getTextNodeStream().forEach(visualizer::originalTextNode);
     visualizer.endOriginal();
 
-    visualizer.startDiff();
+    visualizer.startDiff(witness1, witness2);
     segments.forEach(segment -> {
       switch (segment.type) {
         case aligned:
@@ -90,7 +93,7 @@ public class VariantGraphVisualizer {
     });
     visualizer.endDiff();
 
-    visualizer.startEdited();
+    visualizer.startEdited(witness2);
     document2.getTextNodeStream().forEach(visualizer::editedTextNode);
     visualizer.endEdited();
 
