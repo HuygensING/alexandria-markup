@@ -94,6 +94,7 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
+//      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
       DiffVisualizer visualizer = new AsDOTDiffVisualizer();
       new VariantGraphVisualizer(visualizer)
           .visualizeVariation(witness1, original, witness2, edited, allTags);
