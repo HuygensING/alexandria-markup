@@ -22,12 +22,17 @@ package nl.knaw.huygens.alexandria.compare;
 
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import prioritised_xml_collation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
+
 public class VariantGraphVisualizer {
+  Logger LOG = LoggerFactory.getLogger(VariantGraphVisualizer.class);
 
   private final DiffVisualizer visualizer;
 
@@ -44,11 +49,14 @@ public class VariantGraphVisualizer {
         .stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
+    LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
     List<TAGToken> editedTextTokens = new Tokenizer(document2, tagView)
         .getTAGTokens()
         .stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
+    LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
+
     SegmenterInterface segmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
     List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, segmenter);
 
@@ -98,6 +106,12 @@ public class VariantGraphVisualizer {
     visualizer.endEdited();
 
     visualizer.endVisualization();
+  }
+
+  private String serializeTokens(final List<TAGToken> originalTextTokens) {
+    return originalTextTokens.stream()
+        .map(t -> "[" + t.toString().replaceAll(" ", "_") + "]")
+        .collect(joining(", "));
   }
 
 }

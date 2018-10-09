@@ -31,12 +31,18 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void startVisualization() {
-    resultBuilder.append("<table border=\"1\">\n");
+    resultBuilder.append("<style>\n")
+        .append(".markup-original { background-color:#66ccff}\n")
+        .append(".original { background-color:lightcyan}\n")
+        .append(".edited { background-color:palegreen}\n")
+        .append(".markup-edited { background-color:#33cc33}\n")
+        .append("</style>\n")
+        .append("<table border=\"1\">\n");
   }
 
   @Override
   public void startOriginal(final String witness1) {
-    resultBuilder.append("  <tr>\n    <th>").append(witness1).append("</th>\n");
+    resultBuilder.append("  <tr>\n    <th class=\"original\">").append(witness1).append("</th>\n");
   }
 
   @Override
@@ -134,7 +140,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void startEdited(final String witness2) {
-    resultBuilder.append("  <tr>\n    <th>").append(witness2).append("</th>\n");
+    resultBuilder.append("  <tr>\n    <th class=\"edited\">").append(witness2).append("</th>\n");
   }
 
   @Override
@@ -165,7 +171,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   private String escapedText(final String text) {
-    String normalized = text.replace("\n", "\\n");
+    String normalized = text.replace("\n", "\\n").replace(" ", "_");
     return StringEscapeUtils.escapeHtml3(normalized)
         .replace(" ", "&nbsp;");
   }

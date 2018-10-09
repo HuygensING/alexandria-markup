@@ -87,6 +87,8 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
   }
 
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+    LOG.info("{}:\n{}",witness1,tagml1);
+    LOG.info("{}:\n{}",witness2,tagml2);
     store.runInTransaction(() -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
@@ -94,8 +96,8 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
-//      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
-      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
       new VariantGraphVisualizer(visualizer)
           .visualizeVariation(witness1, original, witness2, edited, allTags);
       String result = visualizer.getResult();
