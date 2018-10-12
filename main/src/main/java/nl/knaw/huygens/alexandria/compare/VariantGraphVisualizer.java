@@ -44,21 +44,34 @@ public class VariantGraphVisualizer {
       final String witness1, TAGDocument document1,
       final String witness2, TAGDocument document2,
       TAGView tagView) {
-    List<TAGToken> originalTextTokens = new Tokenizer(document1, tagView)
-        .getTAGTokens()
-        .stream()
+    List<TAGToken> originalTokens = new Tokenizer(document1, tagView)
+        .getTAGTokens();
+    List<TAGToken> originalTextTokens = originalTokens.stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
     LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
-    List<TAGToken> editedTextTokens = new Tokenizer(document2, tagView)
-        .getTAGTokens()
+    List<TAGToken> originalMarkupTokens = originalTokens.stream()
+        .filter(this::isMarkupToken)
+        .collect(Collectors.toList());
+    LOG.info("originalMarkupTokens={}", serializeTokens(originalMarkupTokens));
+
+    List<TAGToken> editedTokens = new Tokenizer(document2, tagView)
+        .getTAGTokens();
+    List<TAGToken> editedTextTokens = editedTokens
         .stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
     LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
+    List<TAGToken> editedMarkupTokens = editedTokens.stream()
+        .filter(this::isMarkupToken)
+        .collect(Collectors.toList());
+    LOG.info("editedMarkupTokens={}", serializeTokens(editedMarkupTokens));
 
-    SegmenterInterface segmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
-    List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, segmenter);
+    SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
+    List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
+
+    SegmenterInterface markupSegmenter = new ProvenanceAwareSegmenter(originalMarkupTokens, editedMarkupTokens);
+    List<Segment> markupSegments = new TypeAndContentAligner().alignTokens(originalMarkupTokens, editedMarkupTokens, textSegmenter);
 
     visualizer.startVisualization();
 
@@ -67,7 +80,7 @@ public class VariantGraphVisualizer {
     visualizer.endOriginal();
 
     visualizer.startDiff(witness1, witness2);
-    segments.forEach(segment -> {
+    textSegments.forEach(segment -> {
       switch (segment.type) {
         case aligned:
           visualizer.startAligned();
@@ -106,6 +119,11 @@ public class VariantGraphVisualizer {
     visualizer.endEdited();
 
     visualizer.endVisualization();
+  }
+
+  private boolean isMarkupToken(final TAGToken tagToken) {
+    return tagToken instanceof MarkupOpenToken
+        || tagToken instanceof MarkupCloseToken;
   }
 
   private String serializeTokens(final List<TAGToken> originalTextTokens) {
