@@ -50,13 +50,15 @@
 
 - initialize nodes-to-process list *ntp*
 
+- if *m<sub>i</sub>* is part of a discontinued markup, add all preceding markup nodes that are part of this discontinuity to *ntp*    
+
 - add the given markup node *m<sub>i</sub>* to *ntp*
 
-- if *m<sub>i</sub>* has incoming *continuation-edge* *e<sub>i</sub>*  
+- if *m<sub>i</sub>* is part of a discontinued markup, add all succeeding markup nodes that are part of this discontinuity to *ntp*    
 
-- for *e<sub>i</sub>* in all outgoing edges *e<sub>1</sub>* .. *e<sub>n</sub>*,
-  - add target nodes *n<sub>1</sub>* .. *n<sub>n</sub>* to *ns*
-
-- if the given markup node is part of a discontinued markup, add all child nodes of the continued markup node to *ns*
+- for markup node *m<sub>j</sub>* in *ntp*, 
+  - for *e<sub>i</sub>* in all outgoing edges *e<sub>1</sub>* .. *e<sub>n</sub>* of *m<sub>j</sub>*,
+    - add target nodes *n<sub>1</sub>* .. *n<sub>n</sub>* to *ns*
 
 - *ns* now contains all child nodes for the given markup node. 
+
