@@ -53,6 +53,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   @AfterClass
   public static void afterClass() {
     store.close();
+    LOG.info("Deleting tempDirectory {}", tmpDir.toAbsolutePath());
     boolean success = tmpDir.toFile().delete();
     if (!success) {
       LOG.warn("Could not delete tempDirectory {}", tmpDir.toAbsolutePath());
