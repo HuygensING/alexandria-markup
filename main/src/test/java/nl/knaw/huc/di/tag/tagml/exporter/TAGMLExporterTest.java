@@ -30,6 +30,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGMLExporterTest extends TAGBaseStoreTest {
 
+  @Test
+  public void testNonLinearityWith3Branches() {
+    String tagML = "[tagml|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|miserable|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
   @Ignore
   @Test
   public void testBrulez() {
