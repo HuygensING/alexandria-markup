@@ -42,6 +42,9 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException {
+    LOG.info("System.getenv()={}",System.getenv());
+    LOG.info("System.getenv().keySet()={}",System.getenv().keySet());
+    LOG.info("System.getenv().values()={}",System.getenv().values());
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
@@ -52,12 +55,14 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   @AfterClass
   public static void afterClass() {
+    LOG.info("afterClass() called!");
     store.close();
     LOG.info("Deleting tempDirectory {}", tmpDir.toAbsolutePath());
     boolean success = tmpDir.toFile().delete();
     if (!success) {
       LOG.warn("Could not delete tempDirectory {}", tmpDir.toAbsolutePath());
     }
+    LOG.info("afterClass() finished!");
   }
 
 }
