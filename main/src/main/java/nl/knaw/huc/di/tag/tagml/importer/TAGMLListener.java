@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
@@ -148,6 +147,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitText(TextContext ctx) {
     String text = unEscape(ctx.getText());
+    if (text.equals("jolie")) {
+      LOG.info("jolie!");
+    }
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     // TODO: smarter whitespace handling
@@ -179,6 +181,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             Set<String> newParentLayers = handledLayers.stream()
                 .map(l -> document.getDTO().textGraph.getParentLayerMap().get(l))
                 .filter(l -> !handledLayers.contains(l))
+                .filter(l -> !TAGML.DEFAULT_LAYER.equals(l)) // Once again, the default layer is special! TODO: fix default layer usage
                 .collect(toSet());
             handledLayers.addAll(newParentLayers);
             goOn = !newParentLayers.isEmpty();

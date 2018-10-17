@@ -28,9 +28,9 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@Ignore
 public class TAGMLExporterTest extends TAGBaseStoreTest {
 
+  @Ignore
   @Test
   public void testBrulez() {
     String tagmlIn = "[doc source=\"typescript-tg_lhhs_107\">\n" +
@@ -171,8 +171,14 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testNonLinearityAndLayers() {
+  public void testNonLinearityAndLayers1() {
     String tagML = "[tagml|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
+  public void testNonLinearityAndLayers2() {
+    String tagML = "[a>[tagml|+A,+B>[l|A>Et voilà que de la <|[w|A>sombre<w|A]|[w|B>jolie<w|B]|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]<a]";
     assertTAGMLOutIsIn(tagML);
   }
 

@@ -93,6 +93,10 @@ public class TAGView {
     return relevantMarkupIds;
   }
 
+//  private boolean isInDefaultLayerOnly(final Long markupId) {
+//    return getLayers(markupId).stream().anyMatch(TAGML.DEFAULT_LAYER::equals);
+//  }
+
   private boolean isInDefaultLayerOnly(final Long markupId) {
     Set<String> layers = getLayers(markupId);
     return layers.size() == 1
