@@ -41,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 import static nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
@@ -59,6 +61,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Deque<State> stateStack = new ArrayDeque<>();
   private final Deque<TAGDocument> documentStack = new ArrayDeque<>(); // TODO: move to state
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
+  private static final Set<String> DEFAULT_LAYER_ONLY = singleton(TAGML.DEFAULT_LAYER);
 
   private boolean atDocumentStart = true;
 
@@ -332,16 +335,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void enterTextVariation(final TextVariationContext ctx) {
 //    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
-    final Set<String> layers = getOpenLayers();
 
-    TAGMarkup branches = openTextVariationMarkup(":branches", layers);
+    TAGMarkup branches = openTextVariationMarkup(BRANCHES, DEFAULT_LAYER_ONLY);
 
     TextVariationState textVariationState = new TextVariationState();
     textVariationState.startMarkup = branches;
     textVariationState.startState = state.copy();
     textVariationState.branch = 0;
     textVariationStateStack.push(textVariationState);
-    openTextVariationMarkup(":branch", layers);
+    openTextVariationMarkup(BRANCH, DEFAULT_LAYER_ONLY);
   }
 
   private TAGMarkup openTextVariationMarkup(final String tagName, final Set<String> layers) {
@@ -363,14 +365,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
-    final Set<String> layers = getOpenLayers();
-    closeSystemMarkup(":branch", layers);
+    closeSystemMarkup(BRANCH, DEFAULT_LAYER_ONLY);
     checkForOpenMarkupInBranch(ctx);
 
     currentTextVariationState().endStates.add(state.copy());
     currentTextVariationState().branch += 1;
     state = currentTextVariationState().startState.copy();
-    openTextVariationMarkup(":branch", layers);
+    openTextVariationMarkup(BRANCH, DEFAULT_LAYER_ONLY);
   }
 
   private void closeTextVariationMarkup(final String extendedMarkupName, final Set<String> layers) {
@@ -415,10 +416,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
-    final Set<String> layers = getOpenLayers();
-    closeSystemMarkup(":branch", layers);
+    closeSystemMarkup(BRANCH, DEFAULT_LAYER_ONLY);
     checkForOpenMarkupInBranch(ctx);
-    closeSystemMarkup(":branches", layers);
+    closeSystemMarkup(BRANCHES, DEFAULT_LAYER_ONLY);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
     if (errorListener.hasErrors()) { // TODO: check if a breaking error should have been set earlier
@@ -618,7 +618,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           return null;
         } else if (!isSuspend) {
           TAGMarkup expected = markupStack.peek();
-          if (expected.hasTag(":branch")) {
+          if (expected.hasTag(BRANCH)) {
             errorListener.addBreakingError(
                 "%s Markup [%s> opened before branch %s, should not be closed in a branch.",
                 errorPrefix(ctx), extendedMarkupName, currentTextVariationState().branch + 1);

@@ -129,6 +129,12 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testNonLinearityAndLayers() {
+    String tagML = "[tagml|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
   public void testSingleQuotedStringAnnotation() {
     String tagML = "[tagml author='me'>test<tagml]";
     assertTAGMLOutIsIn(tagML);

@@ -29,6 +29,8 @@ import nl.knaw.huygens.alexandria.view.TAGView;
 import java.util.List;
 import java.util.Set;
 
+import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+
 public class TAGMLBuilder implements TAGVisitor {
   String result = "";
   StringBuilder tagmlBuilder = new StringBuilder();
@@ -46,9 +48,9 @@ public class TAGMLBuilder implements TAGVisitor {
   @Override
   public void exitDocument(final TAGDocument document) {
     result = tagmlBuilder.toString()
-        .replace("[:branches>[:branch>", TAGML.DIVERGENCE)
-        .replace("<:branch][:branch>", TAGML.DIVIDER)
-        .replace("<:branch]<:branches]", TAGML.CONVERGENCE)
+        .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
+        .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
+        .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE)
     ;
   }
 
