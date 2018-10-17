@@ -24,6 +24,7 @@ package nl.knaw.huygens.alexandria;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException {
-    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
+//    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
@@ -53,18 +54,19 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   @AfterClass
   public static void afterClass() {
-    LOG.info("afterClass() called!");
-    try {
-      store.close();
-    }catch (Exception e){
-      e.printStackTrace();
+    if (store != null) {
+      try {
+        store.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
     LOG.info("Deleting tempDirectory {}", tmpDir.toAbsolutePath());
-    boolean success = tmpDir.toFile().delete();
-    if (!success) {
-      LOG.warn("Could not delete tempDirectory {}", tmpDir.toAbsolutePath());
+    try {
+      FileUtils.forceDelete(tmpDir.toFile());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-    LOG.info("afterClass() finished!");
   }
 
 }
