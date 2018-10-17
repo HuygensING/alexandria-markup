@@ -26,6 +26,8 @@ import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
   protected static TAGStore store;
   protected static TAGMLExporter tagmlExporter;
   private static Path tmpDir;
@@ -40,6 +43,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   @BeforeClass
   public static void beforeClass() throws IOException {
     tmpDir = Files.createTempDirectory("tmpDir");
+    LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
     store = new TAGStore(tmpDir.toString(), false);
     store.open();
@@ -49,7 +53,10 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   @AfterClass
   public static void afterClass() {
     store.close();
-    tmpDir.toFile().delete();
+    boolean success = tmpDir.toFile().delete();
+    if (!success) {
+      LOG.warn("Could not delete tempDirectory {}", tmpDir.toAbsolutePath());
+    }
   }
 
 }
