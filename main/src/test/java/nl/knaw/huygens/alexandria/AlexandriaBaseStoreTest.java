@@ -44,8 +44,6 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException {
-    EnvironmentConfig envConfig = new EnvironmentConfig();
-    envConfig.setConfigParam(EnvironmentConfig.FREE_DISK, "0");
 //    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());

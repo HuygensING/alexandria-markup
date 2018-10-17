@@ -66,7 +66,9 @@ public class TAGStore implements AutoCloseable {
       EnvironmentConfig envConfig = new EnvironmentConfig()
           .setReadOnly(readOnly)
           .setAllowCreate(!readOnly)
-          .setTransactional(true);
+          .setTransactional(true)
+          .setConfigParam(EnvironmentConfig.FREE_DISK, "0");
+
       bdbEnvironment = new Environment(new File(dbDir), envConfig);
 
       EntityModel model = new AnnotationModel();
