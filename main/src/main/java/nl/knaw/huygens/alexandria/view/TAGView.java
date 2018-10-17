@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
@@ -65,13 +66,13 @@ public class TAGView {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
       List<Long> retain = markupIds.stream()//
-          .filter(m -> hasOverlap(layersToInclude, getLayers(m)))//
+          .filter(m -> hasOverlap(layersToInclude, getLayers(m)) || isInDefaultLayerOnly(m))//
           .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
       List<Long> remove = markupIds.stream()//
-          .filter(m -> hasOverlap(layersToExclude, getLayers(m)))//
+          .filter(m -> hasOverlap(layersToExclude, getLayers(m)) && !isInDefaultLayerOnly(m))//
           .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
@@ -90,6 +91,12 @@ public class TAGView {
       relevantMarkupIds.removeAll(remove);
     }
     return relevantMarkupIds;
+  }
+
+  private boolean isInDefaultLayerOnly(final Long markupId) {
+    Set<String> layers = getLayers(markupId);
+    return layers.size() == 1
+        && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
   }
 
   private boolean hasOverlap(Set<String> layersToInclude, Set<String> layers) {
