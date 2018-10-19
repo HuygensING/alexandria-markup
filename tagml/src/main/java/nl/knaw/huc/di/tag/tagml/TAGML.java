@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml;
  * limitations under the License.
  * #L%
  */
+
 import static java.util.regex.Pattern.quote;
 
 public class TAGML {
@@ -38,6 +39,14 @@ public class TAGML {
   public static final String RESUME_PREFIX = "+";
 
   public static final String DEFAULT_LAYER = "";
+
+  public static final String BRANCHES = ":branches";
+  public static final String BRANCH = ":branch";
+
+  public static final String BRANCHES_START = OPEN_TAG_STARTCHAR + BRANCHES + OPEN_TAG_ENDCHAR;
+  public static final String BRANCH_START = OPEN_TAG_STARTCHAR + BRANCH + OPEN_TAG_ENDCHAR;
+  public static final String BRANCH_END = CLOSE_TAG_STARTCHAR + BRANCH + CLOSE_TAG_ENDCHAR;
+  public static final String BRANCHES_END = CLOSE_TAG_STARTCHAR + BRANCHES + CLOSE_TAG_ENDCHAR;
 
   public static String escapeRegularText(final String content) {
     return content

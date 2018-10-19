@@ -200,7 +200,10 @@ public class TAGDocument {
   }
 
   public void closeMarkupInLayer(TAGMarkup markup, String layerName) {
-    TAGMarkup lastOpenedMarkup = openMarkupStackForLayer.get(layerName).pop();
+    Deque<TAGMarkup> tagMarkups = openMarkupStackForLayer.get(layerName);
+    if (!tagMarkups.isEmpty()) {
+      TAGMarkup lastOpenedMarkup = tagMarkups.pop();
+    }
   }
 
   public Stream<TAGTextNode> getTextNodeStreamForMarkup(final TAGMarkup markup) {

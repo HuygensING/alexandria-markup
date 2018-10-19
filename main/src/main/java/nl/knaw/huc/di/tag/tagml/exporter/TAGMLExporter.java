@@ -214,9 +214,9 @@ public class TAGMLExporter extends TAGExporter {
     state.openMarkupIds.descendingIterator()//
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     return tagmlBuilder.toString()
-        .replace("[:branches>[:branch>", TAGML.DIVERGENCE)
-        .replace("<:branch][:branch>", TAGML.DIVIDER)
-        .replace("<:branch]<:branches]", TAGML.CONVERGENCE)
+        .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
+        .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
+        .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE)
         ;
   }
 
