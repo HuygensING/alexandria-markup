@@ -4,7 +4,7 @@
 .project
 .idea
 *.iml
-target
+**/target
 out/*
-/dependency-reduced-pom.xml
 main/out
+**/dependency-reduced-pom.xml
