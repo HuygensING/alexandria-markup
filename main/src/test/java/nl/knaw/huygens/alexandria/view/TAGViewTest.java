@@ -40,6 +40,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGViewTest extends AlexandriaBaseStoreTest {
 
+  @Test
+  public void testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
+    String tagml = "[tagml|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<tagml]";
+    String viewJson = "{'includeLayers':['A']}".replace("'", "\"");
+    String expected = "[tagml|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml|A,B]";
+    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+    TAGView view = tagViewFactory.fromJsonString(viewJson);
+    TAGDocument document = store.runInTransaction(() ->
+        new TAGMLImporter(store).importTAGML(tagml)
+    );
+    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+    assertThat(viewExport).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
+    String tagml = "[tagml|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<tagml]";
+    String viewJson = "{'excludeLayers':['B']}".replace("'", "\"");
+    String expected = "[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?";
+    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+    TAGView view = tagViewFactory.fromJsonString(viewJson);
+    TAGDocument document = store.runInTransaction(() ->
+        new TAGMLImporter(store).importTAGML(tagml)
+    );
+    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+    assertThat(viewExport).isEqualTo(expected);
+  }
+
   @Test // NLA-489
   public void testLayerMarkupCombinationInView() {
     String tagml = "[tagml|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<tagml]";

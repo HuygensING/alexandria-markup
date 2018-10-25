@@ -100,6 +100,16 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testBranchError() {
+    String input = "[tagml|+sem,+gen>" +
+        "[l|sem>a <|[add|gen>added<add]|[del|gen>del<del]|> line<l]" +
+        "<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+    });
+  }
+
+  @Test
   public void testLayerShouldBeHierarchical() {
     String input = "[tagml|+a,+b>" +
         "[page|b>" +

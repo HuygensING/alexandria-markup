@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 
 public class DotFactory {
   private ColorPicker colorPicker = new ColorPicker("red", "blue", "darkgray", "gray", "green", "lightgray", //
@@ -115,10 +117,10 @@ public class DotFactory {
   }
 
   private String toMarkupNodeLine(final TAGMarkup markup) {
-    if (markup.getExtendedTag().startsWith(":branches")) {
+    if (markup.getExtendedTag().startsWith(BRANCHES)) {
       return format("  m%d [shape=triangle;color=red;label=\"\"]\n", markup.getDbId());
 
-    } else if (markup.getExtendedTag().startsWith(":branch")) {
+    } else if (markup.getExtendedTag().startsWith(BRANCH)) {
       return format("  m%d [shape=point;color=red]\n", markup.getDbId());
 
     }
@@ -127,14 +129,14 @@ public class DotFactory {
     Iterator<String> layerIterator = markup.getLayers().iterator();
     String layerName = layerIterator.next();
     String color = getLayerColor(layerName);
-    while (layerIterator.hasNext()){
+    while (layerIterator.hasNext()) {
       String otherLayer = layerIterator.next();
       String otherColor = getLayerColor(otherLayer);
       pre.append("  subgraph cluster_").append(markup.getDbId()).append(otherLayer).append("{\n")
           .append("    style=rounded\n    color=").append(otherColor).append("\n  ");
       post.append("  }\n");
     }
-    return format("%s  m%d [color=%s;label=<%s>]\n%s", pre, markup.getDbId(), color, markup.getExtendedTag(),post);
+    return format("%s  m%d [color=%s;label=<%s>]\n%s", pre, markup.getDbId(), color, markup.getExtendedTag(), post);
   }
 
   private String toMarkupContinuationLine(final TAGMarkup tagMarkup) {

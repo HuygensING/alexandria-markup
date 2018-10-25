@@ -46,6 +46,8 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
@@ -122,6 +124,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
     String input = "[tagml>[pre|+L1,+L2>" +
@@ -155,7 +158,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           .findFirst()
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-      assertThat(markups).extracting("tag").containsExactly(":branch", ":branches", "s", "pre", "tagml");
+      assertThat(markups).extracting("tag").containsExactly(BRANCH, BRANCHES, "s", "pre", "tagml");
 
       List<TAGMarkup> preMarkups = document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
       assertThat(preMarkups).hasSize(1);

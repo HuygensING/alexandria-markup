@@ -70,8 +70,8 @@ public class VariantGraphVisualizer {
     SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
     List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
 
-    SegmenterInterface markupSegmenter = new ProvenanceAwareSegmenter(originalMarkupTokens, editedMarkupTokens);
-    List<Segment> markupSegments = new TypeAndContentAligner().alignTokens(originalMarkupTokens, editedMarkupTokens, textSegmenter);
+//    SegmenterInterface markupSegmenter = new ProvenanceAwareSegmenter(originalMarkupTokens, editedMarkupTokens);
+//    List<Segment> markupSegments = new TypeAndContentAligner().alignTokens(originalMarkupTokens, editedMarkupTokens, markupSegmenter);
 
     visualizer.startVisualization();
 

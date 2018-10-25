@@ -36,6 +36,8 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 import static org.junit.Assert.fail;
 
@@ -536,7 +538,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       assertThat(TAGMarkups)
           .extracting("tag")
-          .containsExactly("t", "x", ":branches", ":branch", ":branch");
+          .containsExactly("t", "x", BRANCHES, BRANCH, BRANCH);
 
       TAGMarkup t = TAGMarkups.get(0);
       assertThat(t.getTag()).isEqualTo("t");
