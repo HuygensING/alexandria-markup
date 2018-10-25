@@ -303,7 +303,7 @@ public class TAGMarkup {
     return annotationsString.toString();
   }
 
-  private String layerSuffix(final Set<String> newLayers) {
+  String layerSuffix(final Set<String> newLayers) {
     String layerSuffix = getLayers().stream()
         .filter(l -> !l.isEmpty())
         .map(l -> newLayers.contains(l) ? "+" + l : l)

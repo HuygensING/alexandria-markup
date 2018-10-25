@@ -55,6 +55,28 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
   private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
+  @Test // Rd-205
+  public void testDefaultLayerIsAlwaysOpen() {
+    String input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("x"),
+          markupSketch("t"),
+          markupSketch("t")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("simple"),
+          textNodeSketch(" "),
+          textNodeSketch("text"),
+          textNodeSketch(" "),
+          textNodeSketch("test")
+      );
+      assertThat(document.getLayerNames()).containsExactly("","A");
+    });
+  }
+
   @Test // RD-131
   public void testSimpleTextWithRoot() {
     String input = "[tagml>simple text<tagml]";

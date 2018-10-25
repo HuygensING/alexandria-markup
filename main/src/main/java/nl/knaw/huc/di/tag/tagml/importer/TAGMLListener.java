@@ -113,6 +113,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitDocument(DocumentContext ctx) {
+    if (state.openMarkup.containsKey(TAGML.DEFAULT_LAYER)) {
+      state.openMarkup.get(TAGML.DEFAULT_LAYER).clear();
+    }
     document.linkParentlessLayerRootsToDocument();
     document.setNamespaces(namespaces);
     update(document.getDTO());
@@ -214,22 +217,26 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layers = new HashSet<>();
       state.allOpenMarkup.push(markup);
       layerIds.forEach(layerId -> {
-        if (layerId.equals("") && !document.getLayerNames().contains(TAGML.DEFAULT_LAYER)) {
+        boolean defaultLayerAdded = false;
+        if (!document.getLayerNames().contains(TAGML.DEFAULT_LAYER)) {
           addDefaultLayer(markup, layers);
-
-        } else if (layerId.contains("+")) {
+          defaultLayerAdded = true;
+        }
+        if (layerId.contains("+")) {
           String[] parts = layerId.split("\\+");
-          String parentLayer = parts[0];
+          String parentLayer = defaultLayerAdded ? null : parts[0];
           String newLayerId = parts[1];
           document.addLayer(newLayerId, markup, parentLayer);
 //          layers.add(parentLayer);
           layers.add(newLayerId);
 
-        } else {
+        } else if (!TAGML.DEFAULT_LAYER.equals(layerId)) {
           checkLayerWasAdded(ctx, layerId);
           checkLayerIsOpen(ctx, layerId);
           document.openMarkupInLayer(markup, layerId);
           layers.add(layerId);
+        } else {
+          layers.add(TAGML.DEFAULT_LAYER);
         }
       });
       markup.addAllLayers(layers);
@@ -597,6 +604,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     boolean layerSuffixNeeded = !(layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER));
     String foundLayerSuffix = layerSuffixNeeded
         ? TAGML.DIVIDER + layers.stream()
+        .filter(l -> !l.isEmpty())
         .sorted()
         .collect(joining(","))
         : "";
@@ -763,7 +771,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkForCorrespondingSuspendTag(final StartTagContext ctx, final String tag,
-      final TAGMarkup markup) {
+                                               final TAGMarkup markup) {
     if (markup == null) {
       errorListener.addBreakingError(
           "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
@@ -802,7 +810,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private boolean nameContextIsValid(final ParserRuleContext ctx,
-      final NameContext nameContext, final LayerInfoContext layerInfoContext) {
+                                     final NameContext nameContext, final LayerInfoContext layerInfoContext) {
     AtomicBoolean valid = new AtomicBoolean(true);
     if (layerInfoContext != null) {
       layerInfoContext.layerName().stream()
