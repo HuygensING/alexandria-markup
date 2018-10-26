@@ -27,11 +27,16 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
+import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -44,6 +49,67 @@ import static org.junit.Assert.fail;
 public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
+
+  @Test // RD-206
+  public void testRD206_1() {
+    String tagML = "[root metadata={" +
+        "stages=[" +
+        "{:id=stage1 medium={tool=\"typewriter\" color=\"black\"} desc=\"xxx\"} " +
+        "{:id=stage2 medium={tool=\"pencil\" color=\"grey\"} desc=\"xxxx\"} " +
+        "{:id=stage3 medium={tool=\"pen\" color=\"blue\"} desc=\"xxx\"}" +
+        "]" +
+        "}>\n" +
+        "[text> \n" +
+        "[del|+gen ref->stage3>  [! some text here !] <del]\n" +
+        "<text]\n" +
+        "<root]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test // RD-206
+  public void testRD206_2() {
+    String tagML = "[root metadata={" +
+        "persons=[" +
+        "{:id=rou001 name='Gustave Roud'} " +
+        "{:id=doe002 name='Jane Doe'}" +
+        "]" +
+        "}>\n" +
+        "[excerpt source={" +
+        "author->rou001 " +
+        "editor->doe002 " +
+        "work=\"requiem\" " +
+        "ts-id=\"CRLR_GR_MS1H16d_1r_1\"" +
+        "} " +
+        "lang=\"fr\" " +
+        "encoding=\"UTF-8\">\n" +
+        "<excerpt]\n" +
+        "<root]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test // RD-207
+  public void testRD207() throws IOException {
+    String tagML = FileUtils.readFileToString(new File("data/tagml/CRLR_GR_MS1H16d_ES.tagml"), "UTF-8");
+    String view = FileUtils.readFileToString(new File("data/tagml/view-stage2-layer.json"), "UTF-8");
+    TAGViewFactory tvf = new TAGViewFactory(store);
+    TAGView tagView = tvf.fromJsonString(view);
+    TAGDocument document = store.runInTransaction(() -> {
+      return parseTAGML(tagML);
+    });
+    assertThat(document).isNotNull();
+    store.runInTransaction(() -> {
+      TAGMLExporter exporter = new TAGMLExporter(store, tagView);
+      String tagmlView = exporter.asTAGML(document);
+      assertThat(tagmlView).isNotNull();
+      LOG.info("view=\n{}", tagmlView);
+    });
+  }
 
   @Test
   public void testFrostQuote() {

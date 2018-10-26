@@ -26,6 +26,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.BasicAnnotationContext;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.IdentifyingAnnotationContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.RefAnnotationContext;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -170,6 +171,12 @@ public class AnnotationFactory {
       IdentifyingAnnotationContext identifyingAnnotationContext = (IdentifyingAnnotationContext) parseTree;
       String value = identifyingAnnotationContext.idValue().getText();
       return new KeyValue(":id", value);
+
+    } else if (parseTree instanceof RefAnnotationContext) {
+      RefAnnotationContext refAnnotationContext = (RefAnnotationContext) parseTree;
+      final String aName = refAnnotationContext.annotationName().getText();
+      final String value = refAnnotationContext.refValue().getText();
+      return new KeyValue("!" + aName, value);
 
     } else {
       throw new RuntimeException("unhandled type " + parseTree.getClass().getName());

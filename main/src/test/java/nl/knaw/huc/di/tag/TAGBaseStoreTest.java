@@ -1,6 +1,5 @@
 package nl.knaw.huc.di.tag;
 
-
 /*
  * #%L
  * alexandria-markup
