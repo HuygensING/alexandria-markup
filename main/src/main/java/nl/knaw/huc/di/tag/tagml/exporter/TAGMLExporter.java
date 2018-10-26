@@ -142,10 +142,10 @@ public class TAGMLExporter extends TAGExporter {
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
         Set<Long> markupIds = new LinkedHashSet<>();
-        List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
+        List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
-        Collections.reverse(markupStreamForTextNode);
-        markupStreamForTextNode.forEach(mw -> {
+        Collections.reverse(markupForTextNode);
+        markupForTextNode.forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);
           state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw, openLayers));

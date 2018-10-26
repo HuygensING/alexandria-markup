@@ -200,6 +200,43 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
+    Set<Long> markupIds = new HashSet<>();
+    Map<Long, Integer> maxDepth = new HashMap<>();
+    List<Long> parentMarkupIds = getIncomingEdges(textNodeId).stream()
+        .filter(LayerEdge.class::isInstance)
+        .map(LayerEdge.class::cast)
+        .map(this::getSource)
+        .collect(toList());
+    parentMarkupIds.remove(documentNode);
+    parentMarkupIds.forEach(m -> maxDepth.put(m, 1));
+    Set<Long> markupHandled = new HashSet<>();
+    markupHandled.add(documentNode);
+    Deque<Long> markupToProcess = new ArrayDeque<>(parentMarkupIds);
+    while (!markupToProcess.isEmpty()) {
+      Long nodeId = markupToProcess.pop();
+      markupIds.add(nodeId);
+      markupHandled.add(nodeId);
+      List<Long> parentMarkupList = getIncomingEdges(nodeId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .map(this::getSource)
+          .collect(toList());
+      parentMarkupList.remove(documentNode);
+      int currentDistance = maxDepth.get(nodeId);
+      int newMaxParentDistance = currentDistance + 1;
+      parentMarkupList.forEach(m -> {
+        if (!maxDepth.containsKey(m) || maxDepth.get(m) < newMaxParentDistance) {
+          maxDepth.put(m, newMaxParentDistance);
+        }
+      });
+      markupToProcess.addAll(parentMarkupList);
+    }
+    final Comparator<Long> maxDistanceComparator = comparing(maxDepth::get);
+    Comparator<Long> comparator = maxDistanceComparator.thenComparing(reverseOrder());
+    return markupIds.stream().sorted(comparator);
+  }
+
+  public Stream<Long> getMarkupIdStreamForTextNodeIdOrderedByDistanceFromTextNode(final Long textNodeId) {
     // TODO: This traversal revisits markup nodes because the maxDistance might have changed.
     //       The maxDistance is needed for the ordering, to get the markupIds back ordered by the maximum distance from the textnode, closest first
     Set<Long> markupIds = new HashSet<>();
