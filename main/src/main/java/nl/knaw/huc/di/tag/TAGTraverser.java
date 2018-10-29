@@ -75,7 +75,7 @@ public class TAGTraverser {
         Set<Long> markupIds = new LinkedHashSet<>();
         List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
-        Collections.reverse(markupStreamForTextNode);
+//        Collections.reverse(markupStreamForTextNode);
         markupStreamForTextNode.forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);

@@ -355,7 +355,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(3);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("country", "a", "line");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("line", "country", "a");
 
       List<String> textSegments = document.getDTO().textGraph
           .getTextNodeIdStream()
@@ -440,7 +440,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("b:b", "a:a");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a", "b:b");
     });
   }
 
@@ -497,7 +497,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("space", "t");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
     });
   }
 
@@ -796,7 +796,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TAGMarkup> TAGMarkups = document.getMarkupStreamForTextNode(always).collect(toList());
       assertThat(TAGMarkups).hasSize(2);
 
-      TAGMarkup del = TAGMarkups.get(0);
+      TAGMarkup del = TAGMarkups.get(1);
       assertThat(del).hasTag("del");
       assertThat(del).isOptional();
     });

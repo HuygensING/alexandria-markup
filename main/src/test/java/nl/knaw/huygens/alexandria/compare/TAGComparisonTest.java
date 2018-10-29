@@ -62,21 +62,17 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     TAGComparison comparison = compare(originText, editedText);
 
     List<String> expected = new ArrayList<>(asList(//
+        " [TAGML>[text>[l>",
         "+[s>",
-        " [l>[text>[TAGML>",
-        " Une [add>[del>jolie<del]<add][add>belle<add] main de femme, élégante et fine",
-        "+.",
-        " <l]",
-        "+<s]",
-        "  ",
-        "+[s>",
-        " [l>",
+        " Une [del>[add>jolie<add]<del][add>belle<add] main de femme, élégante et fine",
+        "+.<s]",
+        " <l] [l>",
         "-malgré ",
-        "+Malgré ",
+        "+[s>Malgré ",
         " l'agrandissement du close-up.",
         "+<s]",
         " <l]",
-        " <TAGML]<text]"//
+        " <text]<TAGML]"//
     ));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }

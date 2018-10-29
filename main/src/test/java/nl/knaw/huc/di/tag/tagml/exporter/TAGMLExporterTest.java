@@ -35,16 +35,16 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML = "[tagml>" +
         "[layerdef|+A>" +
         "[p>" +
-        "[l>A line in the [m|A>sand<m].<l]" +
+        "[l>A line in the [m|A>sand<m|A].<l]" +
         "<p]" +
-        "<layerdef]" +
+        "<layerdef|A]" +
         "<tagml]";
     assertTAGMLOutIsIn(tagML);
   }
 
   @Test
   public void testNonLinearityWith3Branches() {
-    String tagML = "[tagml|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|miserable|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]";
+    String tagML = "[tagml>[layerdef|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|miserable|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<layerdef|A,B]<tagml]";
     assertTAGMLOutIsIn(tagML);
   }
 
@@ -190,7 +190,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNonLinearityAndLayers1() {
-    String tagML = "[tagml|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]";
+    String tagML = "[tagml>[layerdef|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<layerdef|A,B]<tagml]";
     assertTAGMLOutIsIn(tagML);
   }
 

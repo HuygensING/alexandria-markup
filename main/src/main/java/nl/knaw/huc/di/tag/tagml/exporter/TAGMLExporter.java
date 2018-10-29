@@ -144,7 +144,7 @@ public class TAGMLExporter extends TAGExporter {
         Set<Long> markupIds = new LinkedHashSet<>();
         List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
-        Collections.reverse(markupForTextNode);
+//        Collections.reverse(markupForTextNode);
         markupForTextNode.forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);

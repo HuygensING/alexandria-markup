@@ -32,8 +32,10 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.reverseOrder;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
 import static nl.knaw.huc.di.tag.model.graph.edges.Edges.markupContinuation;
@@ -201,38 +203,49 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
     Set<Long> markupIds = new HashSet<>();
-    Map<Long, Integer> maxDepth = new HashMap<>();
-    List<Long> parentMarkupIds = getIncomingEdges(textNodeId).stream()
-        .filter(LayerEdge.class::isInstance)
-        .map(LayerEdge.class::cast)
-        .map(this::getSource)
-        .collect(toList());
-    parentMarkupIds.remove(documentNode);
-    parentMarkupIds.forEach(m -> maxDepth.put(m, 1));
-    Set<Long> markupHandled = new HashSet<>();
-    markupHandled.add(documentNode);
-    Deque<Long> markupToProcess = new ArrayDeque<>(parentMarkupIds);
-    while (!markupToProcess.isEmpty()) {
-      Long nodeId = markupToProcess.pop();
+    Set<Long> nodesHandled = new HashSet<>();
+    nodesHandled.add(documentNode);
+    Deque<Long> nodesToProcess = new ArrayDeque<>(singleton(textNodeId));
+    // collect all markupNodeIds that are connected to the given textNodeId
+    while (!nodesToProcess.isEmpty()) {
+      Long nodeId = nodesToProcess.pop();
       markupIds.add(nodeId);
-      markupHandled.add(nodeId);
-      List<Long> parentMarkupList = getIncomingEdges(nodeId).stream()
+      nodesHandled.add(nodeId);
+      getIncomingEdges(nodeId).stream()
           .filter(LayerEdge.class::isInstance)
           .map(LayerEdge.class::cast)
           .map(this::getSource)
-          .collect(toList());
-      parentMarkupList.remove(documentNode);
-      int currentDistance = maxDepth.get(nodeId);
-      int newMaxParentDistance = currentDistance + 1;
-      parentMarkupList.forEach(m -> {
-        if (!maxDepth.containsKey(m) || maxDepth.get(m) < newMaxParentDistance) {
-          maxDepth.put(m, newMaxParentDistance);
-        }
-      });
-      markupToProcess.addAll(parentMarkupList);
+          .filter(id -> !nodesHandled.contains(id))
+          .forEach(nodesToProcess::add);
     }
-    final Comparator<Long> maxDistanceComparator = comparing(maxDepth::get);
-    Comparator<Long> comparator = maxDistanceComparator.thenComparing(reverseOrder());
+    markupIds.remove(textNodeId);
+
+    // For each connected node we have to determine the distance from the root ( = depth)
+    Map<Long, Integer> nodeDepth = new HashMap<>();
+    nodesToProcess.addAll(layerRootMap.values());
+    layerRootMap.values().forEach(v -> nodeDepth.put(v, 0));
+    nodesHandled.clear();
+    while (!nodesToProcess.isEmpty()) {
+      Long nodeId = nodesToProcess.pop();
+//      LOG.info("nodeId={}", nodeId);
+      nodesHandled.add(nodeId);
+      int nextDepth = nodeDepth.get(nodeId) + 1;
+      getOutgoingEdges(nodeId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .map(this::getTargets)
+          .flatMap(Collection::stream)
+//          .peek(System.out::println)
+          .filter(id -> !nodesHandled.contains(id))
+          .filter(markupIds::contains)
+          .forEach(n -> {
+            nodesToProcess.add(n);
+            nodeDepth.put(n, nextDepth);
+          });
+    }
+
+    final Comparator<Long> maxDistanceComparator = comparing(nodeDepth::get);
+    Comparator<Long> comparator = maxDistanceComparator.thenComparing(identity());
     return markupIds.stream().sorted(comparator);
   }
 
