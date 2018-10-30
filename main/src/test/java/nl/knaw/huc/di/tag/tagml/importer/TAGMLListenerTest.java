@@ -101,9 +101,9 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
   @Test
   public void testBranchError() {
-    String input = "[tagml|+sem,+gen>" +
+    String input = "[tagml>[layerdef|+sem,+gen>" +
         "[l|sem>a <|[add|gen>added<add]|[del|gen>del<del]|> line<l]" +
-        "<tagml]";
+        "<layerdef]<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
     });

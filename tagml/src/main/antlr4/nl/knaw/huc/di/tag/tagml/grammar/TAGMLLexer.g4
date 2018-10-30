@@ -34,7 +34,8 @@ DEFAULT_Text  // match any 16 bit char other than { (start close tag) and [ (sta
   ;
 
 NAME
-  : NameStartChar NameChar*
+  : NameStartChar
+  | NameStartChar NameChar* NameEndChar
   ;
 
 // ----------------- Everything INSIDE of a NAMESPACE ---------------------
@@ -99,10 +100,6 @@ IMO_EndOpenMarkup
 // ----------------- Everything after the markup name -------------
 mode ANNOTATIONS;
 
-A_Ref
-  : '->' -> pushMode(INSIDE_REF_VALUE)
-  ;
-
 A_IdAnnotation
   : ':id'
   ;
@@ -117,6 +114,10 @@ A_WS
 
 A_EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
+  ;
+
+A_Ref
+  : '->' -> pushMode(INSIDE_REF_VALUE)
   ;
 
 A_EndOpenMarkup
@@ -216,27 +217,27 @@ IO_AnnotationName
   : NAME
   ;
 
+IO_Ref
+  : '->' -> pushMode(INSIDE_REF_VALUE)
+  ;
+
 IO_EQ
   : '=' -> pushMode(ANNOTATION_VALUE)
   ;
 
 IO_ObjectCloser
-  : '}' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
+  : WS* '}' -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of [ ] -------------
 mode INSIDE_LIST;
 
 IL_WS
-  :  WS  -> skip
-  ;
-
-IL_COMMA
-  : COMMA -> pushMode(ANNOTATION_VALUE)
+  :  (WS|COMMA)  -> pushMode(ANNOTATION_VALUE)
   ;
 
 IL_ListCloser
-  : RIGHT_SQUARE_BRACKET -> popMode, popMode // back to INSIDE_MARKUP_OPENER
+  : WS* RIGHT_SQUARE_BRACKET -> popMode, popMode // back to INSIDE_MARKUP_OPENER
   ;
 
 // ----------------- Everything INSIDE of a MARKUP CLOSER -------------
@@ -430,7 +431,9 @@ fragment Z : [Zz];
 fragment
 NameChar
   : NameStartChar
-  | '_' | DIGIT
+  | '-'
+  | '_'
+  | DIGIT
 //  | '.'
   | '\u00B7'
   | '\u0300'..'\u036F'
@@ -445,6 +448,11 @@ NameStartChar
   | '\u3001'..'\uD7FF'
   | '\uF900'..'\uFDCF'
   | '\uFDF0'..'\uFFFD'
+  ;
+
+NameEndChar
+  : NameStartChar
+  | DIGIT
   ;
 
 WS
