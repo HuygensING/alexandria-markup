@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.storage;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,7 +74,7 @@ public class TAGDocument {
       lastOpenedMarkup.forEach(m -> {
             Long dbId = m.getDbId();
             Set<String> relevantLayers = new HashSet<>(m.getLayers());
-            if (relevantLayers.size() > 1 && relevantLayers.contains(DEFAULT_LAYER)) {
+            if (relevantLayers.size() > 1) {
               relevantLayers.remove(DEFAULT_LAYER);
             }
             relevantLayers.forEach(l -> documentDTO.textGraph
@@ -305,9 +305,8 @@ public class TAGDocument {
   }
 
   private boolean isInDefaultLayer(final Edge edge) {
-    if (edge instanceof LayerEdge) {
-      return ((LayerEdge) edge).hasLayer(DEFAULT_LAYER);
-    }
-    return (edge instanceof MarkupToTextHyperEdge);
+    return edge instanceof LayerEdge
+        ? ((LayerEdge) edge).hasLayer(DEFAULT_LAYER)
+        : edge instanceof MarkupToTextHyperEdge;
   }
 }
