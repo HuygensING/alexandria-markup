@@ -435,6 +435,24 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
+  @Test // RD-206
+  public void testListElementSeparatorShouldBeComma() {
+    String input = "[tagml>" +
+        "[m l=[3 5 7 11]>text<m]" +
+        "<tagml]";
+    TAGDocument doc = store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("m")
+      );
+      List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
+      assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+      return document;
+    });
+    assertExportEqualsInput(input, doc);
+  }
+
   @Test // NLA-467
   public void testObjectAnnotation0() {
     String input = "[tagml>" +

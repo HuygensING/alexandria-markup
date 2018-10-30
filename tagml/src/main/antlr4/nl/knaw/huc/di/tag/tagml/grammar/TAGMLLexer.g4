@@ -232,7 +232,7 @@ IO_ObjectCloser
 // ----------------- Everything INSIDE of [ ] -------------
 mode INSIDE_LIST;
 
-IL_WS
+IL_SEPARATOR
   :  (WS|COMMA)  -> pushMode(ANNOTATION_VALUE)
   ;
 
