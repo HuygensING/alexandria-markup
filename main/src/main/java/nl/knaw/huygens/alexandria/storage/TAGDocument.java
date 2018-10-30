@@ -181,7 +181,7 @@ public class TAGDocument {
     if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
       Long parentMarkupId = openMarkupStack.peek().getDbId();
       Long childMarkupId = rootMarkup.getDbId();
-      if (parentMarkupId != childMarkupId) {
+      if (!Objects.equals(parentMarkupId, childMarkupId)) {
         TextGraph textGraph = documentDTO.textGraph;
         boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
             .stream()

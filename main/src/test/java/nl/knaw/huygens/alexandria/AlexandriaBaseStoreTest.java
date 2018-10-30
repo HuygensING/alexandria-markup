@@ -21,7 +21,6 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import com.sleepycat.je.EnvironmentConfig;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.storage.TAGStore;

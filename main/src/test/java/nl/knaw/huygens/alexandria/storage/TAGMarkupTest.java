@@ -23,6 +23,7 @@ import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class TAGMarkupTest {
   @Test
   public void testLayerSuffix() {
     Set<String> markupLayers = new HashSet<>(asList("A", "B"));
-    Set<String> newLayers = new HashSet<>(asList("B"));
+    Set<String> newLayers = new HashSet<>(Collections.singletonList("B"));
     String suffix = getLayerSuffix(markupLayers, newLayers);
     assertThat(suffix).isEqualTo("|A,+B");
   }
@@ -44,7 +45,7 @@ public class TAGMarkupTest {
   @Test
   public void testLayerSuffix1() {
     Set<String> markupLayers = new HashSet<>(asList(TAGML.DEFAULT_LAYER, "A", "B"));
-    Set<String> newLayers = new HashSet<>(asList(TAGML.DEFAULT_LAYER));
+    Set<String> newLayers = new HashSet<>(Collections.singletonList(TAGML.DEFAULT_LAYER));
 
     String suffix = getLayerSuffix(markupLayers, newLayers);
     assertThat(suffix).isEqualTo("|A,B");
@@ -52,8 +53,8 @@ public class TAGMarkupTest {
 
   @Test
   public void testLayerSuffix2() {
-    Set<String> markupLayers = new HashSet<>(asList(TAGML.DEFAULT_LAYER));
-    Set<String> newLayers = new HashSet<>(asList(TAGML.DEFAULT_LAYER));
+    Set<String> markupLayers = new HashSet<>(Collections.singletonList(TAGML.DEFAULT_LAYER));
+    Set<String> newLayers = new HashSet<>(Collections.singletonList(TAGML.DEFAULT_LAYER));
 
     String suffix = getLayerSuffix(markupLayers, newLayers);
     assertThat(suffix).isEqualTo("");

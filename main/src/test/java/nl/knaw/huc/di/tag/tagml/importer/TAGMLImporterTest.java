@@ -99,9 +99,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String view = FileUtils.readFileToString(new File("data/tagml/view-stage2-layer.json"), "UTF-8");
     TAGViewFactory tvf = new TAGViewFactory(store);
     TAGView tagView = tvf.fromJsonString(view);
-    TAGDocument document = store.runInTransaction(() -> {
-      return parseTAGML(tagML);
-    });
+    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML));
     assertThat(document).isNotNull();
     store.runInTransaction(() -> {
       TAGMLExporter exporter = new TAGMLExporter(store, tagView);
