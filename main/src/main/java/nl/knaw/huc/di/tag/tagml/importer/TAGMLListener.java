@@ -62,8 +62,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
   private static final Set<String> DEFAULT_LAYER_ONLY = singleton(TAGML.DEFAULT_LAYER);
   private boolean atDocumentStart = true;
-  private Long rootMarkupId = null;
-  private boolean eof = false;
 
   public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
     this.store = store;
@@ -81,6 +79,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     public Map<String, Deque<TAGMarkup>> openMarkup = new HashMap<>();
     public Map<String, Deque<TAGMarkup>> suspendedMarkup = new HashMap();
     public Deque<TAGMarkup> allOpenMarkup = new ArrayDeque<>();
+    public Long rootMarkupId = null;
+    public boolean eof = false;
 
     public State copy() {
       State copy = new State();
@@ -89,7 +89,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       copy.suspendedMarkup = new HashMap<>();
       suspendedMarkup.forEach((k, v) -> copy.suspendedMarkup.put(k, new ArrayDeque<>(v)));
       copy.allOpenMarkup = new ArrayDeque<>(allOpenMarkup);
+      copy.rootMarkupId = rootMarkupId;
+      copy.eof = eof;
       return copy;
+    }
+
+    public boolean rootMarkupIsSet() {
+      return rootMarkupId != null;
     }
   }
 
@@ -162,21 +168,22 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitText(TextContext ctx) {
-    checkEOF(ctx);
     String text = unEscape(ctx.getText());
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     // TODO: smarter whitespace handling
     boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
     if (useText) {
-      if (rootMarkupId == null) {
+      if (StringUtils.isNotBlank(text)) {
+        checkEOF(ctx);
+      }
+      if (!state.rootMarkupIsSet()) {
         errorListener.addBreakingError(
             "%s No text allowed here, the root markup must be started first.",
             errorPrefix(ctx));
       }
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
-//      logTextNode(tn);
     }
   }
 
@@ -236,7 +243,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       boolean firstTag = !document.getLayerNames().contains(TAGML.DEFAULT_LAYER);
       if (firstTag) {
         addDefaultLayer(markup, layers);
-        rootMarkupId = markup.getDbId();
+        state.rootMarkupId = markup.getDbId();
       }
       layerIds.forEach(layerId -> {
         if (layerId.contains("+")) {
@@ -337,7 +344,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
-    if (rootMarkupId == null) {
+    if (!state.rootMarkupIsSet()) {
       errorListener.addBreakingError(
           "%s The root markup cannot be a milestone tag.",
           errorPrefix(ctx));
@@ -694,9 +701,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         }
       }
     }
-    eof = (markup.getDbId().equals(rootMarkupId));
-    if (isSuspend && eof) {
-      TAGMarkup rootMarkup = store.getMarkup(rootMarkupId);
+    state.eof = (markup.getDbId().equals(state.rootMarkupId));
+    if (isSuspend && state.eof) {
+      TAGMarkup rootMarkup = store.getMarkup(state.rootMarkupId);
       errorListener.addBreakingError(
           "%s The root markup %s cannot be suspended.",
           errorPrefix(ctx), rootMarkup);
@@ -926,8 +933,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void checkEOF(final ParserRuleContext ctx) {
-    if (eof) {
-      TAGMarkup rootMarkup = store.getMarkup(rootMarkupId);
+    if (state.eof) {
+      TAGMarkup rootMarkup = store.getMarkup(state.rootMarkupId);
       errorListener.addBreakingError(
           "%s No text or markup allowed after the root markup %s has been ended.",
           errorPrefix(ctx), rootMarkup);

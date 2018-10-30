@@ -581,7 +581,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testRichTextAnnotation1() {
-    String input = "[t note=[>This is a [n>note<n] about this text<]>main text<t]";
+    String input = "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(

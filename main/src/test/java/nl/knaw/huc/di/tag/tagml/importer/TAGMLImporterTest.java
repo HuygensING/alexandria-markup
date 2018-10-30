@@ -30,6 +30,7 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -577,7 +578,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[text> [q>Hello my name is " +
         "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
         "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
-    String expectedErrors = "line 1:53 : Close tag <q] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:46 : No text allowed here, the root markup must be started first.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
