@@ -156,30 +156,21 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "<page]\n" +
         "<text]\n" +
         "<tagml]";
-    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A B _default\">\n" +
-        "<tagml th:doc=\"_default\" th:sId=\"tagml0\"/>" +
-        "<text th:doc=\"A B\" th:sId=\"text1\"/>" +
-        "<page th:doc=\"A\" th:sId=\"page2\"/>" +
-        "<p th:doc=\"B\" th:sId=\"p3\"/>" +
-        "<line th:doc=\"_default\" th:sId=\"line4\"/>1st. Voice from the Springs" +
-        "<line th:doc=\"_default\" th:eId=\"line4\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line5\"/>Thrice three hundred thousand years" +
-        "<line th:doc=\"_default\" th:eId=\"line5\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line6\"/>We had been stained with bitter blood" +
-        "<line th:doc=\"_default\" th:eId=\"line6\"/>\n" +
-        "<page th:doc=\"A\" th:eId=\"page2\"/>\n" +
-        "<page th:doc=\"A\" th:sId=\"page7\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line8\"/>And had ran mute &apos;mid shrieks of slaugter[sic]" +
-        "<line th:doc=\"_default\" th:eId=\"line8\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line9\"/>Thro&apos; a city &amp; a multitude" +
-        "<line th:doc=\"_default\" th:eId=\"line9\"/>\n" +
-        "<p th:doc=\"B\" th:eId=\"p3\"/>\n" +
-        "<page th:doc=\"A\" th:eId=\"page7\"/>\n" +
-        "<text th:doc=\"A B\" th:eId=\"text1\"/>\n" +
-        "<tagml th:doc=\"_default\" th:eId=\"tagml0\"/>\n" +
+    String expectedXML = "<?xml version='1.0' encoding='UTF-8'?>\n" +
+        "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='A B _default'>\n" +
+        "<tagml th:doc='_default' th:sId='tagml0'/><text th:doc='A B' th:sId='text1'/><line th:doc='_default' th:sId='line2'/><page th:doc='A' th:sId='page3'/><p th:doc='B' th:sId='p4'/>1st. Voice from the Springs<line th:doc='_default' th:eId='line2'/>\n" +
+        "<line th:doc='_default' th:sId='line5'/>Thrice three hundred thousand years<line th:doc='_default' th:eId='line5'/>\n" +
+        "<line th:doc='_default' th:sId='line6'/>We had been stained with bitter blood<line th:doc='_default' th:eId='line6'/>\n" +
+        "<page th:doc='A' th:eId='page3'/>\n" +
+        "<page th:doc='A' th:sId='page7'/>\n" +
+        "<line th:doc='_default' th:sId='line8'/>And had ran mute &apos;mid shrieks of slaugter[sic]<line th:doc='_default' th:eId='line8'/>\n" +
+        "<line th:doc='_default' th:sId='line9'/>Thro&apos; a city &amp; a multitude<line th:doc='_default' th:eId='line9'/>\n" +
+        "<p th:doc='B' th:eId='p4'/>\n" +
+        "<page th:doc='A' th:eId='page7'/>\n" +
+        "<text th:doc='A B' th:eId='text1'/>\n" +
+        "<tagml th:doc='_default' th:eId='tagml0'/>\n" +
         "</xml>";
-    assertXMLExportIsAsExpected(tagML, expectedXML);
+    assertXMLExportIsAsExpected(tagML, expectedXML.replace("'", "\""));
   }
 
   @Test
