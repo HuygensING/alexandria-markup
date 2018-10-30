@@ -161,7 +161,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<p]\n" +
         "<page]\n" +
         "<text]\n" +
-        "<tagml]\n";
+        "<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -292,7 +292,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
     String tagML = "on the plain.<line]";
-    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:1 : No text allowed here, the root markup must be started first.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -310,7 +310,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
         "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n" +
-        "line 1:20 : Nameless markup is not allowed here.";
+        "line 1:3 : No text allowed here, the root markup must be started first.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -557,7 +558,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUnclosedDiscontinuityLeadsToError() {
     String tagML = "[t>This is<-t], he said...";
-    String expectedErrors = "Some suspended markup was not resumed: <-t]";
+    String expectedErrors = "line 1:12 : The root markup [t] cannot be suspended.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -939,6 +941,38 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
+  @Test
+  public void testJustTextIsNotValidTAGML() {
+    String tagML = "This is not valid TAGML";
+    String expectedErrors = "line 1:1 : No text allowed here, the root markup must be started first.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testJustAMilestoneIsNotValidTAGML() {
+    String tagML = "[miles stone='rock']";
+    String expectedErrors = "line 1:1 : The root markup cannot be a milestone tag.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testOpeningMarkupShouldBeClosedLast() {
+    String tagML = "[a|+A>AAA AA [b|+B>BBBAAA<a]BBBB<b]";
+    String expectedErrors = "line 1:29 : No text or markup allowed after the root markup [a] has been ended.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testRootMarkupMayNotBeSuspended() {
+    String tagML = "[m>foo<-m] fie [+m>bar<m]";
+    String expectedErrors = "line 1:8 : The root markup [m] cannot be suspended.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
   // private methods
 
   private void parseWithExpectedErrors(final String tagML, final String expectedErrors) {
@@ -956,9 +990,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private TAGDocument parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
-    printTokens(tagML);
-    TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
-    logDocumentGraph(document, tagML);
+    String trimmedTagML = tagML.trim();
+    printTokens(trimmedTagML);
+    TAGDocument document = new TAGMLImporter(store).importTAGML(trimmedTagML);
+    logDocumentGraph(document, trimmedTagML);
     return document;
   }
 
