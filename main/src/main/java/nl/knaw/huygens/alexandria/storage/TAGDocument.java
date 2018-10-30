@@ -21,8 +21,9 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
-import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.model.graph.edges.MarkupToTextHyperEdge;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
 public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
@@ -69,8 +71,16 @@ public class TAGDocument {
       documentDTO.setFirstTextNodeId(textNodeDbId);
     }
     if (lastOpenedMarkup != null) {
-      lastOpenedMarkup.forEach(m -> documentDTO.textGraph
-          .linkMarkupToTextNodeForLayer(m.getDbId(), textNodeDbId, m.getLayers().iterator().next())
+      lastOpenedMarkup.forEach(m -> {
+            Long dbId = m.getDbId();
+            Set<String> relevantLayers = new HashSet<>(m.getLayers());
+            if (relevantLayers.size() > 1 && relevantLayers.contains(DEFAULT_LAYER)) {
+              relevantLayers.remove(DEFAULT_LAYER);
+            }
+            relevantLayers.forEach(l -> documentDTO.textGraph
+                .linkMarkupToTextNodeForLayer(dbId, textNodeDbId, l)
+            );
+          }
       );
     }
     update();
@@ -125,7 +135,7 @@ public class TAGDocument {
   }
 
   public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup) {
-    associateTextNodeWithMarkupForLayer(tagTextNode, tagMarkup, TAGML.DEFAULT_LAYER);
+    associateTextNodeWithMarkupForLayer(tagTextNode, tagMarkup, DEFAULT_LAYER);
   }
 
   public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup, String layerName) {
@@ -171,18 +181,20 @@ public class TAGDocument {
     if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
       Long parentMarkupId = openMarkupStack.peek().getDbId();
       Long childMarkupId = rootMarkup.getDbId();
-      TextGraph textGraph = documentDTO.textGraph;
-      boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
-          .stream()
-          .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast)
-          .filter(e -> e.hasLayer(parentLayer))
-          .anyMatch(e -> {
-            Collection<Long> targets = textGraph.getTargets(e);
-            return targets.size() == 1 && targets.contains(childMarkupId);
-          });
-      if (!edgeExists) {
-        textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
+      if (parentMarkupId != childMarkupId) {
+        TextGraph textGraph = documentDTO.textGraph;
+        boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
+            .stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .filter(e -> e.hasLayer(parentLayer))
+            .anyMatch(e -> {
+              Collection<Long> targets = textGraph.getTargets(e);
+              return targets.size() == 1 && targets.contains(childMarkupId);
+            });
+        if (!edgeExists) {
+          textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
+        }
       }
     }
   }
@@ -274,4 +286,28 @@ public class TAGDocument {
     return documentDTO.getNamespaces();
   }
 
+  // If there is no markup unique to the default layer, remove the default layer
+  public void removeDefaultLayerIfUnused() {
+    Long defaultRootMarkupId = documentDTO.textGraph.getLayerRootMap().get(DEFAULT_LAYER);
+    if (defaultRootMarkupId != null) {
+      boolean defaultLayerIsUnused = documentDTO.textGraph
+          .getOutgoingEdges(defaultRootMarkupId)
+          .stream()
+          .noneMatch(this::isInDefaultLayer);
+      if (defaultLayerIsUnused) {
+        documentDTO.textGraph.getLayerRootMap().remove(DEFAULT_LAYER);
+        TAGMarkup markup = store.getMarkup(defaultRootMarkupId);
+        markup.getLayers().remove(DEFAULT_LAYER);
+        store.persist(markup.getDTO());
+        update();
+      }
+    }
+  }
+
+  private boolean isInDefaultLayer(final Edge edge) {
+    if (edge instanceof LayerEdge) {
+      return ((LayerEdge) edge).hasLayer(DEFAULT_LAYER);
+    }
+    return (edge instanceof MarkupToTextHyperEdge);
+  }
 }

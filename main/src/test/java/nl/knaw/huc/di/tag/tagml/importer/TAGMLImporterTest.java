@@ -253,7 +253,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCharacterEscapingInRegularText() {
-    String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
+    String tagML = "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -355,7 +355,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(3);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("line", "country", "a");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("line", "a", "country");
 
       List<String> textSegments = document.getDTO().textGraph
           .getTextNodeIdStream()

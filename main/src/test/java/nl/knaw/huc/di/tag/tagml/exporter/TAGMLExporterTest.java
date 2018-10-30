@@ -271,13 +271,13 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void balisageSelfOverlap2() {
-    String tagML = "[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]";
+    String tagML = "[tagml>[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
     assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
   }
 
   @Test
   public void balisageSelfOverlap2a() {
-    String tagML = "[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]";
+    String tagML = "[tagml>[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
     assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
   }
 
