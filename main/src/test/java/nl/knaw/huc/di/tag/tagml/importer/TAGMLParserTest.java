@@ -46,6 +46,8 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
@@ -53,6 +55,27 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
   private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
+  @Test // Rd-205
+  public void testDefaultLayerIsAlwaysOpen() {
+    String input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
+    store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml"),
+          markupSketch("x"),
+          markupSketch("t"),
+          markupSketch("t")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("simple"),
+          textNodeSketch(" "),
+          textNodeSketch("text"),
+          textNodeSketch(" "),
+          textNodeSketch("test")
+      );
+      assertThat(document.getLayerNames()).containsExactly("","A");
+    });
+  }
   @Test // RD-131
   public void testSimpleTextWithRoot() {
     String input = "[tagml>simple text<tagml]";
@@ -122,6 +145,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     });
   }
 
+  @Ignore
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
     String input = "[tagml>[pre|+L1,+L2>" +
@@ -155,7 +179,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           .findFirst()
           .get();
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-      assertThat(markups).extracting("tag").containsExactly(":branch", ":branches", "s", "pre", "tagml");
+      assertThat(markups).extracting("tag").containsExactly(BRANCH, BRANCHES, "s", "pre", "tagml");
 
       List<TAGMarkup> preMarkups = document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
       assertThat(preMarkups).hasSize(1);
@@ -411,6 +435,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
+  @Test // RD-206
+  public void testListElementSeparatorShouldBeComma() {
+    String input = "[tagml>" +
+        "[m l=[3 5 7 11]>text<m]" +
+        "<tagml]";
+    final String expectedError = "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
+    store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
+  }
+
   @Test // NLA-467
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
@@ -557,7 +590,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testRichTextAnnotation1() {
-    String input = "[t note=[>This is a [n>note<n] about this text<]>main text<t]";
+    String input = "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]";
     store.runInTransaction(() -> {
       TAGDocument document = assertTAGMLParses(input);
       assertThat(document).hasMarkupMatching(

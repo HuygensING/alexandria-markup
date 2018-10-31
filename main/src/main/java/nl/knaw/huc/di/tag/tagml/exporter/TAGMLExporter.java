@@ -142,10 +142,10 @@ public class TAGMLExporter extends TAGExporter {
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
         Set<Long> markupIds = new LinkedHashSet<>();
-        List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
+        List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
-        Collections.reverse(markupStreamForTextNode);
-        markupStreamForTextNode.forEach(mw -> {
+//        Collections.reverse(markupForTextNode);
+        markupForTextNode.forEach(mw -> {
           Long id = mw.getDbId();
           markupIds.add(id);
           state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw, openLayers));
@@ -214,9 +214,9 @@ public class TAGMLExporter extends TAGExporter {
     state.openMarkupIds.descendingIterator()//
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     return tagmlBuilder.toString()
-        .replace("[:branches>[:branch>", TAGML.DIVERGENCE)
-        .replace("<:branch][:branch>", TAGML.DIVIDER)
-        .replace("<:branch]<:branches]", TAGML.CONVERGENCE)
+        .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
+        .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
+        .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE)
         ;
   }
 

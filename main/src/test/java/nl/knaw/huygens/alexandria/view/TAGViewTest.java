@@ -40,11 +40,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGViewTest extends AlexandriaBaseStoreTest {
 
+  @Test
+  public void testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
+    String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
+    String viewJson = "{'includeLayers':['A']}".replace("'", "\"");
+    String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]";
+    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+    TAGView view = tagViewFactory.fromJsonString(viewJson);
+    TAGDocument document = store.runInTransaction(() ->
+        new TAGMLImporter(store).importTAGML(tagml)
+    );
+    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+    assertThat(viewExport).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
+    String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
+    String viewJson = "{'excludeLayers':['B']}".replace("'", "\"");
+    String expected = "[tagml>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml]";
+    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+    TAGView view = tagViewFactory.fromJsonString(viewJson);
+    TAGDocument document = store.runInTransaction(() ->
+        new TAGMLImporter(store).importTAGML(tagml)
+    );
+    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+    assertThat(viewExport).isEqualTo(expected);
+  }
+
   @Test // NLA-489
   public void testLayerMarkupCombinationInView() {
-    String tagml = "[tagml|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<tagml]";
+    String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]";
     String viewJson = "{'includeLayers':['A'],'excludeMarkup':['b']}".replace("'", "\"");
-    String expected = "[tagml|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<tagml|A,B]";
+    String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]";
     TAGViewFactory tagViewFactory = new TAGViewFactory(store);
     TAGView view = tagViewFactory.fromJsonString(viewJson);
     TAGDocument document = store.runInTransaction(() ->

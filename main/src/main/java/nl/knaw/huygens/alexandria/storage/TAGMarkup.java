@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
 public class TAGMarkup {
   private final TAGStore store;
@@ -303,9 +304,9 @@ public class TAGMarkup {
     return annotationsString.toString();
   }
 
-  private String layerSuffix(final Set<String> newLayers) {
+  String layerSuffix(final Set<String> newLayers) {
     String layerSuffix = getLayers().stream()
-        .filter(l -> !l.isEmpty())
+        .filter(l -> !DEFAULT_LAYER.equals(l))
         .map(l -> newLayers.contains(l) ? "+" + l : l)
         .collect(joining(","));
     return layerSuffix.isEmpty() ? "" : TAGML.DIVIDER + layerSuffix;

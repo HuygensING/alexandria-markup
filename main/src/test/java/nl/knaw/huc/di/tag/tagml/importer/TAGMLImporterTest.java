@@ -27,21 +27,88 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.view.TAGView;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 import static org.junit.Assert.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
+
+  @Test // RD-206
+  public void testRD206_1() {
+    String tagML = "[root metadata={" +
+        "stages=[" +
+        "{:id=stage1 medium={tool=\"typewriter\" color=\"black\"} desc=\"xxx\"}, " +
+        "{:id=stage2 medium={tool=\"pencil\" color=\"grey\"} desc=\"xxxx\"}, " +
+        "{:id=stage3 medium={tool=\"pen\" color=\"blue\"} desc=\"xxx\"}" +
+        "]" +
+        "}>\n" +
+        "[text> \n" +
+        "[del|+gen ref->stage3>  [! some text here !] <del]\n" +
+        "<text]\n" +
+        "<root]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test // RD-206
+  public void testRD206_2() {
+    String tagML = "[root metadata={" +
+        "persons=[" +
+        "{:id=rou001 name='Gustave Roud'}, " +
+        "{:id=doe002 name='Jane Doe'}" +
+        "]" +
+        "}>\n" +
+        "[excerpt source={" +
+        "author->rou001 " +
+        "editor->doe002 " +
+        "work=\"requiem\" " +
+        "ts-id=\"CRLR_GR_MS1H16d_1r_1\"" +
+        "} " +
+        "lang=\"fr\" " +
+        "encoding=\"UTF-8\">\n" +
+        "<excerpt]\n" +
+        "<root]";
+    store.runInTransaction(() -> {
+      TAGDocument document = parseTAGML(tagML);
+      assertThat(document).isNotNull();
+    });
+  }
+
+  @Test // RD-207
+  public void testRD207() throws IOException {
+    String tagML = FileUtils.readFileToString(new File("data/tagml/CRLR_GR_MS1H16d_ES.tagml"), "UTF-8");
+    String view = FileUtils.readFileToString(new File("data/tagml/view-stage2-layer.json"), "UTF-8");
+    TAGViewFactory tvf = new TAGViewFactory(store);
+    TAGView tagView = tvf.fromJsonString(view);
+    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML));
+    assertThat(document).isNotNull();
+    store.runInTransaction(() -> {
+      TAGMLExporter exporter = new TAGMLExporter(store, tagView);
+      String tagmlView = exporter.asTAGML(document);
+      assertThat(tagmlView).isNotNull();
+      LOG.info("view=\n{}", tagmlView);
+    });
+  }
 
   @Test
   public void testFrostQuote() {
@@ -95,7 +162,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         "<p]\n" +
         "<page]\n" +
         "<text]\n" +
-        "<tagml]\n";
+        "<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -185,7 +252,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCharacterEscapingInRegularText() {
-    String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
+    String tagML = "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]";
     store.runInTransaction(() -> {
       TAGDocument document = parseTAGML(tagML);
       assertThat(document).isNotNull();
@@ -226,7 +293,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
     String tagML = "on the plain.<line]";
-    String expectedErrors = "line 1:15 : Close tag <line] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:1 : No text allowed here, the root markup must be started first.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -244,7 +311,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors = "syntax error: line 1:1 no viable alternative at input '[>'\n" +
         "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n" +
-        "line 1:20 : Nameless markup is not allowed here.";
+        "line 1:3 : No text allowed here, the root markup must be started first.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -287,7 +355,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(3);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("country", "a", "line");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("line", "a", "country");
 
       List<String> textSegments = document.getDTO().textGraph
           .getTextNodeIdStream()
@@ -372,7 +440,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("b:b", "a:a");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("a:a", "b:b");
     });
   }
 
@@ -429,7 +497,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(2);
-      assertThat(markupForTextNode).extracting("tag").containsExactly("space", "t");
+      assertThat(markupForTextNode).extracting("tag").containsExactly("t", "space");
     });
   }
 
@@ -491,7 +559,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUnclosedDiscontinuityLeadsToError() {
     String tagML = "[t>This is<-t], he said...";
-    String expectedErrors = "Some suspended markup was not resumed: <-t]";
+    String expectedErrors = "line 1:12 : The root markup [t] cannot be suspended.\n" +
+        "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -509,7 +578,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     String tagML = "[text> [q>Hello my name is " +
         "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>" +
         "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
-    String expectedErrors = "line 1:53 : Close tag <q] found without corresponding open tag.\n" +
+    String expectedErrors = "line 1:46 : No text allowed here, the root markup must be started first.\n" +
         "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -536,7 +605,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TAGMarkup> TAGMarkups = document.getMarkupStream().collect(toList());
       assertThat(TAGMarkups)
           .extracting("tag")
-          .containsExactly("t", "x", ":branches", ":branch", ":branch");
+          .containsExactly("t", "x", BRANCHES, BRANCH, BRANCH);
 
       TAGMarkup t = TAGMarkups.get(0);
       assertThat(t.getTag()).isEqualTo("t");
@@ -728,7 +797,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       List<TAGMarkup> TAGMarkups = document.getMarkupStreamForTextNode(always).collect(toList());
       assertThat(TAGMarkups).hasSize(2);
 
-      TAGMarkup del = TAGMarkups.get(0);
+      TAGMarkup del = TAGMarkups.get(1);
       assertThat(del).hasTag("del");
       assertThat(del).isOptional();
     });
@@ -873,6 +942,38 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
+  @Test
+  public void testJustTextIsNotValidTAGML() {
+    String tagML = "This is not valid TAGML";
+    String expectedErrors = "line 1:1 : No text allowed here, the root markup must be started first.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testJustAMilestoneIsNotValidTAGML() {
+    String tagML = "[miles stone='rock']";
+    String expectedErrors = "line 1:1 : The root markup cannot be a milestone tag.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testOpeningMarkupShouldBeClosedLast() {
+    String tagML = "[a|+A>AAA AA [b|+B>BBBAAA<a]BBBB<b]";
+    String expectedErrors = "line 1:29 : No text or markup allowed after the root markup [a] has been ended.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testRootMarkupMayNotBeSuspended() {
+    String tagML = "[m>foo<-m] fie [+m>bar<m]";
+    String expectedErrors = "line 1:8 : The root markup [m] cannot be suspended.\n" +
+        "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
   // private methods
 
   private void parseWithExpectedErrors(final String tagML, final String expectedErrors) {
@@ -890,9 +991,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private TAGDocument parseTAGML(final String tagML) {
 //    LOG.info("TAGML=\n{}\n", tagML);
-    printTokens(tagML);
-    TAGDocument document = new TAGMLImporter(store).importTAGML(tagML);
-    logDocumentGraph(document, tagML);
+    String trimmedTagML = tagML.trim();
+    printTokens(trimmedTagML);
+    TAGDocument document = new TAGMLImporter(store).importTAGML(trimmedTagML);
+    logDocumentGraph(document, trimmedTagML);
     return document;
   }
 

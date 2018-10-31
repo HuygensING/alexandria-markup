@@ -125,6 +125,7 @@ idValue
 
 ref
   : A_Ref
+  | IO_Ref
   ;
 
 refValue
@@ -141,7 +142,7 @@ richTextValue
   ;
 
 listValue
-  : AV_ListOpener annotationValue ( IL_COMMA annotationValue )* IL_ListCloser // possible recursion
+  : AV_ListOpener annotationValue ( IL_SEPARATOR annotationValue )* IL_ListCloser // possible recursion
   ;
 
 objectValue

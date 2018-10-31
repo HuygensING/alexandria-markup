@@ -28,8 +28,68 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@Ignore
 public class TAGMLExporterTest extends TAGBaseStoreTest {
+
+  @Test
+  public void testRD207() {
+    String tagML = "[tagml>" +
+        "[layerdef|+A>" +
+        "[p>" +
+        "[l>A line in the [m|A>sand<m|A].<l]" +
+        "<p]" +
+        "<layerdef|A]" +
+        "<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
+  public void testNonLinearityWith3Branches() {
+    String tagML = "[tagml>[layerdef|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|miserable|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<layerdef|A,B]<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Ignore
+  @Test
+  public void testBrulez() {
+    String tagmlIn = "[doc source=\"typescript-tg_lhhs_107\">\n" +
+        "\t[defineLayers|+sem,+mat,+gen>\n" +
+        "\t[page|mat>\n" +
+        "\t\t[titleSection>\n" +
+        "\t\t\t[l|mat>[u>[title|sem>LA LANTERNE DE PROJECTION \"A L A D I N\"<title]<u]<l]\n" +
+        "\t\t\t[l|mat>par<l]\n" +
+        "\t\t\t[l|mat>[u>[name|sem>Raymond Brulez<name]<u]<l]\n" +
+        "\t\t<titleSection]\n" +
+        "\t\t[bodySection>\n" +
+        "\t\t\t[p>\n" +
+        "\t\t\t\t[l|mat>Une belle main de femme, élégante et fine malgr<|[del|gen>á<del]|[add|gen>é<add]|> l'agrandissement<l]\n" +
+        "\t\t\t\t[l|mat>du close-up, manipule du browning-bi[del|gen rend=\"slash_crossed\" type=\"typo\">l<del]jou. Les doigts bien manucurés<l]\n" +
+        "\t\t\t\t[l|mat>caressent, irrésolus, les arabesques de la crosse d'ivoire. C'est<l]\n" +
+        "\t\t\t\t[l|mat>l'image des dernie[subst|gen rend=\"add-del_crossed\" type=\"typo\">[del|gen>u<del][add|gen type=\"typo\">r<add]<subst]s soubresauts [del|gen rend=\"x_crossed\" type=\"ling\">pshy<del]psychologiques de l'heroïne avant<l]\n" +
+        "\t\t\t\t[l|mat>sont acte de désespoir : sublime rébellion de la virginale [persName|sem>G[subst|gen rend=\"add-del_crossed\" type=\"typo\">[del|gen>e<del][add|gen>r<add]<subst]eta Brenn<persName]<l]\n" +
+        "\t\t\t\t[l|mat>refusant de se laisser vendre par des parents indignes à un banquier<l]\n" +
+        "\t\t\t\t[l|mat>riche, mais [del|gen rend=\"x_crossed\" type=\"?\">fi<del] difforme et débauché. L'index se courbe sur la cédille<l]\n" +
+        "\t\t\t\t[l|mat>métallique de la détente... tire...<l] \n" +
+        "\t\t\t<p]\n" +
+        "\n" +
+        "\t\t\t[p>\n" +
+        "\t\t\t\t[l|mat>Et voilà que de la sombre surface d'un étang s'élève un cygne<l]\n" +
+        "\t\t\t\t[l|mat>majestueux en un ébouissant battement d'ailes : ce qui n'est pas<l]\n" +
+        "\t\t\t\t[l|mat>l'image allégorique de cette âme se dégageant des liens terrestre[subst|gen rend=\"add-del_crossed\" type=\"typo\">[del|gen>l<del][add|gen type=\"typo\">s<add]<subst]<l]\n" +
+        "\t\t\t\t[l|mat>vers de calmes empyrées, mais simplement la signature du film et la<l]\n" +
+        "\t\t\t\t[l|mat>marque commerciale de la \"[orgName|sem index=false>Swann Vitascope Distributing Co. Ltd.<orgName]\"<l]\n" +
+        "\t\t\t<p]\n" +
+        "\n" +
+        "\t\t\t[p>\n" +
+        "\t\t\t\t[l|mat>[quote>Comment trouvez-vous cette nouve[subst|gen rend=\"add-del_crossed\" type=\"typo\">[del|gen>e<del][add|gen type=\"typo\">lle<add]<subst] [del|gen rend=\"slash_crossed\" type=\"typo\">e<del]invention, ce film en re[wordDivision|mat>-<wordDivision]<l]\n" +
+        "\t\t\t\t[l|mat>lief ?<quote] demandait [persName|sem index=true>Van Truggel<persName], le directeur du cinéma \"[placeName|sem index=true>Apollon<placeName]\" à<l]\n" +
+        "\t\t\t\t[l|mat>l'opérateur qui enlevait les bobines.<l]\n" +
+        "\t\t\t<p]\n" +
+        "\t\t<bodySection]\n" +
+        "\t<page]\n" +
+        "\t<defineLayers]\n" +
+        "<doc]\n";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
 
   @Test
   public void testSimpleExampleWithMarkupAndTwoLayers() {
@@ -129,6 +189,18 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testNonLinearityAndLayers1() {
+    String tagML = "[tagml>[layerdef|+A,+B>[l|A>Et voilà que de la <|sombre|jolie|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<layerdef|A,B]<tagml]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
+  public void testNonLinearityAndLayers2() {
+    String tagML = "[a>[tagml|+A,+B>[l|A>Et voilà que de la <|[w|A>sombre<w|A]|[w|B>jolie<w|B]|> [x|B>surface<x|B] d'un étang s'élève un cygne<l|A]<tagml|A,B]<a]";
+    assertTAGMLOutIsIn(tagML);
+  }
+
+  @Test
   public void testSingleQuotedStringAnnotation() {
     String tagML = "[tagml author='me'>test<tagml]";
     assertTAGMLOutIsIn(tagML);
@@ -199,13 +271,13 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void balisageSelfOverlap2() {
-    String tagML = "[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]";
+    String tagML = "[tagml>[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
     assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
   }
 
   @Test
   public void balisageSelfOverlap2a() {
-    String tagML = "[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]";
+    String tagML = "[tagml>[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
     assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
   }
 
