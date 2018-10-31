@@ -142,7 +142,7 @@ richTextValue
   ;
 
 listValue
-  : AV_ListOpener annotationValue ( IL_WS annotationValue )* IL_ListCloser // possible recursion
+  : AV_ListOpener annotationValue ( IL_SEPARATOR annotationValue )* IL_ListCloser // possible recursion
   ;
 
 objectValue

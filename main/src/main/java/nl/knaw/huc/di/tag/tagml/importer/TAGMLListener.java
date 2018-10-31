@@ -592,26 +592,28 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void addAnnotations(List<AnnotationContext> annotationContexts, TAGMarkup markup) {
-    annotationContexts.forEach(actx -> {
-      if (actx instanceof BasicAnnotationContext) {
-        AnnotationInfo aInfo = annotationFactory.makeAnnotation((BasicAnnotationContext) actx);
-        Long markupNode = markup.getDbId();
-        document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);
+    annotationContexts.forEach(actx -> addAnnotation(markup, actx));
+  }
 
-      } else if (actx instanceof IdentifyingAnnotationContext) {
-        IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
-        String id = idAnnotationContext.idValue().getText();
-        markup.setMarkupId(id);
+  private void addAnnotation(final TAGMarkup markup, final AnnotationContext actx) {
+    if (actx instanceof BasicAnnotationContext) {
+      AnnotationInfo aInfo = annotationFactory.makeAnnotation((BasicAnnotationContext) actx);
+      Long markupNode = markup.getDbId();
+      document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);
 
-      } else if (actx instanceof RefAnnotationContext) {
-        RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
-        String aName = refAnnotationContext.annotationName().getText();
-        String refId = refAnnotationContext.refValue().getText();
-        // TODO add ref to model
+    } else if (actx instanceof IdentifyingAnnotationContext) {
+      IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
+      String id = idAnnotationContext.idValue().getText();
+      markup.setMarkupId(id);
+
+    } else if (actx instanceof RefAnnotationContext) {
+      RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
+      String aName = refAnnotationContext.annotationName().getText();
+      String refId = refAnnotationContext.refValue().getText();
+      // TODO add ref to model
 //        TAGAnnotation annotation = store.createRefAnnotation(aName, refId);
 //        markup.addAnnotation(annotation);
-      }
-    });
+    }
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {

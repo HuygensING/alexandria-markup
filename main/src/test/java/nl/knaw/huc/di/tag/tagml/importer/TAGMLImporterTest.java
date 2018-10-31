@@ -55,8 +55,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testRD206_1() {
     String tagML = "[root metadata={" +
         "stages=[" +
-        "{:id=stage1 medium={tool=\"typewriter\" color=\"black\"} desc=\"xxx\"} " +
-        "{:id=stage2 medium={tool=\"pencil\" color=\"grey\"} desc=\"xxxx\"} " +
+        "{:id=stage1 medium={tool=\"typewriter\" color=\"black\"} desc=\"xxx\"}, " +
+        "{:id=stage2 medium={tool=\"pencil\" color=\"grey\"} desc=\"xxxx\"}, " +
         "{:id=stage3 medium={tool=\"pen\" color=\"blue\"} desc=\"xxx\"}" +
         "]" +
         "}>\n" +
@@ -74,7 +74,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testRD206_2() {
     String tagML = "[root metadata={" +
         "persons=[" +
-        "{:id=rou001 name='Gustave Roud'} " +
+        "{:id=rou001 name='Gustave Roud'}, " +
         "{:id=doe002 name='Jane Doe'}" +
         "]" +
         "}>\n" +

@@ -435,6 +435,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
   }
 
+  @Test // RD-206
+  public void testListElementSeparatorShouldBeComma() {
+    String input = "[tagml>" +
+        "[m l=[3 5 7 11]>text<m]" +
+        "<tagml]";
+    final String expectedError = "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
+    store.runInTransaction(() -> assertTAGMLParsesWithSyntaxError(input, expectedError));
+  }
+
   @Test // NLA-467
   public void testObjectAnnotation0() {
     String input = "[tagml>" +
