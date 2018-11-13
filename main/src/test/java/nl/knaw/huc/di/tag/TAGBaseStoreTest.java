@@ -1,6 +1,5 @@
 package nl.knaw.huc.di.tag;
 
-
 /*
  * #%L
  * alexandria-markup
@@ -52,7 +51,9 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
 
   @AfterClass
   public static void afterClass() throws IOException {
-    store.close();
+    if (store != null) {
+      store.close();
+    }
     rmTmpDir(tmpDir);
   }
 

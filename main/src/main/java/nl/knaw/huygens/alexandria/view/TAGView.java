@@ -50,8 +50,7 @@ public class TAGView {
   }
 
   public Set<String> filterRelevantLayers(final Set<String> layerNames) {
-    Set<String> relevantLayers = new HashSet<>();
-    relevantLayers.addAll(layerNames);
+    Set<String> relevantLayers = new HashSet<>(layerNames);
     if (layerRelevance.equals(RelevanceStyle.include)) {
       relevantLayers.clear();
       relevantLayers.addAll(layersToInclude);

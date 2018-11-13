@@ -92,9 +92,8 @@ class TextNodeIdIterator implements Iterator<Long> {
   }
 
   private List<Long> getContinuedMarkupIds(final Long id) {
-    List<Long> continuedMarkupIds = new ArrayList<>();
     List<Long> precedingMarkupIds = getPrecedingMarkupIds(id);
-    continuedMarkupIds.addAll(precedingMarkupIds);
+    List<Long> continuedMarkupIds = new ArrayList<>(precedingMarkupIds);
     continuedMarkupIds.add(id);
     List<Long> succeedingMarkupIds = getSucceedingMarkupIds(id);
     continuedMarkupIds.addAll(succeedingMarkupIds);

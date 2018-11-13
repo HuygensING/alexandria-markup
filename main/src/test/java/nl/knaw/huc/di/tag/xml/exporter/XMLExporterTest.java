@@ -88,19 +88,15 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "[l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]\n" +
         "[l|L n=146>We fence our flowers in and the hens range.<l]<s]\n" +
         "<excerpt]";
-    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"L S\">\n" +
-        "<excerpt source=\"The Housekeeper\" author=\"Robert Frost\" th:doc=\"L S\" th:sId=\"excerpt0\"/>" +
-        "<s th:doc=\"S\" th:sId=\"s1\"/><l n=\"144\" th:doc=\"L\" th:sId=\"l2\"/>He manages to keep the upper hand" +
-        "<l th:doc=\"L\" th:eId=\"l2\"/>\n" +
-        "<l n=\"145\" th:doc=\"L\" th:sId=\"l3\"/>On his own farm.<s th:doc=\"S\" th:eId=\"s1\"/> " +
-        "<s th:doc=\"S\" th:sId=\"s4\"/>He&apos;s boss.<s th:doc=\"S\" th:eId=\"s4\"/> " +
-        "<s th:doc=\"S\" th:sId=\"s5\"/>But as to hens:<l th:doc=\"L\" th:eId=\"l3\"/>\n" +
-        "<l n=\"146\" th:doc=\"L\" th:sId=\"l6\"/>We fence our flowers in and the hens range." +
-        "<l th:doc=\"L\" th:eId=\"l6\"/><s th:doc=\"S\" th:eId=\"s5\"/>\n" +
-        "<excerpt th:doc=\"L S\" th:eId=\"excerpt0\"/>\n" +
+    String expectedXML = "<?xml version='1.0' encoding='UTF-8'?>\n" +
+        "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='L S'>\n" +
+        "<excerpt source='The Housekeeper' author='Robert Frost' th:doc='L S' th:sId='excerpt0'/><s th:doc='S' th:sId='s1'/><l n='144' th:doc='L' th:sId='l2'/>He manages to keep the upper hand<l th:doc='L' th:eId='l2'/>\n" +
+        "<l n='145' th:doc='L' th:sId='l3'/>On his own farm.<s th:doc='S' th:eId='s1'/> <s th:doc='S' th:sId='s4'/>He&apos;s boss.<s th:doc='S' th:eId='s4'/> <s th:doc='S' th:sId='s5'/>But as to hens:<l th:doc='L' th:eId='l3'/>\n" +
+        "<l n='146' th:doc='L' th:sId='l6'/>We fence our flowers in and the hens range.<l th:doc='L' th:eId='l6'/><s th:doc='S' th:eId='s5'/>\n" +
+        "<excerpt th:doc='L S' th:eId='excerpt0'/>\n" +
         "</xml>";
-    assertXMLExportIsAsExpected(tagML, expectedXML);
+
+    assertXMLExportIsAsExpected(tagML, expectedXML.replaceAll("'", "\""));
   }
 
   @Test
@@ -156,30 +152,21 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "<page]\n" +
         "<text]\n" +
         "<tagml]";
-    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"A B _default\">\n" +
-        "<tagml th:doc=\"_default\" th:sId=\"tagml0\"/>" +
-        "<text th:doc=\"A B\" th:sId=\"text1\"/>" +
-        "<page th:doc=\"A\" th:sId=\"page2\"/>" +
-        "<p th:doc=\"B\" th:sId=\"p3\"/>" +
-        "<line th:doc=\"_default\" th:sId=\"line4\"/>1st. Voice from the Springs" +
-        "<line th:doc=\"_default\" th:eId=\"line4\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line5\"/>Thrice three hundred thousand years" +
-        "<line th:doc=\"_default\" th:eId=\"line5\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line6\"/>We had been stained with bitter blood" +
-        "<line th:doc=\"_default\" th:eId=\"line6\"/>\n" +
-        "<page th:doc=\"A\" th:eId=\"page2\"/>\n" +
-        "<page th:doc=\"A\" th:sId=\"page7\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line8\"/>And had ran mute &apos;mid shrieks of slaugter[sic]" +
-        "<line th:doc=\"_default\" th:eId=\"line8\"/>\n" +
-        "<line th:doc=\"_default\" th:sId=\"line9\"/>Thro&apos; a city &amp; a multitude" +
-        "<line th:doc=\"_default\" th:eId=\"line9\"/>\n" +
-        "<p th:doc=\"B\" th:eId=\"p3\"/>\n" +
-        "<page th:doc=\"A\" th:eId=\"page7\"/>\n" +
-        "<text th:doc=\"A B\" th:eId=\"text1\"/>\n" +
-        "<tagml th:doc=\"_default\" th:eId=\"tagml0\"/>\n" +
+    String expectedXML = "<?xml version='1.0' encoding='UTF-8'?>\n" +
+        "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='A B _default'>\n" +
+        "<tagml th:doc='_default' th:sId='tagml0'/><text th:doc='A B' th:sId='text1'/><line th:doc='_default' th:sId='line2'/><page th:doc='A' th:sId='page3'/><p th:doc='B' th:sId='p4'/>1st. Voice from the Springs<line th:doc='_default' th:eId='line2'/>\n" +
+        "<line th:doc='_default' th:sId='line5'/>Thrice three hundred thousand years<line th:doc='_default' th:eId='line5'/>\n" +
+        "<line th:doc='_default' th:sId='line6'/>We had been stained with bitter blood<line th:doc='_default' th:eId='line6'/>\n" +
+        "<page th:doc='A' th:eId='page3'/>\n" +
+        "<page th:doc='A' th:sId='page7'/>\n" +
+        "<line th:doc='_default' th:sId='line8'/>And had ran mute &apos;mid shrieks of slaugter[sic]<line th:doc='_default' th:eId='line8'/>\n" +
+        "<line th:doc='_default' th:sId='line9'/>Thro&apos; a city &amp; a multitude<line th:doc='_default' th:eId='line9'/>\n" +
+        "<p th:doc='B' th:eId='p4'/>\n" +
+        "<page th:doc='A' th:eId='page7'/>\n" +
+        "<text th:doc='A B' th:eId='text1'/>\n" +
+        "<tagml th:doc='_default' th:eId='tagml0'/>\n" +
         "</xml>";
-    assertXMLExportIsAsExpected(tagML, expectedXML);
+    assertXMLExportIsAsExpected(tagML, expectedXML.replace("'", "\""));
   }
 
   @Test
@@ -214,10 +201,10 @@ public class XMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCharacterEscapingInRegularText() throws Exception {
-    String tagML = "In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.";
+    String tagML = "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<xml>\n" +
-        "In regular text, &lt;, [ and \\ need to be escaped, |, !, &quot;, and &apos; don&apos;t.\n" +
+        "<tagml>In regular text, &lt;, [ and \\ need to be escaped, |, !, &quot;, and &apos; don&apos;t.</tagml>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
@@ -256,12 +243,12 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "<line|a,b]";
     String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"_default a b\">\n" +
-        "<line th:doc=\"a b\" th:sId=\"line0\"/>" +
+        "<line th:doc=\"_default a b\" th:sId=\"line0\"/>" +
         "<a th:doc=\"a\" th:sId=\"a1\"/>" +
         "The rain in " +
         "<country th:doc=\"_default\" th:sId=\"country2\"/>Spain<country th:doc=\"_default\" th:eId=\"country2\"/>" +
         " <b th:doc=\"b\" th:sId=\"b3\"/>falls<a th:doc=\"a\" th:eId=\"a1\"/> mainly on the plain." +
-        "<b th:doc=\"b\" th:eId=\"b3\"/><line th:doc=\"a b\" th:eId=\"line0\"/>\n" +
+        "<b th:doc=\"b\" th:eId=\"b3\"/><line th:doc=\"_default a b\" th:eId=\"line0\"/>\n" +
         "</xml>";
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }

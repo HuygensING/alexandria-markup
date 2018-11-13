@@ -32,8 +32,10 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.reverseOrder;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.model.graph.edges.EdgeType.hasText;
 import static nl.knaw.huc.di.tag.model.graph.edges.Edges.markupContinuation;
@@ -200,6 +202,54 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
+    Set<Long> markupIds = new HashSet<>();
+    Set<Long> nodesHandled = new HashSet<>();
+    nodesHandled.add(documentNode);
+    Deque<Long> nodesToProcess = new ArrayDeque<>(singleton(textNodeId));
+    // collect all markupNodeIds that are connected to the given textNodeId
+    while (!nodesToProcess.isEmpty()) {
+      Long nodeId = nodesToProcess.pop();
+      markupIds.add(nodeId);
+      nodesHandled.add(nodeId);
+      getIncomingEdges(nodeId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .map(this::getSource)
+          .filter(id -> !nodesHandled.contains(id))
+          .forEach(nodesToProcess::add);
+    }
+    markupIds.remove(textNodeId);
+
+    // For each connected node we have to determine the distance from the root ( = depth)
+    Map<Long, Integer> nodeDepth = new HashMap<>();
+    nodesToProcess.addAll(layerRootMap.values());
+    layerRootMap.values().forEach(v -> nodeDepth.put(v, 0));
+    nodesHandled.clear();
+    while (!nodesToProcess.isEmpty()) {
+      Long nodeId = nodesToProcess.pop();
+//      LOG.info("nodeId={}", nodeId);
+      nodesHandled.add(nodeId);
+      int nextDepth = nodeDepth.get(nodeId) + 1;
+      getOutgoingEdges(nodeId).stream()
+          .filter(LayerEdge.class::isInstance)
+          .map(LayerEdge.class::cast)
+          .map(this::getTargets)
+          .flatMap(Collection::stream)
+//          .peek(System.out::println)
+          .filter(id -> !nodesHandled.contains(id))
+          .filter(markupIds::contains)
+          .forEach(n -> {
+            nodesToProcess.add(n);
+            nodeDepth.put(n, nextDepth);
+          });
+    }
+
+    final Comparator<Long> maxDistanceComparator = comparing(nodeDepth::get);
+    Comparator<Long> comparator = maxDistanceComparator.thenComparing(identity());
+    return markupIds.stream().sorted(comparator);
+  }
+
+  public Stream<Long> getMarkupIdStreamForTextNodeIdOrderedByDistanceFromTextNode(final Long textNodeId) {
     // TODO: This traversal revisits markup nodes because the maxDistance might have changed.
     //       The maxDistance is needed for the ordering, to get the markupIds back ordered by the maximum distance from the textnode, closest first
     Set<Long> markupIds = new HashSet<>();

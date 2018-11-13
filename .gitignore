@@ -6,5 +6,5 @@
 *.iml
 **/target
 out/*
-main/out
 **/dependency-reduced-pom.xml
+main/out

@@ -61,7 +61,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private final Deque<TAGDocument> documentStack = new ArrayDeque<>(); // TODO: move to state
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
   private static final Set<String> DEFAULT_LAYER_ONLY = singleton(TAGML.DEFAULT_LAYER);
-
   private boolean atDocumentStart = true;
 
   public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
@@ -80,6 +79,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     public Map<String, Deque<TAGMarkup>> openMarkup = new HashMap<>();
     public Map<String, Deque<TAGMarkup>> suspendedMarkup = new HashMap();
     public Deque<TAGMarkup> allOpenMarkup = new ArrayDeque<>();
+    public Long rootMarkupId = null;
+    public boolean eof = false;
 
     public State copy() {
       State copy = new State();
@@ -88,7 +89,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       copy.suspendedMarkup = new HashMap<>();
       suspendedMarkup.forEach((k, v) -> copy.suspendedMarkup.put(k, new ArrayDeque<>(v)));
       copy.allOpenMarkup = new ArrayDeque<>(allOpenMarkup);
+      copy.rootMarkupId = rootMarkupId;
+      copy.eof = eof;
       return copy;
+    }
+
+    public boolean rootMarkupIsSet() {
+      return rootMarkupId != null;
     }
   }
 
@@ -113,12 +120,35 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitDocument(DocumentContext ctx) {
+    document.removeDefaultLayerIfUnused();
     document.linkParentlessLayerRootsToDocument();
     document.setNamespaces(namespaces);
     update(document.getDTO());
-    boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
+    verifyNoMarkupUnclosed();
+    verifyNoSuspendedMarkupLeft();
+  }
+
+  private void verifyNoSuspendedMarkupLeft() {
+    boolean noSuspendedMarkup = state.suspendedMarkup.values().stream()
+        .allMatch(Collection::isEmpty);
+    if (!noSuspendedMarkup) {
+      String suspendedMarkupString = state.suspendedMarkup.values()
+          .stream()
+          .flatMap(Collection::stream)//
+          .map(this::suspendTag)//
+          .distinct()
+          .collect(joining(", "));
+      errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
+    }
+  }
+
+  private void verifyNoMarkupUnclosed() {
+    boolean noOpenMarkup = state.openMarkup.values().stream()
+        .allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
-      String openRanges = state.openMarkup.values().stream().flatMap(Collection::stream)//
+      String openRanges = state.openMarkup.values()
+          .stream()
+          .flatMap(Collection::stream)//
           .map(this::openTag)//
           .distinct()
           .collect(joining(", "));
@@ -126,14 +156,6 @@ public class TAGMLListener extends TAGMLParserBaseListener {
           "Missing close tag(s) for: %s",
           openRanges
       );
-    }
-    boolean noSuspendedMarkup = state.suspendedMarkup.values().stream().allMatch(Collection::isEmpty);
-    if (!noSuspendedMarkup) {
-      String suspendedMarkupString = state.suspendedMarkup.values().stream().flatMap(Collection::stream)//
-          .map(this::suspendTag)//
-          .distinct()
-          .collect(joining(", "));
-      errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
   }
 
@@ -147,17 +169,21 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   @Override
   public void exitText(TextContext ctx) {
     String text = unEscape(ctx.getText());
-    if (text.equals("jolie")) {
-      LOG.info("jolie!");
-    }
 //    LOG.debug("text=<{}>", text);
     atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
     // TODO: smarter whitespace handling
     boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
     if (useText) {
+      if (StringUtils.isNotBlank(text)) {
+        checkEOF(ctx);
+      }
+      if (!state.rootMarkupIsSet()) {
+        errorListener.addBreakingError(
+            "%s No text allowed here, the root markup must be started first.",
+            errorPrefix(ctx));
+      }
       TAGTextNode tn = store.createTextNode(text);
       addAndConnectToMarkup(tn);
-//      logTextNode(tn);
     }
   }
 
@@ -194,6 +220,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterStartTag(StartTagContext ctx) {
+    checkEOF(ctx);
     if (tagNameIsValid(ctx)) {
       MarkupNameContext markupNameContext = ctx.markupName();
       String markupName = markupNameContext.name().getText();
@@ -213,11 +240,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
       Set<String> layers = new HashSet<>();
       state.allOpenMarkup.push(markup);
+      boolean firstTag = !document.getLayerNames().contains(TAGML.DEFAULT_LAYER);
+      if (firstTag) {
+        addDefaultLayer(markup, layers);
+        state.rootMarkupId = markup.getDbId();
+      }
       layerIds.forEach(layerId -> {
-        if (layerId.equals("") && !document.getLayerNames().contains(TAGML.DEFAULT_LAYER)) {
-          addDefaultLayer(markup, layers);
-
-        } else if (layerId.contains("+")) {
+        if (layerId.contains("+")) {
           String[] parts = layerId.split("\\+");
           String parentLayer = parts[0];
           String newLayerId = parts[1];
@@ -225,7 +254,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 //          layers.add(parentLayer);
           layers.add(newLayerId);
 
-        } else {
+        } else if (!(firstTag && DEFAULT_LAYER.equals(layerId))) {
           checkLayerWasAdded(ctx, layerId);
           checkLayerIsOpen(ctx, layerId);
           document.openMarkupInLayer(markup, layerId);
@@ -305,6 +334,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitEndTag(EndTagContext ctx) {
+    checkEOF(ctx);
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.markupName().name().getText();
 //      LOG.debug("endTag.markupName=<{}>", markupName);
@@ -314,6 +344,11 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
+    if (!state.rootMarkupIsSet()) {
+      errorListener.addBreakingError(
+          "%s The root markup cannot be a milestone tag.",
+          errorPrefix(ctx));
+    }
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.name().getText();
 //      LOG.debug("milestone.markupName=<{}>", markupName);
@@ -337,6 +372,8 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void enterTextVariation(final TextVariationContext ctx) {
+    checkEOF(ctx);
+
 //    LOG.debug("<| lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
 
     TAGMarkup branches = openTextVariationMarkup(BRANCHES, DEFAULT_LAYER_ONLY);
@@ -368,6 +405,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariationSeparator(final TextVariationSeparatorContext ctx) {
+    checkEOF(ctx);
     closeSystemMarkup(BRANCH, DEFAULT_LAYER_ONLY);
     checkForOpenMarkupInBranch(ctx);
 
@@ -419,6 +457,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitTextVariation(final TextVariationContext ctx) {
+    checkEOF(ctx);
     closeSystemMarkup(BRANCH, DEFAULT_LAYER_ONLY);
     checkForOpenMarkupInBranch(ctx);
     closeSystemMarkup(BRANCHES, DEFAULT_LAYER_ONLY);
@@ -553,26 +592,28 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   }
 
   private void addAnnotations(List<AnnotationContext> annotationContexts, TAGMarkup markup) {
-    annotationContexts.forEach(actx -> {
-      if (actx instanceof BasicAnnotationContext) {
-        AnnotationInfo aInfo = annotationFactory.makeAnnotation((BasicAnnotationContext) actx);
-        Long markupNode = markup.getDbId();
-        document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);
+    annotationContexts.forEach(actx -> addAnnotation(markup, actx));
+  }
 
-      } else if (actx instanceof IdentifyingAnnotationContext) {
-        IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
-        String id = idAnnotationContext.idValue().getText();
-        markup.setMarkupId(id);
+  private void addAnnotation(final TAGMarkup markup, final AnnotationContext actx) {
+    if (actx instanceof BasicAnnotationContext) {
+      AnnotationInfo aInfo = annotationFactory.makeAnnotation((BasicAnnotationContext) actx);
+      Long markupNode = markup.getDbId();
+      document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);
 
-      } else if (actx instanceof RefAnnotationContext) {
-        RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
-        String aName = refAnnotationContext.annotationName().getText();
-        String refId = refAnnotationContext.refValue().getText();
-        // TODO add ref to model
+    } else if (actx instanceof IdentifyingAnnotationContext) {
+      IdentifyingAnnotationContext idAnnotationContext = (IdentifyingAnnotationContext) actx;
+      String id = idAnnotationContext.idValue().getText();
+      markup.setMarkupId(id);
+
+    } else if (actx instanceof RefAnnotationContext) {
+      RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
+      String aName = refAnnotationContext.annotationName().getText();
+      String refId = refAnnotationContext.refValue().getText();
+      // TODO add ref to model
 //        TAGAnnotation annotation = store.createRefAnnotation(aName, refId);
 //        markup.addAnnotation(annotation);
-      }
-    });
+    }
   }
 
   private void linkTextToMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName) {
@@ -586,22 +627,24 @@ public class TAGMLListener extends TAGMLParserBaseListener {
   private TAGMarkup removeFromOpenMarkup(MarkupNameContext ctx) {
     String markupName = ctx.name().getText();
     String extendedMarkupName = markupName;
-
     extendedMarkupName = withPrefix(ctx, extendedMarkupName);
     extendedMarkupName = withSuffix(ctx, extendedMarkupName);
 
-    boolean isSuspend = ctx.prefix() != null && ctx.prefix().getText().equals(TAGML.SUSPEND_PREFIX);
+    boolean isSuspend = ctx.prefix() != null
+        && ctx.prefix().getText().equals(TAGML.SUSPEND_PREFIX);
 
     Set<String> layers = deduceLayers(ctx, markupName, extendedMarkupName);
 
-    boolean layerSuffixNeeded = !(layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER));
+    boolean layerSuffixNeeded = !(layers.size() == 1
+        && layers.iterator().next().equals(TAGML.DEFAULT_LAYER));
     String foundLayerSuffix = layerSuffixNeeded
         ? TAGML.DIVIDER + layers.stream()
+        .filter(l -> !TAGML.DEFAULT_LAYER.equals(l))
         .sorted()
         .collect(joining(","))
         : "";
 
-    extendedMarkupName = extendedMarkupName + foundLayerSuffix;
+    extendedMarkupName += foundLayerSuffix;
     removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup);
     TAGMarkup markup = null;
     for (String l : layers) {
@@ -638,6 +681,12 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       }
       document.closeMarkupInLayer(markup, l);
     }
+    // for the last closing tag, close the markup for the default layer
+    if (!layers.contains(DEFAULT_LAYER) && markup.getLayers().contains(DEFAULT_LAYER)) {
+      Deque<TAGMarkup> markupDeque = state.openMarkup.get(DEFAULT_LAYER);
+      removeFromMarkupStack(extendedMarkupName, markupDeque);
+      document.closeMarkupInLayer(markup, DEFAULT_LAYER);
+    }
 
     PrefixContext prefixNode = ctx.prefix();
     if (prefixNode != null) {
@@ -654,7 +703,13 @@ public class TAGMLListener extends TAGMLParserBaseListener {
         }
       }
     }
-
+    state.eof = (markup.getDbId().equals(state.rootMarkupId));
+    if (isSuspend && state.eof) {
+      TAGMarkup rootMarkup = store.getMarkup(state.rootMarkupId);
+      errorListener.addBreakingError(
+          "%s The root markup %s cannot be suspended.",
+          errorPrefix(ctx), rootMarkup);
+    }
     return markup;
   }
 
@@ -877,6 +932,15 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       layers.add(TAGML.DEFAULT_LAYER);
     }
     return layers;
+  }
+
+  private void checkEOF(final ParserRuleContext ctx) {
+    if (state.eof) {
+      TAGMarkup rootMarkup = store.getMarkup(state.rootMarkupId);
+      errorListener.addBreakingError(
+          "%s No text or markup allowed after the root markup %s has been ended.",
+          errorPrefix(ctx), rootMarkup);
+    }
   }
 
 }
