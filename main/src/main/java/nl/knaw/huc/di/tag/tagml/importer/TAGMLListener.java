@@ -610,9 +610,9 @@ public class TAGMLListener extends TAGMLParserBaseListener {
       RefAnnotationContext refAnnotationContext = (RefAnnotationContext) actx;
       String aName = refAnnotationContext.annotationName().getText();
       String refId = refAnnotationContext.refValue().getText();
-      // TODO add ref to model
-//        TAGAnnotation annotation = store.createRefAnnotation(aName, refId);
-//        markup.addAnnotation(annotation);
+      AnnotationInfo annotationInfo = annotationFactory.makeReferenceAnnotation(aName, refId);
+      Long markupNode = markup.getDbId();
+      document.getDTO().textGraph.addAnnotationEdge(markupNode, annotationInfo);
     }
   }
 

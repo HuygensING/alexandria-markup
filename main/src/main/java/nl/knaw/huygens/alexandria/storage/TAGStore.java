@@ -409,6 +409,12 @@ public class TAGStore implements AutoCloseable {
     return persist(av);
   }
 
+  public Long createReferenceValue(String value) {
+    assertInTransaction();
+    ReferenceValue av = new ReferenceValue(value);
+    return persist(av);
+  }
+
   public StringAnnotationValue getStringAnnotationValue(final Long id) {
     return da.stringAnnotationValueById.get(id);
   }
@@ -420,5 +426,10 @@ public class TAGStore implements AutoCloseable {
   public BooleanAnnotationValue getBooleanAnnotationValue(final Long id) {
     return da.booleanAnnotationValueById.get(id);
   }
+
+  public ReferenceValue getReferenceValue(final Long id) {
+    return da.referenceValueById.get(id);
+  }
+
 
 }
