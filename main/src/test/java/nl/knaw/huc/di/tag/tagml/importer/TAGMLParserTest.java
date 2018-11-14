@@ -55,6 +55,33 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
   private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
+  @Test
+  public void testTagWithReferenceParses() {
+    String input = "[tagml pers->pers01>Some text<tagml]";
+    AnnotationInfo pers = store.runInTransaction(() -> {
+      TAGDocument document = assertTAGMLParses(input);
+      assertThat(document).hasMarkupMatching(
+          markupSketch("tagml")
+      );
+      assertThat(document).hasTextNodesMatching(
+          textNodeSketch("Some text")
+      );
+      assertThat(document.getLayerNames()).containsExactly("");
+
+      TAGMarkup tagmlMarkup = document.getMarkupStream().findFirst().get();
+      assertThat(tagmlMarkup).hasTag("tagml");
+
+      AnnotationInfo persInfo = tagmlMarkup.getAnnotation("pers");
+      assertThat(persInfo).isReference();
+      return persInfo;
+    });
+
+    store.runInTransaction(() -> {
+      String persValue = store.getReferenceValue(pers.getNodeId()).getValue();
+      assertThat(persValue).isEqualTo("pers01");
+    });
+  }
+
   @Test // Rd-205
   public void testDefaultLayerIsAlwaysOpen() {
     String input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
@@ -73,9 +100,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
           textNodeSketch(" "),
           textNodeSketch("test")
       );
-      assertThat(document.getLayerNames()).containsExactly("","A");
+      assertThat(document.getLayerNames()).containsExactly("", "A");
     });
   }
+
   @Test // RD-131
   public void testSimpleTextWithRoot() {
     String input = "[tagml>simple text<tagml]";

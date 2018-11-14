@@ -321,6 +321,11 @@ public class TAGMLExporter extends TAGExporter {
         stringBuilder.append("}");
         break;
 
+      case Reference:
+        String refValue = annotationFactory.getReferenceValue(a);
+        stringBuilder.append(refValue);
+        break;
+
       default:
         throw new RuntimeException("unhandled annotation type:" + a.getType());
 
