@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,11 @@ import java.util.List;
 
 public class AsHTMLDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
+  private final StringBuilder originalBuilder = new StringBuilder();
+  private final StringBuilder diffBuilder = new StringBuilder();
+  private final StringBuilder editedBuilder = new StringBuilder();
+  private String originalText;
+  private String editedText;
 
   @Override
   public void startVisualization() {
@@ -36,129 +41,144 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
         .append(".original { background-color:lightcyan}\n")
         .append(".edited { background-color:palegreen}\n")
         .append(".markup-edited { background-color:#33cc33}\n")
+        .append("table, th, td {border: 1px solid black; border-collapse: collapse;}\n")
+        .append("table table, table table th, table table td {border: 0px; border-collapse: collapse; padding: 0;}")
         .append("</style>\n")
         .append("<table border=\"1\">\n");
   }
 
   @Override
   public void startOriginal(final String witness1) {
-    resultBuilder.append("  <tr>\n    <th class=\"original\">").append(witness1).append("</th>\n");
+    originalBuilder.append("  <tr>\n    <th class=\"original\">").append(witness1).append("</th>\n");
   }
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
-    resultBuilder.append("    <td class=\"original\">")
+    originalBuilder.append("    <td class=\"original\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
   }
 
   @Override
   public void endOriginal() {
-    resultBuilder.append("  </tr>\n");
+    originalBuilder.append("  </tr>\n");
   }
 
   @Override
   public void startDiff(final String witness1, final String witness2) {
-    resultBuilder.append("  <tr>\n    <th>").append(witness1).append("/").append(witness2).append("</th>\n");
+    diffBuilder.append("  <tr>\n    <th>").append(witness1).append("/").append(witness2).append("</th>\n");
   }
 
   @Override
   public void startAligned() {
-    resultBuilder.append("    <td class=\"aligned\">");
+    diffBuilder.append("    <td class=\"aligned\">");
   }
 
   @Override
   public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
-    tokensWa.forEach(t -> resultBuilder.append(escapedContent(t))
+    tokensWa.forEach(t -> diffBuilder.append(escapedContent(t))
     );
   }
 
   @Override
   public void endAligned() {
-    resultBuilder.append("</td>\n");
+    diffBuilder.append("</td>\n");
   }
 
   @Override
   public void startAddition() {
-    resultBuilder.append("    <td class=\"addition\">&nbsp;<br/>");
+    diffBuilder.append("    <td class=\"addition\">");
   }
 
   @Override
   public void addedTextToken(final TAGToken t) {
-    resultBuilder.append(escapedContent(t));
+    originalText = "&nbsp;";
+    editedText = escapedContent(t);
   }
 
   @Override
   public void endAddition() {
-    resultBuilder.append("</td>\n");
+    addTable();
   }
 
   @Override
   public void startOmission() {
-    resultBuilder.append("    <td class=\"omission\">");
+    diffBuilder.append("    <td class=\"omission\">");
   }
 
   @Override
   public void omittedTextToken(final TAGToken t) {
-    resultBuilder.append(escapedContent(t));
+    originalText = escapedContent(t);
+    editedText = "&nbsp;";
   }
 
   @Override
   public void endOmission() {
-    resultBuilder.append("<br/>&nbsp;</td>\n");
+    addTable();
   }
 
   @Override
   public void startReplacement() {
-    resultBuilder.append("    <td class=\"replacement\">");
+    diffBuilder.append("    <td class=\"replacement\">");
   }
 
   @Override
   public void originalTextToken(final TAGToken t) {
-    resultBuilder.append(escapedContent(t));
+    originalText = escapedContent(t);
   }
 
   @Override
   public void replacementSeparator() {
-    resultBuilder.append("<br/>");
   }
 
   @Override
   public void editedTextToken(final TAGToken t) {
-    resultBuilder.append(escapedContent(t));
+    editedText = escapedContent(t);
   }
 
   @Override
   public void endReplacement() {
-    resultBuilder.append("</td>\n");
+    addTable();
+  }
+
+  private void addTable() {
+    diffBuilder
+        .append("<table       width=\"100%\"><tr><td class=\"edited\">")
+        .append(editedText)
+        .append("</td></tr><tr><td class=\"original\">")
+        .append(originalText)
+        .append("</td></tr></table></td>\n");
   }
 
   @Override
   public void endDiff() {
-    resultBuilder.append("  </tr>\n");
+    diffBuilder.append("  </tr>\n");
   }
 
   @Override
   public void startEdited(final String witness2) {
-    resultBuilder.append("  <tr>\n    <th class=\"edited\">").append(witness2).append("</th>\n");
+    editedBuilder.append("  <tr>\n    <th class=\"edited\">").append(witness2).append("</th>\n");
   }
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
-    resultBuilder.append("    <td class=\"edited\">")
+    editedBuilder.append("    <td class=\"edited\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
   }
 
   @Override
   public void endEdited() {
-    resultBuilder.append("  </tr>\n");
-
+    editedBuilder.append("  </tr>\n");
   }
 
   @Override
   public void endVisualization() {
-    resultBuilder.append("</table>\n");
+    resultBuilder
+        .append(editedBuilder)
+        .append(diffBuilder)
+        .append(originalBuilder)
+        .append("</table>\n");
   }
 
   @Override
