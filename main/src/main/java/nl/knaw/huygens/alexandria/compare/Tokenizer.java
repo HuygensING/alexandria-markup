@@ -91,7 +91,6 @@ class Tokenizer {
 
       List<TAGMarkup> toOpen = new ArrayList<>(markups);
       toOpen.removeAll(openMarkup);
-      Collections.reverse(toOpen);
 
       openMarkup.removeAll(toClose);
       openMarkup.addAll(toOpen);
