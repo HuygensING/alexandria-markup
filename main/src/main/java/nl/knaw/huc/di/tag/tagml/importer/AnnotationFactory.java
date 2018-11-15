@@ -109,6 +109,11 @@ public class AnnotationFactory {
     return new AnnotationInfo(id, AnnotationType.Number, aName);
   }
 
+  public AnnotationInfo makeReferenceAnnotation(final String aName, final String value) {
+    Long id = store.createReferenceValue(value);
+    return new AnnotationInfo(id, AnnotationType.Reference, aName);
+  }
+
   private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
     final AnnotationInfo annotationInfo;
     List<Object> list = value;
@@ -155,8 +160,8 @@ public class AnnotationFactory {
       } else if (subValueParseTree instanceof RefValueContext) {
         RefValueContext refValueContext = (RefValueContext) subValueParseTree;
         String refValue = refValueContext.getText();
-        LOG.warn("TODO: handle refValue {}", refValue);
-        // TODO: handle refValue
+        final AnnotationInfo aInfo = makeReferenceAnnotation(subName, refValue);
+        textGraph.addAnnotationEdge(id, aInfo);
 
       } else {
         throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
@@ -305,6 +310,11 @@ public class AnnotationFactory {
         .map(AnnotationEdge.class::cast)
         .map(this::toAnnotationInfo)
         .collect(toList());
+  }
+
+  public String getReferenceValue(final AnnotationInfo annotationInfo) {
+    Long nodeId = annotationInfo.getNodeId();
+    return store.getReferenceValue(nodeId).getValue();
   }
 
   private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {

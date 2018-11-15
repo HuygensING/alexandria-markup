@@ -40,6 +40,7 @@ class DataAccessor {
   final PrimaryIndex<Long, NumberAnnotationValue> numberAnnotationValueById;
   final PrimaryIndex<Long, ListAnnotationValue> listAnnotationValueById;
   final PrimaryIndex<Long, MapAnnotationValue> mapAnnotationValueById;
+  final PrimaryIndex<Long, ReferenceValue> referenceValueById;
 
   Map<Class, PrimaryIndex> indexMap = new HashMap<>();
 
@@ -52,6 +53,7 @@ class DataAccessor {
     numberAnnotationValueById = initIndex(store, NumberAnnotationValue.class);
     listAnnotationValueById = initIndex(store, ListAnnotationValue.class);
     mapAnnotationValueById = initIndex(store, MapAnnotationValue.class);
+    referenceValueById = initIndex(store, ReferenceValue.class);
   }
 
   public <T> PrimaryIndex<Long, T> getPrimaryIndexForClass(final Class<T> dtoClass) {

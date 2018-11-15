@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria.storage.dto;
  */
 
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import org.assertj.core.api.AbstractObjectAssert;
 
 public class AnnotationInfoAssert extends AbstractObjectAssert<AnnotationInfoAssert, AnnotationInfo> {
@@ -37,4 +38,39 @@ public class AnnotationInfoAssert extends AbstractObjectAssert<AnnotationInfoAss
     return myself;
   }
 
+  public AnnotationInfoAssert isReference() {
+    return assertAnnotationTypeIs(AnnotationType.Reference);
+  }
+
+  public AnnotationInfoAssert isString() {
+    return assertAnnotationTypeIs(AnnotationType.String);
+  }
+
+  public AnnotationInfoAssert isBoolean() {
+    return assertAnnotationTypeIs(AnnotationType.Boolean);
+  }
+
+  public AnnotationInfoAssert isList() {
+    return assertAnnotationTypeIs(AnnotationType.List);
+  }
+
+  public AnnotationInfoAssert isMap() {
+    return assertAnnotationTypeIs(AnnotationType.Map);
+  }
+
+  public AnnotationInfoAssert isNumber() {
+    return assertAnnotationTypeIs(AnnotationType.Number);
+  }
+
+  public AnnotationInfoAssert isRichText() {
+    return assertAnnotationTypeIs(AnnotationType.RichText);
+  }
+
+  private AnnotationInfoAssert assertAnnotationTypeIs(final AnnotationType expectedAnnotationType) {
+    isNotNull();
+    if (!actual.getType().equals(expectedAnnotationType)) {
+      failWithMessage("Expected annotation's type to be <%s> but was <%s>", expectedAnnotationType.name(), actual.getType());
+    }
+    return myself;
+  }
 }
