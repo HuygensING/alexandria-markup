@@ -7,4 +7,8 @@ package nl.knaw.huc.di.tag.model.graph.experimental.nodes;
 public class MarkupNode implements TextGraphNode {
     // Every markup node has a name, every annotation has a name
     private String name;
+
+    public MarkupNode(String name) {
+        this.name = name;
+    }
 }

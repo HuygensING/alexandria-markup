@@ -21,46 +21,58 @@ public class Hypergraph<H extends N, N> {
     private static int OUTGOING = 1;
     private static int INCOMING = 2;
 
-    private Map<N, List<N>[]> adjancency;
+    private Map<N, List<N>[]> adjacency;
 
     Hypergraph() {
-        this.adjancency = new LinkedHashMap<>();
+        this.adjacency = new LinkedHashMap<>();
     }
 
     public void addEdge(N source, N target, boolean directed) {
         if (directed) {
-            adjancency.computeIfAbsent(source, e -> new ArrayList[3])[OUTGOING].add(target);
-            adjancency.computeIfAbsent(target, e -> new ArrayList[3])[INCOMING].add(source);
+            adjacency.computeIfAbsent(source, e -> new ArrayList[3])[OUTGOING].add(target);
+            adjacency.computeIfAbsent(target, e -> new ArrayList[3])[INCOMING].add(source);
         } else {
             throw new UnsupportedOperationException("not yet implemented");
         }
     }
 
     public List<N> getOutgoingNodes(N source) {
-        return adjancency.get(source)[OUTGOING];
+        return adjacency.get(source)[OUTGOING];
     }
 
     public List<N> getIncomingNodes(N target) {
-        return adjancency.get(target)[INCOMING];
+        return adjacency.get(target)[INCOMING];
+    }
+
+    public void addNode(N node) {
+        adjacency.computeIfAbsent(node, n -> new ArrayList[3]);
     }
 
     public void addHyperedge(H edge, N... targets) {
         for (N target : targets) {
-            adjancency.computeIfAbsent(edge, e -> new ArrayList[3])[UNDIRECTED].add(target);
-            adjancency.computeIfAbsent(target, e -> new ArrayList[3])[UNDIRECTED].add(edge);
+            adjacency.computeIfAbsent(edge, e -> new ArrayList[3])[UNDIRECTED].add(target);
+            adjacency.computeIfAbsent(target, e -> new ArrayList[3])[UNDIRECTED].add(edge);
         }
     }
 
+    public void addHyperedge(H edge, N[] targets, boolean dummy) {
+        for (N target : targets) {
+        adjacency.computeIfAbsent(edge, e -> new ArrayList[3])[UNDIRECTED].add(target);
+        adjacency.computeIfAbsent(target, e -> new ArrayList[3])[UNDIRECTED].add(edge);
+    }
+}
+
     public List<N> getTargets(H edge) {
-        return adjancency.get(edge)[UNDIRECTED];
+        return adjacency.get(edge)[UNDIRECTED];
     }
 
     @Override
     public String toString() {
         String bla = "";
-        for (N key : adjancency.keySet()) {
-            bla += key.toString()+" -> "+adjancency.get(key).toString();
+        for (N key : adjacency.keySet()) {
+            bla += key.toString()+" -> "+ adjacency.get(key).toString();
         }
         return bla;
     }
+
 }

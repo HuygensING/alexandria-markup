@@ -18,28 +18,37 @@ import nl.knaw.huc.di.tag.model.graph.experimental.nodes.TextNode;
 public class TextHypergraph {
     private Hypergraph<MarkupNode, TextGraphNode> underlyingGraph;
     private TextNode firstTextNode;
+    private TextNode lastTextNode;
 
     public TextHypergraph() {
         this.underlyingGraph = new Hypergraph<>();
         this.firstTextNode = null;
+        this.lastTextNode = null;
     }
 
-    public void addText(String text) {
+    public TextNode addText(String text) {
         TextNode textNode = new TextNode(text);
-//        underlyingGraph.addNode(new TextNode());
+        underlyingGraph.addNode(textNode);
         if (firstTextNode==null) {
             firstTextNode = textNode;
         } else {
-            throw new UnsupportedOperationException("Not implemented yet!");
+            underlyingGraph.addEdge(lastTextNode, textNode, true);
         }
+        lastTextNode = textNode;
+        return textNode;
     }
 
-    public void addTextAfter(String text, TextNode previous) {
-        TextNode textNode = new TextNode(text);
-        underlyingGraph.addEdge(previous, textNode, true);
+    public MarkupNode addMarkupNode(String tag) {
+        MarkupNode node = new MarkupNode(tag);
+        underlyingGraph.addNode(node);
+        return node;
     }
 
-    public void addMarkupNode(String tag, TextNode start, TextNode end) {
+    public void addHyperedge(MarkupNode edge, TextGraphNode... text) {
+        underlyingGraph.addHyperedge(edge, text, true);
+    }
 
+    public void showMe() {
+        System.out.println(underlyingGraph);
     }
 }
