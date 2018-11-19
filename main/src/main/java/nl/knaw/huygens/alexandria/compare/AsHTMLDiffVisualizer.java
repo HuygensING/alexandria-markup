@@ -24,13 +24,20 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.text.StringEscapeUtils;
 import prioritised_xml_collation.TAGToken;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsHTMLDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
   private final StringBuilder originalBuilder = new StringBuilder();
   private final StringBuilder diffBuilder = new StringBuilder();
   private final StringBuilder editedBuilder = new StringBuilder();
+  private final AtomicInteger originalTextSegmentCounter = new AtomicInteger();
+  private final AtomicInteger editedTextSegmentCounter = new AtomicInteger();
+  private final Map<Integer, Integer> originalColSpan = new HashMap<>();
+  private final Map<Integer, Integer> editedColSpan = new HashMap<>();
   private String originalText;
   private String editedText;
 
@@ -54,7 +61,9 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
-    originalBuilder.append("    <td class=\"original\">")
+    originalBuilder.append("    <td class=\"original\" colspan=\"original")
+        .append(originalTextSegmentCounter.getAndIncrement())
+        .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
   }
@@ -76,8 +85,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
-    tokensWa.forEach(t -> diffBuilder.append(escapedContent(t))
-    );
+    tokensWa.forEach(t -> diffBuilder.append(escapedContent(t)));
+    ExtendedTextToken extendedTextTokenA = (ExtendedTextToken) tokensWa.get(0);
   }
 
   @Override
@@ -162,7 +171,9 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
-    editedBuilder.append("    <td class=\"edited\">")
+    editedBuilder.append("    <td class=\"edited\" colspan=\"edited")
+        .append(editedTextSegmentCounter.getAndIncrement())
+        .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
   }
@@ -174,10 +185,24 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void endVisualization() {
+    String edited = editedBuilder.toString();
+    for (int k : editedColSpan.keySet()) {
+      edited = edited.replace(
+          "edited" + k + "\"",
+          editedColSpan.get(k) + "\""
+      );
+    }
+    String original = originalBuilder.toString();
+    for (int k : originalColSpan.keySet()) {
+      original = original.replace(
+          "original" + k + "\"",
+          originalColSpan.get(k) + "\""
+      );
+    }
     resultBuilder
-        .append(editedBuilder)
+        .append(edited)
         .append(diffBuilder)
-        .append(originalBuilder)
+        .append(original)
         .append("</table>\n");
   }
 
