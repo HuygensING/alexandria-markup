@@ -390,7 +390,7 @@ public class LaTeXExporter {
       TAGTextNode lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
-    String markupPartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;
+    String markupPartNum = rangeLayerIndex + "_" + partNo;
     appendMarkup(latexBuilder, tr, markupPartNum, markupRow, color, first, last);
   }
 
