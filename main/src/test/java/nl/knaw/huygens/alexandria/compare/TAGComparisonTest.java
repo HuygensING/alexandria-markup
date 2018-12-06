@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * alexandria-markup-core
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -39,7 +39,6 @@ import static java.util.stream.Collectors.joining;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
-  // TODO: change the lmnl examples to TAGML examples
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
 
 
@@ -118,7 +117,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
@@ -135,7 +133,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement2() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";

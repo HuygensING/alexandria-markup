@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
 
 /*
  * #%L
- * alexandria-markup
+ * alexandria-markup-core
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
