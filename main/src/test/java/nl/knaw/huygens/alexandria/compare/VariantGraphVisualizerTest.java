@@ -72,7 +72,6 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void test3() {
-    fail();
     String originText = "[FRAGML|+M>\n" +
         "[body|M>\n" +
         "[s|M>Une belle main de femme, élégante et fine, malgré [del|M>l'agrandissement du<del] close-up.\n" +
