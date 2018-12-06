@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.storage.bdb;
 
 /*
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======

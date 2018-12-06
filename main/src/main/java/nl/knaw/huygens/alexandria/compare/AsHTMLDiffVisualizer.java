@@ -2,16 +2,16 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   private final StringBuilder editedBuilder = new StringBuilder();
   private final AtomicInteger originalTextSegmentCounter = new AtomicInteger();
   private final AtomicInteger editedTextSegmentCounter = new AtomicInteger();
-  private final Map<Integer, Integer> originalColSpan = new HashMap<>();
-  private final Map<Integer, Integer> editedColSpan = new HashMap<>();
+  private final Map<Integer, AtomicInteger> originalColSpan = new HashMap<>();
+  private final Map<Integer, AtomicInteger> editedColSpan = new HashMap<>();
   private String originalText;
   private String editedText;
 
@@ -61,11 +61,13 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
+    int originalTextSegmentCount = this.originalTextSegmentCounter.incrementAndGet();
     originalBuilder.append("    <td class=\"original\" colspan=\"original")
-        .append(originalTextSegmentCounter.getAndIncrement())
+        .append(originalTextSegmentCount)
         .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
+    originalColSpan.put(originalTextSegmentCount, new AtomicInteger(1));
   }
 
   @Override
@@ -87,6 +89,17 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
     tokensWa.forEach(t -> diffBuilder.append(escapedContent(t)));
     ExtendedTextToken extendedTextTokenA = (ExtendedTextToken) tokensWa.get(0);
+    incrementColSpan();
+  }
+
+  private void incrementColSpan() {
+    int originalIndex = originalTextSegmentCounter.get();
+    originalColSpan.putIfAbsent(originalIndex, new AtomicInteger(1));
+    originalColSpan.get(originalIndex).incrementAndGet();
+
+    int editedIndex = editedTextSegmentCounter.get();
+    editedColSpan.putIfAbsent(editedIndex, new AtomicInteger(1));
+    editedColSpan.get(editedIndex).incrementAndGet();
   }
 
   @Override
@@ -103,6 +116,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   public void addedTextToken(final TAGToken t) {
     originalText = "&nbsp;";
     editedText = escapedContent(t);
+    incrementColSpan();
   }
 
   @Override
@@ -119,6 +133,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   public void omittedTextToken(final TAGToken t) {
     originalText = escapedContent(t);
     editedText = "&nbsp;";
+    incrementColSpan();
   }
 
   @Override
@@ -148,11 +163,12 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void endReplacement() {
     addTable();
+    incrementColSpan();
   }
 
   private void addTable() {
     diffBuilder
-        .append("<table       width=\"100%\"><tr><td class=\"edited\">")
+        .append("<table width=\"100%\"><tr><td class=\"edited\">")
         .append(editedText)
         .append("</td></tr><tr><td class=\"original\">")
         .append(originalText)
@@ -171,11 +187,13 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
+    int editedTextSegmentCounter = this.editedTextSegmentCounter.incrementAndGet();
     editedBuilder.append("    <td class=\"edited\" colspan=\"edited")
-        .append(editedTextSegmentCounter.getAndIncrement())
+        .append(editedTextSegmentCounter)
         .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
+    editedColSpan.put(editedTextSegmentCounter, new AtomicInteger(1));
   }
 
   @Override

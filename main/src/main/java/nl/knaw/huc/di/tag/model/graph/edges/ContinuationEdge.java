@@ -4,7 +4,7 @@ import com.sleepycat.persist.model.Persistent;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======

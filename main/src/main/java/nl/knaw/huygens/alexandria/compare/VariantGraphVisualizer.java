@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import prioritised_xml_collation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
@@ -49,6 +51,7 @@ public class VariantGraphVisualizer {
     List<TAGToken> originalTextTokens = originalTokens.stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
+    Map<TAGToken,Integer> originalTextTokenToTextNodeIndex = new HashMap<>();
     LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
     List<TAGToken> originalMarkupTokens = originalTokens.stream()
         .filter(this::isMarkupToken)
@@ -61,6 +64,7 @@ public class VariantGraphVisualizer {
         .stream()
         .filter(ExtendedTextToken.class::isInstance)
         .collect(Collectors.toList());
+    Map<TAGToken,Integer> editedTextTokenToTextNodeIndex = new HashMap<>();
     LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
     List<TAGToken> editedMarkupTokens = editedTokens.stream()
         .filter(this::isMarkupToken)

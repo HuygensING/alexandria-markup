@@ -3,7 +3,7 @@ package nl.knaw.huygens.alexandria;
 
 /*
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -44,7 +44,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   @BeforeClass
   public static void beforeClass() throws IOException {
 //    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
-    tmpDir = Files.createTempDirectory("tmpDir");
+    tmpDir = Files.createTempDirectory("alexandria");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
     store = new TAGStore(tmpDir.toString(), false);

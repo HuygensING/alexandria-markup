@@ -3,7 +3,7 @@ package nl.knaw.huc.di.tag.model.graph;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======

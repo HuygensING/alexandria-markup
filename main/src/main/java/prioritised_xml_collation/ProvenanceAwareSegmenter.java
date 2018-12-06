@@ -2,7 +2,7 @@ package prioritised_xml_collation;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======

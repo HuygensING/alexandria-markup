@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * main
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -39,9 +39,7 @@ import static java.util.stream.Collectors.joining;
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
-  // TODO: change the lmnl examples to TAGML examples
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
-
 
   @Test
   public void testSplitCase() {
@@ -102,7 +100,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testAddition() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
@@ -118,7 +115,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
@@ -135,7 +131,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testReplacement2() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
@@ -157,7 +152,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("change to TAGML first")
+  //  @Ignore()
   @Test
   public void testJoin() {
     String originText = "[t>[l>one two<l]\n[l>three four<l]<t]";
@@ -175,7 +170,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("change to TAGML first")
   @Test
   public void testSplit() {
     String originText = "[t>[l>one two three four<l]<t]";
@@ -193,7 +187,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testAddedNewlines() {
     String originText = "[t>one two three four<t]";
@@ -208,12 +201,11 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-
   @Ignore
   @Test
   public void testNewlinesInText() {
-    String originText = "[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]";
-    String editedText = "[l>line 1<l]\n[l>line 1a<l]\n[l>line 2<l]\n[l>line 3<l]";
+    String originText = "[t>[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]<t]";
+    String editedText = "[t>[l>line 1<l]\n[l>line 1a<l]\n[l>line 2<l]\n[l>line 3<l]<t]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
