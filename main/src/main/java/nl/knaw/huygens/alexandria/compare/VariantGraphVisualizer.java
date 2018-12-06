@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * alexandria-markup-core
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -69,9 +69,6 @@ public class VariantGraphVisualizer {
 
     SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
     List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
-
-//    SegmenterInterface markupSegmenter = new ProvenanceAwareSegmenter(originalMarkupTokens, editedMarkupTokens);
-//    List<Segment> markupSegments = new TypeAndContentAligner().alignTokens(originalMarkupTokens, editedMarkupTokens, markupSegmenter);
 
     visualizer.startVisualization();
 

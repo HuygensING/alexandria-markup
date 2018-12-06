@@ -2,7 +2,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * alexandria-markup-core
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Set;
+
+import static org.junit.Assert.fail;
 
 public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(VariantGraphVisualizerTest.class);
@@ -70,7 +72,8 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void test3() {
-    String originText = "[TAGML|+M>\n" +
+    fail();
+    String originText = "[FRAGML|+M>\n" +
         "[body|M>\n" +
         "[s|M>Une belle main de femme, élégante et fine, malgré [del|M>l'agrandissement du<del] close-up.\n" +
         "<s]\n" +
@@ -87,8 +90,8 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
   }
 
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
-    LOG.info("{}:\n{}",witness1,tagml1);
-    LOG.info("{}:\n{}",witness2,tagml2);
+    LOG.info("{}:\n{}", witness1, tagml1);
+    LOG.info("{}:\n{}", witness2, tagml2);
     store.runInTransaction(() -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));

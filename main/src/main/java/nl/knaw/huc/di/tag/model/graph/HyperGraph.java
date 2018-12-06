@@ -1,6 +1,5 @@
 package nl.knaw.huc.di.tag.model.graph;
 
-
 /*-
  * #%L
  * alexandria-markup-core

@@ -2,16 +2,16 @@ package nl.knaw.huygens.alexandria.compare;
 
 /*-
  * #%L
- * alexandria-markup
+ * alexandria-markup-core
  * =======
  * Copyright (C) 2016 - 2018 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,17 +29,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Collections.singletonList;
+
 public class AsHTMLDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
+
   private final StringBuilder originalBuilder = new StringBuilder();
-  private final StringBuilder diffBuilder = new StringBuilder();
-  private final StringBuilder editedBuilder = new StringBuilder();
-  private final AtomicInteger originalTextSegmentCounter = new AtomicInteger();
-  private final AtomicInteger editedTextSegmentCounter = new AtomicInteger();
-  private final Map<Integer, Integer> originalColSpan = new HashMap<>();
-  private final Map<Integer, Integer> editedColSpan = new HashMap<>();
+  private final Map<Long, AtomicInteger> originalColSpan = new HashMap<>();
   private String originalText;
+
+  private final StringBuilder diffBuilder = new StringBuilder();
+
+  private final StringBuilder editedBuilder = new StringBuilder();
+  private final Map<Long, AtomicInteger> editedColSpan = new HashMap<>();
   private String editedText;
+  private TAGToken lastOriginalTextToken;
+  private TAGToken lastEditedTextToken;
 
   @Override
   public void startVisualization() {
@@ -61,8 +66,9 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
+    Long textNodeId = t.getDbId();
     originalBuilder.append("    <td class=\"original\" colspan=\"original")
-        .append(originalTextSegmentCounter.getAndIncrement())
+        .append(textNodeId)
         .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
@@ -86,7 +92,34 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void alignedTextTokens(final List<TAGToken> tokensWa, final List<TAGToken> tokensWb) {
     tokensWa.forEach(t -> diffBuilder.append(escapedContent(t)));
-    ExtendedTextToken extendedTextTokenA = (ExtendedTextToken) tokensWa.get(0);
+    incrementOriginalColSpan(tokensWa);
+    incrementEditedColSpan(tokensWb);
+  }
+
+  private void incrementOriginalColSpan(final List<TAGToken> originalTextTokens) {
+    originalTextTokens.stream()
+        .map(ExtendedTextToken.class::cast)
+        .map(ExtendedTextToken::getTextNodeIds)
+        .flatMap(List::stream)
+        .distinct()
+        .forEach(textNodeId -> {
+      originalColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
+      originalColSpan.get(textNodeId).getAndIncrement();
+    });
+    lastOriginalTextToken = originalTextTokens.get(originalTextTokens.size() - 1);
+  }
+
+  private void incrementEditedColSpan(final List<TAGToken> editedTextTokens) {
+    editedTextTokens.stream()
+        .map(ExtendedTextToken.class::cast)
+        .map(ExtendedTextToken::getTextNodeIds)
+        .flatMap(List::stream)
+        .distinct()
+        .forEach(textNodeId -> {
+          editedColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
+          editedColSpan.get(textNodeId).getAndIncrement();
+        });
+    lastEditedTextToken = editedTextTokens.get(editedTextTokens.size() - 1);
   }
 
   @Override
@@ -103,6 +136,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   public void addedTextToken(final TAGToken t) {
     originalText = "&nbsp;";
     editedText = escapedContent(t);
+    incrementOriginalColSpan(singletonList(lastOriginalTextToken));
+    incrementEditedColSpan(singletonList(t));
   }
 
   @Override
@@ -119,6 +154,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   public void omittedTextToken(final TAGToken t) {
     originalText = escapedContent(t);
     editedText = "&nbsp;";
+    incrementOriginalColSpan(singletonList(t));
+    incrementEditedColSpan(singletonList(lastEditedTextToken));
   }
 
   @Override
@@ -134,6 +171,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void originalTextToken(final TAGToken t) {
     originalText = escapedContent(t);
+    incrementOriginalColSpan(singletonList(t));
   }
 
   @Override
@@ -143,6 +181,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void editedTextToken(final TAGToken t) {
     editedText = escapedContent(t);
+    incrementEditedColSpan(singletonList(t));
   }
 
   @Override
@@ -152,7 +191,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   private void addTable() {
     diffBuilder
-        .append("<table       width=\"100%\"><tr><td class=\"edited\">")
+        .append("<table width=\"100%\"><tr><td class=\"edited\">")
         .append(editedText)
         .append("</td></tr><tr><td class=\"original\">")
         .append(originalText)
@@ -171,8 +210,9 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
+    Long textNodeId = t.getDbId();
     editedBuilder.append("    <td class=\"edited\" colspan=\"edited")
-        .append(editedTextSegmentCounter.getAndIncrement())
+        .append(textNodeId)
         .append("\">")
         .append(escapedText(t.getText()))
         .append("</td>\n");
@@ -185,18 +225,18 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void endVisualization() {
-    String edited = editedBuilder.toString();
-    for (int k : editedColSpan.keySet()) {
-      edited = edited.replace(
-          "edited" + k + "\"",
-          editedColSpan.get(k) + "\""
-      );
-    }
     String original = originalBuilder.toString();
-    for (int k : originalColSpan.keySet()) {
+    for (long k : originalColSpan.keySet()) {
       original = original.replace(
           "original" + k + "\"",
           originalColSpan.get(k) + "\""
+      );
+    }
+    String edited = editedBuilder.toString();
+    for (long k : editedColSpan.keySet()) {
+      edited = edited.replace(
+          "edited" + k + "\"",
+          editedColSpan.get(k) + "\""
       );
     }
     resultBuilder
