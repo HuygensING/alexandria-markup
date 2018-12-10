@@ -225,6 +225,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void endVisualization() {
+    String originalMarkup = getOriginalMarkup();
     String original = originalBuilder.toString();
     for (long k : originalColSpan.keySet()) {
       original = original.replace(
@@ -232,6 +233,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
           originalColSpan.get(k) + "\""
       );
     }
+
+    String editedMarkup = getEditedMarkup();
     String edited = editedBuilder.toString();
     for (long k : editedColSpan.keySet()) {
       edited = edited.replace(
@@ -240,10 +243,20 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
       );
     }
     resultBuilder
+        .append(editedMarkup)
         .append(edited)
         .append(diffBuilder)
         .append(original)
+        .append(originalMarkup)
         .append("</table>\n");
+  }
+
+  private String getEditedMarkup() {
+    return "" ;
+  }
+
+  private String getOriginalMarkup() {
+    return "";
   }
 
   @Override
