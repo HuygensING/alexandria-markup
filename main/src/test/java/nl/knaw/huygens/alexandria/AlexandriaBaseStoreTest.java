@@ -21,7 +21,6 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
@@ -33,12 +32,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
-  protected static TAGStore store;
-  protected static TAGMLExporter tagmlExporter;
   private static Path tmpDir;
 
   @BeforeClass
@@ -47,26 +46,38 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
-    store = new TAGStore(tmpDir.toString(), false);
-    store.open();
-    tagmlExporter = new TAGMLExporter(store);
   }
 
   @AfterClass
   public static void afterClass() {
-    if (store != null) {
-      try {
-        store.close();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
     LOG.info("Deleting tempDirectory {}", tmpDir.toAbsolutePath());
     try {
       FileUtils.forceDelete(tmpDir.toFile());
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void runInStore(Consumer<TAGStore> storeConsumer) {
+    try (TAGStore store = getStore()) {
+      storeConsumer.accept(store);
+    }
+  }
+
+  public void runInStoreTransaction(Consumer<TAGStore> storeConsumer) {
+    try (TAGStore store = getStore()) {
+      store.runInTransaction(() -> storeConsumer.accept(store));
+    }
+  }
+
+  public <T> T runInStoreTransaction(Function<TAGStore, T> storeFunction) {
+    try (TAGStore store = getStore()) {
+      return store.runInTransaction(() -> storeFunction.apply(store));
+    }
+  }
+
+  private TAGStore getStore() {
+    return new TAGStore(tmpDir.toString(), false);
   }
 
 }

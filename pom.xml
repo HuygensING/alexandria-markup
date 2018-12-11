@@ -120,40 +120,40 @@
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco.version}</version>
-        <executions>
-          <execution>
-            <id>prepare-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-unit-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <!-- Sets the path to the file which contains the execution
-                data. -->
-              <dataFile>target/jacoco.exec</dataFile>
-              <!-- Sets the output directory for the code coverage report. -->
-              <outputDirectory>target/jacoco-ut</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+      <!--<plugin>-->
+      <!--<groupId>org.jacoco</groupId>-->
+      <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+      <!--<version>${jacoco.version}</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<id>prepare-agent</id>-->
+      <!--<goals>-->
+      <!--<goal>prepare-agent</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>report</id>-->
+      <!--<phase>prepare-package</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>post-unit-test</id>-->
+      <!--<phase>test</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--<configuration>-->
+      <!--&lt;!&ndash; Sets the path to the file which contains the execution-->
+      <!--data. &ndash;&gt;-->
+      <!--<dataFile>target/jacoco.exec</dataFile>-->
+      <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
+      <!--<outputDirectory>target/jacoco-ut</outputDirectory>-->
+      <!--</configuration>-->
+      <!--</execution>-->
+      <!--</executions>-->
+      <!--</plugin>-->
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -207,15 +207,6 @@
 
   <repositories>
     <repository>
-      <id>central</id>
-      <name>Maven Repository Switchboard</name>
-      <layout>default</layout>
-      <url>http://repo1.maven.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>huygens</id>
       <url>http://maven.huygens.knaw.nl/repository/</url>
       <releases>
@@ -229,22 +220,6 @@
         <checksumPolicy>fail</checksumPolicy>
       </snapshots>
     </repository>
-    <repository>
-      <id>oracleReleases</id>
-      <name>Oracle Released Java Packages</name>
-      <url>http://download.oracle.com/maven</url>
-      <layout>default</layout>
-    </repository>
-    <repository>
-      <id>restlet</id>
-      <name>Maven Restlet</name>
-      <layout>default</layout>
-      <url>http://maven.restlet.com/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
   </repositories>
 
   <prerequisites>
@@ -255,6 +230,5 @@
     <connection>scm:git:git@github.com:huygensING/alexandria-markup.git</connection>
     <tag>HEAD</tag>
   </scm>
-
 
 </project>

@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria.compare;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
@@ -100,7 +101,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testTokenizer() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument doc = new TAGMLImporter(store).importTAGML("[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
       TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
@@ -109,19 +110,19 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
           .containsExactly("l", "Alas", ", ", "poor ", "Yorick", "!", "/l");
 
       ExtendedTextToken alas = ((ExtendedTextToken) tokens.get(1));
-      assertTextNodesTextMatches(alas, "Alas,");
+      assertTextNodesTextMatches(alas, store, "Alas,");
 
       ExtendedTextToken comma = (ExtendedTextToken) tokens.get(2);
-      assertTextNodesTextMatches(comma, "Alas,", " ");
+      assertTextNodesTextMatches(comma, store, "Alas,", " ");
 
       ExtendedTextToken poor = (ExtendedTextToken) tokens.get(3);
-      assertTextNodesTextMatches(poor, "poor Yorick!");
+      assertTextNodesTextMatches(poor, store, "poor Yorick!");
 
       ExtendedTextToken yorick = (ExtendedTextToken) tokens.get(4);
-      assertTextNodesTextMatches(yorick, "poor Yorick!");
+      assertTextNodesTextMatches(yorick, store, "poor Yorick!");
 
       ExtendedTextToken exclamation = (ExtendedTextToken) tokens.get(5);
-      assertTextNodesTextMatches(exclamation, "poor Yorick!");
+      assertTextNodesTextMatches(exclamation, store, "poor Yorick!");
 
     });
   }
@@ -132,7 +133,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
     return Tokenizer.tokenizeText(text, 0, textNodeIds, textTokenInfoMap);
   }
 
-  private void assertTextNodesTextMatches(final ExtendedTextToken alas, final String... contents) {
+  private void assertTextNodesTextMatches(final ExtendedTextToken alas, final TAGStore store, final String... contents) {
     List<String> textNodeContents = alas.getTextNodeIds()
         .stream()
 //        .peek(System.out::println)

@@ -89,7 +89,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   }
 
   private Map<TAGMarkup, MarkupInfo> doDiff(String tagml1, String tagml2) {
-    return store.runInTransaction(() -> {
+    return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
       TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));

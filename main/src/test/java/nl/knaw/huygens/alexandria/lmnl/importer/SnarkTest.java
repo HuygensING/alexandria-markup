@@ -80,7 +80,7 @@ public class SnarkTest extends AlexandriaBaseStoreTest {
         "{text]\n" +
         "{poem]";
     printTokens(input);
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument document = new LMNLImporter(store).importLMNL(input);
       assertThat(document).isNotNull();
 

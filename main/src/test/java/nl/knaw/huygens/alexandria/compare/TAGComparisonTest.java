@@ -41,7 +41,6 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
 
-
   @Test
   public void testSplitCase() {
     String originText = "[TAGML|+M>\n" +
@@ -205,7 +204,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-
   @Ignore
   @Test
   public void testNewlinesInText() {
@@ -225,7 +223,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   }
 
   private TAGComparison compare(String originText, String editedText) {
-    return store.runInTransaction(() -> {
+    return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(originText);
       TAGDocument edited = importer.importTAGML(editedText);

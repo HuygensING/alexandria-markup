@@ -52,7 +52,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "thought Alice\n"//
         + "[q [n}a{]}without pictures or conversation?{q]\n"//
         + "{p]{excerpt]";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
@@ -76,7 +76,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l}line 2{l]\n"//
         + "[l}line 3{l]\n"//
         + "{text]";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
@@ -117,7 +117,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[verse}And the young men that were grown up with him spake unto him, saying, [q}Thus shalt thou speak unto this people that spake unto thee, saying, [q=i}Thy father made our yoke heavy, but make thou it lighter unto us;{q=i] thus shalt thou say unto them, [q=j}My little finger shall be thicker than my father's loins.{verse]\n"
         + "[verse}And now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I will chastise you with scorpions.{q=j]{q]{verse]\n"
         + "[verse}So Jeroboam and all the people came to Rehoboam the third day, as the king had appointed, saying, [q}Come to me again the third day.{q]{verse]\n" + "{excerpt]";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument kings = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(kings);
@@ -155,7 +155,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l [type}B{]}line 2{l]\n"//
         + "[l [type}A{]}line 3{l]\n"//
         + "{text]";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
@@ -182,7 +182,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testLuminescentQuery1() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument frankenstein = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(frankenstein);
@@ -203,7 +203,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testLuminescentQuery2() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument frankenstein = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(frankenstein);
@@ -227,7 +227,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l}line 2{l]\n"//
         + "[l}line 3{l]\n"//
         + "{text]";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument doc = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(doc);

@@ -33,28 +33,41 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
-  protected static TAGStore store;
-  protected static LMNLExporter lmnlExporter;
   private static Path tmpDir;
   DotFactory dotFactory = new DotFactory();
 
   @BeforeClass
   public static void beforeClass() throws IOException {
     tmpDir = mkTmpDir();
-    store = new TAGStore(tmpDir.toString(), false);
-    store.open();
-    lmnlExporter = new LMNLExporter(store).useShorthand();
   }
 
   @AfterClass
   public static void afterClass() throws IOException {
-    if (store != null) {
-      store.close();
-    }
     rmTmpDir(tmpDir);
+  }
+
+  private TAGStore getStore() {
+    return new TAGStore(tmpDir.toString(), false);
+  }
+
+  public LMNLExporter getLmnlExporter(TAGStore store) {
+    return new LMNLExporter(store).useShorthand();
+  }
+
+  public void runInStore(Consumer<TAGStore> storeConsumer) {
+    try (TAGStore store = getStore()) {
+      storeConsumer.accept(store);
+    }
+  }
+
+  public void runInStoreTransaction(Consumer<TAGStore> storeConsumer) {
+    try (TAGStore store = getStore()) {
+      store.runInTransaction(() -> storeConsumer.accept(store));
+    }
   }
 
   protected void logDocumentGraph(final TAGDocument document, final String input) {

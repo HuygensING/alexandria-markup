@@ -26,6 +26,8 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGMLExporterTest extends TAGBaseStoreTest {
@@ -290,13 +292,18 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   private String parseAndExport(final String tagmlIn) {
-    TAGDocument document = store.runInTransaction(
-        () -> new TAGMLImporter(store).importTAGML(tagmlIn)
-    );
-    return store.runInTransaction(() -> {
-      logDocumentGraph(document, tagmlIn);
-      return new TAGMLExporter(store).asTAGML(document);
+    AtomicReference<String> tagmlOut = new AtomicReference<>();
+    runInStore(store -> {
+      TAGDocument document = store.runInTransaction(
+          () -> new TAGMLImporter(store).importTAGML(tagmlIn)
+      );
+      String tagml = store.runInTransaction(() -> {
+        logDocumentGraph(document, tagmlIn);
+        return new TAGMLExporter(store).asTAGML(document);
+      });
+      tagmlOut.set(tagml);
     });
+    return tagmlOut.get();
   }
 
 }

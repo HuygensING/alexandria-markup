@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.TAGViews;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
@@ -73,12 +74,18 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     String tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]";
     final Set<String> a = new HashSet<>();
     a.add("A");
-    TAGView justA = new TAGView(store).setLayersToInclude(a);
-    String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<xml>\n" +
-        "<tagml><phr>Cookie Monster likes</phr> cookies</tagml>\n" +
-        "</xml>";
-    assertXMLExportIsAsExpected(tagML, justA, expectedXML);
+    runInStore(store -> {
+      TAGView justA = new TAGView(store).setLayersToInclude(a);
+      String expectedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+          "<xml>\n" +
+          "<tagml><phr>Cookie Monster likes</phr> cookies</tagml>\n" +
+          "</xml>";
+      try {
+        assertXMLExportIsAsExpected(tagML, justA, expectedXML, store);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Test
@@ -454,7 +461,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
-  private TAGDocument parseTAGML(final String tagML) {
+  private TAGDocument parseTAGML(final String tagML, final TAGStore store) {
     LOG.info("TAGML=\n\n{}\n", tagML);
 //    printTokens(tagML);
     //    logDocumentGraph(document, tagML);
@@ -462,11 +469,17 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) throws Exception {
-    assertXMLExportIsAsExpected(tagML, TAGViews.getShowAllMarkupView(store), expectedXML);
+    runInStore(store -> {
+      try {
+        assertXMLExportIsAsExpected(tagML, TAGViews.getShowAllMarkupView(store), expectedXML, store);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
-  private void assertXMLExportIsAsExpected(final String tagML, TAGView view, final String expectedXML) throws Exception {
-    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML));
+  private void assertXMLExportIsAsExpected(final String tagML, TAGView view, final String expectedXML, final TAGStore store) throws Exception {
+    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML, store));
     assertThat(document).isNotNull();
 
     String xml = store.runInTransaction(() -> new XMLExporter(store, view).asXML(document));
