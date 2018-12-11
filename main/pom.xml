@@ -86,14 +86,13 @@
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
     </dependency>
-
-    <!-- test dependencies -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
-      <scope>test</scope>
     </dependency>
+
+    <!-- test dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
