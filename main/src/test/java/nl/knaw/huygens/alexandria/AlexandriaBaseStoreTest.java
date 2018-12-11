@@ -56,6 +56,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   public static void afterClass() {
     if (store != null) {
       try {
+        LOG.info("Closing store {}", store);
         store.close();
       } catch (Exception e) {
         e.printStackTrace();
