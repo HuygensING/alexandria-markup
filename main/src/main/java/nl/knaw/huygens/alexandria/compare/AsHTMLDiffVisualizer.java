@@ -199,6 +199,8 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
         .append("</td></tr><tr><td class=\"original\">")
         .append(originalText)
         .append("</td></tr></table></td>\n");
+    originalText = "";
+    editedText = "";
   }
 
   @Override
