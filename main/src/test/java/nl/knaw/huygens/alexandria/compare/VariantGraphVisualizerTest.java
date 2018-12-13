@@ -86,6 +86,13 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
     visualizeDiff("A-3", originText, "B-3", editedText);
   }
 
+  @Test
+  public void test4() {
+    String originText = "[line>The rain in Spain falls mainly on the plain.<line]";
+    String editedText = "[markup annotation_1='string value' annotation_2=2.718>Some text<markup]";
+    visualizeDiff("A-4", originText, "B-4", editedText);
+  }
+
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);

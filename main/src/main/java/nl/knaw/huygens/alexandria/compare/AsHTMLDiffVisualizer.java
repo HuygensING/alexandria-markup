@@ -27,6 +27,7 @@ import prioritised_xml_collation.TAGToken;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singletonList;
@@ -98,19 +99,21 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   private void incrementOriginalColSpan(final List<TAGToken> originalTextTokens) {
     originalTextTokens.stream()
+        .filter(Objects::nonNull)
         .map(ExtendedTextToken.class::cast)
         .map(ExtendedTextToken::getTextNodeIds)
         .flatMap(List::stream)
         .distinct()
         .forEach(textNodeId -> {
-      originalColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
-      originalColSpan.get(textNodeId).getAndIncrement();
-    });
+          originalColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
+          originalColSpan.get(textNodeId).getAndIncrement();
+        });
     lastOriginalTextToken = originalTextTokens.get(originalTextTokens.size() - 1);
   }
 
   private void incrementEditedColSpan(final List<TAGToken> editedTextTokens) {
     editedTextTokens.stream()
+        .filter(Objects::nonNull)
         .map(ExtendedTextToken.class::cast)
         .map(ExtendedTextToken::getTextNodeIds)
         .flatMap(List::stream)
@@ -170,7 +173,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void originalTextToken(final TAGToken t) {
-    originalText = escapedContent(t);
+    originalText += escapedContent(t);
     incrementOriginalColSpan(singletonList(t));
   }
 
@@ -180,7 +183,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void editedTextToken(final TAGToken t) {
-    editedText = escapedContent(t);
+    editedText += escapedContent(t);
     incrementEditedColSpan(singletonList(t));
   }
 
@@ -252,7 +255,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   private String getEditedMarkup() {
-    return "" ;
+    return "";
   }
 
   private String getOriginalMarkup() {

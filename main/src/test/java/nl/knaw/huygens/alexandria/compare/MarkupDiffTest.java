@@ -128,23 +128,6 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
               markupInfoMap.putIfAbsent(markupId, new MarkupInfo(rank, rank));
               markupInfoMap.get(markupId).setEndRank(rank);
             });
-//        switch (segment.type) {
-//          case aligned:
-//
-//            break;
-//
-//          case addition:
-//            break;
-//
-//          case omission:
-//            break;
-//
-//          case replacement:
-//            break;
-//
-//          default:
-//            throw new RuntimeException("unexpected type:" + segment.type);
-//        }
       });
       Map<TAGMarkup, MarkupInfo> markupInfoMap2 = new HashMap<>();
       markupInfoMap.forEach((k, v) -> {
