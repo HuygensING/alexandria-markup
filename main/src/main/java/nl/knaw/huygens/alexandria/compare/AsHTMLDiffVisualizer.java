@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import prioritised_xml_collation.TAGToken;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singletonList;
@@ -36,13 +37,13 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   private final StringBuilder originalBuilder = new StringBuilder();
   private final Map<Long, AtomicInteger> originalColSpan = new HashMap<>();
-  private String originalText;
+  private String originalText = "";
 
   private final StringBuilder diffBuilder = new StringBuilder();
 
   private final StringBuilder editedBuilder = new StringBuilder();
   private final Map<Long, AtomicInteger> editedColSpan = new HashMap<>();
-  private String editedText;
+  private String editedText = "";
   private TAGToken lastOriginalTextToken;
   private TAGToken lastEditedTextToken;
 
@@ -98,19 +99,21 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   private void incrementOriginalColSpan(final List<TAGToken> originalTextTokens) {
     originalTextTokens.stream()
+        .filter(Objects::nonNull)
         .map(ExtendedTextToken.class::cast)
         .map(ExtendedTextToken::getTextNodeIds)
         .flatMap(List::stream)
         .distinct()
         .forEach(textNodeId -> {
-      originalColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
-      originalColSpan.get(textNodeId).getAndIncrement();
-    });
+          originalColSpan.putIfAbsent(textNodeId, new AtomicInteger(0));
+          originalColSpan.get(textNodeId).getAndIncrement();
+        });
     lastOriginalTextToken = originalTextTokens.get(originalTextTokens.size() - 1);
   }
 
   private void incrementEditedColSpan(final List<TAGToken> editedTextTokens) {
     editedTextTokens.stream()
+        .filter(Objects::nonNull)
         .map(ExtendedTextToken.class::cast)
         .map(ExtendedTextToken::getTextNodeIds)
         .flatMap(List::stream)
@@ -135,7 +138,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void addedTextToken(final TAGToken t) {
     originalText = "&nbsp;";
-    editedText = escapedContent(t);
+    editedText += escapedContent(t);
     incrementOriginalColSpan(singletonList(lastOriginalTextToken));
     incrementEditedColSpan(singletonList(t));
   }
@@ -152,7 +155,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void omittedTextToken(final TAGToken t) {
-    originalText = escapedContent(t);
+    originalText += escapedContent(t);
     editedText = "&nbsp;";
     incrementOriginalColSpan(singletonList(t));
     incrementEditedColSpan(singletonList(lastEditedTextToken));
@@ -170,7 +173,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void originalTextToken(final TAGToken t) {
-    originalText = escapedContent(t);
+    originalText += escapedContent(t);
     incrementOriginalColSpan(singletonList(t));
   }
 
@@ -180,7 +183,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void editedTextToken(final TAGToken t) {
-    editedText = escapedContent(t);
+    editedText += escapedContent(t);
     incrementEditedColSpan(singletonList(t));
   }
 
@@ -252,7 +255,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   private String getEditedMarkup() {
-    return "" ;
+    return "";
   }
 
   private String getOriginalMarkup() {

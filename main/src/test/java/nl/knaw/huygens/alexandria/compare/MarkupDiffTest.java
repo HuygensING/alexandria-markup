@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -54,8 +55,8 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
         "<s]\n" +
         "<text]<TAGML]\n";
-    Map<TAGMarkup, MarkupInfo> markupInfoMap = doDiff(originText, editedText);
-    assertThat(markupInfoMap).hasSize(10);
+    Map<Integer, Map<TAGMarkup, MarkupInfo>> markupInfoMap = doDiff(originText, editedText);
+    assertThat(markupInfoMap).hasSize(2);
     markupInfoMap.forEach((k, v) -> {
       LOG.info("{}: {}", k, v);
     });
@@ -88,7 +89,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     }
   }
 
-  private Map<TAGMarkup, MarkupInfo> doDiff(String tagml1, String tagml2) {
+  private Map<Integer, Map<TAGMarkup, MarkupInfo>> doDiff(String tagml1, String tagml2) {
     return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
@@ -113,44 +114,35 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
       SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
       List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
       AtomicInteger rankCounter = new AtomicInteger();
-      Map<Long, MarkupInfo> markupInfoMap = new HashMap<>();
+      Map<Long, MarkupInfo> markupInfoMap1 = new HashMap<>();
+      Map<Long, MarkupInfo> markupInfoMap2 = new HashMap<>();
       textSegments.forEach(segment -> {
         int rank = rankCounter.incrementAndGet();
         getTextNodeIdsForTokens(segment.tokensWa)
             .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
             .forEach(markupId -> {
-              markupInfoMap.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-              markupInfoMap.get(markupId).setEndRank(rank);
+              markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+              markupInfoMap1.get(markupId).setEndRank(rank);
             });
         getTextNodeIdsForTokens(segment.tokensWb)
             .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
             .forEach(markupId -> {
-              markupInfoMap.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-              markupInfoMap.get(markupId).setEndRank(rank);
+              markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+              markupInfoMap2.get(markupId).setEndRank(rank);
             });
-//        switch (segment.type) {
-//          case aligned:
-//
-//            break;
-//
-//          case addition:
-//            break;
-//
-//          case omission:
-//            break;
-//
-//          case replacement:
-//            break;
-//
-//          default:
-//            throw new RuntimeException("unexpected type:" + segment.type);
-//        }
       });
-      Map<TAGMarkup, MarkupInfo> markupInfoMap2 = new HashMap<>();
-      markupInfoMap.forEach((k, v) -> {
-        markupInfoMap2.put(store.getMarkup(k), v);
+      Map<Integer, Map<TAGMarkup, MarkupInfo>> resultMap = new HashMap<>();
+      Map<TAGMarkup, MarkupInfo> subMap1 = new HashMap<>();
+      markupInfoMap1.forEach((k, v) -> {
+        subMap1.put(store.getMarkup(k), v);
       });
-      return markupInfoMap2;
+      resultMap.put(1, subMap1);
+      Map<TAGMarkup, MarkupInfo> subMap2 = new HashMap<>();
+      markupInfoMap2.forEach((k, v) -> {
+        subMap2.put(store.getMarkup(k), v);
+      });
+      resultMap.put(2, subMap2);
+      return resultMap;
     });
   }
 
