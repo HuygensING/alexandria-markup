@@ -37,13 +37,13 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   private final StringBuilder originalBuilder = new StringBuilder();
   private final Map<Long, AtomicInteger> originalColSpan = new HashMap<>();
-  private String originalText;
+  private String originalText = "";
 
   private final StringBuilder diffBuilder = new StringBuilder();
 
   private final StringBuilder editedBuilder = new StringBuilder();
   private final Map<Long, AtomicInteger> editedColSpan = new HashMap<>();
-  private String editedText;
+  private String editedText = "";
   private TAGToken lastOriginalTextToken;
   private TAGToken lastEditedTextToken;
 
@@ -138,7 +138,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   @Override
   public void addedTextToken(final TAGToken t) {
     originalText = "&nbsp;";
-    editedText = escapedContent(t);
+    editedText += escapedContent(t);
     incrementOriginalColSpan(singletonList(lastOriginalTextToken));
     incrementEditedColSpan(singletonList(t));
   }
@@ -155,7 +155,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
 
   @Override
   public void omittedTextToken(final TAGToken t) {
-    originalText = escapedContent(t);
+    originalText += escapedContent(t);
     editedText = "&nbsp;";
     incrementOriginalColSpan(singletonList(t));
     incrementEditedColSpan(singletonList(lastEditedTextToken));

@@ -19,6 +19,7 @@ package prioritised_xml_collation;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.compare.ExtendedTextToken;
 
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public class ProvenanceAwareSegmenter implements SegmenterInterface {
   }
 
   private boolean provenanceChanged(final List<TAGToken> tokens, final int x0, int x1) {
+    if (x0 == x1) {
+      return false;
+    }
     if (x0 < 1 || x1 < 1) {
       return true;
     }
