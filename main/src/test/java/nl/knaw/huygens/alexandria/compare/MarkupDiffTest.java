@@ -43,7 +43,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
   @Test
-  public void testMakupDiff() {
+  public void testMarkupDiff() {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
         "[l|M>\n" +
@@ -55,16 +55,20 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
         "<s]\n" +
         "<text]<TAGML]\n";
-    Map<Integer, Map<TAGMarkup, MarkupInfo>> markupInfoMap = doDiff(originText, editedText);
-    assertThat(markupInfoMap).hasSize(2);
-    markupInfoMap.forEach((k, v) -> {
-      LOG.info("{}: {}", k, v);
-    });
+    List<MarkupInfo>[] markupInfoLists = doDiff(originText, editedText);
+    assertThat(markupInfoLists).hasSize(2);
+    for (int i = 0; i < 2; i++) {
+      for (MarkupInfo mi : markupInfoLists[i]) {
+        LOG.info("{}: {}", i, mi);
+      }
+    }
+
   }
 
   public class MarkupInfo {
     int startRank;
     int endRank;
+    private TAGMarkup markup;
 
     public MarkupInfo(int startRank, int endRank) {
       this.startRank = startRank;
@@ -85,15 +89,32 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
     @Override
     public String toString() {
-      return format("startRank=%d, endRank=%d", startRank, endRank);
+      return format("%s span=%d, startRank=%d, endRank=%d", markup, getSpan(), startRank, endRank);
+    }
+
+    private Integer getSpan() {
+      return endRank - startRank + 1;
+    }
+
+    public void setMarkup(TAGMarkup markup) {
+      this.markup = markup;
+    }
+
+    public TAGMarkup getMarkup() {
+      return markup;
     }
   }
 
-  private Map<Integer, Map<TAGMarkup, MarkupInfo>> doDiff(String tagml1, String tagml2) {
+  private static final Comparator<MarkupInfo> BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK = Comparator.comparing(MarkupInfo::getSpan)
+      .reversed()
+      .thenComparing(MarkupInfo::getStartRank)
+      .thenComparing(m -> m.getMarkup().getTag());
+
+  private List<MarkupInfo>[] doDiff(String tagmlA, String tagmlB) {
     return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+      TAGDocument original = importer.importTAGML(tagmlA.replace("\n", ""));
+      TAGDocument edited = importer.importTAGML(tagmlB.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
       List<TAGToken> originalTokens = new Tokenizer(original, allTags)
@@ -131,18 +152,22 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
               markupInfoMap2.get(markupId).setEndRank(rank);
             });
       });
-      Map<Integer, Map<TAGMarkup, MarkupInfo>> resultMap = new HashMap<>();
-      Map<TAGMarkup, MarkupInfo> subMap1 = new HashMap<>();
+      List<MarkupInfo>[] results = new ArrayList[2];
+      List<MarkupInfo> listA = new ArrayList<>();
       markupInfoMap1.forEach((k, v) -> {
-        subMap1.put(store.getMarkup(k), v);
+        v.setMarkup(store.getMarkup(k));
+        listA.add(v);
       });
-      resultMap.put(1, subMap1);
-      Map<TAGMarkup, MarkupInfo> subMap2 = new HashMap<>();
+      listA.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
+      results[0] = listA;
+      List<MarkupInfo> listB = new ArrayList<>();
       markupInfoMap2.forEach((k, v) -> {
-        subMap2.put(store.getMarkup(k), v);
+        v.setMarkup(store.getMarkup(k));
+        listB.add(v);
       });
-      resultMap.put(2, subMap2);
-      return resultMap;
+      listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
+      results[1] = listB;
+      return results;
     });
   }
 
