@@ -100,6 +100,7 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
 
     visualizeDiff("A-4", originText, "B-4", editedText);
   }
+
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);

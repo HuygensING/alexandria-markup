@@ -361,7 +361,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
       List<String> textSegments = document.getDTO().textGraph
           .getTextNodeIdStream()
-          .map(id -> store.getTextNodeDTO(id))
+          .map(store::getTextNodeDTO)
           .map(TAGTextNodeDTO::getText)
           .collect(toList());
 

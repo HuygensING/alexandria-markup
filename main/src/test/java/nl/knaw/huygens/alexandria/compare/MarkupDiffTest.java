@@ -25,6 +25,8 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
   @Test
-  public void testMarkupDiff() {
+  public void testMarkupDiff0() {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
         "[l|M>\n" +
@@ -55,6 +57,52 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
         "<s]\n" +
         "<text]<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
+  }
+
+  @Test
+  public void testMarkupDeletion() {
+    String originText = "[TAGML>A simple [del>short<del] text<TAGML]\n";
+    String editedText = "[TAGML>A simple text<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[del](2-2) deleted");
+  }
+
+  @Test
+  public void testMarkupAddition() {
+    String originText = "[TAGML>A simple text<TAGML]\n";
+    String editedText = "[TAGML>A simple [add>short<add] text<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[add](2-2) added");
+  }
+
+  @Test
+  public void testMarkupReplacement() {
+    String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
+    String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[a](1-1) replaced by [b](1-1)");
+  }
+
+  @Test
+  public void testMarkupSplit() {
+    String originText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
+    String editedText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[l](1,2) split in {[l](1,1),[l](2,1)}");
+  }
+
+  @Test
+  public void testMarkupJoin() {
+    String originText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
+    String editedText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("{[l](1,1),[l](2,1)} joined to [l](1,2)");
+  }
+
+  private List<String> getMarkupDiffs(final String originText, final String editedText) {
+    visualizeDiff("A", originText, "B", editedText);
     List<MarkupInfo>[] markupInfoLists = doDiff(originText, editedText);
     assertThat(markupInfoLists).hasSize(2);
     for (int i = 0; i < 2; i++) {
@@ -62,7 +110,9 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         LOG.info("{}: {}", i, mi);
       }
     }
-
+    List<String> diffMarkupInfo = diffMarkupInfo(markupInfoLists);
+    LOG.info("{}", diffMarkupInfo);
+    return diffMarkupInfo;
   }
 
   public class MarkupInfo {
@@ -188,6 +238,75 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   private boolean isMarkupToken(final TAGToken tagToken) {
     return tagToken instanceof MarkupOpenToken
         || tagToken instanceof MarkupCloseToken;
+  }
+
+  private List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists) {
+    final List<String> diff = new ArrayList<>();
+    List<MarkupInfo> markupInfoListA = markupInfoLists[0];
+    List<MarkupInfo> markupInfoListB = markupInfoLists[1];
+    List<Pair<Integer, Integer>> unchanged = new ArrayList<>();
+    boolean[] determinedInA = new boolean[markupInfoListA.size()];
+    boolean[] determinedInB = new boolean[markupInfoListB.size()];
+
+    // determine matches
+    for (int i = 0; i < markupInfoListA.size(); i++) {
+      MarkupInfo markupInfoA = markupInfoListA.get(i);
+      Pair<Integer, Integer> tentativeMatch = null;
+      Integer tentativeDeletion = i;
+
+      for (int j = 0; j < markupInfoListB.size(); j++) {
+        Integer tentativeAddition = j;
+        if (!determinedInB[j]) {
+          MarkupInfo markupInfoB = markupInfoListB.get(j);
+          boolean sameName = markupInfoA.markup.getTag().equals(markupInfoB.markup.getTag());
+          boolean sameSpan = markupInfoA.getSpan().equals(markupInfoB.getSpan());
+          boolean sameStartRank = markupInfoA.getStartRank() == markupInfoB.getStartRank();
+          LOG.info("[{},{}]: {},{},{}", i, j, sameName, sameSpan, sameStartRank);
+          if (sameName && sameSpan && sameStartRank) {
+            unchanged.add(new ImmutablePair(i, j));
+            determinedInA[i] = true;
+            determinedInB[j] = true;
+            break;
+          }
+        }
+      }
+    }
+
+    for (int i = 0; i < determinedInA.length; i++) {
+      if (!determinedInA[i]) {
+        MarkupInfo markupInfo = markupInfoListA.get(i);
+        diff.add(String.format("[%s](%d-%d) deleted", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+      }
+    }
+    for (int i = 0; i < determinedInB.length; i++) {
+      if (!determinedInB[i]) {
+        MarkupInfo markupInfo = markupInfoListB.get(i);
+        diff.add(String.format("[%s](%d-%d) added", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+      }
+    }
+    return diff;
+  }
+
+  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+    LOG.info("{}:\n{}", witness1, tagml1);
+    LOG.info("{}:\n{}", witness2, tagml2);
+    runInStoreTransaction(store -> {
+      TAGMLImporter importer = new TAGMLImporter(store);
+      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+      Set<String> none = Collections.EMPTY_SET;
+      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+
+      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+      new VariantGraphVisualizer(visualizer)
+          .visualizeVariation(witness1, original, witness2, edited, allTags);
+      String result = visualizer.getResult();
+      LOG.info("result=\n" +
+          "------8<---------------------------------------\n" +
+          "{}\n" +
+          "------8<---------------------------------------\n", result);
+    });
   }
 
 }
