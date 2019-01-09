@@ -36,22 +36,20 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest {
     AtomicLong documentId = new AtomicLong();
     TAGTextNodeDTO textNode = new TAGTextNodeDTO("something");
 
-    runInStore(store -> {
-      store.runInTransaction(() -> {
-        Long textNodeId = store.persist(textNode);
+    runInStore(store ->
+        store.runInTransaction(() -> {
+          Long textNodeId = store.persist(textNode);
 
-        TAGDocumentDTO document = new TAGDocumentDTO();
-        document.getTextNodeIds().add(textNode.getDbId());
-        documentId.set(store.persist(document));
-      });
-    });
+          TAGDocumentDTO document = new TAGDocumentDTO();
+          document.getTextNodeIds().add(textNode.getDbId());
+          documentId.set(store.persist(document));
+        }));
 
-    runInStore(store -> {
-      store.runInTransaction(() -> {
-        TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
-        assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
-      });
-    });
+    runInStore(store ->
+        store.runInTransaction(() -> {
+          TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
+          assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
+        }));
   }
 
 }
