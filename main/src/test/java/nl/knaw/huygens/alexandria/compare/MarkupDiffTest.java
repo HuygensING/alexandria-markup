@@ -82,7 +82,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[a](1-1) replaced by [b](1-1)");
+    assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
   }
 
   @Test
@@ -247,6 +247,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     List<Pair<Integer, Integer>> unchanged = new ArrayList<>();
     boolean[] determinedInA = new boolean[markupInfoListA.size()];
     boolean[] determinedInB = new boolean[markupInfoListB.size()];
+    final List<Pair<Integer, Integer>> potentialReplacements = new ArrayList<>();
 
     // determine matches
     for (int i = 0; i < markupInfoListA.size(); i++) {
@@ -268,14 +269,39 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
             determinedInB[j] = true;
             break;
           }
+          if (sameSpan && sameStartRank) {
+            potentialReplacements.add(new ImmutablePair(i, j));
+          }
         }
       }
     }
+    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
 
     for (int i = 0; i < determinedInA.length; i++) {
       if (!determinedInA[i]) {
-        MarkupInfo markupInfo = markupInfoListA.get(i);
-        diff.add(String.format("[%s](%d-%d) deleted", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+        // check for replacement
+        final int finalI = i;
+        List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
+            .filter(p -> p.getLeft() == finalI)
+            .collect(toList());
+        potentialReplacements.removeAll(matchingPotentialReplacements);
+        if (!matchingPotentialReplacements.isEmpty()) {
+          Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
+          MarkupInfo markupInfoA = markupInfoListA.get(i);
+          MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
+          diff.add(String.format("[%s](%d-%d) replaced by [%s](%d-%d)",
+              markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+              markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
+              )
+          );
+          determinedInA[i] = true;
+          determinedInB[replacement.getRight()] = true;
+
+        } else {
+          // otherwise, deletion
+          MarkupInfo markupInfo = markupInfoListA.get(i);
+          diff.add(String.format("[%s](%d-%d) deleted", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+        }
       }
     }
     for (int i = 0; i < determinedInB.length; i++) {
@@ -285,6 +311,13 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
       }
     }
     return diff;
+  }
+
+  private void removeDeterminedPairs(final boolean[] determinedInA, final boolean[] determinedInB, final List<Pair<Integer, Integer>> potentialReplacements) {
+    List<Pair<Integer, Integer>> potentialReplacementsWithDetermined = potentialReplacements.stream()
+        .filter(p -> determinedInA[p.getLeft()] || determinedInB[p.getRight()])
+        .collect(toList());
+    potentialReplacements.removeAll(potentialReplacementsWithDetermined);
   }
 
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
