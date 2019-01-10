@@ -75,12 +75,32 @@ public class TAGMLImporter {
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
 
+    validateTAGML(parser, errorListener);
+    checkErrorListener(errorListener);
+
     TAGDocument document = usingListener(parser, errorListener);
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
 //    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
 
+    checkErrorListener(errorListener);
+    update(document.getDTO());
+    return document;
+  }
+
+  private void validateTAGML(final TAGMLParser parser, final ErrorListener errorListener) {
+    parser.setBuildParseTree(true);
+    ParseTree parseTree = parser.document();
+    TAGMLValidator validator = new TAGMLValidator(errorListener);
+    try {
+      ParseTreeWalker.DEFAULT.walk(validator, parseTree);
+    } catch (TAGMLBreakingError ignored) {
+
+    }
+  }
+
+  private void checkErrorListener(final ErrorListener errorListener) {
     String errorMsg = "";
     if (errorListener.hasErrors()) {
 //      logDocumentGraph(document,"");
@@ -88,8 +108,6 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    update(document.getDTO());
-    return document;
   }
 
   private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
