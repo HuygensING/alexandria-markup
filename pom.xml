@@ -26,7 +26,7 @@
     <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
     <java.version>1.8</java.version>
 
-      <antlr.version>4.7.2</antlr.version>
+    <antlr.version>4.7.2</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
     <assertj.version>3.11.1</assertj.version>
     <berkeleydb.version>18.3.12</berkeleydb.version>
