@@ -41,7 +41,7 @@
     <slf4j-api.version>1.8.0-beta2</slf4j-api.version>
     <tag.version>1.0-SNAPSHOT</tag.version>
 
-    <maven-compiler.version>3.8.0-jboss-2</maven-compiler.version>
+    <maven-compiler.version>3.8.0</maven-compiler.version>
     <maven-jar.version>3.1.1</maven-jar.version>
     <maven-license.version>1.16</maven-license.version>
     <maven-shade.version>3.2.1</maven-shade.version>
