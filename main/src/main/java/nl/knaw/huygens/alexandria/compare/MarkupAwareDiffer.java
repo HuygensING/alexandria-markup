@@ -160,10 +160,10 @@ public class MarkupAwareDiffer {
         .collect(joining(", "));
   }
 
-  private boolean isMarkupToken(final TAGToken tagToken) {
-    return tagToken instanceof MarkupOpenToken
-        || tagToken instanceof MarkupCloseToken;
-  }
+//  private boolean isMarkupToken(final TAGToken tagToken) {
+//    return tagToken instanceof MarkupOpenToken
+//        || tagToken instanceof MarkupCloseToken;
+//  }
 
   public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists) {
     final List<String> diff = new ArrayList<>();
@@ -177,11 +177,7 @@ public class MarkupAwareDiffer {
     // determine matches
     for (int i = 0; i < markupInfoListA.size(); i++) {
       MarkupInfo markupInfoA = markupInfoListA.get(i);
-      Pair<Integer, Integer> tentativeMatch = null;
-      Integer tentativeDeletion = i;
-
       for (int j = 0; j < markupInfoListB.size(); j++) {
-        Integer tentativeAddition = j;
         if (!determinedInB[j]) {
           MarkupInfo markupInfoB = markupInfoListB.get(j);
           boolean sameName = markupInfoA.markup.getTag().equals(markupInfoB.markup.getTag());

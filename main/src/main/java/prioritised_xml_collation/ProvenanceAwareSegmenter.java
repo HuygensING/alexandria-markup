@@ -70,15 +70,15 @@ public class ProvenanceAwareSegmenter implements SegmenterInterface {
     return superwitness;
   }
 
-  private boolean provenanceChanged(final List<TAGToken> tokens, final int x0, int x1) {
-    if (x0 == x1) {
+  private boolean provenanceChanged(final List<TAGToken> tokens, final int i0, int i1) {
+    if (i0 == i1) {
       return false;
     }
-    if (x0 < 1 || x1 < 1) {
+    if (i0 < 1 || i1 < 1) {
       return true;
     }
-    ExtendedTextToken tagToken0 = (ExtendedTextToken) tokens.get(x0 - 1);
-    ExtendedTextToken tagToken1 = (ExtendedTextToken) tokens.get(x1 - 1);
+    ExtendedTextToken tagToken0 = (ExtendedTextToken) tokens.get(i0 - 1);
+    ExtendedTextToken tagToken1 = (ExtendedTextToken) tokens.get(i1 - 1);
     return !(tagToken0.getTextNodeIds().equals(tagToken1.getTextNodeIds()));
   }
 
