@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
+  @Ignore
   @Test
   public void testMarkupDiff0() {
     String originText = "[TAGML|+M>\n" +
@@ -85,6 +87,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
   }
 
+  @Ignore
   @Test
   public void testMarkupSplit() {
     String originText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
@@ -93,6 +96,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     assertThat(markupInfoDiffs).containsExactly("[l](1,2) split in {[l](1,1),[l](2,1)}");
   }
 
+  @Ignore
   @Test
   public void testMarkupJoin() {
     String originText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
