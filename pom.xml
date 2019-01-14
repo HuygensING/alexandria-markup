@@ -26,29 +26,29 @@
     <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
     <java.version>1.8</java.version>
 
-    <antlr.version>4.7.1</antlr.version>
+    <antlr.version>4.7.2</antlr.version>
     <antlr4.visitor>true</antlr4.visitor>
     <assertj.version>3.11.1</assertj.version>
-    <berkeleydb.version>18.3.1</berkeleydb.version>
+    <berkeleydb.version>18.3.12</berkeleydb.version>
     <commons-io.version>2.6</commons-io.version>
     <commons-lang3.version>3.8.1</commons-lang3.version>
     <commons-text.version>1.6</commons-text.version>
     <freemarker.version>2.3.28</freemarker.version>
     <guava.version>27.0.1-jre</guava.version>
-    <jacoco.version>0.7.9</jacoco.version>
-    <junit.version>4.12</junit.version>
+    <jacoco.version>0.8.2</jacoco.version>
+    <junit.version>4.13-beta-1</junit.version>
     <logback.version>1.3.0-alpha4</logback.version>
     <slf4j-api.version>1.8.0-beta2</slf4j-api.version>
     <tag.version>1.0-SNAPSHOT</tag.version>
 
-    <maven-compiler.version>3.7.0</maven-compiler.version>
-    <maven-jar.version>3.0.2</maven-jar.version>
-    <maven-license.version>1.14</maven-license.version>
-    <maven-shade.version>3.1.0</maven-shade.version>
+    <maven-compiler.version>3.8.0</maven-compiler.version>
+    <maven-jar.version>3.1.1</maven-jar.version>
+    <maven-license.version>1.16</maven-license.version>
+    <maven-shade.version>3.2.1</maven-shade.version>
     <wagon-ssh.version>2.7</wagon-ssh.version>
     <asciitable.version>0.3.2</asciitable.version>
-    <maven-resources.version>3.0.2</maven-resources.version>
-    <xmlcalabash.version>1.1.22-98</xmlcalabash.version>
+    <maven-resources.version>3.1.0</maven-resources.version>
+    <xmlcalabash.version>1.1.23-98</xmlcalabash.version>
     <mockito-core.version>2.23.4</mockito-core.version>
   </properties>
 
@@ -207,6 +207,15 @@
 
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>huygens</id>
       <url>http://maven.huygens.knaw.nl/repository/</url>
       <releases>
@@ -220,6 +229,22 @@
         <checksumPolicy>fail</checksumPolicy>
       </snapshots>
     </repository>
+    <repository>
+      <id>oracleReleases</id>
+      <name>Oracle Released Java Packages</name>
+      <url>http://download.oracle.com/maven</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>restlet</id>
+      <name>Maven Restlet</name>
+      <layout>default</layout>
+      <url>http://maven.restlet.com/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
   </repositories>
 
   <prerequisites>
@@ -230,5 +255,6 @@
     <connection>scm:git:git@github.com:huygensING/alexandria-markup.git</connection>
     <tag>HEAD</tag>
   </scm>
+
 
 </project>
