@@ -78,6 +78,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
+//    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
   }
 
   @Ignore
@@ -100,21 +101,25 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   private List<String> getMarkupDiffs(final String originText, final String editedText) {
     visualizeDiff("A", originText, "B", editedText);
-    MarkupAwareDiffer differ = new MarkupAwareDiffer();
-    List<MarkupAwareDiffer.MarkupInfo>[] markupInfoLists = runInStoreTransaction(store -> {
-      return differ.doDiff(store, originText, editedText);
-    });
-    assertThat(markupInfoLists).hasSize(2);
-    for (int i = 0; i < 2; i++) {
-      for (MarkupAwareDiffer.MarkupInfo mi : markupInfoLists[i]) {
-        LOG.info("{}: {}", i, mi);
+    return runInStoreTransaction(store -> {
+      TAGMLImporter importer = new TAGMLImporter(store);
+      TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
+      TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
+      Set<String> none = Collections.EMPTY_SET;
+      TAGView tagView = new TAGView(store).setMarkupToExclude(none);
+      TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
+      List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
+      assertThat(markupInfoLists).hasSize(2);
+      for (int i = 0; i < 2; i++) {
+        for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
+          LOG.info("{}: {}", i, mi);
+        }
       }
-    }
-    List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists);
-    LOG.info("{}", diffMarkupInfo);
-    return diffMarkupInfo;
+      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists);
+      LOG.info("{}", diffMarkupInfo);
+      return diffMarkupInfo;
+    });
   }
-
 
   private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
