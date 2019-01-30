@@ -1,8 +1,7 @@
 package nl.knaw.huc.di.tag.treediff;
 
-import nl.knaw.huc.di.tag.treediff.TreeDiff.Mapping;
-import nl.knaw.huc.di.tag.treediff.TreeDiff.TreeDiffResult;
-import org.apache.commons.lang3.tuple.Pair;
+import nl.knaw.huc.di.tag.treediff.TreeDiffer.Mapping;
+import nl.knaw.huc.di.tag.treediff.TreeDiffer.TreeDiff;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,8 +10,8 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
-import static nl.knaw.huc.di.tag.treediff.TreeDiff.computeDiff;
-import static nl.knaw.huc.di.tag.treediff.TreeDiff.produceHumanFriendlyMapping;
+import static nl.knaw.huc.di.tag.treediff.TreeDiffer.computeDiff;
+import static nl.knaw.huc.di.tag.treediff.TreeDiffer.produceHumanFriendlyMapping;
 import static org.junit.Assert.assertEquals;
 
 public class TestTreeDiff {
@@ -68,12 +67,12 @@ public class TestTreeDiff {
 
   @Test
   public void testTreeDiff12() {
-    final TreeDiffResult computeDiff = computeDiff(treeOne, treeTwo);
-    Integer distance = computeDiff.distance;
+    final TreeDiff diff = computeDiff(treeOne, treeTwo);
+    Integer distance = diff.distance;
     assertThat(distance).isEqualTo(2);
 
-    Mapping mapping = computeDiff.mapping;
-    String expectedMapping = "[(1,1), (2,3), (3,4), (α,2)]";
+    Mapping mapping = diff.mapping;
+    String expectedMapping = "[(1,1), (2,3), (3,4), (null,2)]";
     assertEquals(expectedMapping, mapping.toString());
 
     List<String> description = produceHumanFriendlyMapping(mapping, treeOne, treeTwo);
@@ -87,12 +86,12 @@ public class TestTreeDiff {
 
   @Test
   public void testTreeDiff13() {
-    final TreeDiffResult computeDiff = computeDiff(treeOne, treeThree);
-    Integer distance = computeDiff.distance;
+    final TreeDiff diff = computeDiff(treeOne, treeThree);
+    Integer distance = diff.distance;
     assertThat(distance).isEqualTo(3);
 
-    final Mapping mapping = computeDiff.mapping;
-    final String expectedMapping = "[(1,1), (2,3), (3,4), (α,2), (α,5)]";
+    final Mapping mapping = diff.mapping;
+    final String expectedMapping = "[(1,1), (2,3), (3,4), (null,2), (null,5)]";
     assertEquals(expectedMapping, mapping.toString());
 
     final List<String> description = produceHumanFriendlyMapping(mapping, treeOne, treeThree);
@@ -107,11 +106,11 @@ public class TestTreeDiff {
 
   @Test
   public void testTreeDiff23() {
-    TreeDiffResult computeDiff = computeDiff(treeTwo, treeThree);
-    assertThat(computeDiff.distance).isEqualTo(1);
+    TreeDiff diff = computeDiff(treeTwo, treeThree);
+    assertThat(diff.distance).isEqualTo(1);
 
-    final Mapping mapping = computeDiff.mapping;
-    final String expectedMapping = "[(1,1), (2,2), (3,3), (4,4), (α,5)]";
+    final Mapping mapping = diff.mapping;
+    final String expectedMapping = "[(1,1), (2,2), (3,3), (4,4), (null,5)]";
     assertEquals(expectedMapping, mapping.toString());
 
     final List<String> description = produceHumanFriendlyMapping(mapping, treeTwo, treeThree);
@@ -126,11 +125,11 @@ public class TestTreeDiff {
 
   @Test
   public void testTreeDiff34() {
-    TreeDiffResult computeDiff = computeDiff(treeThree, treeFour);
-    Integer distance = computeDiff.distance;
+    TreeDiff diff = computeDiff(treeThree, treeFour);
+    Integer distance = diff.distance;
     assertThat(distance).isEqualTo(1);
 
-    final Mapping mapping = computeDiff.mapping;
+    final Mapping mapping = diff.mapping;
     final String expectedMapping = "[(1,1), (2,2), (3,3), (4,4), (5,5)]";
     assertEquals(expectedMapping, mapping.toString());
 
@@ -146,11 +145,11 @@ public class TestTreeDiff {
 
   @Test
   public void testTreeDiff22() {
-    TreeDiffResult computeDiff = computeDiff(treeTwo, treeTwo);
-    Integer distance = computeDiff.distance;
+    TreeDiff diff = computeDiff(treeTwo, treeTwo);
+    Integer distance = diff.distance;
     assertThat(distance).isEqualTo(0);
 
-    final Mapping mapping = computeDiff.mapping;
+    final Mapping mapping = diff.mapping;
     final String expectedMapping = "[(1,1), (2,2), (3,3), (4,4)]";
     assertEquals(expectedMapping, mapping.toString());
 

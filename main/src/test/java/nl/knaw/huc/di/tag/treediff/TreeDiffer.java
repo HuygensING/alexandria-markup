@@ -18,7 +18,7 @@ missing piece in the algorithm provided in the paper which is
 MIN_M(i, 1) and MIN_M(1, j) values. We added the computation
 of these in the implementation below.
 */
-class TreeDiff {
+class TreeDiffer {
 
   private static final int INFINITE = Integer.MAX_VALUE;
 
@@ -352,7 +352,7 @@ class TreeDiff {
    *
    * @returns (int, [(int, int)])
    */
-  public static TreeDiffResult computeDiff(Tree sourceTree, Tree targetTree) {
+  public static TreeDiff computeDiff(Tree sourceTree, Tree targetTree) {
     Pair<Map<String, Integer>, Map<String, Mapping>> pair = computeE(sourceTree, targetTree);
     Map<String, Integer> E = pair.getLeft();
     Map<String, Mapping> mappingForE = pair.getRight();
@@ -370,7 +370,7 @@ class TreeDiff {
     mapping.sort(MAPPING_PAIR_COMPARATOR);
 
     Integer distance = D.get(key);
-    return new TreeDiffResult(distance, mapping);
+    return new TreeDiff(distance, mapping);
   }
 
   static Comparator<Pair<Integer, Integer>> MAPPING_PAIR_COMPARATOR = new Comparator<Pair<Integer, Integer>>() {
@@ -395,11 +395,11 @@ class TreeDiff {
     }
   };
 
-  static class TreeDiffResult {
+  static class TreeDiff {
     public Integer distance;
     public Mapping mapping;
 
-    TreeDiffResult(Integer distance, Mapping mapping) {
+    TreeDiff(Integer distance, Mapping mapping) {
       this.distance = distance;
       this.mapping = mapping;
     }
