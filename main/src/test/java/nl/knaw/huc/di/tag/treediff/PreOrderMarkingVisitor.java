@@ -5,7 +5,7 @@ package nl.knaw.huc.di.tag.treediff;
  */
 public class PreOrderMarkingVisitor implements Visitor {
   private int position;
-  private Tree tree;
+  private final Tree tree;
 
   public PreOrderMarkingVisitor(Tree tree) {
     position = 1;
@@ -14,7 +14,7 @@ public class PreOrderMarkingVisitor implements Visitor {
 
   @Override
   public void visit(TreeNode node) {
-    tree.set_node_at(position, node);
+    tree.setNodeAt(position, node);
     position += 1;
   }
 }

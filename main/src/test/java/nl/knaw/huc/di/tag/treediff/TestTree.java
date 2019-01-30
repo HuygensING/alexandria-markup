@@ -16,77 +16,79 @@ import static org.junit.Assert.assertNull;
  * */
 public class TestTree {
 
-  Tree tree_one, tree_two, tree_three;
+  private Tree treeOne;
+  private Tree treeTwo;
+  private Tree treeThree;
 
   @Before
   public void setUp() {
     TreeNode a_node = new TreeNode("A");
     TreeNode b_node = new TreeNode("B");
-    a_node.add_child(b_node);
+    a_node.addChild(b_node);
     TreeNode c_node = new TreeNode("C");
-    b_node.add_child(c_node);
-    tree_one = new Tree(a_node);
-    tree_one.build_caches();
+    b_node.addChild(c_node);
+    treeOne = new Tree(a_node);
+    treeOne.buildCaches();
 
     a_node = new TreeNode("A");
     b_node = new TreeNode("B");
     c_node = new TreeNode("C");
     TreeNode d_node = new TreeNode("D");
-    a_node.add_child(b_node);
-    a_node.add_child(c_node);
-    c_node.add_child(d_node);
-    tree_two = new Tree(a_node);
-    tree_two.build_caches();
+    a_node.addChild(b_node);
+    a_node.addChild(c_node);
+    c_node.addChild(d_node);
+    treeTwo = new Tree(a_node);
+    treeTwo.buildCaches();
 
     a_node = new TreeNode("A");
     b_node = new TreeNode("B");
     c_node = new TreeNode("C");
     d_node = new TreeNode("D");
     TreeNode e_node = new TreeNode("E");
-    a_node.add_child(b_node);
-    a_node.add_child(c_node);
-    c_node.add_child(d_node);
-    d_node.add_child(e_node);
-    tree_three = new Tree(a_node);
-    tree_three.build_caches();
+    a_node.addChild(b_node);
+    a_node.addChild(c_node);
+    c_node.addChild(d_node);
+    d_node.addChild(e_node);
+    treeThree = new Tree(a_node);
+    treeThree.buildCaches();
   }
 
   @Test
-  public void testPreorderTraversal_success() {
+  public void testPreorderTraversalSuccess() {
     // Successfully produce the list of visited node labels
     TreeNodeVisitor visitor = new TreeNodeVisitor();
-    tree_one.perform_preorder_traversal(visitor);
-    String[] expString = {"label: A, preorder_position: 1", "label: B, preorder_position: 2",
-        "label: C, preorder_position: 3"};
+    treeOne.performPreorderTraversal(visitor);
+    String[] expString = {"label: A, preorderPosition: 1", "label: B, preorderPosition: 2",
+        "label: C, preorderPosition: 3"};
     List<String> expected = new ArrayList<>(Arrays.asList(expString));
     assertEquals(expected, visitor.traversal);
 
     visitor = new TreeNodeVisitor();
-    tree_two.perform_preorder_traversal(visitor);
-    String[] expString2 = {"label: A, preorder_position: 1", "label: B, preorder_position: 2",
-        "label: C, preorder_position: 3", "label: D, preorder_position: 4"};
+    treeTwo.performPreorderTraversal(visitor);
+    String[] expString2 = {"label: A, preorderPosition: 1", "label: B, preorderPosition: 2",
+        "label: C, preorderPosition: 3", "label: D, preorderPosition: 4"};
     expected = new ArrayList<>(Arrays.asList(expString2));
     assertEquals(expected.toString(), visitor.traversal.toString());
   }
 
   /*
-   * Tests node_at method of Tree class Testing getting a node from the tree
+   * Tests nodeAt method of Tree class Testing getting a node from the tree
    * by its preorder position
    */
   @Test
   public void testNodeAt() {
     // Tree 1
-    assertEquals("A", tree_one.node_at(1).label());
-    assertEquals("B", tree_one.node_at(2).label());
-    assertEquals("C", tree_one.node_at(3).label());
-    assertNull(tree_one.node_at(4));
+    assertEquals("A", treeOne.nodeAt(1).label());
+    assertEquals("B", treeOne.nodeAt(2).label());
+    assertEquals("C", treeOne.nodeAt(3).label());
+    assertNull(treeOne.nodeAt(4));
 
     // Tree 2
-    assertEquals("A", tree_two.node_at(1).label());
-    assertEquals("B", tree_two.node_at(2).label());
-    assertEquals("C", tree_two.node_at(3).label());
-    assertEquals("D", tree_two.node_at(4).label());
-    assertNull(tree_two.node_at(5));
+    assertEquals("A", treeTwo.nodeAt(1).label());
+    assertEquals("B", treeTwo.nodeAt(2).label());
+    assertEquals("C", treeTwo.nodeAt(3).label());
+    assertEquals("D", treeTwo.nodeAt(4).label());
+    assertNull(treeTwo.nodeAt(5));
   }
 
   /*
@@ -94,9 +96,9 @@ public class TestTree {
    */
   @Test
   public void testFatherOf_success() {
-    assertEquals(3, tree_two.father_of(4).preorder_position());
-    assertEquals(1, tree_two.father_of(3).preorder_position());
-    assertEquals(1, tree_two.father_of(2).preorder_position());
+    assertEquals(3, treeTwo.fatherOf(4).preorderPosition());
+    assertEquals(1, treeTwo.fatherOf(3).preorderPosition());
+    assertEquals(1, treeTwo.fatherOf(2).preorderPosition());
   }
 
   /*
@@ -104,7 +106,7 @@ public class TestTree {
    */
   @Test
   public void testFatherOf_root() {
-    assertNull(tree_two.father_of(1));
+    assertNull(treeTwo.fatherOf(1));
   }
 
   /*
@@ -112,7 +114,7 @@ public class TestTree {
    */
   @Test(expected = IllegalArgumentException.class)
   public void testFatherOf_when_no_such_node() {
-    tree_two.father_of(5);
+    treeTwo.fatherOf(5);
   }
 
   /*
@@ -121,7 +123,7 @@ public class TestTree {
   @Test
   public void testAncestorIterator_success() {
     List<Integer> ancestor_preorder_positions = new ArrayList<>();
-    for (Integer i : tree_two.ancestor_iterator(4)) {
+    for (Integer i : treeTwo.ancestorIterator(4)) {
       try {
         ancestor_preorder_positions.add(i);
       } catch (Exception e) {
@@ -131,7 +133,7 @@ public class TestTree {
     assertEquals(new ArrayList<>(Arrays.asList(4, 3, 1)), ancestor_preorder_positions);
 
     ancestor_preorder_positions = new ArrayList<>();
-    for (Integer i : tree_two.ancestor_iterator(2)) {
+    for (Integer i : treeTwo.ancestorIterator(2)) {
       try {
         ancestor_preorder_positions.add(i);
       } catch (Exception e) {
@@ -147,7 +149,7 @@ public class TestTree {
   @Test
   public void testAncestorIterator_from_the_root() {
     List<Integer> ancestor_preorder_positions = new ArrayList<>();
-    for (Integer i : tree_two.ancestor_iterator(1)) {
+    for (Integer i : treeTwo.ancestorIterator(1)) {
       try {
         ancestor_preorder_positions.add(i);
       } catch (Exception e) {
@@ -162,7 +164,7 @@ public class TestTree {
    */
   @Test(expected = IllegalArgumentException.class)
   public void testAncestorIterator_from_non_existing_position() {
-    for (Integer i : tree_two.ancestor_iterator(100)) {
+    for (Integer i : treeTwo.ancestorIterator(100)) {
       System.out.println("Should not yield even once");
     }
   }
@@ -172,17 +174,17 @@ public class TestTree {
    */
   @Test
   public void testChildOnPathFromDescendant_success() {
-    TreeNode node = tree_two.child_on_path_from_descendant(1, 4);
+    TreeNode node = treeTwo.childOnPathFromDescendant(1, 4);
     assertEquals("C", node.label());
-    assertEquals(3, node.preorder_position());
+    assertEquals(3, node.preorderPosition());
 
-    node = tree_three.child_on_path_from_descendant(1, 5);
+    node = treeThree.childOnPathFromDescendant(1, 5);
     assertEquals("C", node.label());
-    assertEquals(3, node.preorder_position());
+    assertEquals(3, node.preorderPosition());
 
-    node = tree_three.child_on_path_from_descendant(3, 5);
+    node = treeThree.childOnPathFromDescendant(3, 5);
     assertEquals("D", node.label());
-    assertEquals(4, node.preorder_position());
+    assertEquals(4, node.preorderPosition());
   }
 
   /*
@@ -190,6 +192,6 @@ public class TestTree {
    */
   @Test(expected = IllegalArgumentException.class)
   public void testChildOnPathFromDescendant_when_no_such_node() {
-    tree_two.child_on_path_from_descendant(1, 1);
+    treeTwo.childOnPathFromDescendant(1, 1);
   }
 }

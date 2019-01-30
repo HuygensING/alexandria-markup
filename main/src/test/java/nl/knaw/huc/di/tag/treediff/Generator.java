@@ -24,8 +24,7 @@ public abstract class Generator<T> implements Iterable<T> {
 
   private final SynchronousQueue<T> queue = new SynchronousQueue<>();
 
-  private final ExecutorService executorService =
-      Executors.newSingleThreadExecutor(new DaemonThreadFactory());
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor(new DaemonThreadFactory());
 
   private volatile Throwable throwable = null;
 
@@ -58,8 +57,7 @@ public abstract class Generator<T> implements Iterable<T> {
    *                                     thread when the generator exits abnormally by throwing any exception
    *                                     other than {@link GeneratorExit} exception.
    */
-  public Generator(final int generatorNormalExitTimeout,
-      final int generatorAbnormalExitTimeout) {
+  private Generator(final int generatorNormalExitTimeout, final int generatorAbnormalExitTimeout) {
     this.generatorNormalExitTimeout = generatorNormalExitTimeout;
     this.generatorAbnormalExitTimeout = generatorAbnormalExitTimeout;
   }
@@ -78,7 +76,7 @@ public abstract class Generator<T> implements Iterable<T> {
    *
    * @return The value yielded by the generator.
    */
-  public final T get() {
+  final T get() {
     try {
       return next();
     } catch (Throwable e) {
@@ -124,7 +122,7 @@ public abstract class Generator<T> implements Iterable<T> {
    * @throws InterruptedException
    * @throws BrokenBarrierException
    */
-  protected final void yield(final T result)
+  final void yield(final T result)
       throws InterruptedException, BrokenBarrierException {
     barrier.await();
     queue.put(result);

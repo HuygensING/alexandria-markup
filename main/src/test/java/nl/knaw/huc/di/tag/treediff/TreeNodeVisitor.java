@@ -5,13 +5,13 @@ import java.util.List;
 
 public class TreeNodeVisitor implements Visitor {
 
-  List<String> traversal;
+  final List<String> traversal;
 
   /*
    * Builds an array of node labels it visits
    */
   public TreeNodeVisitor() {
-    traversal = new ArrayList<String>();
+    traversal = new ArrayList<>();
   }
 
   /*

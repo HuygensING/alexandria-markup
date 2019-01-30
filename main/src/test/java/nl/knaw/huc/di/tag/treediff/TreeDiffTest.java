@@ -1,6 +1,6 @@
 package nl.knaw.huc.di.tag.treediff;
 
-public class TreeDiffTest {
+class TreeDiffTest {
 
 //  @Test
 //  public void cost() {

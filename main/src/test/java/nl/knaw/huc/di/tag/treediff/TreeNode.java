@@ -8,7 +8,7 @@ import java.util.List;
  * */
 public class TreeNode {
   private String label;
-  private List<TreeNode> children;
+  private final List<TreeNode> children;
   private TreeNode father;
   private int preorder_position;
 
@@ -44,7 +44,7 @@ public class TreeNode {
   /*
    * Sets the father of the node (TreeNode)
    */
-  public void set_father(TreeNode node) {
+  private void set_father(TreeNode node) {
     father = node;
   }
 
@@ -58,7 +58,7 @@ public class TreeNode {
   /*
    * Adds a new child (TreeNode) to the node
    */
-  public void add_child(TreeNode node) {
+  public void addChild(TreeNode node) {
     children.add(node);
     node.set_father(this);
   }
@@ -87,7 +87,7 @@ public class TreeNode {
   /*
    * Returns the position (int) of the node in the preorder traversal
    */
-  public int preorder_position() {
+  public int preorderPosition() {
     return preorder_position + 1;
   }
 
@@ -95,10 +95,10 @@ public class TreeNode {
    * Does a preorder traversal of the subtree rooted at this node The
    * parameter visitor should have a visit method accepting a TreeNode.
    */
-  public void preorder_traversal(Visitor visitor) {
+  public void preorderTraversal(Visitor visitor) {
     visitor.visit(this);
     for (TreeNode child : children) {
-      child.preorder_traversal(visitor);
+      child.preorderTraversal(visitor);
     }
   }
 
@@ -106,7 +106,7 @@ public class TreeNode {
    * Returns a representation (str) for this node for debugging
    */
   public String debug_string() {
-    return String.format("label: %s, preorder_position: %d", label, preorder_position + 1);
+    return String.format("label: %s, preorderPosition: %d", label, preorder_position + 1);
   }
 
 }
