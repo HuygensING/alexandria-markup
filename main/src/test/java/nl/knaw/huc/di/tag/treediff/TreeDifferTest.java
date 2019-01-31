@@ -1,7 +1,7 @@
 package nl.knaw.huc.di.tag.treediff;
 
 import nl.knaw.huc.di.tag.treediff.TreeDiffer.Mapping;
-import nl.knaw.huc.di.tag.treediff.TreeDiffer.TreeDiff;
+import nl.knaw.huc.di.tag.treediff.TreeDiffer.TreeMapping;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,8 +67,8 @@ public class TreeDifferTest {
 
   @Test
   public void testTreeDiff12() {
-    final TreeDiff diff = computeDiff(treeOne, treeTwo);
-    Integer distance = diff.distance;
+    final TreeMapping diff = computeDiff(treeOne, treeTwo);
+    Integer distance = diff.cost;
     assertThat(distance).isEqualTo(2);
 
     Mapping mapping = diff.mapping;
@@ -86,8 +86,8 @@ public class TreeDifferTest {
 
   @Test
   public void testTreeDiff13() {
-    final TreeDiff diff = computeDiff(treeOne, treeThree);
-    Integer distance = diff.distance;
+    final TreeMapping diff = computeDiff(treeOne, treeThree);
+    Integer distance = diff.cost;
     assertThat(distance).isEqualTo(3);
 
     final Mapping mapping = diff.mapping;
@@ -106,8 +106,8 @@ public class TreeDifferTest {
 
   @Test
   public void testTreeDiff23() {
-    TreeDiff diff = computeDiff(treeTwo, treeThree);
-    assertThat(diff.distance).isEqualTo(1);
+    TreeMapping diff = computeDiff(treeTwo, treeThree);
+    assertThat(diff.cost).isEqualTo(1);
 
     final Mapping mapping = diff.mapping;
     final String expectedMapping = "[(1,1), (2,2), (3,3), (4,4), (null,5)]";
@@ -125,8 +125,8 @@ public class TreeDifferTest {
 
   @Test
   public void testTreeDiff34() {
-    TreeDiff diff = computeDiff(treeThree, treeFour);
-    Integer distance = diff.distance;
+    TreeMapping diff = computeDiff(treeThree, treeFour);
+    Integer distance = diff.cost;
     assertThat(distance).isEqualTo(1);
 
     final Mapping mapping = diff.mapping;
@@ -145,8 +145,8 @@ public class TreeDifferTest {
 
   @Test
   public void testTreeDiff22() {
-    TreeDiff diff = computeDiff(treeTwo, treeTwo);
-    Integer distance = diff.distance;
+    TreeMapping diff = computeDiff(treeTwo, treeTwo);
+    Integer distance = diff.cost;
     assertThat(distance).isEqualTo(0);
 
     final Mapping mapping = diff.mapping;
