@@ -5,6 +5,6 @@ package treediff.util;
  * */
 public interface Visitor {
 
-	public void visit(TreeNode node);
+  void visit(TreeNode node);
 
 }
