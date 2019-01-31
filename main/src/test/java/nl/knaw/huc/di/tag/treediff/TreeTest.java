@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNull;
 /*
  * Tests the functionality of Tree
  * */
-public class TestTree {
+public class TreeTest {
 
   private Tree treeOne;
   private Tree treeTwo;

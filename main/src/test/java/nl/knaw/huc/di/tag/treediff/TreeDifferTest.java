@@ -14,7 +14,7 @@ import static nl.knaw.huc.di.tag.treediff.TreeDiffer.computeDiff;
 import static nl.knaw.huc.di.tag.treediff.TreeDiffer.produceHumanFriendlyMapping;
 import static org.junit.Assert.assertEquals;
 
-public class TestTreeDiff {
+public class TreeDifferTest {
   private Tree treeOne;
   private Tree treeTwo;
   private Tree treeThree;
