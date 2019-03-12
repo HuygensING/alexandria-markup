@@ -29,7 +29,7 @@ public class TreeNode {
   private String label;
   private final List<TreeNode> children;
   private TreeNode father;
-  private int preorder_position;
+  private int preorderPosition;
 
   public TreeNode(String label) {
     // Label of the current node
@@ -43,13 +43,13 @@ public class TreeNode {
 
     // The cached position of the current node in the preorder traversal of
     // the tree.
-    this.preorder_position = 0;
+    this.preorderPosition = 0;
   }
 
   /*
    * Sets the label (str) of this node
    */
-  public void set_label(String label) {
+  public void setLabel(String label) {
     this.label = label;
   }
 
@@ -63,7 +63,7 @@ public class TreeNode {
   /*
    * Sets the father of the node (TreeNode)
    */
-  private void set_father(TreeNode node) {
+  private void setFather(TreeNode node) {
     father = node;
   }
 
@@ -79,7 +79,7 @@ public class TreeNode {
    */
   public void addChild(TreeNode node) {
     children.add(node);
-    node.set_father(this);
+    node.setFather(this);
   }
 
   /*
@@ -99,15 +99,15 @@ public class TreeNode {
   /*
    * Sets the preorder traversal position (int)
    */
-  public void set_preorder_position(int new_position) {
-    preorder_position = new_position - 1;
+  public void setPreorderPosition(int new_position) {
+    preorderPosition = new_position - 1;
   }
 
   /*
    * Returns the position (int) of the node in the preorder traversal
    */
   public int preorderPosition() {
-    return preorder_position + 1;
+    return preorderPosition + 1;
   }
 
   /*
@@ -124,8 +124,8 @@ public class TreeNode {
   /*
    * Returns a representation (str) for this node for debugging
    */
-  public String debug_string() {
-    return String.format("label: %s, preorderPosition: %d", label, preorder_position + 1);
+  public String debugString() {
+    return String.format("label: %s, preorderPosition: %d", label, preorderPosition + 1);
   }
 
 }

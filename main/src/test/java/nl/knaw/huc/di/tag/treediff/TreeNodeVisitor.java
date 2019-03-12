@@ -37,6 +37,6 @@ public class TreeNodeVisitor implements Visitor {
    * Records the label of the node visited
    */
   public void visit(TreeNode node) {
-    traversal.add(node.debug_string());
+    traversal.add(node.debugString());
   }
 }

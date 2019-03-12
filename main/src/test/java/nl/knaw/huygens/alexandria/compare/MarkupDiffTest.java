@@ -115,8 +115,10 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
           LOG.info("{}: {}", i, mi);
         }
       }
-      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists);
+      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
       LOG.info("{}", diffMarkupInfo);
+      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
+      LOG.info("{}", mrDiffMarkupInfo);
       return diffMarkupInfo;
     });
   }

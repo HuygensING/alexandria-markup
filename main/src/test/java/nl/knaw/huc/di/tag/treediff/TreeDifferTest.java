@@ -19,10 +19,13 @@ package nl.knaw.huc.di.tag.treediff;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.treediff.TreeDiffer.Mapping;
 import nl.knaw.huc.di.tag.treediff.TreeDiffer.TreeMapping;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,7 @@ import static nl.knaw.huc.di.tag.treediff.TreeDiffer.produceHumanFriendlyMapping
 import static org.junit.Assert.assertEquals;
 
 public class TreeDifferTest {
+  private static final Logger LOG = LoggerFactory.getLogger(TreeDifferTest.class);
   private Tree treeOne;
   private Tree treeTwo;
   private Tree treeThree;
@@ -179,5 +183,36 @@ public class TreeDifferTest {
         "No change for C (@3 and @3)",
         "No change for D (@4 and @4)"));
     assertEquals(expected, description);
+  }
+
+  @Test
+  public void test() {
+    TreeNode textA = new TreeNode("<text>");
+    TreeNode dogA = new TreeNode("The dog's big eyes.");
+    textA.addChild(dogA);
+    Tree treeA = new Tree(textA);
+    treeA.buildCaches();
+
+    TreeNode textB = new TreeNode("<text>");
+    TreeNode dogB1 = new TreeNode("The dog's ");
+    TreeNode dogB2 = new TreeNode("big black ears");
+    TreeNode dogB3 = new TreeNode("brown eyes");
+    TreeNode dogB4 = new TreeNode(".");
+    TreeNode addB = new TreeNode("<add>");
+    TreeNode delB = new TreeNode("<del>");
+    textB.addChild(dogB1);
+    textB.addChild(delB);
+    textB.addChild(addB);
+    textB.addChild(dogB4);
+    delB.addChild(dogB2);
+    addB.addChild(dogB3);
+    Tree treeB = new Tree(textB);
+    treeB.buildCaches();
+
+    final TreeMapping diff = computeDiff(treeA, treeB);
+    LOG.info("diff = {}", diff);
+    LOG.info("cost = {}", diff.cost);
+    LOG.info("mapping = {}", diff.mapping);
+    LOG.info("humanFriendly = {}", produceHumanFriendlyMapping(diff.mapping, treeA, treeB));
   }
 }

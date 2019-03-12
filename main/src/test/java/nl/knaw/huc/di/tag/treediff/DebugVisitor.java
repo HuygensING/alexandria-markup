@@ -25,6 +25,6 @@ package nl.knaw.huc.di.tag.treediff;
 public class DebugVisitor implements Visitor {
   @Override
   public void visit(TreeNode node) {
-    System.out.println(node.debug_string());
+    System.out.println(node.debugString());
   }
 }

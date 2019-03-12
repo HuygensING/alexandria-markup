@@ -83,7 +83,7 @@ class Tree {
    */
   public void setNodeAt(int preorderPosition, TreeNode node) {
     preorderPositionToNode.add(preorderPosition - 1, node);
-    node.set_preorder_position(preorderPosition);// It handles "-1" inside
+    node.setPreorderPosition(preorderPosition);// It handles "-1" inside
   }
 
   /*

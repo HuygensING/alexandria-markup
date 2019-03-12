@@ -33,6 +33,8 @@ import prioritised_xml_collation.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -43,6 +45,7 @@ public class TAGComparison2 {
   private static final int MAX_MARKEDUP_TEXT_LENGTH = 20;
   Logger LOG = LoggerFactory.getLogger(TAGComparison2.class);
   private final List<String> diffLines = new ArrayList<>();
+  private final List<String> mrDiffLines = new ArrayList<>();
   private final List<MarkupInfo>[] markupInfoLists;
 
   public TAGComparison2(TAGDocument original, TAGView tagView, TAGDocument edited, TAGStore store) {
@@ -97,7 +100,8 @@ public class TAGComparison2 {
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
     markupInfoLists = results;
-    diffLines.addAll(diffMarkupInfo(markupInfoLists));
+    diffLines.addAll(diffMarkupInfo(markupInfoLists, HR_DIFFPRINTER));
+    mrDiffLines.addAll(diffMarkupInfo(markupInfoLists, MR_DIFFPRINTER));
   }
 
   public boolean hasDifferences() {
@@ -106,6 +110,15 @@ public class TAGComparison2 {
 
   public List<String> getDiffLines() {
     return diffLines;
+  }
+
+  public List<String> getMRDiffLines() {
+    // these difflines should contain all the information needed to change the document graph, so:
+    // markup: added, deleted, tagchanges
+    // textnodes: added, deleted, content changes
+    // edges: added, deleted
+
+    return mrDiffLines;
   }
 
   public class MarkupInfo {
@@ -176,7 +189,7 @@ public class TAGComparison2 {
 //        || tagToken instanceof MarkupCloseToken;
 //  }
 
-  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists) {
+  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
     final List<String> diff = new ArrayList<>();
     List<MarkupInfo> markupInfoListA = markupInfoLists[0];
     List<MarkupInfo> markupInfoListB = markupInfoLists[1];
@@ -228,29 +241,63 @@ public class TAGComparison2 {
 //              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
 //              )
 
-          diff.add(String.format("[%s](%d-%d) replaced by [%s](%d-%d)",
-              markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-              markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
-              )
-          );
+          diff.add(diffPrinter.modification.apply(markupInfoA, markupInfoB));
           determinedInA[i] = true;
           determinedInB[replacement.getRight()] = true;
 
         } else {
           // otherwise, deletion
           MarkupInfo markupInfo = markupInfoListA.get(i);
-          diff.add(String.format("[%s](%d-%d) deleted", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+          diff.add(diffPrinter.deletion.apply(markupInfo));
         }
       }
     }
     for (int i = 0; i < determinedInB.length; i++) {
       if (!determinedInB[i]) {
         MarkupInfo markupInfo = markupInfoListB.get(i);
-        diff.add(String.format("[%s](%d-%d) added", markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()));
+        diff.add(diffPrinter.addition.apply(markupInfo));
       }
     }
     return diff;
   }
+
+  static class DiffPrinter {
+    Function<MarkupInfo, String> addition;
+    Function<MarkupInfo, String> deletion;
+    BiFunction<MarkupInfo, MarkupInfo, String> modification;
+
+    DiffPrinter setAddition(Function<MarkupInfo, String> addition) {
+      this.addition = addition;
+      return this;
+    }
+
+    DiffPrinter setDeletion(Function<MarkupInfo, String> deletion) {
+      this.deletion = deletion;
+      return this;
+    }
+
+    DiffPrinter setModification(BiFunction<MarkupInfo, MarkupInfo, String> modification) {
+      this.modification = modification;
+      return this;
+    }
+  }
+
+  static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
+      .setAddition(markupInfo -> String.format("[%s](%d-%d) added",
+          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
+      .setDeletion(markupInfo -> String.format("[%s](%d-%d) deleted",
+          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
+      .setModification((markupInfoA, markupInfoB) -> String.format("[%s](%d-%d) replaced by [%s](%d-%d)",
+          markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
+      ));
+
+  static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()
+      .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
+      .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
+      .setModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
+          markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
+      ));
 
   private String toString(MarkupInfo markupInfo) {
     TAGMarkup markup = markupInfo.markup;
