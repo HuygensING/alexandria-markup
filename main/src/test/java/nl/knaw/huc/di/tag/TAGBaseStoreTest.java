@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -51,7 +52,7 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
   }
 
   private TAGStore getStore() {
-    return new TAGStore(tmpDir.toString(), false);
+    return new BDBTAGStore(tmpDir.toString(), false);
   }
 
   public LMNLExporter getLmnlExporter(TAGStore store) {

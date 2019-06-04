@@ -61,7 +61,7 @@ public class TAGMarkupTest {
   }
 
   private String getLayerSuffix(Set<String> layers, Set<String> newLayers) {
-    TAGStore mockStore = mock(TAGStore.class);
+    TAGStore mockStore = mock(BDBTAGStore.class);
     TAGMarkupDTO mockDTO = mock(TAGMarkupDTO.class);
     when(mockDTO.getLayers()).thenReturn(layers);
     TAGMarkup tm = new TAGMarkup(mockStore, mockDTO);

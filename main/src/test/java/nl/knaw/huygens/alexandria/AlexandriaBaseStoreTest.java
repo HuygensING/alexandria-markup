@@ -23,6 +23,7 @@ package nl.knaw.huygens.alexandria;
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -77,7 +78,7 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   }
 
   private TAGStore getStore() {
-    return new TAGStore(tmpDir.toString(), false);
+    return new BDBTAGStore(tmpDir.toString(), false);
   }
 
 }
