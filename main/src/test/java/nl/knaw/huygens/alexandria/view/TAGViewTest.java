@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.view;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,10 @@ package nl.knaw.huygens.alexandria.view;
 
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -46,11 +49,12 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
     String viewJson = "{'includeLayers':['A']}".replace("'", "\"");
     String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]";
-    runInStore(store -> {
+    runInStoreTransaction(store -> {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
+      final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
       TAGDocument document = store.runInTransaction(() ->
-          new TAGMLImporter(store).importTAGML(tagml)
+          new TAGMLImporter().importTAGML(tagModelBuilder,tagml)
       );
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
@@ -62,10 +66,11 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
     String viewJson = "{'excludeLayers':['B']}".replace("'", "\"");
     String expected = "[tagml>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml]";
-    runInStore(store -> {
+    runInStoreTransaction(store -> {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml));
+      final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
     });
@@ -76,10 +81,11 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]";
     String viewJson = "{'includeLayers':['A'],'excludeMarkup':['b']}".replace("'", "\"");
     String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]";
-    runInStore(store -> {
+    runInStoreTransaction(store -> {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml));
+      final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
     });
@@ -125,8 +131,9 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       Set<Long> filteredMarkupIds3 = viewL1.filterRelevantMarkup(allMarkupIds);
       assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3);
 
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument document1 = importer.importTAGML("[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]");
+      final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+      TAGMLImporter importer = new TAGMLImporter();
+      TAGDocument document1 = importer.importTAGML(tagModelBuilder,"[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]");
 
       TAGMLExporter exporter1 = new TAGMLExporter(store, viewNoL1);
       String tagmlBD = exporter1.asTAGML(document1);

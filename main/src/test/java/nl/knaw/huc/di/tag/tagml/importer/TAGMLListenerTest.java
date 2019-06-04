@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -180,10 +180,10 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
     assertThat(numberOfSyntaxErrors).isEqualTo(0);
 
-    TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
+    TAGModelBuilder tagModelBuilder = walkParseTree(errorListener, parseTree, store);
     assertThat(errorListener.hasErrors()).isFalse();
 
-    TAGDocument document = listener.getDocument();
+    TAGDocument document = tagModelBuilder.getDocument();
     logDocumentGraph(document, input);
     String lmnl = new LMNLExporter(store).toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
@@ -201,8 +201,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
       try {
-        TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
-        TAGDocument document = listener.getDocument();
+        TAGModelBuilder tagModelBuilder = walkParseTree(errorListener, parseTree, store);
+        TAGDocument document = tagModelBuilder.getDocument();
         logDocumentGraph(document, input);
       } catch (TAGMLBreakingError e) {
       }
@@ -226,12 +226,13 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     return parser;
   }
 
-  private TAGMLListener walkParseTree(final ErrorListener errorListener, final ParseTree parseTree, final TAGStore store) {
-    TAGMLListener listener = new TAGMLListener(store, errorListener);
+  private TAGModelBuilder walkParseTree(final ErrorListener errorListener, final ParseTree parseTree, final TAGStore store) {
+    TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, errorListener);
+    TAGMLListener listener = new TAGMLListener(tagModelBuilder, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    return listener;
+    return tagModelBuilder;
   }
 }

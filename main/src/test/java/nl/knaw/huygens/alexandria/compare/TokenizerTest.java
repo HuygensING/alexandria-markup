@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,10 @@ package nl.knaw.huygens.alexandria.compare;
  */
 
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -102,7 +105,8 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTokenizer() {
     runInStoreTransaction(store -> {
-      TAGDocument doc = new TAGMLImporter(store).importTAGML("[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
+      final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+      TAGDocument doc = new TAGMLImporter().importTAGML(tagModelBuilder,"[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
       TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();

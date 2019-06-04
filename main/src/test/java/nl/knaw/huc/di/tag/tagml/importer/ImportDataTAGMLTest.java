@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -100,7 +101,8 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
         input = getInputStream(basename);
         LOG.info("testing data/tagml/{}.tagml", basename);
         LOG.info("importTAGML\n");
-        TAGDocument document = new TAGMLImporter(store).importTAGML(input);
+        final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+        TAGDocument document = new TAGMLImporter().importTAGML(tagModelBuilder,input);
         logDocumentGraph(document, "");
 //        generateLaTeX(basename, document);
       } catch (IOException e) {

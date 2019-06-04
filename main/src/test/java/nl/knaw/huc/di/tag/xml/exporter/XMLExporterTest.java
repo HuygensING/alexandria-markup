@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.xml.exporter;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,10 @@ package nl.knaw.huc.di.tag.xml.exporter;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.TAGViews;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
+import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
@@ -465,7 +468,8 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     LOG.info("TAGML=\n\n{}\n", tagML);
 //    printTokens(tagML);
     //    logDocumentGraph(document, tagML);
-    return new TAGMLImporter(store).importTAGML(tagML);
+    final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+    return new TAGMLImporter().importTAGML(tagModelBuilder,tagML);
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) throws Exception {
