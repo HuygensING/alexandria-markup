@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,14 +63,14 @@ public class TAGMLImporter {
 
   private TAGDocument importTAGML(final TAGModelBuilder tagModelBuilder, CharStream antlrInputStream) throws TAGMLSyntaxError {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
-    ErrorListener errorListener = new ErrorListener();
+    ErrorListener errorListener = tagModelBuilder.getErrorListener();
     lexer.addErrorListener(errorListener);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
 
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
 
-    TAGDocument document = usingListener(parser, tagModelBuilder, errorListener);
+    TAGDocument document = usingListener(parser, tagModelBuilder);
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
@@ -87,11 +87,11 @@ public class TAGMLImporter {
     return document;
   }
 
-  private TAGDocument usingListener(final TAGMLParser parser, final TAGModelBuilder tagModelBuilder, final ErrorListener errorListener) {
+  private TAGDocument usingListener(final TAGMLParser parser, final TAGModelBuilder tagModelBuilder) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
 //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
-    TAGMLListener listener = new TAGMLListener(tagModelBuilder, errorListener);
+    TAGMLListener listener = new TAGMLListener(tagModelBuilder);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     } catch (TAGMLBreakingError ignored) {

@@ -65,7 +65,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
   }
 
-
   @Test // RD-206
   public void testRD206_1() {
     String tagML = "[root metadata={" +
@@ -1012,8 +1011,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 //    LOG.info("TAGML=\n{}\n", tagML);
     String trimmedTagML = tagML.trim();
     printTokens(trimmedTagML);
-    TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store,new ErrorListener());
-    TAGDocument document = new TAGMLImporter().importTAGML(tagModelBuilder,trimmedTagML);
+    TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
+    TAGDocument document = new TAGMLImporter().importTAGML(tagModelBuilder, trimmedTagML);
     logDocumentGraph(document, trimmedTagML);
     return document;
   }
