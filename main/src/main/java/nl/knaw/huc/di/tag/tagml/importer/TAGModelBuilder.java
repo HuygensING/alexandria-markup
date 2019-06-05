@@ -35,8 +35,6 @@ import java.util.stream.Stream;
 public interface TAGModelBuilder {
   void exitDocument(final Map<String, String> namespaces);
 
-  void exitText(String text, final Deque<TAGMarkup> allOpenMarkup);
-
   boolean isFirstTag();
 
   void addLayer(String newLayerId, TAGMarkup markup, String parentLayer);

@@ -166,7 +166,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
             "%s No text allowed here, the root markup must be started first.",
             errorPrefix(ctx));
       }
-      tagModelBuilder.exitText(text, state.allOpenMarkup);
+      tagModelBuilder.createConnectedTextNode(text, state.allOpenMarkup);
     }
   }
 
