@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer2;
 
 /*-
  * #%L
@@ -26,9 +26,6 @@ import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -41,22 +38,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-public class TAGMLImporter {
+public class TAGMLImporter2 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter2.class);
 
-  private final TAGStore tagStore;
-
-  public TAGMLImporter(final TAGStore store) {
-    tagStore = store;
+  public TAGMLImporter2() {
   }
 
-  public TAGDocument importTAGML(final String input) throws TAGMLSyntaxError {
+  public TAGKnowledgeModel importTAGML(final String input) throws TAGMLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTAGML(antlrInputStream);
   }
 
-  public TAGDocument importTAGML(InputStream input) throws TAGMLSyntaxError {
+  public TAGKnowledgeModel importTAGML(InputStream input) throws TAGMLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTAGML(antlrInputStream);
@@ -66,7 +60,7 @@ public class TAGMLImporter {
     }
   }
 
-  private TAGDocument importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
+  private TAGKnowledgeModel importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
     lexer.addErrorListener(errorListener);
@@ -74,12 +68,19 @@ public class TAGMLImporter {
 
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
+    parser.setBuildParseTree(true);
+    ParseTree parseTree = parser.document();
+//    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
 
-    TAGDocument document = usingListener(parser, errorListener);
-//    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
+    TAGMLKnowledgeModelListener listener = new TAGMLKnowledgeModelListener(errorListener);
+    try {
+      ParseTreeWalker.DEFAULT.walk(listener, parseTree);
+    } catch (TAGMLBreakingError ignored) {
+        LOG.error("TAGMLBreakingError:{}", ignored);
+    }
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-//    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
+    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
@@ -88,37 +89,12 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    update(document.getDTO());
-    return document;
+    return listener.getKnowledgeModel();
   }
 
-  private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
-    parser.setBuildParseTree(true);
-    ParseTree parseTree = parser.document();
-//    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
-    TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
-    try {
-      ParseTreeWalker.DEFAULT.walk(listener, parseTree);
-    } catch (TAGMLBreakingError ignored) {
-
-    }
-    return listener.getDocument();
-  }
-
-  private TAGDocument usingVisitor(final TAGMLParser parser, final ErrorListener errorListener) {
-    TAGMLParser.DocumentContext documentContext = parser.document();
-    TAGMLVisitor visitor = new TAGMLVisitor(tagStore, errorListener);
-    visitor.visit(documentContext);
-    return visitor.getDocument();
-  }
-
-  private Long update(TAGDTO tagdto) {
-    return tagStore.persist(tagdto);
-  }
-
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
+  protected static void logDocumentGraph(final TAGKnowledgeModel knowledgeModel, final String input) {
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-    System.out.println(new DotFactory().toDot(document, input));
+    System.out.println(new DotFactory().toDot(knowledgeModel, input));
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
   }
 

@@ -22,6 +22,7 @@ package nl.knaw.huc.di.tag.model.graph;
 
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.tagml.importer2.TAGKnowledgeModel;
 import nl.knaw.huygens.alexandria.exporter.ColorPicker;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
@@ -41,6 +42,17 @@ public class DotFactory {
       "lime", "magenta", "olive", "orange", "pink", "purple", "brown", "cyan", "teal", "violet", "black");
   Map<String, String> layerColor = new HashMap<>();
   private TextGraph textGraph;
+
+  public String toDot(TAGKnowledgeModel knowledgeModel, final String label) {
+    layerColor.clear();
+    StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
+        .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
+        .append("  d [shape=doublecircle;label=\"\"]\n")
+        .append("  subgraph{\n");
+    // TODO
+
+    return dotBuilder.append("}").toString();
+  }
 
   public String toDot(TAGDocument document, final String label) {
     layerColor.clear();
