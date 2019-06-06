@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -35,12 +35,12 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
-public class TAGMarkup {
+public class TAGMarkupDAO {
   private final TAGStore store;
-  private final TAGMarkupDTO markupDTO;
-  private final TAGDocument document;
+  private final TAGMarkup markupDTO;
+  private final TAGDocumentDAO document;
 
-  public TAGMarkup(TAGStore store, TAGMarkupDTO markupDTO) {
+  public TAGMarkupDAO(TAGStore store, TAGMarkup markupDTO) {
     checkNotNull(store);
     checkNotNull(markupDTO);
     this.store = store;
@@ -88,7 +88,7 @@ public class TAGMarkup {
 //    return this;
 //  }
 
-  public TAGMarkup addAnnotation(AnnotationInfo annotation) {
+  public TAGMarkupDAO addAnnotation(AnnotationInfo annotation) {
 //    markupDTO.getAnnotationIds().add(annotation.getDbId());
 //    update();
     return this;
@@ -109,15 +109,15 @@ public class TAGMarkup {
     return new AnnotationInfo(valueNode, annotationEdge.getAnnotationType(), annotationEdge.getField());
   }
 
-  public Stream<TAGTextNode> getTextNodeStream() {
+  public Stream<TAGTextNodeDAO> getTextNodeStream() {
     return document.getTextNodeStreamForMarkup(this);
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForLayers(Set<String> layers) {
+  public Stream<TAGTextNodeDAO> getTextNodeStreamForLayers(Set<String> layers) {
     return document.getTextNodeStreamForMarkupInLayers(this, layers);
   }
 
-  public TAGMarkupDTO getDTO() {
+  public TAGMarkup getDTO() {
     return markupDTO;
   }
 
@@ -160,13 +160,13 @@ public class TAGMarkup {
     return markupDTO.getSuffix();
   }
 
-  public Optional<TAGMarkup> getDominatedMarkup() {
+  public Optional<TAGMarkupDAO> getDominatedMarkup() {
     return markupDTO.getDominatedMarkupId()
         .map(store::getMarkupDTO)
-        .map(m -> new TAGMarkup(store, m));
+        .map(m -> new TAGMarkupDAO(store, m));
   }
 
-  public void setDominatedMarkup(TAGMarkup dominatedMarkup) {
+  public void setDominatedMarkup(TAGMarkupDAO dominatedMarkup) {
     markupDTO.setDominatedMarkupId(dominatedMarkup.getDbId());
     if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
@@ -174,10 +174,10 @@ public class TAGMarkup {
     update();
   }
 
-  public Optional<TAGMarkup> getDominatingMarkup() {
+  public Optional<TAGMarkupDAO> getDominatingMarkup() {
     return markupDTO.getDominatingMarkupId()
         .map(store::getMarkupDTO)
-        .map(m -> new TAGMarkup(store, m));
+        .map(m -> new TAGMarkupDAO(store, m));
   }
 
   public boolean hasMarkupId() {
@@ -192,12 +192,12 @@ public class TAGMarkup {
     return markupDTO.isOptional();
   }
 
-  public TAGMarkup setOptional(boolean optional) {
+  public TAGMarkupDAO setOptional(boolean optional) {
     markupDTO.setOptional(optional);
     return this;
   }
 
-  public TAGMarkup setMarkupId(String id) {
+  public TAGMarkupDAO setMarkupId(String id) {
     markupDTO.setMarkupId(id);
     return this;
   }
@@ -210,7 +210,7 @@ public class TAGMarkup {
     markupDTO.setSuffix(suffix);
   }
 
-  public TAGMarkup addAllLayers(final Set<String> layers) {
+  public TAGMarkupDAO addAllLayers(final Set<String> layers) {
     markupDTO.addAllLayers(layers);
     return this;
   }
@@ -220,7 +220,7 @@ public class TAGMarkup {
   }
 
   public boolean isAnonymous() {
-    List<TAGTextNode> textNodesForMarkup = document.getTextNodeStreamForMarkup(this)
+    List<TAGTextNodeDAO> textNodesForMarkup = document.getTextNodeStreamForMarkup(this)
         .collect(toList());
     return textNodesForMarkup.size() == 1 // markup has just 1 textnode
         && textNodesForMarkup.get(0).getText().isEmpty();  // and it's empty
@@ -240,7 +240,7 @@ public class TAGMarkup {
         .anyMatch(ContinuationEdge.class::isInstance);
   }
 
-  public boolean matches(TAGMarkup other) {
+  public boolean matches(TAGMarkupDAO other) {
     if (!other.getExtendedTag().equals(getExtendedTag())) {
       return false;
     }
@@ -280,15 +280,15 @@ public class TAGMarkup {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGMarkup //
-        && markupDTO.equals(((TAGMarkup) other).getDTO());
+    return other instanceof TAGMarkupDAO //
+        && markupDTO.equals(((TAGMarkupDAO) other).getDTO());
   }
 
   private void update() {
     store.persist(markupDTO);
   }
 
-  private void setDominatingMarkup(TAGMarkup dominatingMarkup) {
+  private void setDominatingMarkup(TAGMarkupDAO dominatingMarkup) {
     markupDTO.setDominatingMarkupId(dominatingMarkup.getDbId());
     if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
@@ -319,12 +319,12 @@ public class TAGMarkup {
   }
 
   @Deprecated
-  public TAGMarkup setOnlyTextNode(final TAGTextNode t1) {
+  public TAGMarkupDAO setOnlyTextNode(final TAGTextNodeDAO t1) {
     return this;
   }
 
   @Deprecated
-  public TAGMarkup setFirstAndLastTextNode(final TAGTextNode tn00, final TAGTextNode tn10) {
+  public TAGMarkupDAO setFirstAndLastTextNode(final TAGTextNodeDAO tn00, final TAGTextNodeDAO tn10) {
     return this;
   }
 

@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -33,14 +33,14 @@ import java.util.stream.Stream;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 3)
-public class TAGDocumentDTO implements TAGDTO {
+public class TAGDocument implements TAGDTO {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNodeDTO.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNode.class)
   private List<Long> textNodeIds = new ArrayList<>();
 
-  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkupDTO.class)
+  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGMarkup.class)
   private List<Long> markupIds = new ArrayList<>();
 
   private Date creationDate = new Date();
@@ -48,7 +48,7 @@ public class TAGDocumentDTO implements TAGDTO {
   public TextGraph textGraph = new TextGraph();
   private Map<String, String> namespaces;
 
-  public TAGDocumentDTO() {
+  public TAGDocument() {
   }
 
   public void initialize() {
@@ -114,7 +114,7 @@ public class TAGDocumentDTO implements TAGDTO {
     return new HashSet<>(textGraph.getLayerRootMap().values());
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDTO markup) {
+  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup markup) {
     int textNodeSize = textNodeIds.size();
     final Set<String> layers = new HashSet<>();
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
@@ -130,15 +130,15 @@ public class TAGDocumentDTO implements TAGDTO {
     return textGraph.getMarkupIdStreamForTextNodeId(textNodeId);
   }
 
-  public void addTextNode(TAGTextNodeDTO textNode) {
+  public void addTextNode(TAGTextNode textNode) {
     textNodeIds.add(textNode.getDbId());
   }
 
-  public void associateTextWithMarkupForLayer(TAGTextNodeDTO textNode, TAGMarkupDTO markup, final String layerName) {
+  public void associateTextWithMarkupForLayer(TAGTextNode textNode, TAGMarkup markup, final String layerName) {
     textGraph.linkMarkupToTextNodeForLayer(markup.getDbId(), textNode.getDbId(), layerName);
   }
 
-  public boolean markupHasTextNodes(final TAGMarkup markup) {
+  public boolean markupHasTextNodes(final TAGMarkupDAO markup) {
     final Set<String> layers = new HashSet<>();
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
     return getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)

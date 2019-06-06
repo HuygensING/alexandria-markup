@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
 @Entity(version = 2)
-public class TAGAnnotationDTO implements TAGDTO {
+public class TAGAnnotation implements TAGDTO {
   @PrimaryKey(sequence = "annotation_pk_sequence")
   private Long id;
 
@@ -39,10 +39,10 @@ public class TAGAnnotationDTO implements TAGDTO {
 //  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
 //  private final List<Long> annotationIds = new ArrayList<>();
 
-  private TAGAnnotationDTO() {
+  private TAGAnnotation() {
   }
 
-  public TAGAnnotationDTO(String key) {
+  public TAGAnnotation(String key) {
     this.key = key;
   }
 

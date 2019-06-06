@@ -21,8 +21,8 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,20 +34,20 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest {
   @Test
   public void testTAGStore() {
     AtomicLong documentId = new AtomicLong();
-    TAGTextNodeDTO textNode = new TAGTextNodeDTO("something");
+    TAGTextNode textNode = new TAGTextNode("something");
 
     runInStore(store ->
         store.runInTransaction(() -> {
           Long textNodeId = store.persist(textNode);
 
-          TAGDocumentDTO document = new TAGDocumentDTO();
+          TAGDocument document = new TAGDocument();
           document.getTextNodeIds().add(textNode.getDbId());
           documentId.set(store.persist(document));
         }));
 
     runInStore(store ->
         store.runInTransaction(() -> {
-          TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
+          TAGDocument document = store.getDocumentDTO(documentId.get());
           assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
         }));
   }

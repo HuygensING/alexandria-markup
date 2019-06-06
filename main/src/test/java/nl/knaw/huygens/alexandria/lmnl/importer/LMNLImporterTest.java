@@ -26,11 +26,11 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,18 +58,18 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testMarkupAnnotation() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
       String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
       // Expectations:
       // We expect a Document
       // - with one text node
       // - with one range on it
       // - with one annotation on it.
-      TAGDocument expected = store.createDocument();
-      TAGMarkup r1 = store.createMarkup(expected, "l");
+      TAGDocumentDAO expected = store.createDocument();
+      TAGMarkupDAO r1 = store.createMarkup(expected, "l");
       AnnotationInfo a1 = simpleAnnotation("n", "144");
       r1.addAnnotation(a1);
-      TAGTextNode t1 = store.createTextNode("He manages to keep the upper hand");
+      TAGTextNodeDAO t1 = store.createTextNode("He manages to keep the upper hand");
       expected.addTextNode(t1, null);
       expected.addMarkup(r1);
       String layerName = "";
@@ -105,21 +105,21 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
           + "{excerpt]";
 
       LMNLImporter importer = new LMNLImporter(store);
-      TAGDocument actual = importer.importLMNL(input);
+      TAGDocumentDAO actual = importer.importLMNL(input);
 
-      TAGDocument expected = store.createDocument();
+      TAGDocumentDAO expected = store.createDocument();
 
-      TAGTextNode tn00 = store.createTextNode("\n");
-      TAGTextNode tn01 = store.createTextNode("He manages to keep the upper hand");
-      TAGTextNode tn02 = store.createTextNode("\n");
-      TAGTextNode tn03 = store.createTextNode("On his own farm.");
-      TAGTextNode tn04 = store.createTextNode(" ");
-      TAGTextNode tn05 = store.createTextNode("He's boss.");
-      TAGTextNode tn06 = store.createTextNode(" ");
-      TAGTextNode tn07 = store.createTextNode("But as to hens:");
-      TAGTextNode tn08 = store.createTextNode("\n");
-      TAGTextNode tn09 = store.createTextNode("We fence our flowers in and the hens range.");
-      TAGTextNode tn10 = store.createTextNode("\n");
+      TAGTextNodeDAO tn00 = store.createTextNode("\n");
+      TAGTextNodeDAO tn01 = store.createTextNode("He manages to keep the upper hand");
+      TAGTextNodeDAO tn02 = store.createTextNode("\n");
+      TAGTextNodeDAO tn03 = store.createTextNode("On his own farm.");
+      TAGTextNodeDAO tn04 = store.createTextNode(" ");
+      TAGTextNodeDAO tn05 = store.createTextNode("He's boss.");
+      TAGTextNodeDAO tn06 = store.createTextNode(" ");
+      TAGTextNodeDAO tn07 = store.createTextNode("But as to hens:");
+      TAGTextNodeDAO tn08 = store.createTextNode("\n");
+      TAGTextNodeDAO tn09 = store.createTextNode("We fence our flowers in and the hens range.");
+      TAGTextNodeDAO tn10 = store.createTextNode("\n");
 
       AnnotationInfo date = simpleAnnotation("date", "1915");
       AnnotationInfo title = simpleAnnotation("title", "The Housekeeper");
@@ -129,25 +129,25 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       AnnotationInfo dates = simpleAnnotation("dates", "1874-1963");
       AnnotationInfo author = simpleAnnotation("author")/*.addAnnotation(name).addAnnotation(dates)*/;
 
-      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")//
+      TAGMarkupDAO excerpt = store.createMarkup(expected, "excerpt")//
           .addAnnotation(source)//
           .addAnnotation(author)//
           .setFirstAndLastTextNode(tn00, tn10);
       expected.associateTextNodeWithMarkupForLayer(tn00, excerpt);
       // 3 sentences
-      TAGMarkup s1 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn01, tn03);
-      TAGMarkup s2 = store.createMarkup(expected, "s")/*.addTextNode(tn05)*/;
-      TAGMarkup s3 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn07, tn09);
+      TAGMarkupDAO s1 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn01, tn03);
+      TAGMarkupDAO s2 = store.createMarkup(expected, "s")/*.addTextNode(tn05)*/;
+      TAGMarkupDAO s3 = store.createMarkup(expected, "s").setFirstAndLastTextNode(tn07, tn09);
 
       // 3 lines
       AnnotationInfo n144 = simpleAnnotation("n", "144");
-      TAGMarkup l1 = store.createMarkup(expected, "l")/*.addTextNode(tn01)*/.addAnnotation(n144);
+      TAGMarkupDAO l1 = store.createMarkup(expected, "l")/*.addTextNode(tn01)*/.addAnnotation(n144);
 
       AnnotationInfo n145 = simpleAnnotation("n", "145");
-      TAGMarkup l2 = store.createMarkup(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
+      TAGMarkupDAO l2 = store.createMarkup(expected, "l").setFirstAndLastTextNode(tn03, tn07).addAnnotation(n145);
 
       AnnotationInfo n146 = simpleAnnotation("n", "146");
-      TAGMarkup l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
+      TAGMarkupDAO l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
 
       expected.addTextNode(tn00, null)//
           .addTextNode(tn01, null)//
@@ -215,16 +215,16 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     InputStream input = FileUtils.openInputStream(new File(pathname));
     runInStoreTransaction(store -> {
       LMNLImporter importer = new LMNLImporter(store);
-      TAGDocument actual = importer.importLMNL(input);
+      TAGDocumentDAO actual = importer.importLMNL(input);
 
       LOG.info("document={}", actual);
 
       final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
       logTAGML(actual, tagmlExporter);
 
-      List<TAGMarkup> actualMarkupList = actual.getMarkupStream().collect(toList());
+      List<TAGMarkupDAO> actualMarkupList = actual.getMarkupStream().collect(toList());
 
-      TAGMarkup excerpt = actualMarkupList.get(0);
+      TAGMarkupDAO excerpt = actualMarkupList.get(0);
       assertThat(excerpt.getTag()).isEqualTo("excerpt");
 
       List<AnnotationInfo> annotations = excerpt.getAnnotationStream().collect(toList());
@@ -240,11 +240,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       String expectedSourceTAGML = tagmlExporter.toTAGML(source).toString();
       assertThat(actualSourceTAGML).isEqualTo(expectedSourceTAGML);
 
-      TAGMarkup q1 = actualMarkupList.get(2);
+      TAGMarkupDAO q1 = actualMarkupList.get(2);
       assertThat(q1.getTag()).isEqualTo("q"); // first q
       assertThat(q1.getTextNodeStream()).hasSize(2); // has 2 textnodes
 
-      TAGMarkup q2 = actualMarkupList.get(3);
+      TAGMarkupDAO q2 = actualMarkupList.get(3);
       assertThat(q2.getTag()).isEqualTo("q"); // second q, nested in first
       assertThat(q2.getTextNodeStream()).hasSize(1); // has 1 textnode
 
@@ -263,7 +263,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
     runInStoreTransaction(store -> {
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
       LOG.info("document={}", actual);
       final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
       logTAGML(actual, tagmlExporter);
@@ -286,7 +286,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testDiscontinuousRanges() throws LMNLSyntaxError {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
     runInStoreTransaction(store -> {
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
       final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
       String tagml = tagmlExporter.asTAGML(actual);
@@ -310,7 +310,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     runInStoreTransaction(store -> {
       String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
       printTokens(input);
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
       // Expectations:
       // We expect a Document
@@ -361,11 +361,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
     printTokens(input);
     runInStoreTransaction(store -> {
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocument();
+      TAGDocumentDAO expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkup(expected, "range1");
+      TAGMarkupDAO m1 = store.createMarkup(expected, "range1");
       AnnotationInfo a1 = simpleAnnotation("annotation1");
 //      TAGDocument annotationDocument = a1.getDocument();
 //      TAGTextNode at1 = store.createTextNode("");
@@ -398,15 +398,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     String input = "[range1 [}annotation text{]}bla{range1]";
     printTokens(input);
     runInStoreTransaction(store -> {
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocument();
+      TAGDocumentDAO expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkup(expected, "range1");
+      TAGMarkupDAO m1 = store.createMarkup(expected, "range1");
       AnnotationInfo a1 = simpleAnnotation("", "annotation text");
       m1.addAnnotation(a1);
 
-      TAGTextNode t1 = store.createTextNode("bla");
+      TAGTextNodeDAO t1 = store.createTextNode("bla");
 //      m1.addTextNode(t1);
       expected.addTextNode(t1, null);
       expected.addMarkup(m1);
@@ -426,12 +426,12 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     runInStoreTransaction(store -> {
       String input = "[r}Splitting the {{Atom}}.{r]";
       printTokens(input);
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
-      TAGDocument expected = store.createDocument();
+      TAGDocumentDAO expected = store.createDocument();
 
-      TAGMarkup m1 = store.createMarkup(expected, "r");
-      TAGTextNode t1 = store.createTextNode("Splitting the .");
+      TAGMarkupDAO m1 = store.createMarkup(expected, "r");
+      TAGTextNodeDAO t1 = store.createTextNode("Splitting the .");
 //      m1.addTextNode(t1);
       expected.addTextNode(t1, null);
       expected.addMarkup(m1);
@@ -451,10 +451,10 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     String input = "[empty}{empty]";
     printTokens(input);
     runInStoreTransaction(store -> {
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
-      TAGDocument expected = store.createDocument();
-      TAGMarkup m1 = store.createMarkup(expected, "empty");
-      TAGTextNode t1 = store.createTextNode("");
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO expected = store.createDocument();
+      TAGMarkupDAO m1 = store.createMarkup(expected, "empty");
+      TAGTextNodeDAO t1 = store.createTextNode("");
 //      m1.addTextNode(t1);
       expected.addTextNode(t1, null);
       expected.addMarkup(m1);
@@ -472,15 +472,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testComments() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
       String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
-      TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+      TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
 
       // Comments are ignored, so:
       // We expect a Document
       // - with one text node
       // - with one range on it
-      TAGDocument document = store.createDocument();
-      TAGMarkup m1 = store.createMarkup(document, "foo");
-      TAGTextNode t1 = store.createTextNode("FOOBAR");
+      TAGDocumentDAO document = store.createDocument();
+      TAGMarkupDAO m1 = store.createMarkup(document, "foo");
+      TAGTextNodeDAO t1 = store.createTextNode("FOOBAR");
 //      m1.addTextNode(t1);
       document.addTextNode(t1, null);
       String layerName = "";
@@ -497,7 +497,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     runInStoreTransaction(store -> {
       String input = "[tag} tag [v}is{v] not closed";
       try {
-        TAGDocument actual = new LMNLImporter(store).importLMNL(input);
+        TAGDocumentDAO actual = new LMNLImporter(store).importLMNL(input);
         fail("no LMNLSyntaxError thrown");
       } catch (LMNLSyntaxError e) {
         assertThat(e.getMessage()).contains("Unclosed LMNL range(s): [tag}");
@@ -552,7 +552,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //    assertThat(outTAGML).isEqualTo(inLMNL);
 //  }
 
-  private void compareTAGML(TAGDocument expected, TAGDocument actual, final TAGStore store) {
+  private void compareTAGML(TAGDocumentDAO expected, TAGDocumentDAO actual, final TAGStore store) {
     final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
     String expectedTAGML = tagmlExporter.asTAGML(expected);
     String actualTAGML = tagmlExporter.asTAGML(actual);
@@ -571,27 +571,27 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     return simpleAnnotation(tag);
   }
 
-  private void assertActualMatchesExpected(TAGDocument actual, TAGDocument expected, final TAGStore store) {
-    List<TAGMarkup> actualMarkupList = actual.getMarkupStream().collect(toList());
-    List<TAGTextNode> actualTextNodeList = actual.getTextNodeStream().collect(toList());
+  private void assertActualMatchesExpected(TAGDocumentDAO actual, TAGDocumentDAO expected, final TAGStore store) {
+    List<TAGMarkupDAO> actualMarkupList = actual.getMarkupStream().collect(toList());
+    List<TAGTextNodeDAO> actualTextNodeList = actual.getTextNodeStream().collect(toList());
 
-    List<TAGMarkup> expectedMarkupList = expected.getMarkupStream().collect(toList());
-    List<TAGTextNode> expectedTextNodeList = expected.getTextNodeStream().collect(toList());
+    List<TAGMarkupDAO> expectedMarkupList = expected.getMarkupStream().collect(toList());
+    List<TAGTextNodeDAO> expectedTextNodeList = expected.getTextNodeStream().collect(toList());
 
     assertThat(actualTextNodeList).hasSize(expectedTextNodeList.size());
     for (int i = 0; i < expectedTextNodeList.size(); i++) {
-      TAGTextNode actualTextNode = actualTextNodeList.get(i);
-      TAGTextNode expectedTextNode = expectedTextNodeList.get(i);
-      Comparator<TAGTextNode> textNodeComparator = Comparator.comparing(TAGTextNode::getText);
+      TAGTextNodeDAO actualTextNode = actualTextNodeList.get(i);
+      TAGTextNodeDAO expectedTextNode = expectedTextNodeList.get(i);
+      Comparator<TAGTextNodeDAO> textNodeComparator = Comparator.comparing(TAGTextNodeDAO::getText);
       assertThat(actualTextNode).usingComparator(textNodeComparator).isEqualTo(expectedTextNode);
     }
 
     assertThat(actualMarkupList).hasSize(expectedMarkupList.size());
     for (int i = 0; i < expectedMarkupList.size(); i++) {
-      TAGMarkup actualMarkup = actualMarkupList.get(i);
-      TAGMarkup expectedMarkup = expectedMarkupList.get(i);
+      TAGMarkupDAO actualMarkup = actualMarkupList.get(i);
+      TAGMarkupDAO expectedMarkup = expectedMarkupList.get(i);
       assertThat(actualMarkup.getTag()).isEqualTo(expectedMarkup.getTag());
-      Comparator<TAGMarkup> markupComparator = Comparator.comparing(TAGMarkup::getTag);
+      Comparator<TAGMarkupDAO> markupComparator = Comparator.comparing(TAGMarkupDAO::getTag);
       assertThat(actualMarkup).usingComparator(markupComparator).isEqualTo(expectedMarkup);
     }
 
@@ -603,27 +603,27 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     // assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
   }
 
-  private boolean compareDocuments(TAGDocument expected, TAGDocument actual) {
-    Iterator<TAGTextNodeDTO> i1 = expected.getTextNodeIterator();
-    Iterator<TAGTextNodeDTO> i2 = actual.getTextNodeIterator();
+  private boolean compareDocuments(TAGDocumentDAO expected, TAGDocumentDAO actual) {
+    Iterator<TAGTextNode> i1 = expected.getTextNodeIterator();
+    Iterator<TAGTextNode> i2 = actual.getTextNodeIterator();
     boolean result = true;
     while (i1.hasNext() && result) {
-      TAGTextNodeDTO t1 = i1.next();
-      TAGTextNodeDTO t2 = i2.next();
+      TAGTextNode t1 = i1.next();
+      TAGTextNode t2 = i2.next();
       result = compareTextNodes(t1, t2);
     }
     return result;
   }
 
-  private boolean compareTextNodes(TAGTextNodeDTO t1, TAGTextNodeDTO t2) {
+  private boolean compareTextNodes(TAGTextNode t1, TAGTextNode t2) {
     return t1.getText().equals(t2.getText());
   }
 
-  private void logTAGML(TAGDocument document, final TAGMLExporter tagmlExporter) {
+  private void logTAGML(TAGDocumentDAO document, final TAGMLExporter tagmlExporter) {
     LOG.info("TAGML=\n{}", tagmlExporter.asTAGML(document));
   }
 
-  private void logKdTree(TAGDocument document, final TAGStore store) {
+  private void logKdTree(TAGDocumentDAO document, final TAGStore store) {
     LaTeXExporter latexExporter = new LaTeXExporter(store, document);
     String latex1 = latexExporter.exportMatrix();
     LOG.info("matrix=\n{}", latex1);

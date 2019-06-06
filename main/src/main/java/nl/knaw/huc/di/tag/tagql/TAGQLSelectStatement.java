@@ -21,8 +21,8 @@ package nl.knaw.huc.di.tag.tagql;
  */
 
 import nl.knaw.huygens.alexandria.query.TAGQLResult;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +33,22 @@ public class TAGQLSelectStatement implements TAGQLStatement {
 
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  private Predicate<? super TAGMarkup> markupFilter = tr -> true;
-  private Function<? super TAGMarkup, ? super Object> markupMapper = a -> a;
+  private Predicate<? super TAGMarkupDAO> markupFilter = tr -> true;
+  private Function<? super TAGMarkupDAO, ? super Object> markupMapper = a -> a;
 
   private Integer index = null;
 
-  public void setMarkupFilter(Predicate<? super TAGMarkup> markupFilter) {
+  public void setMarkupFilter(Predicate<? super TAGMarkupDAO> markupFilter) {
     this.markupFilter = markupFilter;
   }
 
-  public void setMarkupMapper(Function<? super TAGMarkup, ? super Object> markupMapper) {
+  public void setMarkupMapper(Function<? super TAGMarkupDAO, ? super Object> markupMapper) {
     this.markupMapper = markupMapper;
   }
 
   @Override
-  public Function<TAGDocument, TAGQLResult> getLimenProcessor() {
-    return (TAGDocument document) -> {
+  public Function<TAGDocumentDAO, TAGQLResult> getLimenProcessor() {
+    return (TAGDocumentDAO document) -> {
       TAGQLResult result = new TAGQLResult();
       document.getMarkupStream()//
           .filter(markupFilter)//

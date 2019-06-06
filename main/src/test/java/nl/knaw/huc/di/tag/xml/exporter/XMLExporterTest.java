@@ -27,7 +27,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
 import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.io.IOUtils;
@@ -464,7 +464,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     assertXMLExportIsAsExpected(tagML, expectedXML);
   }
 
-  private TAGDocument parseTAGML(final String tagML, final TAGStore store) {
+  private TAGDocumentDAO parseTAGML(final String tagML, final TAGStore store) {
     LOG.info("TAGML=\n\n{}\n", tagML);
 //    printTokens(tagML);
     //    logDocumentGraph(document, tagML);
@@ -483,7 +483,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   private void assertXMLExportIsAsExpected(final String tagML, TAGView view, final String expectedXML, final TAGStore store) throws Exception {
-    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML, store));
+    TAGDocumentDAO document = store.runInTransaction(() -> parseTAGML(tagML, store));
     assertThat(document).isNotNull();
 
     String xml = store.runInTransaction(() -> new XMLExporter(store, view).asXML(document));

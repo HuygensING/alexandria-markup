@@ -21,9 +21,9 @@ package nl.knaw.huc.di.tag;
  */
 
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import nl.knaw.huygens.alexandria.storage.dto.*;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.CheckReturnValue;
@@ -37,7 +37,7 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static TAGDocumentAssert assertThat(TAGDocument actual) {
+  public static TAGDocumentAssert assertThat(TAGDocumentDAO actual) {
     return new TAGDocumentAssert(actual);
   }
 
@@ -49,7 +49,7 @@ public class TAGAssertions extends Assertions {
    */
   @CheckReturnValue
 
-  public static TAGMarkupAssert assertThat(TAGMarkup actual) {
+  public static TAGMarkupAssert assertThat(TAGMarkupDAO actual) {
     return new TAGMarkupAssert(actual);
   }
 
@@ -71,7 +71,7 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-  public static TAGTextNodeAssert assertThat(TAGTextNode actual) {
+  public static TAGTextNodeAssert assertThat(TAGTextNodeDAO actual) {
     return new TAGTextNodeAssert(actual);
   }
 

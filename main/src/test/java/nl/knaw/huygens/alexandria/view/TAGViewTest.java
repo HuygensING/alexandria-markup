@@ -28,8 +28,8 @@ import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.assertj.core.util.Sets;
 import org.junit.Ignore;
@@ -53,7 +53,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
       final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
-      TAGDocument document = store.runInTransaction(() ->
+      TAGDocumentDAO document = store.runInTransaction(() ->
           new TAGMLImporter().importTAGML(tagModelBuilder,tagml)
       );
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
@@ -70,7 +70,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
       final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
+      TAGDocumentDAO document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
     });
@@ -85,7 +85,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
       final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
+      TAGDocumentDAO document = store.runInTransaction(() -> new TAGMLImporter().importTAGML(tagModelBuilder,tagml));
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
     });
@@ -94,7 +94,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   @Test
   public void testFilterRelevantMarkup0() {
     runInStoreTransaction(store -> {
-      TAGDocument document = store.createDocument();
+      TAGDocumentDAO document = store.createDocument();
 
       String layer1 = "L1";
       String layer2 = "L2";
@@ -133,7 +133,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
 
       final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
       TAGMLImporter importer = new TAGMLImporter();
-      TAGDocument document1 = importer.importTAGML(tagModelBuilder,"[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]");
+      TAGDocumentDAO document1 = importer.importTAGML(tagModelBuilder,"[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]");
 
       TAGMLExporter exporter1 = new TAGMLExporter(store, viewNoL1);
       String tagmlBD = exporter1.asTAGML(document1);
@@ -164,7 +164,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   @Test
   public void testFilterRelevantMarkup() {
     runInStoreTransaction(store -> {
-      TAGDocument document = store.createDocument();
+      TAGDocumentDAO document = store.createDocument();
 
       String tag1 = "a";
       Long markupId1 = createNewMarkup(document, tag1, store);
@@ -199,7 +199,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3);
 
       LMNLImporter importer = new LMNLImporter(store);
-      TAGDocument document1 = importer.importLMNL("[a}a[b}b[c}c[d}da{a]b{b]c{c]d{d]");
+      TAGDocumentDAO document1 = importer.importLMNL("[a}a[b}b[c}c[d}da{a]b{b]c{c]d{d]");
 
       LMNLExporter exporter1 = new LMNLExporter(store, viewNoAC);
       String lmnlBD = exporter1.toLMNL(document1);
@@ -211,12 +211,12 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  private Long createNewMarkup(TAGDocument document, String tag1, final TAGStore store) {
+  private Long createNewMarkup(TAGDocumentDAO document, String tag1, final TAGStore store) {
     return store.createMarkup(document, tag1).getDbId();
   }
 
-  private Long createNewMarkup(TAGDocument document, String tag1, String layer, final TAGStore store) {
-    TAGMarkup markup = store.createMarkup(document, tag1);
+  private Long createNewMarkup(TAGDocumentDAO document, String tag1, String layer, final TAGStore store) {
+    TAGMarkupDAO markup = store.createMarkup(document, tag1);
     markup.getLayers().add(layer);
     store.persist(markup.getDTO());
     return markup.getDbId();

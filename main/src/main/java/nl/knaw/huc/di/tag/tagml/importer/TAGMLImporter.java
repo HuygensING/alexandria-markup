@@ -26,7 +26,7 @@ import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -46,12 +46,12 @@ public class TAGMLImporter {
   public TAGMLImporter() {
   }
 
-  public TAGDocument importTAGML(final TAGModelBuilder tagModelBuilder, final String input) throws TAGMLSyntaxError {
+  public TAGDocumentDAO importTAGML(final TAGModelBuilder tagModelBuilder, final String input) throws TAGMLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);
     return importTAGML(tagModelBuilder, antlrInputStream);
   }
 
-  public TAGDocument importTAGML(final TAGModelBuilder tagModelBuilder, InputStream input) throws TAGMLSyntaxError {
+  public TAGDocumentDAO importTAGML(final TAGModelBuilder tagModelBuilder, InputStream input) throws TAGMLSyntaxError {
     try {
       CharStream antlrInputStream = CharStreams.fromStream(input);
       return importTAGML(tagModelBuilder, antlrInputStream);
@@ -61,7 +61,7 @@ public class TAGMLImporter {
     }
   }
 
-  private TAGDocument importTAGML(final TAGModelBuilder tagModelBuilder, CharStream antlrInputStream) throws TAGMLSyntaxError {
+  private TAGDocumentDAO importTAGML(final TAGModelBuilder tagModelBuilder, CharStream antlrInputStream) throws TAGMLSyntaxError {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = tagModelBuilder.getErrorListener();
     lexer.addErrorListener(errorListener);
@@ -70,7 +70,7 @@ public class TAGMLImporter {
     TAGMLParser parser = new TAGMLParser(tokens);
     parser.addErrorListener(errorListener);
 
-    TAGDocument document = usingListener(parser, tagModelBuilder);
+    TAGDocumentDAO document = usingListener(parser, tagModelBuilder);
 //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
@@ -87,7 +87,7 @@ public class TAGMLImporter {
     return document;
   }
 
-  private TAGDocument usingListener(final TAGMLParser parser, final TAGModelBuilder tagModelBuilder) {
+  private TAGDocumentDAO usingListener(final TAGMLParser parser, final TAGModelBuilder tagModelBuilder) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
 //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
@@ -107,7 +107,7 @@ public class TAGMLImporter {
 //    return visitor.getDocument();
 //  }
 
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
+  protected void logDocumentGraph(final TAGDocumentDAO document, final String input) {
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
     System.out.println(new DotFactory().toDot(document, input));
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");

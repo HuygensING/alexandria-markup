@@ -20,8 +20,8 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.List;
@@ -30,11 +30,11 @@ import java.util.Set;
 public interface TAGVisitor {
   void setView(TAGView tagView);
 
-  void enterDocument(TAGDocument document);
+  void enterDocument(TAGDocumentDAO document);
 
-  void exitDocument(TAGDocument document);
+  void exitDocument(TAGDocumentDAO document);
 
-  void enterOpenTag(TAGMarkup markup);
+  void enterOpenTag(TAGMarkupDAO markup);
 
   void addAnnotation(String serializedAnnotation);
 
@@ -50,9 +50,9 @@ public interface TAGVisitor {
 
   String serializeMapAnnotationValue(List<String> serializedMapItems);
 
-  void exitOpenTag(TAGMarkup markup);
+  void exitOpenTag(TAGMarkupDAO markup);
 
-  void exitCloseTag(TAGMarkup markup);
+  void exitCloseTag(TAGMarkupDAO markup);
 
   void exitText(String escapedText, final boolean inVariation);
 

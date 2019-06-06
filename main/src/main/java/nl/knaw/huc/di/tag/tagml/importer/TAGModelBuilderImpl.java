@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,10 @@ import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 
 import java.util.*;
@@ -38,10 +38,10 @@ import static java.util.stream.Collectors.toSet;
 public class TAGModelBuilderImpl implements TAGModelBuilder {
 
   private final TAGStore store;
-  private TAGDocument document;
+  private TAGDocumentDAO document;
   private ErrorListener errorListener;
   private final AnnotationFactory annotationFactory;
-  private final Deque<TAGDocument> documentStack = new ArrayDeque<>(); // TODO: move to state
+  private final Deque<TAGDocumentDAO> documentStack = new ArrayDeque<>(); // TODO: move to state
 
   public TAGModelBuilderImpl(final TAGStore store, ErrorListener errorListener) { // TODO: fix errorListener dependency
     this.store = store;
@@ -50,7 +50,7 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
     this.annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph, errorListener);
   }
 
-  public TAGDocument getDocument() {
+  public TAGDocumentDAO getDocument() {
     return document;
   }
 
@@ -73,8 +73,8 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
   }
 
   @Override
-  public TAGTextNode createConnectedTextNode(final String text, final Deque<TAGMarkup> allOpenMarkup) {
-    TAGTextNode tn = store.createTextNode(text);
+  public TAGTextNodeDAO createConnectedTextNode(final String text, final Deque<TAGMarkupDAO> allOpenMarkup) {
+    TAGTextNodeDAO tn = store.createTextNode(text);
     addAndConnectToMarkup(tn, allOpenMarkup);
     return tn;
   }
@@ -85,39 +85,39 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
   }
 
   @Override
-  public void addLayer(final String newLayerId, final TAGMarkup markup, final String parentLayer) {
+  public void addLayer(final String newLayerId, final TAGMarkupDAO markup, final String parentLayer) {
     document.addLayer(newLayerId, markup, parentLayer);
   }
 
   @Override
-  public void openMarkupInLayer(final TAGMarkup markup, final String layerId) {
+  public void openMarkupInLayer(final TAGMarkupDAO markup, final String layerId) {
     document.openMarkupInLayer(markup, layerId);
   }
 
   @Override
-  public void closeMarkupInLayer(final TAGMarkup markup, final String layerName) {
+  public void closeMarkupInLayer(final TAGMarkupDAO markup, final String layerName) {
     document.closeMarkupInLayer(markup, layerName);
   }
 
   @Override
-  public TAGMarkup getMarkup(final Long rootMarkupId) {
+  public TAGMarkupDAO getMarkup(final Long rootMarkupId) {
     return store.getMarkup(rootMarkupId);
   }
 
   @Override
-  public TAGTextNode getLastTextNode() {
+  public TAGTextNodeDAO getLastTextNode() {
     return document.getLastTextNode();
   }
 
   @Override
-  public Stream<TAGMarkup> getMarkupStreamForTextNode(final TAGTextNode previousTextNode) {
+  public Stream<TAGMarkupDAO> getMarkupStreamForTextNode(final TAGTextNodeDAO previousTextNode) {
     return document.getMarkupStreamForTextNode(previousTextNode);
   }
 
   @Override
-  public TAGMarkup resumeMarkup(final TAGMarkup suspendedMarkup, final Set<String> layers) {
+  public TAGMarkupDAO resumeMarkup(final TAGMarkupDAO suspendedMarkup, final Set<String> layers) {
     TextGraph textGraph = document.getDTO().textGraph;
-    TAGMarkup resumedMarkup = store.createMarkup(document, suspendedMarkup.getTag()).addAllLayers(layers);
+    TAGMarkupDAO resumedMarkup = store.createMarkup(document, suspendedMarkup.getTag()).addAllLayers(layers);
     document.addMarkup(resumedMarkup);
     update(resumedMarkup.getDTO());
     textGraph.continueMarkup(suspendedMarkup, resumedMarkup);
@@ -126,36 +126,36 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
   }
 
   @Override
-  public void associateTextNodeWithMarkupForLayer(final TAGTextNode tn, final TAGMarkup markup, final String layerName) {
+  public void associateTextNodeWithMarkupForLayer(final TAGTextNodeDAO tn, final TAGMarkupDAO markup, final String layerName) {
     document.associateTextNodeWithMarkupForLayer(tn, markup, layerName);
   }
 
   @Override
-  public void addRefAnnotation(final TAGMarkup markup, final String aName, final String refId) {
+  public void addRefAnnotation(final TAGMarkupDAO markup, final String aName, final String refId) {
     AnnotationInfo annotationInfo = annotationFactory.makeReferenceAnnotation(aName, refId);
     Long markupNode = markup.getDbId();
     document.getDTO().textGraph.addAnnotationEdge(markupNode, annotationInfo);
   }
 
   @Override
-  public void addBasicAnnotation(final TAGMarkup markup, final TAGMLParser.BasicAnnotationContext actx) {
+  public void addBasicAnnotation(final TAGMarkupDAO markup, final TAGMLParser.BasicAnnotationContext actx) {
     AnnotationInfo aInfo = annotationFactory.makeAnnotation(actx);
     Long markupNode = markup.getDbId();
     document.getDTO().textGraph.addAnnotationEdge(markupNode, aInfo);
   }
 
   @Override
-  public TAGMarkup createMarkup(final String extendedTag) {
+  public TAGMarkupDAO createMarkup(final String extendedTag) {
     return store.createMarkup(document, extendedTag);
   }
 
   @Override
-  public void addMarkup(final TAGMarkup markup) {
+  public void addMarkup(final TAGMarkupDAO markup) {
     document.addMarkup(markup);
   }
 
   @Override
-  public void persist(final TAGMarkup markup) {
+  public void persist(final TAGMarkupDAO markup) {
     store.persist(markup.getDTO());
   }
 
@@ -172,8 +172,8 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
   }
 
   @Override
-  public TAGMarkup addMarkup(final String tagName) {
-    TAGMarkup markup = store.createMarkup(document, tagName);
+  public TAGMarkupDAO addMarkup(final String tagName) {
+    TAGMarkupDAO markup = store.createMarkup(document, tagName);
     document.addMarkup(markup);
     return markup;
   }
@@ -182,17 +182,17 @@ public class TAGModelBuilderImpl implements TAGModelBuilder {
     return store.persist(tagdto);
   }
 
-  private void addAndConnectToMarkup(final TAGTextNode tn, final Deque<TAGMarkup> allOpenMarkup) {
-    List<TAGMarkup> relevantMarkup = getRelevantOpenMarkup(allOpenMarkup);
+  private void addAndConnectToMarkup(final TAGTextNodeDAO tn, final Deque<TAGMarkupDAO> allOpenMarkup) {
+    List<TAGMarkupDAO> relevantMarkup = getRelevantOpenMarkup(allOpenMarkup);
     document.addTextNode(tn, relevantMarkup);
   }
 
   @Override
-  public List<TAGMarkup> getRelevantOpenMarkup(Deque<TAGMarkup> allOpenMarkup) {
-    List<TAGMarkup> relevantMarkup = new ArrayList<>();
+  public List<TAGMarkupDAO> getRelevantOpenMarkup(Deque<TAGMarkupDAO> allOpenMarkup) {
+    List<TAGMarkupDAO> relevantMarkup = new ArrayList<>();
     if (!allOpenMarkup.isEmpty()) {
       Set<String> handledLayers = new HashSet<>();
-      for (TAGMarkup m : allOpenMarkup) {
+      for (TAGMarkupDAO m : allOpenMarkup) {
         Set<String> layers = m.getLayers();
         boolean markupHasNoHandledLayer = layers.stream().noneMatch(handledLayers::contains);
         if (markupHasNoHandledLayer) {

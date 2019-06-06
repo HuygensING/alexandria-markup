@@ -23,17 +23,17 @@ package nl.knaw.huygens.alexandria.storage;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 class DataAccessor {
-  final PrimaryIndex<Long, TAGDocumentDTO> documentById;
-  final PrimaryIndex<Long, TAGTextNodeDTO> textNodeById;
-  final PrimaryIndex<Long, TAGMarkupDTO> markupById;
+  final PrimaryIndex<Long, TAGDocument> documentById;
+  final PrimaryIndex<Long, TAGTextNode> textNodeById;
+  final PrimaryIndex<Long, TAGMarkup> markupById;
 
   final PrimaryIndex<Long, StringAnnotationValue> stringAnnotationValueById;
   final PrimaryIndex<Long, BooleanAnnotationValue> booleanAnnotationValueById;
@@ -45,9 +45,9 @@ class DataAccessor {
   Map<Class, PrimaryIndex> indexMap = new HashMap<>();
 
   public DataAccessor(EntityStore store) throws DatabaseException {
-    documentById = initIndex(store, TAGDocumentDTO.class);
-    textNodeById = initIndex(store, TAGTextNodeDTO.class);
-    markupById = initIndex(store, TAGMarkupDTO.class);
+    documentById = initIndex(store, TAGDocument.class);
+    textNodeById = initIndex(store, TAGTextNode.class);
+    markupById = initIndex(store, TAGMarkup.class);
     stringAnnotationValueById = initIndex(store, StringAnnotationValue.class);
     booleanAnnotationValueById = initIndex(store, BooleanAnnotationValue.class);
     numberAnnotationValueById = initIndex(store, NumberAnnotationValue.class);

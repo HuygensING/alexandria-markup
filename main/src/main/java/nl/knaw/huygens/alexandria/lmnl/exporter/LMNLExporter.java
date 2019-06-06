@@ -21,9 +21,9 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  */
 
 import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGAnnotationDAO;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
@@ -59,14 +59,14 @@ public class LMNLExporter {
     return this;
   }
 
-  public String toLMNL(TAGDocument document) {
+  public String toLMNL(TAGDocumentDAO document) {
     StringBuilder lmnlBuilder = new StringBuilder();
     store.runInTransaction(() -> appendLimen(lmnlBuilder, document));
     // LOG.info("LMNL={}", lmnlBuilder);
     return lmnlBuilder.toString();
   }
 
-  private void appendLimen(StringBuilder lmnlBuilder, TAGDocument document) {
+  private void appendLimen(StringBuilder lmnlBuilder, TAGDocumentDAO document) {
     if (document != null) {
       Deque<Long> openMarkupIds = new ArrayDeque<>();
       Map<Long, StringBuilder> openTags = new HashMap<>();
@@ -100,13 +100,13 @@ public class LMNLExporter {
 
   }
 
-  private StringBuilder toCloseTag(TAGMarkup markup) {
+  private StringBuilder toCloseTag(TAGMarkupDAO markup) {
     return markup.isAnonymous()//
         ? new StringBuilder()//
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup) {
+  private StringBuilder toOpenTag(TAGMarkupDAO markup) {
     return new StringBuilder("TODO");
 //    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
 //    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
@@ -115,7 +115,7 @@ public class LMNLExporter {
 //        : tagBuilder.append("}");
   }
 
-  public StringBuilder toLMNL(TAGAnnotation annotation) {
+  public StringBuilder toLMNL(TAGAnnotationDAO annotation) {
     StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getKey());
 //    annotation.getAnnotationStream()
 //        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));

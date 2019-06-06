@@ -20,8 +20,8 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import prioritised_xml_collation.MarkupCloseToken;
 import prioritised_xml_collation.MarkupOpenToken;
@@ -39,10 +39,10 @@ import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 import static nl.knaw.huygens.alexandria.compare.SimplePatternTokenizer.PUNCT;
 
 class Tokenizer {
-  private final TAGDocument document;
+  private final TAGDocumentDAO document;
   private final TAGView tagView;
 
-  public Tokenizer(TAGDocument document, TAGView tagView) {
+  public Tokenizer(TAGDocumentDAO document, TAGView tagView) {
     this.document = document;
     this.tagView = tagView;
   }
@@ -75,21 +75,21 @@ class Tokenizer {
 
   public List<TAGToken> getTAGTokens() {
     List<TAGToken> tokens = new ArrayList<>();
-    Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
+    Deque<TAGMarkupDAO> openMarkup = new ArrayDeque<>();
     StringBuilder textBuilder = new StringBuilder();
     List<Long> textNodeIds = new ArrayList<>();
     final AtomicReference<Integer> totalTextSize = new AtomicReference<>(0);
     Map<Long, TextTokenInfo> textTokenInfoMap = new HashMap<>();
     document.getTextNodeStream().forEach(tn -> {
-      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
+      List<TAGMarkupDAO> markups = document.getMarkupStreamForTextNode(tn)//
           .filter(tagView::isIncluded)//
           .collect(toList());
 
-      List<TAGMarkup> toClose = new ArrayList<>(openMarkup);
+      List<TAGMarkupDAO> toClose = new ArrayList<>(openMarkup);
       toClose.removeAll(markups);
       Collections.reverse(toClose);
 
-      List<TAGMarkup> toOpen = new ArrayList<>(markups);
+      List<TAGMarkupDAO> toOpen = new ArrayList<>(markups);
       toOpen.removeAll(openMarkup);
 
       openMarkup.removeAll(toClose);
@@ -124,12 +124,12 @@ class Tokenizer {
     return tokens;
   }
 
-  private MarkupOpenToken toMarkupOpenToken(TAGMarkup tagMarkup) {
-    return new MarkupOpenToken(tagMarkup.getTag());
+  private MarkupOpenToken toMarkupOpenToken(TAGMarkupDAO tagMarkupDAO) {
+    return new MarkupOpenToken(tagMarkupDAO.getTag());
   }
 
-  private MarkupCloseToken toMarkupCloseToken(TAGMarkup tagMarkup) {
-    return new MarkupCloseToken("/" + tagMarkup.getTag());
+  private MarkupCloseToken toMarkupCloseToken(TAGMarkupDAO tagMarkupDAO) {
+    return new MarkupCloseToken("/" + tagMarkupDAO.getTag());
   }
 
   private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));

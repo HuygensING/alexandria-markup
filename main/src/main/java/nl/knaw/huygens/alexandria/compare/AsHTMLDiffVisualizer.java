@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.apache.commons.text.StringEscapeUtils;
 import prioritised_xml_collation.TAGToken;
 
@@ -66,7 +66,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void originalTextNode(final TAGTextNode t) {
+  public void originalTextNode(final TAGTextNodeDAO t) {
     Long textNodeId = t.getDbId();
     originalBuilder.append("    <td class=\"original\" colspan=\"original")
         .append(textNodeId)
@@ -214,7 +214,7 @@ public class AsHTMLDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void editedTextNode(final TAGTextNode t) {
+  public void editedTextNode(final TAGTextNodeDAO t) {
     Long textNodeId = t.getDbId();
     editedBuilder.append("    <td class=\"edited\" colspan=\"edited")
         .append(textNodeId)

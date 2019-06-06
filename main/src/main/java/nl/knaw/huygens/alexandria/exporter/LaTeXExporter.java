@@ -24,10 +24,10 @@ import nl.knaw.huygens.alexandria.data_model.IndexPoint;
 import nl.knaw.huygens.alexandria.data_model.KdTree;
 import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
 import nl.knaw.huygens.alexandria.freemarker.FreeMarker;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +48,11 @@ public class LaTeXExporter {
       .thenComparingInt(MarkupLayer::getMaxRangeSize);
   private List<IndexPoint> indexPoints;
   private static TAGStore store;
-  private final TAGDocument document;
+  private final TAGDocumentDAO document;
   private Set<Integer> longMarkupIndexes;
   private NodeRangeIndex index;
 
-  public LaTeXExporter(TAGStore store, TAGDocument document) {
+  public LaTeXExporter(TAGStore store, TAGDocumentDAO document) {
     LaTeXExporter.store = store;
     this.document = document;
   }
@@ -76,7 +76,7 @@ public class LaTeXExporter {
     return FreeMarker.templateToString("colored-text.tex.ftl", map, this.getClass());
   }
 
-  private void addColoredTextNode(StringBuilder latexBuilder, TAGTextNode tn, int depth) {
+  private void addColoredTextNode(StringBuilder latexBuilder, TAGTextNodeDAO tn, int depth) {
     String content = tn.getText();
     if ("\n".equals(content)) {
       latexBuilder.append("\\TextNode{").append(depth).append("}{\\n}\\\\\n");
@@ -102,25 +102,25 @@ public class LaTeXExporter {
     return FreeMarker.templateToString("document.tex.ftl", map, this.getClass());
   }
 
-  private void appendDocument(StringBuilder latexBuilder, TAGDocument document) {
+  private void appendDocument(StringBuilder latexBuilder, TAGDocumentDAO document) {
     ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray", //
         "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (document != null) {
-      Set<TAGMarkup> openMarkups = new LinkedHashSet<>();
+      Set<TAGMarkupDAO> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
-      Map<TAGTextNode, Integer> textNodeIndices = new HashMap<>();
+      Map<TAGTextNodeDAO, Integer> textNodeIndices = new HashMap<>();
       document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         textNodeIndices.put(tn, i);
-        Set<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
+        Set<TAGMarkupDAO> markups = document.getMarkupStreamForTextNode(tn)//
             .collect(Collectors.toSet());
 
-        List<TAGMarkup> toClose = new ArrayList<>(openMarkups);
+        List<TAGMarkupDAO> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<TAGMarkup> toOpen = new ArrayList<>(markups);
+        List<TAGMarkupDAO> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -135,7 +135,7 @@ public class LaTeXExporter {
     }
   }
 
-  private void addTextNode(StringBuilder latexBuilder, TAGTextNode tn, int i) {
+  private void addTextNode(StringBuilder latexBuilder, TAGTextNodeDAO tn, int i) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "below=of doc" : ("right=of tn" + (i - 1));
     String nodeLine = "    \\node[textnode] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
@@ -149,8 +149,8 @@ public class LaTeXExporter {
     return FreeMarker.templateToString("matrix.tex.ftl", map, this.getClass());
   }
 
-  private String exportMatrix(List<TAGTextNode> allTextNodes, List<TAGMarkup> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
-    List<String> rangeLabels = allMarkups.stream().map(TAGMarkup::getTag).collect(toList());
+  private String exportMatrix(List<TAGTextNodeDAO> allTextNodes, List<TAGMarkupDAO> allMarkups, List<IndexPoint> indexPoints, Set<Integer> longMarkupIndexes) {
+    List<String> rangeLabels = allMarkups.stream().map(TAGMarkupDAO::getTag).collect(toList());
     List<String> rangeIndex = new ArrayList<>();
     rangeIndex.add("");
     for (int i = 0; i < rangeLabels.size(); i++) {
@@ -245,7 +245,7 @@ public class LaTeXExporter {
       longMarkupIndexes = new HashSet<>();
       for (int i = 0; i < document.getDTO().getMarkupIds().size(); i++) {
         Long markupId = document.getDTO().getMarkupIds().get(i);
-        TAGMarkup markup = store.getMarkup(markupId);
+        TAGMarkupDAO markup = store.getMarkup(markupId);
         if (document.containsAtLeastHalfOfAllTextNodes(markup)) {
           longMarkupIndexes.add(i);
         }
@@ -254,7 +254,7 @@ public class LaTeXExporter {
     return longMarkupIndexes;
   }
 
-  private void appendGradedTAGDocument(StringBuilder latexBuilder, TAGDocument document) {
+  private void appendGradedTAGDocument(StringBuilder latexBuilder, TAGDocumentDAO document) {
     long maxMarkupsPerTextNode = document.getTextNodeStream()
         .map(document::getMarkupStreamForTextNode)//
         .mapToLong(Stream::count)//
@@ -262,19 +262,19 @@ public class LaTeXExporter {
         .getAsLong();
     latexBuilder.append("\n    % TextNodes\n");
     if (document != null) {
-      Set<TAGMarkup> openMarkups = new LinkedHashSet<>();
+      Set<TAGMarkupDAO> openMarkups = new LinkedHashSet<>();
       AtomicInteger textNodeCounter = new AtomicInteger(0);
       // Map<TextNodeWrapper, Integer> textNodeIndices = new HashMap<>();
       document.getTextNodeStream().forEach(tn -> {
         int i = textNodeCounter.getAndIncrement();
         // textNodeIndices.put(tn, i);
-        Set<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
+        Set<TAGMarkupDAO> markups = document.getMarkupStreamForTextNode(tn).collect(Collectors.toSet());
 
-        List<TAGMarkup> toClose = new ArrayList<>(openMarkups);
+        List<TAGMarkupDAO> toClose = new ArrayList<>(openMarkups);
         toClose.removeAll(markups);
         Collections.reverse(toClose);
 
-        List<TAGMarkup> toOpen = new ArrayList<>(markups);
+        List<TAGMarkupDAO> toOpen = new ArrayList<>(markups);
         toOpen.removeAll(openMarkups);
 
         openMarkups.removeAll(toClose);
@@ -307,14 +307,14 @@ public class LaTeXExporter {
   // });
   // }
 
-  private void addGradedTextNode(StringBuilder latexBuilder, TAGTextNode tn, int i, String fillColor, long size) {
+  private void addGradedTextNode(StringBuilder latexBuilder, TAGTextNodeDAO tn, int i, String fillColor, long size) {
     String content = escapedContent(tn);
     String relPos = i == 0 ? "" : "right=0 of tn" + (i - 1);
     String nodeLine = "    \\node[textnode,fill=" + fillColor + "] (tn" + i + ") [" + relPos + "] {" + content + "};\n";
     latexBuilder.append(nodeLine);
   }
 
-  private String escapedContent(TAGTextNode tn) {
+  private String escapedContent(TAGTextNodeDAO tn) {
     return tn.getText()//
         .replaceAll(" ", "\\\\s ")//
         .replaceAll("&", "\\\\& ")//
@@ -329,34 +329,34 @@ public class LaTeXExporter {
     latexBuilder.append("};\n");
   }
 
-  private void markMarkups(StringBuilder latexBuilder, TAGDocument document, ColorPicker colorPicker, Map<TAGTextNode, Integer> textNodeIndices) {
+  private void markMarkups(StringBuilder latexBuilder, TAGDocumentDAO document, ColorPicker colorPicker, Map<TAGTextNodeDAO, Integer> textNodeIndices) {
     // AtomicInteger markupCounter = new AtomicInteger(0);
     latexBuilder.append("\n    % Markups");
-    Map<TAGMarkup, Integer> layerIndex = calculateLayerIndex(document.getMarkupStream().collect(toList()), textNodeIndices);
+    Map<TAGMarkupDAO, Integer> layerIndex = calculateLayerIndex(document.getMarkupStream().collect(toList()), textNodeIndices);
     document.getMarkupStream().forEach(markup -> {
       int rangeLayerIndex = layerIndex.get(markup);
       float markupRow = 0.75f * (rangeLayerIndex + 1);
       String color = colorPicker.nextColor();
       if (markup.isContinuous()) {
         List<Long> textNodeIds = markup.getDTO().getTextNodeIds();
-        TAGTextNode firstTextNode = store.getTextNode(textNodeIds.get(0));
-        TAGTextNode lastTextNode = store.getTextNode(textNodeIds.get(textNodeIds.size() - 1));
+        TAGTextNodeDAO firstTextNode = store.getTextNode(textNodeIds.get(0));
+        TAGTextNodeDAO lastTextNode = store.getTextNode(textNodeIds.get(textNodeIds.size() - 1));
         int first = textNodeIndices.get(firstTextNode);
         int last = textNodeIndices.get(lastTextNode);
 
         appendMarkup(latexBuilder, markup, String.valueOf(rangeLayerIndex), markupRow, color, first, last);
 
       } else {
-        Iterator<TAGTextNode> textNodeIterator = markup.getTextNodeStream().iterator();
-        TAGTextNode firstTextNode = textNodeIterator.next();
-        TAGTextNode lastTextNode = firstTextNode;
+        Iterator<TAGTextNodeDAO> textNodeIterator = markup.getTextNodeStream().iterator();
+        TAGTextNodeDAO firstTextNode = textNodeIterator.next();
+        TAGTextNodeDAO lastTextNode = firstTextNode;
         boolean finished = false;
         int partNo = 0;
         while (!finished) {
-          TAGTextNode expectedNextNode = firstTextNode.getNextTextNodes().get(0);// TODO: handle divergence
+          TAGTextNodeDAO expectedNextNode = firstTextNode.getNextTextNodes().get(0);// TODO: handle divergence
           boolean goOn = textNodeIterator.hasNext();
           while (goOn) {
-            TAGTextNode nextTextNode = textNodeIterator.next();
+            TAGTextNodeDAO nextTextNode = textNodeIterator.next();
             if (nextTextNode.equals(expectedNextNode)) {
               lastTextNode = nextTextNode;
               expectedNextNode = lastTextNode.getNextTextNodes().get(0);// TODO: handle divergence
@@ -386,15 +386,15 @@ public class LaTeXExporter {
     });
   }
 
-  private void appendMarkupPart(StringBuilder latexBuilder, Map<TAGTextNode, Integer> textNodeIndices, TAGMarkup tr, int rangeLayerIndex, float markupRow, String color, TAGTextNode firstTextNode,
-      TAGTextNode lastTextNode, int partNo) {
+  private void appendMarkupPart(StringBuilder latexBuilder, Map<TAGTextNodeDAO, Integer> textNodeIndices, TAGMarkupDAO tr, int rangeLayerIndex, float markupRow, String color, TAGTextNodeDAO firstTextNode,
+      TAGTextNodeDAO lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
     String markupPartNum = rangeLayerIndex + "_" + partNo;
     appendMarkup(latexBuilder, tr, markupPartNum, markupRow, color, first, last);
   }
 
-  private void appendMarkup(StringBuilder latexBuilder, TAGMarkup tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
+  private void appendMarkup(StringBuilder latexBuilder, TAGMarkupDAO tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
     latexBuilder.append("\n    \\node[label=below right:{$")//
         .append(tr.getTag())//
         .append("$}](tr")//
@@ -430,29 +430,29 @@ public class LaTeXExporter {
   }
 
   private static class MarkupLayer {
-    final Map<TAGTextNode, Integer> textNodeIndex;
+    final Map<TAGTextNodeDAO, Integer> textNodeIndex;
 
-    final List<TAGMarkup> markups = new ArrayList<>();
+    final List<TAGMarkupDAO> markups = new ArrayList<>();
     final Set<String> tags = new HashSet<>();
     int maxMarkupSize = 1; // the number of textnodes of the biggest markup
     int lastTextNodeUsed = 0;
 
-    MarkupLayer(Map<TAGTextNode, Integer> textNodeIndex) {
+    MarkupLayer(Map<TAGTextNodeDAO, Integer> textNodeIndex) {
       this.textNodeIndex = textNodeIndex;
     }
 
-    void addMarkup(TAGMarkup markup) {
+    void addMarkup(TAGMarkupDAO markup) {
       // LOG.info("markup={}", markup.getKey());
       markups.add(markup);
       tags.add(normalize(markup.getTag()));
       int size = markup.getDTO().getTextNodeIds().size();
       maxMarkupSize = Math.max(maxMarkupSize, size);
       int lastIndex = size - 1;
-      TAGTextNode lastTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(lastIndex));
+      TAGTextNodeDAO lastTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(lastIndex));
       lastTextNodeUsed = textNodeIndex.get(lastTextNode);
     }
 
-    List<TAGMarkup> getMarkups() {
+    List<TAGMarkupDAO> getMarkups() {
       return markups;
     }
 
@@ -468,12 +468,12 @@ public class LaTeXExporter {
       return maxMarkupSize;
     }
 
-    boolean canAdd(TAGMarkup markup) {
+    boolean canAdd(TAGMarkupDAO markup) {
       String nTag = normalize(markup.getTag());
       if (!tags.contains(nTag)) {
         return false;
       }
-      TAGTextNode firstTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(0));
+      TAGTextNodeDAO firstTextNode = store.getTextNode(markup.getDTO().getTextNodeIds().get(0));
       int firstTextNodeIndex = textNodeIndex.get(firstTextNode);
       return (firstTextNodeIndex > lastTextNodeUsed);
     }
@@ -483,7 +483,7 @@ public class LaTeXExporter {
     }
   }
 
-  private Map<TAGMarkup, Integer> calculateLayerIndex(List<TAGMarkup> markupList, Map<TAGTextNode, Integer> textNodeIndex) {
+  private Map<TAGMarkupDAO, Integer> calculateLayerIndex(List<TAGMarkupDAO> markupList, Map<TAGTextNodeDAO, Integer> textNodeIndex) {
     List<MarkupLayer> layers = new ArrayList<>();
     markupList.forEach(tr -> {
       Optional<MarkupLayer> oLayer = layers.stream().filter(layer -> layer.canAdd(tr)).findFirst();
@@ -498,7 +498,7 @@ public class LaTeXExporter {
     });
 
     AtomicInteger layerCounter = new AtomicInteger();
-    Map<TAGMarkup, Integer> index = new HashMap<>();
+    Map<TAGMarkupDAO, Integer> index = new HashMap<>();
     layers.stream().sorted(ON_MAX_RANGE_SIZE).forEach(layer -> {
       int i = layerCounter.getAndIncrement();
       layer.getMarkups().forEach(tr -> index.put(tr, i));

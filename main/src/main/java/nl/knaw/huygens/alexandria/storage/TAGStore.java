@@ -20,9 +20,9 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 
 import java.util.function.Supplier;
 
@@ -37,27 +37,27 @@ public interface TAGStore extends AutoCloseable {
   void remove(TAGDTO tagdto);
 
   // Document
-  TAGDocumentDTO getDocumentDTO(Long documentId);
+  TAGDocument getDocumentDTO(Long documentId);
 
-  TAGDocument getDocument(Long documentId);
+  TAGDocumentDAO getDocument(Long documentId);
 
-  TAGDocument createDocument();
+  TAGDocumentDAO createDocument();
 
   // TextNode
-  TAGTextNodeDTO getTextNodeDTO(Long textNodeId);
+  TAGTextNode getTextNodeDTO(Long textNodeId);
 
-  TAGTextNode createTextNode(String content);
+  TAGTextNodeDAO createTextNode(String content);
 
-  TAGTextNode createTextNode();
+  TAGTextNodeDAO createTextNode();
 
-  TAGTextNode getTextNode(Long textNodeId);
+  TAGTextNodeDAO getTextNode(Long textNodeId);
 
   // Markup
-  TAGMarkupDTO getMarkupDTO(Long markupId);
+  TAGMarkup getMarkupDTO(Long markupId);
 
-  TAGMarkup createMarkup(TAGDocument document, String tagName);
+  TAGMarkupDAO createMarkup(TAGDocumentDAO document, String tagName);
 
-  TAGMarkup getMarkup(Long markupId);
+  TAGMarkupDAO getMarkup(Long markupId);
 
   // transaction
   void runInTransaction(Runnable runner);

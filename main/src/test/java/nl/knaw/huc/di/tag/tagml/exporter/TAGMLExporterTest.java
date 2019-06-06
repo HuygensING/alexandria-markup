@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -296,7 +296,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   private String parseAndExport(final String tagmlIn) {
     AtomicReference<String> tagmlOut = new AtomicReference<>();
     runInStore(store -> {
-      TAGDocument document = store.runInTransaction(
+      TAGDocumentDAO document = store.runInTransaction(
           () -> new TAGMLImporter().importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()), tagmlIn)
       );
       String tagml = store.runInTransaction(() -> {

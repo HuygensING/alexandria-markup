@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,8 @@ public class VariantGraphVisualizer {
   }
 
   public void visualizeVariation(
-      final String witness1, TAGDocument document1,
-      final String witness2, TAGDocument document2,
+      final String witness1, TAGDocumentDAO document1,
+      final String witness2, TAGDocumentDAO document2,
       TAGView tagView) {
     List<TAGToken> originalTokens = new Tokenizer(document1, tagView)
         .getTAGTokens();

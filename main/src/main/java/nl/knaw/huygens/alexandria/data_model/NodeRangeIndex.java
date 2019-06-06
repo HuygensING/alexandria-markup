@@ -22,8 +22,8 @@ package nl.knaw.huygens.alexandria.data_model;
 
 
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +40,10 @@ public class NodeRangeIndex {
 
   private List<IndexPoint> indexPoints;
   private KdTree<IndexPoint> kdTree;
-  private final TAGDocument document;
+  private final TAGDocumentDAO document;
   private Set<Integer> invertedMarkupsIndices = new HashSet<>();
 
-  public NodeRangeIndex(TAGStore store, TAGDocument document) {
+  public NodeRangeIndex(TAGStore store, TAGDocumentDAO document) {
     this.document = document;
   }
 
@@ -56,11 +56,11 @@ public class NodeRangeIndex {
       for (int i = 0; i < markupIds.size(); i++) {
         markupIndex.put(markupIds.get(i), i);
       }
-      List<TAGMarkup> markupsToInvert = document.getMarkupStream()//
+      List<TAGMarkupDAO> markupsToInvert = document.getMarkupStream()//
           .filter(document::containsAtLeastHalfOfAllTextNodes)//
           .collect(Collectors.toList());
       invertedMarkupsIndices = markupsToInvert.stream()//
-          .map(TAGMarkup::getDbId)//
+          .map(TAGMarkupDAO::getDbId)//
           .map(markupIndex::get)//
           .collect(Collectors.toSet());
 
@@ -70,10 +70,10 @@ public class NodeRangeIndex {
         int i = textNodeIndex.getAndIncrement();
 
         // all the Markups associated with this TextNode
-        Set<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn).collect(toSet());
+        Set<TAGMarkupDAO> markups = document.getMarkupStreamForTextNode(tn).collect(toSet());
 
         // all the Markups that should be inverted and are NOT associated with this TextNode
-        List<TAGMarkup> relevantInvertedMarkups = markupsToInvert.stream()//
+        List<TAGMarkupDAO> relevantInvertedMarkups = markupsToInvert.stream()//
             .filter(tr -> !markups.contains(tr))//
             .collect(Collectors.toList());
 
@@ -84,7 +84,7 @@ public class NodeRangeIndex {
         markups.addAll(relevantInvertedMarkups);
 
         markups.stream()//
-            .map(TAGMarkup::getDbId)//
+            .map(TAGMarkupDAO::getDbId)//
             .sorted(Comparator.comparingInt(markupIndex::get))//
             .forEach(markupId -> {
               int j = markupIndex.get(markupId);

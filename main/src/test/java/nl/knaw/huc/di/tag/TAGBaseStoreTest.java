@@ -23,7 +23,7 @@ package nl.knaw.huc.di.tag;
 import nl.knaw.huc.di.tag.model.graph.DotFactory;
 import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import org.junit.AfterClass;
@@ -71,7 +71,7 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     }
   }
 
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
+  protected void logDocumentGraph(final TAGDocumentDAO document, final String input) {
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
     System.out.println(dotFactory.toDot(document, input));
     System.out.println("\n------------8<------------------------------------------------------------------------------------\n");

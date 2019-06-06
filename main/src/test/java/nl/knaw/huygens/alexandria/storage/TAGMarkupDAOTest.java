@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TAGMarkupTest {
+public class TAGMarkupDAOTest {
 
   @Test
   public void testLayerSuffix() {
@@ -62,9 +62,9 @@ public class TAGMarkupTest {
 
   private String getLayerSuffix(Set<String> layers, Set<String> newLayers) {
     TAGStore mockStore = mock(BDBTAGStore.class);
-    TAGMarkupDTO mockDTO = mock(TAGMarkupDTO.class);
+    TAGMarkup mockDTO = mock(TAGMarkup.class);
     when(mockDTO.getLayers()).thenReturn(layers);
-    TAGMarkup tm = new TAGMarkup(mockStore, mockDTO);
+    TAGMarkupDAO tm = new TAGMarkupDAO(mockStore, mockDTO);
     return tm.layerSuffix(newLayers);
   }
 

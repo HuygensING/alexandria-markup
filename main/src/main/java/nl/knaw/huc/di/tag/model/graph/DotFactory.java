@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.model.graph;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,9 @@ package nl.knaw.huc.di.tag.model.graph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huygens.alexandria.exporter.ColorPicker;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.*;
@@ -42,7 +42,7 @@ public class DotFactory {
   Map<String, String> layerColor = new HashMap<>();
   private TextGraph textGraph;
 
-  public String toDot(TAGDocument document, final String label) {
+  public String toDot(TAGDocumentDAO document, final String label) {
     layerColor.clear();
     StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
         .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
@@ -68,7 +68,7 @@ public class DotFactory {
     document.getMarkupStream().map(this::toMarkupContinuationLine).forEach(dotBuilder::append);
 
     document.getMarkupStream()
-        .map(TAGMarkup::getDbId)
+        .map(TAGMarkupDAO::getDbId)
         .flatMap(id -> textGraph
             .getOutgoingEdges(id).stream()
             .filter(LayerEdge.class::isInstance)
@@ -98,7 +98,7 @@ public class DotFactory {
         ;
   }
 
-  private String toTextNodeLine(final TAGTextNode textNode) {
+  private String toTextNodeLine(final TAGTextNodeDAO textNode) {
     String shape = "box";
     String templateStart = "    t%d [shape=%s;arrowhead=none;label=";
     String templateEnd = "]\n";
@@ -116,7 +116,7 @@ public class DotFactory {
     return format("    t%d->t%d [color=invis;arrowhead=none;label=\"\"]\n", textNode0, textNode1);
   }
 
-  private String toMarkupNodeLine(final TAGMarkup markup) {
+  private String toMarkupNodeLine(final TAGMarkupDAO markup) {
     if (markup.getExtendedTag().startsWith(BRANCHES)) {
       return format("  m%d [shape=triangle;color=red;label=\"\"]\n", markup.getDbId());
 
@@ -139,10 +139,10 @@ public class DotFactory {
     return format("%s  m%d [color=%s;label=<%s>]\n%s", pre, markup.getDbId(), color, markup.getExtendedTag(), post);
   }
 
-  private String toMarkupContinuationLine(final TAGMarkup tagMarkup) {
-    Optional<Long> continuedMarkup = textGraph.getContinuedMarkupId(tagMarkup.getDbId());
+  private String toMarkupContinuationLine(final TAGMarkupDAO tagMarkupDAO) {
+    Optional<Long> continuedMarkup = textGraph.getContinuedMarkupId(tagMarkupDAO.getDbId());
     if (continuedMarkup.isPresent()) {
-      return format("  m%d->m%d [color=red;style=dashed;arrowhead=none]\n", tagMarkup.getDbId(), continuedMarkup.get());
+      return format("  m%d->m%d [color=red;style=dashed;arrowhead=none]\n", tagMarkupDAO.getDbId(), continuedMarkup.get());
     }
     return "";
   }

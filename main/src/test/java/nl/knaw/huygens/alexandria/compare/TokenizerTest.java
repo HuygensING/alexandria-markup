@@ -25,9 +25,9 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
 import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -106,7 +106,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   public void testTokenizer() {
     runInStoreTransaction(store -> {
       final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
-      TAGDocument doc = new TAGMLImporter().importTAGML(tagModelBuilder,"[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
+      TAGDocumentDAO doc = new TAGMLImporter().importTAGML(tagModelBuilder,"[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
       TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();
@@ -142,7 +142,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
         .stream()
 //        .peek(System.out::println)
         .map(store::getTextNode)
-        .map(TAGTextNode::getText)
+        .map(TAGTextNodeDAO::getText)
         .collect(toList());
     assertThat(textNodeContents).containsExactly(contents);
   }

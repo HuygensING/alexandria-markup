@@ -20,12 +20,12 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.assertj.core.api.AbstractObjectAssert;
 
-public class TAGTextNodeAssert extends AbstractObjectAssert<TAGTextNodeAssert, TAGTextNode> {
+public class TAGTextNodeAssert extends AbstractObjectAssert<TAGTextNodeAssert, TAGTextNodeDAO> {
 
-  public TAGTextNodeAssert(final TAGTextNode actual) {
+  public TAGTextNodeAssert(final TAGTextNodeDAO actual) {
     super(actual, TAGTextNodeAssert.class);
   }
 

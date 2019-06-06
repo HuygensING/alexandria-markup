@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Entity(version = 2)
-public class TAGMarkupDTO implements TAGDTO {
+public class TAGMarkup implements TAGDTO {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 
@@ -45,14 +45,14 @@ public class TAGMarkupDTO implements TAGDTO {
   private boolean discontinuous = false;
   private Set<String> layers = new TreeSet<>();
 
-  private TAGMarkupDTO() {
+  private TAGMarkup() {
   }
 
-  public TAGMarkupDTO(TAGDocumentDTO document, String tagName) {
+  public TAGMarkup(TAGDocument document, String tagName) {
     this(document.getDbId(), tagName);
   }
 
-  public TAGMarkupDTO(Long documentId, String tagName) {
+  public TAGMarkup(Long documentId, String tagName) {
     this.documentId = documentId;
     this.tag = tagName;
   }
@@ -105,17 +105,17 @@ public class TAGMarkupDTO implements TAGDTO {
     return markupId;
   }
 
-  public TAGMarkupDTO setMarkupId(String markupId) {
+  public TAGMarkup setMarkupId(String markupId) {
     this.markupId = markupId;
     return this;
   }
 
-  public TAGMarkupDTO addLayer(final String layer) {
+  public TAGMarkup addLayer(final String layer) {
     this.layers.add(layer);
     return this;
   }
 
-  public TAGMarkupDTO addAllLayers(final Set<String> layers) {
+  public TAGMarkup addAllLayers(final Set<String> layers) {
     this.layers.addAll(layers);
     return this;
   }
@@ -124,7 +124,7 @@ public class TAGMarkupDTO implements TAGDTO {
     return layers;
   }
 
-  public TAGMarkupDTO setOptional(boolean optional) {
+  public TAGMarkup setOptional(boolean optional) {
     this.optional = optional;
     return this;
   }
@@ -153,8 +153,8 @@ public class TAGMarkupDTO implements TAGDTO {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGMarkupDTO//
-        && getDbId().equals(((TAGMarkupDTO) other).getDbId());
+    return other instanceof TAGMarkup//
+        && getDbId().equals(((TAGMarkup) other).getDbId());
   }
 
   @Deprecated

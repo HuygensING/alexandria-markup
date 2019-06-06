@@ -23,8 +23,8 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.HashSet;
@@ -36,11 +36,11 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
-public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMarkup> {
+public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMarkupDAO> {
 
   private String layerName = TAGML.DEFAULT_LAYER;
 
-  public TAGMarkupAssert(final TAGMarkup actual) {
+  public TAGMarkupAssert(final TAGMarkupDAO actual) {
     super(actual, TAGMarkupAssert.class);
   }
 
@@ -58,7 +58,7 @@ public class TAGMarkupAssert extends AbstractObjectAssert<TAGMarkupAssert, TAGMa
     final Set<String> layers = new HashSet<>();
     layers.add(layerName);
     List<String> actualTexts = actual.getTextNodeStreamForLayers(layers)
-        .map(TAGTextNode::getText)
+        .map(TAGTextNodeDAO::getText)
         .collect(toList());
     assertThat(actualTexts).containsExactly(text);
     return myself;

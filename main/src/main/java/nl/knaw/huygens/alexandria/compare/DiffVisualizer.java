@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import prioritised_xml_collation.TAGToken;
 
 import java.util.List;
@@ -30,7 +30,7 @@ interface DiffVisualizer {
 
   void startOriginal(final String witness1);
 
-  void originalTextNode(TAGTextNode t);
+  void originalTextNode(TAGTextNodeDAO t);
 
   void endOriginal();
 
@@ -68,7 +68,7 @@ interface DiffVisualizer {
 
   void startEdited(final String witness2);
 
-  void editedTextNode(TAGTextNode t);
+  void editedTextNode(TAGTextNodeDAO t);
 
   void endEdited();
 

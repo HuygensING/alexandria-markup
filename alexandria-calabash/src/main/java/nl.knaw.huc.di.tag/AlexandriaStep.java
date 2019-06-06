@@ -37,7 +37,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +93,7 @@ public class AlexandriaStep extends DefaultStep {
       Path tmpPath = mkTmpDir();
       TAGStore store = new BDBTAGStore(tmpPath.toString(), false);
       store.open();
-      TAGDocument document = store.runInTransaction(() -> {
+      TAGDocumentDAO document = store.runInTransaction(() -> {
         TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
         try {
           return new TAGMLImporter().importTAGML(tagModelBuilder, stream);

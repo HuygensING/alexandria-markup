@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[q [n}a{]}without pictures or conversation?{q]\n"//
         + "{p]{excerpt]";
     runInStoreTransaction(store -> {
-      TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
       // String statement = "select m.text from markup m where m.name='q' and m.id='a'";
@@ -77,7 +77,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l}line 3{l]\n"//
         + "{text]";
     runInStoreTransaction(store -> {
-      TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
 
@@ -118,7 +118,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[verse}And now whereas my father did lade you with a heavy yoke, I will add to your yoke: my father hath chastised you with whips, but I will chastise you with scorpions.{q=j]{q]{verse]\n"
         + "[verse}So Jeroboam and all the people came to Rehoboam the third day, as the king had appointed, saying, [q}Come to me again the third day.{q]{verse]\n" + "{excerpt]";
     runInStoreTransaction(store -> {
-      TAGDocument kings = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO kings = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(kings);
 
@@ -156,7 +156,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l [type}A{]}line 3{l]\n"//
         + "{text]";
     runInStoreTransaction(store -> {
-      TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO alice = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(alice);
 
@@ -183,7 +183,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   public void testLuminescentQuery1() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
     runInStoreTransaction(store -> {
-      TAGDocument frankenstein = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO frankenstein = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(frankenstein);
 
@@ -204,7 +204,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   public void testLuminescentQuery2() throws IOException, LMNLSyntaxError {
     String lmnl = FileUtils.readFileToString(new File("data/lmnl/frankenstein.lmnl"), "UTF-8");
     runInStoreTransaction(store -> {
-      TAGDocument frankenstein = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO frankenstein = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(frankenstein);
 
@@ -228,7 +228,7 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
         + "[l}line 3{l]\n"//
         + "{text]";
     runInStoreTransaction(store -> {
-      TAGDocument doc = new LMNLImporter(store).importLMNL(lmnl);
+      TAGDocumentDAO doc = new LMNLImporter(store).importLMNL(lmnl);
 
       TAGQLQueryHandler h = new TAGQLQueryHandler(doc);
 

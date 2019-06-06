@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huc.di.tag.model.graph.edges.*;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -322,7 +322,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         .forEach(r -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, r));
   }
 
-  public void continueMarkup(TAGMarkup suspendedMarkup, TAGMarkup resumedMarkup) {
+  public void continueMarkup(TAGMarkupDAO suspendedMarkup, TAGMarkupDAO resumedMarkup) {
     ContinuationEdge edge = markupContinuation();
     addDirectedHyperEdge(edge, edge.getLabel(), suspendedMarkup.getDbId(), resumedMarkup.getDbId());
   }

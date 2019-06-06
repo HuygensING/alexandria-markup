@@ -22,12 +22,12 @@ package nl.knaw.huc.di.tag.tagql;
 
 
 import nl.knaw.huygens.alexandria.query.TAGQLResult;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 
 import java.util.function.Function;
 
 public interface TAGQLStatement {
 
-  Function<TAGDocument, TAGQLResult> getLimenProcessor();
+  Function<TAGDocumentDAO, TAGQLResult> getLimenProcessor();
 
 }

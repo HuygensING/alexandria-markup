@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -227,8 +227,8 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private TAGComparison compare(String originText, String editedText) {
     return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter();
-      TAGDocument original = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()), originText);
-      TAGDocument edited = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()), editedText);
+      TAGDocumentDAO original = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()), originText);
+      TAGDocumentDAO edited = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()), editedText);
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 

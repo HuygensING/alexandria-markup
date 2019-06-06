@@ -22,9 +22,9 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.data_model.Annotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.assertj.core.api.AbstractObjectAssert;
 
 import java.util.*;
@@ -32,9 +32,9 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, TAGDocument> {
+public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, TAGDocumentDAO> {
 
-  public TAGDocumentAssert(final TAGDocument actual) {
+  public TAGDocumentAssert(final TAGDocumentDAO actual) {
     super(actual, TAGDocumentAssert.class);
   }
 
@@ -66,7 +66,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
   public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
-    List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
+    List<TAGMarkupDAO> relevantMarkup = actual.getMarkupStream()
 //        .peek(System.out::println)
         .filter(m -> m.hasTag(tag))
         .collect(toList());
@@ -74,7 +74,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
       failWithMessage("No markup found with tag %s", tag);
     }
 
-    TAGMarkup markup = relevantMarkup.get(0);
+    TAGMarkupDAO markup = relevantMarkup.get(0);
     return new TAGMarkupAssert(markup);
   }
 
@@ -84,7 +84,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
         .collect(toSet());
   }
 
-  private TextNodeSketch toTextNodeSketch(final TAGTextNode textNode) {
+  private TextNodeSketch toTextNodeSketch(final TAGTextNodeDAO textNode) {
     return textNodeSketch(textNode.getText());
   }
 
@@ -190,7 +190,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
         .collect(toSet());
   }
 
-  public MarkupSketch toMarkupSketch(TAGMarkup markup) {
+  public MarkupSketch toMarkupSketch(TAGMarkupDAO markup) {
     return markupSketch(markup.getTag(), markup.isOptional());
   }
 

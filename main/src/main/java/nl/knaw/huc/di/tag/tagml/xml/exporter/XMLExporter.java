@@ -22,7 +22,7 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter;
 
 import nl.knaw.huc.di.tag.TAGExporter;
 import nl.knaw.huc.di.tag.TAGTraverser;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class XMLExporter extends TAGExporter {
     super(store, view);
   }
 
-  public String asXML(TAGDocument document) {
+  public String asXML(TAGDocumentDAO document) {
     XMLBuilder xmlBuilder = new XMLBuilder();
     new TAGTraverser(store, view, document).accept(xmlBuilder);
     return xmlBuilder.getResult();

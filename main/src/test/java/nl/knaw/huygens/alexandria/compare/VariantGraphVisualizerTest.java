@@ -21,11 +21,10 @@ package nl.knaw.huygens.alexandria.compare;
  */
 
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
-import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilder;
 import nl.knaw.huc.di.tag.tagml.importer.TAGModelBuilderImpl;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -109,8 +108,8 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
     LOG.info("{}:\n{}", witness2, tagml2);
     runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter();
-      TAGDocument original = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()),tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()),tagml2.replace("\n", ""));
+      TAGDocumentDAO original = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()),tagml1.replace("\n", ""));
+      TAGDocumentDAO edited = importer.importTAGML(new TAGModelBuilderImpl(store, new ErrorListener()),tagml2.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
       TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 

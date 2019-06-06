@@ -24,9 +24,9 @@ import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.MarkupToTextHyperEdge;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,18 +36,18 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
-public class TAGDocument {
-  Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
+public class TAGDocumentDAO {
+  Logger LOG = LoggerFactory.getLogger(TAGDocumentDAO.class);
   private final TAGStore store;
-  private final TAGDocumentDTO documentDTO;
-  private final Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
+  private final TAGDocument documentDTO;
+  private final Map<String, Deque<TAGMarkupDAO>> openMarkupStackForLayer = new HashMap<>();
 
-  public TAGDocument(TAGStore store, TAGDocumentDTO documentDTO) {
+  public TAGDocumentDAO(TAGStore store, TAGDocument documentDTO) {
     this.store = store;
     this.documentDTO = documentDTO;
   }
 
-  public TAGDocumentDTO getDTO() {
+  public TAGDocument getDTO() {
     return documentDTO;
   }
 
@@ -63,7 +63,7 @@ public class TAGDocument {
     return documentDTO.getModificationDate();
   }
 
-  public TAGDocument addTextNode(TAGTextNode textNode, List<TAGMarkup> lastOpenedMarkup) {
+  public TAGDocumentDAO addTextNode(TAGTextNodeDAO textNode, List<TAGMarkupDAO> lastOpenedMarkup) {
     List<Long> textNodeIds = documentDTO.getTextNodeIds();
     Long textNodeDbId = textNode.getDbId();
     textNodeIds.add(textNodeDbId);
@@ -87,27 +87,27 @@ public class TAGDocument {
     return this;
   }
 
-  public Stream<TAGTextNode> getTextNodeStream() {
+  public Stream<TAGTextNodeDAO> getTextNodeStream() {
     return documentDTO.getTextNodeIds().stream()
         .map(store::getTextNode);
   }
 
-  public Stream<TAGMarkup> getMarkupStream() {
+  public Stream<TAGMarkupDAO> getMarkupStream() {
     return documentDTO.getMarkupIds().stream()
         .map(store::getMarkup);
   }
 
-  public TAGTextNode getFirstTextNode() {
+  public TAGTextNodeDAO getFirstTextNode() {
     return store.getTextNode(documentDTO.getFirstTextNodeId());
   }
 
-  public TAGTextNode getLastTextNode() {
+  public TAGTextNodeDAO getLastTextNode() {
 //    TextGraph textGraph = documentDTO.textGraph;
 //    Long rootMarkup = textGraph.getLayerRootMap().get(TAGML.DEFAULT_LAYER);
 //    List<Edge> outgoingEdges = (List<Edge>) textGraph.getOutgoingEdges(rootMarkup);
 //    final Edge last = outgoingEdges.get(outgoingEdges.size() - 1);
     // TODO: make this more efficient
-    List<TAGTextNode> textNodes = getTextNodeStream().collect(toList());
+    List<TAGTextNodeDAO> textNodes = getTextNodeStream().collect(toList());
     return textNodes.get(textNodes.size() - 1);
   }
 
@@ -115,40 +115,40 @@ public class TAGDocument {
     return documentDTO.getFirstTextNodeId() != null;
   }
 
-  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkup tagMarkup) {
-    return documentDTO.containsAtLeastHalfOfAllTextNodes(tagMarkup.getDTO());
+  public boolean containsAtLeastHalfOfAllTextNodes(TAGMarkupDAO tagMarkupDAO) {
+    return documentDTO.containsAtLeastHalfOfAllTextNodes(tagMarkupDAO.getDTO());
   }
 
-  public TAGDocument addMarkup(TAGMarkupDTO markup) {
+  public TAGDocumentDAO addMarkup(TAGMarkup markup) {
     Long id = markup.getDbId();
     return addMarkupId(id);
   }
 
-  public TAGDocument addMarkup(TAGMarkup markup) {
+  public TAGDocumentDAO addMarkup(TAGMarkupDAO markup) {
     Long id = markup.getDbId();
     return addMarkupId(id);
   }
 
-  public Iterator<TAGTextNodeDTO> getTextNodeIterator() {
+  public Iterator<TAGTextNode> getTextNodeIterator() {
     return getTagTextNodeStream()//
         .iterator();
   }
 
-  public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup) {
-    associateTextNodeWithMarkupForLayer(tagTextNode, tagMarkup, DEFAULT_LAYER);
+  public void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, TAGMarkupDAO tagMarkupDAO) {
+    associateTextNodeWithMarkupForLayer(tagTextNodeDAO, tagMarkupDAO, DEFAULT_LAYER);
   }
 
-  public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup, String layerName) {
-    associateTextNodeWithMarkupForLayer(tagTextNode, tagMarkup.getDbId(), layerName);
+  public void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, TAGMarkupDAO tagMarkupDAO, String layerName) {
+    associateTextNodeWithMarkupForLayer(tagTextNodeDAO, tagMarkupDAO.getDbId(), layerName);
     update();
   }
 
-  public void disassociateTextNodeFromMarkupForLayer(TAGTextNode node, TAGMarkup markup, final String layerName) {
+  public void disassociateTextNodeFromMarkupForLayer(TAGTextNodeDAO node, TAGMarkupDAO markup, final String layerName) {
     disassociateTextNodeFromMarkupForLayer(node, markup.getDTO(), layerName);
     update();
   }
 
-  public Stream<TAGMarkup> getMarkupStreamForTextNode(TAGTextNode tn) {
+  public Stream<TAGMarkupDAO> getMarkupStreamForTextNode(TAGTextNodeDAO tn) {
     return documentDTO.textGraph
         .getMarkupIdStreamForTextNodeId(tn.getDbId())
         .distinct()
@@ -166,18 +166,18 @@ public class TAGDocument {
 //    markup1.getAnnotationIds().addAll(markup2.getDTO().getAnnotationIds());
 //  }
 
-  public void addLayer(final String layerName, final TAGMarkup rootMarkup, final String parentLayer) {
+  public void addLayer(final String layerName, final TAGMarkupDAO rootMarkup, final String parentLayer) {
     documentDTO.textGraph.setLayerRootMarkup(layerName, rootMarkup.getDbId());
     openMarkupStackForLayer.put(layerName, new ArrayDeque<>());
     openMarkupStackForLayer.get(layerName).push(rootMarkup);
     if (parentLayer != null) {
-      Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(parentLayer);
+      Deque<TAGMarkupDAO> openMarkupStack = openMarkupStackForLayer.get(parentLayer);
       linkToParentMarkup(rootMarkup, parentLayer, openMarkupStack);
       documentDTO.textGraph.getParentLayerMap().put(layerName, parentLayer);
     }
   }
 
-  private void linkToParentMarkup(final TAGMarkup rootMarkup, final String parentLayer, final Deque<TAGMarkup> openMarkupStack) {
+  private void linkToParentMarkup(final TAGMarkupDAO rootMarkup, final String parentLayer, final Deque<TAGMarkupDAO> openMarkupStack) {
     if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
       Long parentMarkupId = openMarkupStack.peek().getDbId();
       Long childMarkupId = rootMarkup.getDbId();
@@ -203,32 +203,32 @@ public class TAGDocument {
     return documentDTO.textGraph.getLayerNames();
   }
 
-  public void openMarkupInLayer(TAGMarkup markup, String layerName) {
+  public void openMarkupInLayer(TAGMarkupDAO markup, String layerName) {
 //    LOG.debug("layer={}", layerName);
     openMarkupStackForLayer.putIfAbsent(layerName, new ArrayDeque<>());
-    Deque<TAGMarkup> openMarkupStack = openMarkupStackForLayer.get(layerName);
+    Deque<TAGMarkupDAO> openMarkupStack = openMarkupStackForLayer.get(layerName);
     linkToParentMarkup(markup, layerName, openMarkupStack);
     openMarkupStack.push(markup);
   }
 
-  public void closeMarkupInLayer(TAGMarkup markup, String layerName) {
-    Deque<TAGMarkup> tagMarkups = openMarkupStackForLayer.get(layerName);
-    if (!tagMarkups.isEmpty()) {
-      TAGMarkup lastOpenedMarkup = tagMarkups.pop();
+  public void closeMarkupInLayer(TAGMarkupDAO markup, String layerName) {
+    Deque<TAGMarkupDAO> tagMarkupDAOS = openMarkupStackForLayer.get(layerName);
+    if (!tagMarkupDAOS.isEmpty()) {
+      TAGMarkupDAO lastOpenedMarkup = tagMarkupDAOS.pop();
     }
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForMarkup(final TAGMarkup markup) {
+  public Stream<TAGTextNodeDAO> getTextNodeStreamForMarkup(final TAGMarkupDAO markup) {
     return getTextNodeStreamForMarkupInLayers(markup, getLayerNames());
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayer(final TAGMarkup markup, final String layer) {
+  public Stream<TAGTextNodeDAO> getTextNodeStreamForMarkupInLayer(final TAGMarkupDAO markup, final String layer) {
     Set<String> layers = new HashSet<>();
     layers.add(layer);
     return getTextNodeStreamForMarkupInLayers(markup, layers);
   }
 
-  public Stream<TAGTextNode> getTextNodeStreamForMarkupInLayers(final TAGMarkup markup, Set<String> layers) {
+  public Stream<TAGTextNodeDAO> getTextNodeStreamForMarkupInLayers(final TAGMarkupDAO markup, Set<String> layers) {
     return documentDTO.textGraph
         .getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)
         .map(store::getTextNode);
@@ -240,7 +240,7 @@ public class TAGDocument {
 
   /* private methods */
 
-  private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
+  private Stream<TAGTextNode> getTagTextNodeStream() {
     return documentDTO.getTextNodeIds().stream()//
         .map(store::getTextNodeDTO);
   }
@@ -250,29 +250,29 @@ public class TAGDocument {
     store.persist(documentDTO);
   }
 
-  private void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkupDTO markup, String layerName) {
-    associateTextNodeWithMarkupForLayer(tagTextNode, markup.getDbId(), layerName);
+  private void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, TAGMarkup markup, String layerName) {
+    associateTextNodeWithMarkupForLayer(tagTextNodeDAO, markup.getDbId(), layerName);
   }
 
-  private void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, Long markupId, String layerName) {
+  private void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, Long markupId, String layerName) {
 //    documentDTO.getTextNodeIdToMarkupIds()
 //        .computeIfAbsent(
 //            tagTextNode.getDbId(),
 //            f -> new LinkedHashSet<>()).add(markupId);
-    documentDTO.textGraph.linkMarkupToTextNodeForLayer(markupId, tagTextNode.getDbId(), layerName);
+    documentDTO.textGraph.linkMarkupToTextNodeForLayer(markupId, tagTextNodeDAO.getDbId(), layerName);
     update();
   }
 
-  private void disassociateTextNodeFromMarkupForLayer(TAGTextNode tagTextNode, TAGMarkupDTO markup, String layerName) {
-    disassociateTextNodeFromMarkupForLayer(tagTextNode, markup.getDbId(), layerName);
+  private void disassociateTextNodeFromMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, TAGMarkup markup, String layerName) {
+    disassociateTextNodeFromMarkupForLayer(tagTextNodeDAO, markup.getDbId(), layerName);
   }
 
-  private void disassociateTextNodeFromMarkupForLayer(TAGTextNode tagTextNode, Long markupId, String layerName) {
-    documentDTO.textGraph.unlinkMarkupFromTextNodeForLayer(markupId, tagTextNode.getDbId(), layerName);
+  private void disassociateTextNodeFromMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, Long markupId, String layerName) {
+    documentDTO.textGraph.unlinkMarkupFromTextNodeForLayer(markupId, tagTextNodeDAO.getDbId(), layerName);
     update();
   }
 
-  private TAGDocument addMarkupId(Long id) {
+  private TAGDocumentDAO addMarkupId(Long id) {
     documentDTO.getMarkupIds().add(id);
     update();
     return this;
@@ -296,7 +296,7 @@ public class TAGDocument {
           .noneMatch(this::isInDefaultLayer);
       if (defaultLayerIsUnused) {
         documentDTO.textGraph.getLayerRootMap().remove(DEFAULT_LAYER);
-        TAGMarkup markup = store.getMarkup(defaultRootMarkupId);
+        TAGMarkupDAO markup = store.getMarkup(defaultRootMarkupId);
         markup.getLayers().remove(DEFAULT_LAYER);
         store.persist(markup.getDTO());
         update();

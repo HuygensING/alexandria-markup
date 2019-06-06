@@ -20,10 +20,10 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,7 +48,7 @@ public class TAGComparison2 {
   private final List<String> mrDiffLines = new ArrayList<>();
   private final List<MarkupInfo>[] markupInfoLists;
 
-  public TAGComparison2(TAGDocument original, TAGView tagView, TAGDocument edited, TAGStore store) {
+  public TAGComparison2(TAGDocumentDAO original, TAGView tagView, TAGDocumentDAO edited, TAGStore store) {
     List<TAGToken> originalTokens = new Tokenizer(original, tagView)
         .getTAGTokens();
     List<TAGToken> originalTextTokens = originalTokens.stream()
@@ -124,7 +124,7 @@ public class TAGComparison2 {
   public class MarkupInfo {
     int startRank;
     int endRank;
-    private TAGMarkup markup;
+    private TAGMarkupDAO markup;
 
     public MarkupInfo(int startRank, int endRank) {
       this.startRank = startRank;
@@ -152,11 +152,11 @@ public class TAGComparison2 {
       return endRank - startRank + 1;
     }
 
-    public void setMarkup(TAGMarkup markup) {
+    public void setMarkup(TAGMarkupDAO markup) {
       this.markup = markup;
     }
 
-    public TAGMarkup getMarkup() {
+    public TAGMarkupDAO getMarkup() {
       return markup;
     }
   }
@@ -300,10 +300,10 @@ public class TAGComparison2 {
       ));
 
   private String toString(MarkupInfo markupInfo) {
-    TAGMarkup markup = markupInfo.markup;
+    TAGMarkupDAO markup = markupInfo.markup;
     String markedUpText = markup
         .getTextNodeStream()
-        .map(TAGTextNode::getText)
+        .map(TAGTextNodeDAO::getText)
         .collect(joining());
     int length = markedUpText.length();
     if (length > MAX_MARKEDUP_TEXT_LENGTH) {

@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.compare;
 
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.apache.commons.text.StringEscapeUtils;
 import prioritised_xml_collation.TAGToken;
 
@@ -60,7 +60,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void originalTextNode(final TAGTextNode t) {
+  public void originalTextNode(final TAGTextNodeDAO t) {
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     textNodeVariables.put(t.getDbId(), nodeVariable);
     resultBuilder.append("    ")
@@ -256,7 +256,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   }
 
   @Override
-  public void editedTextNode(final TAGTextNode t) {
+  public void editedTextNode(final TAGTextNodeDAO t) {
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     textNodeVariables.put(t.getDbId(), nodeVariable);
     resultBuilder.append("    ")

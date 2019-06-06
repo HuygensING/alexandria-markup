@@ -24,11 +24,11 @@ import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.*;
@@ -43,18 +43,18 @@ public class TAGTraverser {
   private final Set<String> relevantLayers;
   private final TAGStore store;
   private final TAGView view;
-  private final TAGDocument document;
-  private final Set<TAGTextNode> processedNodes = new HashSet<>();
+  private final TAGDocumentDAO document;
+  private final Set<TAGTextNodeDAO> processedNodes = new HashSet<>();
   private final HashMap<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
   private final Deque<TextVariationState> textVariationStates = new ArrayDeque<>();
 
-  public TAGTraverser(final TAGStore store, final TAGView view, final TAGDocument document) {
+  public TAGTraverser(final TAGStore store, final TAGView view, final TAGDocumentDAO document) {
     this.store = store;
     this.view = view;
     this.document = document;
 //    final AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     document.getMarkupStream()
-        .filter(TAGMarkup::isDiscontinuous)
+        .filter(TAGMarkupDAO::isDiscontinuous)
         .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
     textVariationStates.push(new TextVariationState());
     Set<String> layerNames = document.getLayerNames();
@@ -73,7 +73,7 @@ public class TAGTraverser {
       if (!processedNodes.contains(nodeToProcess)) {
         ExporterState state = stateRef.get();
         Set<Long> markupIds = new LinkedHashSet<>();
-        List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
+        List<TAGMarkupDAO> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
             .collect(toList());
 //        Collections.reverse(markupStreamForTextNode);
         markupStreamForTextNode.forEach(mw -> {
@@ -106,7 +106,7 @@ public class TAGTraverser {
         toClose.forEach(markupId -> {
           String closeTag = state.closeTags.get(markupId).toString();
           closeTag = addSuspendPrefixIfRequired(closeTag, markupId, discontinuousMarkupTextNodesToHandle);
-          final TAGMarkup markup = store.getMarkup(markupId);
+          final TAGMarkupDAO markup = store.getMarkup(markupId);
           tagVisitor.exitCloseTag(markup);
 //          tagmlBuilder.append(closeTag);
         });
@@ -114,7 +114,7 @@ public class TAGTraverser {
         List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
         toOpen.removeAll(state.openMarkupIds);
         toOpen.forEach(markupId -> {
-          final TAGMarkup markup = store.getMarkup(markupId);
+          final TAGMarkupDAO markup = store.getMarkup(markupId);
           tagVisitor.enterOpenTag(markup);
           String openTag = state.openTags.get(markupId).toString();
           openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle);
@@ -134,7 +134,7 @@ public class TAGTraverser {
           stateRef.set(variationState.getStartState());
           variationState.incrementBranchesStarted();
         }
-        TAGTextNodeDTO textNode = nodeToProcess.getDTO();
+        TAGTextNode textNode = nodeToProcess.getDTO();
         String content = nodeToProcess.getText();
 //        String escapedText = variationState.inVariation()
 //            ? TAGML.escapeVariantText(content)
@@ -238,14 +238,14 @@ public class TAGTraverser {
       return startState;
     }
 
-    public TextVariationState setBranchStartNodes(List<TAGTextNode> branchStartNodes) {
+    public TextVariationState setBranchStartNodes(List<TAGTextNodeDAO> branchStartNodes) {
       this.branchStartNodeIds = branchStartNodes.stream()
-          .map(TAGTextNode::getDbId).collect(toSet());
+          .map(TAGTextNodeDAO::getDbId).collect(toSet());
       this.branchesToTraverse = branchStartNodes.size();
       return this;
     }
 
-    public boolean isBranchStartNode(TAGTextNode node) {
+    public boolean isBranchStartNode(TAGTextNodeDAO node) {
       return branchStartNodeIds.contains(node.getDbId());
     }
 
@@ -254,7 +254,7 @@ public class TAGTraverser {
       return this;
     }
 
-    public boolean isFirstNodeAfterConvergence(TAGTextNode node) {
+    public boolean isFirstNodeAfterConvergence(TAGTextNodeDAO node) {
       return node.getDbId().equals(convergenceSucceedingNodeId);
     }
 
@@ -271,7 +271,7 @@ public class TAGTraverser {
     }
   }
 
-  private StringBuilder toCloseTag(TAGMarkup markup) {
+  private StringBuilder toCloseTag(TAGMarkupDAO markup) {
     String suspend = markup.isSuspended()
         ? TAGML.SUSPEND_PREFIX
         : "";
@@ -281,7 +281,7 @@ public class TAGTraverser {
         : new StringBuilder(CLOSE_TAG_STARTCHAR).append(suspend).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup, Set<String> openLayers, final TAGVisitor tagVisitor) {
+  private StringBuilder toOpenTag(TAGMarkupDAO markup, Set<String> openLayers, final TAGVisitor tagVisitor) {
     String resume = markup.isResumed()
         ? TAGML.RESUME_PREFIX
         : "";
@@ -299,7 +299,7 @@ public class TAGTraverser {
       final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
-      TAGMarkup markup = store.getMarkup(markupId);
+      TAGMarkupDAO markup = store.getMarkup(markupId);
       if (textNodesToHandle < markup.getTextNodeCount() - 1) {
         openTag = openTag.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX);
       }

@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -102,7 +102,7 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
         LOG.info("testing data/tagml/{}.tagml", basename);
         LOG.info("importTAGML\n");
         final TAGModelBuilder tagModelBuilder = new TAGModelBuilderImpl(store, new ErrorListener());
-        TAGDocument document = new TAGMLImporter().importTAGML(tagModelBuilder,input);
+        TAGDocumentDAO document = new TAGMLImporter().importTAGML(tagModelBuilder,input);
         logDocumentGraph(document, "");
 //        generateLaTeX(basename, document);
       } catch (IOException e) {
@@ -116,7 +116,7 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
     return FileUtils.openInputStream(new File("data/tagml/" + basename + ".tagml"));
   }
 
-  private void generateLaTeX(String basename, TAGDocument document, final TAGStore store) throws IOException {
+  private void generateLaTeX(String basename, TAGDocumentDAO document, final TAGStore store) throws IOException {
     LaTeXExporter exporter = new LaTeXExporter(store, document);
     String outDir = "out/";
 

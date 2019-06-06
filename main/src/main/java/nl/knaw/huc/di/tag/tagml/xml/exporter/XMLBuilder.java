@@ -22,8 +22,8 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter;
 
 import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -66,7 +66,7 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterDocument(TAGDocument document) {
+  public void enterDocument(TAGDocumentDAO document) {
     xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     if (relevantLayers.size() > 1) {
       namespaceDefinitions.add(TH_NAMESPACE);
@@ -84,7 +84,7 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void exitDocument(final TAGDocument document) {
+  public void exitDocument(final TAGDocumentDAO document) {
     xmlBuilder.append("\n</xml>");
     result = xmlBuilder.toString();
     if (useTagNamespace) {
@@ -93,7 +93,7 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterOpenTag(final TAGMarkup markup) {
+  public void enterOpenTag(final TAGMarkupDAO markup) {
     String markupName = getMarkupName(markup);
     xmlBuilder.append("<").append(markupName);
     if (markup.isOptional()) {
@@ -113,13 +113,13 @@ public class XMLBuilder implements TAGVisitor {
     }
   }
 
-  private String discontinuityKey(final TAGMarkup markup, final String markupName) {
+  private String discontinuityKey(final TAGMarkupDAO markup, final String markupName) {
     return markup.getLayers().stream()
             .sorted()
             .collect(joining(",", markupName + "|", ""));
   }
 
-  private String getMarkupName(final TAGMarkup markup) {
+  private String getMarkupName(final TAGMarkupDAO markup) {
     String markupName = markup.getTag();
     if (markupName.startsWith(":")) {
       markupName = "tag" + markupName;
@@ -134,7 +134,7 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void exitOpenTag(final TAGMarkup markup) {
+  public void exitOpenTag(final TAGMarkupDAO markup) {
     Set<String> layers = markup.getLayers();
     layers.retainAll(relevantLayers);
     if (useTrojanHorse) {
@@ -153,7 +153,7 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void exitCloseTag(final TAGMarkup markup) {
+  public void exitCloseTag(final TAGMarkupDAO markup) {
     String markupName = getMarkupName(markup);
     Set<String> layers = markup.getLayers();
     layers.retainAll(relevantLayers);

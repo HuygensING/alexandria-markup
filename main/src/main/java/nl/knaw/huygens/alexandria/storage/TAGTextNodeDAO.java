@@ -20,18 +20,18 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
 
-public class TAGTextNode {
+public class TAGTextNodeDAO {
   private final TAGStore store;
-  private final TAGTextNodeDTO textNode;
+  private final TAGTextNode textNode;
 
-  public TAGTextNode(TAGStore store, TAGTextNodeDTO textNode) {
+  public TAGTextNodeDAO(TAGStore store, TAGTextNode textNode) {
     this.store = store;
     this.textNode = textNode;
     update();
@@ -41,7 +41,7 @@ public class TAGTextNode {
     return textNode.getDbId();
   }
 
-  public TAGTextNodeDTO getDTO() {
+  public TAGTextNode getDTO() {
     return textNode;
   }
 
@@ -49,7 +49,7 @@ public class TAGTextNode {
     return textNode.getText();
   }
 
-  public List<TAGTextNode> getNextTextNodes() {
+  public List<TAGTextNodeDAO> getNextTextNodes() {
     // TODO: implement here or in TAGDocument
     return new ArrayList<>();
   }
@@ -61,8 +61,8 @@ public class TAGTextNode {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGTextNode//
-        && ((TAGTextNode) other).getDbId().equals(getDbId());
+    return other instanceof TAGTextNodeDAO//
+        && ((TAGTextNodeDAO) other).getDbId().equals(getDbId());
   }
 
   @Override

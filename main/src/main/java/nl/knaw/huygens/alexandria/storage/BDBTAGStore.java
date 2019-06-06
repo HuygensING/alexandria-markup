@@ -29,9 +29,9 @@ import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,57 +137,57 @@ public class BDBTAGStore implements TAGStore {
 
   // Document
   @Override
-  public TAGDocumentDTO getDocumentDTO(Long documentId) {
+  public TAGDocument getDocumentDTO(Long documentId) {
     assertInTransaction();
     return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
   @Override
-  public TAGDocument getDocument(Long documentId) {
-    return new TAGDocument(this, getDocumentDTO(documentId));
+  public TAGDocumentDAO getDocument(Long documentId) {
+    return new TAGDocumentDAO(this, getDocumentDTO(documentId));
   }
 
   @Override
-  public TAGDocument createDocument() {
-    TAGDocumentDTO documentDTO = new TAGDocumentDTO();
+  public TAGDocumentDAO createDocument() {
+    TAGDocument documentDTO = new TAGDocument();
     persist(documentDTO);
     documentDTO.initialize();
-    return new TAGDocument(this, documentDTO);
+    return new TAGDocumentDAO(this, documentDTO);
   }
 
   // TextNode
   @Override
-  public TAGTextNodeDTO getTextNodeDTO(Long textNodeId) {
+  public TAGTextNode getTextNodeDTO(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(tx, textNodeId, LOCK_MODE);
   }
 
   @Override
-  public TAGTextNode createTextNode(String content) {
-    TAGTextNodeDTO tagTextNodeDTO = new TAGTextNodeDTO(content);
-    persist(tagTextNodeDTO);
-    return new TAGTextNode(this, tagTextNodeDTO);
+  public TAGTextNodeDAO createTextNode(String content) {
+    TAGTextNode tagTextNode = new TAGTextNode(content);
+    persist(tagTextNode);
+    return new TAGTextNodeDAO(this, tagTextNode);
   }
 
   @Override
-  public TAGTextNode createTextNode() {
+  public TAGTextNodeDAO createTextNode() {
     return createTextNode("");
   }
 
   @Override
-  public TAGTextNode getTextNode(Long textNodeId) {
-    return new TAGTextNode(this, getTextNodeDTO(textNodeId));
+  public TAGTextNodeDAO getTextNode(Long textNodeId) {
+    return new TAGTextNodeDAO(this, getTextNodeDTO(textNodeId));
   }
 
   // Markup
   @Override
-  public TAGMarkupDTO getMarkupDTO(Long markupId) {
+  public TAGMarkup getMarkupDTO(Long markupId) {
     assertInTransaction();
     return da.markupById.get(tx, markupId, LOCK_MODE);
   }
 
   @Override
-  public TAGMarkup createMarkup(TAGDocument document, String tagName) {
+  public TAGMarkupDAO createMarkup(TAGDocumentDAO document, String tagName) {
     String tag;
     String suffix = null;
     String id = null;
@@ -213,17 +213,17 @@ public class BDBTAGStore implements TAGStore {
       tag = tagName;
     }
 
-    TAGMarkupDTO markupDTO = new TAGMarkupDTO(document.getDbId(), tag);
+    TAGMarkup markupDTO = new TAGMarkup(document.getDbId(), tag);
     markupDTO.setMarkupId(id);
     markupDTO.setSuffix(suffix);
     persist(markupDTO);
     // document.addMarkup(markup);
-    return new TAGMarkup(this, markupDTO);
+    return new TAGMarkupDAO(this, markupDTO);
   }
 
   @Override
-  public TAGMarkup getMarkup(Long markupId) {
-    return new TAGMarkup(this, getMarkupDTO(markupId));
+  public TAGMarkupDAO getMarkup(Long markupId) {
+    return new TAGMarkupDAO(this, getMarkupDTO(markupId));
   }
 
   // Annotation

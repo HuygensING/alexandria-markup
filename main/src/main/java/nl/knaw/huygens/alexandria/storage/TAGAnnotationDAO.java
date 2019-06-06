@@ -20,13 +20,13 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotationDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGAnnotation;
 
-public class TAGAnnotation {
+public class TAGAnnotationDAO {
   private final TAGStore store;
-  private final TAGAnnotationDTO annotation;
+  private final TAGAnnotation annotation;
 
-  public TAGAnnotation(TAGStore store, TAGAnnotationDTO annotation) {
+  public TAGAnnotationDAO(TAGStore store, TAGAnnotation annotation) {
     this.store = store;
     this.annotation = annotation;
     update();
@@ -60,7 +60,7 @@ public class TAGAnnotation {
     return (T) getValue();
   }
 
-  public TAGAnnotationDTO getDTO() {
+  public TAGAnnotation getDTO() {
     return annotation;
   }
 

@@ -27,9 +27,9 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -56,7 +56,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   public void testSnarkParses() {
     String input = Files.contentOf(new File("data/tagml/snark81.tagml"), Charset.defaultCharset());
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
     });
   }
 
@@ -66,7 +66,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         "[a>a<a] [b>b<b]" +
         "<tagml]";
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
     });
   }
 
@@ -86,7 +86,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         "[a|a>a<a|a] [b|a>b<b|a]" +
         "<tagml|a]";
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
     });
   }
 
@@ -96,7 +96,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         "[a|a>a [b|b>b<a|a]<b|b]" +
         "<tagml|a,b]";
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
     });
   }
 
@@ -106,7 +106,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         "[l|sem>a <|[add|gen>added<add]|[del|gen>del<del]|> line<l]" +
         "<layerdef]<tagml]";
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
     });
   }
 
@@ -131,15 +131,15 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   public void testNonlinearText() {
     String input = "[o>Icecream is <|tasty|cold|sweet|>!<o]";
     runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+      TAGDocumentDAO document = assertTAGMLParses(input, store);
       logDocumentGraph(document, input);
 
       TextGraph textGraph = document.getDTO().textGraph;
 
-      List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
+      List<TAGTextNodeDAO> textNodes = document.getTextNodeStream().collect(toList());
       assertThat(textNodes).hasSize(5);
 
-      TAGTextNode textNode1 = textNodes.get(0);
+      TAGTextNodeDAO textNode1 = textNodes.get(0);
       assertThat(textNode1).hasText("Icecream is ");
 
 //      TAGTextNode textNode2 = textNodes.get(1);
@@ -148,13 +148,13 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 //      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
 //      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
 
-      TAGTextNode textNode3 = textNodes.get(1);
+      TAGTextNodeDAO textNode3 = textNodes.get(1);
       assertThat(textNode3).hasText("tasty");
 
-      TAGTextNode textNode4 = textNodes.get(2);
+      TAGTextNodeDAO textNode4 = textNodes.get(2);
       assertThat(textNode4).hasText("cold");
 
-      TAGTextNode textNode5 = textNodes.get(3);
+      TAGTextNodeDAO textNode5 = textNodes.get(3);
       assertThat(textNode5).hasText("sweet");
 
 //      TAGTextNode textNode6 = textNodes.get(5);
@@ -163,14 +163,14 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 //      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
 //      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
 
-      TAGTextNode textNode7 = textNodes.get(4);
+      TAGTextNodeDAO textNode7 = textNodes.get(4);
       assertThat(textNode7).hasText("!");
     });
   }
 
   // private methods
 
-  private TAGDocument assertTAGMLParses(final String input, final TAGStore store) {
+  private TAGDocumentDAO assertTAGMLParses(final String input, final TAGStore store) {
     ErrorListener errorListener = new ErrorListener();
     TAGMLParser parser = setupParser(input, errorListener);
     ParseTree parseTree = parser.document();
@@ -183,7 +183,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     TAGModelBuilder tagModelBuilder = walkParseTree(errorListener, parseTree, store);
     assertThat(errorListener.hasErrors()).isFalse();
 
-    TAGDocument document = tagModelBuilder.getDocument();
+    TAGDocumentDAO document = tagModelBuilder.getDocument();
     logDocumentGraph(document, input);
     String lmnl = new LMNLExporter(store).toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
@@ -202,7 +202,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
       try {
         TAGModelBuilder tagModelBuilder = walkParseTree(errorListener, parseTree, store);
-        TAGDocument document = tagModelBuilder.getDocument();
+        TAGDocumentDAO document = tagModelBuilder.getDocument();
         logDocumentGraph(document, input);
       } catch (TAGMLBreakingError e) {
       }

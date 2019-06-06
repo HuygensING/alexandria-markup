@@ -20,7 +20,7 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  *
- * @deprecated use {@link TAGMarkup} instead.
+ * @deprecated use {@link TAGMarkupDAO} instead.
  */
 @Deprecated
 public class Markup {

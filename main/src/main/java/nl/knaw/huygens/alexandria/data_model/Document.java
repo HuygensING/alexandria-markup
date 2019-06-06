@@ -20,14 +20,14 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
  * <p>
  * A document contains a Limen.
  *</p>
- * @deprecated use {@link TAGDocument} instead.
+ * @deprecated use {@link TAGDocumentDAO} instead.
  */
 @Deprecated
 public class Document {

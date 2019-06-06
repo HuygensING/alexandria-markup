@@ -24,17 +24,17 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version = 2)
-public class TAGTextNodeDTO implements TAGDTO {
+public class TAGTextNode implements TAGDTO {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long dbId;
 
   private String text;
 
-  public TAGTextNodeDTO(String text) {
+  public TAGTextNode(String text) {
     this.text = text;
   }
 
-  public TAGTextNodeDTO() {
+  public TAGTextNode() {
     this("");
   }
 
@@ -42,7 +42,7 @@ public class TAGTextNodeDTO implements TAGDTO {
     return dbId;
   }
 
-  public TAGTextNodeDTO setText(String text) {
+  public TAGTextNode setText(String text) {
     this.text = text;
     return this;
   }

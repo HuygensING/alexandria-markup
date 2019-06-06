@@ -26,8 +26,8 @@ import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -45,9 +45,9 @@ class TAGQLQueryListener extends TAGQLBaseListener {
   private Logger LOG = LoggerFactory.getLogger(getClass());
 
   private final List<TAGQLStatement> statements = new ArrayList<>();
-  private TAGDocument document;
+  private TAGDocumentDAO document;
 
-  TAGQLQueryListener(TAGDocument document) {
+  TAGQLQueryListener(TAGDocumentDAO document) {
     this.document = document;
   }
 
@@ -55,7 +55,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     return statements;
   }
 
-  private String toText(TAGMarkup markup) {
+  private String toText(TAGMarkupDAO markup) {
     StringBuilder textBuilder = new StringBuilder();
     document.getTextNodeStreamForMarkup(markup)
         .forEach(textNode -> textBuilder.append(textNode.getText()));
@@ -80,7 +80,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       if (part instanceof TAGQLParser.TextPartContext) {
         statement.setMarkupMapper(this::toText);
       } else if (part instanceof TAGQLParser.NamePartContext) {
-        statement.setMarkupMapper(TAGMarkup::getExtendedTag);
+        statement.setMarkupMapper(TAGMarkupDAO::getExtendedTag);
       } else if (part instanceof TAGQLParser.AnnotationValuePartContext) {
         String annotationIdentifier = getAnnotationName(part);
         statement.setMarkupMapper(toAnnotationTextMapper(annotationIdentifier));
@@ -90,9 +90,9 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     }
   }
 
-  private Function<? super TAGMarkup, ? super Object> toAnnotationTextMapper(String annotationIdentifier) {
+  private Function<? super TAGMarkupDAO, ? super Object> toAnnotationTextMapper(String annotationIdentifier) {
     List<String> annotationTags = Arrays.asList(annotationIdentifier.split(":"));
-    return (TAGMarkup markup) -> {
+    return (TAGMarkupDAO markup) -> {
       List<String> annotationTexts = new ArrayList<>();
       int depth = 0;
       List<AnnotationInfo> annotationsToFilter = markup.getAnnotationStream().collect(toList());
@@ -137,7 +137,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
   private void handleWhereClause(TAGQLSelectStatement statement, WhereClauseContext whereClause) {
     if (whereClause != null) {
-      Predicate<TAGMarkup> filter = handleExpression(whereClause.expr());
+      Predicate<TAGMarkupDAO> filter = handleExpression(whereClause.expr());
       if (filter != null) {
         statement.setMarkupFilter(filter);
       } else {
@@ -146,8 +146,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     }
   }
 
-  private Predicate<TAGMarkup> handleExpression(ExprContext expr) {
-    Predicate<TAGMarkup> filter = null;
+  private Predicate<TAGMarkupDAO> handleExpression(ExprContext expr) {
+    Predicate<TAGMarkupDAO> filter = null;
     if (expr instanceof EqualityComparisonExpressionContext) {
       EqualityComparisonExpressionContext ecec = (EqualityComparisonExpressionContext) expr;
       ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
@@ -166,14 +166,14 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
     } else if (expr instanceof JoiningExpressionContext) {
       JoiningExpressionContext jec = (JoiningExpressionContext) expr;
-      Predicate<TAGMarkup> predicate0 = handleExpression(jec.expr(0));
-      Predicate<TAGMarkup> predicate1 = handleExpression(jec.expr(1));
+      Predicate<TAGMarkupDAO> predicate0 = handleExpression(jec.expr(0));
+      Predicate<TAGMarkupDAO> predicate1 = handleExpression(jec.expr(1));
       filter = predicate0.and(predicate1);
 
     } else if (expr instanceof CombiningExpressionContext) {
       CombiningExpressionContext context = (CombiningExpressionContext) expr;
-      Predicate<TAGMarkup> predicate0 = handleExpression(context.expr(0));
-      Predicate<TAGMarkup> predicate1 = handleExpression(context.expr(2));
+      Predicate<TAGMarkupDAO> predicate0 = handleExpression(context.expr(0));
+      Predicate<TAGMarkupDAO> predicate1 = handleExpression(context.expr(2));
       filter = predicate0.or(predicate1);
 
     } else if (expr instanceof TextContainsExpressionContext) {

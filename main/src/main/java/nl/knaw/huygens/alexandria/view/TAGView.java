@@ -21,7 +21,7 @@ package nl.knaw.huygens.alexandria.view;
  */
 
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 import java.util.HashSet;
@@ -188,8 +188,8 @@ public class TAGView {
     return exclude.equals(layerRelevance);
   }
 
-  public boolean isIncluded(TAGMarkup tagMarkup) {
-    String tag = tagMarkup.getTag();
+  public boolean isIncluded(TAGMarkupDAO tagMarkupDAO) {
+    String tag = tagMarkupDAO.getTag();
     if (include.equals(markupRelevance)) {
       return markupToInclude.contains(tag);
     }

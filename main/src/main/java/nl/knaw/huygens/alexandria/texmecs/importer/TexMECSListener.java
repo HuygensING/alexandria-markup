@@ -34,11 +34,11 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private final TAGDocument document;
-  private final Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
-  private final Deque<TAGMarkup> suspendedMarkup = new ArrayDeque<>();
+  private final TAGDocumentDAO document;
+  private final Deque<TAGMarkupDAO> openMarkup = new ArrayDeque<>();
+  private final Deque<TAGMarkupDAO> suspendedMarkup = new ArrayDeque<>();
   private boolean insideTagSet = false; // TODO: use this?
-  private final HashMap<String, TAGMarkup> identifiedMarkups = new HashMap<>();
+  private final HashMap<String, TAGMarkupDAO> identifiedMarkups = new HashMap<>();
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final List<String> errors = new ArrayList<>();
   private final TAGStore store;
@@ -48,26 +48,26 @@ class TexMECSListener extends TexMECSParserBaseListener {
     document = store.createDocument();
   }
 
-  public TAGDocument getDocument() {
+  public TAGDocumentDAO getDocument() {
     return document;
   }
 
   @Override
   public void exitStartTag(StartTagContext ctx) {
-    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkupDAO markup = addMarkup(ctx.eid(), ctx.atts());
     openMarkup.add(markup);
   }
 
   @Override
   public void exitStartTagSet(StartTagSetContext ctx) {
-    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkupDAO markup = addMarkup(ctx.eid(), ctx.atts());
     openMarkup.add(markup);
     insideTagSet = true;
   }
 
   @Override
   public void exitText(TextContext ctx) {
-    TAGTextNode tn = store.createTextNode(ctx.getText());
+    TAGTextNodeDAO tn = store.createTextNode(ctx.getText());
     document.addTextNode(tn, null);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
   }
@@ -85,21 +85,21 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitSoleTag(SoleTagContext ctx) {
-    TAGTextNode tn = store.createTextNode("");
+    TAGTextNodeDAO tn = store.createTextNode("");
     document.addTextNode(tn, null);
     openMarkup.forEach(m -> linkTextToMarkup(tn, m));
-    TAGMarkup markup = addMarkup(ctx.eid(), ctx.atts());
+    TAGMarkupDAO markup = addMarkup(ctx.eid(), ctx.atts());
     linkTextToMarkup(tn, markup);
   }
 
-  private void linkTextToMarkup(TAGTextNode tn, TAGMarkup markup) {
+  private void linkTextToMarkup(TAGTextNodeDAO tn, TAGMarkupDAO markup) {
     markup.getLayers()
         .forEach(layerName -> document.associateTextNodeWithMarkupForLayer(tn, markup, layerName));
   }
 
   @Override
   public void exitSuspendTag(SuspendTagContext ctx) {
-    TAGMarkup markup = removeFromOpenMarkup(ctx.gi());
+    TAGMarkupDAO markup = removeFromOpenMarkup(ctx.gi());
     if (markup != null) {
       suspendedMarkup.add(markup);
     }
@@ -107,7 +107,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
 
   @Override
   public void exitResumeTag(ResumeTagContext ctx) {
-    TAGMarkup markup = removeFromSuspendedMarkup(ctx);
+    TAGMarkupDAO markup = removeFromSuspendedMarkup(ctx);
     if (markup != null) {
       openMarkup.add(markup);
     }
@@ -119,10 +119,10 @@ class TexMECSListener extends TexMECSParserBaseListener {
     String gi = ctx.eid().gi().getText();
     String extendedTag = gi + "=" + idref;
     if (identifiedMarkups.containsKey(extendedTag)) {
-      TAGMarkup ref = identifiedMarkups.get(extendedTag);
-      TAGMarkup markup = addMarkup(ref.getTag(), ctx.atts());
+      TAGMarkupDAO ref = identifiedMarkups.get(extendedTag);
+      TAGMarkupDAO markup = addMarkup(ref.getTag(), ctx.atts());
       ref.getTextNodeStream().forEach(tn -> {
-        TAGTextNode copy = store.createTextNode(tn.getText());
+        TAGTextNodeDAO copy = store.createTextNode(tn.getText());
         document.addTextNode(copy, null);
         openMarkup.forEach(m -> linkTextToMarkup(copy, m));
         linkTextToMarkup(copy, markup);
@@ -161,13 +161,13 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return errors;
   }
 
-  private TAGMarkup addMarkup(EidContext eid, AttsContext atts) {
+  private TAGMarkupDAO addMarkup(EidContext eid, AttsContext atts) {
     String extendedTag = eid.getText();
     return addMarkup(extendedTag, atts);
   }
 
-  private TAGMarkup addMarkup(String extendedTag, AttsContext atts) {
-    TAGMarkup markup = store.createMarkup(document, extendedTag);
+  private TAGMarkupDAO addMarkup(String extendedTag, AttsContext atts) {
+    TAGMarkupDAO markup = store.createMarkup(document, extendedTag);
     addAttributes(atts, markup);
     document.addMarkup(markup);
     if (markup.hasMarkupId()) {
@@ -182,7 +182,7 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private void addAttributes(AttsContext attsContext, TAGMarkup markup) {
+  private void addAttributes(AttsContext attsContext, TAGMarkupDAO markup) {
     attsContext.avs().forEach(avs -> {
       String attrName = avs.NAME_O().getText();
       String quotedAttrValue = avs.STRING().getText();
@@ -192,9 +192,9 @@ class TexMECSListener extends TexMECSParserBaseListener {
     });
   }
 
-  private TAGMarkup removeFromOpenMarkup(GiContext gi) {
+  private TAGMarkupDAO removeFromOpenMarkup(GiContext gi) {
     String tag = gi.getText();
-    TAGMarkup markup = removeFromMarkupStack(tag, openMarkup);
+    TAGMarkupDAO markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {
       String message = "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
       errors.add(message);
@@ -202,9 +202,9 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private TAGMarkup removeFromSuspendedMarkup(ResumeTagContext ctx) {
+  private TAGMarkupDAO removeFromSuspendedMarkup(ResumeTagContext ctx) {
     String tag = ctx.gi().getText();
-    TAGMarkup markup = removeFromMarkupStack(tag, suspendedMarkup);
+    TAGMarkupDAO markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
       String message = "Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.";
       errors.add(message);
@@ -212,9 +212,9 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private TAGMarkup removeFromMarkupStack(String tag, Deque<TAGMarkup> markupStack) {
-    Iterator<TAGMarkup> descendingIterator = markupStack.descendingIterator();
-    TAGMarkup markup = null;
+  private TAGMarkupDAO removeFromMarkupStack(String tag, Deque<TAGMarkupDAO> markupStack) {
+    Iterator<TAGMarkupDAO> descendingIterator = markupStack.descendingIterator();
+    TAGMarkupDAO markup = null;
     while (descendingIterator.hasNext()) {
       markup = descendingIterator.next();
       if (markup.getTag().equals(tag)) {
@@ -227,11 +227,11 @@ class TexMECSListener extends TexMECSParserBaseListener {
     return markup;
   }
 
-  private static String suspendTag(TAGMarkup m) {
+  private static String suspendTag(TAGMarkupDAO m) {
     return "|-" + m.getTag() + ">";
   }
 
-  private static String startTag(TAGMarkup m) {
+  private static String startTag(TAGMarkupDAO m) {
     return "<" + m.getExtendedTag() + "|";
   }
 
