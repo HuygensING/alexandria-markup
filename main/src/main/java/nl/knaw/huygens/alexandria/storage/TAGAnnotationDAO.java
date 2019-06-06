@@ -65,7 +65,7 @@ public class TAGAnnotationDAO {
   }
 
   private void update() {
-    store.persist(annotation);
+    store.update(annotation);
   }
 
   @Override

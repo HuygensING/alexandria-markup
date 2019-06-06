@@ -22,8 +22,8 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 
 import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
-import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
 
 import java.util.List;
@@ -41,12 +41,12 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterDocument(final TAGDocumentDAO document) {
+  public void enterDocument(final TAGDocument document) {
 
   }
 
   @Override
-  public void exitDocument(final TAGDocumentDAO document) {
+  public void exitDocument(final TAGDocument document) {
     result = tagmlBuilder.toString()
         .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
         .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
@@ -55,7 +55,7 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterOpenTag(final TAGMarkupDAO markup) {
+  public void enterOpenTag(final TAGMarkup markup) {
 
   }
 
@@ -70,12 +70,12 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void exitOpenTag(final TAGMarkupDAO markup) {
+  public void exitOpenTag(final TAGMarkup markup) {
 
   }
 
   @Override
-  public void exitCloseTag(final TAGMarkupDAO markup) {
+  public void exitCloseTag(final TAGMarkup markup) {
 
   }
 

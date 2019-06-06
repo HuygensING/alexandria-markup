@@ -25,7 +25,7 @@ import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
 import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
 import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
 
 import java.util.Deque;
 import java.util.List;
@@ -146,7 +146,7 @@ public class TAGKnowledgeModelBuilder implements TAGModelBuilder {
   }
 
   @Override
-  public Long persist(final TAGDTO tagdto) {
+  public Long persist(final TAGElement tagElement) {
     return null;
   }
 

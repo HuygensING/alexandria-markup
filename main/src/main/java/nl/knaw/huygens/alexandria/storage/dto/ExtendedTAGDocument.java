@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huygens.alexandria.storage.dto;
 
 /*-
  * #%L
@@ -19,21 +19,14 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-import com.sleepycat.persist.model.Persistent;
-import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
+import java.util.stream.Stream;
 
-@Persistent
-public class AnnotationValue implements TAGElement {
-  @PrimaryKey(sequence = "annotation_pk_sequence")
-  private Long id;
+public class ExtendedTAGDocument {
 
-  public AnnotationValue() {
-  }
+  private TAGDocument document;
 
-  @Override
-  public Long getDbId() {
-    return id;
+  public ExtendedTAGDocument(TAGDocument document) {
+    this.document = document;
   }
 
 }

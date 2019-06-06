@@ -19,12 +19,15 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
+
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public interface TAGStore extends AutoCloseable {
   void open();
@@ -32,43 +35,49 @@ public interface TAGStore extends AutoCloseable {
   @Override
   void close();
 
-  Long persist(TAGDTO tagdto);
+  Long update(TAGElement TAGElement);
 
-  void remove(TAGDTO tagdto);
+  void remove(TAGElement TAGElement);
 
   // Document
-  TAGDocument getDocumentDTO(Long documentId);
+  TAGDocument createDocument();
 
-  TAGDocumentDAO getDocument(Long documentId);
+  TAGDocument getDocument(Long documentId);
 
-  TAGDocumentDAO createDocument();
+  Stream<TAGMarkup> getMarkupStream(TAGDocument document);
+
+  Stream<TAGMarkup> getMarkupStreamForTextNode(TAGDocument document, TAGTextNode nodeToProcess);
+
+  Stream<TAGTextNode> getTextNodeStream(TAGDocument document);
 
   // TextNode
-  TAGTextNode getTextNodeDTO(Long textNodeId);
+  TAGTextNode createTextNode(String content);
 
-  TAGTextNodeDAO createTextNode(String content);
-
-  TAGTextNodeDAO createTextNode();
-
-  TAGTextNodeDAO getTextNode(Long textNodeId);
+  TAGTextNode getTextNode(Long textNodeId);
 
   // Markup
-  TAGMarkup getMarkupDTO(Long markupId);
+  TAGMarkup createMarkup(TAGDocument document, String tagName);
 
-  TAGMarkupDAO createMarkup(TAGDocumentDAO document, String tagName);
-
-  TAGMarkupDAO getMarkup(Long markupId);
+  TAGMarkup getMarkup(Long markupId);
 
   // transaction
   void runInTransaction(Runnable runner);
 
   <A> A runInTransaction(Supplier<A> supplier);
 
+  // Annotation
+
   Long createStringAnnotationValue(String value);
+
+  StringAnnotationValue getStringAnnotationValue(Long id);
 
   Long createBooleanAnnotationValue(Boolean value);
 
+  BooleanAnnotationValue getBooleanAnnotationValue(Long id);
+
   Long createNumberAnnotationValue(Double value);
+
+  NumberAnnotationValue getNumberAnnotationValue(Long id);
 
   Long createListAnnotationValue();
 
@@ -76,11 +85,13 @@ public interface TAGStore extends AutoCloseable {
 
   Long createReferenceValue(String value);
 
-  StringAnnotationValue getStringAnnotationValue(Long id);
-
-  NumberAnnotationValue getNumberAnnotationValue(Long id);
-
-  BooleanAnnotationValue getBooleanAnnotationValue(Long id);
-
   ReferenceValue getReferenceValue(Long id);
+
+  Stream<AnnotationInfo> getAnnotationStream(TAGMarkup markup);
+
+  boolean isSuspended(TAGDocument document, TAGMarkup markup);
+
+  boolean isAnonymous(TAGDocument document, TAGMarkup markup);
+
+  boolean isResumed(TAGDocument document, TAGMarkup markup);
 }

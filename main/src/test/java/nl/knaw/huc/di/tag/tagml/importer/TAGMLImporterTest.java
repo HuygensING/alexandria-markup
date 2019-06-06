@@ -373,7 +373,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       assertThat(markupForTextNode).hasSize(3);
       assertThat(markupForTextNode).extracting("tag").containsExactly("line", "a", "country");
 
-      List<String> textSegments = document.getDTO().textGraph
+      List<String> textSegments = document.textGraph
           .getTextNodeIdStream()
           .map(store::getTextNodeDTO)
           .map(TAGTextNode::getText)

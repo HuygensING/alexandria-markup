@@ -19,12 +19,13 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocumentDAO;
-import nl.knaw.huygens.alexandria.storage.TAGMarkupDAO;
-import nl.knaw.huygens.alexandria.storage.TAGTextNodeDAO;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
+import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 
 import java.util.Deque;
 import java.util.List;
@@ -37,45 +38,45 @@ public interface TAGModelBuilder {
 
   boolean isFirstTag();
 
-  void addLayer(String newLayerId, TAGMarkupDAO markup, String parentLayer);
+  void addLayer(String newLayerId, TAGMarkup markup, String parentLayer);
 
-  void openMarkupInLayer(TAGMarkupDAO markup, String layerId);
+  void openMarkupInLayer(TAGMarkup markup, String layerId);
 
-  void persist(TAGMarkupDAO markup);
+  void persist(TAGMarkup markup);
 
   void enterRichTextValue();
 
   void exitRichTextValue();
 
-  TAGMarkupDAO addMarkup(String tagName);
+  TAGMarkup addMarkup(String tagName);
 
-  void closeMarkupInLayer(TAGMarkupDAO markup, String layerName);
+  void closeMarkupInLayer(TAGMarkup markup, String layerName);
 
-  TAGMarkupDAO getMarkup(Long rootMarkupId);
+  TAGMarkup getMarkup(Long rootMarkupId);
 
-  TAGTextNodeDAO getLastTextNode();
+  TAGTextNode getLastTextNode();
 
-  Stream<TAGMarkupDAO> getMarkupStreamForTextNode(TAGTextNodeDAO previousTextNode);
+  Stream<TAGMarkup> getMarkupStreamForTextNode(TAGTextNode previousTextNode);
 
-  TAGMarkupDAO resumeMarkup(TAGMarkupDAO suspendedMarkup, Set<String> layers);
+  TAGMarkup resumeMarkup(TAGMarkup suspendedMarkup, Set<String> layers);
 
-  void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tn, TAGMarkupDAO markup, String layerName);
+  void associateTextNodeWithMarkupForLayer(TAGTextNode tn, TAGMarkup markup, String layerName);
 
-  void addRefAnnotation(TAGMarkupDAO markup, String aName, String refId);
+  void addRefAnnotation(TAGMarkup markup, String aName, String refId);
 
-  void addBasicAnnotation(TAGMarkupDAO markup, TAGMLParser.BasicAnnotationContext actx);
+  void addBasicAnnotation(TAGMarkup markup, TAGMLParser.BasicAnnotationContext actx);
 
-  TAGMarkupDAO createMarkup(String extendedTag);
+  TAGMarkup createMarkup(String extendedTag);
 
-  void addMarkup(TAGMarkupDAO markup);
+  void addMarkup(TAGMarkup markup);
 
-  List<TAGMarkupDAO> getRelevantOpenMarkup(Deque<TAGMarkupDAO> allOpenMarkup);
+  List<TAGMarkup> getRelevantOpenMarkup(Deque<TAGMarkup> allOpenMarkup);
 
-  TAGTextNodeDAO createConnectedTextNode(String s, Deque<TAGMarkupDAO> allOpenMarkup);
+  TAGTextNode createConnectedTextNode(String s, Deque<TAGMarkup> allOpenMarkup);
 
-  TAGDocumentDAO getDocument();
+  TAGDocument getDocument();
 
-  Long persist(TAGDTO tagdto);
+  Long persist(TAGElement tagElement);
 
   ErrorListener getErrorListener();
 }

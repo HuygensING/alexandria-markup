@@ -71,7 +71,7 @@ public class TAGTextNodeDAO {
   }
 
   private void update() {
-    store.persist(textNode);
+    store.update(textNode);
   }
 
 }

@@ -28,8 +28,8 @@ import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNode;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class BDBTAGStore implements TAGStore {
+public class BDBTAGStore extends AbstractTAGStore {
   private static final Logger LOG = LoggerFactory.getLogger(BDBTAGStore.class);
   private static final LockMode LOCK_MODE = LockMode.READ_UNCOMMITTED_ALL;
 
@@ -107,87 +107,73 @@ public class BDBTAGStore implements TAGStore {
   }
 
   @Override
-  public Long persist(TAGDTO tagdto) {
-    checkNotNull(tagdto);
+  public Long update(TAGElement TAGElement) {
+    checkNotNull(TAGElement);
     assertInTransaction();
-    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    Class<? extends TAGElement> dtoClass = TAGElement.getClass();
     final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
     if (index != null) {
-      index.put(tx, tagdto);
+      index.put(tx, TAGElement);
 
     } else {
-      throw new RuntimeException("unhandled class: " + tagdto.getClass());
+      throw new RuntimeException("unhandled class: " + TAGElement.getClass());
     }
-    return tagdto.getDbId();
+    return TAGElement.getDbId();
   }
 
   @Override
-  public void remove(TAGDTO tagdto) {
-    checkNotNull(tagdto);
+  public void remove(TAGElement TAGElement) {
+    checkNotNull(TAGElement);
     assertInTransaction();
-    Class<? extends TAGDTO> dtoClass = tagdto.getClass();
+    Class<? extends TAGElement> dtoClass = TAGElement.getClass();
     final PrimaryIndex index = da.getPrimaryIndexForClass(dtoClass);
     if (index != null) {
-      index.delete(tx, tagdto.getDbId());
+      index.delete(tx, TAGElement.getDbId());
 
     } else {
-      throw new RuntimeException("unhandled class: " + tagdto.getClass());
+      throw new RuntimeException("unhandled class: " + TAGElement.getClass());
     }
   }
 
   // Document
   @Override
-  public TAGDocument getDocumentDTO(Long documentId) {
+  public TAGDocument getDocument(Long documentId) {
     assertInTransaction();
     return da.documentById.get(tx, documentId, LOCK_MODE);
   }
 
   @Override
-  public TAGDocumentDAO getDocument(Long documentId) {
-    return new TAGDocumentDAO(this, getDocumentDTO(documentId));
-  }
-
-  @Override
-  public TAGDocumentDAO createDocument() {
-    TAGDocument documentDTO = new TAGDocument();
-    persist(documentDTO);
-    documentDTO.initialize();
-    return new TAGDocumentDAO(this, documentDTO);
+  public TAGDocument createDocument() {
+    TAGDocument document = new TAGDocument();
+    update(document);
+    document.initialize();
+    return document;
   }
 
   // TextNode
   @Override
-  public TAGTextNode getTextNodeDTO(Long textNodeId) {
+  public TAGTextNode getTextNode(Long textNodeId) {
     assertInTransaction();
     return da.textNodeById.get(tx, textNodeId, LOCK_MODE);
   }
 
   @Override
-  public TAGTextNodeDAO createTextNode(String content) {
+  public TAGTextNode createTextNode(String content) {
     TAGTextNode tagTextNode = new TAGTextNode(content);
-    persist(tagTextNode);
-    return new TAGTextNodeDAO(this, tagTextNode);
-  }
-
-  @Override
-  public TAGTextNodeDAO createTextNode() {
-    return createTextNode("");
-  }
-
-  @Override
-  public TAGTextNodeDAO getTextNode(Long textNodeId) {
-    return new TAGTextNodeDAO(this, getTextNodeDTO(textNodeId));
+    update(tagTextNode);
+    return tagTextNode;
   }
 
   // Markup
+
   @Override
-  public TAGMarkup getMarkupDTO(Long markupId) {
+  public TAGMarkup getMarkup(Long markupId) {
     assertInTransaction();
     return da.markupById.get(tx, markupId, LOCK_MODE);
   }
 
   @Override
-  public TAGMarkupDAO createMarkup(TAGDocumentDAO document, String tagName) {
+  public TAGMarkup createMarkup(TAGDocument document, String tagName) {
     String tag;
     String suffix = null;
     String id = null;
@@ -213,17 +199,12 @@ public class BDBTAGStore implements TAGStore {
       tag = tagName;
     }
 
-    TAGMarkup markupDTO = new TAGMarkup(document.getDbId(), tag);
-    markupDTO.setMarkupId(id);
-    markupDTO.setSuffix(suffix);
-    persist(markupDTO);
+    TAGMarkup markup = new TAGMarkup(document.getDbId(), tag);
+    markup.setMarkupId(id);
+    markup.setSuffix(suffix);
+    update(markup);
     // document.addMarkup(markup);
-    return new TAGMarkupDAO(this, markupDTO);
-  }
-
-  @Override
-  public TAGMarkupDAO getMarkup(Long markupId) {
-    return new TAGMarkupDAO(this, getMarkupDTO(markupId));
+    return markup;
   }
 
   // Annotation
@@ -234,10 +215,10 @@ public class BDBTAGStore implements TAGStore {
 //
 //  public TAGAnnotationDTO createAnnotationDTO(String tag) {
 ////    TAGDocumentDTO document = new TAGDocumentDTO();
-////    persist(document);
+////    update(document);
 //    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
 ////    annotation.setDocumentId(document.getDbId());
-//    persist(annotation);
+//    update(annotation);
 //    return annotation;
 //  }
 
@@ -269,7 +250,7 @@ public class BDBTAGStore implements TAGStore {
 //    TAGAnnotationDTO dto = createAnnotationDTO(aName);
 //    dto.setType(type);
 //    dto.setValue(value);
-//    persist(dto);
+//    update(dto);
 //    return new TAGAnnotation(this, dto);
 //  }
 //
@@ -398,42 +379,42 @@ public class BDBTAGStore implements TAGStore {
   public Long createStringAnnotationValue(final String value) {
     assertInTransaction();
     StringAnnotationValue av = new StringAnnotationValue(value);
-    return persist(av);
+    return update(av);
   }
 
   @Override
   public Long createBooleanAnnotationValue(final Boolean value) {
     assertInTransaction();
     BooleanAnnotationValue av = new BooleanAnnotationValue(value);
-    return persist(av);
+    return update(av);
   }
 
   @Override
   public Long createNumberAnnotationValue(Double value) {
     assertInTransaction();
     NumberAnnotationValue av = new NumberAnnotationValue(value);
-    return persist(av);
+    return update(av);
   }
 
   @Override
   public Long createListAnnotationValue() {
     assertInTransaction();
     ListAnnotationValue av = new ListAnnotationValue();
-    return persist(av);
+    return update(av);
   }
 
   @Override
   public Long createMapAnnotationValue() {
     assertInTransaction();
     MapAnnotationValue av = new MapAnnotationValue();
-    return persist(av);
+    return update(av);
   }
 
   @Override
   public Long createReferenceValue(String value) {
     assertInTransaction();
     ReferenceValue av = new ReferenceValue(value);
-    return persist(av);
+    return update(av);
   }
 
   @Override
@@ -455,6 +436,5 @@ public class BDBTAGStore implements TAGStore {
   public ReferenceValue getReferenceValue(final Long id) {
     return da.referenceValueById.get(id);
   }
-
 
 }

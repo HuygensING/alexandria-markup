@@ -25,9 +25,11 @@ import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkup;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,24 +39,24 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
 public class TAGMarkupDAO {
   private final TAGStore store;
-  private final TAGMarkup markupDTO;
+  private final TAGMarkup markup;
   private final TAGDocumentDAO document;
 
-  public TAGMarkupDAO(TAGStore store, TAGMarkup markupDTO) {
+  public TAGMarkupDAO(TAGStore store, TAGMarkup markup) {
     checkNotNull(store);
-    checkNotNull(markupDTO);
+    checkNotNull(markup);
     this.store = store;
-    this.markupDTO = markupDTO;
-    this.document = store.getDocument(markupDTO.getDocumentId());
+    this.markup = markup;
+    this.document = store.getDocument(markup.getDocumentId());
     update();
   }
 
   public Long getDbId() {
-    return markupDTO.getDbId();
+    return markup.getDbId();
   }
 
   public String getTag() {
-    return markupDTO.getTag();
+    return markup.getTag();
   }
 
 //  @Deprecated
@@ -118,37 +120,37 @@ public class TAGMarkupDAO {
   }
 
   public TAGMarkup getDTO() {
-    return markupDTO;
+    return markup;
   }
 
   public void setIsDiscontinuous(final boolean b) {
-    markupDTO.setDiscontinuous(b);
+    markup.setDiscontinuous(b);
   }
 
   public boolean isDiscontinuous() {
-    return markupDTO.isDiscontinuous();
+    return markup.isDiscontinuous();
   }
 
   public boolean isContinuous() {
-    return !markupDTO.isDiscontinuous();
+    return !markup.isDiscontinuous();
   }
 
-  public String getExtendedTag() {
-    return getExtendedTag(Collections.emptySet());
-  }
-
-  public String getExtendedTag(final Set<String> newLayers) {
-    String layerSuffix = layerSuffix(newLayers);
-    String tag = getTag();
-    if (isOptional()) {
-      return TAGML.OPTIONAL_PREFIX + tag + layerSuffix;
-    }
-    String suffix = getSuffix();
-    if (StringUtils.isNotEmpty(suffix)) {
-      return tag + "~" + suffix + layerSuffix;
-    }
-    return tag + layerSuffix;
-  }
+//  public String getExtendedTag() {
+//    return getExtendedTag(Collections.emptySet());
+//  }
+//
+//  public String getExtendedTag(final Set<String> newLayers) {
+//    String layerSuffix = layerSuffix(newLayers);
+//    String tag = getTag();
+//    if (isOptional()) {
+//      return TAGML.OPTIONAL_PREFIX + tag + layerSuffix;
+//    }
+//    String suffix = getSuffix();
+//    if (StringUtils.isNotEmpty(suffix)) {
+//      return tag + "~" + suffix + layerSuffix;
+//    }
+//    return tag + layerSuffix;
+//  }
 
   public boolean hasN() {
     return getAnnotationStream()//
@@ -157,17 +159,17 @@ public class TAGMarkupDAO {
   }
 
   public String getSuffix() {
-    return markupDTO.getSuffix();
+    return markup.getSuffix();
   }
 
   public Optional<TAGMarkupDAO> getDominatedMarkup() {
-    return markupDTO.getDominatedMarkupId()
+    return markup.getDominatedMarkupId()
         .map(store::getMarkupDTO)
         .map(m -> new TAGMarkupDAO(store, m));
   }
 
   public void setDominatedMarkup(TAGMarkupDAO dominatedMarkup) {
-    markupDTO.setDominatedMarkupId(dominatedMarkup.getDbId());
+    markup.setDominatedMarkupId(dominatedMarkup.getDbId());
     if (!dominatedMarkup.getDTO().getDominatingMarkupId().isPresent()) {
       dominatedMarkup.setDominatingMarkup(this);
     }
@@ -175,48 +177,48 @@ public class TAGMarkupDAO {
   }
 
   public Optional<TAGMarkupDAO> getDominatingMarkup() {
-    return markupDTO.getDominatingMarkupId()
+    return markup.getDominatingMarkupId()
         .map(store::getMarkupDTO)
         .map(m -> new TAGMarkupDAO(store, m));
   }
 
   public boolean hasMarkupId() {
-    return markupDTO.getMarkupId() != null;
+    return markup.getMarkupId() != null;
   }
 
   public String getMarkupId() {
-    return markupDTO.getMarkupId();
+    return markup.getMarkupId();
   }
 
   public boolean isOptional() {
-    return markupDTO.isOptional();
+    return markup.isOptional();
   }
 
   public TAGMarkupDAO setOptional(boolean optional) {
-    markupDTO.setOptional(optional);
+    markup.setOptional(optional);
     return this;
   }
 
   public TAGMarkupDAO setMarkupId(String id) {
-    markupDTO.setMarkupId(id);
+    markup.setMarkupId(id);
     return this;
   }
 
   public boolean hasTag(String tag) {
-    return tag.equals(markupDTO.getTag());
+    return tag.equals(markup.getTag());
   }
 
   public void setSuffix(String suffix) {
-    markupDTO.setSuffix(suffix);
+    markup.setSuffix(suffix);
   }
 
   public TAGMarkupDAO addAllLayers(final Set<String> layers) {
-    markupDTO.addAllLayers(layers);
+    markup.addAllLayers(layers);
     return this;
   }
 
   public Set<String> getLayers() {
-    return markupDTO.getLayers();
+    return markup.getLayers();
   }
 
   public boolean isAnonymous() {
@@ -270,26 +272,26 @@ public class TAGMarkupDAO {
 
   @Override
   public String toString() {
-    return markupDTO.toString();
+    return markup.toString();
   }
 
   @Override
   public int hashCode() {
-    return markupDTO.hashCode();
+    return markup.hashCode();
   }
 
   @Override
   public boolean equals(Object other) {
     return other instanceof TAGMarkupDAO //
-        && markupDTO.equals(((TAGMarkupDAO) other).getDTO());
+        && markup.equals(((TAGMarkupDAO) other).getDTO());
   }
 
   private void update() {
-    store.persist(markupDTO);
+    store.update(markup);
   }
 
   private void setDominatingMarkup(TAGMarkupDAO dominatingMarkup) {
-    markupDTO.setDominatingMarkupId(dominatingMarkup.getDbId());
+    markup.setDominatingMarkupId(dominatingMarkup.getDbId());
     if (!dominatingMarkup.getDTO().getDominatedMarkupId().isPresent()) {
       dominatingMarkup.setDominatedMarkup(this);
     }

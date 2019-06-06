@@ -38,11 +38,11 @@ public class TAGStoreTest extends AlexandriaBaseStoreTest {
 
     runInStore(store ->
         store.runInTransaction(() -> {
-          Long textNodeId = store.persist(textNode);
+          Long textNodeId = store.update(textNode);
 
           TAGDocument document = new TAGDocument();
           document.getTextNodeIds().add(textNode.getDbId());
-          documentId.set(store.persist(document));
+          documentId.set(store.update(document));
         }));
 
     runInStore(store ->

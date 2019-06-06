@@ -218,7 +218,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   private Long createNewMarkup(TAGDocumentDAO document, String tag1, String layer, final TAGStore store) {
     TAGMarkupDAO markup = store.createMarkup(document, tag1);
     markup.getLayers().add(layer);
-    store.persist(markup.getDTO());
+    store.update(markup);
     return markup.getDbId();
   }
 

@@ -51,7 +51,7 @@ public class NodeRangeIndex {
     if (indexPoints == null) {
       indexPoints = new ArrayList<>();
 
-      List<Long> markupIds = document.getDTO().getMarkupIds();
+      List<Long> markupIds = document.getMarkupIds();
       Map<Long, Integer> markupIndex = new HashMap<>(markupIds.size());
       for (int i = 0; i < markupIds.size(); i++) {
         markupIndex.put(markupIds.get(i), i);
@@ -127,7 +127,7 @@ public class NodeRangeIndex {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getDTO().getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, document.getTextNodeIds().size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {
@@ -162,7 +162,7 @@ public class NodeRangeIndex {
 
     if (invertedMarkupsIndices.contains(i)) {
       // range i is inverted, so start with all textnodes, then subtract
-      IntStream.range(0, document.getDTO().getTextNodeIds().size()).forEach(textNodeIndices::add);
+      IntStream.range(0, document.getTextNodeIds().size()).forEach(textNodeIndices::add);
       textNodeIndices.removeAll(relevantTextNodeIndices);
 
     } else {

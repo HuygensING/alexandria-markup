@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
 @Entity(version = 2)
-public class TAGAnnotation implements TAGDTO {
+public class TAGAnnotation implements TAGElement {
   @PrimaryKey(sequence = "annotation_pk_sequence")
   private Long id;
 

@@ -1,6 +1,6 @@
 package nl.knaw.huygens.alexandria.storage.dto;
 
-/*
+/*-
  * #%L
  * alexandria-markup-core
  * =======
@@ -19,7 +19,13 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * limitations under the License.
  * #L%
  */
+public class TAGElementWrapper {
 
-public interface TAGDTO {
-  Long getDbId();
+  public static ExtendedTAGDocument wrap(TAGDocument document) {
+    return new ExtendedTAGDocument(document);
+  }
+
+  public static ExtendedTAGMarkup wrap(TAGMarkup markup) {
+    return new ExtendedTAGMarkup(markup);
+  }
 }

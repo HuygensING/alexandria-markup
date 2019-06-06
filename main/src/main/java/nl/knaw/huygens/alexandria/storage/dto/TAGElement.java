@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.storage;
+package nl.knaw.huygens.alexandria.storage.dto;
 
-/*-
+/*
  * #%L
  * alexandria-markup-core
  * =======
@@ -19,21 +19,7 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
-import com.sleepycat.persist.model.Persistent;
-import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huygens.alexandria.storage.dto.TAGElement;
 
-@Persistent
-public class AnnotationValue implements TAGElement {
-  @PrimaryKey(sequence = "annotation_pk_sequence")
-  private Long id;
-
-  public AnnotationValue() {
-  }
-
-  @Override
-  public Long getDbId() {
-    return id;
-  }
-
+public interface TAGElement {
+  Long getDbId();
 }

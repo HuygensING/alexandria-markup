@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Entity(version = 2)
-public class TAGMarkup implements TAGDTO {
+public class TAGMarkup implements TAGElement {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 

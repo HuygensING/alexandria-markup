@@ -83,7 +83,7 @@ public class TAGMLImporter {
       errorMsg = "Parsing errors:\n" + errors;
       throw new TAGMLSyntaxError(errorMsg);
     }
-    tagModelBuilder.persist(document.getDTO());
+    tagModelBuilder.persist(document);
     return document;
   }
 

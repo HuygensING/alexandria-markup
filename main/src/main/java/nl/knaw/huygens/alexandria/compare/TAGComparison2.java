@@ -72,13 +72,13 @@ public class TAGComparison2 {
     textSegments.forEach(segment -> {
       int rank = rankCounter.incrementAndGet();
       getTextNodeIdsForTokens(segment.tokensWa)
-          .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
+          .flatMap(original::getMarkupIdsForTextNodeId)
           .forEach(markupId -> {
             markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
             markupInfoMap1.get(markupId).setEndRank(rank);
           });
       getTextNodeIdsForTokens(segment.tokensWb)
-          .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
+          .flatMap(edited::getMarkupIdsForTextNodeId)
           .forEach(markupId -> {
             markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
             markupInfoMap2.get(markupId).setEndRank(rank);

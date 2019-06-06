@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 3)
-public class TAGDocument implements TAGDTO {
+public class TAGDocument implements TAGElement {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long id;
 

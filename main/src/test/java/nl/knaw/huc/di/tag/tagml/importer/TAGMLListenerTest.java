@@ -134,7 +134,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       TAGDocumentDAO document = assertTAGMLParses(input, store);
       logDocumentGraph(document, input);
 
-      TextGraph textGraph = document.getDTO().textGraph;
+      TextGraph textGraph = document.textGraph;
 
       List<TAGTextNodeDAO> textNodes = document.getTextNodeStream().collect(toList());
       assertThat(textNodes).hasSize(5);

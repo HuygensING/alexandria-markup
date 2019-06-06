@@ -92,10 +92,10 @@ public class TAGDocumentDAO {
         .map(store::getTextNode);
   }
 
-  public Stream<TAGMarkupDAO> getMarkupStream() {
-    return documentDTO.getMarkupIds().stream()
-        .map(store::getMarkup);
-  }
+//  public Stream<TAGMarkupDAO> getMarkupStream() {
+//    return documentDTO.getMarkupIds().stream()
+//        .map(store::getMarkup);
+//  }
 
   public TAGTextNodeDAO getFirstTextNode() {
     return store.getTextNode(documentDTO.getFirstTextNodeId());
@@ -247,7 +247,7 @@ public class TAGDocumentDAO {
 
   private void update() {
     documentDTO.updateModificationDate();
-    store.persist(documentDTO);
+    store.update(documentDTO);
   }
 
   private void associateTextNodeWithMarkupForLayer(TAGTextNodeDAO tagTextNodeDAO, TAGMarkup markup, String layerName) {
@@ -298,7 +298,7 @@ public class TAGDocumentDAO {
         documentDTO.textGraph.getLayerRootMap().remove(DEFAULT_LAYER);
         TAGMarkupDAO markup = store.getMarkup(defaultRootMarkupId);
         markup.getLayers().remove(DEFAULT_LAYER);
-        store.persist(markup.getDTO());
+        store.update(markup.getDTO());
         update();
       }
     }

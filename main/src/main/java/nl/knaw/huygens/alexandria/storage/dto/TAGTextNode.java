@@ -24,7 +24,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version = 2)
-public class TAGTextNode implements TAGDTO {
+public class TAGTextNode implements TAGElement {
   @PrimaryKey(sequence = "tgnode_pk_sequence")
   private Long dbId;
 
