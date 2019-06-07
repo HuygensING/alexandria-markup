@@ -51,6 +51,20 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
 
+  @Test
+  public void test() {
+    String tagML = "[root>" +
+        "[s><|[del>Dit kwam van een<del]|[del>[add>Gevolg van een<add]<del]|[add>De<add]|>" +
+        " te streng doorgedreven rationalisatie van zijne " +
+        "<|[del>opvoeding<del]|[del>[add>prinselijke jeugd<add]<del]|[add>prinsenjeugd [?del>bracht<?del] had dit met zich meegebracht<add]|><s]" +
+        "<root]";
+    runInStoreTransaction(store -> {
+      TAGDocument document = parseTAGML(tagML, store);
+      assertThat(document).isNotNull();
+    });
+  }
+
+
   @Test // RD-206
   public void testRD206_1() {
     String tagML = "[root metadata={" +
