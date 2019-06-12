@@ -19,25 +19,27 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * limitations under the License.
  * #L%
  */
+
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
-class TAG {
+public class TAG {
   public static final String NS = "https://brambg.github.io/tag-rdf/tag.ttl#";
 
   public static final Resource Document = resource("Document");
   public static final Resource MarkupElement = resource("MarkupElement");
   public static final Resource TextNode = resource("TextNode");
-  public static final Resource Attribute = resource("Attribute");
+  public static final Resource Annotation = resource("Annotation");
 
-  public static final Property hasAttributes = property("hasAttributes");
+  public static final Property hasAnnotations = property("hasAnnotations");
   public static final Property hasElements = property("hasElements");
   public static final Property hasRootMarkup = property("hasRootMarkup");
   public static final Property next = property("next");
   public static final Property name = property("name");
   public static final Property value = property("value");
   public static final Property marksUp = property("marksUp");
+  public static final Property firstTextNode = property("firstTextNode");
 
   private TAG() {
     throw new UnsupportedOperationException();

@@ -38,7 +38,7 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
 public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
-  private final TAGStore store;
+  public final TAGStore store;
   private final TAGDocumentDTO documentDTO;
   private final Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
 

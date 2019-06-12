@@ -23,9 +23,9 @@ package nl.knaw.huc.di.tag;
 import nl.knaw.huc.di.tag.model.graph.DotFactory;
 import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 

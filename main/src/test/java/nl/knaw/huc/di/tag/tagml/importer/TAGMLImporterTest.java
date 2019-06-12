@@ -23,6 +23,8 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
+import nl.knaw.huc.di.tag.tagml.rdf.DotFactory;
+import nl.knaw.huc.di.tag.tagml.rdf.RDFFactory;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -31,6 +33,7 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.jena.rdf.model.Model;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -61,9 +64,9 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     runInStoreTransaction(store -> {
       TAGDocument document = parseTAGML(tagML, store);
       assertThat(document).isNotNull();
+      testRDFConversion(document);
     });
   }
-
 
   @Test // RD-206
   public void testRD206_1() {
@@ -263,6 +266,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
       final List<TAGMarkup> markupForTextNode = document.getMarkupStreamForTextNode(textNode).collect(toList());
       assertThat(markupForTextNode).hasSize(1);
       assertThat(markupForTextNode).extracting("tag").contains("line");
+      testRDFConversion(document);
     });
   }
 
@@ -1023,6 +1027,20 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     });
     LOG.info("\n\nTAGML:\n{}\n", tagml);
     return tagml;
+  }
+
+  private void testRDFConversion(final TAGDocument document) {
+    Model model = RDFFactory.fromDocument(document);
+    String dot = DotFactory.fromModel(model);
+
+    System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
+    model.write(System.out, "TURTLE");
+    System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
+
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(dot);
+    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+
   }
 
 }

@@ -77,8 +77,8 @@ public class TAGKnowledgeModel {
     return markupResource;
   }
 
-  private String resourceURI(final Long resourceId, final String markup) {
-    return URI.create(TAG.getURI() + markup + resourceId).toASCIIString();
+  private String resourceURI(final Long resourceId, final String type) {
+    return URI.create(TAG.getURI() + type + resourceId).toASCIIString();
   }
 
   public void connectTextNodeAndMarkup(final Resource textResource, final Resource markupResource) {

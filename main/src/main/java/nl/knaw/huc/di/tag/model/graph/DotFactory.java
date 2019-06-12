@@ -134,7 +134,6 @@ public class DotFactory {
 
     } else if (markup.getExtendedTag().startsWith(BRANCH)) {
       return format("  m%d [shape=point;color=red]\n", markup.getDbId());
-
     }
     StringBuilder pre = new StringBuilder();
     StringBuilder post = new StringBuilder();
