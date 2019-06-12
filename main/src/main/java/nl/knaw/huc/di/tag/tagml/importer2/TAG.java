@@ -37,6 +37,7 @@ class TAG {
   public static final Property next = property("next");
   public static final Property name = property("name");
   public static final Property value = property("value");
+  public static final Property marksUp = property("marksUp");
 
   private TAG() {
     throw new UnsupportedOperationException();

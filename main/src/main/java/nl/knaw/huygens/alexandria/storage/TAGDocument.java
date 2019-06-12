@@ -257,7 +257,7 @@ public class TAGDocument {
   private void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, Long markupId, String layerName) {
 //    documentDTO.getTextNodeIdToMarkupIds()
 //        .computeIfAbsent(
-//            tagTextNode.getDbId(),
+//            tagTextNode.getResourceId(),
 //            f -> new LinkedHashSet<>()).add(markupId);
     documentDTO.textGraph.linkMarkupToTextNodeForLayer(markupId, tagTextNode.getDbId(), layerName);
     update();

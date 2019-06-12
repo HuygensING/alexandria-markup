@@ -19,13 +19,28 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * limitations under the License.
  * #L%
  */
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class TAGKnowledgeModel {
   private final Model model;
+  final AtomicLong resourceCounter = new AtomicLong();
+  private Multimap<MarkupResource, String> layersForMarkup = ArrayListMultimap.create();
+  private Map<String, String> parentLayers = new HashMap<>();
+  private List<String> layerNames = new ArrayList<>();
+  private Map<Long, Resource> resourceMap = new HashMap<>();
+  private final Map<String, Deque<MarkupResource>> openMarkupStackForLayer = new HashMap<>();
 
   TAGKnowledgeModel() {
     model = ModelFactory.createDefaultModel()
@@ -34,5 +49,118 @@ public class TAGKnowledgeModel {
 //        .setNsPrefix("dc", DC.getURI())
         .setNsPrefix("tag", TAG.getURI());
 
+  }
+
+  public DocumentResource createDocument() {
+    String documentURI = resourceURI(resourceCounter.getAndIncrement(), "document");
+    Resource resource = model.createResource(documentURI).addProperty(RDF.type, TAG.Document);
+    return new DocumentResource(resource);
+  }
+
+  public TextResource createTextResource(final String text) {
+    String textURI = resourceURI(resourceCounter.getAndIncrement(), "text");
+    Resource textResource = model.createResource(textURI).addProperty(RDF.type, TAG.TextNode);
+    Literal content = model.createLiteral(text);
+    textResource.addProperty(RDF.value, content);
+    return new TextResource(textResource);
+  }
+
+  public MarkupResource createMarkupResource(final String tag) {
+    Long resourceId = resourceCounter.getAndIncrement();
+    String markupURI = resourceURI(resourceId, "markup");
+    Resource resource = model.createResource(markupURI).addProperty(RDF.type, TAG.MarkupElement);
+    MarkupResource markupResource = new MarkupResource(resource);
+    markupResource.setResourceId(resourceId);
+    markupResource.setTag(tag);
+    markupResource.setExtendedTag(tag);
+    markupResource.addProperty(TAG.name, tag);
+    return markupResource;
+  }
+
+  private String resourceURI(final Long resourceId, final String markup) {
+    return URI.create(TAG.getURI() + markup + resourceId).toASCIIString();
+  }
+
+  public void connectTextNodeAndMarkup(final Resource textResource, final Resource markupResource) {
+    model.add(markupResource, TAG.marksUp, textResource);
+  }
+
+  public Set<String> getLayers(final MarkupResource m) {
+    return new HashSet(layersForMarkup.get(m));
+  }
+
+  public Map<String, String> getParentLayerMap() {
+    return parentLayers;
+  }
+
+  public List<String> getLayerNames() {
+    return layerNames;
+  }
+
+  public void addLayer(final String layerName, final MarkupResource rootMarkup, final String parentLayer) {
+    layerNames.add(layerName);
+    openMarkupStackForLayer.put(layerName, new ArrayDeque<>());
+    openMarkupStackForLayer.get(layerName).push(rootMarkup);
+    if (parentLayer != null) {
+      Deque<MarkupResource> openMarkupStack = openMarkupStackForLayer.get(parentLayer);
+      linkToParentMarkup(rootMarkup, parentLayer, openMarkupStack);
+    }
+  }
+
+  private void linkToParentMarkup(final MarkupResource rootMarkup, final String parentLayer, final Deque<MarkupResource> openMarkupStack) {
+    if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
+      Long parentMarkupId = openMarkupStack.peek().getResourceId();
+      Long childMarkupId = rootMarkup.getResourceId();
+      if (!Objects.equals(parentMarkupId, childMarkupId)) {
+//        boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
+//            .stream()
+//            .filter(LayerEdge.class::isInstance)
+//            .map(LayerEdge.class::cast)
+//            .filter(e -> e.hasLayer(parentLayer))
+//            .anyMatch(e -> {
+//              Collection<Long> targets = textGraph.getTargets(e);
+//              return targets.size() == 1 && targets.contains(childMarkupId);
+//            });
+//        if (!edgeExists) {
+//          textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
+//        }
+      }
+    }
+
+  }
+
+  public void openMarkupInLayer(final MarkupResource markup, final String layerId) {
+
+  }
+
+  public void addAllLayers(final MarkupResource markup, final Set<String> layers) {
+    layersForMarkup.putAll(markup, layers);
+  }
+
+  public MarkupResource getMarkup(final Long resourceId) {
+    return (MarkupResource) resourceMap.get(resourceId);
+  }
+
+  public void closeMarkupInLayer(final MarkupResource markup, final String layerName) {
+  }
+
+  public Long createStringAnnotationValue(final String value) {
+    return null;
+  }
+
+  public Long createBooleanAnnotationValue(final Boolean value) {
+    return null;
+  }
+
+  public Long createNumberAnnotationValue(final Double value) {
+    return null;
+  }
+
+  public Long createReferenceValue(final String value) {
+    return null;
+  }
+
+  public ListAnnotationValueResource createListAnnotationValue() {
+    return null;
   }
 }

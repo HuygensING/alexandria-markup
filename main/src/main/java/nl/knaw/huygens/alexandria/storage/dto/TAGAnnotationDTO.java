@@ -87,7 +87,7 @@ public class TAGAnnotationDTO implements TAGDTO {
 //  }
 
 //  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
-//    annotationIds.add(annotation.getDbId());
+//    annotationIds.add(annotation.getResourceId());
 //    return this;
 //  }
 //

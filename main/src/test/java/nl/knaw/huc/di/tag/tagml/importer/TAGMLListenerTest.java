@@ -144,7 +144,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
 //      TAGTextNode textNode2 = textNodes.get(1);
 //      assertThat(textNode2).isDivergence();
-//      Long divergenceNode = textNode2.getDbId();
+//      Long divergenceNode = textNode2.getResourceId();
 //      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
 //      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
 
@@ -159,7 +159,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
 //      TAGTextNode textNode6 = textNodes.get(5);
 //      assertThat(textNode6).isConvergence();
-//      Long convergenceNode = textNode6.getDbId();
+//      Long convergenceNode = textNode6.getResourceId();
 //      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
 //      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
 

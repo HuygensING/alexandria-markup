@@ -236,7 +236,7 @@ public class BDBTAGStore implements TAGStore {
 ////    TAGDocumentDTO document = new TAGDocumentDTO();
 ////    persist(document);
 //    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
-////    annotation.setDocumentId(document.getDbId());
+////    annotation.setDocumentId(document.getResourceId());
 //    persist(annotation);
 //    return annotation;
 //  }

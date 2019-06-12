@@ -472,9 +472,9 @@ public class LMNLImporter {
 //          String key = tag + "-" + annotationText(annotation);
 //          if (markupsToJoin.containsKey(key)) {
 //            TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
-//            markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
+//            markup.getDTO().getAnnotationIds().remove(annotation.getResourceId());
 ////            document.joinMarkup(originalMarkup, markup);
-//            markupIdsToRemove.add(markup.getDbId());
+//            markupIdsToRemove.add(markup.getResourceId());
 //          } else {
 //            markupsToJoin.put(key, markup.getDTO());
 //          }

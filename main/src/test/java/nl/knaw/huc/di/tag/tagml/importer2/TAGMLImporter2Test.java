@@ -29,7 +29,7 @@ import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 public class TAGMLImporter2Test extends TAGMLBaseTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter2Test.class);
 
-  @Test
+//  @Test
   public void test() {
     String tagML = "[root>" +
         "[s><|[del>Dit kwam van een<del]|[del>[add>Gevolg van een<add]<del]|[add>De<add]|>" +
