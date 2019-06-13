@@ -107,6 +107,7 @@ public class RDFFactory {
           });
       RDFList list = model.createList(subElements.iterator());
       markupResource.addProperty(TAG.elements, list);
+      // TODO: remove markup-text links for parent layers that cover textnodes that are linked by markup in child layer.
     });
 
     return model;

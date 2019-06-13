@@ -57,6 +57,12 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void test5() {
+    String tagml = "[line>[a>Cookie Monster [b>likes<b] cookies.<a]<line]";
+    testRDFConversion(tagml);
+  }
+
+  @Test
   public void loadOntology() {
     OntModel model = ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
     model.read(TAG.NS);
