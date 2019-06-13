@@ -73,7 +73,7 @@ public class TAGKnowledgeModel {
     markupResource.setResourceId(resourceId);
     markupResource.setTag(tag);
     markupResource.setExtendedTag(tag);
-    markupResource.addProperty(TAG.name, tag);
+    markupResource.addProperty(TAG.markupName, tag);
     return markupResource;
   }
 
@@ -82,7 +82,7 @@ public class TAGKnowledgeModel {
   }
 
   public void connectTextNodeAndMarkup(final Resource textResource, final Resource markupResource) {
-    model.add(markupResource, TAG.marksUp, textResource);
+    model.add(markupResource, TAG.elements, textResource);
   }
 
   public Set<String> getLayers(final MarkupResource m) {

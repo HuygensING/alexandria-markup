@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,15 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Test;
 
 public class RDFFactoryTest extends TAGBaseStoreTest {
@@ -45,10 +50,23 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
     testRDFConversion(tagml);
   }
 
+  @Test
+  public void test4() {
+    String tagml = "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
+    testRDFConversion(tagml);
+  }
+
+  @Test
+  public void loadOntology() {
+    OntModel model = ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
+    model.read(TAG.NS);
+    System.out.println(DotFactory.fromModel(model));
+  }
+
   private void testRDFConversion(String tagml) {
-    runInStoreTransaction(store -> {
-      TAGDocument document = new TAGMLImporter(store).importTAGML(tagml.trim());
-      Model model = RDFFactory.fromDocument(document);
+    runInStore(store -> {
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml.trim()));
+      Model model = store.runInTransaction(() -> RDFFactory.fromDocument(document));
       String dot = DotFactory.fromModel(model);
 
       System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
@@ -59,6 +77,6 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
       System.out.println(dot);
       System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
     });
-   }
+  }
 
 }
