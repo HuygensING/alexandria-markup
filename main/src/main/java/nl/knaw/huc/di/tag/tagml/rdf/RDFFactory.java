@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,8 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * #L%
  */
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
@@ -38,6 +40,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class RDFFactory {
 
@@ -62,25 +65,18 @@ public class RDFFactory {
       documentResource.addProperty(TAG.layer, layerResource);
     });
 
-    Map<Long, Resource> textResources = new HashMap<>();
-    AtomicReference<Resource> lastTextResource = new AtomicReference<>();
-    textGraph.getTextNodeIdStream()
-        .map(document.store::getTextNode)
-        .forEach(textNode -> {
-          Long id = textNode.getDbId();
-          Resource textResource = createTextResource(model, textNode.getText(), id);
-          textResources.put(id, textResource);
-          lastTextResource.set(textResource);
-        });
-
     Map<Long, Resource> markupResources = new HashMap<>();
+    Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
     document.getMarkupStream().forEach(markup -> {
       Resource markupResource = createMarkupResource(model, markup);
       if (markupResources.isEmpty()) {
         model.add(documentResource, TAG.root, markupResource);
       }
-      markupResources.put(markup.getDbId(), markupResource);
-      for (String layer : markup.getLayers()) {
+      Long id = markup.getDbId();
+      markupResources.put(id, markupResource);
+      Set<String> layers = markup.getLayers();
+      layersForMarkup.putAll(id, layers);
+      for (String layer : layers) {
         markupResource.addProperty(TAG.layer, layerResources.get(layer));
       }
       markup.getAnnotationStream()
@@ -88,17 +84,33 @@ public class RDFFactory {
           .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
     });
 
+    Map<Long, Resource> textResources = new HashMap<>();
+    AtomicReference<Resource> lastTextResource = new AtomicReference<>();
+    Multimap<Long, String> layersForTextNode = ArrayListMultimap.create();
+    textGraph.getTextNodeIdStream()
+        .map(document.store::getTextNode)
+        .forEach(textNode -> {
+          Long id = textNode.getDbId();
+          Resource textResource = createTextResource(model, textNode.getText(), id);
+          textResources.put(id, textResource);
+          lastTextResource.set(textResource);
+          List<String> relevantLayers = determineRelevantLayers(textGraph, id, layersForMarkup);
+          layersForTextNode.putAll(id, relevantLayers);
+        });
+
     markupResources.keySet().forEach(markupId -> {
       Resource markupResource = markupResources.get(markupId);
+
       List<Resource> subElements = new ArrayList<>();
       textGraph.getOutgoingEdges(markupId).stream()
           .filter(LayerEdge.class::isInstance)
           .map(LayerEdge.class::cast)
           .forEach(le -> {
+            String layerName = le.getLayerName();
             if (le.hasType(EdgeType.hasText)) {
-              textGraph.getTargets(le).forEach(t -> {
-                subElements.add(textResources.get(t.longValue()));
-              });
+              textGraph.getTargets(le).stream()
+                  .filter(tId -> layersForTextNode.get(tId).contains(layerName))
+                  .forEach(tId -> subElements.add(textResources.get(tId.longValue())));
             } else if (le.hasType(EdgeType.hasMarkup)) {
               textGraph.getTargets(le).forEach(t -> {
                 subElements.add(markupResources.get(t.longValue()));
@@ -107,10 +119,30 @@ public class RDFFactory {
           });
       RDFList list = model.createList(subElements.iterator());
       markupResource.addProperty(TAG.elements, list);
-      // TODO: remove markup-text links for parent layers that cover textnodes that are linked by markup in child layer.
     });
 
     return model;
+  }
+
+  private static List<String> determineRelevantLayers(TextGraph textGraph, Long id, Multimap<Long, String> layersForMarkup) {
+    // returns all the layers to which this textnode belongs through its markup, leaving out parent layers if a child layer is included
+    List<String> list = new ArrayList<>();
+    Set<String> rawLayers = textGraph.getIncomingEdges(id).stream()
+        .filter(LayerEdge.class::isInstance)
+        .map(LayerEdge.class::cast)
+        .filter(e -> e.hasType(EdgeType.hasText))
+        .map(textGraph::getSource)
+        .map(layersForMarkup::get)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+    list.addAll(rawLayers);
+    // Now remove those layers that are parents of other layers in the list.
+    Map<String, String> parentLayerMap = textGraph.getParentLayerMap();
+    rawLayers.forEach(l -> {
+      String parentLayer = parentLayerMap.get(l);
+      list.remove(parentLayer);
+    });
+    return list;
   }
 
   private static Resource createLayerResource(final Model model, final String layerName) {
