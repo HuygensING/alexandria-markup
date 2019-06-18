@@ -52,6 +52,7 @@ public class TAG {
   public static final Property elements = property("elements");
   public static final Property value = property("value");
   public static final Property content = property("content");
+  public static final Property continued = property("continued");
 
   private TAG() {
     throw new UnsupportedOperationException();

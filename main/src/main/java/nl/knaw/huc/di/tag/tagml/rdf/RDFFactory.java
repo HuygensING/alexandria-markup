@@ -67,12 +67,16 @@ public class RDFFactory {
 
     Map<Long, Resource> markupResources = new HashMap<>();
     Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
+    Map<Long, Long> continuedMarkupId = new HashMap<>();
     document.getMarkupStream().forEach(markup -> {
+      Long id = markup.getDbId();
+      if (markup.isSuspended()){
+        continuedMarkupId.put(id, textGraph.getContinuedMarkupId(id).get());
+      }
       Resource markupResource = createMarkupResource(model, markup);
       if (markupResources.isEmpty()) {
         model.add(documentResource, TAG.root, markupResource);
       }
-      Long id = markup.getDbId();
       markupResources.put(id, markupResource);
       Set<String> layers = markup.getLayers();
       layersForMarkup.putAll(id, layers);
@@ -100,7 +104,6 @@ public class RDFFactory {
 
     markupResources.keySet().forEach(markupId -> {
       Resource markupResource = markupResources.get(markupId);
-
       List<Resource> subElements = new ArrayList<>();
       textGraph.getOutgoingEdges(markupId).stream()
           .filter(LayerEdge.class::isInstance)
@@ -110,15 +113,22 @@ public class RDFFactory {
             if (le.hasType(EdgeType.hasText)) {
               textGraph.getTargets(le).stream()
                   .filter(tId -> layersForTextNode.get(tId).contains(layerName))
-                  .forEach(tId -> subElements.add(textResources.get(tId.longValue())));
+                  .forEach(tId -> subElements.add(textResources.get(tId)));
             } else if (le.hasType(EdgeType.hasMarkup)) {
               textGraph.getTargets(le).forEach(t -> {
-                subElements.add(markupResources.get(t.longValue()));
+                subElements.add(markupResources.get(t));
               });
             }
           });
       RDFList list = model.createList(subElements.iterator());
       markupResource.addProperty(TAG.elements, list);
+    });
+
+    // connect discontinuous markup
+    continuedMarkupId.forEach((suspend,resume)->{
+      Resource suspended = markupResources.get(suspend);
+      Resource resumed = markupResources.get(resume);
+      suspended.addProperty(TAG.continued, resumed);
     });
 
     return model;
