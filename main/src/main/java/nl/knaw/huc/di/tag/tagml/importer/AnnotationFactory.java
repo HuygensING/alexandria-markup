@@ -116,8 +116,7 @@ public class AnnotationFactory {
 
   private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
     final AnnotationInfo annotationInfo;
-    List<Object> list = value;
-    verifyListElementsAreSameType(aName, annotationValueContext, list);
+    verifyListElementsAreSameType(aName, annotationValueContext, value);
     verifySeparatorsAreCommas(aName, annotationValueContext);
     Long id = store.createListAnnotationValue();
     annotationInfo = new AnnotationInfo(id, AnnotationType.List, aName);
@@ -126,7 +125,7 @@ public class AnnotationFactory {
     for (int i = 1; i < childCount; i += 2) {
       ParseTree listElement = valueTree.getChild(i);
       final ParseTree subValueParseTree = listElement.getChild(0);
-      Object subValue = list.get((i - 1) / 2);
+      Object subValue = value.get((i - 1) / 2);
       final AnnotationValueContext subValueContext = (AnnotationValueContext) listElement;
       AnnotationInfo listElementInfo = makeAnnotation("", subValueContext, subValue);
       textGraph.addListItem(id, listElementInfo);
@@ -138,7 +137,6 @@ public class AnnotationFactory {
     final AnnotationInfo annotationInfo;
     Long id = store.createMapAnnotationValue();
     annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
-    HashMap<String, Object> map = value;
     ParseTree valueTree = annotationValueContext.children.get(0);
     int childCount = valueTree.getChildCount(); // children: '{' annotation+ '}'
     for (int i = 1; i < childCount - 1; i++) {
@@ -147,7 +145,7 @@ public class AnnotationFactory {
       ParseTree subValueParseTree = hashElement.getChild(2);
       if (subValueParseTree instanceof AnnotationValueContext) {
         final AnnotationValueContext subValueContext = (AnnotationValueContext) subValueParseTree;
-        final Object subValue = map.get(subName);
+        final Object subValue = value.get(subName);
         final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
         textGraph.addAnnotationEdge(id, aInfo);
 

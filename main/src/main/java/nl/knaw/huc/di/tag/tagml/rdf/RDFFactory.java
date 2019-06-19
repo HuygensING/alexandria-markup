@@ -115,9 +115,7 @@ public class RDFFactory {
                   .filter(tId -> layersForTextNode.get(tId).contains(layerName))
                   .forEach(tId -> subElements.add(textResources.get(tId)));
             } else if (le.hasType(EdgeType.hasMarkup)) {
-              textGraph.getTargets(le).forEach(t -> {
-                subElements.add(markupResources.get(t));
-              });
+              textGraph.getTargets(le).forEach(t -> subElements.add(markupResources.get(t)));
             }
           });
       RDFList list = model.createList(subElements.iterator());
@@ -136,7 +134,6 @@ public class RDFFactory {
 
   private static List<String> determineRelevantLayers(TextGraph textGraph, Long id, Multimap<Long, String> layersForMarkup) {
     // returns all the layers to which this textnode belongs through its markup, leaving out parent layers if a child layer is included
-    List<String> list = new ArrayList<>();
     Set<String> rawLayers = textGraph.getIncomingEdges(id).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
@@ -145,7 +142,7 @@ public class RDFFactory {
         .map(layersForMarkup::get)
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
-    list.addAll(rawLayers);
+    List<String> list = new ArrayList<>(rawLayers);
     // Now remove those layers that are parents of other layers in the list.
     Map<String, String> parentLayerMap = textGraph.getParentLayerMap();
     rawLayers.forEach(l -> {
@@ -157,18 +154,16 @@ public class RDFFactory {
 
   private static Resource createLayerResource(final Model model, final String layerName) {
     String uri = TAG.NS + "layer_" + layerName;
-    Resource resource = model.createResource(uri)
+    return model.createResource(uri)
         .addProperty(RDF.type, TAG.Layer)
         .addProperty(TAG.layerName, layerName);
-    return resource;
   }
 
   private static Resource createMarkupResource(final Model model, final TAGMarkup markup) {
     String textURI = resourceURI("markup", markup.getDbId());
-    Resource resource = model.createResource(textURI)
+    return model.createResource(textURI)
         .addProperty(RDF.type, TAG.MarkupElement)
         .addProperty(TAG.markupName, markup.getTag());
-    return resource;
   }
 
   public static Resource createTextResource(final Model model, final String text, final Long resourceId) {
@@ -211,10 +206,9 @@ public class RDFFactory {
 
   private static Resource toLayerResource(Model model, String layerName) {
     String layerURI = resourceURI("layer", new Random().nextLong());
-    Resource resource = model.createResource(layerURI)
+    return model.createResource(layerURI)
         .addProperty(RDF.type, TAG.Layer)
         .addProperty(TAG.layerName, layerName);
-    return resource;
   }
 
   private static String resourceURI(final String type, final Long resourceId) {

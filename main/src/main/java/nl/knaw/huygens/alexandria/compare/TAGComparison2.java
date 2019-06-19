@@ -311,11 +311,10 @@ public class TAGComparison2 {
       markedUpText = markedUpText.substring(0, half) + " ... " + markedUpText.substring(half + 5);
     }
     String extendedTag = markup.getExtendedTag();
-    String text = String.format("[%s>%s<%s]",
+    return String.format("[%s>%s<%s]",
         extendedTag,
         markedUpText,
         extendedTag);
-    return text;
   }
 
   private void removeDeterminedPairs(final boolean[] determinedInA, final boolean[] determinedInB, final List<Pair<Integer, Integer>> potentialReplacements) {

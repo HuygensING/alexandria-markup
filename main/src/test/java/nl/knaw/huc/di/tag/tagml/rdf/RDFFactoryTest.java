@@ -98,6 +98,12 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testNonLinearity() {
+    String tagml = "[q>To be, or <|to be not|not to be|>.<q]";
+    testRDFConversionContains(tagml, "");
+  }
+
+  @Test
   public void loadOntology() {
     OntModel model = ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
     model.read(TAG.NS);

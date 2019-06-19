@@ -20,7 +20,6 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #L%
  */
 import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

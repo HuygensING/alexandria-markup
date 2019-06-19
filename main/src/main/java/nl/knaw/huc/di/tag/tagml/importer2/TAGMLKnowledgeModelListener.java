@@ -473,7 +473,7 @@ public class TAGMLKnowledgeModelListener extends TAGMLParserBaseListener {
 
   private Set<String> getOpenLayers() {
     return getRelevantOpenMarkup().stream()
-        .map(m -> knowledgeModel.getLayers(m))
+        .map(knowledgeModel::getLayers)
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -541,8 +541,7 @@ public class TAGMLKnowledgeModelListener extends TAGMLParserBaseListener {
   }
 
   private MarkupResource addMarkup(String extendedTag, List<TAGMLParser.AnnotationContext> atts, ParserRuleContext ctx) {
-    MarkupResource markup = knowledgeModel.createMarkupResource(extendedTag);
-//    addAnnotations(atts, markup);
+    //    addAnnotations(atts, markup);
 //    if (markup.hasMarkupId()) {
 ////      identifiedMarkups.put(extendedTag, markup);
 //      String id = markup.getMarkupId();
@@ -553,7 +552,7 @@ public class TAGMLKnowledgeModelListener extends TAGMLParserBaseListener {
 //      }
 //      idsInUse.put(id, extendedTag);
 //    }
-    return markup;
+    return knowledgeModel.createMarkupResource(extendedTag);
   }
 
   private void addAnnotations(List<TAGMLParser.AnnotationContext> annotationContexts, MarkupResource markup) {

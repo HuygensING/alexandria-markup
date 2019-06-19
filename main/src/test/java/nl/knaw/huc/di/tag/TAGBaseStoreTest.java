@@ -35,7 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 

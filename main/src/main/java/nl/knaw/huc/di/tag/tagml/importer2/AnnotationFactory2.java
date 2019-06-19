@@ -114,8 +114,7 @@ public class AnnotationFactory2 {
 
   private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
     final AnnotationInfo annotationInfo;
-    List<Object> list = value;
-    verifyListElementsAreSameType(aName, annotationValueContext, list);
+    verifyListElementsAreSameType(aName, annotationValueContext, value);
     verifySeparatorsAreCommas(aName, annotationValueContext);
     ListAnnotationValueResource resource = model.createListAnnotationValue();
 //    annotationInfo = new AnnotationInfo(resource, AnnotationType.List, aName);
@@ -124,7 +123,7 @@ public class AnnotationFactory2 {
     for (int i = 1; i < childCount; i += 2) {
       ParseTree listElement = valueTree.getChild(i);
       final ParseTree subValueParseTree = listElement.getChild(0);
-      Object subValue = list.get((i - 1) / 2);
+      Object subValue = value.get((i - 1) / 2);
       final AnnotationValueContext subValueContext = (AnnotationValueContext) listElement;
       AnnotationInfo listElementInfo = makeAnnotation("", subValueContext, subValue);
       resource.addListItem(listElementInfo);
@@ -134,8 +133,7 @@ public class AnnotationFactory2 {
   }
 
   private AnnotationInfo makeMapAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final HashMap<String, Object> value) {
-    final AnnotationInfo annotationInfo=null;
-//    Long id = store.createMapAnnotationValue();
+    //    Long id = store.createMapAnnotationValue();
 //    annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
 //    HashMap<String, Object> map = value;
 //    ParseTree valueTree = annotationValueContext.children.get(0);
@@ -166,15 +164,14 @@ public class AnnotationFactory2 {
 //        throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
 //      }
 //    }
-    return annotationInfo;
+    return null;
   }
 
   private AnnotationInfo makeOtherAnnotation(final String aName, final AnnotationValueContext annotationValueContext) {
-    final AnnotationInfo annotationInfo=null;
-//    String placeholder = annotationValueContext.getText();
+    //    String placeholder = annotationValueContext.getText();
 //    Long id = store.createStringAnnotationValue(placeholder);
 //    annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
-    return annotationInfo;
+    return null;
   }
 
   private void verifyListElementsAreSameType(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> list) {
