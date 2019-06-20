@@ -174,8 +174,7 @@ public class RDFFactory {
     String textURI = resourceURI("text", resourceId);
     Resource textResource = model.createResource(textURI)
         .addProperty(RDF.type, TAG.TextNode);
-    Literal content = model.createLiteral(text);
-    textResource.addProperty(TAG.content, content);
+    textResource.addProperty(TAG.content, model.createLiteral(text));
     return textResource;
   }
 
@@ -199,20 +198,29 @@ public class RDFFactory {
     if (!name.isEmpty()) {
       resource.addProperty(TAG.annotationName, name);
     }
+
     if (annotationInfo.getType().equals(AnnotationType.String)) {
       String value = store.getStringAnnotationValue(annotationInfo.getNodeId()).getValue();
-      Literal literal = model.createLiteral(value);
-      resource.addProperty(TAG.value, literal);
-    } else if (annotationInfo.getType().equals(AnnotationType.Number)) {
-      Double value = store.getNumberAnnotationValue(annotationInfo.getNodeId()).getValue();
-      Literal literal = model.createTypedLiteral(value);
-      resource.addProperty(TAG.value, literal);
+      resource.addProperty(TAG.value, model.createLiteral(value));
+
     } else if (annotationInfo.getType().equals(AnnotationType.Boolean)) {
       Boolean value = store.getBooleanAnnotationValue(annotationInfo.getNodeId()).getValue();
-      Literal literal = model.createTypedLiteral(value);
-      resource.addProperty(TAG.value, literal);
+      resource.addProperty(TAG.value, model.createTypedLiteral(value));
+
+    } else if (annotationInfo.getType().equals(AnnotationType.Number)) {
+      Double value = store.getNumberAnnotationValue(annotationInfo.getNodeId()).getValue();
+      resource.addProperty(TAG.value, model.createTypedLiteral(value));
+
     } else if (annotationInfo.getType().equals(AnnotationType.List)) {
       Iterator<Resource> iterator = annotationFactory.getListValue(annotationInfo).stream()
+          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory))
+          .collect(toList())
+          .iterator();
+      RDFList list = model.createList(iterator);
+      resource.addProperty(TAG.value, list);
+
+    } else if (annotationInfo.getType().equals(AnnotationType.Map)) {
+      Iterator<Resource> iterator = annotationFactory.getMapValue(annotationInfo).stream()
           .map(ai -> toAnnotationResource(model, ai, store, annotationFactory))
           .collect(toList())
           .iterator();

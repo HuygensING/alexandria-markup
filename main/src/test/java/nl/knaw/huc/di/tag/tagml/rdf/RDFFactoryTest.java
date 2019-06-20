@@ -95,6 +95,12 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testMapAnnotation() {
+    String tagml = "[quote>Van de maan af gezien zijn we allen even groot.\n[by>[alias person={first_name='Eduard' middle_name='Douwes' last_name='Dekker'}>Multatuli<alias]<by]<quote]";
+    testRDFConversionContains(tagml, "tag:content  \"Van de maan af gezien zijn we allen even groot.\\n\"");
+  }
+
+  @Test
   public void testOverlap() {
     String tagml = "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
     testRDFConversionContains(tagml, "");
