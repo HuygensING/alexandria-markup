@@ -104,8 +104,7 @@ public class TAGMarkup {
   }
 
   private AnnotationInfo toAnnotationInfo(final AnnotationEdge annotationEdge) {
-    Collection<Long> targets = document.getDTO().textGraph.getTargets(annotationEdge);
-    final Long valueNode = targets.iterator().next();
+    final Long valueNode = document.getDTO().textGraph.getTargets(annotationEdge).iterator().next();
     return new AnnotationInfo(valueNode, annotationEdge.getAnnotationType(), annotationEdge.getField());
   }
 

@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huygens.alexandria.storage.DataAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ import java.util.TreeSet;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
-  @PrimaryKey(sequence = "tgnode_pk_sequence")
+  @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
 
   private String tag;

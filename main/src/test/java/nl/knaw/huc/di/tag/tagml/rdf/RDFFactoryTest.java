@@ -101,6 +101,18 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testRichTextAnnotation() {
+    String tagml = "[text>Hello, my name is [gloss addition=[>[p>that’s [qualifier>Mrs.<qualifier] to you<p]<]>Doubtfire. How do you do?<gloss]<text]";
+    testRDFConversionContains(tagml, "");
+  }
+
+  @Test
+  public void testReferenceAnnotation() {
+    String tagml = "[text meta={persons=[{:id=huyg0001 name='Constantijn Huygens'}]}>[title>De Zee-Straet<title] door [author pers->huyg0001>Constantijn Huygens<author] ....... <text]";
+    testRDFConversionContains(tagml, "");
+  }
+
+  @Test
   public void testOverlap() {
     String tagml = "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
     testRDFConversionContains(tagml, "");

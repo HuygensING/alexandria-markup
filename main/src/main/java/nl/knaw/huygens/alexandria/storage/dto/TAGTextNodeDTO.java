@@ -22,10 +22,11 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+import nl.knaw.huygens.alexandria.storage.DataAccessor;
 
 @Entity(version = 2)
 public class TAGTextNodeDTO implements TAGDTO {
-  @PrimaryKey(sequence = "tgnode_pk_sequence")
+  @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long dbId;
 
   private String text;

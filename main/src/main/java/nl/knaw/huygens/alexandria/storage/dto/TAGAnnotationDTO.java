@@ -23,10 +23,11 @@ package nl.knaw.huygens.alexandria.storage.dto;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
+import nl.knaw.huygens.alexandria.storage.DataAccessor;
 
-@Entity(version = 2)
+@Entity(version = 3)
 public class TAGAnnotationDTO implements TAGDTO {
-  @PrimaryKey(sequence = "annotation_pk_sequence")
+  @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
 
   private String key;

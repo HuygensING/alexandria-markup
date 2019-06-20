@@ -19,20 +19,23 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
+
 import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
 @Persistent
 public class AnnotationEdge implements Edge {
-  AnnotationType annotationType;
-  String field;
+  private AnnotationType annotationType;
+  private String field;
+  private String id;
 
   private AnnotationEdge() {
   }
 
-  public AnnotationEdge(AnnotationType type, String field) {
+  public AnnotationEdge(AnnotationType type, String field, final String id) {
     annotationType = type;
     this.field = field;
+    this.id = id;
   }
 
   public AnnotationType getAnnotationType() {
@@ -55,4 +58,7 @@ public class AnnotationEdge implements Edge {
     return EdgeType.hasAnnotation.name();
   }
 
+  public String getId() {
+    return id;
+  }
 }

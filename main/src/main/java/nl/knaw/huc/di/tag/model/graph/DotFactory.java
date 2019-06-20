@@ -45,13 +45,15 @@ public class DotFactory {
 
   public String toDot(TAGKnowledgeModel knowledgeModel, final String label) {
     layerColor.clear();
-    StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
-        .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
-        .append("  d [shape=doublecircle;label=\"\"]\n")
-        .append("  subgraph{\n");
-    // TODO
 
-    return dotBuilder.append("}").toString();
+    final String dotBuilder = "digraph TextGraph{\n" +
+        "  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n" +
+        "  d [shape=doublecircle;label=\"\"]\n" +
+        "  subgraph{\n" +
+        // TODO
+
+        "}";
+    return dotBuilder;
   }
 
   public String toDot(TAGDocument document, final String label) {

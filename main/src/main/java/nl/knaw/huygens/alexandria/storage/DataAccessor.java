@@ -30,7 +30,9 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import java.util.HashMap;
 import java.util.Map;
 
-class DataAccessor {
+public class DataAccessor {
+  public static final String SEQUENCE = "tgnode_pk_sequence";
+
   final PrimaryIndex<Long, TAGDocumentDTO> documentById;
   final PrimaryIndex<Long, TAGTextNodeDTO> textNodeById;
   final PrimaryIndex<Long, TAGMarkupDTO> markupById;

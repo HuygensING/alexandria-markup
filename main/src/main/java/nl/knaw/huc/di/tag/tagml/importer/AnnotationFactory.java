@@ -152,8 +152,7 @@ public class AnnotationFactory {
       } else if (subValueParseTree instanceof IdValueContext) {
         IdValueContext idValueContext = (IdValueContext) subValueParseTree;
         String idValue = idValueContext.getText();
-        LOG.warn("TODO: handle idValue {}", idValue);
-        // TODO: handle idValue
+        annotationInfo.setId(idValue);
 
       } else if (subValueParseTree instanceof RefValueContext) {
         RefValueContext refValueContext = (RefValueContext) subValueParseTree;
@@ -318,14 +317,18 @@ public class AnnotationFactory {
   private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {
     Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
     AnnotationType type = listItemEdge.getAnnotationType();
-    return new AnnotationInfo(nodeId, type, "");
+    AnnotationInfo annotationInfo = new AnnotationInfo(nodeId, type, "");
+    annotationInfo.setId(listItemEdge.getId());
+    return annotationInfo;
   }
 
   private AnnotationInfo toAnnotationInfo(AnnotationEdge annotationEdge) {
     Long nodeId = textGraph.getTargets(annotationEdge).iterator().next();
     AnnotationType type = annotationEdge.getAnnotationType();
     String name = annotationEdge.getField();
-    return new AnnotationInfo(nodeId, type, name);
+    AnnotationInfo annotationInfo = new AnnotationInfo(nodeId, type, name);
+    annotationInfo.setId(annotationEdge.getId());
+    return annotationInfo;
   }
 
   private class KeyValue {

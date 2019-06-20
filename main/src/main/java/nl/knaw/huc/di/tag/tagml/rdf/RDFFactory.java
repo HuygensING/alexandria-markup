@@ -32,7 +32,10 @@ import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFList;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +75,7 @@ public class RDFFactory {
     Map<Long, Resource> markupResources = new HashMap<>();
     Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
     Map<Long, Long> continuedMarkupId = new HashMap<>();
+    final Map<String, Resource> identifiedResources = new HashMap<>();
     document.getMarkupStream().forEach(markup -> {
       Long id = markup.getDbId();
       if (markup.isSuspended()) {
@@ -88,7 +92,7 @@ public class RDFFactory {
         markupResource.addProperty(TAG.layer, layerResources.get(layer));
       }
       markup.getAnnotationStream()
-          .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory))
+          .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory, identifiedResources))
           .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
     });
 
@@ -190,10 +194,11 @@ public class RDFFactory {
     annotationTypeResources.put(AnnotationType.RichText, TAG.RichTextAnnotation);
   }
 
-  private static Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store, AnnotationFactory annotationFactory) {
+  private static Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store, AnnotationFactory annotationFactory, Map<String, Resource> identifiedResources) {
     String annotationURI = resourceURI("annotation", annotationInfo.getNodeId());
     Resource resource = model.createResource(annotationURI)
         .addProperty(RDF.type, annotationTypeResources.get(annotationInfo.getType()));
+    annotationInfo.getId().ifPresent(s -> identifiedResources.put(s, resource));
     String name = annotationInfo.getName();
     if (!name.isEmpty()) {
       resource.addProperty(TAG.annotationName, name);
@@ -213,7 +218,7 @@ public class RDFFactory {
 
     } else if (annotationInfo.getType().equals(AnnotationType.List)) {
       Iterator<Resource> iterator = annotationFactory.getListValue(annotationInfo).stream()
-          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory))
+          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory, identifiedResources))
           .collect(toList())
           .iterator();
       RDFList list = model.createList(iterator);
@@ -221,11 +226,16 @@ public class RDFFactory {
 
     } else if (annotationInfo.getType().equals(AnnotationType.Map)) {
       Iterator<Resource> iterator = annotationFactory.getMapValue(annotationInfo).stream()
-          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory))
+          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory, identifiedResources))
           .collect(toList())
           .iterator();
       RDFList list = model.createList(iterator);
       resource.addProperty(TAG.value, list);
+
+    } else if (annotationInfo.getType().equals(AnnotationType.Reference)) {
+      String referenceValue = annotationFactory.getReferenceValue(annotationInfo);
+      Resource referredResource = identifiedResources.get(referenceValue);
+      resource.addProperty(TAG.value, referredResource);
 
     } else {
       throw new RuntimeException("Unhandled AnnotationType: " + annotationInfo.getType());

@@ -25,7 +25,7 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 
 @Persistent
 public class AnnotationValue implements TAGDTO {
-  @PrimaryKey(sequence = "annotation_pk_sequence")
+  @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
 
   public AnnotationValue() {

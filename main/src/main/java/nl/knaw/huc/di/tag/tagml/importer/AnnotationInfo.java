@@ -23,10 +23,13 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 public class AnnotationInfo {
   Long nodeId;
   AnnotationType type;
   String name;
+  private String id;
 
   public AnnotationInfo(Long nodeId, AnnotationType type, String name) {
     this.nodeId = nodeId;
@@ -52,5 +55,13 @@ public class AnnotationInfo {
 
   public boolean hasName() {
     return StringUtils.isNotEmpty(name);
+  }
+
+  public void setId(final String id) {
+    this.id = id;
+  }
+
+  public Optional<String> getId() {
+    return Optional.ofNullable(id);
   }
 }
