@@ -59,7 +59,7 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   public void testLayers() {
     String tagml = "[line|+A>Cookie Monster likes cookies.<line|A]";
     testRDFConversionContains(tagml,
-        "");
+        "tag:content  \"Cookie Monster likes cookies.\"");
 //        "tag:document0  a   tag:Document ;\n" +
 //            "        tag:layer  tag:layer_A ;\n" +
 //            "        tag:root   tag:markup2 .",
@@ -77,6 +77,13 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   public void testAnnotations() {
     String tagml = "[line month_1='November' month_2=11>In the eleventh month...<line]";
     testRDFConversionContains(tagml, "");
+  }
+
+  @Test
+  public void testBooleanAnnotation() {
+    String tagml = "[line rhyme=false>There once was a vicar in [place real=true>Slough<place]<line]";
+    testRDFConversionContains(tagml, "tag:value            true",
+        "tag:value            false");
   }
 
   @Test

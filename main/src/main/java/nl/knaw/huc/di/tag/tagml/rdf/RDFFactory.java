@@ -200,6 +200,10 @@ public class RDFFactory {
       Double value = store.getNumberAnnotationValue(annotationInfo.getNodeId()).getValue();
       Literal literal = model.createTypedLiteral(value);
       resource.addProperty(TAG.value, literal);
+    } else if (annotationInfo.getType().equals(AnnotationType.Boolean)) {
+      Boolean value = store.getBooleanAnnotationValue(annotationInfo.getNodeId()).getValue();
+      Literal literal = model.createTypedLiteral(value);
+      resource.addProperty(TAG.value, literal);
     }
     return resource;
   }
