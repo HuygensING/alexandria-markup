@@ -87,6 +87,14 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void testListAnnotation() {
+    String tagml = "[line>Donald and [group names=['Huey','Louie','Dewey']>his nephews<group] went for a ride.<line]";
+    testRDFConversionContains(tagml, "tag:value  \"Huey\"",
+        "tag:value  \"Louie\"",
+        "tag:value  \"Dewey\"");
+  }
+
+  @Test
   public void testOverlap() {
     String tagml = "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
     testRDFConversionContains(tagml, "");

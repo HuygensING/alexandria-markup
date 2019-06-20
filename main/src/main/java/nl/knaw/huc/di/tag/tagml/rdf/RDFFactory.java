@@ -25,6 +25,7 @@ import com.google.common.collect.Multimap;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
@@ -42,6 +43,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class RDFFactory {
 
   static Logger LOG = LoggerFactory.getLogger(RDFFactory.class);
@@ -57,6 +60,7 @@ public class RDFFactory {
     String documentURI = resourceURI("document", resourceCounter.getAndIncrement());
     Resource documentResource = model.createResource(documentURI).addProperty(RDF.type, TAG.Document);
     final TextGraph textGraph = document.getDTO().textGraph;
+    AnnotationFactory annotationFactory = new AnnotationFactory(document.store, textGraph);
 
     Map<String, Resource> layerResources = new HashMap<>();
     textGraph.getLayerNames().forEach(l -> {
@@ -70,7 +74,7 @@ public class RDFFactory {
     Map<Long, Long> continuedMarkupId = new HashMap<>();
     document.getMarkupStream().forEach(markup -> {
       Long id = markup.getDbId();
-      if (markup.isSuspended()){
+      if (markup.isSuspended()) {
         continuedMarkupId.put(id, textGraph.getContinuedMarkupId(id).get());
       }
       Resource markupResource = createMarkupResource(model, markup);
@@ -84,7 +88,7 @@ public class RDFFactory {
         markupResource.addProperty(TAG.layer, layerResources.get(layer));
       }
       markup.getAnnotationStream()
-          .map(ai -> toAnnotationResource(model, ai, document.store))
+          .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory))
           .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
     });
 
@@ -123,7 +127,7 @@ public class RDFFactory {
     });
 
     // connect discontinuous markup
-    continuedMarkupId.forEach((suspend,resume)->{
+    continuedMarkupId.forEach((suspend, resume) -> {
       Resource suspended = markupResources.get(suspend);
       Resource resumed = markupResources.get(resume);
       suspended.addProperty(TAG.continued, resumed);
@@ -187,11 +191,14 @@ public class RDFFactory {
     annotationTypeResources.put(AnnotationType.RichText, TAG.RichTextAnnotation);
   }
 
-  private static Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store) {
+  private static Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store, AnnotationFactory annotationFactory) {
     String annotationURI = resourceURI("annotation", annotationInfo.getNodeId());
     Resource resource = model.createResource(annotationURI)
-        .addProperty(RDF.type, annotationTypeResources.get(annotationInfo.getType()))
-        .addProperty(TAG.annotationName, annotationInfo.getName());
+        .addProperty(RDF.type, annotationTypeResources.get(annotationInfo.getType()));
+    String name = annotationInfo.getName();
+    if (!name.isEmpty()) {
+      resource.addProperty(TAG.annotationName, name);
+    }
     if (annotationInfo.getType().equals(AnnotationType.String)) {
       String value = store.getStringAnnotationValue(annotationInfo.getNodeId()).getValue();
       Literal literal = model.createLiteral(value);
@@ -204,6 +211,16 @@ public class RDFFactory {
       Boolean value = store.getBooleanAnnotationValue(annotationInfo.getNodeId()).getValue();
       Literal literal = model.createTypedLiteral(value);
       resource.addProperty(TAG.value, literal);
+    } else if (annotationInfo.getType().equals(AnnotationType.List)) {
+      Iterator<Resource> iterator = annotationFactory.getListValue(annotationInfo).stream()
+          .map(ai -> toAnnotationResource(model, ai, store, annotationFactory))
+          .collect(toList())
+          .iterator();
+      RDFList list = model.createList(iterator);
+      resource.addProperty(TAG.value, list);
+
+    } else {
+      throw new RuntimeException("Unhandled AnnotationType: " + annotationInfo.getType());
     }
     return resource;
   }
