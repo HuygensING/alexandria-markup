@@ -28,7 +28,9 @@ public class TAG {
   public static final String NS = "https://brambg.github.io/tag-rdf/tagml.ttl#";
 
   public static final Resource Document = resource("Document");
-  public static final Resource MarkupElement = resource("MarkupNode");
+  public static final Resource MarkupNode = resource("MarkupNode");
+  public static final Resource BranchesNode = resource("BranchesNode");
+  public static final Resource BranchNode = resource("BranchNode");
   public static final Resource TextNode = resource("TextNode");
   public static final Resource Annotation = resource("AnnotationNode");
   public static final Resource StringAnnotation = resource("StringAnnotationNode");
@@ -40,6 +42,7 @@ public class TAG {
   public static final Resource RichTextAnnotation = resource("RichTextAnnotationNode");
   public static final Resource Layer = resource("LayerNode");
   public static final Resource ElementList = resource("ElementList");
+  public static final Resource BranchList = resource("BranchList");
 
   public static final Property first = property("first");
   public static final Property rest = property("rest");
@@ -53,6 +56,7 @@ public class TAG {
   public static final Property value = property("value");
   public static final Property content = property("content");
   public static final Property continued = property("continued");
+  public static final Property branches = property("branches");
 
   private TAG() {
     throw new UnsupportedOperationException();

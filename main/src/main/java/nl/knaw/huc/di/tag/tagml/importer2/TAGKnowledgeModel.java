@@ -68,7 +68,7 @@ public class TAGKnowledgeModel {
   public MarkupResource createMarkupResource(final String tag) {
     Long resourceId = resourceCounter.getAndIncrement();
     String markupURI = resourceURI(resourceId, "markup");
-    Resource resource = model.createResource(markupURI).addProperty(RDF.type, TAG.MarkupElement);
+    Resource resource = model.createResource(markupURI).addProperty(RDF.type, TAG.MarkupNode);
     MarkupResource markupResource = new MarkupResource(resource);
     markupResource.setResourceId(resourceId);
     markupResource.setTag(tag);

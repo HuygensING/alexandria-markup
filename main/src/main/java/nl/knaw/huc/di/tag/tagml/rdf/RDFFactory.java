@@ -25,6 +25,7 @@ import com.google.common.collect.Multimap;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huc.di.tag.tagml.importer2.TAG;
@@ -76,6 +77,8 @@ public class RDFFactory {
     Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
     Map<Long, Long> continuedMarkupId = new HashMap<>();
     final Map<String, Resource> identifiedResources = new HashMap<>();
+    Set<Long> branchesSet = new HashSet<>();
+    Set<Long> branchSet = new HashSet<>();
     document.getMarkupStream().forEach(markup -> {
       Long id = markup.getDbId();
       if (markup.isSuspended()) {
@@ -86,14 +89,22 @@ public class RDFFactory {
         model.add(documentResource, TAG.root, markupResource);
       }
       markupResources.put(id, markupResource);
-      Set<String> layers = markup.getLayers();
-      layersForMarkup.putAll(id, layers);
-      for (String layer : layers) {
-        markupResource.addProperty(TAG.layer, layerResources.get(layer));
+      if (markup.getTag().equals(TAGML.BRANCHES)) {
+        branchesSet.add(id);
       }
-      markup.getAnnotationStream()
-          .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory, identifiedResources))
-          .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
+      if (markup.getTag().equals(TAGML.BRANCH)) {
+        branchSet.add(id);
+      }
+      if (!markup.getTag().equals(TAGML.BRANCH) && !markup.getTag().equals(TAGML.BRANCHES)) {
+        Set<String> layers = markup.getLayers();
+        layersForMarkup.putAll(id, layers);
+        for (String layer : layers) {
+          markupResource.addProperty(TAG.layer, layerResources.get(layer));
+        }
+        markup.getAnnotationStream()
+            .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory, identifiedResources))
+            .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
+      }
     });
 
     Map<Long, Resource> textResources = new HashMap<>();
@@ -120,14 +131,18 @@ public class RDFFactory {
             String layerName = le.getLayerName();
             if (le.hasType(EdgeType.hasText)) {
               textGraph.getTargets(le).stream()
-                  .filter(tId -> layersForTextNode.get(tId).contains(layerName))
+                  .filter(tId -> layersForTextNode.get(tId).contains(layerName) || branchSet.contains(markupId))
                   .forEach(tId -> subElements.add(textResources.get(tId)));
             } else if (le.hasType(EdgeType.hasMarkup)) {
               textGraph.getTargets(le).forEach(t -> subElements.add(markupResources.get(t)));
             }
           });
       RDFList list = model.createList(subElements.iterator());
-      markupResource.addProperty(TAG.elements, list);
+      if (branchesSet.contains(markupId)) {
+        markupResource.addProperty(TAG.branches, list);
+      } else {
+        markupResource.addProperty(TAG.elements, list);
+      }
     });
 
     // connect discontinuous markup
@@ -168,10 +183,22 @@ public class RDFFactory {
   }
 
   private static Resource createMarkupResource(final Model model, final TAGMarkup markup) {
-    String textURI = resourceURI("markup", markup.getDbId());
-    return model.createResource(textURI)
-        .addProperty(RDF.type, TAG.MarkupElement)
-        .addProperty(TAG.markupName, markup.getTag());
+    if (markup.getTag().equals(TAGML.BRANCHES)) {
+      String branchesURI = resourceURI("branches", markup.getDbId());
+      return model.createResource(branchesURI)
+          .addProperty(RDF.type, TAG.BranchesNode);
+
+    } else if (markup.getTag().equals(TAGML.BRANCH)) {
+      String branchURI = resourceURI("branch", markup.getDbId());
+      return model.createResource(branchURI)
+          .addProperty(RDF.type, TAG.BranchNode);
+
+    } else {
+      String resourceURI = resourceURI("markup", markup.getDbId());
+      return model.createResource(resourceURI)
+          .addProperty(RDF.type, TAG.MarkupNode)
+          .addProperty(TAG.markupName, markup.getTag());
+    }
   }
 
   public static Resource createTextResource(final Model model, final String text, final Long resourceId) {

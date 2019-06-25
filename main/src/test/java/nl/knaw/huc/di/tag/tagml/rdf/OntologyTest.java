@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -42,7 +43,9 @@ public class OntologyTest {
 
     OntClass document = createLabeledResourceClass(model, TAG.Document);
 
-    OntClass markupNode = createLabeledClass(model, TAG.MarkupElement);
+    OntClass markupNode = createLabeledClass(model, TAG.MarkupNode);
+    OntClass branchesNode = createLabeledClass(model, TAG.BranchesNode);
+    OntClass branchNode = createLabeledClass(model, TAG.BranchNode);
 
     OntClass textNode = createLabeledResourceClass(model, TAG.TextNode);
 
@@ -66,6 +69,9 @@ public class OntologyTest {
 
     OntClass elementList = createLabeledClass(model, TAG.ElementList);
     elementList.addSuperClass(RDF.List);
+
+    OntClass branchList = createLabeledClass(model, TAG.BranchList);
+    branchList.addSuperClass(RDF.List);
 
     OntClass nil = model.createClass(namespace + "nil");
     nil.addSuperClass(elementList);
@@ -118,6 +124,10 @@ public class OntologyTest {
     OntProperty content = createLabeledProperty(model, TAG.content);
     content.addDomain(textNode);
     content.addRange(RDFS.Literal);
+
+    OntProperty hasbranches = createLabeledProperty(model, TAG.branches);
+    hasbranches.addDomain(branchesNode);
+    hasbranches.addRange(branchList);
 
 //    OntProperty next = model.createOntProperty(namespace + "next");
 //    addLabel(next, "next");
