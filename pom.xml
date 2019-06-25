@@ -46,7 +46,7 @@
     <maven-jar.version>3.1.1</maven-jar.version>
     <maven-license.version>1.16</maven-license.version>
     <maven-shade.version>3.2.1</maven-shade.version>
-    <wagon-ssh.version>3.3.2</wagon-ssh.version>
+    <wagon-ssh.version>3.3.3</wagon-ssh.version>
     <asciitable.version>0.3.2</asciitable.version>
     <maven-resources.version>3.1.0</maven-resources.version>
     <xmlcalabash.version>1.1.23-98</xmlcalabash.version>
