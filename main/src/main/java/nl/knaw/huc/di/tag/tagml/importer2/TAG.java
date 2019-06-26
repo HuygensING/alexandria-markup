@@ -25,7 +25,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 public class TAG {
-  public static final String NS = "https://brambg.github.io/tag-rdf/tagml.ttl#";
+  public static final String NS = "https://huygensing.github.io/TAG/TAGML/ontology/tagml.ttl#";
 
   public static final Resource Document = resource("Document");
   public static final Resource MarkupNode = resource("MarkupNode");
