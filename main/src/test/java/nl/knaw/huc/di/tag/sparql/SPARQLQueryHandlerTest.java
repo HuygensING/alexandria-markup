@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.sparql;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
@@ -37,7 +38,7 @@ public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  public void testSPARQLQuerySelect1() {
+  public void testSPARQLQuerySelect() {
     String tagml = "[x>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<x]";
     runInStoreTransaction(store -> {
       TAGDocument alice = new TAGMLImporter(store).importTAGML(tagml);
@@ -61,6 +62,65 @@ public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
           "------------------\n"));
 
       assertThat(result.getValues()).containsExactlyElementsOf(expected);
+    });
+  }
+
+  @Test
+  public void testSPARQLQueryAsk() {
+    String tagml = "[x>some text<x]";
+    runInStoreTransaction(store -> {
+      TAGDocument alice = new TAGMLImporter(store).importTAGML(tagml);
+
+      SPARQLQueryHandler h = new SPARQLQueryHandler(alice);
+      String statement = "prefix tag: <" + TAG.getURI() + "> " +
+          "prefix rdf: <" + RDF.getURI() + "> " +
+          "ask {" +
+          "  ?m tag:markup_name 'x' ." + // markup has name 'x'
+          "  ?m tag:elements ?list ." + // markup has elements ?list = rdf:list
+          "  ?list rdf:rest*/rdf:first ?t ." + // the list has a textnode ?t
+          "  ?t tag:content 'some text' . " + // textnode has content 'some text'
+          "}";
+      SPARQLResult result = h.execute(statement);
+      LOG.info("result={}", result);
+      assertQuerySucceeded(result);
+      List<Boolean> expected = new ArrayList<>();
+      expected.add(true);
+      assertThat(result.getValues()).containsExactlyElementsOf(expected);
+    });
+  }
+
+  @Test
+  public void testSPARQLQueryDescribe() {
+    String tagml = "[l>[w>Just<w] [w>some<w] [w>words<w]<l]";
+    runInStoreTransaction(store -> {
+      TAGDocument alice = new TAGMLImporter(store).importTAGML(tagml);
+
+      SPARQLQueryHandler h = new SPARQLQueryHandler(alice);
+      String statement = "prefix tag: <" + TAG.getURI() + "> " +
+          "prefix rdf: <" + RDF.getURI() + "> " +
+          "describe ?x where { ?x tag:markup_name 'w' }";
+      SPARQLResult result = h.execute(statement);
+      LOG.info("result={}", result);
+      assertQuerySucceeded(result);
+      List<String> expected = new ArrayList<>();
+      expected.add("@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
+          "@prefix tag:   <https://huygensing.github.io/TAG/TAGML/ontology/tagml.ttl#> .\n" +
+          "\n" +
+          "tag:markup9  a           tag:MarkupNode ;\n" +
+          "        tag:elements     ( tag:text10 ) ;\n" +
+          "        tag:layer        tag:layer_ ;\n" +
+          "        tag:markup_name  \"w\" .\n" +
+          "\n" +
+          "tag:markup3  a           tag:MarkupNode ;\n" +
+          "        tag:elements     ( tag:text4 ) ;\n" +
+          "        tag:layer        tag:layer_ ;\n" +
+          "        tag:markup_name  \"w\" .\n" +
+          "\n" +
+          "tag:markup6  a           tag:MarkupNode ;\n" +
+          "        tag:elements     ( tag:text7 ) ;\n" +
+          "        tag:layer        tag:layer_ ;\n" +
+          "        tag:markup_name  \"w\" .\n");
+//      assertThat(result.getValues()).containsExactlyElementsOf(expected);
     });
   }
 
