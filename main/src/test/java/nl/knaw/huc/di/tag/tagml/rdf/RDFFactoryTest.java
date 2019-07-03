@@ -26,12 +26,19 @@ import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.shared.PrefixMapping;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
@@ -147,6 +154,14 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
     runInStore(store -> {
       TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml.trim()));
       Model model = store.runInTransaction(() -> RDFFactory.fromDocument(document));
+
+//      String queryString = "prefix tag: <" + TAG.getURI() + "> "
+//          + "select ?s ?o "
+//          + "where { ?s <" + TAG.markupName + "> ?o . }";
+//      System.out.println(queryString);
+//      List<Map<String, String>> resultList = getResults(model, queryString);
+//      System.out.println(resultList);
+
       String dot = DotFactory.fromModel(model);
 
       System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
@@ -163,6 +178,42 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
       assertThat(ttl).contains(turtleStatements);
     });
 
+  }
+
+  private List<Map<String, String>> getResults(final Model model, final String queryString) {
+    Query query = QueryFactory.create(queryString);
+    PrefixMapping prefixMapping = query.getPrefixMapping();
+    QueryExecution qe = QueryExecutionFactory.create(query, model);
+//    if (query.isSelectType()){
+    ResultSet results = qe.execSelect();
+//    boolean b = qe.execAsk();
+//    Model model1 = qe.execConstruct();
+//    Model model2 = qe.execDescribe();
+    System.out.println("----------------------------------------------------------------");
+    ResultSetFormatter.out(System.out, results, query);
+    System.out.println("----------------------------------------------------------------");
+    ResultSetFormatter.outputAsJSON(QueryExecutionFactory.create(query, model).execSelect());
+    System.out.println("----------------------------------------------------------------");
+    ResultSetFormatter.outputAsCSV(QueryExecutionFactory.create(query, model).execSelect());
+    System.out.println("----------------------------------------------------------------");
+    ResultSetFormatter.outputAsTSV(QueryExecutionFactory.create(query, model).execSelect());
+    System.out.println("----------------------------------------------------------------");
+    ResultSetFormatter.outputAsXML(QueryExecutionFactory.create(query, model).execSelect());
+    System.out.println("----------------------------------------------------------------");
+    List<Map<String, String>> resultList = new ArrayList<>();
+    while (results.hasNext()) {
+      QuerySolution querySolution = results.next();
+      Map<String, String> result = new HashMap<>();
+      querySolution.varNames().forEachRemaining((String varName) -> {
+        RDFNode node = querySolution.get(varName);
+        String val = node.isResource() ? "<" + prefixMapping.shortForm(node.asResource().getURI()) + ">"
+            : node.toString();
+        result.put(varName, val);
+      });
+      resultList.add(result);
+    }
+    qe.close();
+    return resultList;
   }
 
 }

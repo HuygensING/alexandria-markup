@@ -1,0 +1,79 @@
+package nl.knaw.huc.di.tag.sparql;
+
+/*-
+ * #%L
+ * alexandria-markup-core
+ * =======
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.importer2.TAG;
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import org.apache.jena.vocabulary.RDF;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+  @Test
+  public void testSPARQLQuerySelect1() {
+    String tagml = "[x>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<x]";
+    runInStoreTransaction(store -> {
+      TAGDocument alice = new TAGMLImporter(store).importTAGML(tagml);
+
+      SPARQLQueryHandler h = new SPARQLQueryHandler(alice);
+      String statement = "prefix tag: <" + TAG.getURI() + "> " +
+          "prefix rdf: <" + RDF.getURI() + "> " +
+          "select ?markup (count(?markup) as ?count) " +
+          "where { [] tag:markup_name ?markup . } " +
+          "group by ?markup " + // otherwise: "Non-group key variable in SELECT"
+          "order by ?markup";
+      SPARQLResult result = h.execute(statement);
+      LOG.info("result={}", result);
+      assertQuerySucceeded(result);
+      List<String> expected = new ArrayList<>();
+      expected.add(normalizeLineEndings("------------------\n" +
+          "| markup | count |\n" +
+          "==================\n" +
+          "| \"q\"    | 2     |\n" +
+          "| \"x\"    | 1     |\n" +
+          "------------------\n"));
+
+      assertThat(result.getValues()).containsExactlyElementsOf(expected);
+    });
+  }
+
+  private String normalizeLineEndings(final String string) {
+    return string.replaceAll("\\n", System.lineSeparator());
+  }
+
+  private void assertQuerySucceeded(SPARQLResult result) {
+    if (!result.isOk()) {
+      LOG.error("errors: {}", result.getErrors());
+    }
+    assertThat(result).isNotNull();
+    assertThat(result.isOk()).isTrue();
+  }
+
+}
