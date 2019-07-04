@@ -54,6 +54,7 @@ public class RDFFactory {
   static Logger LOG = LoggerFactory.getLogger(RDFFactory.class);
 
   public static Model fromDocument(TAGDocument document) {
+    System.out.println("1");
     AtomicLong resourceCounter = new AtomicLong();
     Model model = ModelFactory.createDefaultModel()
         .setNsPrefix("rdf", RDF.getURI())
@@ -61,11 +62,13 @@ public class RDFFactory {
 //        .setNsPrefix("dc", DC.getURI())
         .setNsPrefix("tag", TAG.getURI());
 
+    System.out.println("2");
     String documentURI = resourceURI("document", resourceCounter.getAndIncrement());
     Resource documentResource = model.createResource(documentURI).addProperty(RDF.type, TAG.Document);
     final TextGraph textGraph = document.getDTO().textGraph;
     AnnotationFactory annotationFactory = new AnnotationFactory(document.store, textGraph);
 
+    System.out.println("3");
     Map<String, Resource> layerResources = new HashMap<>();
     textGraph.getLayerNames().forEach(l -> {
       final Resource layerResource = createLayerResource(model, l);
@@ -73,6 +76,7 @@ public class RDFFactory {
       documentResource.addProperty(TAG.layer, layerResource);
     });
 
+    System.out.println("4");
     Map<Long, Resource> markupResources = new HashMap<>();
     Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
     Map<Long, Long> continuedMarkupId = new HashMap<>();
@@ -107,6 +111,7 @@ public class RDFFactory {
       }
     });
 
+    System.out.println("5");
     Map<Long, Resource> textResources = new HashMap<>();
     AtomicReference<Resource> lastTextResource = new AtomicReference<>();
     Multimap<Long, String> layersForTextNode = ArrayListMultimap.create();
@@ -121,6 +126,7 @@ public class RDFFactory {
           layersForTextNode.putAll(id, relevantLayers);
         });
 
+    System.out.println("6");
     markupResources.keySet().forEach(markupId -> {
       Resource markupResource = markupResources.get(markupId);
       List<Resource> subElements = new ArrayList<>();
@@ -146,6 +152,7 @@ public class RDFFactory {
     });
 
     // connect discontinuous markup
+    System.out.println("7");
     continuedMarkupId.forEach((suspend, resume) -> {
       Resource suspended = markupResources.get(suspend);
       Resource resumed = markupResources.get(resume);

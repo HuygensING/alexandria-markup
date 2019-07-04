@@ -24,6 +24,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -120,6 +121,32 @@ public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
           "        tag:elements     ( tag:text7 ) ;\n" +
           "        tag:layer        tag:layer_ ;\n" +
           "        tag:markup_name  \"w\" .\n");
+//      assertThat(result.getValues()).containsExactlyElementsOf(expected);
+    });
+  }
+
+  @Test
+  public void testSPARQLQueryConstruct() {
+    String tagml = "[l>[person>John<person] went to [country>Spain<country], [person>Rachel<person] went to [country>Peru<country]<l]";
+    runInStoreTransaction(store -> {
+      TAGDocument alice = new TAGMLImporter(store).importTAGML(tagml);
+
+      SPARQLQueryHandler h = new SPARQLQueryHandler(alice);
+      String statement = "prefix tag: <" + TAG.getURI() + "> " +
+          "prefix rdf: <" + RDF.getURI() + "> " +
+          "prefix foaf: <" + FOAF.getURI() + "> " +
+          "construct {" +
+          " ?m rdf:type  foaf:Person;" +
+          "    foaf:name ?name . " +
+          "} where {" +
+          "  ?m  tag:markup_name                               'person' ." +
+          "  ?m  tag:elements/rdf:rest*/rdf:first/tag:content  ?name . " +
+          "}";
+      SPARQLResult result = h.execute(statement);
+      assertQuerySucceeded(result);
+      System.out.println(statement);
+//      List<String> expected = new ArrayList<>();
+//      expected.add("");
 //      assertThat(result.getValues()).containsExactlyElementsOf(expected);
     });
   }

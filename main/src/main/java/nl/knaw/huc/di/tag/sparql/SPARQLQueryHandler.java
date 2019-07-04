@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.sparql;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.rdf.RDFFactory;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.apache.jena.query.*;
@@ -33,7 +34,10 @@ public class SPARQLQueryHandler {
   private final Model model;
 
   public SPARQLQueryHandler(final TAGDocument document) {
-    model = document.store.runInTransaction(() -> RDFFactory.fromDocument(document));
+    System.out.println("document=" + document.getDbId());
+//    model = document.store.runInTransaction(() -> RDFFactory.fromDocument(document));
+    model = RDFFactory.fromDocument(document);
+    System.out.println("done!");
   }
 
   public SPARQLResult execute(final String sparqlQuery) {
