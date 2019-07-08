@@ -51,6 +51,7 @@ public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
           "where { [] tag:markup_name ?markup . } " +
           "group by ?markup " + // otherwise: "Non-group key variable in SELECT"
           "order by ?markup";
+      LOG.info(statement);
       SPARQLResult result = h.execute(statement);
       LOG.info("result={}", result);
       assertQuerySucceeded(result);

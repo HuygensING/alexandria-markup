@@ -34,10 +34,11 @@ public class SPARQLQueryHandler {
   private final Model model;
 
   public SPARQLQueryHandler(final TAGDocument document) {
-    System.out.println("document=" + document.getDbId());
-//    model = document.store.runInTransaction(() -> RDFFactory.fromDocument(document));
-    model = RDFFactory.fromDocument(document);
-    System.out.println("done!");
+//    System.out.println("before RDF.list");
+//    Resource list = RDFS.Container;
+//    System.out.println("before fromDocument");
+    model = document.store.runInTransaction(() -> RDFFactory.fromDocument(document));
+//    System.out.println("after");
   }
 
   public SPARQLResult execute(final String sparqlQuery) {

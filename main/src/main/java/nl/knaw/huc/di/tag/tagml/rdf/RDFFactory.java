@@ -51,10 +51,25 @@ import static java.util.stream.Collectors.toList;
 
 public class RDFFactory {
 
-  static Logger LOG = LoggerFactory.getLogger(RDFFactory.class);
+  Logger LOG = LoggerFactory.getLogger(RDFFactory.class);
+
+  static Map<AnnotationType, Resource> annotationTypeResources;
+
+  static RDFFactory instance = new RDFFactory();
+
+  public RDFFactory() {
+    annotationTypeResources = new HashMap<>();
+    annotationTypeResources.put(AnnotationType.String, TAG.StringAnnotation);
+    annotationTypeResources.put(AnnotationType.Boolean, TAG.BooleanAnnotation);
+    annotationTypeResources.put(AnnotationType.Number, TAG.NumberAnnotation);
+    annotationTypeResources.put(AnnotationType.List, TAG.ListAnnotation);
+    annotationTypeResources.put(AnnotationType.Map, TAG.MapAnnotation);
+    annotationTypeResources.put(AnnotationType.Reference, TAG.ReferenceAnnotation);
+    annotationTypeResources.put(AnnotationType.RichText, TAG.RichTextAnnotation);
+  }
 
   public static Model fromDocument(TAGDocument document) {
-    System.out.println("1");
+//    System.out.println("1");
     AtomicLong resourceCounter = new AtomicLong();
     Model model = ModelFactory.createDefaultModel()
         .setNsPrefix("rdf", RDF.getURI())
@@ -62,21 +77,21 @@ public class RDFFactory {
 //        .setNsPrefix("dc", DC.getURI())
         .setNsPrefix("tag", TAG.getURI());
 
-    System.out.println("2");
-    String documentURI = resourceURI("document", resourceCounter.getAndIncrement());
+//    System.out.println("2");
+    String documentURI = instance.resourceURI("document", resourceCounter.getAndIncrement());
     Resource documentResource = model.createResource(documentURI).addProperty(RDF.type, TAG.Document);
     final TextGraph textGraph = document.getDTO().textGraph;
     AnnotationFactory annotationFactory = new AnnotationFactory(document.store, textGraph);
 
-    System.out.println("3");
+//    System.out.println("3");
     Map<String, Resource> layerResources = new HashMap<>();
     textGraph.getLayerNames().forEach(l -> {
-      final Resource layerResource = createLayerResource(model, l);
+      final Resource layerResource = instance.createLayerResource(model, l);
       layerResources.put(l, layerResource);
       documentResource.addProperty(TAG.layer, layerResource);
     });
 
-    System.out.println("4");
+//    System.out.println("4");
     Map<Long, Resource> markupResources = new HashMap<>();
     Multimap<Long, String> layersForMarkup = ArrayListMultimap.create();
     Map<Long, Long> continuedMarkupId = new HashMap<>();
@@ -88,7 +103,7 @@ public class RDFFactory {
       if (markup.isSuspended()) {
         continuedMarkupId.put(id, textGraph.getContinuedMarkupId(id).get());
       }
-      Resource markupResource = createMarkupResource(model, markup);
+      Resource markupResource = instance.createMarkupResource(model, markup);
       if (markupResources.isEmpty()) {
         model.add(documentResource, TAG.root, markupResource);
       }
@@ -106,12 +121,12 @@ public class RDFFactory {
           markupResource.addProperty(TAG.layer, layerResources.get(layer));
         }
         markup.getAnnotationStream()
-            .map(ai -> toAnnotationResource(model, ai, document.store, annotationFactory, identifiedResources))
+            .map(ai -> instance.toAnnotationResource(model, ai, document.store, annotationFactory, identifiedResources))
             .forEach(ar -> markupResource.addProperty(TAG.annotation, ar));
       }
     });
 
-    System.out.println("5");
+//    System.out.println("5");
     Map<Long, Resource> textResources = new HashMap<>();
     AtomicReference<Resource> lastTextResource = new AtomicReference<>();
     Multimap<Long, String> layersForTextNode = ArrayListMultimap.create();
@@ -119,14 +134,14 @@ public class RDFFactory {
         .map(document.store::getTextNode)
         .forEach(textNode -> {
           Long id = textNode.getDbId();
-          Resource textResource = createTextResource(model, textNode.getText(), id);
+          Resource textResource = instance.createTextResource(model, textNode.getText(), id);
           textResources.put(id, textResource);
           lastTextResource.set(textResource);
-          List<String> relevantLayers = determineRelevantLayers(textGraph, id, layersForMarkup);
+          List<String> relevantLayers = instance.determineRelevantLayers(textGraph, id, layersForMarkup);
           layersForTextNode.putAll(id, relevantLayers);
         });
 
-    System.out.println("6");
+//    System.out.println("6");
     markupResources.keySet().forEach(markupId -> {
       Resource markupResource = markupResources.get(markupId);
       List<Resource> subElements = new ArrayList<>();
@@ -152,7 +167,7 @@ public class RDFFactory {
     });
 
     // connect discontinuous markup
-    System.out.println("7");
+//    System.out.println("7");
     continuedMarkupId.forEach((suspend, resume) -> {
       Resource suspended = markupResources.get(suspend);
       Resource resumed = markupResources.get(resume);
@@ -162,7 +177,7 @@ public class RDFFactory {
     return model;
   }
 
-  private static List<String> determineRelevantLayers(TextGraph textGraph, Long id, Multimap<Long, String> layersForMarkup) {
+  private List<String> determineRelevantLayers(TextGraph textGraph, Long id, Multimap<Long, String> layersForMarkup) {
     // returns all the layers to which this textnode belongs through its markup, leaving out parent layers if a child layer is included
     Set<String> rawLayers = textGraph.getIncomingEdges(id).stream()
         .filter(LayerEdge.class::isInstance)
@@ -182,14 +197,14 @@ public class RDFFactory {
     return list;
   }
 
-  private static Resource createLayerResource(final Model model, final String layerName) {
+  private Resource createLayerResource(final Model model, final String layerName) {
     String uri = TAG.NS + "layer_" + layerName;
     return model.createResource(uri)
         .addProperty(RDF.type, TAG.Layer)
         .addProperty(TAG.layerName, layerName);
   }
 
-  private static Resource createMarkupResource(final Model model, final TAGMarkup markup) {
+  private Resource createMarkupResource(final Model model, final TAGMarkup markup) {
     if (markup.getTag().equals(TAGML.BRANCHES)) {
       String branchesURI = resourceURI("branches", markup.getDbId());
       return model.createResource(branchesURI)
@@ -208,7 +223,7 @@ public class RDFFactory {
     }
   }
 
-  public static Resource createTextResource(final Model model, final String text, final Long resourceId) {
+  public Resource createTextResource(final Model model, final String text, final Long resourceId) {
     String textURI = resourceURI("text", resourceId);
     Resource textResource = model.createResource(textURI)
         .addProperty(RDF.type, TAG.TextNode);
@@ -216,19 +231,8 @@ public class RDFFactory {
     return textResource;
   }
 
-  static final Map<AnnotationType, Resource> annotationTypeResources = new HashMap<>();
 
-  static {
-    annotationTypeResources.put(AnnotationType.String, TAG.StringAnnotation);
-    annotationTypeResources.put(AnnotationType.Boolean, TAG.BooleanAnnotation);
-    annotationTypeResources.put(AnnotationType.Number, TAG.NumberAnnotation);
-    annotationTypeResources.put(AnnotationType.List, TAG.ListAnnotation);
-    annotationTypeResources.put(AnnotationType.Map, TAG.MapAnnotation);
-    annotationTypeResources.put(AnnotationType.Reference, TAG.ReferenceAnnotation);
-    annotationTypeResources.put(AnnotationType.RichText, TAG.RichTextAnnotation);
-  }
-
-  private static Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store, AnnotationFactory annotationFactory, Map<String, Resource> identifiedResources) {
+  private Resource toAnnotationResource(Model model, AnnotationInfo annotationInfo, final TAGStore store, AnnotationFactory annotationFactory, Map<String, Resource> identifiedResources) {
     String annotationURI = resourceURI("annotation", annotationInfo.getNodeId());
     Resource resource = model.createResource(annotationURI)
         .addProperty(RDF.type, annotationTypeResources.get(annotationInfo.getType()));
@@ -277,14 +281,14 @@ public class RDFFactory {
     return resource;
   }
 
-  private static Resource toLayerResource(Model model, String layerName) {
+  private Resource toLayerResource(Model model, String layerName) {
     String layerURI = resourceURI("layer", new Random().nextLong());
     return model.createResource(layerURI)
         .addProperty(RDF.type, TAG.Layer)
         .addProperty(TAG.layerName, layerName);
   }
 
-  private static String resourceURI(final String type, final Long resourceId) {
+  private String resourceURI(final String type, final Long resourceId) {
     return URI.create(TAG.getURI() + type + resourceId).toASCIIString();
   }
 }
