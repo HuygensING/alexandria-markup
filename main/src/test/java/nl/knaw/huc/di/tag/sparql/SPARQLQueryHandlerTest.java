@@ -140,12 +140,13 @@ public class SPARQLQueryHandlerTest extends AlexandriaBaseStoreTest {
           " ?m rdf:type  foaf:Person;" +
           "    foaf:name ?name . " +
           "} where {" +
-          "  ?m  tag:markup_name                               'person' ." +
-          "  ?m  tag:elements/rdf:rest*/rdf:first/tag:content  ?name . " +
+          "  ?m  tag:markup_name                               'person' ;" +
+          "      tag:elements/rdf:rest*/rdf:first/tag:content  ?name . " +
           "}";
       SPARQLResult result = h.execute(statement);
       assertQuerySucceeded(result);
       System.out.println(statement);
+      System.out.println(result.getValues());
 //      List<String> expected = new ArrayList<>();
 //      expected.add("");
 //      assertThat(result.getValues()).containsExactlyElementsOf(expected);
