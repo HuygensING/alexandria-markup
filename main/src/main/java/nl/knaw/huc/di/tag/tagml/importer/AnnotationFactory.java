@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,8 +116,7 @@ public class AnnotationFactory {
 
   private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
     final AnnotationInfo annotationInfo;
-    List<Object> list = value;
-    verifyListElementsAreSameType(aName, annotationValueContext, list);
+    verifyListElementsAreSameType(aName, annotationValueContext, value);
     verifySeparatorsAreCommas(aName, annotationValueContext);
     Long id = store.createListAnnotationValue();
     annotationInfo = new AnnotationInfo(id, AnnotationType.List, aName);
@@ -126,7 +125,7 @@ public class AnnotationFactory {
     for (int i = 1; i < childCount; i += 2) {
       ParseTree listElement = valueTree.getChild(i);
       final ParseTree subValueParseTree = listElement.getChild(0);
-      Object subValue = list.get((i - 1) / 2);
+      Object subValue = value.get((i - 1) / 2);
       final AnnotationValueContext subValueContext = (AnnotationValueContext) listElement;
       AnnotationInfo listElementInfo = makeAnnotation("", subValueContext, subValue);
       textGraph.addListItem(id, listElementInfo);
@@ -138,7 +137,6 @@ public class AnnotationFactory {
     final AnnotationInfo annotationInfo;
     Long id = store.createMapAnnotationValue();
     annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
-    HashMap<String, Object> map = value;
     ParseTree valueTree = annotationValueContext.children.get(0);
     int childCount = valueTree.getChildCount(); // children: '{' annotation+ '}'
     for (int i = 1; i < childCount - 1; i++) {
@@ -147,15 +145,14 @@ public class AnnotationFactory {
       ParseTree subValueParseTree = hashElement.getChild(2);
       if (subValueParseTree instanceof AnnotationValueContext) {
         final AnnotationValueContext subValueContext = (AnnotationValueContext) subValueParseTree;
-        final Object subValue = map.get(subName);
+        final Object subValue = value.get(subName);
         final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
         textGraph.addAnnotationEdge(id, aInfo);
 
       } else if (subValueParseTree instanceof IdValueContext) {
         IdValueContext idValueContext = (IdValueContext) subValueParseTree;
         String idValue = idValueContext.getText();
-        LOG.warn("TODO: handle idValue {}", idValue);
-        // TODO: handle idValue
+        annotationInfo.setId(idValue);
 
       } else if (subValueParseTree instanceof RefValueContext) {
         RefValueContext refValueContext = (RefValueContext) subValueParseTree;
@@ -320,14 +317,18 @@ public class AnnotationFactory {
   private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {
     Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
     AnnotationType type = listItemEdge.getAnnotationType();
-    return new AnnotationInfo(nodeId, type, "");
+    AnnotationInfo annotationInfo = new AnnotationInfo(nodeId, type, "");
+    annotationInfo.setId(listItemEdge.getId());
+    return annotationInfo;
   }
 
   private AnnotationInfo toAnnotationInfo(AnnotationEdge annotationEdge) {
     Long nodeId = textGraph.getTargets(annotationEdge).iterator().next();
     AnnotationType type = annotationEdge.getAnnotationType();
     String name = annotationEdge.getField();
-    return new AnnotationInfo(nodeId, type, name);
+    AnnotationInfo annotationInfo = new AnnotationInfo(nodeId, type, name);
+    annotationInfo.setId(annotationEdge.getId());
+    return annotationInfo;
   }
 
   private class KeyValue {

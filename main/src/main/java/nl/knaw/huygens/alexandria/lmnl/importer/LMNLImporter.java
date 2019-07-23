@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -472,9 +472,9 @@ public class LMNLImporter {
 //          String key = tag + "-" + annotationText(annotation);
 //          if (markupsToJoin.containsKey(key)) {
 //            TAGMarkupDTO originalMarkup = markupsToJoin.get(key);
-//            markup.getDTO().getAnnotationIds().remove(annotation.getDbId());
+//            markup.getDTO().getAnnotationIds().remove(annotation.getResourceId());
 ////            document.joinMarkup(originalMarkup, markup);
-//            markupIdsToRemove.add(markup.getDbId());
+//            markupIdsToRemove.add(markup.getResourceId());
 //          } else {
 //            markupsToJoin.put(key, markup.getDTO());
 //          }

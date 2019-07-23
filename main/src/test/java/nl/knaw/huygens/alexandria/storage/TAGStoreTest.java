@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,40 +21,35 @@ package nl.knaw.huygens.alexandria.storage;
  */
 
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TAGStoreTest extends AlexandriaBaseStoreTest{
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class TAGStoreTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTAGStore() {
-    store.open();
-
     AtomicLong documentId = new AtomicLong();
     TAGTextNodeDTO textNode = new TAGTextNodeDTO("something");
-    store.runInTransaction(() -> {
-      Long textNodeId = store.persist(textNode);
 
-      TAGDocumentDTO document = new TAGDocumentDTO();
-      document.getTextNodeIds().add(textNode.getDbId());
-      documentId.set(store.persist(document));
-    });
+    runInStore(store ->
+        store.runInTransaction(() -> {
+          Long textNodeId = store.persist(textNode);
 
-    store.close();
+          TAGDocumentDTO document = new TAGDocumentDTO();
+          document.getTextNodeIds().add(textNode.getDbId());
+          documentId.set(store.persist(document));
+        }));
 
-    store.open();
-
-    store.runInTransaction(() -> {
-      TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
-      assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
-    });
-
-    store.close();
+    runInStore(store ->
+        store.runInTransaction(() -> {
+          TAGDocumentDTO document = store.getDocumentDTO(documentId.get());
+          assertThat(document.getTextNodeIds()).contains(textNode.getDbId());
+        }));
   }
 
 }

@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.view;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.assertj.core.util.Sets;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -45,13 +46,15 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
     String viewJson = "{'includeLayers':['A']}".replace("'", "\"");
     String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]";
-    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
-    TAGView view = tagViewFactory.fromJsonString(viewJson);
-    TAGDocument document = store.runInTransaction(() ->
-        new TAGMLImporter(store).importTAGML(tagml)
-    );
-    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
-    assertThat(viewExport).isEqualTo(expected);
+    runInStore(store -> {
+      TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+      TAGView view = tagViewFactory.fromJsonString(viewJson);
+      TAGDocument document = store.runInTransaction(() ->
+          new TAGMLImporter(store).importTAGML(tagml)
+      );
+      String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+      assertThat(viewExport).isEqualTo(expected);
+    });
   }
 
   @Test
@@ -59,13 +62,13 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
     String viewJson = "{'excludeLayers':['B']}".replace("'", "\"");
     String expected = "[tagml>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml]";
-    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
-    TAGView view = tagViewFactory.fromJsonString(viewJson);
-    TAGDocument document = store.runInTransaction(() ->
-        new TAGMLImporter(store).importTAGML(tagml)
-    );
-    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
-    assertThat(viewExport).isEqualTo(expected);
+    runInStore(store -> {
+      TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+      TAGView view = tagViewFactory.fromJsonString(viewJson);
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml));
+      String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+      assertThat(viewExport).isEqualTo(expected);
+    });
   }
 
   @Test // NLA-489
@@ -73,34 +76,34 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]";
     String viewJson = "{'includeLayers':['A'],'excludeMarkup':['b']}".replace("'", "\"");
     String expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]";
-    TAGViewFactory tagViewFactory = new TAGViewFactory(store);
-    TAGView view = tagViewFactory.fromJsonString(viewJson);
-    TAGDocument document = store.runInTransaction(() ->
-        new TAGMLImporter(store).importTAGML(tagml)
-    );
-    String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
-    assertThat(viewExport).isEqualTo(expected);
+    runInStore(store -> {
+      TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+      TAGView view = tagViewFactory.fromJsonString(viewJson);
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml));
+      String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
+      assertThat(viewExport).isEqualTo(expected);
+    });
   }
 
   @Test
   public void testFilterRelevantMarkup0() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument document = store.createDocument();
 
       String layer1 = "L1";
       String layer2 = "L2";
 
       String tag1 = "a";
-      Long markupId1 = createNewMarkup(document, tag1, layer1);
+      Long markupId1 = createNewMarkup(document, tag1, layer1, store);
 
       String tag2 = "b";
-      Long markupId2 = createNewMarkup(document, tag2, layer2);
+      Long markupId2 = createNewMarkup(document, tag2, layer2, store);
 
       String tag3 = "c";
-      Long markupId3 = createNewMarkup(document, tag3, layer1);
+      Long markupId3 = createNewMarkup(document, tag3, layer1, store);
 
       String tag4 = "d";
-      Long markupId4 = createNewMarkup(document, tag4, layer2);
+      Long markupId4 = createNewMarkup(document, tag4, layer2, store);
 
       Set<Long> allMarkupIds = new HashSet<>(asList(markupId1, markupId2, markupId3, markupId4));
 
@@ -153,20 +156,20 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testFilterRelevantMarkup() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument document = store.createDocument();
 
       String tag1 = "a";
-      Long markupId1 = createNewMarkup(document, tag1);
+      Long markupId1 = createNewMarkup(document, tag1, store);
 
       String tag2 = "b";
-      Long markupId2 = createNewMarkup(document, tag2);
+      Long markupId2 = createNewMarkup(document, tag2, store);
 
       String tag3 = "c";
-      Long markupId3 = createNewMarkup(document, tag3);
+      Long markupId3 = createNewMarkup(document, tag3, store);
 
       String tag4 = "d";
-      Long markupId4 = createNewMarkup(document, tag4);
+      Long markupId4 = createNewMarkup(document, tag4, store);
 
       Set<Long> allMarkupIds = new HashSet<>(asList(markupId1, markupId2, markupId3, markupId4));
 
@@ -201,12 +204,11 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  private Long createNewMarkup(TAGDocument document, String tag1) {
-    TAGMarkup markup1 = store.createMarkup(document, tag1);
-    return markup1.getDbId();
+  private Long createNewMarkup(TAGDocument document, String tag1, final TAGStore store) {
+    return store.createMarkup(document, tag1).getDbId();
   }
 
-  private Long createNewMarkup(TAGDocument document, String tag1, String layer) {
+  private Long createNewMarkup(TAGDocument document, String tag1, String layer, final TAGStore store) {
     TAGMarkup markup = store.createMarkup(document, tag1);
     markup.getLayers().add(layer);
     store.persist(markup.getDTO());

@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
-
 
   @Test
   public void testSplitCase() {
@@ -205,7 +204,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-
   @Ignore
   @Test
   public void testNewlinesInText() {
@@ -225,7 +223,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   }
 
   private TAGComparison compare(String originText, String editedText) {
-    return store.runInTransaction(() -> {
+    return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(originText);
       TAGDocument edited = importer.importTAGML(editedText);

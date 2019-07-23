@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package nl.knaw.huc.di.tag.model.graph;
 
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.tagml.importer2.TAGKnowledgeModel;
 import nl.knaw.huygens.alexandria.exporter.ColorPicker;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
@@ -41,6 +42,19 @@ public class DotFactory {
       "lime", "magenta", "olive", "orange", "pink", "purple", "brown", "cyan", "teal", "violet", "black");
   Map<String, String> layerColor = new HashMap<>();
   private TextGraph textGraph;
+
+  public String toDot(TAGKnowledgeModel knowledgeModel, final String label) {
+    layerColor.clear();
+
+    final String dotBuilder = "digraph TextGraph{\n" +
+        "  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n" +
+        "  d [shape=doublecircle;label=\"\"]\n" +
+        "  subgraph{\n" +
+        // TODO
+
+        "}";
+    return dotBuilder;
+  }
 
   public String toDot(TAGDocument document, final String label) {
     layerColor.clear();
@@ -122,7 +136,6 @@ public class DotFactory {
 
     } else if (markup.getExtendedTag().startsWith(BRANCH)) {
       return format("  m%d [shape=point;color=red]\n", markup.getDbId());
-
     }
     StringBuilder pre = new StringBuilder();
     StringBuilder post = new StringBuilder();

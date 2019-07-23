@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class TAGMarkup {
 
 //  @Deprecated
 //  public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
-//    markupDTO.getTextNodeIds().add(tagTextNode.getDbId());
+//    markupDTO.getTextNodeIds().add(tagTextNode.getResourceId());
 //    Long ownerId = markupDTO.getDocumentId();
 //    new TAGDocument(store, store.getDocumentDTO(ownerId))//
 //        .associateTextNodeWithMarkupForLayer(tagTextNode, this, "");
@@ -76,9 +76,9 @@ public class TAGMarkup {
 //  public TAGMarkup setFirstAndLastTextNode(TAGTextNode first, TAGTextNode last) {
 //    markupDTO.getTextNodeIds().clear();
 //    addTextNode(first);
-//    if (!first.getDbId().equals(last.getDbId())) {
+//    if (!first.getResourceId().equals(last.getResourceId())) {
 //      TAGTextNode next = first.getNextTextNodes().get(0); // TODO: handle divergence
-//      while (!next.getDbId().equals(last.getDbId())) {
+//      while (!next.getResourceId().equals(last.getResourceId())) {
 //        addTextNode(next);
 //        next = next.getNextTextNodes().get(0);// TODO: handle divergence
 //      }
@@ -89,7 +89,7 @@ public class TAGMarkup {
 //  }
 
   public TAGMarkup addAnnotation(AnnotationInfo annotation) {
-//    markupDTO.getAnnotationIds().add(annotation.getDbId());
+//    markupDTO.getAnnotationIds().add(annotation.getResourceId());
 //    update();
     return this;
   }
@@ -104,8 +104,7 @@ public class TAGMarkup {
   }
 
   private AnnotationInfo toAnnotationInfo(final AnnotationEdge annotationEdge) {
-    Collection<Long> targets = document.getDTO().textGraph.getTargets(annotationEdge);
-    final Long valueNode = targets.iterator().next();
+    final Long valueNode = document.getDTO().textGraph.getTargets(annotationEdge).iterator().next();
     return new AnnotationInfo(valueNode, annotationEdge.getAnnotationType(), annotationEdge.getField());
   }
 

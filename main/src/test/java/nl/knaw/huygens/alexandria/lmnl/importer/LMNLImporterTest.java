@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.data_model.IndexPoint;
@@ -27,6 +28,7 @@ import nl.knaw.huygens.alexandria.data_model.NodeRangeIndex;
 import nl.knaw.huygens.alexandria.exporter.LaTeXExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.apache.commons.io.FileUtils;
@@ -54,7 +56,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[l [n}144{n]}He manages to keep the upper hand{l]";
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
@@ -73,14 +75,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, r1, layerName);
 
-      logTAGML(actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
       assertThat(compareDocuments(expected, actual)).isTrue();
-      assertActualMatchesExpected(actual, expected);
+      assertActualMatchesExpected(actual, expected, store);
 
-      logKdTree(actual);
+      logKdTree(actual, store);
       NodeRangeIndex index = new NodeRangeIndex(store, actual);
       List<IndexPoint> indexPoints = index.getIndexPoints();
-      logKdTree(actual);
+      logKdTree(actual, store);
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
       expectedIndexPoints.add(new IndexPoint(0, 0));
       assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
@@ -90,7 +93,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[excerpt\n"//
           + "  [source [date}1915{][title}The Housekeeper{]]\n"//
           + "  [author\n"//
@@ -197,11 +200,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
       expected.associateTextNodeWithMarkupForLayer(tn09, l3, layerName);
 
-      assertActualMatchesExpected(actual, expected);
+      assertActualMatchesExpected(actual, expected, store);
 
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
       expectedIndexPoints.add(new IndexPoint(0, 0));
-      logKdTree(actual);
+      logKdTree(actual, store);
       // assertThat(indexPoints).containsExactlyElementsOf(expectedIndexPoints);
     });
   }
@@ -210,13 +213,14 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testLMNL1kings12() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/1kings12.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       LMNLImporter importer = new LMNLImporter(store);
       TAGDocument actual = importer.importLMNL(input);
 
       LOG.info("document={}", actual);
 
-      logTAGML(actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
 
       List<TAGMarkup> actualMarkupList = actual.getMarkupStream().collect(toList());
 
@@ -231,6 +235,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //      source.addAnnotation(book);
       AnnotationInfo chapter = simpleAnnotation("chapter", "12");
 //      source.addAnnotation(chapter);
+
       String actualSourceTAGML = tagmlExporter.toTAGML(annotations.get(0)).toString();
       String expectedSourceTAGML = tagmlExporter.toTAGML(source).toString();
       assertThat(actualSourceTAGML).isEqualTo(expectedSourceTAGML);
@@ -244,7 +249,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       assertThat(q2.getTextNodeStream()).hasSize(1); // has 1 textnode
 
       // compareTAGML(pathname, actual);
-      logKdTree(actual);
+      logKdTree(actual, store);
 
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
       expectedIndexPoints.add(new IndexPoint(0, 0));
@@ -257,17 +262,18 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testLMNLOzymandias() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
       LOG.info("document={}", actual);
-      logTAGML(actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
       assertThat(actual.hasTextNodes()).isTrue();
       String tagml = tagmlExporter.asTAGML(actual);
       assertThat(tagml).startsWith("[sonneteer [id}ozymandias{] [encoding [resp}ebeshero{] [resp}wap{]]}"); // annotations from sonneteer endtag moved to start tag
       assertThat(tagml).contains("[meta [author}Percy Bysshe Shelley{] [title}Ozymandias{]]"); // anonymous markup
       // compareTAGML(pathname, actual);
 
-      logKdTree(actual);
+      logKdTree(actual, store);
 
       List<IndexPoint> expectedIndexPoints = new ArrayList<>();
       expectedIndexPoints.add(new IndexPoint(0, 0));
@@ -279,9 +285,10 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Test
   public void testDiscontinuousRanges() throws LMNLSyntaxError {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
       String tagml = tagmlExporter.asTAGML(actual);
       LOG.info("tagml={}", tagml);
       assertThat(tagml).isEqualTo(input);
@@ -300,7 +307,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testAnnotationTextWithRanges() throws LMNLSyntaxError {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[lmnl [a}This is the [type}annotation{type] text{a]}This is the main text{lmnl]";
       printTokens(input);
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
@@ -353,7 +360,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testAnnotationTextInAnnotationWithRanges() throws LMNLSyntaxError {
     String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
     printTokens(input);
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
       TAGDocument expected = store.createDocument();
@@ -390,7 +397,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testAnonymousAnnotationRangeOpener() throws LMNLSyntaxError {
     String input = "[range1 [}annotation text{]}bla{range1]";
     printTokens(input);
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
       TAGDocument expected = store.createDocument();
@@ -406,8 +413,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
 
-      logTAGML(actual);
-      compareTAGML(expected, actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
+      compareTAGML(expected, actual, store);
       assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
@@ -415,7 +423,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testAtomsAreIgnored() throws LMNLSyntaxError {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[r}Splitting the {{Atom}}.{r]";
       printTokens(input);
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
@@ -431,8 +439,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
 
-      logTAGML(actual);
-      compareTAGML(expected, actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
+      compareTAGML(expected, actual, store);
     });
   }
 
@@ -441,7 +450,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testEmptyRange() throws LMNLSyntaxError {
     String input = "[empty}{empty]";
     printTokens(input);
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
       TAGDocument expected = store.createDocument();
       TAGMarkup m1 = store.createMarkup(expected, "empty");
@@ -451,9 +460,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       expected.addMarkup(m1);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
-
-      logTAGML(actual);
-      compareTAGML(expected, actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
+      compareTAGML(expected, actual, store);
       assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
@@ -461,7 +470,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testComments() throws LMNLSyntaxError {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[!-- comment 1 --][foo [!-- comment 2 --]}FOO[!-- comment 3 --]BAR{foo]";
       TAGDocument actual = new LMNLImporter(store).importLMNL(input);
 
@@ -477,14 +486,15 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       String layerName = "";
       document.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
       document.addMarkup(m1);
-      logTAGML(actual);
-      compareTAGML(document, actual);
+      final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
+      logTAGML(actual, tagmlExporter);
+      compareTAGML(document, actual, store);
     });
   }
 
   @Test
   public void testUnclosedRangeThrowsSyntaxError() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[tag} tag [v}is{v] not closed";
       try {
         TAGDocument actual = new LMNLImporter(store).importLMNL(input);
@@ -497,7 +507,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testUnopenedRangeThrowsSyntaxError() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "text{lmnl]";
       try {
         new LMNLImporter(store).importLMNL(input);
@@ -510,7 +520,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testSyntaxError() {
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       String input = "[a}bla{b]";
       try {
         new LMNLImporter(store).importLMNL(input);
@@ -526,7 +536,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   public void testAcrosticFileThrowsSyntaxError() throws IOException {
     String pathname = "data/lmnl/acrostic-syntax-error.lmnl";
     InputStream input = FileUtils.openInputStream(new File(pathname));
-    store.runInTransaction(() -> {
+    runInStoreTransaction(store -> {
       try {
         new LMNLImporter(store).importLMNL(input);
         fail("no LMNLSyntaxError thrown");
@@ -542,7 +552,8 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //    assertThat(outTAGML).isEqualTo(inLMNL);
 //  }
 
-  private void compareTAGML(TAGDocument expected, TAGDocument actual) {
+  private void compareTAGML(TAGDocument expected, TAGDocument actual, final TAGStore store) {
+    final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
     String expectedTAGML = tagmlExporter.asTAGML(expected);
     String actualTAGML = tagmlExporter.asTAGML(actual);
     assertThat(actualTAGML).isEqualTo(expectedTAGML);
@@ -560,7 +571,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     return simpleAnnotation(tag);
   }
 
-  private void assertActualMatchesExpected(TAGDocument actual, TAGDocument expected) {
+  private void assertActualMatchesExpected(TAGDocument actual, TAGDocument expected, final TAGStore store) {
     List<TAGMarkup> actualMarkupList = actual.getMarkupStream().collect(toList());
     List<TAGTextNode> actualTextNodeList = actual.getTextNodeStream().collect(toList());
 
@@ -584,6 +595,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       assertThat(actualMarkup).usingComparator(markupComparator).isEqualTo(expectedMarkup);
     }
 
+    final TAGMLExporter tagmlExporter = new TAGMLExporter(store);
     String actualTAGML = tagmlExporter.asTAGML(actual);
     String expectedTAGML = tagmlExporter.asTAGML(expected);
     LOG.info("TAGML={}", actualTAGML);
@@ -607,11 +619,11 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     return t1.getText().equals(t2.getText());
   }
 
-  private void logTAGML(TAGDocument document) {
+  private void logTAGML(TAGDocument document, final TAGMLExporter tagmlExporter) {
     LOG.info("TAGML=\n{}", tagmlExporter.asTAGML(document));
   }
 
-  private void logKdTree(TAGDocument document) {
+  private void logKdTree(TAGDocument document, final TAGStore store) {
     LaTeXExporter latexExporter = new LaTeXExporter(store, document);
     String latex1 = latexExporter.exportMatrix();
     LOG.info("matrix=\n{}", latex1);

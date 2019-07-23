@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 public class AnnotationInfo {
   Long nodeId;
   AnnotationType type;
   String name;
+  private String id;
 
   public AnnotationInfo(Long nodeId, AnnotationType type, String name) {
     this.nodeId = nodeId;
@@ -52,5 +55,13 @@ public class AnnotationInfo {
 
   public boolean hasName() {
     return StringUtils.isNotEmpty(name);
+  }
+
+  public void setId(final String id) {
+    this.id = id;
+  }
+
+  public Optional<String> getId() {
+    return Optional.ofNullable(id);
   }
 }

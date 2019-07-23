@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -343,13 +343,13 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public void addAnnotationEdge(final Long sourceNode, final AnnotationInfo targetAnnotation) {
-    AnnotationEdge edge = new AnnotationEdge(targetAnnotation.getType(), targetAnnotation.getName());
+    AnnotationEdge edge = new AnnotationEdge(targetAnnotation.getType(), targetAnnotation.getName(), targetAnnotation.getId().orElse(null));
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
 
   public void addListItem(Long sourceNode, AnnotationInfo targetAnnotation) {
-    ListItemEdge edge = new ListItemEdge(targetAnnotation.getType());
+    ListItemEdge edge = new ListItemEdge(targetAnnotation.getType(), targetAnnotation.getId().orElse(null));
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }

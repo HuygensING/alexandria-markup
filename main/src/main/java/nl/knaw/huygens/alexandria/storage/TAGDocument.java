@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 
 public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
-  private final TAGStore store;
+  public final TAGStore store;
   private final TAGDocumentDTO documentDTO;
   private final Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
 
@@ -257,7 +257,7 @@ public class TAGDocument {
   private void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, Long markupId, String layerName) {
 //    documentDTO.getTextNodeIdToMarkupIds()
 //        .computeIfAbsent(
-//            tagTextNode.getDbId(),
+//            tagTextNode.getResourceId(),
 //            f -> new LinkedHashSet<>()).add(markupId);
     documentDTO.textGraph.linkMarkupToTextNodeForLayer(markupId, tagTextNode.getDbId(), layerName);
     update();

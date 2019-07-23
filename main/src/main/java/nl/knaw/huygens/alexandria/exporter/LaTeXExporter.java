@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,7 +390,7 @@ public class LaTeXExporter {
       TAGTextNode lastTextNode, int partNo) {
     int first = textNodeIndices.get(firstTextNode);
     int last = textNodeIndices.get(lastTextNode);
-    String markupPartNum = String.valueOf(rangeLayerIndex) + "_" + partNo;
+    String markupPartNum = rangeLayerIndex + "_" + partNo;
     appendMarkup(latexBuilder, tr, markupPartNum, markupRow, color, first, last);
   }
 

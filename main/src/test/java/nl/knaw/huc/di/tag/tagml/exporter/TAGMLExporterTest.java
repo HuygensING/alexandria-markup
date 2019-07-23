@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -290,13 +292,18 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
   }
 
   private String parseAndExport(final String tagmlIn) {
-    TAGDocument document = store.runInTransaction(
-        () -> new TAGMLImporter(store).importTAGML(tagmlIn)
-    );
-    return store.runInTransaction(() -> {
-      logDocumentGraph(document, tagmlIn);
-      return new TAGMLExporter(store).asTAGML(document);
+    AtomicReference<String> tagmlOut = new AtomicReference<>();
+    runInStore(store -> {
+      TAGDocument document = store.runInTransaction(
+          () -> new TAGMLImporter(store).importTAGML(tagmlIn)
+      );
+      String tagml = store.runInTransaction(() -> {
+        logDocumentGraph(document, tagmlIn);
+        return new TAGMLExporter(store).asTAGML(document);
+      });
+      tagmlOut.set(tagml);
     });
+    return tagmlOut.get();
   }
 
 }

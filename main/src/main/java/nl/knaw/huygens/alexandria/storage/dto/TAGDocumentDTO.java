@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huygens.alexandria.storage.DataAccessor;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 import java.util.*;
@@ -34,7 +35,7 @@ import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
 @Entity(version = 3)
 public class TAGDocumentDTO implements TAGDTO {
-  @PrimaryKey(sequence = "tgnode_pk_sequence")
+  @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
 
   @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGTextNodeDTO.class)

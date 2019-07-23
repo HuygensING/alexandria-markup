@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2018 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import prioritised_xml_collation.TAGToken;
 import prioritised_xml_collation.TextToken;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -46,10 +47,39 @@ class Tokenizer {
     this.tagView = tagView;
   }
 
+  class TextTokenInfo {
+    Integer offset;
+    Integer length;
+
+    TextTokenInfo(Integer offset, Integer length) {
+      this.offset = offset;
+      this.length = length;
+    }
+
+    public void setOffset(final Integer offset) {
+      this.offset = offset;
+    }
+
+    Integer getOffset() {
+      return offset;
+    }
+
+    public void setLength(final Integer length) {
+      this.length = length;
+    }
+
+    Integer getLength() {
+      return length;
+    }
+  }
+
   public List<TAGToken> getTAGTokens() {
     List<TAGToken> tokens = new ArrayList<>();
     Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
     StringBuilder textBuilder = new StringBuilder();
+    List<Long> textNodeIds = new ArrayList<>();
+    final AtomicReference<Integer> totalTextSize = new AtomicReference<>(0);
+    Map<Long, TextTokenInfo> textTokenInfoMap = new HashMap<>();
     document.getTextNodeStream().forEach(tn -> {
       List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
           .filter(tagView::isIncluded)//
@@ -66,9 +96,11 @@ class Tokenizer {
       openMarkup.addAll(toOpen);
 
       if (!toClose.isEmpty() || !toOpen.isEmpty()) {
-        tokens.addAll(tokenizeText(textBuilder.toString()));
+        tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
         textBuilder.delete(0, textBuilder.length());
+        textNodeIds.clear();
       }
+
       toClose.stream()//
           .map(this::toMarkupCloseToken)//
           .forEach(tokens::add);
@@ -79,8 +111,12 @@ class Tokenizer {
 
       String text = tn.getText();
       textBuilder.append(text);
+      Long textNodeId = tn.getDbId();
+      textNodeIds.add(textNodeId);
+      textTokenInfoMap.put(textNodeId, new TextTokenInfo(totalTextSize.get(), text.length()));
+      totalTextSize.updateAndGet(v -> v + text.length());
     });
-    tokens.addAll(tokenizeText(textBuilder.toString()));
+    tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
     stream(openMarkup.descendingIterator())//
         .map(this::toMarkupCloseToken)//
         .forEach(tokens::add);
@@ -98,14 +134,33 @@ class Tokenizer {
 
   private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
 
-  static List<TextToken> tokenizeText(String text) {
+  static List<TextToken> tokenizeText(String text, Integer endOffset, List<Long> textNodeIds, final Map<Long, TextTokenInfo> textTokenInfoMap) {
     if (WS_OR_PUNCT.matcher(text).matches()) {
-      return new ArrayList<>(singletonList(new TextToken(text)));
+      return new ArrayList<>(singletonList(new ExtendedTextToken(text).addTextNodeIds(textNodeIds)));
     }
-    return SimplePatternTokenizer.BY_WS_OR_PUNCT//
+    List<String> parts = SimplePatternTokenizer.BY_WS_OR_PUNCT//
         .apply(text)//
-        .map(TextToken::new)//
         .collect(toList());
+    final List<TextToken> textTokens = new ArrayList<>();
+    int textPartStart = endOffset - text.length();
+    for (String part : parts) {
+      final ExtendedTextToken textToken = new ExtendedTextToken(part);
+      int length = part.length();
+      for (final Long textNodeId : textNodeIds) {
+        TextTokenInfo textTokenInfo = textTokenInfoMap.get(textNodeId);
+        Integer textPartEnd = textPartStart + length - 1;
+        Integer textNodeStart = textTokenInfo.getOffset();
+        Integer textNodeEnd = textNodeStart + textTokenInfo.getLength() - 1;
+        boolean textPartStartIsInTextNode = textNodeStart <= textPartStart && textNodeEnd >= textPartStart;
+        boolean textPartEndIsInTextNode = textNodeStart <= textPartEnd && textNodeEnd >= textPartEnd;
+        if (textPartStartIsInTextNode || textPartEndIsInTextNode) {
+          textToken.addTextNodeId(textNodeId);
+        }
+      }
+      textPartStart += length;
+      textTokens.add(textToken);
+    }
+    return textTokens;
   }
 
 }
