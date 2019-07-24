@@ -23,7 +23,7 @@ package nl.knaw.huc.di.tag.model.graph.edges;
 import com.sleepycat.persist.model.Persistent;
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
-@Persistent
+@Persistent(version=1)
 public class AnnotationEdge implements Edge {
   private AnnotationType annotationType;
   private String field;
