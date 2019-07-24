@@ -10,7 +10,7 @@ add this dependency to your `pom.xml`
 <dependency>
   <groupId>nl.knaw.huygens.alexandria</groupId>
   <artifactId>lmnl</artifactId>
-  <version>2.1.1-SNAPSHOT</version>
+  <version>2.2</version>
 </dependency>
 ```
 
