@@ -38,7 +38,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
-  @Ignore
+  @Test
+  public void testTAGMLDiffCase1() {
+    String originText = "[TAGML|+M>\n" +
+        "[text|M>\n" +
+        "[l|M>]\n" +
+        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M>malgré l'agrandissement du close-up.\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+    String editedText = "[TAGML|+N>\n" +
+        "[text|N>\n" +
+        "[s|N>Une belle main de femme, élégante et fine.<s] [s>Malgré l'agrandissement du close-up.\n" +
+        "<s]\n" +
+        "<text]<TAGML]";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly("[l|M](1-4) deleted",
+        "[l|M](6-8) deleted",
+        "[l|M](1-5) added",
+        "[s|N](1-5) added",
+        "[l|M](7-8) added",
+        "[s|N](7-8) added");
+  }
+
+
+  //  @Ignore
   @Test
   public void testMarkupDiff0() {
     String originText = "[TAGML|+M>\n" +

@@ -30,6 +30,7 @@
     <antlr4.visitor>true</antlr4.visitor>
     <assertj.version>3.12.2</assertj.version>
     <berkeleydb.version>18.3.12</berkeleydb.version>
+    <collatex.version>1.7.1</collatex.version>
     <commons-io.version>2.6</commons-io.version>
     <commons-lang3.version>3.9</commons-lang3.version>
     <commons-text.version>1.7</commons-text.version>

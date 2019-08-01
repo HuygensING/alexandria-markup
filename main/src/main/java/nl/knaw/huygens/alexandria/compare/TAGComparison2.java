@@ -84,7 +84,9 @@ public class TAGComparison2 {
             markupInfoMap2.get(markupId).setEndRank(rank);
           });
     });
+
     List<MarkupInfo>[] results = new ArrayList[2];
+
     List<MarkupInfo> listA = new ArrayList<>();
     markupInfoMap1.forEach((k, v) -> {
       v.setMarkup(store.getMarkup(k));
@@ -92,6 +94,7 @@ public class TAGComparison2 {
     });
     listA.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[0] = listA;
+
     List<MarkupInfo> listB = new ArrayList<>();
     markupInfoMap2.forEach((k, v) -> {
       v.setMarkup(store.getMarkup(k));
@@ -99,6 +102,7 @@ public class TAGComparison2 {
     });
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
+
     markupInfoLists = results;
     diffLines.addAll(diffMarkupInfo(markupInfoLists, HR_DIFFPRINTER));
     mrDiffLines.addAll(diffMarkupInfo(markupInfoLists, MR_DIFFPRINTER));
@@ -189,6 +193,9 @@ public class TAGComparison2 {
 //        || tagToken instanceof MarkupCloseToken;
 //  }
 
+
+  // TODO: use A* for finding optimal markup edit set
+  // optimal = minimum number of steps?
   public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
     final List<String> diff = new ArrayList<>();
     List<MarkupInfo> markupInfoListA = markupInfoLists[0];
