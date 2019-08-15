@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -103,6 +103,8 @@ public class TAGComparison2 {
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
 
+    List<Pair<MarkupInfo,MarkupInfo>> matches = new MyAStar(listA, listB).matches();
+
     markupInfoLists = results;
     diffLines.addAll(diffMarkupInfo(markupInfoLists, HR_DIFFPRINTER));
     mrDiffLines.addAll(diffMarkupInfo(markupInfoLists, MR_DIFFPRINTER));
@@ -193,10 +195,10 @@ public class TAGComparison2 {
 //        || tagToken instanceof MarkupCloseToken;
 //  }
 
-
   // TODO: use A* for finding optimal markup edit set
-  // optimal = minimum number of steps?
+  // optimal = minimum number of steps? no: maximum number of matches
   public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
+    // this current algorithm does not
     final List<String> diff = new ArrayList<>();
     List<MarkupInfo> markupInfoListA = markupInfoLists[0];
     List<MarkupInfo> markupInfoListB = markupInfoLists[1];
