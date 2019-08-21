@@ -25,10 +25,7 @@ import nl.knaw.huc.di.tag.TAGExporter;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
+import nl.knaw.huygens.alexandria.storage.*;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import org.slf4j.Logger;
@@ -280,9 +277,10 @@ public class TAGMLExporter extends TAGExporter {
   public StringBuilder toTAGML(final AnnotationInfo a) {
     StringBuilder stringBuilder = new StringBuilder();
     if (a.hasName()) {
+      String connectingChars = a.getType().equals(AnnotationType.Reference) ? "->" : "=";
       stringBuilder
           .append(a.getName())
-          .append("=");
+          .append(connectingChars);
     }
     switch (a.getType()) {
       case String:
