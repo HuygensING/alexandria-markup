@@ -33,6 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
+  public void testReferenceAnnotation() {
+    String tagmlIn = "[x>[p pers->p42>Donald<p] likes KFC<x]";
+    assertTAGMLOutIsIn(tagmlIn);
+  }
+
+  @Test
   public void testRD207() {
     String tagML = "[tagml>" +
         "[layerdef|+A>" +
