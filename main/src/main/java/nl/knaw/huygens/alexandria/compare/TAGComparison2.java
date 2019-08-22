@@ -217,8 +217,47 @@ public class TAGComparison2 {
 //        || tagToken instanceof MarkupCloseToken;
 //  }
 
+  private static class MarkupSegment {
+    List<MarkupInfo> original = new ArrayList<>();
+    List<MarkupInfo> modified = new ArrayList<>();
+    boolean isMatch = false;
+  }
+
   private List<MarkupEdit> calculateMarkupEdits(final List<MarkupInfo> listA, final List<MarkupInfo> listB, final List<Pair<Integer, Integer>> optimalMatches) {
+    List<MarkupSegment> segments = new ArrayList<>();
     final List<MarkupEdit> markupEdits = new ArrayList<>();
+    int indexA = 0;
+    int indexB = 0;
+    int matchesIndex = 0;
+
+    while (matchesIndex <= optimalMatches.size()) {
+      Pair<Integer, Integer> pair = optimalMatches.get(matchesIndex);
+      int matchIndexA = pair.getLeft();
+      int matchIndexB = pair.getRight();
+      MarkupSegment segment = new MarkupSegment();
+      while (indexA < matchIndexA) {
+        segment.original.add(listA.get(indexA++));
+      }
+      while (indexB < matchIndexB) {
+        segment.modified.add(listB.get(indexB++));
+      }
+      segments.add(segment);
+      MarkupSegment matchingSegment = new MarkupSegment();
+      matchingSegment.original.add(listA.get(indexA++));
+      matchingSegment.modified.add(listB.get(indexB++));
+      matchingSegment.isMatch = true;
+      matchesIndex++;
+    }
+
+    MarkupSegment segment = new MarkupSegment();
+    while (indexA < listA.size()) {
+      segment.original.add(listA.get(indexA++));
+    }
+    while (indexB < listB.size()) {
+      segment.modified.add(listB.get(indexB++));
+    }
+    segments.add(segment);
+
     return markupEdits;
   }
 

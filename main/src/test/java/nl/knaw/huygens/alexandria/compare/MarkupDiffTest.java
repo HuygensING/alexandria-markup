@@ -58,6 +58,20 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "[s|N](1-5) added",
         "[l|M](7-8) added",
         "[s|N](7-8) added");
+
+//    Edit operations on markup:
+//
+//    { "layeridentifier_change" : [TAGML|M][TAGML|N] }
+//    { "layeridentifier_change" : [TAGML/text|M][TAGML/text|N] }
+//    the Markup nodes are a match, but their layer suffix is not.
+//
+//    { "replace" : [TAGML/text/l[1]|M][TAGML/text/s[1]|N] }
+//    { "replace" : [TAGML/text/l[2]|M][TAGML/text/s[2]|N] }
+//    We need to specify that the first child of the text node is replaced.
+//
+//    { "del" : [TAGML/text/l[1]/del|M][] }
+//    { "del" : [TAGML/text/l[1]/add|M][] }
+
   }
 
 
