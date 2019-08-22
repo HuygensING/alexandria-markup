@@ -1,93 +1,109 @@
 package nl.knaw.huygens.alexandria.compare;
 
+/*-
+ * #%L
+ * alexandria-markup-core
+ * =======
+ * Copyright (C) 2016 - 2019 HuC DI (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
-import nl.knaw.huygens.alexandria.compare.TAGComparison2.MarkupInfo;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-import static java.lang.Math.abs;
-import static java.util.stream.Collectors.toList;
+public class MyAStar extends AstarAlgorithm<QuantumMatchList, LostPotential> {
+  private static final Logger LOG = LoggerFactory.getLogger(MyAStar.class);
 
-public class MyAStar extends AstarAlgorithm<MyNode, MyCost> {
+  private static final Comparator<Pair<Integer, Integer>> BY_LEFT = Comparator.comparing(Pair::getLeft);
+  private static final Comparator<Pair<Integer, Integer>> BY_RIGHT = Comparator.comparing(Pair::getRight);
+  private static final Comparator<Pair<Integer, Integer>> BY_ASCENDING_A_INDEX = BY_LEFT.thenComparing(BY_RIGHT);
+  private static final Comparator<Pair<Integer, Integer>> BY_ASCENDING_B_INDEX = BY_RIGHT.thenComparing(BY_LEFT);
 
-  private final List<MarkupInfo> markupInfoListA;
-  private final List<MarkupInfo> markupInfoListB;
-  private final int maxA;
-  private final int maxB;
+  private final List<Pair<Integer, Integer>> potentialMatchesSortedOnA;
+  private final List<Pair<Integer, Integer>> potentialMatchesSortedOnB;
+  private final int maxPotential;
+  private List<Pair<Integer, Integer>> matches;
 
-  public MyAStar(List<MarkupInfo> markupInfoListA, List<MarkupInfo> markupInfoListB) {
-    this.markupInfoListA = markupInfoListA;
-    this.maxA = markupInfoListA.size() - 1;
-    this.markupInfoListB = markupInfoListB;
-    this.maxB = markupInfoListB.size() - 1;
-    System.out.println("maxA=" + maxA + ",maxB=" + maxB);
+  public MyAStar(List<Pair<Integer, Integer>> allPotentialMatches) {
+    maxPotential = allPotentialMatches.size();
+    potentialMatchesSortedOnA = new ArrayList<>(allPotentialMatches);
+    potentialMatchesSortedOnA.sort(BY_ASCENDING_A_INDEX);
+
+    potentialMatchesSortedOnB = new ArrayList<>(allPotentialMatches);
+    potentialMatchesSortedOnB.sort(BY_ASCENDING_B_INDEX);
+
+    QuantumMatchList startNode = new QuantumMatchList(Collections.EMPTY_LIST, new ArrayList<>(allPotentialMatches));
+    LostPotential startCost = new LostPotential(0);
+    Stopwatch sw = Stopwatch.createStarted();
+    List<QuantumMatchList> winningPath = aStar(startNode, startCost);
+    sw.stop();
+    LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS));
+    QuantumMatchList winningGoal = winningPath.get(winningPath.size() - 1);
+    matches = winningGoal.chosenMatches;
   }
 
   @Override
-  protected boolean isGoal(final MyNode node) {
-    boolean goal = node.indexA == maxA && node.indexB == maxB;
-    System.out.println("(" + node.indexA + "," + node.indexB + "):" + goal);
-    return goal;
+  protected boolean isGoal(final QuantumMatchList node) {
+    return node.potentialMatches.isEmpty();
   }
 
   @Override
-  protected Iterable<MyNode> neighborNodes(final MyNode current) {
-    final List<MyNode> neighborNodes = new ArrayList<>();
+  protected Iterable<QuantumMatchList> neighborNodes(final QuantumMatchList current) {
+    final Set<QuantumMatchList> neighborNodes = new HashSet<>();
 
-    if (current.indexA < maxA) {
-      final MyNode neighborNodeA = nodeAt(current.indexA + 1, current.indexB, current.matches);
-      neighborNodes.add(neighborNodeA);
-    }
+    Pair<Integer, Integer> firstPotentialMatch1 = getFirstPotentialMatch(this.potentialMatchesSortedOnA, current);
+    addNeighborNodes(current, neighborNodes, firstPotentialMatch1);
 
-    if (current.indexA < maxA && current.indexB < maxB) {
-      final MyNode neighborNodeAB = nodeAt(current.indexA + 1, current.indexB + 1, current.matches);
-      neighborNodes.add(neighborNodeAB);
-    }
-
-    if (current.indexB < maxB) {
-      final MyNode neighborNodeB = nodeAt(current.indexA, current.indexB + 1, current.matches);
-      neighborNodes.add(neighborNodeB);
+    Pair<Integer, Integer> firstPotentialMatch2 = getFirstPotentialMatch(this.potentialMatchesSortedOnB, current);
+    if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
+      addNeighborNodes(current, neighborNodes, firstPotentialMatch2);
     }
 
     return neighborNodes;
   }
 
-  private MyNode nodeAt(final Integer indexA, final Integer indexB, final List<Pair<Integer, Integer>> currentMatches) {
-    boolean isMatch = isMatch(markupInfoListA.get(indexA), markupInfoListB.get(indexB));
-    final ArrayList matches = new ArrayList(currentMatches);
-    if (isMatch) {
-      matches.add(new ImmutablePair(indexA, indexB));
-    }
-    return new MyNode(indexA, indexB, matches, isMatch);
+  private void addNeighborNodes(final QuantumMatchList current, final Set<QuantumMatchList> neighborNodes, final Pair<Integer, Integer> firstPotentialMatch) {
+    QuantumMatchList quantumMatchSet1 = current.chooseMatch(firstPotentialMatch);
+    QuantumMatchList quantumMatchSet2 = current.discardMatch(firstPotentialMatch);
+    neighborNodes.add(quantumMatchSet1);
+    neighborNodes.add(quantumMatchSet2);
   }
 
-  private boolean isMatch(final MarkupInfo markupInfoA, final MarkupInfo markupInfoB) {
-    return Objects.equals(markupInfoA.getMarkup().getTag(), markupInfoB.getMarkup().getTag());
-  }
-
-  @Override
-  protected MyCost heuristicCostEstimate(final MyNode node) {
-    final int cost = node.isMatch ? -1 : 0;
-    return new MyCost(cost);
+  private Pair<Integer, Integer> getFirstPotentialMatch(final List<Pair<Integer, Integer>> matches, final QuantumMatchList current) {
+    List<Pair<Integer, Integer>> potentialMatches = new ArrayList<>(matches);
+    potentialMatches.retainAll(current.getPotentialMatches());
+    return potentialMatches.get(0);
   }
 
   @Override
-  protected MyCost distBetween(final MyNode current, final MyNode neighbor) {
-    int dist = abs(current.matches.size() - neighbor.matches.size());
-    return new MyCost(dist);
+  protected LostPotential heuristicCostEstimate(final QuantumMatchList node) {
+    return new LostPotential(maxPotential - node.totalSize());
   }
 
-  public List<Pair<MarkupInfo, MarkupInfo>> matches() {
-    final MyNode startNode = nodeAt(0, 0, new ArrayList<>());
-    final MyCost startCost = new MyCost(0);
-    List<MyNode> nodePath = aStar(startNode, startCost);
-    final List<Pair<MarkupInfo, MarkupInfo>> matches = nodePath.get(0).matches.stream()
-        .map(pair -> new ImmutablePair<>(markupInfoListA.get(pair.getLeft()), markupInfoListB.get(pair.getRight())))
-        .collect(toList());
+  @Override
+  protected LostPotential distBetween(final QuantumMatchList current, final QuantumMatchList neighbor) {
+    return new LostPotential(Math.abs(current.totalSize() - neighbor.totalSize()));
+  }
+
+  public List<Pair<Integer, Integer>> matches() {
     return matches;
   }
 }

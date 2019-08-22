@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.compare;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -102,12 +102,34 @@ public class TAGComparison2 {
     });
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
-
-    List<Pair<MarkupInfo,MarkupInfo>> matches = new MyAStar(listA, listB).matches();
-
     markupInfoLists = results;
-    diffLines.addAll(diffMarkupInfo(markupInfoLists, HR_DIFFPRINTER));
-    mrDiffLines.addAll(diffMarkupInfo(markupInfoLists, MR_DIFFPRINTER));
+
+    List<Pair<Integer, Integer>> potentialMatches = potentialMatches(listA, listB);
+
+    List<Pair<Integer, Integer>> optimalMatches = new MyAStar(potentialMatches).matches();
+
+    List<MarkupEdit> markupEdits = calculateMarkupEdits(listA, listB, optimalMatches);
+
+    diffLines.addAll(toDiffLines(markupEdits, HR_DIFFPRINTER));
+    mrDiffLines.addAll(toDiffLines(markupEdits, MR_DIFFPRINTER));
+  }
+
+  private List<Pair<Integer, Integer>> potentialMatches(final List<MarkupInfo> listA, final List<MarkupInfo> listB) {
+    final List<Pair<Integer, Integer>> potentialMatches = new ArrayList<>();
+    for (int i = 0; i < listA.size(); i++) {
+      MarkupInfo markupA = listA.get(i);
+      for (int j = 0; j < listB.size(); j++) {
+        MarkupInfo markupB = listB.get(j);
+        if (isMatch(markupA, markupB)) {
+          potentialMatches.add(new ImmutablePair<>(i, j));
+        }
+      }
+    }
+    return potentialMatches;
+  }
+
+  private boolean isMatch(final MarkupInfo markupA, final MarkupInfo markupB) {
+    return Objects.equals(markupA.getMarkup().getTag(), markupB.getMarkup().getTag());
   }
 
   public boolean hasDifferences() {
@@ -195,6 +217,27 @@ public class TAGComparison2 {
 //        || tagToken instanceof MarkupCloseToken;
 //  }
 
+  private List<MarkupEdit> calculateMarkupEdits(final List<MarkupInfo> listA, final List<MarkupInfo> listB, final List<Pair<Integer, Integer>> optimalMatches) {
+    final List<MarkupEdit> markupEdits = new ArrayList<>();
+    return markupEdits;
+  }
+
+  private Collection<? extends String> toDiffLines(final List<MarkupEdit> markupEdits, final DiffPrinter diffPrinter) {
+    return markupEdits.stream()
+        .map(me -> {
+          if (me instanceof MarkupAddition) {
+            return diffPrinter.addition.apply(((MarkupAddition) me).markupInfo);
+          } else if (me instanceof MarkupDeletion) {
+            return diffPrinter.deletion.apply(((MarkupDeletion) me).markupInfo);
+          } else if (me instanceof MarkupModification) {
+            MarkupModification mm = (MarkupModification) me;
+            return diffPrinter.modification.apply(mm.original, mm.modified);
+          }
+          return null;
+        })
+        .collect(toList());
+  }
+
   // TODO: use A* for finding optimal markup edit set
   // optimal = minimum number of steps? no: maximum number of matches
   public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
@@ -222,14 +265,13 @@ public class TAGComparison2 {
             determinedInA[i] = true;
             determinedInB[j] = true;
             break;
-          }
-          if (sameSpan && sameStartRank) {
+          } else if (sameSpan && sameStartRank) {
             potentialReplacements.add(new ImmutablePair(i, j));
           }
         }
       }
     }
-    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
+//    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
 
     for (int i = 0; i < determinedInA.length; i++) {
       if (!determinedInA[i]) {
@@ -238,8 +280,8 @@ public class TAGComparison2 {
         List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
             .filter(p -> p.getLeft() == finalI)
             .collect(toList());
-        potentialReplacements.removeAll(matchingPotentialReplacements);
         if (!matchingPotentialReplacements.isEmpty()) {
+          potentialReplacements.removeAll(matchingPotentialReplacements);
           Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
           MarkupInfo markupInfoA = markupInfoListA.get(i);
           MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
