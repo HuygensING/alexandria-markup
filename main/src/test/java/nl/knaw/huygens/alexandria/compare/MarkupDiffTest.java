@@ -42,8 +42,8 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   public void testTAGMLDiffCase1() {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
-        "[l|M>]\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M>malgré l'agrandissement du close-up.\n" +
+        "[l|M>" +
+        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
         "<l]\n" +
         "<text]<TAGML]";
     String editedText = "[TAGML|+N>\n" +
@@ -52,12 +52,13 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<s]\n" +
         "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[l|M](1-4) deleted",
-        "[l|M](6-8) deleted",
-        "[l|M](1-5) added",
-        "[s|N](1-5) added",
-        "[l|M](7-8) added",
-        "[s|N](7-8) added");
+    assertThat(markupInfoDiffs).containsExactly(
+        "del [l|M](0-6)",
+        "replace [l|M](7-8) -> [s](7-8)",
+        "del [del|M](1-1)",
+        "del [add|M](2-2)",
+        "add [s|N](0-5)"
+    );
 
 //    Edit operations on markup:
 //
@@ -81,7 +82,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
         "[l|M>\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
+        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
         "<l]\n" +
         "<text]<TAGML]\n";
     String editedText = "[TAGML|+N>\n" +
@@ -90,7 +91,11 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<s]\n" +
         "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
+    assertThat(markupInfoDiffs).containsExactly(
+        "replace [l|M](0-5) -> [s|N](0-5)",
+        "replace [l|M](6-7) -> [s|N](6-7)",
+        "del [del|M](1-1)",
+        "del [add|M](2-2)");
   }
 
   @Test
@@ -98,7 +103,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple [del>short<del] text<TAGML]\n";
     String editedText = "[TAGML>A simple text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[del](2-2) deleted");
+    assertThat(markupInfoDiffs).containsExactly("del [del](1-1)");
   }
 
   @Test
@@ -106,7 +111,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple text<TAGML]\n";
     String editedText = "[TAGML>A simple [add>short<add] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[add](2-2) added");
+    assertThat(markupInfoDiffs).containsExactly("add [add](1-1)");
   }
 
   @Test
@@ -114,8 +119,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
-//    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
+    assertThat(markupInfoDiffs).containsExactly("replace [a](1-1) -> [b](1-1)");
   }
 
   @Ignore
@@ -152,11 +156,11 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
           LOG.info("{}: {}", i, mi);
         }
       }
-      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
-      LOG.info("{}", diffMarkupInfo);
-      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
-      LOG.info("{}", mrDiffMarkupInfo);
-      return diffMarkupInfo;
+//      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
+//      LOG.info("{}", diffMarkupInfo);
+//      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
+//      LOG.info("{}", mrDiffMarkupInfo);
+      return differ.getDiffLines();
     });
   }
 

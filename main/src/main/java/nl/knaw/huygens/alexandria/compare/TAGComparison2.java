@@ -70,7 +70,7 @@ public class TAGComparison2 {
     Map<Long, MarkupInfo> markupInfoMap1 = new HashMap<>();
     Map<Long, MarkupInfo> markupInfoMap2 = new HashMap<>();
     textSegments.forEach(segment -> {
-      int rank = rankCounter.incrementAndGet();
+      int rank = rankCounter.getAndIncrement();
       getTextNodeIdsForTokens(segment.tokensWa)
           .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
           .forEach(markupId -> {
@@ -221,6 +221,10 @@ public class TAGComparison2 {
     List<MarkupInfo> original = new ArrayList<>();
     List<MarkupInfo> modified = new ArrayList<>();
     boolean isMatch = false;
+
+    public boolean isEmpty() {
+      return original.isEmpty() && modified.isEmpty();
+    }
   }
 
   private List<MarkupEdit> calculateMarkupEdits(final List<MarkupInfo> listA, final List<MarkupInfo> listB, final List<Pair<Integer, Integer>> optimalMatches) {
@@ -230,7 +234,7 @@ public class TAGComparison2 {
     int indexB = 0;
     int matchesIndex = 0;
 
-    while (matchesIndex <= optimalMatches.size()) {
+    while (matchesIndex < optimalMatches.size()) {
       Pair<Integer, Integer> pair = optimalMatches.get(matchesIndex);
       int matchIndexA = pair.getLeft();
       int matchIndexB = pair.getRight();
@@ -241,11 +245,14 @@ public class TAGComparison2 {
       while (indexB < matchIndexB) {
         segment.modified.add(listB.get(indexB++));
       }
-      segments.add(segment);
+      if (!segment.isEmpty()) {
+        segments.add(segment);
+      }
       MarkupSegment matchingSegment = new MarkupSegment();
       matchingSegment.original.add(listA.get(indexA++));
       matchingSegment.modified.add(listB.get(indexB++));
       matchingSegment.isMatch = true;
+      segments.add(matchingSegment);
       matchesIndex++;
     }
 
@@ -256,7 +263,30 @@ public class TAGComparison2 {
     while (indexB < listB.size()) {
       segment.modified.add(listB.get(indexB++));
     }
-    segments.add(segment);
+    if (!segment.isEmpty()) {
+      segments.add(segment);
+    }
+
+    for (MarkupSegment s : segments) {
+      if (!s.isMatch) {
+        // simple deletion/addition
+        for (MarkupInfo o : s.original) {
+          Optional<MarkupInfo> replacement = s.modified.stream()
+              .filter(mi -> mi.startRank == o.startRank && mi.endRank == o.endRank)
+              .findAny();
+          if (replacement.isPresent()) {
+            MarkupInfo modified = replacement.get();
+            markupEdits.add(new MarkupModification(o, modified));
+            s.modified.remove(modified);
+          } else {
+            markupEdits.add(new MarkupDeletion(o));
+          }
+        }
+        for (MarkupInfo m : s.modified) {
+          markupEdits.add(new MarkupAddition(m));
+        }
+      }
+    }
 
     return markupEdits;
   }
@@ -373,11 +403,11 @@ public class TAGComparison2 {
   }
 
   static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("[%s](%d-%d) added",
+      .setAddition(markupInfo -> String.format("add [%s](%d-%d)",
           markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setDeletion(markupInfo -> String.format("[%s](%d-%d) deleted",
+      .setDeletion(markupInfo -> String.format("del [%s](%d-%d)",
           markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setModification((markupInfoA, markupInfoB) -> String.format("[%s](%d-%d) replaced by [%s](%d-%d)",
+      .setModification((markupInfoA, markupInfoB) -> String.format("replace [%s](%d-%d) -> [%s](%d-%d)",
           markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
           markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
       ));

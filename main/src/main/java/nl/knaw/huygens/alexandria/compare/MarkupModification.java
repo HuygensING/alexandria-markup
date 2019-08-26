@@ -19,7 +19,7 @@ package nl.knaw.huygens.alexandria.compare;
  * limitations under the License.
  * #L%
  */
-public class MarkupModification {
+public class MarkupModification implements MarkupEdit {
   public TAGComparison2.MarkupInfo original;
   public TAGComparison2.MarkupInfo modified;
 
