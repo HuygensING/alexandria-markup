@@ -268,7 +268,15 @@ public class TAGComparison2 {
     }
 
     for (MarkupSegment s : segments) {
-      if (!s.isMatch) {
+      if (s.isMatch) {
+        MarkupInfo original = s.original.get(0);
+        Set<String> originalLayers = original.getMarkup().getLayers();
+        MarkupInfo modified = s.modified.get(0);
+        Set<String> modifiedLayers = modified.getMarkup().getLayers();
+        if (!originalLayers.equals(modifiedLayers)) {
+          markupEdits.add(new LayerModification(original, modified));
+        }
+      } else {
         // simple deletion/addition
         for (MarkupInfo o : s.original) {
           Optional<MarkupInfo> replacement = s.modified.stream()
@@ -301,6 +309,9 @@ public class TAGComparison2 {
           } else if (me instanceof MarkupModification) {
             MarkupModification mm = (MarkupModification) me;
             return diffPrinter.modification.apply(mm.original, mm.modified);
+          } else if (me instanceof LayerModification) {
+            LayerModification lm = (LayerModification) me;
+            return diffPrinter.layermodification.apply(lm.original, lm.modified);
           }
           return null;
         })
@@ -385,6 +396,7 @@ public class TAGComparison2 {
     Function<MarkupInfo, String> addition;
     Function<MarkupInfo, String> deletion;
     BiFunction<MarkupInfo, MarkupInfo, String> modification;
+    BiFunction<MarkupInfo, MarkupInfo, String> layermodification;
 
     DiffPrinter setAddition(Function<MarkupInfo, String> addition) {
       this.addition = addition;
@@ -400,6 +412,11 @@ public class TAGComparison2 {
       this.modification = modification;
       return this;
     }
+
+    DiffPrinter setLayerModification(BiFunction<MarkupInfo, MarkupInfo, String> layerModification) {
+      this.layermodification = layerModification;
+      return this;
+    }
   }
 
   static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
@@ -409,13 +426,18 @@ public class TAGComparison2 {
           markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
       .setModification((markupInfoA, markupInfoB) -> String.format("replace [%s](%d-%d) -> [%s](%d-%d)",
           markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
-      ));
+          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()))
+      .setLayerModification((markupInfoA, markupInfoB) -> String.format("layeridentifier change [%s](%d-%d) -> [%s](%d-%d)",
+          markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()));
 
   static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()
       .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
       .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
       .setModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
+          markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
+      ))
+      .setLayerModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
           markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
       ));
 

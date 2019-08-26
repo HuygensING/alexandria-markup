@@ -53,6 +53,8 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
+        "layeridentifier change [TAGML|M](0-8) -> [TAGML|N](0-8)",
+        "layeridentifier change [text|M](0-8) -> [text|N](0-8)",
         "del [l|M](0-6)",
         "replace [l|M](7-8) -> [s](7-8)",
         "del [del|M](1-1)",
@@ -92,6 +94,8 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
+        "layeridentifier change [TAGML|M](0-7) -> [TAGML|N](0-7)",
+        "layeridentifier change [text|M](0-7) -> [text|N](0-7)",
         "replace [l|M](0-5) -> [s|N](0-5)",
         "replace [l|M](6-7) -> [s|N](6-7)",
         "del [del|M](1-1)",
