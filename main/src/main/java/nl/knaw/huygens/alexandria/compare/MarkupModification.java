@@ -1,5 +1,7 @@
 package nl.knaw.huygens.alexandria.compare;
 
+import java.util.List;
+
 /*-
  * #%L
  * alexandria-markup-core
@@ -20,10 +22,10 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class MarkupModification implements MarkupEdit {
-  public TAGComparison2.MarkupInfo original;
-  public TAGComparison2.MarkupInfo modified;
+  public List<TAGComparison2.MarkupInfo> original;
+  public List<TAGComparison2.MarkupInfo> modified;
 
-  public MarkupModification(TAGComparison2.MarkupInfo original, TAGComparison2.MarkupInfo modified) {
+  public MarkupModification(List<TAGComparison2.MarkupInfo> original, List<TAGComparison2.MarkupInfo> modified) {
     this.original = original;
     this.modified = modified;
   }

@@ -38,6 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -277,21 +278,32 @@ public class TAGComparison2 {
           markupEdits.add(new LayerModification(original, modified));
         }
       } else {
-        // simple deletion/addition
-        for (MarkupInfo o : s.original) {
-          Optional<MarkupInfo> replacement = s.modified.stream()
-              .filter(mi -> mi.startRank == o.startRank && mi.endRank == o.endRank)
-              .findAny();
-          if (replacement.isPresent()) {
-            MarkupInfo modified = replacement.get();
-            markupEdits.add(new MarkupModification(o, modified));
-            s.modified.remove(modified);
-          } else {
+//        for (MarkupInfo o : s.original) {
+//          Optional<MarkupInfo> replacement = s.modified.stream()
+//              .filter(mi -> mi.startRank == o.startRank && mi.endRank == o.endRank)
+//              .findAny();
+//          if (replacement.isPresent()) {
+//            MarkupInfo modified = replacement.get();
+//            markupEdits.add(new MarkupModification(o, modified));
+//            s.modified.remove(modified);
+//          } else {
+//            markupEdits.add(new MarkupDeletion(o));
+//          }
+//        }
+//        for (MarkupInfo m : s.modified) {
+//          markupEdits.add(new MarkupAddition(m));
+//        }
+        if (s.original.isEmpty()) {
+          for (MarkupInfo m : s.modified) {
+            markupEdits.add(new MarkupAddition(m));
+          }
+        } else if (s.modified.isEmpty()) {
+          for (MarkupInfo o : s.original) {
             markupEdits.add(new MarkupDeletion(o));
           }
-        }
-        for (MarkupInfo m : s.modified) {
-          markupEdits.add(new MarkupAddition(m));
+
+        } else {
+          markupEdits.add(new MarkupModification(s.original, s.modified));
         }
       }
     }
@@ -372,7 +384,7 @@ public class TAGComparison2 {
 //              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
 //              )
 
-          diff.add(diffPrinter.modification.apply(markupInfoA, markupInfoB));
+          diff.add(diffPrinter.modification.apply(singletonList(markupInfoA), singletonList(markupInfoB)));
           determinedInA[i] = true;
           determinedInB[replacement.getRight()] = true;
 
@@ -395,7 +407,7 @@ public class TAGComparison2 {
   static class DiffPrinter {
     Function<MarkupInfo, String> addition;
     Function<MarkupInfo, String> deletion;
-    BiFunction<MarkupInfo, MarkupInfo, String> modification;
+    BiFunction<List<MarkupInfo>, List<MarkupInfo>, String> modification;
     BiFunction<MarkupInfo, MarkupInfo, String> layermodification;
 
     DiffPrinter setAddition(Function<MarkupInfo, String> addition) {
@@ -408,7 +420,7 @@ public class TAGComparison2 {
       return this;
     }
 
-    DiffPrinter setModification(BiFunction<MarkupInfo, MarkupInfo, String> modification) {
+    DiffPrinter setModification(BiFunction<List<MarkupInfo>, List<MarkupInfo>, String> modification) {
       this.modification = modification;
       return this;
     }
@@ -424,18 +436,27 @@ public class TAGComparison2 {
           markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
       .setDeletion(markupInfo -> String.format("del [%s](%d-%d)",
           markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setModification((markupInfoA, markupInfoB) -> String.format("replace [%s](%d-%d) -> [%s](%d-%d)",
-          markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()))
+      .setModification((markupInfoA, markupInfoB) ->
+          String.format("replace {%s} -> {%s}",
+              markupInfoA.stream().map(TAGComparison2::markupInfoString).collect(joining(",")),
+              markupInfoB.stream().map(TAGComparison2::markupInfoString).collect(joining(",")))
+      )
       .setLayerModification((markupInfoA, markupInfoB) -> String.format("layeridentifier change [%s](%d-%d) -> [%s](%d-%d)",
           markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
           markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()));
+
+  public static String markupInfoString(MarkupInfo markupInfo) {
+    return String.format("[%s](%d-%d)",
+        markupInfo.markup.getExtendedTag(),
+        markupInfo.getStartRank(),
+        markupInfo.getEndRank());
+  }
 
   static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()
       .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
       .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
       .setModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
-          markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
+          markupInfoA.get(0).markup.getDbId(), markupInfoB.get(0).markup.getExtendedTag()
       ))
       .setLayerModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
           markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
