@@ -39,7 +39,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
   @Test
-  public void testTAGMLDiffCase1() {
+  public void testTAGMLDiffCase1a() {
     String originText = "[TAGML|+M>\n" +
         "[text|M>\n" +
         "[l|M>" +
@@ -48,7 +48,31 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]";
     String editedText = "[TAGML|+N>\n" +
         "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s] [s>Malgré l'agrandissement du close-up.\n" +
+        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
+        "<s]\n" +
+        "<text]<TAGML]";
+    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    assertThat(markupInfoDiffs).containsExactly(
+        "layeridentifier change [TAGML|M](0-7) -> [TAGML|N](0-7)",
+        "layeridentifier change [text|M](0-7) -> [text|N](0-7)",
+        "replace [l|M](0-5) -> [s|N](0-5)",
+        "replace [l|M](6-7) -> [s|N](6-7)",
+        "del [del|M](1-1)",
+        "del [add|M](2-2)"
+    );
+  }
+
+  @Test
+  public void testTAGMLDiffCase1b() {
+    String originText = "[TAGML|+M>\n" +
+        "[text|M>\n" +
+        "[l|M>" +
+        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
+        "<l]\n" +
+        "<text]<TAGML]";
+    String editedText = "[TAGML|+N>\n" +
+        "[text|N>\n" +
+        "[s|N>Une belle main de femme, élégante et fine.<s] [s|N>Malgré l'agrandissement du close-up.\n" +
         "<s]\n" +
         "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
@@ -56,7 +80,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "layeridentifier change [TAGML|M](0-8) -> [TAGML|N](0-8)",
         "layeridentifier change [text|M](0-8) -> [text|N](0-8)",
         "del [l|M](0-6)",
-        "replace [l|M](7-8) -> [s](7-8)",
+        "replace [l|M](7-8) -> [s|N](7-8)",
         "del [del|M](1-1)",
         "del [add|M](2-2)",
         "add [s|N](0-5)"
