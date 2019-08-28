@@ -83,4 +83,5 @@ public interface TAGStore extends AutoCloseable {
   BooleanAnnotationValue getBooleanAnnotationValue(Long id);
 
   ReferenceValue getReferenceValue(Long id);
+
 }

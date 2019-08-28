@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
@@ -34,25 +35,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MarkupPathTest extends AlexandriaBaseStoreTest {
   @Test
   public void test1() {
-    String tagml = "[a>bla [b>bla<b] bla<a]";
+    String tagml = "[a>Uno [b>Dos [c>Tres<c]<b] Quatro<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
-      assertThat(markups).hasSize(2);
+      assertThat(markups).hasSize(3);
 
       final TAGMarkup a = markups.get(0);
-      assertThat(a.getTag()).isEqualTo("a");
+      assertTagAndPath(a, "a", "a", store, tagDocument);
 
       final TAGMarkup b = markups.get(1);
-      assertThat(b.getTag()).isEqualTo("b");
+      assertTagAndPath(b, "b", "a/b", store, tagDocument);
 
-      MarkupPath pathA = new MarkupPath(a, tagDocument,store);
-      assertThat(pathA.getPath()).isEqualTo("a");
+      final TAGMarkup c = markups.get(2);
+      assertTagAndPath(c, "c", "a/b/c", store, tagDocument);
 
-      MarkupPath pathB = new MarkupPath(b, tagDocument, store);
-      assertThat(pathB.getPath()).isEqualTo("a/b[1]");
     });
+  }
+
+  private void assertTagAndPath(final TAGMarkup tagMarkup, final String expectedTag, final String expectedPath, final TAGStore store, final TAGDocument tagDocument) {
+    assertThat(tagMarkup.getTag()).isEqualTo(expectedTag);
+    MarkupPath pathA = new MarkupPath(tagMarkup, tagDocument, store);
+    assertThat(pathA.getPath()).isEqualTo(expectedPath);
   }
 
   private List<TAGMarkup> getTagMarkups(final TAGDocument tagDocument) {

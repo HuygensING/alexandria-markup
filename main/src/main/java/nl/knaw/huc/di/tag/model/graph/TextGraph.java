@@ -354,4 +354,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
 
+  public boolean isRootNode(final Long l) {
+    return l.equals(documentNode);
+  }
 }
