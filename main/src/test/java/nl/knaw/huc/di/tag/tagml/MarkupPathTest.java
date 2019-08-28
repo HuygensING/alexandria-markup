@@ -46,15 +46,75 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
       assertTagAndPath(a, "a", "a", store, tagDocument);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b", store, tagDocument);
+      assertTagAndPath(b, "b", "a/b[1]", store, tagDocument);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/b/c", store, tagDocument);
-
+      assertTagAndPath(c, "c", "a/b[1]/c[1]", store, tagDocument);
     });
   }
 
-  private void assertTagAndPath(final TAGMarkup tagMarkup, final String expectedTag, final String expectedPath, final TAGStore store, final TAGDocument tagDocument) {
+  @Test
+  public void test2() {
+    String tagml = "[a>[l>line 1<l] [l>line 2<l]<a]";
+    runInStoreTransaction(store -> {
+      TAGDocument tagDocument = parse(tagml, store);
+
+      final List<TAGMarkup> markups = getTagMarkups(tagDocument);
+      assertThat(markups).hasSize(3);
+
+      final TAGMarkup a = markups.get(0);
+      assertTagAndPath(a, "a", "a", store, tagDocument);
+
+      final TAGMarkup l1 = markups.get(1);
+      assertTagAndPath(l1, "l", "a/l[1]", store, tagDocument);
+
+      final TAGMarkup l2 = markups.get(2);
+      assertTagAndPath(l2, "l", "a/l[2]", store, tagDocument);
+    });
+  }
+
+  @Test
+  public void test3() {
+    String tagml = "[a|+L>[l|L>line 1<l] [l|L>line 2<l]<a]";
+    runInStoreTransaction(store -> {
+      TAGDocument tagDocument = parse(tagml, store);
+
+      final List<TAGMarkup> markups = getTagMarkups(tagDocument);
+      assertThat(markups).hasSize(3);
+
+      final TAGMarkup a = markups.get(0);
+      assertTagAndPath(a, "a", "a|L", store, tagDocument);
+
+      final TAGMarkup l1 = markups.get(1);
+      assertTagAndPath(l1, "l", "a/l[1]|L", store, tagDocument);
+
+      final TAGMarkup l2 = markups.get(2);
+      assertTagAndPath(l2, "l", "a/l[2]|L", store, tagDocument);
+    });
+  }
+
+  @Test
+  public void test4() {
+    String tagml = "[a|+B,+C>[b|B>bbbb<b] [c|C>ccccc<c]<a]";
+    runInStoreTransaction(store -> {
+      TAGDocument tagDocument = parse(tagml, store);
+
+      final List<TAGMarkup> markups = getTagMarkups(tagDocument);
+      assertThat(markups).hasSize(3);
+
+      final TAGMarkup a = markups.get(0);
+      assertTagAndPath(a, "a", "a|B", store, tagDocument);
+
+      final TAGMarkup b = markups.get(1);
+      assertTagAndPath(b, "b", "a/b|B", store, tagDocument);
+
+      final TAGMarkup c = markups.get(2);
+      assertTagAndPath(c, "c", "a/c|C", store, tagDocument);
+    });
+  }
+
+  private void assertTagAndPath(final TAGMarkup tagMarkup, final String expectedTag, final String expectedPath,
+      final TAGStore store, final TAGDocument tagDocument) {
     assertThat(tagMarkup.getTag()).isEqualTo(expectedTag);
     MarkupPath pathA = new MarkupPath(tagMarkup, tagDocument, store);
     assertThat(pathA.getPath()).isEqualTo(expectedPath);

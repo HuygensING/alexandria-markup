@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
@@ -30,7 +31,6 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class MarkupPath {
@@ -39,6 +39,18 @@ public class MarkupPath {
 
   public MarkupPath(final TAGMarkup tagMarkup, final TAGDocument tagDocument, final TAGStore store) {
 //    path = tagMarkup.getTag();
+
+    String layer = "";
+    if (!tagMarkup.getLayers().isEmpty()) {
+      List<String> nonDefaultLayers = tagMarkup.getLayers().stream()
+          .filter(l -> !l.equals(TAGML.DEFAULT_LAYER))
+          .collect(toList());
+      if (!nonDefaultLayers.isEmpty()) {
+        Preconditions.checkState(nonDefaultLayers.size() == 1, nonDefaultLayers.toString() + " should have size 1");
+        layer = nonDefaultLayers.get(0);
+      }
+    }
+
     List<String> pathParts = new ArrayList<>();
     pathParts.add(tagMarkup.getTag());
     TextGraph textGraph = tagDocument.getDTO().textGraph;
@@ -56,14 +68,24 @@ public class MarkupPath {
           .filter(l -> !textGraph.isRootNode(l))
           .map(store::getMarkup)
           .collect(toList());
-      if (!parentMarkup.isEmpty()) {
-        pathParts.add(0, parentMarkup.get(0).getTag());
-        markup = parentMarkup.get(0);
-      } else {
+      if (parentMarkup.isEmpty()) {
         hasParents = false;
+
+      } else {
+        Preconditions.checkState(parentMarkup.size() == 1, parentMarkup.toString() + " should have size 1");
+        int childIndex = 1;
+        final String child = pathParts.get(0) + "[" + childIndex + "]";
+        pathParts.remove(0);
+        pathParts.add(0, child);
+        TAGMarkup parent = parentMarkup.get(0); // there can be only one!
+        pathParts.add(0, parent.getTag());
+        markup = parent;
       }
     }
-    path = pathParts.stream().collect(joining("/"));
+    path = String.join("/", pathParts);
+    if (!layer.isEmpty()) {
+      path += "|" + layer;
+    }
   }
 
   public String getPath() {
