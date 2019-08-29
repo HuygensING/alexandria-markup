@@ -24,7 +24,6 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -177,10 +176,10 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
       Set<String> none = Collections.EMPTY_SET;
       TAGView tagView = new TAGView(store).setMarkupToExclude(none);
       TAGComparison2 differ = new TAGComparison2(original, tagView, modified, store);
-      List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
+      List<MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
       assertThat(markupInfoLists).hasSize(2);
       for (int i = 0; i < 2; i++) {
-        for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
+        for (MarkupInfo mi : markupInfoLists[i]) {
           LOG.info("{}: {}", i, mi);
         }
       }

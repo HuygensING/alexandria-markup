@@ -22,10 +22,10 @@ import java.util.List;
  * #L%
  */
 public class MarkupModification implements MarkupEdit {
-  public List<TAGComparison2.MarkupInfo> original;
-  public List<TAGComparison2.MarkupInfo> modified;
+  public List<MarkupInfo> original;
+  public List<MarkupInfo> modified;
 
-  public MarkupModification(List<TAGComparison2.MarkupInfo> original, List<TAGComparison2.MarkupInfo> modified) {
+  public MarkupModification(List<MarkupInfo> original, List<MarkupInfo> modified) {
     this.original = original;
     this.modified = modified;
   }

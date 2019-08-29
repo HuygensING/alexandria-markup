@@ -20,9 +20,9 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class MarkupDeletion implements MarkupEdit {
-  public TAGComparison2.MarkupInfo markupInfo;
+  public MarkupInfo markupInfo;
 
-  public MarkupDeletion(TAGComparison2.MarkupInfo markupInfo) {
+  public MarkupDeletion(MarkupInfo markupInfo) {
     this.markupInfo = markupInfo;
   }
 }

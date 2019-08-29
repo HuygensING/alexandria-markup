@@ -20,10 +20,10 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class LayerModification implements MarkupEdit {
-  public TAGComparison2.MarkupInfo original;
-  public TAGComparison2.MarkupInfo modified;
+  public MarkupInfo original;
+  public MarkupInfo modified;
 
-  public LayerModification(TAGComparison2.MarkupInfo original, TAGComparison2.MarkupInfo modified) {
+  public LayerModification(MarkupInfo original, MarkupInfo modified) {
     this.original = original;
     this.modified = modified;
   }

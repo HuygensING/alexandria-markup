@@ -20,9 +20,9 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 public class MarkupAddition implements MarkupEdit {
-  public TAGComparison2.MarkupInfo markupInfo;
+  public MarkupInfo markupInfo;
 
-  public MarkupAddition(TAGComparison2.MarkupInfo markupInfo) {
+  public MarkupAddition(MarkupInfo markupInfo) {
     this.markupInfo = markupInfo;
   }
 }
