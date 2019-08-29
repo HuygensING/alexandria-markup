@@ -55,12 +55,12 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void test2() {
-    String tagml = "[a>[l>line 1<l] [l>line 2<l]<a]";
+    String tagml = "[a>[l>line [n>1<n]<l] [l>line [n>2<n]<l]<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
-      assertThat(markups).hasSize(3);
+      assertThat(markups).hasSize(5);
 
       final TAGMarkup a = markups.get(0);
       assertTagAndPath(a, "a", "a", store, tagDocument);
@@ -68,8 +68,14 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
       final TAGMarkup l1 = markups.get(1);
       assertTagAndPath(l1, "l", "a/l[1]", store, tagDocument);
 
-      final TAGMarkup l2 = markups.get(2);
+      final TAGMarkup n1 = markups.get(2);
+      assertTagAndPath(n1, "n", "a/l[1]/n[1]", store, tagDocument);
+
+      final TAGMarkup l2 = markups.get(3);
       assertTagAndPath(l2, "l", "a/l[2]", store, tagDocument);
+
+      final TAGMarkup n2 = markups.get(4);
+      assertTagAndPath(n2, "n", "a/l[2]/n[1]", store, tagDocument);
     });
   }
 
@@ -106,10 +112,10 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
       assertTagAndPath(a, "a", "a|B", store, tagDocument);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b|B", store, tagDocument);
+      assertTagAndPath(b, "b", "a/b[1]|B", store, tagDocument);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/c|C", store, tagDocument);
+      assertTagAndPath(c, "c", "a/c[1]|C", store, tagDocument);
     });
   }
 
