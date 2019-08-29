@@ -173,17 +173,6 @@ public class TAGComparison2 {
         .distinct();
   }
 
-  private String serializeTokens(final List<TAGToken> textTokens) {
-    return textTokens.stream()
-        .map(t -> "[" + t.toString().replaceAll(" ", "_") + "]")
-        .collect(joining(", "));
-  }
-
-//  private boolean isMarkupToken(final TAGToken tagToken) {
-//    return tagToken instanceof MarkupOpenToken
-//        || tagToken instanceof MarkupCloseToken;
-//  }
-
   private static class MarkupSegment {
     List<MarkupInfo> original = new ArrayList<>();
     List<MarkupInfo> modified = new ArrayList<>();
@@ -296,80 +285,6 @@ public class TAGComparison2 {
         .collect(toList());
   }
 
-  // TODO: use A* for finding optimal markup edit set
-  // optimal = minimum number of steps? no: maximum number of matches
-  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
-    // this current algorithm does not
-    final List<String> diff = new ArrayList<>();
-    List<MarkupInfo> markupInfoListA = markupInfoLists[0];
-    List<MarkupInfo> markupInfoListB = markupInfoLists[1];
-    List<Pair<Integer, Integer>> unchanged = new ArrayList<>();
-    boolean[] determinedInA = new boolean[markupInfoListA.size()];
-    boolean[] determinedInB = new boolean[markupInfoListB.size()];
-    final List<Pair<Integer, Integer>> potentialReplacements = new ArrayList<>();
-
-    // determine matches
-    for (int i = 0; i < markupInfoListA.size(); i++) {
-      MarkupInfo markupInfoA = markupInfoListA.get(i);
-      for (int j = 0; j < markupInfoListB.size(); j++) {
-        if (!determinedInB[j]) {
-          MarkupInfo markupInfoB = markupInfoListB.get(j);
-          boolean sameName = markupInfoA.markup.getTag().equals(markupInfoB.markup.getTag());
-          boolean sameSpan = markupInfoA.getSpan().equals(markupInfoB.getSpan());
-          boolean sameStartRank = markupInfoA.getStartRank() == markupInfoB.getStartRank();
-          LOG.info("[{},{}]: {},{},{}", i, j, sameName, sameSpan, sameStartRank);
-          if (sameName && sameSpan && sameStartRank) {
-            unchanged.add(new ImmutablePair(i, j));
-            determinedInA[i] = true;
-            determinedInB[j] = true;
-            break;
-          } else if (sameSpan && sameStartRank) {
-            potentialReplacements.add(new ImmutablePair(i, j));
-          }
-        }
-      }
-    }
-//    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
-
-    for (int i = 0; i < determinedInA.length; i++) {
-      if (!determinedInA[i]) {
-        // check for replacement
-        final int finalI = i;
-        List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
-            .filter(p -> p.getLeft() == finalI)
-            .collect(toList());
-        if (!matchingPotentialReplacements.isEmpty()) {
-          potentialReplacements.removeAll(matchingPotentialReplacements);
-          Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
-          MarkupInfo markupInfoA = markupInfoListA.get(i);
-          MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
-//          String markupA = toString(markupInfoA);
-//          String markupB = toString(markupInfoB);
-//          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
-//              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-//              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
-//              )
-
-          diff.add(diffPrinter.modification.apply(singletonList(markupInfoA), singletonList(markupInfoB)));
-          determinedInA[i] = true;
-          determinedInB[replacement.getRight()] = true;
-
-        } else {
-          // otherwise, deletion
-          MarkupInfo markupInfo = markupInfoListA.get(i);
-          diff.add(diffPrinter.deletion.apply(markupInfo));
-        }
-      }
-    }
-    for (int i = 0; i < determinedInB.length; i++) {
-      if (!determinedInB[i]) {
-        MarkupInfo markupInfo = markupInfoListB.get(i);
-        diff.add(diffPrinter.addition.apply(markupInfo));
-      }
-    }
-    return diff;
-  }
-
   static class DiffPrinter {
     Function<MarkupInfo, String> addition;
     Function<MarkupInfo, String> deletion;
@@ -446,5 +361,88 @@ public class TAGComparison2 {
         .collect(toList());
     potentialReplacements.removeAll(potentialReplacementsWithDetermined);
   }
+
+  // optimal = minimum number of steps? no: maximum number of matches
+  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
+    // this current algorithm does not
+    final List<String> diff = new ArrayList<>();
+    List<MarkupInfo> markupInfoListA = markupInfoLists[0];
+    List<MarkupInfo> markupInfoListB = markupInfoLists[1];
+    List<Pair<Integer, Integer>> unchanged = new ArrayList<>();
+    boolean[] determinedInA = new boolean[markupInfoListA.size()];
+    boolean[] determinedInB = new boolean[markupInfoListB.size()];
+    final List<Pair<Integer, Integer>> potentialReplacements = new ArrayList<>();
+
+    // determine matches
+    for (int i = 0; i < markupInfoListA.size(); i++) {
+      MarkupInfo markupInfoA = markupInfoListA.get(i);
+      for (int j = 0; j < markupInfoListB.size(); j++) {
+        if (!determinedInB[j]) {
+          MarkupInfo markupInfoB = markupInfoListB.get(j);
+          boolean sameName = markupInfoA.markup.getTag().equals(markupInfoB.markup.getTag());
+          boolean sameSpan = markupInfoA.getSpan().equals(markupInfoB.getSpan());
+          boolean sameStartRank = markupInfoA.getStartRank() == markupInfoB.getStartRank();
+          LOG.info("[{},{}]: {},{},{}", i, j, sameName, sameSpan, sameStartRank);
+          if (sameName && sameSpan && sameStartRank) {
+            unchanged.add(new ImmutablePair(i, j));
+            determinedInA[i] = true;
+            determinedInB[j] = true;
+            break;
+          } else if (sameSpan && sameStartRank) {
+            potentialReplacements.add(new ImmutablePair(i, j));
+          }
+        }
+      }
+    }
+//    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
+
+    for (int i = 0; i < determinedInA.length; i++) {
+      if (!determinedInA[i]) {
+        // check for replacement
+        final int finalI = i;
+        List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
+            .filter(p -> p.getLeft() == finalI)
+            .collect(toList());
+        if (!matchingPotentialReplacements.isEmpty()) {
+          potentialReplacements.removeAll(matchingPotentialReplacements);
+          Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
+          MarkupInfo markupInfoA = markupInfoListA.get(i);
+          MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
+//          String markupA = toString(markupInfoA);
+//          String markupB = toString(markupInfoB);
+//          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
+//              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+//              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
+//              )
+
+          diff.add(diffPrinter.modification.apply(singletonList(markupInfoA), singletonList(markupInfoB)));
+          determinedInA[i] = true;
+          determinedInB[replacement.getRight()] = true;
+
+        } else {
+          // otherwise, deletion
+          MarkupInfo markupInfo = markupInfoListA.get(i);
+          diff.add(diffPrinter.deletion.apply(markupInfo));
+        }
+      }
+    }
+    for (int i = 0; i < determinedInB.length; i++) {
+      if (!determinedInB[i]) {
+        MarkupInfo markupInfo = markupInfoListB.get(i);
+        diff.add(diffPrinter.addition.apply(markupInfo));
+      }
+    }
+    return diff;
+  }
+
+  private String serializeTokens(final List<TAGToken> textTokens) {
+    return textTokens.stream()
+        .map(t -> "[" + t.toString().replaceAll(" ", "_") + "]")
+        .collect(joining(", "));
+  }
+//  private boolean isMarkupToken(final TAGToken tagToken) {
+//    return tagToken instanceof MarkupOpenToken
+//        || tagToken instanceof MarkupCloseToken;
+//  }
 
 }
