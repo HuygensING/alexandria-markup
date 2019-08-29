@@ -24,6 +24,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,12 +54,12 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M](0-7) -> [TAGML|N](0-7)",
-        "layeridentifier change [text|M](0-7) -> [text|N](0-7)",
-        "replace [l|M](0-5) -> [s|N](0-5)",
-        "replace [l|M](6-7) -> [s|N](6-7)",
-        "del [del|M](1-1)",
-        "del [add|M](2-2)"
+        "layeridentifier change [TAGML|M] -> [TAGML|N]",
+        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
+        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
+        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
+        "del [TAGML/text[1]/l[1]/del[1]|M]",
+        "del [TAGML/text[1]/l[1]/add[1]|M]"
     );
   }
 
@@ -77,13 +78,12 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M](0-8) -> [TAGML|N](0-8)",
-        "layeridentifier change [text|M](0-8) -> [text|N](0-8)",
-        "del [l|M](0-6)",
-        "replace [l|M](7-8) -> [s|N](7-8)",
-        "del [del|M](1-1)",
-        "del [add|M](2-2)",
-        "add [s|N](0-5)"
+        "layeridentifier change [TAGML|M] -> [TAGML|N]",
+        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
+        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
+        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
+        "del [TAGML/text[1]/l[1]/del[1]|M]",
+        "del [TAGML/text[1]/l[1]/add[1]|M]"
     );
 
 //    Edit operations on markup:
@@ -118,12 +118,12 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M](0-7) -> [TAGML|N](0-7)",
-        "layeridentifier change [text|M](0-7) -> [text|N](0-7)",
-        "replace [l|M](0-5) -> [s|N](0-5)",
-        "replace [l|M](6-7) -> [s|N](6-7)",
-        "del [del|M](1-1)",
-        "del [add|M](2-2)");
+        "layeridentifier change [TAGML|M] -> [TAGML|N]",
+        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
+        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
+        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
+        "del [TAGML/text[1]/l[1]/del[1]|M]",
+        "del [TAGML/text[1]/l[1]/add[1]|M]");
   }
 
   @Test
@@ -131,7 +131,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple [del>short<del] text<TAGML]\n";
     String editedText = "[TAGML>A simple text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("del [del](1-1)");
+    assertThat(markupInfoDiffs).containsExactly("del [TAGML/del[1]]");
   }
 
   @Test
@@ -139,7 +139,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple text<TAGML]\n";
     String editedText = "[TAGML>A simple [add>short<add] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("add [add](1-1)");
+    assertThat(markupInfoDiffs).containsExactly("add [TAGML/add[1]]");
   }
 
   @Test
@@ -147,7 +147,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("replace [a](1-1) -> [b](1-1)");
+    assertThat(markupInfoDiffs).containsExactly("replace {[TAGML/a[1]]} -> {[TAGML/b[1]]}");
   }
 
   @Ignore
@@ -156,7 +156,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
     String editedText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[l](1,2) split in {[l](1,1),[l](2,1)}");
+    assertThat(markupInfoDiffs).containsExactly("[TAGML/l[1]] split in {[TAGML/l[1]],[TAGML/l[2]]}");
   }
 
   @Ignore
@@ -165,7 +165,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
     String editedText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("{[l](1,1),[l](2,1)} joined to [l](1,2)");
+    assertThat(markupInfoDiffs).containsExactly("{[TAGML/l[1]],[TAGML/l[2]]} joined to [TAGML/l[1]]");
   }
 
   private List<String> getMarkupDiffs(final String originText, final String editedText) {
@@ -173,10 +173,10 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     return runInStoreTransaction(store -> {
       TAGMLImporter importer = new TAGMLImporter(store);
       TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
+      TAGDocument modified = importer.importTAGML(editedText.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
       TAGView tagView = new TAGView(store).setMarkupToExclude(none);
-      TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
+      TAGComparison2 differ = new TAGComparison2(original, tagView, modified, store);
       List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
       assertThat(markupInfoLists).hasSize(2);
       for (int i = 0; i < 2; i++) {

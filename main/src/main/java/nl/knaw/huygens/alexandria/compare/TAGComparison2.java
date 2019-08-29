@@ -20,6 +20,7 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.tagml.MarkupPathFactory;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -88,17 +89,23 @@ public class TAGComparison2 {
 
     List<MarkupInfo>[] results = new ArrayList[2];
 
+    MarkupPathFactory markupPathFactoryA = new MarkupPathFactory(original, store);
     List<MarkupInfo> listA = new ArrayList<>();
     markupInfoMap1.forEach((k, v) -> {
-      v.setMarkup(store.getMarkup(k));
+      TAGMarkup markup = store.getMarkup(k);
+      v.setMarkup(markup);
+      v.setMarkupPath(markupPathFactoryA.getPath(markup));
       listA.add(v);
     });
     listA.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[0] = listA;
 
+    MarkupPathFactory markupPathFactoryB = new MarkupPathFactory(edited, store);
     List<MarkupInfo> listB = new ArrayList<>();
     markupInfoMap2.forEach((k, v) -> {
-      v.setMarkup(store.getMarkup(k));
+      TAGMarkup markup = store.getMarkup(k);
+      v.setMarkup(markup);
+      v.setMarkupPath(markupPathFactoryB.getPath(markup));
       listB.add(v);
     });
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
@@ -154,6 +161,7 @@ public class TAGComparison2 {
     int startRank;
     int endRank;
     private TAGMarkup markup;
+    private String markupPath;
 
     public MarkupInfo(int startRank, int endRank) {
       this.startRank = startRank;
@@ -187,6 +195,14 @@ public class TAGComparison2 {
 
     public TAGMarkup getMarkup() {
       return markup;
+    }
+
+    public void setMarkupPath(final String markupPath) {
+      this.markupPath = markupPath;
+    }
+
+    public String getMarkupPath() {
+      return markupPath;
     }
   }
 
@@ -432,24 +448,18 @@ public class TAGComparison2 {
   }
 
   static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("add [%s](%d-%d)",
-          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setDeletion(markupInfo -> String.format("del [%s](%d-%d)",
-          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
+      .setAddition(markupInfo -> String.format("add %s", markupInfoString(markupInfo)))
+      .setDeletion(markupInfo -> String.format("del %s", markupInfoString(markupInfo)))
       .setModification((markupInfoA, markupInfoB) ->
           String.format("replace {%s} -> {%s}",
               markupInfoA.stream().map(TAGComparison2::markupInfoString).collect(joining(",")),
               markupInfoB.stream().map(TAGComparison2::markupInfoString).collect(joining(",")))
       )
-      .setLayerModification((markupInfoA, markupInfoB) -> String.format("layeridentifier change [%s](%d-%d) -> [%s](%d-%d)",
-          markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()));
+      .setLayerModification((markupInfoA, markupInfoB) -> String.format("layeridentifier change %s -> %s",
+          markupInfoString(markupInfoA), markupInfoString(markupInfoB)));
 
   public static String markupInfoString(MarkupInfo markupInfo) {
-    return String.format("[%s](%d-%d)",
-        markupInfo.markup.getExtendedTag(),
-        markupInfo.getStartRank(),
-        markupInfo.getEndRank());
+    return String.format("[%s]", markupInfo.getMarkupPath());
   }
 
   static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()

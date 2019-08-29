@@ -52,7 +52,7 @@ public class MarkupPathFactory {
           .collect(toList());
       if (!nonDefaultLayers.isEmpty()) {
 //        Preconditions.checkState(nonDefaultLayers.size() == 1, nonDefaultLayers.toString() + " should have size 1");
-        layer = nonDefaultLayers.get(0);
+        layer = nonDefaultLayers.get(0); // We just need a path, not all paths, so pick the first
       }
     }
 
