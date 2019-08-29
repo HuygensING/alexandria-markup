@@ -54,11 +54,11 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
         "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
-        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
-        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
-        "del [TAGML/text[1]/l[1]/del[1]|M]",
-        "del [TAGML/text[1]/l[1]/add[1]|M]"
+        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+        "del [TAGML/text/l[1]/del|M]",
+        "del [TAGML/text/l[1]/add|M]"
     );
   }
 
@@ -78,11 +78,11 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
         "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
-        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
-        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
-        "del [TAGML/text[1]/l[1]/del[1]|M]",
-        "del [TAGML/text[1]/l[1]/add[1]|M]"
+        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+        "del [TAGML/text/l[1]/del|M]",
+        "del [TAGML/text/l[1]/add|M]"
     );
 
 //    Edit operations on markup:
@@ -118,11 +118,11 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly(
         "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text[1]|M] -> [TAGML/text[1]|N]",
-        "replace [TAGML/text[1]/l[1]|M] -> [TAGML/text[1]/s[1]|N]",
-        "replace [TAGML/text[1]/l[2]|M] -> [TAGML/text[1]/s[2]|N]",
-        "del [TAGML/text[1]/l[1]/del[1]|M]",
-        "del [TAGML/text[1]/l[1]/add[1]|M]");
+        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+        "del [TAGML/text/l[1]/del|M]",
+        "del [TAGML/text/l[1]/add|M]");
   }
 
   @Test
@@ -130,7 +130,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple [del>short<del] text<TAGML]\n";
     String editedText = "[TAGML>A simple text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("del [TAGML/del[1]]");
+    assertThat(markupInfoDiffs).containsExactly("del [TAGML/del]");
   }
 
   @Test
@@ -138,7 +138,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A simple text<TAGML]\n";
     String editedText = "[TAGML>A simple [add>short<add] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("add [TAGML/add[1]]");
+    assertThat(markupInfoDiffs).containsExactly("add [TAGML/add]");
   }
 
   @Test
@@ -146,7 +146,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("replace {[TAGML/a[1]]} -> {[TAGML/b[1]]}");
+    assertThat(markupInfoDiffs).containsExactly("replace {[TAGML/a]} -> {[TAGML/b]}");
   }
 
   @Ignore
@@ -155,7 +155,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
     String editedText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[TAGML/l[1]] split in {[TAGML/l[1]],[TAGML/l[2]]}");
+    assertThat(markupInfoDiffs).containsExactly("[TAGML/l] split in {[TAGML/l[1]],[TAGML/l[2]]}");
   }
 
   @Ignore
@@ -164,7 +164,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
     String editedText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("{[TAGML/l[1]],[TAGML/l[2]]} joined to [TAGML/l[1]]");
+    assertThat(markupInfoDiffs).containsExactly("{[TAGML/l[1]],[TAGML/l[2]]} joined to [TAGML/l]");
   }
 
   private List<String> getMarkupDiffs(final String originText, final String editedText) {

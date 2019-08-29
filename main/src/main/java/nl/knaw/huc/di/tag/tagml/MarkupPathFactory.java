@@ -92,9 +92,11 @@ public class MarkupPathFactory {
             .filter(m -> m.hasTag(childTag))
             .map(TAGMarkup::getDbId)
             .collect(toList());
-        int childIndex = twins.indexOf(childId) + 1;
-        final String child = pathParts.get(0) + "[" + childIndex + "]";
-        pathParts.set(0, child);
+        if (twins.size() > 1) {
+          int childIndex = twins.indexOf(childId) + 1;
+          final String child = pathParts.get(0) + "[" + childIndex + "]";
+          pathParts.set(0, child);
+        }
         pathParts.add(0, parent.getTag());
         markup = parent;
       }
