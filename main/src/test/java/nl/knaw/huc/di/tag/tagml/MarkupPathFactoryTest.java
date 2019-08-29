@@ -32,24 +32,25 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MarkupPathTest extends AlexandriaBaseStoreTest {
+public class MarkupPathFactoryTest extends AlexandriaBaseStoreTest {
   @Test
   public void test1() {
     String tagml = "[a>Uno [b>Dos [c>Tres<c]<b] Quatro<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
+      MarkupPathFactory markupPathFactory = new MarkupPathFactory(tagDocument, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
       assertThat(markups).hasSize(3);
 
       final TAGMarkup a = markups.get(0);
-      assertTagAndPath(a, "a", "a", store, tagDocument);
+      assertTagAndPath(a, "a", "a", markupPathFactory);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b[1]", store, tagDocument);
+      assertTagAndPath(b, "b", "a/b[1]", markupPathFactory);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/b[1]/c[1]", store, tagDocument);
+      assertTagAndPath(c, "c", "a/b[1]/c[1]", markupPathFactory);
     });
   }
 
@@ -58,24 +59,25 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
     String tagml = "[a>[l>line [n>1<n]<l] [l>line [n>2<n]<l]<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
+      MarkupPathFactory markupPathFactory = new MarkupPathFactory(tagDocument, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
       assertThat(markups).hasSize(5);
 
       final TAGMarkup a = markups.get(0);
-      assertTagAndPath(a, "a", "a", store, tagDocument);
+      assertTagAndPath(a, "a", "a", markupPathFactory);
 
       final TAGMarkup l1 = markups.get(1);
-      assertTagAndPath(l1, "l", "a/l[1]", store, tagDocument);
+      assertTagAndPath(l1, "l", "a/l[1]", markupPathFactory);
 
       final TAGMarkup n1 = markups.get(2);
-      assertTagAndPath(n1, "n", "a/l[1]/n[1]", store, tagDocument);
+      assertTagAndPath(n1, "n", "a/l[1]/n[1]", markupPathFactory);
 
       final TAGMarkup l2 = markups.get(3);
-      assertTagAndPath(l2, "l", "a/l[2]", store, tagDocument);
+      assertTagAndPath(l2, "l", "a/l[2]", markupPathFactory);
 
       final TAGMarkup n2 = markups.get(4);
-      assertTagAndPath(n2, "n", "a/l[2]/n[1]", store, tagDocument);
+      assertTagAndPath(n2, "n", "a/l[2]/n[1]", markupPathFactory);
     });
   }
 
@@ -84,18 +86,19 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
     String tagml = "[a|+L>[l|L>line 1<l] [l|L>line 2<l]<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
+      MarkupPathFactory markupPathFactory = new MarkupPathFactory(tagDocument, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
       assertThat(markups).hasSize(3);
 
       final TAGMarkup a = markups.get(0);
-      assertTagAndPath(a, "a", "a|L", store, tagDocument);
+      assertTagAndPath(a, "a", "a|L",  markupPathFactory);
 
       final TAGMarkup l1 = markups.get(1);
-      assertTagAndPath(l1, "l", "a/l[1]|L", store, tagDocument);
+      assertTagAndPath(l1, "l", "a/l[1]|L",  markupPathFactory);
 
       final TAGMarkup l2 = markups.get(2);
-      assertTagAndPath(l2, "l", "a/l[2]|L", store, tagDocument);
+      assertTagAndPath(l2, "l", "a/l[2]|L",  markupPathFactory);
     });
   }
 
@@ -104,26 +107,26 @@ public class MarkupPathTest extends AlexandriaBaseStoreTest {
     String tagml = "[a|+B,+C>[b|B>bbbb<b] [c|C>ccccc<c]<a]";
     runInStoreTransaction(store -> {
       TAGDocument tagDocument = parse(tagml, store);
+      MarkupPathFactory markupPathFactory = new MarkupPathFactory(tagDocument, store);
 
       final List<TAGMarkup> markups = getTagMarkups(tagDocument);
       assertThat(markups).hasSize(3);
 
       final TAGMarkup a = markups.get(0);
-      assertTagAndPath(a, "a", "a|B", store, tagDocument);
+      assertTagAndPath(a, "a", "a|B", markupPathFactory);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b[1]|B", store, tagDocument);
+      assertTagAndPath(b, "b", "a/b[1]|B",  markupPathFactory);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/c[1]|C", store, tagDocument);
+      assertTagAndPath(c, "c", "a/c[1]|C",  markupPathFactory);
     });
   }
 
-  private void assertTagAndPath(final TAGMarkup tagMarkup, final String expectedTag, final String expectedPath,
-      final TAGStore store, final TAGDocument tagDocument) {
+  private void assertTagAndPath(final TAGMarkup tagMarkup, final String expectedTag, final String expectedPath, MarkupPathFactory markupPathFactory) {
     assertThat(tagMarkup.getTag()).isEqualTo(expectedTag);
-    MarkupPath pathA = new MarkupPath(tagMarkup, tagDocument, store);
-    assertThat(pathA.getPath()).isEqualTo(expectedPath);
+    String path = markupPathFactory.getPath(tagMarkup);
+    assertThat(path).isEqualTo(expectedPath);
   }
 
   private List<TAGMarkup> getTagMarkups(final TAGDocument tagDocument) {

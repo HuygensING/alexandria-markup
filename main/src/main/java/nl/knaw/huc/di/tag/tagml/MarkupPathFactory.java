@@ -34,11 +34,17 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public class MarkupPath {
+public class MarkupPathFactory {
 
-  private String path;
+  private final TAGDocument tagDocument;
+  private final TAGStore store;
 
-  public MarkupPath(final TAGMarkup tagMarkup, final TAGDocument tagDocument, final TAGStore store) {
+  public MarkupPathFactory(final TAGDocument tagDocument, final TAGStore store) {
+    this.tagDocument = tagDocument;
+    this.store = store;
+  }
+
+  public String getPath(final TAGMarkup tagMarkup) {
     String layer = "";
     if (!tagMarkup.getLayers().isEmpty()) {
       List<String> nonDefaultLayers = tagMarkup.getLayers().stream()
@@ -86,21 +92,18 @@ public class MarkupPath {
             .filter(m -> m.hasTag(childTag))
             .map(TAGMarkup::getDbId)
             .collect(toList());
-        int childIndex = twins.indexOf(childId)+1;
+        int childIndex = twins.indexOf(childId) + 1;
         final String child = pathParts.get(0) + "[" + childIndex + "]";
-        pathParts.remove(0);
-        pathParts.add(0, child);
+        pathParts.set(0, child);
         pathParts.add(0, parent.getTag());
         markup = parent;
       }
     }
-    path = String.join("/", pathParts);
+
+    String path = String.join("/", pathParts);
     if (!layer.isEmpty()) {
       path += "|" + layer;
     }
-  }
-
-  public String getPath() {
     return path;
   }
 }
