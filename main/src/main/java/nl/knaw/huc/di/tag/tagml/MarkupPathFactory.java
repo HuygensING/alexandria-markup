@@ -20,7 +20,6 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
@@ -78,7 +77,7 @@ public class MarkupPathFactory {
         hasParents = false;
 
       } else {
-        Preconditions.checkState(parentMarkup.size() == 1, parentMarkup.toString() + " should have size 1");
+//        Preconditions.checkState(parentMarkup.size() == 1, parentMarkup.toString() + " should have size 1");
         TAGMarkup parent = parentMarkup.get(0); // there can be only one!
         String childTag = markup.getTag();
         List<Long> twins = textGraph.getOutgoingEdges(parent.getDbId())// children with the same tag as the original markup

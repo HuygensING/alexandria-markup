@@ -40,20 +40,20 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTAGMLDiffCase1a() {
-    String originText =
+    String version1 =
         "[TAGML|+M>\n"
             + "[text|M>\n"
             + "[l|M>"
             + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n"
             + "<l]\n"
             + "<text]<TAGML]";
-    String editedText =
+    String version2 =
         "[TAGML|+N>\n"
             + "[text|N>\n"
             + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
             + "<s]\n"
             + "<text]<TAGML]";
-    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    List<String> markupInfoDiffs = getMarkupDiffs(version1, version2);
     assertThat(markupInfoDiffs)
         .containsExactly(
             "layeridentifier change [TAGML|M] -> [TAGML|N]",
@@ -66,20 +66,20 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTAGMLDiffCase1b() {
-    String originText =
+    String version1 =
         "[TAGML|+M>\n"
             + "[text|M>\n"
             + "[l|M>"
             + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n"
             + "<l]\n"
             + "<text]<TAGML]";
-    String editedText =
+    String version2 =
         "[TAGML|+N>\n"
             + "[text|N>\n"
             + "[s|N>Une belle main de femme, élégante et fine.<s] [s|N>Malgré l'agrandissement du close-up.\n"
             + "<s]\n"
             + "<text]<TAGML]";
-    List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
+    List<String> markupInfoDiffs = getMarkupDiffs(version1, version2);
     assertThat(markupInfoDiffs)
         .containsExactly(
             "layeridentifier change [TAGML|M] -> [TAGML|N]",
@@ -88,20 +88,75 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
             "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
             "del [TAGML/text/l[1]/del|M]",
             "del [TAGML/text/l[1]/add|M]");
+  }
 
-    //    Edit operations on markup:
-    //
-    //    { "layeridentifier_change" : [TAGML|M][TAGML|N] }
-    //    { "layeridentifier_change" : [TAGML/text|M][TAGML/text|N] }
-    //    the Markup nodes are a match, but their layer suffix is not.
-    //
-    //    { "replace" : [TAGML/text/l[1]|M][TAGML/text/s[1]|N] }
-    //    { "replace" : [TAGML/text/l[2]|M][TAGML/text/s[2]|N] }
-    //    We need to specify that the first child of the text node is replaced.
-    //
-    //    { "del" : [TAGML/text/l[1]/del|M][] }
-    //    { "del" : [TAGML/text/l[1]/add|M][] }
+  @Ignore("TODO")
+  @Test
+  public void testTAGMLDiffCase2() {
+    String version1 =
+        "[TAGML|+M,+N>\n"
+            + "[text|M,N>\n"
+            + "[l|M>]\n"
+            + "[s|N>Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    String version2 =
+        "[TAGML|+M,+N>\n"
+            + "[text|M,N>\n"
+            + "[l|M>]\n"
+            + "[s|N>Une [del|M>belle<del][add|M>petite<add] main de femme, élégante et fine,<l] [l|M>malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    List<String> markupInfoDiffs = getMarkupDiffs(version1, version2);
 
+    //    Edit operations MARKUP
+    //    { "join" : [[s><s][s><s]][[s><s]] }
+    //
+    //    Edit operations TEXT
+    //    { "del" : [jolie] }
+    //    { "transpose" : [belle] }
+    //    { "add" : [petite] }
+    //    { "replace" : [.][,] }
+    //    { "replace" : [Malgré][malgré] }
+
+    assertThat(markupInfoDiffs)
+        .containsExactly("join {[TAGML/text/s[1]|N],[TAGML/text/s[2]|N]} -> [TAGML/text/s|N]");
+  }
+
+  @Ignore("TODO")
+  @Test
+  public void testTAGMLDiffCase3() {
+    String version1 =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>]\n"
+            + "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M> malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    String version2 =
+        "[TAGML|+M,+N>\n"
+            + "[text|M,N>\n"
+            + "[l|M>]\n"
+            + "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<s] [s|N>Malgré l'agrandissement<l][l|M>du close-up.\n"
+            + "<s]\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+
+    List<String> markupInfoDiffs = getMarkupDiffs(version1, version2);
+
+    //    Edit operations MARKUP
+    //    { "add" : [[TAGML><TAGML]] }
+    //    { "add" : [[text><text]] }
+    //    { "add" : [[[s><s]], [[s><s]]}
+    //
+    //    Edit operations TEXT
+    //    { "add" : [.] }
+    //    { "replace" : [malgré][Malgré] }
+
+    assertThat(markupInfoDiffs)
+        .containsExactly("join {[TAGML/text/s[1]|N],[TAGML/text/s[2]|N]} -> [TAGML/text/s|N]");
   }
 
   //  @Ignore
