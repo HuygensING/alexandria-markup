@@ -20,6 +20,8 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import nl.knaw.huc.di.tag.tagml.MarkupPathFactory;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
@@ -38,6 +40,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -50,78 +54,166 @@ public class TAGComparison2 {
   private final List<MarkupInfo>[] markupInfoLists;
 
   public TAGComparison2(TAGDocument original, TAGView tagView, TAGDocument edited, TAGStore store) {
-    List<TAGToken> originalTokens = new Tokenizer(original, tagView)
-        .getTAGTokens();
-    List<TAGToken> originalTextTokens = originalTokens.stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(toList());
-//    LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
+    List<TAGToken> originalTokens = new Tokenizer(original, tagView).getTAGTokens();
+    List<TAGToken> originalTextTokens =
+        originalTokens.stream().filter(ExtendedTextToken.class::isInstance).collect(toList());
+    //    LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
 
-    List<TAGToken> editedTokens = new Tokenizer(edited, tagView)
-        .getTAGTokens();
-    List<TAGToken> editedTextTokens = editedTokens
-        .stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(toList());
-//    LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
+    List<TAGToken> editedTokens = new Tokenizer(edited, tagView).getTAGTokens();
+    List<TAGToken> editedTextTokens =
+        editedTokens.stream().filter(ExtendedTextToken.class::isInstance).collect(toList());
+    //    LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
 
-    SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
-    List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
+    SegmenterInterface textSegmenter =
+        new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
+    List<Segment> textSegments =
+        new TypeAndContentAligner()
+            .alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
     AtomicInteger rankCounter = new AtomicInteger();
     Map<Long, MarkupInfo> markupInfoMap1 = new HashMap<>();
     Map<Long, MarkupInfo> markupInfoMap2 = new HashMap<>();
-    textSegments.forEach(segment -> {
-      int rank = rankCounter.getAndIncrement();
-      getTextNodeIdsForTokens(segment.tokensWa)
-          .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
-          .forEach(markupId -> {
-            markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-            markupInfoMap1.get(markupId).setEndRank(rank);
-          });
-      getTextNodeIdsForTokens(segment.tokensWb)
-          .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
-          .forEach(markupId -> {
-            markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-            markupInfoMap2.get(markupId).setEndRank(rank);
-          });
-    });
+    textSegments.forEach(
+        segment -> {
+          int rank = rankCounter.getAndIncrement();
+          getTextNodeIdsForTokens(segment.tokensWa)
+              .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
+              .forEach(
+                  markupId -> {
+                    markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+                    markupInfoMap1.get(markupId).setEndRank(rank);
+                  });
+          getTextNodeIdsForTokens(segment.tokensWb)
+              .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
+              .forEach(
+                  markupId -> {
+                    markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+                    markupInfoMap2.get(markupId).setEndRank(rank);
+                  });
+        });
 
     List<MarkupInfo>[] results = new ArrayList[2];
 
     MarkupPathFactory markupPathFactoryA = new MarkupPathFactory(original, store);
     List<MarkupInfo> listA = new ArrayList<>();
-    markupInfoMap1.forEach((k, v) -> {
-      TAGMarkup markup = store.getMarkup(k);
-      v.setMarkup(markup);
-      v.setMarkupPath(markupPathFactoryA.getPath(markup));
-      listA.add(v);
-    });
+    markupInfoMap1.forEach(
+        (k, v) -> {
+          TAGMarkup markup = store.getMarkup(k);
+          v.setMarkup(markup);
+          v.setMarkupPath(markupPathFactoryA.getPath(markup));
+          listA.add(v);
+        });
     listA.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[0] = listA;
 
     MarkupPathFactory markupPathFactoryB = new MarkupPathFactory(edited, store);
     List<MarkupInfo> listB = new ArrayList<>();
-    markupInfoMap2.forEach((k, v) -> {
-      TAGMarkup markup = store.getMarkup(k);
-      v.setMarkup(markup);
-      v.setMarkupPath(markupPathFactoryB.getPath(markup));
-      listB.add(v);
-    });
+    markupInfoMap2.forEach(
+        (k, v) -> {
+          TAGMarkup markup = store.getMarkup(k);
+          v.setMarkup(markup);
+          v.setMarkupPath(markupPathFactoryB.getPath(markup));
+          listB.add(v);
+        });
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
     markupInfoLists = results;
 
-    List<Pair<Integer, Integer>> potentialMatches = potentialMatches(listA, listB);
+    //    List<Pair<Integer, Integer>> potentialMatches = potentialMatches(listA, listB);
+    //
+    //    List<Pair<Integer, Integer>> optimalMatches = new MyAStar(potentialMatches).matches();
 
-    List<Pair<Integer, Integer>> optimalMatches = new MyAStar(potentialMatches).matches();
-
-    List<MarkupEdit> markupEdits = calculateMarkupEdits(listA, listB, optimalMatches);
+    //    List<MarkupEdit> markupEdits = calculateMarkupEdits(listA, listB, optimalMatches);
+    List<MarkupEdit> markupEdits = calculateMarkupEdits2(listA, listB);
 
     diffLines.addAll(toDiffLines(markupEdits, HR_DIFFPRINTER));
     mrDiffLines.addAll(toDiffLines(markupEdits, MR_DIFFPRINTER));
   }
 
-  private List<Pair<Integer, Integer>> potentialMatches(final List<MarkupInfo> listA, final List<MarkupInfo> listB) {
+  private List<MarkupEdit> calculateMarkupEdits2(List<MarkupInfo> listA, List<MarkupInfo> listB) {
+    List<MarkupEdit> markupEdits = new ArrayList<>();
+    int[][] overlap = new int[listA.size()][listB.size()];
+    Multimap<Integer, Pair<Integer, Integer>> overlapSizeIndex = ArrayListMultimap.create();
+    for (int a = 0; a < listA.size(); a++) {
+      for (int b = 0; b < listB.size(); b++) {
+        Integer overlapSize = overlap(listA.get(a), listB.get(b));
+        overlap[a][b] = overlapSize;
+        overlapSizeIndex.put(overlapSize, new ImmutablePair<>(a, b));
+      }
+    }
+    List<Integer> overlapSizes = overlapSizeIndex.keySet().stream().sorted().collect(toList());
+    Set<Integer> handledInA = new HashSet<>();
+    Set<Integer> handledInB = new HashSet<>();
+    while (!overlapSizes.isEmpty()) {
+      int largestOverlap = overlapSizes.remove(overlapSizes.size() - 1);
+      List<Pair<Integer, Integer>> pairs =
+          overlapSizeIndex.get(largestOverlap).stream()
+              .filter(p -> !(handledInA.contains(p.getLeft()) || handledInB.contains(p.getRight())))
+              .collect(toList());
+      if (!pairs.isEmpty()) {
+        if (!pairsAreIndependent(pairs)) {
+          List<Pair<Integer, Integer>> matchingPairs =
+              pairs.stream()
+                  .filter(p -> isMatch(listA.get(p.getLeft()), listB.get(p.getRight())))
+                  .collect(toList());
+          pairs = matchingPairs;
+        }
+
+        for (Pair<Integer, Integer> pair : pairs) {
+          Integer indexA = pair.getLeft();
+          handledInA.add(indexA);
+          MarkupInfo markupA = listA.get(indexA);
+          Integer indexB = pair.getRight();
+          handledInB.add(indexB);
+          MarkupInfo markupB = listB.get(indexB);
+          if (isMatch(markupA, markupB)) {
+            Set<String> originalLayers = markupA.getMarkup().getLayers();
+            Set<String> modifiedLayers = markupB.getMarkup().getLayers();
+            if (!originalLayers.equals(modifiedLayers)) {
+              markupEdits.add(new LayerModification(markupA, markupB));
+            }
+          } else {
+            markupEdits.add(new MarkupModification(singletonList(markupA), singletonList(markupB)));
+          }
+        }
+      }
+    }
+    for (int a = 0; a < listA.size(); a++) {
+      if (!handledInA.contains(a)) {
+        markupEdits.add(new MarkupDeletion(listA.get(a)));
+      }
+    }
+    for (int b = 0; b < listB.size(); b++) {
+      if (!handledInB.contains(b)) {
+        markupEdits.add(new MarkupAddition(listB.get(b)));
+      }
+    }
+
+    return markupEdits;
+  }
+
+  static boolean pairsAreIndependent(Collection<Pair<Integer, Integer>> pairs) {
+    Set<Integer> a = new HashSet<>();
+    Set<Integer> b = new HashSet<>();
+    for (Pair<Integer, Integer> p : pairs) {
+      if (a.contains(p.getLeft()) || b.contains(p.getRight())) {
+        return false;
+      }
+      a.add(p.getLeft());
+      b.add(p.getRight());
+    }
+    return true;
+  }
+
+  private Integer overlap(MarkupInfo markupInfoA, MarkupInfo markupInfoB) {
+    return max(
+        0,
+        min(markupInfoA.endRank, markupInfoB.endRank)
+            - max(markupInfoA.startRank, markupInfoB.startRank)
+            + 1);
+  }
+
+  private List<Pair<Integer, Integer>> potentialMatches(
+      final List<MarkupInfo> listA, final List<MarkupInfo> listB) {
     final List<Pair<Integer, Integer>> potentialMatches = new ArrayList<>();
     for (int i = 0; i < listA.size(); i++) {
       MarkupInfo markupA = listA.get(i);
@@ -156,10 +248,11 @@ public class TAGComparison2 {
     return mrDiffLines;
   }
 
-  private static final Comparator<MarkupInfo> BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK = Comparator.comparing(MarkupInfo::getSpan)
-      .reversed()
-      .thenComparing(MarkupInfo::getStartRank)
-      .thenComparing(m -> m.getMarkup().getTag());
+  private static final Comparator<MarkupInfo> BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK =
+      Comparator.comparing(MarkupInfo::getSpan)
+          .reversed()
+          .thenComparing(MarkupInfo::getStartRank)
+          .thenComparing(m -> m.getMarkup().getTag());
 
   public List<MarkupInfo>[] getMarkupInfoLists() {
     return markupInfoLists;
@@ -183,7 +276,10 @@ public class TAGComparison2 {
     }
   }
 
-  private List<MarkupEdit> calculateMarkupEdits(final List<MarkupInfo> listA, final List<MarkupInfo> listB, final List<Pair<Integer, Integer>> optimalMatches) {
+  private List<MarkupEdit> calculateMarkupEdits(
+      final List<MarkupInfo> listA,
+      final List<MarkupInfo> listB,
+      final List<Pair<Integer, Integer>> optimalMatches) {
     List<MarkupSegment> segments = new ArrayList<>();
     final List<MarkupEdit> markupEdits = new ArrayList<>();
     int indexA = 0;
@@ -233,21 +329,21 @@ public class TAGComparison2 {
           markupEdits.add(new LayerModification(original, modified));
         }
       } else {
-//        for (MarkupInfo o : s.original) {
-//          Optional<MarkupInfo> replacement = s.modified.stream()
-//              .filter(mi -> mi.startRank == o.startRank && mi.endRank == o.endRank)
-//              .findAny();
-//          if (replacement.isPresent()) {
-//            MarkupInfo modified = replacement.get();
-//            markupEdits.add(new MarkupModification(o, modified));
-//            s.modified.remove(modified);
-//          } else {
-//            markupEdits.add(new MarkupDeletion(o));
-//          }
-//        }
-//        for (MarkupInfo m : s.modified) {
-//          markupEdits.add(new MarkupAddition(m));
-//        }
+        //        for (MarkupInfo o : s.original) {
+        //          Optional<MarkupInfo> replacement = s.modified.stream()
+        //              .filter(mi -> mi.startRank == o.startRank && mi.endRank == o.endRank)
+        //              .findAny();
+        //          if (replacement.isPresent()) {
+        //            MarkupInfo modified = replacement.get();
+        //            markupEdits.add(new MarkupModification(o, modified));
+        //            s.modified.remove(modified);
+        //          } else {
+        //            markupEdits.add(new MarkupDeletion(o));
+        //          }
+        //        }
+        //        for (MarkupInfo m : s.modified) {
+        //          markupEdits.add(new MarkupAddition(m));
+        //        }
         if (s.original.isEmpty()) {
           for (MarkupInfo m : s.modified) {
             markupEdits.add(new MarkupAddition(m));
@@ -266,22 +362,24 @@ public class TAGComparison2 {
     return markupEdits;
   }
 
-  private Collection<? extends String> toDiffLines(final List<MarkupEdit> markupEdits, final DiffPrinter diffPrinter) {
+  private Collection<? extends String> toDiffLines(
+      final List<MarkupEdit> markupEdits, final DiffPrinter diffPrinter) {
     return markupEdits.stream()
-        .map(me -> {
-          if (me instanceof MarkupAddition) {
-            return diffPrinter.addition.apply(((MarkupAddition) me).markupInfo);
-          } else if (me instanceof MarkupDeletion) {
-            return diffPrinter.deletion.apply(((MarkupDeletion) me).markupInfo);
-          } else if (me instanceof MarkupModification) {
-            MarkupModification mm = (MarkupModification) me;
-            return diffPrinter.modification.apply(mm.original, mm.modified);
-          } else if (me instanceof LayerModification) {
-            LayerModification lm = (LayerModification) me;
-            return diffPrinter.layermodification.apply(lm.original, lm.modified);
-          }
-          return null;
-        })
+        .map(
+            me -> {
+              if (me instanceof MarkupAddition) {
+                return diffPrinter.addition.apply(((MarkupAddition) me).markupInfo);
+              } else if (me instanceof MarkupDeletion) {
+                return diffPrinter.deletion.apply(((MarkupDeletion) me).markupInfo);
+              } else if (me instanceof MarkupModification) {
+                MarkupModification mm = (MarkupModification) me;
+                return diffPrinter.modification.apply(mm.original, mm.modified);
+              } else if (me instanceof LayerModification) {
+                LayerModification lm = (LayerModification) me;
+                return diffPrinter.layermodification.apply(lm.original, lm.modified);
+              }
+              return null;
+            })
         .collect(toList());
   }
 
@@ -301,7 +399,8 @@ public class TAGComparison2 {
       return this;
     }
 
-    DiffPrinter setModification(BiFunction<List<MarkupInfo>, List<MarkupInfo>, String> modification) {
+    DiffPrinter setModification(
+        BiFunction<List<MarkupInfo>, List<MarkupInfo>, String> modification) {
       this.modification = modification;
       return this;
     }
@@ -312,58 +411,72 @@ public class TAGComparison2 {
     }
   }
 
-  static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("add %s", markupInfoString(markupInfo)))
-      .setDeletion(markupInfo -> String.format("del %s", markupInfoString(markupInfo)))
-      .setModification((markupInfoA, markupInfoB) ->
-          String.format("replace {%s} -> {%s}",
-              markupInfoA.stream().map(TAGComparison2::markupInfoString).collect(joining(",")),
-              markupInfoB.stream().map(TAGComparison2::markupInfoString).collect(joining(",")))
-      )
-      .setLayerModification((markupInfoA, markupInfoB) -> String.format("layeridentifier change %s -> %s",
-          markupInfoString(markupInfoA), markupInfoString(markupInfoB)));
+  static DiffPrinter HR_DIFFPRINTER =
+      new DiffPrinter()
+          .setAddition(markupInfo -> String.format("add %s", markupInfoString(markupInfo)))
+          .setDeletion(markupInfo -> String.format("del %s", markupInfoString(markupInfo)))
+          .setModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "replace %s -> %s",
+                      markupInfoA.stream()
+                          .map(TAGComparison2::markupInfoString)
+                          .collect(joining(",")),
+                      markupInfoB.stream()
+                          .map(TAGComparison2::markupInfoString)
+                          .collect(joining(","))))
+          .setLayerModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "layeridentifier change %s -> %s",
+                      markupInfoString(markupInfoA), markupInfoString(markupInfoB)));
 
   public static String markupInfoString(MarkupInfo markupInfo) {
     return String.format("[%s]", markupInfo.getMarkupPath());
   }
 
-  static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
-      .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
-      .setModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
-          markupInfoA.get(0).markup.getDbId(), markupInfoB.get(0).markup.getExtendedTag()
-      ))
-      .setLayerModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
-          markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
-      ));
+  static DiffPrinter MR_DIFFPRINTER =
+      new DiffPrinter()
+          .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
+          .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
+          .setModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "~[%s,%s]",
+                      markupInfoA.get(0).markup.getDbId(),
+                      markupInfoB.get(0).markup.getExtendedTag()))
+          .setLayerModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "~[%s,%s]",
+                      markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()));
 
   private String toString(MarkupInfo markupInfo) {
     TAGMarkup markup = markupInfo.markup;
-    String markedUpText = markup
-        .getTextNodeStream()
-        .map(TAGTextNode::getText)
-        .collect(joining());
+    String markedUpText = markup.getTextNodeStream().map(TAGTextNode::getText).collect(joining());
     int length = markedUpText.length();
     if (length > MAX_MARKEDUP_TEXT_LENGTH) {
       int half = (length - 5) / 2;
       markedUpText = markedUpText.substring(0, half) + " ... " + markedUpText.substring(half + 5);
     }
     String extendedTag = markup.getExtendedTag();
-    return String.format("[%s>%s<%s]",
-        extendedTag,
-        markedUpText,
-        extendedTag);
+    return String.format("[%s>%s<%s]", extendedTag, markedUpText, extendedTag);
   }
 
-  private void removeDeterminedPairs(final boolean[] determinedInA, final boolean[] determinedInB, final List<Pair<Integer, Integer>> potentialReplacements) {
-    List<Pair<Integer, Integer>> potentialReplacementsWithDetermined = potentialReplacements.stream()
-        .filter(p -> determinedInA[p.getLeft()] || determinedInB[p.getRight()])
-        .collect(toList());
+  private void removeDeterminedPairs(
+      final boolean[] determinedInA,
+      final boolean[] determinedInB,
+      final List<Pair<Integer, Integer>> potentialReplacements) {
+    List<Pair<Integer, Integer>> potentialReplacementsWithDetermined =
+        potentialReplacements.stream()
+            .filter(p -> determinedInA[p.getLeft()] || determinedInB[p.getRight()])
+            .collect(toList());
     potentialReplacements.removeAll(potentialReplacementsWithDetermined);
   }
 
   // optimal = minimum number of steps? no: maximum number of matches
-  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
+  public List<String> diffMarkupInfo(
+      final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
     // this current algorithm does not
     final List<String> diff = new ArrayList<>();
     List<MarkupInfo> markupInfoListA = markupInfoLists[0];
@@ -394,28 +507,29 @@ public class TAGComparison2 {
         }
       }
     }
-//    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
+    //    removeDeterminedPairs(determinedInA, determinedInB, potentialReplacements);
 
     for (int i = 0; i < determinedInA.length; i++) {
       if (!determinedInA[i]) {
         // check for replacement
         final int finalI = i;
-        List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
-            .filter(p -> p.getLeft() == finalI)
-            .collect(toList());
+        List<Pair<Integer, Integer>> matchingPotentialReplacements =
+            potentialReplacements.stream().filter(p -> p.getLeft() == finalI).collect(toList());
         if (!matchingPotentialReplacements.isEmpty()) {
           potentialReplacements.removeAll(matchingPotentialReplacements);
           Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
           MarkupInfo markupInfoA = markupInfoListA.get(i);
           MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
-//          String markupA = toString(markupInfoA);
-//          String markupB = toString(markupInfoB);
-//          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
-//              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-//              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
-//              )
+          //          String markupA = toString(markupInfoA);
+          //          String markupB = toString(markupInfoB);
+          //          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
+          //              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+          //              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
+          //              )
 
-          diff.add(diffPrinter.modification.apply(singletonList(markupInfoA), singletonList(markupInfoB)));
+          diff.add(
+              diffPrinter.modification.apply(
+                  singletonList(markupInfoA), singletonList(markupInfoB)));
           determinedInA[i] = true;
           determinedInB[replacement.getRight()] = true;
 
@@ -440,9 +554,9 @@ public class TAGComparison2 {
         .map(t -> "[" + t.toString().replaceAll(" ", "_") + "]")
         .collect(joining(", "));
   }
-//  private boolean isMarkupToken(final TAGToken tagToken) {
-//    return tagToken instanceof MarkupOpenToken
-//        || tagToken instanceof MarkupCloseToken;
-//  }
+  //  private boolean isMarkupToken(final TAGToken tagToken) {
+  //    return tagToken instanceof MarkupOpenToken
+  //        || tagToken instanceof MarkupCloseToken;
+  //  }
 
 }

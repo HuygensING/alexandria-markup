@@ -40,89 +40,95 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTAGMLDiffCase1a() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]";
+    String originText =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    String editedText =
+        "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
-        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
-        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
-        "del [TAGML/text/l[1]/del|M]",
-        "del [TAGML/text/l[1]/add|M]"
-    );
+    assertThat(markupInfoDiffs)
+        .containsExactly(
+            "layeridentifier change [TAGML|M] -> [TAGML|N]",
+            "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+            "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+            "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+            "del [TAGML/text/l[1]/del|M]",
+            "del [TAGML/text/l[1]/add|M]");
   }
 
   @Test
   public void testTAGMLDiffCase1b() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s] [s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]";
+    String originText =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    String editedText =
+        "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s] [s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
-        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
-        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
-        "del [TAGML/text/l[1]/del|M]",
-        "del [TAGML/text/l[1]/add|M]"
-    );
+    assertThat(markupInfoDiffs)
+        .containsExactly(
+            "layeridentifier change [TAGML|M] -> [TAGML|N]",
+            "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+            "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+            "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+            "del [TAGML/text/l[1]/del|M]",
+            "del [TAGML/text/l[1]/add|M]");
 
-//    Edit operations on markup:
-//
-//    { "layeridentifier_change" : [TAGML|M][TAGML|N] }
-//    { "layeridentifier_change" : [TAGML/text|M][TAGML/text|N] }
-//    the Markup nodes are a match, but their layer suffix is not.
-//
-//    { "replace" : [TAGML/text/l[1]|M][TAGML/text/s[1]|N] }
-//    { "replace" : [TAGML/text/l[2]|M][TAGML/text/s[2]|N] }
-//    We need to specify that the first child of the text node is replaced.
-//
-//    { "del" : [TAGML/text/l[1]/del|M][] }
-//    { "del" : [TAGML/text/l[1]/add|M][] }
+    //    Edit operations on markup:
+    //
+    //    { "layeridentifier_change" : [TAGML|M][TAGML|N] }
+    //    { "layeridentifier_change" : [TAGML/text|M][TAGML/text|N] }
+    //    the Markup nodes are a match, but their layer suffix is not.
+    //
+    //    { "replace" : [TAGML/text/l[1]|M][TAGML/text/s[1]|N] }
+    //    { "replace" : [TAGML/text/l[2]|M][TAGML/text/s[2]|N] }
+    //    We need to specify that the first child of the text node is replaced.
+    //
+    //    { "del" : [TAGML/text/l[1]/del|M][] }
+    //    { "del" : [TAGML/text/l[1]/add|M][] }
 
   }
-
 
   //  @Ignore
   @Test
   public void testMarkupDiff0() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]\n";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]\n";
+    String originText =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine, <l][l|M>malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]\n";
+    String editedText =
+        "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly(
-        "layeridentifier change [TAGML|M] -> [TAGML|N]",
-        "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
-        "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
-        "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
-        "del [TAGML/text/l[1]/del|M]",
-        "del [TAGML/text/l[1]/add|M]");
+    assertThat(markupInfoDiffs)
+        .containsExactly(
+            "layeridentifier change [TAGML|M] -> [TAGML|N]",
+            "layeridentifier change [TAGML/text|M] -> [TAGML/text|N]",
+            "replace [TAGML/text/l[1]|M] -> [TAGML/text/s[1]|N]",
+            "replace [TAGML/text/l[2]|M] -> [TAGML/text/s[2]|N]",
+            "del [TAGML/text/l[1]/del|M]",
+            "del [TAGML/text/l[1]/add|M]");
   }
 
   @Test
@@ -146,7 +152,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String originText = "[TAGML>A [a>simple<a] text<TAGML]\n";
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("replace {[TAGML/a]} -> {[TAGML/b]}");
+    assertThat(markupInfoDiffs).containsExactly("replace [TAGML/a] -> [TAGML/b]");
   }
 
   @Ignore
@@ -169,49 +175,54 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   private List<String> getMarkupDiffs(final String originText, final String editedText) {
     visualizeDiff("A", originText, "B", editedText);
-    return runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
-      TAGDocument modified = importer.importTAGML(editedText.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView tagView = new TAGView(store).setMarkupToExclude(none);
-      TAGComparison2 differ = new TAGComparison2(original, tagView, modified, store);
-      List<MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
-      assertThat(markupInfoLists).hasSize(2);
-      for (int i = 0; i < 2; i++) {
-        for (MarkupInfo mi : markupInfoLists[i]) {
-          LOG.info("{}: {}", i, mi);
-        }
-      }
-//      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
-//      LOG.info("{}", diffMarkupInfo);
-//      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
-//      LOG.info("{}", mrDiffMarkupInfo);
-      return differ.getDiffLines();
-    });
+    return runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
+          TAGDocument modified = importer.importTAGML(editedText.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView tagView = new TAGView(store).setMarkupToExclude(none);
+          TAGComparison2 differ = new TAGComparison2(original, tagView, modified, store);
+          List<MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
+          assertThat(markupInfoLists).hasSize(2);
+          for (int i = 0; i < 2; i++) {
+            for (MarkupInfo mi : markupInfoLists[i]) {
+              LOG.info("{}: {}", i, mi);
+            }
+          }
+          //      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists,
+          // TAGComparison2.HR_DIFFPRINTER);
+          //      LOG.info("{}", diffMarkupInfo);
+          //      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists,
+          // TAGComparison2.MR_DIFFPRINTER);
+          //      LOG.info("{}", mrDiffMarkupInfo);
+          return differ.getDiffLines();
+        });
   }
 
-  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+  private void visualizeDiff(
+      final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);
-    runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+    runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView allTags = new TAGView(store).setMarkupToExclude(none);
 
-      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
-//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
-      new VariantGraphVisualizer(visualizer)
-          .visualizeVariation(witness1, original, witness2, edited, allTags);
-      String result = visualizer.getResult();
-      LOG.info("result=\n" +
-          "------8<---------------------------------------\n" +
-          "{}\n" +
-          "------8<---------------------------------------\n", result);
-    });
+          DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+          //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+          new VariantGraphVisualizer(visualizer)
+              .visualizeVariation(witness1, original, witness2, edited, allTags);
+          String result = visualizer.getResult();
+          LOG.info(
+              "result=\n"
+                  + "------8<---------------------------------------\n"
+                  + "{}\n"
+                  + "------8<---------------------------------------\n",
+              result);
+        });
   }
-
 }
-
