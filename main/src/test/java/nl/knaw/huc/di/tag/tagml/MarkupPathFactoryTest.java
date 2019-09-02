@@ -47,10 +47,10 @@ public class MarkupPathFactoryTest extends AlexandriaBaseStoreTest {
       assertTagAndPath(a, "a", "a", markupPathFactory);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b[1]", markupPathFactory);
+      assertTagAndPath(b, "b", "a/b", markupPathFactory);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/b[1]/c[1]", markupPathFactory);
+      assertTagAndPath(c, "c", "a/b/c", markupPathFactory);
     });
   }
 
@@ -71,13 +71,13 @@ public class MarkupPathFactoryTest extends AlexandriaBaseStoreTest {
       assertTagAndPath(l1, "l", "a/l[1]", markupPathFactory);
 
       final TAGMarkup n1 = markups.get(2);
-      assertTagAndPath(n1, "n", "a/l[1]/n[1]", markupPathFactory);
+      assertTagAndPath(n1, "n", "a/l[1]/n", markupPathFactory);
 
       final TAGMarkup l2 = markups.get(3);
       assertTagAndPath(l2, "l", "a/l[2]", markupPathFactory);
 
       final TAGMarkup n2 = markups.get(4);
-      assertTagAndPath(n2, "n", "a/l[2]/n[1]", markupPathFactory);
+      assertTagAndPath(n2, "n", "a/l[2]/n", markupPathFactory);
     });
   }
 
@@ -116,10 +116,10 @@ public class MarkupPathFactoryTest extends AlexandriaBaseStoreTest {
       assertTagAndPath(a, "a", "a|B", markupPathFactory);
 
       final TAGMarkup b = markups.get(1);
-      assertTagAndPath(b, "b", "a/b[1]|B",  markupPathFactory);
+      assertTagAndPath(b, "b", "a/b|B",  markupPathFactory);
 
       final TAGMarkup c = markups.get(2);
-      assertTagAndPath(c, "c", "a/c[1]|C",  markupPathFactory);
+      assertTagAndPath(c, "c", "a/c|C",  markupPathFactory);
     });
   }
 
