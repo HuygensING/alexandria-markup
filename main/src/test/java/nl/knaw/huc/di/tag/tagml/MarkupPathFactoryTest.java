@@ -113,7 +113,7 @@ public class MarkupPathFactoryTest extends AlexandriaBaseStoreTest {
       assertThat(markups).hasSize(3);
 
       final TAGMarkup a = markups.get(0);
-      assertTagAndPath(a, "a", "a|B", markupPathFactory);
+      assertTagAndPath(a, "a", "a|B,C", markupPathFactory);
 
       final TAGMarkup b = markups.get(1);
       assertTagAndPath(b, "b", "a/b|B",  markupPathFactory);
