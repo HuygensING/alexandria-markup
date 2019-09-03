@@ -125,7 +125,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
         .containsExactly("join {[TAGML/text/s[1]|N],[TAGML/text/s[2]|N]} -> [TAGML/text/s|N]");
   }
 
-  @Ignore("TODO")
+  //  @Ignore("TODO")
   @Test
   public void testTAGMLDiffCase3() {
     String version1 =
@@ -156,7 +156,12 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     //    { "replace" : [malgré][Malgré] }
 
     assertThat(markupInfoDiffs)
-        .containsExactly("join {[TAGML/text/s[1]|N],[TAGML/text/s[2]|N]} -> [TAGML/text/s|N]");
+        .containsExactly(
+            "layeridentifier change [TAGML|M] -> [TAGML|M,N]",
+            "layeridentifier change [TAGML/text|M] -> [TAGML/text|M,N]",
+            "add [TAGML/text/s[1]|N]",
+            "add [TAGML/text/s[2]|N]"
+            );
   }
 
   //  @Ignore

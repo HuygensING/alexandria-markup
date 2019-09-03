@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
@@ -30,8 +31,11 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class MarkupPathFactory {
 
@@ -46,12 +50,14 @@ public class MarkupPathFactory {
   public String getPath(final TAGMarkup tagMarkup) {
     String layer = "";
     if (!tagMarkup.getLayers().isEmpty()) {
-      List<String> nonDefaultLayers = tagMarkup.getLayers().stream()
-          .filter(l -> !l.equals(TAGML.DEFAULT_LAYER))
-          .collect(toList());
+      List<String> nonDefaultLayers =
+          tagMarkup.getLayers().stream()
+              .filter(l -> !l.equals(TAGML.DEFAULT_LAYER))
+              .collect(toList());
       if (!nonDefaultLayers.isEmpty()) {
-//        Preconditions.checkState(nonDefaultLayers.size() == 1, nonDefaultLayers.toString() + " should have size 1");
-        layer = nonDefaultLayers.get(0); // We just need a path, not all paths, so pick the first
+        //        Preconditions.checkState(nonDefaultLayers.size() == 1, nonDefaultLayers.toString()
+        // + " should have size 1");
+        layer = join(",", nonDefaultLayers);
       }
     }
 
@@ -63,34 +69,38 @@ public class MarkupPathFactory {
     TAGMarkup markup = tagMarkup;
     while (hasParents) {
       Long childId = markup.getDbId();
-      final List<TAGMarkup> parentMarkup = textGraph
-          .getIncomingEdges(childId)
-          .stream()
-          .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast)
-          .filter(e -> e.hasType(EdgeType.hasMarkup))
-          .map(textGraph::getSource)
-          .filter(l -> !textGraph.isRootNode(l))
-          .map(store::getMarkup)
-          .collect(toList());
+      final Set<TAGMarkup> parentMarkup =
+          textGraph.getIncomingEdges(childId).stream()
+              .filter(LayerEdge.class::isInstance)
+              .map(LayerEdge.class::cast)
+              .filter(e -> e.hasType(EdgeType.hasMarkup))
+              .map(textGraph::getSource)
+              .filter(l -> !textGraph.isRootNode(l))
+              .map(store::getMarkup)
+              .collect(toSet());
       if (parentMarkup.isEmpty()) {
         hasParents = false;
 
       } else {
-//        Preconditions.checkState(parentMarkup.size() == 1, parentMarkup.toString() + " should have size 1");
-        TAGMarkup parent = parentMarkup.get(0); // there can be only one!
+        Preconditions.checkState(
+            parentMarkup.size() == 1, parentMarkup.toString() + " should have size 1");
+        TAGMarkup parent = parentMarkup.iterator().next(); // there can be only one!
         String childTag = markup.getTag();
-        List<Long> twins = textGraph.getOutgoingEdges(parent.getDbId())// children with the same tag as the original markup
-            .stream()
-            .filter(LayerEdge.class::isInstance)
-            .map(LayerEdge.class::cast)
-            .filter(e -> e.hasType(EdgeType.hasMarkup))
-            .map(textGraph::getTargets)
-            .flatMap(Collection::stream)
-            .map(store::getMarkup)
-            .filter(m -> m.hasTag(childTag))
-            .map(TAGMarkup::getDbId)
-            .collect(toList());
+        List<Long> twins =
+            textGraph
+                .getOutgoingEdges(
+                    parent.getDbId()) // children with the same tag as the original markup
+                .stream()
+                .filter(LayerEdge.class::isInstance)
+                .map(LayerEdge.class::cast)
+                .filter(e -> e.hasType(EdgeType.hasMarkup))
+                .map(textGraph::getTargets)
+                .flatMap(Collection::stream)
+                .map(store::getMarkup)
+                .filter(m -> m.hasTag(childTag))
+                .map(TAGMarkup::getDbId)
+                .distinct()
+                .collect(toList());
         if (twins.size() > 1) {
           int childIndex = twins.indexOf(childId) + 1;
           final String child = pathParts.get(0) + "[" + childIndex + "]";
@@ -101,7 +111,7 @@ public class MarkupPathFactory {
       }
     }
 
-    String path = String.join("/", pathParts);
+    String path = join("/", pathParts);
     if (!layer.isEmpty()) {
       path += "|" + layer;
     }

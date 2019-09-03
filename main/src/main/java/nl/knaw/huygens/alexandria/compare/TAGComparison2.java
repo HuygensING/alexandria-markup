@@ -137,7 +137,9 @@ public class TAGComparison2 {
       for (int b = 0; b < listB.size(); b++) {
         Integer overlapSize = overlap(listA.get(a), listB.get(b));
         overlap[a][b] = overlapSize;
-        overlapSizeIndex.put(overlapSize, new ImmutablePair<>(a, b));
+        if (overlapSize > 0) {
+          overlapSizeIndex.put(overlapSize, new ImmutablePair<>(a, b));
+        }
       }
     }
     List<Integer> overlapSizes = overlapSizeIndex.keySet().stream().sorted().collect(toList());
