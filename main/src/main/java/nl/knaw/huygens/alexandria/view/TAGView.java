@@ -35,7 +35,15 @@ import static nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*;
 public class TAGView {
   private final TAGStore store;
 
-  enum RelevanceStyle {include, exclude, undefined}
+  public boolean isValid() {
+    return !((layerRelevance.equals(undefined)) && (markupRelevance.equals(undefined)));
+  }
+
+  enum RelevanceStyle {
+    include,
+    exclude,
+    undefined
+  }
 
   private RelevanceStyle layerRelevance = undefined;
   private RelevanceStyle markupRelevance = undefined;
@@ -64,42 +72,46 @@ public class TAGView {
   public Set<Long> filterRelevantMarkup(Set<Long> markupIds) {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
-      List<Long> retain = markupIds.stream()//
-          .filter(m -> hasOverlap(layersToInclude, getLayers(m)) || isInDefaultLayerOnly(m))//
-          .collect(toList());
+      List<Long> retain =
+          markupIds.stream() //
+              .filter(m -> hasOverlap(layersToInclude, getLayers(m)) || isInDefaultLayerOnly(m)) //
+              .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
-      List<Long> remove = markupIds.stream()//
-          .filter(m -> hasOverlap(layersToExclude, getLayers(m)) && !isInDefaultLayerOnly(m))//
-          .collect(toList());
+      List<Long> remove =
+          markupIds.stream() //
+              .filter(
+                  m -> hasOverlap(layersToExclude, getLayers(m)) && !isInDefaultLayerOnly(m)) //
+              .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }
     if (include.equals(markupRelevance)) {
-      List<Long> retain = markupIds.stream()//
-          .filter(m -> markupToInclude.contains(getTag(m)))//
-          .collect(toList());
+      List<Long> retain =
+          markupIds.stream() //
+              .filter(m -> markupToInclude.contains(getTag(m))) //
+              .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(markupRelevance)) {
-      List<Long> remove = markupIds.stream()//
-          .filter(m -> markupToExclude.contains(getTag(m)))//
-          .collect(toList());
+      List<Long> remove =
+          markupIds.stream() //
+              .filter(m -> markupToExclude.contains(getTag(m))) //
+              .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }
     return relevantMarkupIds;
   }
 
-//  private boolean isInDefaultLayerOnly(final Long markupId) {
-//    return getLayers(markupId).stream().anyMatch(TAGML.DEFAULT_LAYER::equals);
-//  }
+  //  private boolean isInDefaultLayerOnly(final Long markupId) {
+  //    return getLayers(markupId).stream().anyMatch(TAGML.DEFAULT_LAYER::equals);
+  //  }
 
   private boolean isInDefaultLayerOnly(final Long markupId) {
     Set<String> layers = getLayers(markupId);
-    return layers.size() == 1
-        && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
+    return layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
   }
 
   private boolean hasOverlap(Set<String> layersToInclude, Set<String> layers) {
@@ -199,5 +211,4 @@ public class TAGView {
   private String getTag(Long markupId) {
     return store.getMarkup(markupId).getTag();
   }
-
 }
