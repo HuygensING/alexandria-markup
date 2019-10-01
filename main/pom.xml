@@ -36,7 +36,11 @@
       <artifactId>TAG-diff</artifactId>
       <version>${tag.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>nl.knaw.huygens</groupId>
+      <artifactId>visitei</artifactId>
+      <version>${visitei.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4</artifactId>
@@ -203,38 +207,38 @@
       </plugin>
 
       <!--<plugin>-->
-        <!--<groupId>org.jacoco</groupId>-->
-        <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-        <!--<version>${jacoco.version}</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>prepare-agent</id>-->
-            <!--<goals>-->
-              <!--<goal>prepare-agent</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>report</id>-->
-            <!--<phase>prepare-package</phase>-->
-            <!--<goals>-->
-              <!--<goal>report</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>post-unit-test</id>-->
-            <!--<phase>test</phase>-->
-            <!--<goals>-->
-              <!--<goal>report</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--&lt;!&ndash; Sets the path to the file which contains the execution-->
-                <!--data. &ndash;&gt;-->
-              <!--<dataFile>target/jacoco.exec</dataFile>-->
-              <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
-              <!--<outputDirectory>target/jacoco-ut</outputDirectory>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        <!--</executions>-->
+      <!--<groupId>org.jacoco</groupId>-->
+      <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+      <!--<version>${jacoco.version}</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<id>prepare-agent</id>-->
+      <!--<goals>-->
+      <!--<goal>prepare-agent</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>report</id>-->
+      <!--<phase>prepare-package</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>post-unit-test</id>-->
+      <!--<phase>test</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--<configuration>-->
+      <!--&lt;!&ndash; Sets the path to the file which contains the execution-->
+      <!--data. &ndash;&gt;-->
+      <!--<dataFile>target/jacoco.exec</dataFile>-->
+      <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
+      <!--<outputDirectory>target/jacoco-ut</outputDirectory>-->
+      <!--</configuration>-->
+      <!--</execution>-->
+      <!--</executions>-->
       <!--</plugin>-->
 
       <plugin>
