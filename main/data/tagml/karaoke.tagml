@@ -1,0 +1,8 @@
+[tag|+L,+B,+T,+C>
+[body|B>[timing|T>[chords|C>
+[div|B class='stanza' title=4>[p|B>[screenful|T+S68 starts=68>[main|S68>[em|C>Bright are the<em|C] [bm|C>stars that shine<bm|C]<main|S68]<p|B]
+[p|B>[next|S68>[screenful|T+S72 starts=72>[main|S72>[em|C>Dark is the<em|C] [bm|C>sky<bm|C]<main|S72]<next|S68]<screenful|S68]<p|B]
+[p|B>[next|S72>[screenful|T+S76 starts=76>[main|S76>[em|C>I know [lyrics|L popup={fact=[>[p>Paul McCartney wrote this about his girlfriend, an actress named Jane Asher<p]<]}>this<em|C] [bm|C>love of mine<bm|C]<main|S76]<next|S72]<screenful|S72]<p|B]
+[p|B>[next|S76>[screenful|T+S80 starts=80>[main|S80>[g|C>Will never<g|C] [a|C>die<lyrics|L]<main|S80]<next|S76]<screenful|S76]<p|B]<div|B]
+[div|B class='refrain'>[p|B>[next|S80>[screenful|T+S84 starts=84>[main|S84>And I<a|C] [d|C>love her<d|C]<next|S80]<screenful|S80]<main|S84]<screenful|S84]<p|B]<div|B]
+<chords|C]<timing|T]<body|B]<tag|L,C,T,B]

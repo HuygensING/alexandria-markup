@@ -1,0 +1,33 @@
+[poem [title}The Hunting of the Snark (An Agony in 8 Fits){title] [voice}Narrator{voice]}
+[text [title}The Hunting of the Snark (An Agony in 8 Fits){title]}
+[canto [title}The Vanishing{title]}
+[page [n}81{n]} 
+[line}[phr [type}NP{]}[w [type}D{]}The{w] [w [type}N{]}Vanishing{w]{phr]
+[page-nr}81{page-nr]{line]
+[p}
+[stanza}
+[sentence}
+[line}[l}[pl}[s}[phr [type}NP{]}(As if stung{phr] [phr [type}PP{]}by a spasm){phr] [phr [type}VP{]}plunge into a chasm,{phr]{pl]{l]{line]
+[line}[l}[pl}[phr [type}VP{]}While they waited [w [type}contr{]}and{w] listened in awe.{phr]{s]{pl]{l]{line]{sentence]
+{p]{stanza]
+[el}{el]
+[el}{el]
+[stanza}[p}
+[sentence=a}[line}[l}[pl}[sentence=b [voice}Baker{voice]}[s}[phr [type}NP{]}"It's a Snark!"{phr]{sentence=b] [phr [type}VP{]}was the sound that first came{phr] {pl]{line]
+[line}[pl}[phr [type}PP{]}to their ears,{phr]{pl]{l]{line]
+[line}[l}[pl}[phr [type}VP{]}And seemed almost too [w [type}A{]}good{w] to be true.{phr]{s]{pl]{l]{line]{sentence=a]
+[line}[l}[pl}[sentence=c}[s}[phr [type}VP{]}Then followed{phr] [phr [type}NP{]}a torrent of laughter and cheers:{phr]{pl]{l]{line]
+[line}[l}[pl}[phr=a [type}NP{]}Then the ominous words [sentence=d [voice}Baker{voice]}[phr=b [type}VP{]}"It's a Boo--"{phr=b]{phr=a]{sentence=d]{l]{line]{pl]
+{p]{stanza]
+[el}{el]
+[el}{el]
+[stanza}[p}
+[line}[l}[pl}[phr [type}NP{]}Then, silence.{phr]{s]{sentence=c] [sentence=e}[s}[phr [type}NP{]}Some fancied{phr] [phr [type}VP{]}they heard in the {pl]{line][line}[pl}air{phr]{pl]{l]{line]
+[line}[l}[pl}[phr [type}NP{]}A weary and wandering sigh{phr]{pl]{l]{line]
+[line}[l}[pl}[phr=a [type}VP{]}That sounded like [sentence=f [voice}Baker{voice]}[phr=b [type}N{]}"--jum!"{phr=b]{sentence=f] but the others de-{pl]{line][line}[pl}clare{pl]{phr=a]{l]{line]
+[line}[l}[pl}[phr [type}NP{]}It was only a breeze that went by.{phr]{s]{pl]{l]{line]{sentence=e]
+{p]{stanza]
+{canto]
+{page]
+{text]
+{poem]
