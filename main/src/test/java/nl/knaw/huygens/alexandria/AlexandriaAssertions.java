@@ -22,6 +22,10 @@ package nl.knaw.huygens.alexandria;
 
 import nl.knaw.huygens.alexandria.compare.TAGComparison;
 import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
+import nl.knaw.huygens.alexandria.creole.Pattern;
+import nl.knaw.huygens.alexandria.creole.PatternAssert;
+import nl.knaw.huygens.alexandria.creole.ValidationResult;
+import nl.knaw.huygens.alexandria.creole.ValidationResultAssert;
 import org.assertj.core.api.Assertions;
 
 public class AlexandriaAssertions extends Assertions {
@@ -30,4 +34,11 @@ public class AlexandriaAssertions extends Assertions {
     return new TAGComparisonAssert(actual);
   }
 
+  public static PatternAssert assertThat(Pattern actual) {
+    return new PatternAssert(actual);
+  }
+
+  public static ValidationResultAssert assertThat(ValidationResult actual) {
+    return new ValidationResultAssert(actual);
+  }
 }
