@@ -198,7 +198,7 @@ class LMNLModifier {
     LOG.debug("\nMarkups:\n{}", markups);
   }
 
-  class TextNodeCursor {
+  static class TextNodeCursor {
     private TextNode currentTextNode;
     private int textNodeIndex = 0;
     private int offset = 0;

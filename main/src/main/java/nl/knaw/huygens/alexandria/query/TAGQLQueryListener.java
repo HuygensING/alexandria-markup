@@ -192,7 +192,7 @@ class TAGQLQueryListener extends TAGQLBaseListener {
   }
 
   private int toInteger(ParserRuleContext ctx) {
-    return Integer.valueOf(ctx.getText());
+    return Integer.parseInt(ctx.getText());
   }
 
   private String stringLiteral(ParserRuleContext ctx) {

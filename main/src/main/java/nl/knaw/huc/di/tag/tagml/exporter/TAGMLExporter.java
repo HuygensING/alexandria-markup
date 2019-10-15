@@ -52,7 +52,7 @@ public class TAGMLExporter extends TAGExporter {
     super(store, view);
   }
 
-  class ExporterState {
+  static class ExporterState {
     Deque<Long> openMarkupIds = new ArrayDeque<>();
     Map<Long, StringBuilder> openTags = new LinkedHashMap<>();
     Map<Long, StringBuilder> closeTags = new LinkedHashMap<>();

@@ -47,7 +47,7 @@ class Tokenizer {
     this.tagView = tagView;
   }
 
-  class TextTokenInfo {
+  static class TextTokenInfo {
     Integer offset;
     Integer length;
 

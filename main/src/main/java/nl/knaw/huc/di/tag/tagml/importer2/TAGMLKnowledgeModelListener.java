@@ -69,7 +69,7 @@ public class TAGMLKnowledgeModelListener extends TAGMLParserBaseListener {
     return knowledgeModel;
   }
 
-  public class State {
+  public static class State {
     public Map<String, Deque<MarkupResource>> openMarkup = new HashMap<>();
     public Map<String, Deque<MarkupResource>> suspendedMarkup = new HashMap();
     public Deque<MarkupResource> allOpenMarkup = new ArrayDeque<>();

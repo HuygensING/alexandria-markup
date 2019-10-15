@@ -75,7 +75,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
     return document;
   }
 
-  public class State {
+  public static class State {
     public Map<String, Deque<TAGMarkup>> openMarkup = new HashMap<>();
     public Map<String, Deque<TAGMarkup>> suspendedMarkup = new HashMap();
     public Deque<TAGMarkup> allOpenMarkup = new ArrayDeque<>();

@@ -205,7 +205,7 @@ public class TAGTraverser {
     return stringBuilder.append(value).toString();
   }
 
-  class ExporterState {
+  static class ExporterState {
     Deque<Long> openMarkupIds = new ArrayDeque<>();
     Map<Long, StringBuilder> openTags = new LinkedHashMap<>();
     Map<Long, StringBuilder> closeTags = new LinkedHashMap<>();

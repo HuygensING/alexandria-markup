@@ -121,7 +121,7 @@ public class TAGComparison2 {
     return mrDiffLines;
   }
 
-  public class MarkupInfo {
+  public static class MarkupInfo {
     int startRank;
     int endRank;
     private TAGMarkup markup;

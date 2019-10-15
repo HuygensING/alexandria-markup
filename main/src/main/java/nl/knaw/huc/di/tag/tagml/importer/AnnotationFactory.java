@@ -331,7 +331,7 @@ public class AnnotationFactory {
     return annotationInfo;
   }
 
-  private class KeyValue {
+  private static class KeyValue {
     private String key;
     private Object value;
 

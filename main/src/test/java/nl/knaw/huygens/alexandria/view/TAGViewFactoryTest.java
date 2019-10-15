@@ -57,8 +57,7 @@ public class TAGViewFactoryTest extends AlexandriaBaseStoreTest {
   }
 
   private TAGView createView(final TAGStore store, final String json) {
-    TAGView tagView = new TAGViewFactory(store).fromJsonString(json);
-    return tagView;
+    return new TAGViewFactory(store).fromJsonString(json);
   }
 
   @Test

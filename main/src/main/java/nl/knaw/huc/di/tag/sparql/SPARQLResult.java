@@ -52,8 +52,8 @@ public class SPARQLResult {
     } else if (this.results.isEmpty()) {
       return this.values;
     } else {
-      return this.results.size() == 1 ? ((SPARQLResult) this.results.get(0)).getValues()
-          : (List) this.results.stream()
+      return this.results.size() == 1 ? this.results.get(0).getValues()
+          : this.results.stream()
           .map(SPARQLResult::getValues)
           .collect(toList());
     }

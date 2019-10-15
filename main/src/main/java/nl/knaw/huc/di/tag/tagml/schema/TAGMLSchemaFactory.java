@@ -29,21 +29,21 @@ import java.util.Map;
 public class TAGMLSchemaFactory {
   static final YAMLFactory YAML_F = new YAMLFactory();
 
-  public static TAGMLSchema fromYAML(String schemaYAML) {
+  public static TAGMLSchemaParseResult parseYAML(String schemaYAML) {
     try {
+      final TAGMLSchemaParseResult result = new TAGMLSchemaParseResult();
       ObjectMapper mapper = new ObjectMapper(YAML_F);
-      JsonNode jsonNode = mapper.readTree(schemaYAML);
-      TAGMLSchema tagmlSchema = new TAGMLSchema();
-      jsonNode
+      mapper
+          .readTree(schemaYAML)
           .fields()
           .forEachRemaining(
               entry -> {
-                tagmlSchema.addLayer(entry.getKey());
-                JsonNode jsonNode1 = entry.getValue();
-                TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode1);
-                tagmlSchema.setLayerHierarchy(entry.getKey(), layerHierarchy);
+                result.schema.addLayer(entry.getKey());
+                JsonNode jsonNode = entry.getValue();
+                TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode);
+                result.schema.setLayerHierarchy(entry.getKey(), layerHierarchy);
               });
-      return tagmlSchema;
+      return result;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

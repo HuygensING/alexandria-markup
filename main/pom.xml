@@ -53,12 +53,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>${jackson-dataformat-yaml.version}</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson-databind.version}</version>
+      <version>${jackson.version}</version>
     </dependency>
     <!-- RDF framework -->
     <dependency>
@@ -214,38 +214,38 @@
       </plugin>
 
       <!--<plugin>-->
-        <!--<groupId>org.jacoco</groupId>-->
-        <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-        <!--<version>${jacoco.version}</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>prepare-agent</id>-->
-            <!--<goals>-->
-              <!--<goal>prepare-agent</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>report</id>-->
-            <!--<phase>prepare-package</phase>-->
-            <!--<goals>-->
-              <!--<goal>report</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>post-unit-test</id>-->
-            <!--<phase>test</phase>-->
-            <!--<goals>-->
-              <!--<goal>report</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--&lt;!&ndash; Sets the path to the file which contains the execution-->
-                <!--data. &ndash;&gt;-->
-              <!--<dataFile>target/jacoco.exec</dataFile>-->
-              <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
-              <!--<outputDirectory>target/jacoco-ut</outputDirectory>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        <!--</executions>-->
+      <!--<groupId>org.jacoco</groupId>-->
+      <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+      <!--<version>${jacoco.version}</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<id>prepare-agent</id>-->
+      <!--<goals>-->
+      <!--<goal>prepare-agent</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>report</id>-->
+      <!--<phase>prepare-package</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--<execution>-->
+      <!--<id>post-unit-test</id>-->
+      <!--<phase>test</phase>-->
+      <!--<goals>-->
+      <!--<goal>report</goal>-->
+      <!--</goals>-->
+      <!--<configuration>-->
+      <!--&lt;!&ndash; Sets the path to the file which contains the execution-->
+      <!--data. &ndash;&gt;-->
+      <!--<dataFile>target/jacoco.exec</dataFile>-->
+      <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
+      <!--<outputDirectory>target/jacoco-ut</outputDirectory>-->
+      <!--</configuration>-->
+      <!--</execution>-->
+      <!--</executions>-->
       <!--</plugin>-->
 
       <plugin>
