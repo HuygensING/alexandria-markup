@@ -42,4 +42,8 @@ public class TAGMLSchema {
   public void setLayerHierarchy(String key, TreeNode<String> layerHierarchy) {
     layerHierarchies.put(key, layerHierarchy);
   }
+
+  public TreeNode<String> getLayerHierarchy(final String layer) {
+    return layerHierarchies.get(layer);
+  }
 }

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class TAGMLSchemaFactory {
   static final YAMLFactory YAML_F = new YAMLFactory();
@@ -40,7 +41,7 @@ public class TAGMLSchemaFactory {
                 tagmlSchema.addLayer(entry.getKey());
                 JsonNode jsonNode1 = entry.getValue();
                 TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode1);
-                tagmlSchema.setLayerHierarchy(entry.getKey(),layerHierarchy);
+                tagmlSchema.setLayerHierarchy(entry.getKey(), layerHierarchy);
               });
       return tagmlSchema;
     } catch (IOException e) {
@@ -48,9 +49,15 @@ public class TAGMLSchemaFactory {
     }
   }
 
-  private static TreeNode<String> buildLayerHierarchy(JsonNode jsonNode1) {
-    TreeNode<String> hierarchy = new TreeNode<>(jsonNode1.textValue());
-    jsonNode1.elements().forEachRemaining(n-> hierarchy.addChild(buildLayerHierarchy(n)));
+  private static TreeNode<String> buildLayerHierarchy(JsonNode jsonNode) {
+    String content = jsonNode.textValue();
+    if (jsonNode.isObject()) {
+      Map.Entry<String, JsonNode> next = jsonNode.fields().next();
+      content = next.getKey();
+      jsonNode = next.getValue();
+    }
+    TreeNode<String> hierarchy = new TreeNode<>(content);
+    jsonNode.elements().forEachRemaining(n -> hierarchy.addChild(buildLayerHierarchy(n)));
     return hierarchy;
   }
 }
