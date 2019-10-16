@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.schema;
+package nl.knaw.huc.di.tag.schema;
 
 /*-
  * #%L
@@ -20,9 +20,30 @@ package nl.knaw.huc.di.tag.tagml.schema;
  * #L%
  */
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class TAGMLSchemaParseResult {
-  TAGMLSchema schema = new TAGMLSchema();
-  List<String> errors = new ArrayList<>();
+public class TAGMLSchema {
+  private List<String> layers = new ArrayList<>();
+  private HashMap<String, TreeNode<String>> layerHierarchies = new HashMap<>();
+
+  public List<String> getLayers() {
+    return layers;
+  }
+
+  public void setLayers(List<String> layers) {
+    this.layers = layers;
+  }
+
+  public void addLayer(String name) {
+    layers.add(name);
+  }
+
+  public void setLayerHierarchy(String key, TreeNode<String> layerHierarchy) {
+    layerHierarchies.put(key, layerHierarchy);
+  }
+
+  public TreeNode<String> getLayerHierarchy(final String layer) {
+    return layerHierarchies.get(layer);
+  }
 }

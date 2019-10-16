@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.schema;
+package nl.knaw.huc.di.tag.schema;
 
 /*-
  * #%L
@@ -20,6 +20,7 @@ package nl.knaw.huc.di.tag.tagml.schema;
  * #L%
  */
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,25 +59,25 @@ public class TAGMLSchemaTest {
     TreeNode<String> layerHierarchy1 = result.schema.getLayerHierarchy("L1");
     assertThat(layerHierarchy1.data).isEqualTo("root");
     List<TreeNode<String>> rootChildren = layerHierarchy1.children;
-    assertThat(rootChildren).hasSize(4);
+    Assertions.assertThat(rootChildren).hasSize(4);
     assertThat(rootChildren.get(0).data).isEqualTo("a");
     assertThat(rootChildren.get(1).data).isEqualTo("b");
     assertThat(rootChildren.get(2).data).isEqualTo("c");
     assertThat(rootChildren.get(3).data).isEqualTo("d");
     List<TreeNode<String>> dChildren = rootChildren.get(3).children;
-    assertThat(dChildren).hasSize(2);
+    Assertions.assertThat(dChildren).hasSize(2);
     assertThat(dChildren.get(0).data).isEqualTo("d1");
     assertThat(dChildren.get(1).data).isEqualTo("d2");
 
     TreeNode<String> layerHierarchy2 = result.schema.getLayerHierarchy("L2");
     assertThat(layerHierarchy2.data).isEqualTo("root");
     List<TreeNode<String>> rootChildren2 = layerHierarchy2.children;
-    assertThat(rootChildren2).hasSize(3);
+    Assertions.assertThat(rootChildren2).hasSize(3);
     assertThat(rootChildren2.get(0).data).isEqualTo("x");
     assertThat(rootChildren2.get(1).data).isEqualTo("y");
     assertThat(rootChildren2.get(2).data).isEqualTo("z");
     List<TreeNode<String>> zChildren = rootChildren2.get(2).children;
-    assertThat(zChildren).hasSize(2);
+    Assertions.assertThat(zChildren).hasSize(2);
     assertThat(zChildren.get(0).data).isEqualTo("z1");
     assertThat(zChildren.get(1).data).isEqualTo("z2");
   }

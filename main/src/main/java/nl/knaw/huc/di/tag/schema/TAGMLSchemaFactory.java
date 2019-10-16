@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.schema;
+package nl.knaw.huc.di.tag.schema;
 
 /*-
  * #%L
@@ -23,12 +23,10 @@ package nl.knaw.huc.di.tag.tagml.schema;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class TAGMLSchemaFactory {

@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.schema;
+package nl.knaw.huc.di.tag.schema;
 
 /*-
  * #%L
