@@ -19,35 +19,64 @@ package nl.knaw.huc.di.tag.tagml.schema;
  * limitations under the License.
  * #L%
  */
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class TAGMLSchemaFactory {
+  static Logger LOG = LoggerFactory.getLogger(TAGMLSchemaFactory.class);
+
   static final YAMLFactory YAML_F = new YAMLFactory();
+  static final ObjectMapper mapper = new ObjectMapper(YAML_F);
 
   public static TAGMLSchemaParseResult parseYAML(String schemaYAML) {
+    final TAGMLSchemaParseResult result = new TAGMLSchemaParseResult();
     try {
-      final TAGMLSchemaParseResult result = new TAGMLSchemaParseResult();
-      ObjectMapper mapper = new ObjectMapper(YAML_F);
       mapper
           .readTree(schemaYAML)
           .fields()
           .forEachRemaining(
               entry -> {
-                result.schema.addLayer(entry.getKey());
+                final String layerName = entry.getKey();
+                result.schema.addLayer(layerName);
                 JsonNode jsonNode = entry.getValue();
-                TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode);
-                result.schema.setLayerHierarchy(entry.getKey(), layerHierarchy);
+                LOG.info("layer={}", layerName);
+                LOG.info("jsonNode={}", jsonNode);
+                if (!jsonNode.isObject()) {
+                  result.errors.add("expected list of child markup, found (as json) " + jsonNode);
+                } else {
+                  if (jsonNode.size() > 1) {
+                    result.errors.add(
+                        "only 1 root markup allowed; found "
+                            + jsonNode.size()
+                            + " "
+                            + Lists.newArrayList(jsonNode.fieldNames())
+                            + " in layer "
+                            + layerName);
+                  } else {
+                    TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode);
+                    result.schema.setLayerHierarchy(layerName, layerHierarchy);
+                  }
+                }
               });
-      return result;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      result.errors.add(e.getMessage());
     }
+    if (result.schema.getLayers().isEmpty()) {
+      result.errors.add("no layer definitions found");
+    }
+    LOG.info("result={}", result);
+    return result;
   }
+
 
   private static TreeNode<String> buildLayerHierarchy(JsonNode jsonNode) {
     String content = jsonNode.textValue();

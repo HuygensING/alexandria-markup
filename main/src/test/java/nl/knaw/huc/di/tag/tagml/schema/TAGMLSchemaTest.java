@@ -19,13 +19,18 @@ package nl.knaw.huc.di.tag.tagml.schema;
  * limitations under the License.
  * #L%
  */
+
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGMLSchemaTest {
+  private Logger LOG = LoggerFactory.getLogger(TAGMLSchemaTest.class);
+
   @Test
   public void testCorrectSchema() {
     String schemaYAML =
@@ -76,7 +81,7 @@ public class TAGMLSchemaTest {
     assertThat(zChildren.get(1).data).isEqualTo("z2");
   }
 
-//  @Test
+  @Test
   public void testInCorrectSchemaWithMultipleRoots() {
     String schemaYAML =
         "---\n"
@@ -96,7 +101,50 @@ public class TAGMLSchemaTest {
             + "        - m2\n";
     System.out.println(schemaYAML);
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    assertThat(result.errors).isNotEmpty();
+    LOG.info("errors={}", result.errors);
+    assertThat(result.errors)
+        .contains("only 1 root markup allowed; found 2 [root1, root2] in layer L1");
+  }
 
+  @Test
+  public void testInCorrectYaml() {
+    String schemaYAML = "i am not yaml";
+    TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
+    LOG.info("errors={}", result.errors);
+    assertThat(result.errors).contains("no layer definitions found");
+  }
+
+  @Test
+  public void testInCorrectYaml2() {
+    String schemaYAML =
+        "L1:\n"
+            + "  - boolean: true\n"
+            + "  - integer: 3\n"
+            + "  - float: 3.14\n"
+            + "  - string: \"something\"";
+    TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
+    LOG.info("errors={}", result.errors);
+    assertThat(result.errors)
+        .contains(
+            "expected list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
+  }
+
+  @Test
+  public void testInCorrectSchema() {
+    String schemaYAML = "yaml: no\n" + "x";
+    TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
+    LOG.info("errors={}", result.errors);
+    assertThat(result.errors)
+        .contains(
+            "while scanning a simple key\n"
+                + " in 'reader', line 2, column 1:\n"
+                + "    x\n"
+                + "    ^\n"
+                + "could not find expected ':'\n"
+                + " in 'reader', line 2, column 2:\n"
+                + "    x\n"
+                + "     ^\n"
+                + "\n"
+                + " at [Source: (StringReader); line: 1, column: 9]");
   }
 }
