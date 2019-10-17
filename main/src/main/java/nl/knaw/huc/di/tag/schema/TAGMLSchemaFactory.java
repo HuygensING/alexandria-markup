@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.Lists;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,10 @@ public class TAGMLSchemaFactory {
           .fields()
           .forEachRemaining(
               entry -> {
-                final String layerName = entry.getKey();
+                String layerName = entry.getKey();
+                if (layerName == "$") {
+                  layerName = TAGML.DEFAULT_LAYER;
+                }
                 result.schema.addLayer(layerName);
                 JsonNode jsonNode = entry.getValue();
                 LOG.info("layer={}", layerName);
@@ -74,7 +78,6 @@ public class TAGMLSchemaFactory {
     LOG.info("result={}", result);
     return result;
   }
-
 
   private static TreeNode<String> buildLayerHierarchy(JsonNode jsonNode) {
     String content = jsonNode.textValue();

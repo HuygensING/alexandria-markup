@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.schema;
+package nl.knaw.huc.di.tag.validate;
 
 /*-
  * #%L
@@ -22,7 +22,10 @@ package nl.knaw.huc.di.tag.schema;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TAGMLSchemaParseResult {
-  public TAGMLSchema schema = new TAGMLSchema();
+public class TAGValidationResult {
   List<String> errors = new ArrayList<>();
+
+  public boolean isValid() {
+    return errors.isEmpty();
+  }
 }

@@ -49,7 +49,7 @@
       <version>${berkeleydb.version}</version>
     </dependency>
 
-    <!-- YAML-->
+    <!-- YAML/josn-->
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
@@ -60,6 +60,12 @@
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.java-json-tools</groupId>
+      <artifactId>json-schema-validator</artifactId>
+      <version>${json-schema-validator.version}</version>
+    </dependency>
+
     <!-- RDF framework -->
     <dependency>
       <groupId>org.apache.jena</groupId>

@@ -20,11 +20,21 @@ package nl.knaw.huc.di.tag.schema;
  * #L%
  */
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
@@ -83,7 +93,7 @@ public class TAGMLSchemaTest {
   }
 
   @Test
-  public void testInCorrectSchemaWithMultipleRoots() {
+  public void testInCorrectSchemaWithMultipleRoots() throws IOException, ProcessingException {
     String schemaYAML =
         "---\n"
             + "L1:\n"
@@ -101,6 +111,10 @@ public class TAGMLSchemaTest {
             + "        - m1\n"
             + "        - m2\n";
     System.out.println(schemaYAML);
+
+    ProcessingReport report = validateSchema(schemaYAML);
+    assertThat(report.isSuccess()).isFalse();
+
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
     assertThat(result.errors)
@@ -108,21 +122,29 @@ public class TAGMLSchemaTest {
   }
 
   @Test
-  public void testInCorrectYaml() {
+  public void testInCorrectYaml() throws IOException, ProcessingException {
     String schemaYAML = "i am not yaml";
+
+    ProcessingReport report = validateSchema(schemaYAML);
+    assertThat(report.isSuccess()).isFalse();
+
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
     assertThat(result.errors).contains("no layer definitions found");
   }
 
   @Test
-  public void testInCorrectYaml2() {
+  public void testInCorrectYaml2() throws IOException, ProcessingException {
     String schemaYAML =
         "L1:\n"
             + "  - boolean: true\n"
             + "  - integer: 3\n"
             + "  - float: 3.14\n"
             + "  - string: \"something\"";
+
+    ProcessingReport report = validateSchema(schemaYAML);
+    assertThat(report.isSuccess()).isFalse();
+
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
     assertThat(result.errors)
@@ -130,9 +152,13 @@ public class TAGMLSchemaTest {
             "expected list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
   }
 
-  @Test
-  public void testInCorrectSchema() {
+  //  @Test
+  public void testInCorrectSchema() throws IOException, ProcessingException {
     String schemaYAML = "yaml: no\n" + "x";
+
+    ProcessingReport report = validateSchema(schemaYAML);
+    assertThat(report.isSuccess()).isFalse();
+
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
     assertThat(result.errors)
@@ -147,5 +173,49 @@ public class TAGMLSchemaTest {
                 + "     ^\n"
                 + "\n"
                 + " at [Source: (StringReader); line: 1, column: 9]");
+  }
+
+  @Ignore("fix tagschemaschema.json first: find 'or' function")
+  @Test
+  public void testSchemaValidator() throws ProcessingException, IOException {
+    String yaml =
+        "---\n"
+            + "L1:\n"
+            + "   root:\n"
+            + "     - a\n"
+            + "     - b\n"
+            + "     - c\n"
+            + "     - d:\n"
+            + "         - d1\n"
+            + "         - d2\n"
+            + "L2:\n"
+            + "  root:\n"
+            + "    - x\n"
+            + "    - 'y'\n" // because y = yes = TRUE according to the jackson parser
+            + "    - z:\n"
+            + "        - z1\n"
+            + "        - z2\n";
+
+    ProcessingReport report = validateSchema(yaml);
+    assertThat(report.isSuccess()).isTrue();
+  }
+
+  private ProcessingReport validateSchema(final String yaml)
+      throws IOException, ProcessingException {
+    // This turns out to be not very suitable for yaml validating, at least for incorrect yaml: the
+    // yaml is first converted to json, which is then validated; the error messages would need to be
+    // adapted to the original yaml
+    final JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
+    final ObjectMapper jsonMapper = new ObjectMapper().enable(JsonParser.Feature.ALLOW_COMMENTS);
+    final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    final JsonNode tagSchemaSchema =
+        jsonMapper.readTree(this.getClass().getResource("tagschemaschema.json"));
+    final JsonSchema schema = factory.getJsonSchema(tagSchemaSchema);
+
+    final JsonNode yamlSchema = yamlMapper.readTree(yaml);
+
+    ProcessingReport report = schema.validate(yamlSchema);
+    LOG.info("{}", report);
+    return report;
   }
 }

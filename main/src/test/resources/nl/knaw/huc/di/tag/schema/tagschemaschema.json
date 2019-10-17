@@ -1,5 +1,3 @@
-package nl.knaw.huc.di.tag.schema;
-
 /*-
  * #%L
  * alexandria-markup-core
@@ -19,10 +17,28 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.List;
-
-public class TAGMLSchemaParseResult {
-  public TAGMLSchema schema = new TAGMLSchema();
-  List<String> errors = new ArrayList<>();
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "tag schema",
+  "description": "JSON representation of a TAGML schema",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z0-9]+$": {
+      "$ref": "#/definitions/hierarchy"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "hierarchy": {
+      "title": "hierarchy",
+      "description": "markup subtree",
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9]+$": {
+          "$ref": "#/definitions/hierarchy"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

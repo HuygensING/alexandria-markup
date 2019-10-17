@@ -52,6 +52,7 @@
     <maven-resources.version>3.1.0</maven-resources.version>
     <xmlcalabash.version>1.1.27-99</xmlcalabash.version>
     <mockito-core.version>3.1.0</mockito-core.version>
+    <json-schema-validator.version>2.2.11</json-schema-validator.version>
   </properties>
 
   <organization>
