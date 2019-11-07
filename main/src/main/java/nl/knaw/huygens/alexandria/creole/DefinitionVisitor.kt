@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,114 +19,104 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.tei.*;
-import nl.knaw.huygens.tei.handlers.XmlTextHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import nl.knaw.huygens.tei.*
+import nl.knaw.huygens.tei.handlers.XmlTextHandler
+import org.slf4j.LoggerFactory
+import java.util.*
 
-public class DefinitionVisitor extends DelegatingVisitor<XmlContext> {
-  private static final Logger LOG = LoggerFactory.getLogger(DefinitionVisitor.class);
+class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
 
-  private static String start;
-  private static final Map<String, String> definitionMap = new HashMap<>();
-  private static final Map<String, Set<String>> requirements = new HashMap<>(); // the definitions referred to in this definition
-  private static final Map<String, Set<String>> dependants = new HashMap<>(); // the definitions referring to this definition
+    val expandedSchemaTree: String
+        get() {
+            var schemaTree = start
+            while (schemaTree!!.contains("<ref name=")) {
+                for (name in definitionMap.keys) {
+                    schemaTree = schemaTree!!.replace("<ref name=\"$name\"/>", definitionMap[name])
+                }
+            }
+            return schemaTree
+        }
 
-  private static String currentDefinition;
-
-
-  public DefinitionVisitor() {
-    super(new XmlContext());
-    setTextHandler(new XmlTextHandler());
-    setDefaultElementHandler(new DefaultElementHandler());
-    addElementHandler(new DefineHandler(), "define");
-    addElementHandler(new GrammarHandler(), "grammar");
-    addElementHandler(new RefHandler(), "ref");
-    addElementHandler(new StartHandler(), "start");
-  }
-
-  public String getExpandedSchemaTree() {
-    String schemaTree = start;
-    while (schemaTree.contains("<ref name=")) {
-      for (String name : definitionMap.keySet()) {
-        schemaTree = schemaTree.replace("<ref name=\"" + name + "\"/>", definitionMap.get(name));
-      }
-    }
-    return schemaTree;
-  }
-
-  public static class DefaultElementHandler implements ElementHandler<XmlContext> {
-    @Override
-    public Traversal enterElement(Element element, XmlContext context) {
-      if (element.hasChildren()) {
-        context.addOpenTag(element);
-      } else {
-        context.addEmptyElementTag(element);
-      }
-      return Traversal.NEXT;
+    init {
+        setTextHandler(XmlTextHandler())
+        setDefaultElementHandler(DefaultElementHandler())
+        addElementHandler(DefineHandler(), "define")
+        addElementHandler(GrammarHandler(), "grammar")
+        addElementHandler(RefHandler(), "ref")
+        addElementHandler(StartHandler(), "start")
     }
 
-    @Override
-    public Traversal leaveElement(Element element, XmlContext context) {
-      if (element.hasChildren()) {
-        context.addCloseTag(element);
-      }
-      return Traversal.NEXT;
-    }
-  }
+    open class DefaultElementHandler : ElementHandler<XmlContext> {
+        override fun enterElement(element: Element, context: XmlContext): Traversal {
+            if (element.hasChildren()) {
+                context.addOpenTag(element)
+            } else {
+                context.addEmptyElementTag(element)
+            }
+            return Traversal.NEXT
+        }
 
-  public static class GrammarHandler extends DefaultElementHandler {
-  }
-
-  public static class StartHandler extends DefaultElementHandler {
-    @Override
-    public Traversal enterElement(Element element, XmlContext context) {
-      currentDefinition = "_start";
-      requirements.putIfAbsent(currentDefinition, new HashSet<>());
-      context.openLayer();
-      return Traversal.NEXT;
+        override fun leaveElement(element: Element, context: XmlContext): Traversal {
+            if (element.hasChildren()) {
+                context.addCloseTag(element)
+            }
+            return Traversal.NEXT
+        }
     }
 
-    @Override
-    public Traversal leaveElement(Element element, XmlContext context) {
-      start = context.closeLayer().trim();
-      return Traversal.NEXT;
-    }
-  }
+    class GrammarHandler : DefaultElementHandler()
 
-  public static class RefHandler extends DefaultElementHandler {
-    @Override
-    public Traversal leaveElement(Element element, XmlContext context) {
-      String ref = element.getAttribute("name");
-      requirements.get(currentDefinition).add(ref);
-      dependants.putIfAbsent(ref, new HashSet<>());
-      dependants.get(ref).add(currentDefinition);
-      return super.leaveElement(element, context);
-    }
-  }
+    class StartHandler : DefaultElementHandler() {
+        override fun enterElement(element: Element, context: XmlContext): Traversal {
+            currentDefinition = "_start"
+            (requirements as java.util.Map<String, Set<String>>).putIfAbsent(currentDefinition, HashSet())
+            context.openLayer()
+            return Traversal.NEXT
+        }
 
-  public static class DefineHandler extends DefaultElementHandler {
-    @Override
-    public Traversal enterElement(Element element, XmlContext context) {
-      currentDefinition = element.getAttribute("name");
-      requirements.putIfAbsent(currentDefinition, new HashSet<>());
-      dependants.putIfAbsent(currentDefinition, new HashSet<>());
-      context.openLayer();
-      return Traversal.NEXT;
+        override fun leaveElement(element: Element, context: XmlContext): Traversal {
+            start = context.closeLayer().trim { it <= ' ' }
+            return Traversal.NEXT
+        }
     }
 
-    @Override
-    public Traversal leaveElement(Element element, XmlContext context) {
-      String value = context.closeLayer().replaceAll(" *\n *","");
-      definitionMap.put(currentDefinition, value);
-      return Traversal.NEXT;
+    class RefHandler : DefaultElementHandler() {
+        override fun leaveElement(element: Element, context: XmlContext): Traversal {
+            val ref = element.getAttribute("name")
+            requirements.get(currentDefinition).add(ref)
+            (dependants as java.util.Map<String, Set<String>>).putIfAbsent(ref, HashSet())
+            dependants[ref].add(currentDefinition)
+            return super.leaveElement(element, context)
+        }
     }
-  }
+
+    class DefineHandler : DefaultElementHandler() {
+        override fun enterElement(element: Element, context: XmlContext): Traversal {
+            currentDefinition = element.getAttribute("name")
+            (requirements as java.util.Map<String, Set<String>>).putIfAbsent(currentDefinition, HashSet())
+            (dependants as java.util.Map<String, Set<String>>).putIfAbsent(currentDefinition, HashSet())
+            context.openLayer()
+            return Traversal.NEXT
+        }
+
+        override fun leaveElement(element: Element, context: XmlContext): Traversal {
+            val value = context.closeLayer().replace(" *\n *".toRegex(), "")
+            definitionMap[currentDefinition] = value
+            return Traversal.NEXT
+        }
+    }
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(DefinitionVisitor::class.java!!)
+
+        private var start: String? = null
+        private val definitionMap = HashMap<String, String>()
+        private val requirements = HashMap<String, Set<String>>() // the definitions referred to in this definition
+        private val dependants = HashMap<String, Set<String>>() // the definitions referring to this definition
+
+        private var currentDefinition: String? = null
+    }
 
 
 }

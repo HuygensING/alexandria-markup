@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole.events;
+package nl.knaw.huygens.alexandria.creole.events
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.events;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,57 +19,42 @@ package nl.knaw.huygens.alexandria.creole.events;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.creole.Basics;
-import nl.knaw.huygens.alexandria.creole.Event;
-import nl.knaw.huygens.alexandria.creole.Pattern;
-import org.apache.commons.lang3.StringUtils;
+import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Event
+import nl.knaw.huygens.alexandria.creole.Pattern
+import org.apache.commons.lang3.StringUtils
 
-public class TextEvent implements Event {
-  private final String text;
-  private final Basics.Context context;
+class TextEvent internal constructor(val text: String, val context: Basics.Context) : Event {
 
-  TextEvent(String text, Basics.Context context) {
-    this.text = text;
-    this.context = context;
-  }
+    override fun eventDeriv(p: Pattern): Pattern {
+        //  eventDeriv p (TextEvent s cx) =
+        //    if (whitespace s && not allowsText p)
+        //    then p
+        //    else (textDeriv cx p s)
+        return if (whitespace(text) && !p.allowsText()//
+        )
+            p //
+        else
+            p.textDeriv(context, text)
+    }
 
-  public String getText() {
-    return text;
-  }
+    override fun toString(): String {
+        return text
+    }
+    //    @Override
+    //    public int hashCode() {
+    //      return text.hashCode() * context.hashCode();
+    //    }
+    //
+    //    @Override
+    //    public boolean equals(Object obj) {
+    //      return (obj instanceof TextEvent)
+    //          && (text.equals(((TextEvent) obj).getText())
+    //          && (context.equals(((TextEvent) obj).getContext()))
+    //      );
+    //    }
 
-  public Basics.Context getContext() {
-    return context;
-  }
-
-  @Override
-  public Pattern eventDeriv(Pattern p) {
-    //  eventDeriv p (TextEvent s cx) =
-    //    if (whitespace s && not allowsText p)
-    //    then p
-    //    else (textDeriv cx p s)
-    return whitespace(text) && !p.allowsText()//
-        ? p //
-        : p.textDeriv(context, text);
-  }
-
-  @Override
-  public String toString() {
-    return text;
-  }
-  //    @Override
-//    public int hashCode() {
-//      return text.hashCode() * context.hashCode();
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//      return (obj instanceof TextEvent)
-//          && (text.equals(((TextEvent) obj).getText())
-//          && (context.equals(((TextEvent) obj).getContext()))
-//      );
-//    }
-
-  private static boolean whitespace(String text) {
-    return StringUtils.isBlank(text);
-  }
+    private fun whitespace(text: String): Boolean {
+        return StringUtils.isBlank(text)
+    }
 }

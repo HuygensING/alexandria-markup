@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,57 +19,43 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Constructors.empty;
-import static nl.knaw.huygens.alexandria.creole.Constructors.notAllowed;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.notAllowed
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-public class EndRange extends AbstractPattern {
-  private final Basics.QName qName;
-  private final Basics.Id id;
+class EndRange(val qName: Basics.QName, val id: Basics.Id) : AbstractPattern() {
 
-  public EndRange(Basics.QName qName, Basics.Id id) {
-    this.qName = qName;
-    this.id = id;
-    setHashcode(getClass().hashCode() + qName.hashCode() * id.hashCode());
-  }
+    init {
+        setHashcode(javaClass.hashCode() + qName.hashCode() * id.hashCode())
+    }
 
-  public Basics.QName getQName() {
-    return qName;
-  }
+    override fun init() {
+        nullable = false
+        allowsText = false
+        allowsAnnotations = false
+        onlyAnnotations = false
+    }
 
-  public Basics.Id getId() {
-    return id;
-  }
+    override fun endTagDeriv(qn: Basics.QName, id2: Basics.Id): Pattern {
+        // endTagDeriv (EndRange (QName ns1 ln1) id1)
+        //             (QName ns2 ln2) id2 =
+        //   if id1 == id2 ||
+        //      (id1 == '' && id2 == '' && ns1 == ns2 && ln1 == ln2)
+        //   then Empty
+        //   else NotAllowed
+        val ns1 = qn.uri
+        val ln1 = qn.localName
+        val ns2 = qn.uri
+        val ln2 = qn.localName
+        return if (id == id2 || id.isEmpty && id2.isEmpty && ns1 == ns2 && ln1 == ln2)
+            empty()//
+        else
+            notAllowed()
+    }
 
-  @Override
-  void init() {
-    nullable = false;
-    allowsText = false;
-    allowsAnnotations = false;
-    onlyAnnotations = false;
-  }
-
-  @Override
-  public Pattern endTagDeriv(Basics.QName qn, Basics.Id id2) {
-    // endTagDeriv (EndRange (QName ns1 ln1) id1)
-    //             (QName ns2 ln2) id2 =
-    //   if id1 == id2 ||
-    //      (id1 == '' && id2 == '' && ns1 == ns2 && ln1 == ln2)
-    //   then Empty
-    //   else NotAllowed
-    Basics.Uri ns1 = qn.getUri();
-    Basics.LocalName ln1 = qn.getLocalName();
-    Basics.Uri ns2 = qn.getUri();
-    Basics.LocalName ln2 = qn.getLocalName();
-    return (id.equals(id2) || (id.isEmpty() && id2.isEmpty() && ns1.equals(ns2) && ln1.equals(ln2)))
-        ? empty()//
-        : notAllowed();
-  }
-
-  @Override
-  public String toString() {
-    String postfix = id.isEmpty() ? "" : "~" + id;
-    return "<" + qName + postfix + "]";
-  }
+    override fun toString(): String {
+        val postfix = if (id.isEmpty) "" else "~$id"
+        return "<$qName$postfix]"
+    }
 }

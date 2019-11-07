@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*
 * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,329 +20,312 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
 */
 
-import java.util.ArrayList;
+import nl.knaw.huygens.alexandria.creole.NameClasses.anyName
+import nl.knaw.huygens.alexandria.creole.NameClasses.name
+import nl.knaw.huygens.alexandria.creole.patterns.*
+import nl.knaw.huygens.alexandria.creole.patterns.Annotation
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns.EMPTY
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns.NOT_ALLOWED
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns.TEXT
+import java.util.*
 
-import static nl.knaw.huygens.alexandria.creole.NameClasses.anyName;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import nl.knaw.huygens.alexandria.creole.patterns.*;
-import static nl.knaw.huygens.alexandria.creole.patterns.Patterns.EMPTY;
-import static nl.knaw.huygens.alexandria.creole.patterns.Patterns.NOT_ALLOWED;
-import static nl.knaw.huygens.alexandria.creole.patterns.Patterns.TEXT;
+object Constructors {
 
-public class Constructors {
-
-  /*
+    /*
   Constructors
 
   When we create a derivative, we often need to create a new pattern.
   These constructors take into account special handling of NotAllowed, Empty and After patterns.
    */
 
-  //  choice :: Pattern -> Pattern -> Pattern
-  public static Pattern choice(Pattern pattern1, Pattern pattern2) {
-    //  choice p NotAllowed = p
-    if (pattern1 instanceof NotAllowed) {
-      return pattern2;
-    }
-    //  choice NotAllowed p = p
-    if (pattern2 instanceof NotAllowed) {
-      return pattern1;
-    }
-    //  choice Empty Empty = Empty
-    if (pattern1 instanceof Empty && pattern2 instanceof Empty) {
-      return pattern1;
-    }
-    //  choice p1 p2 = Choice p1 p2
-    return new Choice(pattern1, pattern2);
-  }
-
-  //  group :: Pattern -> Pattern -> Pattern
-  public static Pattern group(Pattern pattern1, Pattern pattern2) {
-    //  group p NotAllowed = NotAllowed
-    //  group NotAllowed p = NotAllowed
-    if (pattern1 instanceof NotAllowed || pattern2 instanceof NotAllowed) {
-      return notAllowed();
-    }
-    //  group p Empty = p
-    if (pattern2 instanceof Empty) {
-      return pattern1;
-    }
-    //  group Empty p = p
-    if (pattern1 instanceof Empty) {
-      return pattern2;
-    }
-    //  group (After p1 p2) p3 = after p1 (group p2 p3)
-    if (pattern1 instanceof After) {
-      After after = (After) pattern1;
-      return after(after.getPattern1(), group(after.getPattern2(), pattern2));
-    }
-    //  group p1 (After p2 p3) = after p2 (group p1 p3)
-    if (pattern2 instanceof After) {
-      After after = (After) pattern2;
-      return after(after.getPattern1(), group(pattern1, after.getPattern2()));
-    }
-    //  group p1 p2 = Group p1 p2
-    return new Group(pattern1, pattern2);
-  }
-
-  //  interleave :: Pattern -> Pattern -> Pattern
-  public static Pattern interleave(Pattern pattern1, Pattern pattern2) {
-    //  interleave p NotAllowed = NotAllowed
-    //  interleave NotAllowed p = NotAllowed
-    if (pattern1 instanceof NotAllowed || pattern2 instanceof NotAllowed) {
-      return notAllowed();
-    }
-    //  interleave p Empty = p
-    if (pattern2 instanceof Empty) {
-      return pattern1;
-    }
-    //  group Empty p = p
-    if (pattern1 instanceof Empty) {
-      return pattern2;
-    }
-    //  interleave (After p1 p2) p3 = after p1 (interleave p2 p3)
-    if (pattern1 instanceof After) {
-      After after = (After) pattern1;
-      return after(after.getPattern1(), interleave(after.getPattern2(), pattern2));
-    }
-    //  interleave p1 (After p2 p3) = after p2 (interleave p1 p3)
-    if (pattern2 instanceof After) {
-      After after = (After) pattern2;
-      return after(after.getPattern1(), interleave(pattern1, after.getPattern2()));
-    }
-    //  interleave p1 p2 = Interleave p1 p2
-    return new Interleave(pattern1, pattern2);
-  }
-
-  //  concur :: Pattern -> Pattern -> Pattern
-  public static Pattern concur(Pattern pattern1, Pattern pattern2) {
-    //  concur p NotAllowed = NotAllowed
-    //  concur NotAllowed p = NotAllowed
-    if (pattern1 instanceof NotAllowed || pattern2 instanceof NotAllowed) {
-      return notAllowed();
+    //  choice :: Pattern -> Pattern -> Pattern
+    fun choice(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  choice p NotAllowed = p
+        if (pattern1 is NotAllowed) {
+            return pattern2
+        }
+        //  choice NotAllowed p = p
+        if (pattern2 is NotAllowed) {
+            return pattern1
+        }
+        //  choice Empty Empty = Empty
+        return if (pattern1 is Empty && pattern2 is Empty) {
+            pattern1
+        } else Choice(pattern1, pattern2)
+        //  choice p1 p2 = Choice p1 p2
     }
 
-    //  concur p Text = p
-    if (pattern2 instanceof Text) {
-      return pattern1;
+    //  group :: Pattern -> Pattern -> Pattern
+    fun group(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  group p NotAllowed = NotAllowed
+        //  group NotAllowed p = NotAllowed
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) {
+            return notAllowed()
+        }
+        //  group p Empty = p
+        if (pattern2 is Empty) {
+            return pattern1
+        }
+        //  group Empty p = p
+        if (pattern1 is Empty) {
+            return pattern2
+        }
+        //  group (After p1 p2) p3 = after p1 (group p2 p3)
+        if (pattern1 is After) {
+            return after(pattern1.pattern1, group(pattern1.pattern2, pattern2))
+        }
+        //  group p1 (After p2 p3) = after p2 (group p1 p3)
+        return if (pattern2 is After) {
+            after(pattern2.pattern1, group(pattern1, pattern2.pattern2))
+        } else Group(pattern1, pattern2)
+        //  group p1 p2 = Group p1 p2
     }
 
-    //  concur Text p = p
-    if (pattern1 instanceof Text) {
-      return pattern2;
+    //  interleave :: Pattern -> Pattern -> Pattern
+    fun interleave(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  interleave p NotAllowed = NotAllowed
+        //  interleave NotAllowed p = NotAllowed
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) {
+            return notAllowed()
+        }
+        //  interleave p Empty = p
+        if (pattern2 is Empty) {
+            return pattern1
+        }
+        //  group Empty p = p
+        if (pattern1 is Empty) {
+            return pattern2
+        }
+        //  interleave (After p1 p2) p3 = after p1 (interleave p2 p3)
+        if (pattern1 is After) {
+            return after(pattern1.pattern1, interleave(pattern1.pattern2, pattern2))
+        }
+        //  interleave p1 (After p2 p3) = after p2 (interleave p1 p3)
+        return if (pattern2 is After) {
+            after(pattern2.pattern1, interleave(pattern1, pattern2.pattern2))
+        } else Interleave(pattern1, pattern2)
+        //  interleave p1 p2 = Interleave p1 p2
     }
 
-    //  concur (After p1 p2) (After p3 p4) = after (all p1 p3) (concur p2 p4)
-    if (pattern1 instanceof After && pattern2 instanceof After) {
-      After after1 = (After) pattern1;
-      Pattern p1 = after1.getPattern1();
-      Pattern p2 = after1.getPattern2();
-      After after2 = (After) pattern2;
-      Pattern p3 = after2.getPattern1();
-      Pattern p4 = after2.getPattern2();
-      return after(all(p1, p3), concur(p2, p4));
+    //  concur :: Pattern -> Pattern -> Pattern
+    fun concur(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  concur p NotAllowed = NotAllowed
+        //  concur NotAllowed p = NotAllowed
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) {
+            return notAllowed()
+        }
+
+        //  concur p Text = p
+        if (pattern2 is Text) {
+            return pattern1
+        }
+
+        //  concur Text p = p
+        if (pattern1 is Text) {
+            return pattern2
+        }
+
+        //  concur (After p1 p2) (After p3 p4) = after (all p1 p3) (concur p2 p4)
+        if (pattern1 is After && pattern2 is After) {
+            val p1 = pattern1.pattern1
+            val p2 = pattern1.pattern2
+            val p3 = pattern2.pattern1
+            val p4 = pattern2.pattern2
+            return after(all(p1, p3), concur(p2, p4))
+        }
+
+        //  concur (After p1 p2) p3 = after p1 (concur p2 p3)
+        if (pattern1 is After) {
+            val p1 = pattern1.pattern1
+            val p2 = pattern1.pattern2
+            return after(p1, concur(p2, pattern2))
+        }
+
+        //  concur p1 (After p2 p3) = after p2 (concur p1 p3)
+        if (pattern2 is After) {
+            val p2 = pattern2.pattern1
+            val p3 = pattern2.pattern2
+            return after(p2, concur(pattern1, p3))
+        }
+
+        //  concur p1 p2 = Concur p1 p2
+        return Concur(pattern1, pattern2)
     }
 
-    //  concur (After p1 p2) p3 = after p1 (concur p2 p3)
-    if (pattern1 instanceof After) {
-      After after = (After) pattern1;
-      Pattern p1 = after.getPattern1();
-      Pattern p2 = after.getPattern2();
-      return after(p1, concur(p2, pattern2));
+    //  partition :: Pattern -> Pattern
+    internal fun partition(pattern: Pattern): Pattern {
+        //  partition NotAllowed = NotAllowed
+        //  partition Empty = Empty
+        return if (pattern is NotAllowed //
+                || pattern is Empty) {
+            pattern
+        } else Partition(pattern)
+        //  partition p = Partition p
     }
 
-    //  concur p1 (After p2 p3) = after p2 (concur p1 p3)
-    if (pattern2 instanceof After) {
-      After after = (After) pattern2;
-      Pattern p2 = after.getPattern1();
-      Pattern p3 = after.getPattern2();
-      return after(p2, concur(pattern1, p3));
+    //  oneOrMore :: Pattern -> Pattern
+    internal fun oneOrMore(pattern: Pattern): Pattern {
+        //  oneOrMore NotAllowed = NotAllowed
+        //  oneOrMore Empty = Empty
+        return if (pattern is NotAllowed //
+                || pattern is Empty) {
+            pattern
+        } else OneOrMore(pattern)
+        //  oneOrMore p = OneOrMore p
     }
 
-    //  concur p1 p2 = Concur p1 p2
-    return new Concur(pattern1, pattern2);
-  }
-
-  //  partition :: Pattern -> Pattern
-  static Pattern partition(Pattern pattern) {
-    //  partition NotAllowed = NotAllowed
-    //  partition Empty = Empty
-    if (pattern instanceof NotAllowed //
-        || pattern instanceof Empty) {
-      return pattern;
-    }
-    //  partition p = Partition p
-    return new Partition(pattern);
-  }
-
-  //  oneOrMore :: Pattern -> Pattern
-  static Pattern oneOrMore(Pattern pattern) {
-    //  oneOrMore NotAllowed = NotAllowed
-    //  oneOrMore Empty = Empty
-    if (pattern instanceof NotAllowed //
-        || pattern instanceof Empty) {
-      return pattern;
-    }
-    //  oneOrMore p = OneOrMore p
-    return new OneOrMore(pattern);
-  }
-
-  //  concurOneOrMore :: Pattern -> Pattern
-  static Pattern concurOneOrMore(Pattern pattern) {
-    //  concurOneOrMore NotAllowed = NotAllowed
-    //  concurOneOrMore Empty = Empty
-    if (pattern instanceof NotAllowed //
-        || pattern instanceof Empty) {
-      return pattern;
-    }
-    //  concurOneOrMore p = ConcurOneOrMore p
-    return new ConcurOneOrMore(pattern);
-  }
-
-  //  after :: Pattern -> Pattern -> Pattern
-  public static Pattern after(Pattern pattern1, Pattern pattern2) {
-    //  after p NotAllowed = NotAllowed
-    //  after NotAllowed p = NotAllowed
-    if (pattern1 instanceof NotAllowed //
-        || pattern2 instanceof NotAllowed) {
-      return notAllowed();
+    //  concurOneOrMore :: Pattern -> Pattern
+    internal fun concurOneOrMore(pattern: Pattern): Pattern {
+        //  concurOneOrMore NotAllowed = NotAllowed
+        //  concurOneOrMore Empty = Empty
+        return if (pattern is NotAllowed //
+                || pattern is Empty) {
+            pattern
+        } else ConcurOneOrMore(pattern)
+        //  concurOneOrMore p = ConcurOneOrMore p
     }
 
-    //  after Empty p = p
-    if (pattern1 instanceof Empty) {
-      return pattern2;
+    //  after :: Pattern -> Pattern -> Pattern
+    fun after(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  after p NotAllowed = NotAllowed
+        //  after NotAllowed p = NotAllowed
+        if (pattern1 is NotAllowed //
+                || pattern2 is NotAllowed) {
+            return notAllowed()
+        }
+
+        //  after Empty p = p
+        if (pattern1 is Empty) {
+            return pattern2
+        }
+
+        //  after (After p1 p2) p3 = after p1 (after p2 p3)
+        if (pattern1 is After) {
+            val p1 = pattern1.pattern1
+            val p2 = pattern1.pattern2
+            return after(p1, after(p2, pattern2))
+        }
+
+        //  after p1 p2 = After p1 p2
+        return After(pattern1, pattern2)
     }
 
-    //  after (After p1 p2) p3 = after p1 (after p2 p3)
-    if (pattern1 instanceof After) {
-      After after = (After) pattern1;
-      Pattern p1 = after.getPattern1();
-      Pattern p2 = after.getPattern2();
-      return after(p1, after(p2, pattern2));
+    //  all :: Pattern -> Pattern -> Pattern
+    internal fun all(pattern1: Pattern, pattern2: Pattern): Pattern {
+        //  all p NotAllowed = NotAllowed
+        //  all NotAllowed p = NotAllowed
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) {
+            return notAllowed()
+        }
+
+        //  all p Empty = if nullable p then Empty else NotAllowed
+        if (pattern2 is Empty) {
+            return if (pattern1.isNullable) empty() else notAllowed()
+        }
+
+        //  all Empty p = if nullable p then Empty else NotAllowed
+        if (pattern1 is Empty) {
+            return if (pattern2.isNullable) empty() else notAllowed()
+        }
+
+        //  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)
+        if (pattern1 is After && pattern2 is After) {
+            val p1 = pattern1.pattern1
+            val p2 = pattern1.pattern2
+            val p3 = pattern2.pattern1
+            val p4 = pattern2.pattern2
+            return after(all(p1, p3), all(p2, p4))
+        }
+
+        //  all p1 p2 = All p1 p2
+        return All(pattern1, pattern2)
     }
 
-    //  after p1 p2 = After p1 p2
-    return new After(pattern1, pattern2);
-  }
-
-  //  all :: Pattern -> Pattern -> Pattern
-  static Pattern all(Pattern pattern1, Pattern pattern2) {
-    //  all p NotAllowed = NotAllowed
-    //  all NotAllowed p = NotAllowed
-    if (pattern1 instanceof NotAllowed || pattern2 instanceof NotAllowed) {
-      return notAllowed();
+    // convenience method: element is a range in a partition
+    internal fun element(localName: String, pattern: Pattern): Pattern {
+        val nameClass = name(localName)
+        return partition(range(nameClass, pattern))
     }
 
-    //  all p Empty = if nullable p then Empty else NotAllowed
-    if (pattern2 instanceof Empty) {
-      return pattern1.isNullable() ? empty() : notAllowed();
+    fun empty(): Pattern {
+        return EMPTY
     }
 
-    //  all Empty p = if nullable p then Empty else NotAllowed
-    if (pattern1 instanceof Empty) {
-      return pattern2.isNullable() ? empty() : notAllowed();
+    fun notAllowed(): Pattern {
+        return NOT_ALLOWED
     }
 
-    //  all (After p1 p2) (After p3 p4) = after (all p1 p3) (all p2 p4)
-    if (pattern1 instanceof After && pattern2 instanceof After) {
-      After after1 = (After) pattern1;
-      Pattern p1 = after1.getPattern1();
-      Pattern p2 = after1.getPattern2();
-      After after2 = (After) pattern2;
-      Pattern p3 = after2.getPattern1();
-      Pattern p4 = after2.getPattern2();
-      return after(all(p1, p3), all(p2, p4));
+    fun text(): Pattern {
+        return TEXT
     }
 
-    //  all p1 p2 = All p1 p2
-    return new All(pattern1, pattern2);
-  }
+    internal fun range(nameClass: NameClass, pattern: Pattern): Pattern {
+        return Range(nameClass, pattern)
+    }
 
-  // convenience method: element is a range in a partition
-  static Pattern element(String localName, Pattern pattern) {
-    NameClass nameClass = name(localName);
-    return partition(range(nameClass, pattern));
-  }
+    fun endRange(qName: Basics.QName, id: Basics.Id): Pattern {
+        return EndRange(qName, id)
+    }
 
-  public static Pattern empty() {
-    return EMPTY;
-  }
+    internal fun endRange(qName: Basics.QName, id: String): Pattern {
+        return EndRange(qName, Basics.id(id))
+    }
 
-  public static Pattern notAllowed() {
-    return NOT_ALLOWED;
-  }
+    internal fun zeroOrMore(pattern: Pattern): Pattern {
+        return choice(oneOrMore(pattern), empty())
+    }
 
-  public static Pattern text() {
-    return TEXT;
-  }
+    internal fun concurZeroOrMore(pattern: Pattern): Pattern {
+        return choice(concurOneOrMore(pattern), empty())
+    }
 
-  static Pattern range(NameClass nameClass, Pattern pattern) {
-    return new Range(nameClass, pattern);
-  }
+    internal fun optional(pattern: Pattern): Pattern {
+        return choice(pattern, empty())
+    }
 
-  public static Pattern endRange(Basics.QName qName, Basics.Id id) {
-    return new EndRange(qName, id);
-  }
+    internal fun mixed(pattern: Pattern): Pattern {
+        return interleave(text(), pattern)
+    }
 
-  static Pattern endRange(Basics.QName qName, String id) {
-    return new EndRange(qName, Basics.id(id));
-  }
+    fun anyContent(): Pattern {
+        return interleave(text(), anyAtoms())
+    }
 
-  static Pattern zeroOrMore(Pattern pattern) {
-    return choice(oneOrMore(pattern), empty());
-  }
+    internal fun atom(name: String): Pattern {
+        return Atom(name(name), ArrayList<Annotation>())
+    }
 
-  static Pattern concurZeroOrMore(Pattern pattern) {
-    return choice(concurOneOrMore(pattern), empty());
-  }
+    internal fun attribute(name: String): Pattern {
+        return annotation(name, text())
+    }
 
-  static Pattern optional(Pattern pattern) {
-    return choice(pattern, empty());
-  }
+    internal fun annotation(name: String, pattern: Pattern): Pattern {
+        return Annotation(name(name), pattern)
+    }
 
-  static Pattern mixed(Pattern pattern) {
-    return interleave(text(), pattern);
-  }
+    internal fun endAnnotation(name: String): Pattern {
+        return EndAnnotation(name(name))
+    }
 
-  public static Pattern anyContent() {
-    return interleave(text(), anyAtoms());
-  }
+    internal fun annotation(nameClass: NameClass, pattern: Pattern): Pattern {
+        return Annotation(nameClass, pattern)
+    }
 
-  static Pattern atom(String name) {
-    return new Atom(name(name), new ArrayList<>());
-  }
+    private fun anyAtoms(): Pattern {
+        return choice(oneOrMoreAtoms(), empty())
+    }
 
-  static Pattern attribute(String name) {
-    return annotation(name, text());
-  }
+    private fun oneOrMoreAtoms(): Pattern {
+        return oneOrMore(anyAtom())
+    }
 
-  static Pattern annotation(String name, Pattern pattern) {
-    return new Annotation(name(name), pattern);
-  }
+    private fun anyAtom(): Pattern {
+        //    return atom(anyName(), anyAnnotations());
+        return Atom(anyName(), null)
+    }
 
-  static Pattern endAnnotation(String name) {
-    return new EndAnnotation(name(name));
-  }
-
-  static Pattern annotation(NameClass nameClass, Pattern pattern) {
-    return new Annotation(nameClass, pattern);
-  }
-
-  private static Pattern anyAtoms() {
-    return choice(oneOrMoreAtoms(), empty());
-  }
-
-  private static Pattern oneOrMoreAtoms() {
-    return oneOrMore(anyAtom());
-  }
-
-  private static Pattern anyAtom() {
-//    return atom(anyName(), anyAnnotations());
-    return new Atom(anyName(), null);
-  }
-
-//  private static Pattern anyAnnotations() {
-//    return null;
-//  }
+    //  private static Pattern anyAnnotations() {
+    //    return null;
+    //  }
 
 }

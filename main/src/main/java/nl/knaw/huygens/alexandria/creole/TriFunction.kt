@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,16 @@ package nl.knaw.huygens.alexandria.creole;
  * limitations under the License.
  * #L%
  */
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.*
+import java.util.function.Function
 
 @FunctionalInterface
-interface TriFunction<A, B, C, R> {
+internal interface TriFunction<A, B, C, R> {
 
-  R apply(A a, B b, C c);
+    fun apply(a: A, b: B, c: C): R
 
-  default <V> TriFunction<A, B, C, V> andThen(Function<? super R, ? extends V> after) {
-    Objects.requireNonNull(after);
-    return (A a, B b, C c) -> after.apply(apply(a, b, c));
-  }
+    fun <V> andThen(after: Function<in R, out V>): TriFunction<A, B, C, V> {
+        Objects.requireNonNull(after)
+        return { a: A, b: B, c: C -> after.apply(apply(a, b, c)) }
+    }
 }

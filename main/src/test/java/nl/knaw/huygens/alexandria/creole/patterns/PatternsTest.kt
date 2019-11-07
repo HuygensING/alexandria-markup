@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
-    /*-
+/*-
      * #%L
  * alexandria-markup-core
  * =======
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,85 +20,83 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * #L%
      */
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import nl.knaw.huygens.alexandria.creole.CreoleTest;
-import nl.knaw.huygens.alexandria.creole.NameClass;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
-import nl.knaw.huygens.alexandria.creole.Pattern;
-import org.junit.Test;
+import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
+import nl.knaw.huygens.alexandria.creole.CreoleTest
+import nl.knaw.huygens.alexandria.creole.NameClass
+import nl.knaw.huygens.alexandria.creole.NameClasses.name
+import org.junit.Test
+import java.util.*
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+class PatternsTest : CreoleTest() {
 
-public class PatternsTest extends CreoleTest {
-
-  private static final Random RANDOM = new Random();
-
-  @Test
-  public void testHashCode1() {
-    assertThat(Patterns.EMPTY.hashCode()).isNotEqualTo(Patterns.NOT_ALLOWED.hashCode());
-  }
-
-  @Test
-  public void testHashCode2() {
-    Pattern p1 = new TestPattern();
-    Pattern p2 = new TestPattern();
-    assertThat(p1).isNotEqualTo(p2);
-    assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode());
-  }
-
-  @Test
-  public void testHashCode3() {
-    Pattern d1 = new DummyPattern();
-    Pattern d2 = new DummyPattern();
-    assertThat(d1).isNotEqualTo(d2);
-    assertThat(d1.hashCode()).isNotEqualTo(d2.hashCode());
-  }
-
-  @Test
-  public void testHashCode4() {
-    Pattern p1 = new TestPattern();
-    Pattern p2 = new TestPattern();
-    Pattern choice = new Choice(p1, p2);
-    Pattern concur = new Concur(p1, p2);
-    assertThat(choice).isNotEqualTo(concur);
-    assertThat(choice.hashCode()).isNotEqualTo(concur.hashCode());
-  }
-
-  @Test
-  public void testHashCode5() {
-    Pattern p1 = new TestPattern();
-    Pattern p2 = new TestPattern();
-    Pattern choice1 = new Choice(p1, p2);
-    Pattern choice2 = new Choice(p1, p2);
-    assertThat(choice1).isEqualTo(choice2);
-    assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode());
-  }
-
-  @Test
-  public void testHashCode6() {
-    NameClass nc1 = name("name");
-    NameClass nc2 = name("name");
-    assertThat(nc1.hashCode()).isEqualTo(nc2.hashCode());
-    assertThat(nc1).isEqualToComparingFieldByField(nc2);
-    assertThat(nc1).isNotEqualTo(nc2);
-    Set<NameClass> ncSet = new HashSet<>();
-    ncSet.add(nc1);
-    ncSet.add(nc2);
-    assertThat(ncSet).hasSize(2);
-  }
-
-  class DummyPattern extends AbstractPattern {
-    DummyPattern() {
-      setHashcode(RANDOM.nextInt());
+    @Test
+    fun testHashCode1() {
+        Assertions.assertThat(Patterns.EMPTY.hashCode()).isNotEqualTo(Patterns.NOT_ALLOWED.hashCode())
     }
 
-    @Override
-    void init() {
-      nullable = false;
-      allowsText = false;
+    @Test
+    fun testHashCode2() {
+        val p1 = CreoleTest.TestPattern()
+        val p2 = CreoleTest.TestPattern()
+        assertThat(p1).isNotEqualTo(p2)
+        Assertions.assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode())
     }
-  }
+
+    @Test
+    fun testHashCode3() {
+        val d1 = DummyPattern()
+        val d2 = DummyPattern()
+        assertThat(d1).isNotEqualTo(d2)
+        Assertions.assertThat(d1.hashCode()).isNotEqualTo(d2.hashCode())
+    }
+
+    @Test
+    fun testHashCode4() {
+        val p1 = CreoleTest.TestPattern()
+        val p2 = CreoleTest.TestPattern()
+        val choice = Choice(p1, p2)
+        val concur = Concur(p1, p2)
+        assertThat(choice).isNotEqualTo(concur)
+        Assertions.assertThat(choice.hashCode()).isNotEqualTo(concur.hashCode())
+    }
+
+    @Test
+    fun testHashCode5() {
+        val p1 = CreoleTest.TestPattern()
+        val p2 = CreoleTest.TestPattern()
+        val choice1 = Choice(p1, p2)
+        val choice2 = Choice(p1, p2)
+        assertThat(choice1).isEqualTo(choice2)
+        Assertions.assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode())
+    }
+
+    @Test
+    fun testHashCode6() {
+        val nc1 = name("name")
+        val nc2 = name("name")
+        Assertions.assertThat(nc1.hashCode()).isEqualTo(nc2.hashCode())
+        Assertions.assertThat(nc1).isEqualToComparingFieldByField(nc2)
+        Assertions.assertThat(nc1).isNotEqualTo(nc2)
+        val ncSet = HashSet<NameClass>()
+        ncSet.add(nc1)
+        ncSet.add(nc2)
+        Assertions.assertThat(ncSet).hasSize(2)
+    }
+
+    internal inner class DummyPattern : AbstractPattern() {
+        init {
+            setHashcode(RANDOM.nextInt())
+        }
+
+        fun init() {
+            nullable = false
+            allowsText = false
+        }
+    }
+
+    companion object {
+
+        private val RANDOM = Random()
+    }
 
 }

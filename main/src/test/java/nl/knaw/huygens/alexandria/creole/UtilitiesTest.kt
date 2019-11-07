@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
-    /*
+/*
      * #%L
  * alexandria-markup-core
  * =======
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,281 +20,286 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
      */
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Basics.id;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import nl.knaw.huygens.alexandria.creole.patterns.*;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
+import nl.knaw.huygens.alexandria.creole.Basics.id
+import nl.knaw.huygens.alexandria.creole.patterns.*
+import org.junit.Test
+import org.slf4j.LoggerFactory
 
 
-public class UtilitiesTest extends CreoleTest {
-  private static final Logger LOG = LoggerFactory.getLogger(UtilitiesTest.class);
+class UtilitiesTest : CreoleTest() {
 
-  @Test
-  public void testEmptyIsNullable() {
-    Pattern p = Patterns.EMPTY;
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testEmptyIsNullable() {
+        val p = Patterns.EMPTY
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testNotAllowedIsNotNullable() {
-    Pattern p = Patterns.NOT_ALLOWED;
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testNotAllowedIsNotNullable() {
+        val p = Patterns.NOT_ALLOWED
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testTextIsNullable() {
-    Pattern p = Patterns.TEXT;
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testTextIsNullable() {
+        val p = Patterns.TEXT
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testChoiceNullability1() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Choice(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testChoiceNullability1() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Choice(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testChoiceNullability2() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Choice(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testChoiceNullability2() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Choice(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testChoiceNullability3() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Choice(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testChoiceNullability3() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Choice(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testChoiceNullability4() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Choice(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testChoiceNullability4() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Choice(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testInterleaveNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Interleave(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testInterleaveNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Interleave(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testInterleaveNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Interleave(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testInterleaveNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Interleave(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testInterleaveNullability3() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Interleave(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testInterleaveNullability3() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Interleave(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testInterleaveNullability4() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Interleave(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testInterleaveNullability4() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Interleave(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testConcurNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Concur(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testConcurNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Concur(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testConcurNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Concur(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testConcurNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Concur(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testConcurNullability3() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new Concur(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testConcurNullability3() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = Concur(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testConcurNullability4() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Concur(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testConcurNullability4() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Concur(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testPartitionNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new Partition(p1);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testPartitionNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p = Partition(p1)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testPartitionNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new Partition(p1);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testPartitionNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = Partition(p1)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testOneOrMoreNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new OneOrMore(p1);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testOneOrMoreNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p = OneOrMore(p1)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testOneOrMoreNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new OneOrMore(p1);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testOneOrMoreNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = OneOrMore(p1)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testConcurOneOrMoreNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p = new ConcurOneOrMore(p1);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testConcurOneOrMoreNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p = ConcurOneOrMore(p1)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testConcurOneOrMoreNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p = new ConcurOneOrMore(p1);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testConcurOneOrMoreNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = ConcurOneOrMore(p1)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testRangeIsNotNullable() {
-    Pattern p1 = NULLABLE_PATTERN;
-    NameClass nameClass = NameClasses.ANY_NAME;
-    Pattern p = new Range(nameClass, p1);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testRangeIsNotNullable() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val nameClass = NameClasses.ANY_NAME
+        val p = Range(nameClass, p1)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testEndRangeIsNotNullable() {
-    Basics.QName qName = Basics.qName("uri", "localName");
-    Pattern p = new EndRange(qName, id("id"));
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testEndRangeIsNotNullable() {
+        val qName = Basics.qName("uri", "localName")
+        val p = EndRange(qName, id("id"))
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testAfterNullability() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new After(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testAfterNullability() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = After(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testAllNullability1() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new All(p1, p2);
-    assertThat(p).isNullable();
-  }
+    @Test
+    fun testAllNullability1() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = All(p1, p2)
+        assertThat(p).isNullable
+    }
 
-  @Test
-  public void testAllNullability2() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new All(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testAllNullability2() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = All(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testAllNullability3() {
-    Pattern p1 = NOT_NULLABLE_PATTERN;
-    Pattern p2 = NULLABLE_PATTERN;
-    Pattern p = new All(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testAllNullability3() {
+        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p = All(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testAllNullability4() {
-    Pattern p1 = NULLABLE_PATTERN;
-    Pattern p2 = NOT_NULLABLE_PATTERN;
-    Pattern p = new All(p1, p2);
-    assertThat(p).isNotNullable();
-  }
+    @Test
+    fun testAllNullability4() {
+        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p = All(p1, p2)
+        assertThat(p).isNotNullable
+    }
 
-  @Test
-  public void testPatternTreeVisualisationForEmpty() {
-    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.EMPTY, 1);
-    assertThat(emptyVisualisation).isEqualTo("Empty()");
-  }
+    @Test
+    fun testPatternTreeVisualisationForEmpty() {
+        val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.EMPTY, 1)
+        Assertions.assertThat(emptyVisualisation).isEqualTo("Empty()")
+    }
 
-  @Test
-  public void testPatternTreeVisualisationForNotAllowed() {
-    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.NOT_ALLOWED, 1);
-    assertThat(emptyVisualisation).isEqualTo("NotAllowed()");
-  }
+    @Test
+    fun testPatternTreeVisualisationForNotAllowed() {
+        val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.NOT_ALLOWED, 1)
+        Assertions.assertThat(emptyVisualisation).isEqualTo("NotAllowed()")
+    }
 
-  @Test
-  public void testPatternTreeVisualisationForText() {
-    String emptyVisualisation = Utilities.patternTreeToDepth(Patterns.TEXT, 1);
-    assertThat(emptyVisualisation).isEqualTo("Text()");
-  }
+    @Test
+    fun testPatternTreeVisualisationForText() {
+        val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.TEXT, 1)
+        Assertions.assertThat(emptyVisualisation).isEqualTo("Text()")
+    }
 
-  @Test
-  public void testPatternTreeVisualisationForChoice() {
-    Pattern choice = choice(text(), empty());
-    String emptyVisualisation = Utilities.patternTreeToDepth(choice, 15);
-    assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
-        "| Text(),\n" +
-        "| Empty()\n" +
-        ")");
-  }
+    @Test
+    fun testPatternTreeVisualisationForChoice() {
+        val choice = choice(text(), empty())
+        val emptyVisualisation = Utilities.patternTreeToDepth(choice, 15)
+        Assertions.assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
+                "| Text(),\n" +
+                "| Empty()\n" +
+                ")")
+    }
 
-  @Test
-  public void testPatternTreeVisualisationForElement() {
-    Pattern element = element("book", text());
-    String visualisation = Utilities.patternTreeToDepth(element, 10);
-    assertThat(visualisation).isEqualTo("Partition(\n" +//
-        "| Range(\"book\",\n" +//
-        "| | Text()\n" +//
-        "| )\n" +//
-        ")");
-  }
+    @Test
+    fun testPatternTreeVisualisationForElement() {
+        val element = element("book", text())
+        val visualisation = Utilities.patternTreeToDepth(element, 10)
+        Assertions.assertThat(visualisation).isEqualTo("Partition(\n" +//
 
-  @Test
-  public void testFlip() {
-    Pattern p1 = new TestPattern();
-    Pattern p2 = new TestPattern();
-    Pattern pattern = group(p1, p2);
+                "| Range(\"book\",\n" +//
 
-    Pattern flipped = pattern.flip();
-    LOG.info("flipped = ", Utilities.patternTreeToDepth(flipped, 10));
-    assertThat(flipped.getClass()).isEqualTo(pattern.getClass());
-    Group group = (Group) pattern;
-    Group flippedGroup = (Group) flipped;
-    assertThat(flippedGroup.getPattern1()).isEqualTo(group.getPattern2());
-    assertThat(flippedGroup.getPattern2()).isEqualTo(group.getPattern1());
-  }
+                "| | Text()\n" +//
+
+                "| )\n" +//
+
+                ")")
+    }
+
+    @Test
+    fun testFlip() {
+        val p1 = CreoleTest.TestPattern()
+        val p2 = CreoleTest.TestPattern()
+        val pattern = group(p1, p2)
+
+        val flipped = pattern.flip()
+        LOG.info("flipped = ", Utilities.patternTreeToDepth(flipped, 10))
+        Assertions.assertThat(flipped.javaClass).isEqualTo(pattern.javaClass)
+        val group = pattern as Group
+        val flippedGroup = flipped as Group
+        assertThat(flippedGroup.pattern1).isEqualTo(group.pattern2)
+        assertThat(flippedGroup.pattern2).isEqualTo(group.pattern1)
+    }
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(UtilitiesTest::class.java!!)
+    }
 
 }

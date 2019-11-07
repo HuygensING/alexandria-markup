@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*-
 * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,278 +20,410 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
 */
 
-import nl.knaw.huygens.alexandria.creole.patterns.Patterns;
-import org.junit.Test;
+import nl.knaw.huygens.alexandria.creole.NameClasses.name
+import nl.knaw.huygens.alexandria.creole.patterns.Patterns
+import org.junit.Test
 
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import static nl.knaw.huygens.alexandria.creole.NameClasses.name;
+class SchemaImporterTest : CreoleTest() {
 
-public class SchemaImporterTest extends CreoleTest {
+    @Test
+    fun testFromXML() {
+        val xml = "<start><text/></start>"
 
-  private static final Pattern BIBLICAL_EXAMPLE_SCHEMA_PATTERN = biblicalExampleSchemaPattern();
+        val schema = SchemaImporter.fromXML(xml)
+        assertSchemaIsExpected(schema, Patterns.TEXT)
+    }
 
-  @Test
-  public void testFromXML() {
-    String xml = "<start><text/></start>";
+    @Test
+    fun testFromCompactGrammar() {
+        val compactGrammar = "start = text"
 
-    Pattern schema = SchemaImporter.fromXML(xml);
-    assertSchemaIsExpected(schema, Patterns.TEXT);
-  }
+        val schema = SchemaImporter.fromCompactGrammar(compactGrammar)
+        //    assertSchemaIsExpected(schema, Patterns.TEXT);
+    }
 
-  @Test
-  public void testFromCompactGrammar() {
-    String compactGrammar = "start = text";
+    @Test
+    fun testBiblicalExampleGrammarFromXML() {
+        val xml = "<grammar xmlns=\"http://lmnl.net/ns/creole\">\n" +//
 
-    Pattern schema = SchemaImporter.fromCompactGrammar(compactGrammar);
-//    assertSchemaIsExpected(schema, Patterns.TEXT);
-  }
+                "<start>\n" +//
 
-  @Test
-  public void testBiblicalExampleGrammarFromXML() {
-    String xml = "<grammar xmlns=\"http://lmnl.net/ns/creole\">\n" +//
-        "<start>\n" +//
-        "  <ref name=\"book\" />\n" +//
-        "</start>\n" +//
-        "\n" +//
-        "<define name=\"book\">\n" +//
-        "  <element name=\"book\">\n" +//
-        "    <concur>\n" +//
-        "      <oneOrMore>\n" +//
-        "        <ref name=\"page\" />\n" +//
-        "      </oneOrMore>\n" +//
-        "      <group>\n" +//
-        "        <ref name=\"title\" />\n" +//
-        "        <concur>\n" +//
-        "          <oneOrMore>\n" +//
-        "            <ref name=\"chapter\" />\n" +//
-        "          </oneOrMore>\n" +//
-        "          <oneOrMore>\n" +//
-        "            <ref name=\"section\" />\n" +//
-        "          </oneOrMore>\n" +//
-        "        </concur>\n" +//
-        "      </group>\n" +//
-        "    </concur>\n" +//
-        "  </element>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"page\">\n" +//
-        "  <range name=\"page\">\n" +//
-        "    <attribute name=\"no\" />\n" +//
-        "    <text />\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"title\">\n" +//
-        "  <element name=\"title\"><text /></element>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"chapter\">\n" +//
-        "  <range name=\"chapter\">\n" +//
-        "    <attribute name=\"no\" />\n" +//
-        "    <oneOrMore>\n" +//
-        "      <ref name=\"verse\" />\n" +//
-        "    </oneOrMore>\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"verse\">\n" +//
-        "  <range name=\"verse\">\n" +//
-        "    <attribute name=\"no\" />\n" +//
-        "    <text />\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"section\">\n" +//
-        "  <range name=\"section\">\n" +//
-        "    <ref name=\"heading\" />\n" +//
-        "    <oneOrMore>\n" +//
-        "      <ref name=\"para\" />\n" +//
-        "    </oneOrMore>\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"heading\">\n" +//
-        "  <element name=\"heading\">\n" +//
-        "    <ref name=\"indexedText\" />\n" +//
-        "  </element>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"indexedText\">\n" +//
-        "  <concurOneOrMore>\n" +//
-        "    <mixed>\n" +//
-        "      <zeroOrMore>\n" +//
-        "        <ref name=\"index\" />\n" +//
-        "      </zeroOrMore>\n" +//
-        "    </mixed>\n" +//
-        "  </concurOneOrMore>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"para\">\n" +//
-        "  <range name=\"para\">\n" +//
-        "    <concur>\n" +//
-        "      <oneOrMore>\n" +//
-        "        <ref name=\"verse\" />\n" +//
-        "      </oneOrMore>\n" +//
-        "      <oneOrMore>\n" +//
-        "        <ref name=\"s\" />\n" +//
-        "      </oneOrMore>\n" +//
-        "    </concur>\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"s\">\n" +//
-        "  <range name=\"s\">\n" +//
-        "    <ref name=\"indexedText\" />\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "<define name=\"index\">\n" +//
-        "  <range name=\"index\">\n" +//
-        "    <attribute name=\"ref\" />\n" +//
-        "    <text />\n" +//
-        "  </range>\n" +//
-        "</define>\n" +//
-        "\n" +//
-        "</grammar>";
+                "  <ref name=\"book\" />\n" +//
 
-    Pattern schema = SchemaImporter.fromXML(xml);
-    assertSchemaIsExpected(schema, BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
-  }
+                "</start>\n" +//
+
+                "\n" +//
+
+                "<define name=\"book\">\n" +//
+
+                "  <element name=\"book\">\n" +//
+
+                "    <concur>\n" +//
+
+                "      <oneOrMore>\n" +//
+
+                "        <ref name=\"page\" />\n" +//
+
+                "      </oneOrMore>\n" +//
+
+                "      <group>\n" +//
+
+                "        <ref name=\"title\" />\n" +//
+
+                "        <concur>\n" +//
+
+                "          <oneOrMore>\n" +//
+
+                "            <ref name=\"chapter\" />\n" +//
+
+                "          </oneOrMore>\n" +//
+
+                "          <oneOrMore>\n" +//
+
+                "            <ref name=\"section\" />\n" +//
+
+                "          </oneOrMore>\n" +//
+
+                "        </concur>\n" +//
+
+                "      </group>\n" +//
+
+                "    </concur>\n" +//
+
+                "  </element>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"page\">\n" +//
+
+                "  <range name=\"page\">\n" +//
+
+                "    <attribute name=\"no\" />\n" +//
+
+                "    <text />\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"title\">\n" +//
+
+                "  <element name=\"title\"><text /></element>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"chapter\">\n" +//
+
+                "  <range name=\"chapter\">\n" +//
+
+                "    <attribute name=\"no\" />\n" +//
+
+                "    <oneOrMore>\n" +//
+
+                "      <ref name=\"verse\" />\n" +//
+
+                "    </oneOrMore>\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"verse\">\n" +//
+
+                "  <range name=\"verse\">\n" +//
+
+                "    <attribute name=\"no\" />\n" +//
+
+                "    <text />\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"section\">\n" +//
+
+                "  <range name=\"section\">\n" +//
+
+                "    <ref name=\"heading\" />\n" +//
+
+                "    <oneOrMore>\n" +//
+
+                "      <ref name=\"para\" />\n" +//
+
+                "    </oneOrMore>\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"heading\">\n" +//
+
+                "  <element name=\"heading\">\n" +//
+
+                "    <ref name=\"indexedText\" />\n" +//
+
+                "  </element>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"indexedText\">\n" +//
+
+                "  <concurOneOrMore>\n" +//
+
+                "    <mixed>\n" +//
+
+                "      <zeroOrMore>\n" +//
+
+                "        <ref name=\"index\" />\n" +//
+
+                "      </zeroOrMore>\n" +//
+
+                "    </mixed>\n" +//
+
+                "  </concurOneOrMore>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"para\">\n" +//
+
+                "  <range name=\"para\">\n" +//
+
+                "    <concur>\n" +//
+
+                "      <oneOrMore>\n" +//
+
+                "        <ref name=\"verse\" />\n" +//
+
+                "      </oneOrMore>\n" +//
+
+                "      <oneOrMore>\n" +//
+
+                "        <ref name=\"s\" />\n" +//
+
+                "      </oneOrMore>\n" +//
+
+                "    </concur>\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"s\">\n" +//
+
+                "  <range name=\"s\">\n" +//
+
+                "    <ref name=\"indexedText\" />\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "<define name=\"index\">\n" +//
+
+                "  <range name=\"index\">\n" +//
+
+                "    <attribute name=\"ref\" />\n" +//
+
+                "    <text />\n" +//
+
+                "  </range>\n" +//
+
+                "</define>\n" +//
+
+                "\n" +//
+
+                "</grammar>"
+
+        val schema = SchemaImporter.fromXML(xml)
+        assertSchemaIsExpected(schema, BIBLICAL_EXAMPLE_SCHEMA_PATTERN)
+    }
 
 
-  @Test
-  public void testBiblicalExampleFromCompactGrammar() {
-    String compactGrammar = "start = book\n" +//
-        "book = element book { page ~ \n" +//
-        "                      ( title, ( chapter+ ~ section+ ) ) }\n" +//
-        "page = range page { attribute no { text }, text }\n" +//
-        "title = element title { text }\n" +//
-        "chapter = range chapter { attribute no { text }, verse+ }\n" +//
-        "verse = range verse { attribute no { text }, text }\n" +//
-        "section = range section { heading, para+ }\n" +//
-        "heading = element heading { indexedText }\n" +//
-        "para = range para { verse+ ~ s+ }\n" +// wo
-        "s = range s { indexedText }\n" +//
-        "indexedText = concurOneOrMore { mixed { index* } }\n" +//
-        "index = range index { attribute ref { text }, text }";
+    @Test
+    fun testBiblicalExampleFromCompactGrammar() {
+        val compactGrammar = "start = book\n" +//
 
-    Pattern schema = SchemaImporter.fromCompactGrammar(compactGrammar);
-//    assertSchemaIsExpected(schema, BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
-  }
+                "book = element book { page ~ \n" +//
 
-  @Test
-  public void testInterleaveSimplification() {
-    String xml = "<start><interleave>" +//
-        "<range name=\"a\"><text/></range>" +//
-        "<range name=\"b\"><text/></range>" +//
-        "<range name=\"c\"><text/></range>" +//
-        "</interleave></start>";
-    Pattern schema = SchemaImporter.fromXML(xml);
-    Pattern expected = interleave(
-        range(name("a"), text()),
-        interleave(
-            range(name("b"), text()),
-            range(name("c"), text())
+                "                      ( title, ( chapter+ ~ section+ ) ) }\n" +//
+
+                "page = range page { attribute no { text }, text }\n" +//
+
+                "title = element title { text }\n" +//
+
+                "chapter = range chapter { attribute no { text }, verse+ }\n" +//
+
+                "verse = range verse { attribute no { text }, text }\n" +//
+
+                "section = range section { heading, para+ }\n" +//
+
+                "heading = element heading { indexedText }\n" +//
+
+                "para = range para { verse+ ~ s+ }\n" +// wo
+
+                "s = range s { indexedText }\n" +//
+
+                "indexedText = concurOneOrMore { mixed { index* } }\n" +//
+
+                "index = range index { attribute ref { text }, text }"
+
+        val schema = SchemaImporter.fromCompactGrammar(compactGrammar)
+        //    assertSchemaIsExpected(schema, BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
+    }
+
+    @Test
+    fun testInterleaveSimplification() {
+        val xml = "<start><interleave>" +//
+
+                "<range name=\"a\"><text/></range>" +//
+
+                "<range name=\"b\"><text/></range>" +//
+
+                "<range name=\"c\"><text/></range>" +//
+
+                "</interleave></start>"
+        val schema = SchemaImporter.fromXML(xml)
+        val expected = interleave(
+                range(name("a"), text()),
+                interleave(
+                        range(name("b"), text()),
+                        range(name("c"), text())
+                )
         )
-    );
-    assertSchemaIsExpected(schema, expected);
-  }
+        assertSchemaIsExpected(schema, expected)
+    }
 
-  @Test
-  public void testGroupSimplification() {
-    String xml = "<start><group>" +//
-        "<range name=\"a\"><text/></range>" +//
-        "<range name=\"b\"><text/></range>" +//
-        "<range name=\"c\"><text/></range>" +//
-        "</group></start>";
-    Pattern schema = SchemaImporter.fromXML(xml);
-    Pattern expected = group(
-        range(name("a"), text()),
-        group(
-            range(name("b"), text()),
-            range(name("c"), text())
+    @Test
+    fun testGroupSimplification() {
+        val xml = "<start><group>" +//
+
+                "<range name=\"a\"><text/></range>" +//
+
+                "<range name=\"b\"><text/></range>" +//
+
+                "<range name=\"c\"><text/></range>" +//
+
+                "</group></start>"
+        val schema = SchemaImporter.fromXML(xml)
+        val expected = group(
+                range(name("a"), text()),
+                group(
+                        range(name("b"), text()),
+                        range(name("c"), text())
+                )
         )
-    );
-    assertSchemaIsExpected(schema, expected);
-  }
+        assertSchemaIsExpected(schema, expected)
+    }
 
-  @Test
-  public void testChoiceSimplification() {
-    String xml = "<start><choice>" +//
-        "<range name=\"a\"><text/></range>" +//
-        "<range name=\"b\"><text/></range>" +//
-        "<range name=\"c\"><text/></range>" +//
-        "</choice></start>";
-    Pattern schema = SchemaImporter.fromXML(xml);
-    Pattern expected = choice(
-        range(name("a"), text()),
-        choice(
-            range(name("b"), text()),
-            range(name("c"), text())
+    @Test
+    fun testChoiceSimplification() {
+        val xml = "<start><choice>" +//
+
+                "<range name=\"a\"><text/></range>" +//
+
+                "<range name=\"b\"><text/></range>" +//
+
+                "<range name=\"c\"><text/></range>" +//
+
+                "</choice></start>"
+        val schema = SchemaImporter.fromXML(xml)
+        val expected = choice(
+                range(name("a"), text()),
+                choice(
+                        range(name("b"), text()),
+                        range(name("c"), text())
+                )
         )
-    );
-    assertSchemaIsExpected(schema, expected);
-  }
+        assertSchemaIsExpected(schema, expected)
+    }
 
-  @Test
-  public void testConcurSimplification() {
-    String xml = "<start><concur>" +//
-        "<range name=\"a\"><text/></range>" +//
-        "<range name=\"b\"><text/></range>" +//
-        "<range name=\"c\"><text/></range>" +//
-        "</concur></start>";
-    Pattern schema = SchemaImporter.fromXML(xml);
-    Pattern expected = concur(
-        range(name("a"), text()),
-        concur(
-            range(name("b"), text()),
-            range(name("c"), text())
+    @Test
+    fun testConcurSimplification() {
+        val xml = "<start><concur>" +//
+
+                "<range name=\"a\"><text/></range>" +//
+
+                "<range name=\"b\"><text/></range>" +//
+
+                "<range name=\"c\"><text/></range>" +//
+
+                "</concur></start>"
+        val schema = SchemaImporter.fromXML(xml)
+        val expected = concur(
+                range(name("a"), text()),
+                concur(
+                        range(name("b"), text()),
+                        range(name("c"), text())
+                )
         )
-    );
-    assertSchemaIsExpected(schema, expected);
-  }
+        assertSchemaIsExpected(schema, expected)
+    }
 
-  private static Pattern biblicalExampleSchemaPattern() {
-    Pattern page = range(name("page"), text());
-    Pattern title = element("title", text());
-    Pattern verse = range(name("verse"), text());
-    Pattern chapter = range(name("chapter"), oneOrMore(verse));
-    Pattern index = range(name("index"), text());
-    Pattern indexedText = concurOneOrMore(mixed(zeroOrMore(index)));
-    Pattern heading = element("heading", indexedText);
-    Pattern s = range(name("s"), indexedText);
-    Pattern para = range(name("para"),//
-        concur(//
-            oneOrMore(verse),//
-            oneOrMore(s)
-        )//
-    );
-    Pattern section = range(name("section"),//
-        group(//
-            heading,//
-            oneOrMore(para)//
-        )//
-    );
-    return element("book",//
-        concur(//
-            oneOrMore(page),//
-            group(//
-                title,//
-                concur(//
-                    oneOrMore(chapter),//
-                    oneOrMore(section)//
-                )//
-            )//
-        )//
-    );
-  }
+    private fun assertSchemaIsExpected(schema: Pattern, expectedSchema: Pattern) {
+        val schemaString = Utilities.patternTreeToDepth(schema, 100)
+        val expectedSchemaString = Utilities.patternTreeToDepth(expectedSchema, 100)
+        Assertions.assertThat(schemaString).isEqualTo(expectedSchemaString)
+        //    assertThat(schema).isEqualTo(BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
+    }
 
-  private void assertSchemaIsExpected(Pattern schema, Pattern expectedSchema) {
-    String schemaString = Utilities.patternTreeToDepth(schema, 100);
-    String expectedSchemaString = Utilities.patternTreeToDepth(expectedSchema, 100);
-    assertThat(schemaString).isEqualTo(expectedSchemaString);
-    //    assertThat(schema).isEqualTo(BIBLICAL_EXAMPLE_SCHEMA_PATTERN);
-  }
+    companion object {
+
+        private val BIBLICAL_EXAMPLE_SCHEMA_PATTERN = biblicalExampleSchemaPattern()
+
+        private fun biblicalExampleSchemaPattern(): Pattern {
+            val page = range(name("page"), text())
+            val title = element("title", text())
+            val verse = range(name("verse"), text())
+            val chapter = range(name("chapter"), oneOrMore(verse))
+            val index = range(name("index"), text())
+            val indexedText = concurOneOrMore(mixed(zeroOrMore(index)))
+            val heading = element("heading", indexedText)
+            val s = range(name("s"), indexedText)
+            val para = range(name("para"), //
+                    concur(//
+                            oneOrMore(verse), //
+                            oneOrMore(s)
+                    )//
+            )
+            val section = range(name("section"), //
+                    group(//
+                            heading, //
+                            oneOrMore(para)//
+                    )//
+            )
+            return element("book", //
+                    concur(//
+                            oneOrMore(page), //
+                            group(//
+                                    title, //
+                                    concur(//
+                                            oneOrMore(chapter), //
+                                            oneOrMore(section)//
+                                    )//
+                            )//
+                    )//
+            )
+        }
+    }
 
 }

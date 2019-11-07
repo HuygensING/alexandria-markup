@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,61 +20,59 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractAssert
 
-public class PatternAssert extends AbstractAssert<PatternAssert, Pattern> {
+class PatternAssert(actual: Pattern) : AbstractAssert<PatternAssert, Pattern>(actual, PatternAssert::class.java) {
 
-  public PatternAssert(Pattern actual) {
-    super(actual, PatternAssert.class);
-  }
+    val isNullable: PatternAssert
+        get() {
+            isNotNull
 
-  public PatternAssert isNullable() {
-    isNotNull();
+            val actualNullable = actual.isNullable
+            if (!actualNullable) {
+                val assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+                failWithMessage(assertjErrorMessage, actual, true, false)
+            }
 
-    boolean actualNullable = actual.isNullable();
-    if (!actualNullable) {
-      String assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-      failWithMessage(assertjErrorMessage, actual, true, false);
+            return myself
+        }
+
+    val isNotNullable: PatternAssert
+        get() {
+            isNotNull
+
+            val actualNotNullable = !actual.isNullable
+            if (!actualNotNullable) {
+                val assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+                failWithMessage(assertjErrorMessage, actual, false, true)
+            }
+
+            return myself
+        }
+
+    fun allowsText(): PatternAssert {
+        isNotNull
+
+        val allowsText = actual.allowsText()
+        if (!allowsText) {
+            val assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+            failWithMessage(assertjErrorMessage, actual, true, false)
+        }
+
+        return myself
     }
 
-    return myself;
-  }
+    fun doesNotAllowText(): PatternAssert {
+        isNotNull
 
-  public PatternAssert isNotNullable() {
-    isNotNull();
+        val doesNotAllowText = !actual.allowsText()
+        if (!doesNotAllowText) {
+            val assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>"
+            failWithMessage(assertjErrorMessage, actual, false, true)
+        }
 
-    boolean actualNotNullable = !actual.isNullable();
-    if (!actualNotNullable) {
-      String assertjErrorMessage = "\nExpecting isNullable of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-      failWithMessage(assertjErrorMessage, actual, false, true);
+        return myself
     }
-
-    return myself;
-  }
-
-  public PatternAssert allowsText() {
-    isNotNull();
-
-    boolean allowsText = actual.allowsText();
-    if (!allowsText) {
-      String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-      failWithMessage(assertjErrorMessage, actual, true, false);
-    }
-
-    return myself;
-  }
-
-  public PatternAssert doesNotAllowText() {
-    isNotNull();
-
-    boolean doesNotAllowText = !actual.allowsText();
-    if (!doesNotAllowText) {
-      String assertjErrorMessage = "\nExpecting allowsText of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-      failWithMessage(assertjErrorMessage, actual, false, true);
-    }
-
-    return myself;
-  }
 
 
 }

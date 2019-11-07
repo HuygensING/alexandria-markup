@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,45 +19,38 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Constructors.*;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-public class OneOrMore extends PatternWithOnePatternParameter {
-  public OneOrMore(Pattern pattern) {
-    super(pattern);
-  }
+class OneOrMore(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
 
-  @Override
-  public Pattern textDeriv(Basics.Context cx, String s) {
-    // textDeriv cx (OneOrMore p) s =
-    //   group (textDeriv cx p s)
-    //         (choice (OneOrMore p) Empty)
-    return group(//
-        pattern.textDeriv(cx, s),//
-        choice(new OneOrMore(pattern), empty())//
-    );
-  }
+    override fun textDeriv(cx: Basics.Context, s: String): Pattern {
+        // textDeriv cx (OneOrMore p) s =
+        //   group (textDeriv cx p s)
+        //         (choice (OneOrMore p) Empty)
+        return group(//
+                pattern.textDeriv(cx, s), //
+                choice(OneOrMore(pattern), empty())//
+        )
+    }
 
-  @Override
-  public Pattern startTagDeriv(Basics.QName qn, Basics.Id id) {
-    // startTagDeriv (OneOrMore p) qn id =
-    //   group (startTagDeriv p qn id)
-    //         (choice (OneOrMore p) Empty)
-    return group(//
-        pattern.startTagDeriv(qn, id),//
-        choice(new OneOrMore(pattern), empty())//
-    );
-  }
+    override fun startTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        // startTagDeriv (OneOrMore p) qn id =
+        //   group (startTagDeriv p qn id)
+        //         (choice (OneOrMore p) Empty)
+        return group(//
+                pattern.startTagDeriv(qn, id), //
+                choice(OneOrMore(pattern), empty())//
+        )
+    }
 
-  @Override
-  public Pattern endTagDeriv(Basics.QName qn, Basics.Id id) {
-    // endTagDeriv (OneOrMore p) qn id =
-    //   group (endTagDeriv p qn id)
-    //         (choice (OneOrMore p) Empty)
-    return group(//
-        pattern.endTagDeriv(qn, id),//
-        choice(new OneOrMore(pattern), empty())//
-    );
-  }
+    override fun endTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        // endTagDeriv (OneOrMore p) qn id =
+        //   group (endTagDeriv p qn id)
+        //         (choice (OneOrMore p) Empty)
+        return group(//
+                pattern.endTagDeriv(qn, id), //
+                choice(OneOrMore(pattern), empty())//
+        )
+    }
 }

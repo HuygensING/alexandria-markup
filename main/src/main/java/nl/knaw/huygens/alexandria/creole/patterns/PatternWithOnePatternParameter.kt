@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +19,20 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * limitations under the License.
  * #L%
  */
-import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import com.google.common.base.Preconditions
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-public abstract class PatternWithOnePatternParameter extends AbstractPattern {
-  final Pattern pattern;
+abstract class PatternWithOnePatternParameter internal constructor(val pattern: Pattern) : AbstractPattern() {
 
-  PatternWithOnePatternParameter(Pattern pattern) {
-    Preconditions.checkNotNull(pattern);
-    this.pattern = pattern;
-    setHashcode(getClass().hashCode() * pattern.hashCode());
-  }
+    init {
+        Preconditions.checkNotNull(pattern)
+        setHashcode(javaClass.hashCode() * pattern.hashCode())
+    }
 
-  public Pattern getPattern() {
-    return pattern;
-  }
-
-  @Override
-  void init() {
-    nullable = pattern.isNullable();
-    allowsText = pattern.allowsText();
-    allowsAnnotations = pattern.allowsText();
-    onlyAnnotations = pattern.onlyAnnotations();
-  }
+    override fun init() {
+        nullable = pattern.isNullable
+        allowsText = pattern.allowsText()
+        allowsAnnotations = pattern.allowsText()
+        onlyAnnotations = pattern.onlyAnnotations()
+    }
 }

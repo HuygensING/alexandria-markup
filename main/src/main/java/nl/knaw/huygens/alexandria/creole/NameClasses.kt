@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,11 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-public class NameClasses {
+object NameClasses {
 
-  public static final AnyName ANY_NAME = new AnyName();
+    val ANY_NAME = AnyName()
 
-  /*
+    /*
   A NameClass represents a name class.
 
   data NameClass = AnyName
@@ -35,181 +35,115 @@ public class NameClasses {
                    | NameClassChoice NameClass NameClass
    */
 
-  public static AnyName anyName() {
-    return ANY_NAME;
-  }
-
-  static class AnyName extends AbstractNameClass {
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return true;
-    }
-  }
-
-  public static AnyNameExcept anyNameExcept(NameClass nameClassToExcept) {
-    return new AnyNameExcept(nameClassToExcept);
-  }
-
-  static class AnyNameExcept extends AbstractNameClass {
-    private final NameClass nameClassToExcept;
-
-    AnyNameExcept(NameClass nameClassToExcept) {
-      this.nameClassToExcept = nameClassToExcept;
+    fun anyName(): AnyName {
+        return ANY_NAME
     }
 
-    public NameClass getNameClassToExcept() {
-      return nameClassToExcept;
+    internal class AnyName : AbstractNameClass() {
+        override fun contains(qName: Basics.QName): Boolean {
+            return true
+        }
     }
 
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return !nameClassToExcept.contains(qName);
-    }
-  }
-
-  public static Name name(String localName) {
-    return name("", localName);
-  }
-
-  private static Name name(String uri, String localName) {
-    return name(Basics.uri(uri), Basics.localName(localName));
-  }
-
-  private static Name name(Basics.Uri uri, Basics.LocalName localName) {
-    return new Name(uri, localName);
-  }
-
-  static class Name extends AbstractNameClass {
-    private final Basics.Uri uri;
-    private final Basics.LocalName localName;
-
-    Name(Basics.Uri uri, Basics.LocalName localName) {
-      this.uri = uri;
-      this.localName = localName;
-      setHashCode(getClass().hashCode() * uri.hashCode() * localName.hashCode());
+    fun anyNameExcept(nameClassToExcept: NameClass): AnyNameExcept {
+        return AnyNameExcept(nameClassToExcept)
     }
 
-    public Basics.Uri getUri() {
-      return uri;
+    internal class AnyNameExcept(val nameClassToExcept: NameClass) : AbstractNameClass() {
+
+        override fun contains(qName: Basics.QName): Boolean {
+            return !nameClassToExcept.contains(qName)
+        }
     }
 
-    public Basics.LocalName getLocalName() {
-      return localName;
+    fun name(localName: String): Name {
+        return name("", localName)
     }
 
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return qName.getUri().equals(uri)
-          && qName.getLocalName().equals(localName);
+    private fun name(uri: String, localName: String): Name {
+        return name(Basics.uri(uri), Basics.localName(localName))
     }
 
-    @Override
-    public String toString() {
-      return localName.getValue();
-    }
-  }
-
-  public static NsNameExcept nsNameExcept(String uri, NameClass nameClass) {
-    return nsNameExcept(Basics.uri(uri), nameClass);
-  }
-
-  private static NsNameExcept nsNameExcept(Basics.Uri uri, NameClass nameClass) {
-    return new NsNameExcept(uri, nameClass);
-  }
-
-  static class NsNameExcept extends AbstractNameClass {
-    private final Basics.Uri uri;
-    private final NameClass nameClass;
-
-    NsNameExcept(Basics.Uri uri, NameClass nameClass) {
-      this.uri = uri;
-      this.nameClass = nameClass;
+    private fun name(uri: Basics.Uri, localName: Basics.LocalName): Name {
+        return Name(uri, localName)
     }
 
-    public Basics.Uri getUri() {
-      return uri;
+    internal class Name(val uri: Basics.Uri, val localName: Basics.LocalName) : AbstractNameClass() {
+
+        init {
+            setHashCode(javaClass.hashCode() * uri.hashCode() * localName.hashCode())
+        }
+
+        override fun contains(qName: Basics.QName): Boolean {
+            return qName.uri == uri && qName.localName == localName
+        }
+
+        override fun toString(): String {
+            return localName.value
+        }
     }
 
-    public NameClass getNameClass() {
-      return nameClass;
+    fun nsNameExcept(uri: String, nameClass: NameClass): NsNameExcept {
+        return nsNameExcept(Basics.uri(uri), nameClass)
     }
 
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return uri.equals(qName.getUri())//
-          && !nameClass.contains(qName);
-    }
-  }
-
-  public static NsName nsName(String uri) {
-    return nsName(Basics.uri(uri));
-  }
-
-  private static NsName nsName(Basics.Uri uri) {
-    return new NsName(uri);
-  }
-
-  static class NsName extends AbstractNameClass {
-    private final Basics.Uri uri;
-
-    NsName(Basics.Uri uri) {
-      this.uri = uri;
+    private fun nsNameExcept(uri: Basics.Uri, nameClass: NameClass): NsNameExcept {
+        return NsNameExcept(uri, nameClass)
     }
 
-    public String getValue() {
-      return uri.getValue();
+    internal class NsNameExcept(val uri: Basics.Uri, val nameClass: NameClass) : AbstractNameClass() {
+
+        override fun contains(qName: Basics.QName): Boolean {
+            return (uri == qName.uri//
+                    && !nameClass.contains(qName))
+        }
     }
 
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return getValue().equals(qName.getUri().getValue());
-    }
-  }
-
-  public static NameClassChoice nameClassChoice(NameClass nameClass1, NameClass nameClass2) {
-    return new NameClassChoice(nameClass1, nameClass2);
-  }
-
-  static class NameClassChoice extends AbstractNameClass {
-    private final NameClass nameClass1;
-    private final NameClass nameClass2;
-
-    NameClassChoice(NameClass nameClass1, NameClass nameClass2) {
-      this.nameClass1 = nameClass1;
-      this.nameClass2 = nameClass2;
+    fun nsName(uri: String): NsName {
+        return nsName(Basics.uri(uri))
     }
 
-    public NameClass getNameClass1() {
-      return nameClass1;
+    private fun nsName(uri: Basics.Uri): NsName {
+        return NsName(uri)
     }
 
-    public NameClass getNameClass2() {
-      return nameClass2;
+    internal class NsName(private val uri: Basics.Uri) : AbstractNameClass() {
+
+        val value: String
+            get() = uri.value
+
+        override fun contains(qName: Basics.QName): Boolean {
+            return value == qName.uri.value
+        }
     }
 
-    @Override
-    public boolean contains(Basics.QName qName) {
-      return nameClass1.contains(qName) //
-          || nameClass2.contains(qName);
-    }
-  }
-
-  /* abstract classes */
-  static abstract class AbstractNameClass implements NameClass {
-    int hashCode;
-
-    AbstractNameClass() {
-      hashCode = getClass().hashCode();
+    fun nameClassChoice(nameClass1: NameClass, nameClass2: NameClass): NameClassChoice {
+        return NameClassChoice(nameClass1, nameClass2)
     }
 
-    void setHashCode(int hashCode) {
-      this.hashCode = hashCode;
+    internal class NameClassChoice(val nameClass1: NameClass, val nameClass2: NameClass) : AbstractNameClass() {
+
+        override fun contains(qName: Basics.QName): Boolean {
+            return (nameClass1.contains(qName) //
+                    || nameClass2.contains(qName))
+        }
     }
 
-    @Override
-    public int hashCode() {
-      return hashCode;
+    /* abstract classes */
+    internal abstract class AbstractNameClass : NameClass {
+        var hashCode: Int = 0
+
+        init {
+            hashCode = javaClass.hashCode()
+        }
+
+        fun setHashCode(hashCode: Int) {
+            this.hashCode = hashCode
+        }
+
+        override fun hashCode(): Int {
+            return hashCode
+        }
     }
-  }
 
 }

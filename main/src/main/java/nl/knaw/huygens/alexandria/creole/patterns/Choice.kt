@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
-    /*-
+/*-
      * #%L
  * alexandria-markup-core
  * =======
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,86 +20,76 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * #L%
      */
 
-import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Constructors.choice;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-import java.util.function.Function;
+import java.util.function.Function
 
-public class Choice extends PatternWithTwoPatternParameters {
-  public Choice(Pattern pattern1, Pattern pattern2) {
-    super(pattern1, pattern2);
-  }
+class Choice(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParameters(pattern1, pattern2) {
 
-  @Override
-  void init() {
-    nullable = pattern1.isNullable() || pattern2.isNullable();
-    allowsText = pattern1.allowsText() || pattern2.allowsText();
-    allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations();
-    onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations();
-  }
+    override fun init() {
+        nullable = pattern1.isNullable || pattern2.isNullable
+        allowsText = pattern1.allowsText() || pattern2.allowsText()
+        allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations()
+        onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations()
+    }
 
-  @Override
-  public Pattern textDeriv(Basics.Context cx, String s) {
-    // textDeriv cx (Choice p1 p2) s =
-    //  choice (textDeriv cx p1 s) (textDeriv cx p2 s)
-    return choice(//
-        pattern1.textDeriv(cx, s),//
-        pattern2.textDeriv(cx, s)//
-    );
-  }
+    override fun textDeriv(cx: Basics.Context, s: String): Pattern {
+        // textDeriv cx (Choice p1 p2) s =
+        //  choice (textDeriv cx p1 s) (textDeriv cx p2 s)
+        return choice(//
+                pattern1.textDeriv(cx, s), //
+                pattern2.textDeriv(cx, s)//
+        )
+    }
 
-  @Override
-  public Pattern startTagDeriv(Basics.QName qn, Basics.Id id) {
-    // startTagDeriv (Choice p1 p2) qn id =
-    //   choice (startTagDeriv p1 qn id)
-    //          (startTagDeriv p2 qn id)
-    return choice(//
-        pattern1.startTagDeriv(qn, id),//
-        pattern2.startTagDeriv(qn, id)//
-    );
-  }
+    override fun startTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        // startTagDeriv (Choice p1 p2) qn id =
+        //   choice (startTagDeriv p1 qn id)
+        //          (startTagDeriv p2 qn id)
+        return choice(//
+                pattern1.startTagDeriv(qn, id), //
+                pattern2.startTagDeriv(qn, id)//
+        )
+    }
 
-  public Pattern startTagOpenDeriv(Basics.QName qn, Basics.Id id) {
-    return choice(//
-        pattern1.startTagOpenDeriv(qn, id),//
-        pattern2.startTagOpenDeriv(qn, id)//
-    );
-  }
+    override fun startTagOpenDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        return choice(//
+                pattern1.startTagOpenDeriv(qn, id), //
+                pattern2.startTagOpenDeriv(qn, id)//
+        )
+    }
 
-  @Override
-  public Pattern endTagDeriv(Basics.QName qn, Basics.Id id) {
-    // endTagDeriv (Choice p1 p2) qn id =
-    //   choice (endTagDeriv p1 qn id)
-    //          (endTagDeriv p2 qn id)
-    return choice(//
-        pattern1.endTagDeriv(qn, id),//
-        pattern2.endTagDeriv(qn, id)//
-    );
-  }
+    override fun endTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        // endTagDeriv (Choice p1 p2) qn id =
+        //   choice (endTagDeriv p1 qn id)
+        //          (endTagDeriv p2 qn id)
+        return choice(//
+                pattern1.endTagDeriv(qn, id), //
+                pattern2.endTagDeriv(qn, id)//
+        )
+    }
 
-  @Override
-  public Pattern startAnnotationDeriv(Basics.QName qn) {
-    return choice(//
-        pattern1.startAnnotationDeriv(qn),//
-        pattern2.startAnnotationDeriv(qn)//
-    );
-  }
+    override fun startAnnotationDeriv(qn: Basics.QName): Pattern {
+        return choice(//
+                pattern1.startAnnotationDeriv(qn), //
+                pattern2.startAnnotationDeriv(qn)//
+        )
+    }
 
-  @Override
-  public Pattern endAnnotationDeriv(Basics.QName qn) {
-    return choice(//
-        pattern1.endAnnotationDeriv(qn),//
-        pattern2.endAnnotationDeriv(qn)//
-    );
-  }
+    override fun endAnnotationDeriv(qn: Basics.QName): Pattern {
+        return choice(//
+                pattern1.endAnnotationDeriv(qn), //
+                pattern2.endAnnotationDeriv(qn)//
+        )
+    }
 
-  @Override
-  public Pattern applyAfter(Function<Pattern, Pattern> f) {
-    return choice(//
-        pattern1.applyAfter(f),//
-        pattern2.applyAfter(f)//
-    );
-  }
+    override fun applyAfter(f: Function<Pattern, Pattern>): Pattern {
+        return choice(//
+                pattern1.applyAfter(f), //
+                pattern2.applyAfter(f)//
+        )
+    }
 
 }

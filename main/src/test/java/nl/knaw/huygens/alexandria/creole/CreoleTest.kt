@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole;
+package nl.knaw.huygens.alexandria.creole
 
 /*
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,43 +20,39 @@ package nl.knaw.huygens.alexandria.creole;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.creole.patterns.NotAllowed;
-import nl.knaw.huygens.alexandria.creole.patterns.Text;
+import nl.knaw.huygens.alexandria.creole.patterns.NotAllowed
+import nl.knaw.huygens.alexandria.creole.patterns.Text
 
-public class CreoleTest {
-//  SoftAssertions softly = new SoftAssertions();
+open class CreoleTest {
+    //  SoftAssertions softly = new SoftAssertions();
 
-  public static class TestPattern implements Pattern {
-    @Override
-    public boolean isNullable() {
-      return false;
+    class TestPattern : Pattern {
+        override val isNullable: Boolean
+            get() = false
+
+        override fun allowsText(): Boolean {
+            return false
+        }
+
+        override fun allowsAnnotations(): Boolean {
+            return false
+        }
+
+        override fun onlyAnnotations(): Boolean {
+            return false
+        }
     }
 
-    @Override
-    public boolean allowsText() {
-      return false;
+    internal class NullablePattern : Text()
+
+    internal class NotNullablePattern : NotAllowed()
+
+    companion object {
+
+        internal val NULLABLE_PATTERN: Pattern = NullablePattern()
+
+        internal val NOT_NULLABLE_PATTERN: Pattern = NotNullablePattern()
     }
-
-    @Override
-    public boolean allowsAnnotations() {
-      return false;
-    }
-
-    @Override
-    public boolean onlyAnnotations() {
-      return false;
-    }
-  }
-
-  static final Pattern NULLABLE_PATTERN = new NullablePattern();
-
-  static class NullablePattern extends Text {
-  }
-
-  static final Pattern NOT_NULLABLE_PATTERN = new NotNullablePattern();
-
-  static class NotNullablePattern extends NotAllowed {
-  }
 
 
 }

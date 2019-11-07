@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.creole.events;
+package nl.knaw.huygens.alexandria.creole.events
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.events;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,21 +19,16 @@ package nl.knaw.huygens.alexandria.creole.events;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.alexandria.creole.Basics;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-public class EndAnnotationCloseEvent extends AnnotationEvent {
-  EndAnnotationCloseEvent(Basics.QName qName) {
-    super(qName);
-  }
+class EndAnnotationCloseEvent internal constructor(qName: Basics.QName) : AnnotationEvent(qName) {
 
-  @Override
-  public Pattern eventDeriv(Pattern p) {
-    return p.endAnnotationDeriv(qName);
-  }
+    override fun eventDeriv(p: Pattern): Pattern {
+        return p.endAnnotationDeriv(qName)
+    }
 
-  @Override
-  public String toString() {
-    return getQName().getLocalName().getValue() + ")";
-  }
+    override fun toString(): String {
+        return qName.localName.value + ")"
+    }
 }

@@ -1,6 +1,6 @@
-package nl.knaw.huygens.alexandria.creole.patterns;
+package nl.knaw.huygens.alexandria.creole.patterns
 
-    /*-
+/*-
      * #%L
  * alexandria-markup-core
  * =======
@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,74 +20,70 @@ package nl.knaw.huygens.alexandria.creole.patterns;
  * #L%
      */
 
-import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.creole.Pattern;
+import com.google.common.base.Preconditions
+import nl.knaw.huygens.alexandria.creole.Pattern
 
-abstract class AbstractPattern implements Pattern {
-  Boolean nullable;
-  Boolean allowsText;
-  Boolean allowsAnnotations;
-  Boolean onlyAnnotations;
+internal abstract class AbstractPattern : Pattern {
+    var nullable: Boolean? = null
+    var allowsText: Boolean? = null
+    var allowsAnnotations: Boolean? = null
+    var onlyAnnotations: Boolean? = null
 
-  abstract void init();
+    var hashcode = javaClass.hashCode()
 
-  int hashcode = getClass().hashCode();
+    override//
+    val isNullable: Boolean
+        get() {
+            if (nullable == null) {
+                init()
+                if (nullable == null) {
+                    throw RuntimeException("nullable == null! Make sure nullable is initialized in the init() of " + javaClass.getSimpleName())
+                }
+            }
+            return nullable!!
+        }
 
-  void setHashcode(int hashcode) {
-    Preconditions.checkState(hashcode != 0, "hashCode should not be 0!");
-    this.hashcode = hashcode;
-  }
+    internal abstract fun init()
 
-  @Override
-  public boolean isNullable() {
-    if (nullable == null) {
-      init();
-      if (nullable == null) {
-        throw new RuntimeException("nullable == null! Make sure nullable is initialized in the init() of " //
-            + getClass().getSimpleName());
-      }
+    fun setHashcode(hashcode: Int) {
+        Preconditions.checkState(hashcode != 0, "hashCode should not be 0!")
+        this.hashcode = hashcode
     }
-    return nullable;
-  }
 
-  @Override
-  public boolean allowsText() {
-    if (allowsText == null) {
-      init();
-      if (allowsText == null) {
-        throw new RuntimeException("allowsText == null! Make sure allowsText is initialized in the init() of " //
-            + getClass().getSimpleName());
-      }
+    override fun allowsText(): Boolean {
+        if (allowsText == null) {
+            init()
+            if (allowsText == null) {
+                throw RuntimeException("allowsText == null! Make sure allowsText is initialized in the init() of " //
+                        + javaClass.getSimpleName())
+            }
+        }
+        return allowsText!!
     }
-    return allowsText;
-  }
 
-  @Override
-  public boolean allowsAnnotations() {
-    if (allowsAnnotations == null) {
-      init();
-      if (allowsAnnotations == null) {
-        throw new RuntimeException("allowsAnnotations == null! Make sure allowsAnnotations is initialized in the init() of " //
-            + getClass().getSimpleName());
-      }
+    override fun allowsAnnotations(): Boolean {
+        if (allowsAnnotations == null) {
+            init()
+            if (allowsAnnotations == null) {
+                throw RuntimeException("allowsAnnotations == null! Make sure allowsAnnotations is initialized in the init() of " //
+                        + javaClass.getSimpleName())
+            }
+        }
+        return allowsAnnotations!!
     }
-    return allowsAnnotations;
-  }
 
-  @Override
-  public boolean onlyAnnotations() {
-    if (onlyAnnotations == null) {
-      init();
-      if (onlyAnnotations == null) {
-        throw new RuntimeException("onlyAnnotations == null! Make sure onlyAnnotations is initialized in the init() of " //
-            + getClass().getSimpleName());
-      }
+    override fun onlyAnnotations(): Boolean {
+        if (onlyAnnotations == null) {
+            init()
+            if (onlyAnnotations == null) {
+                throw RuntimeException("onlyAnnotations == null! Make sure onlyAnnotations is initialized in the init() of " //
+                        + javaClass.getSimpleName())
+            }
+        }
+        return onlyAnnotations!!
     }
-    return onlyAnnotations;
-  }
 
-  @Override
-  public int hashCode() {
-    return hashcode;
-  }
+    override fun hashCode(): Int {
+        return hashcode
+    }
 }
