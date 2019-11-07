@@ -21,19 +21,41 @@ package nl.knaw.huygens.alexandria.creole
      */
 
 import com.google.common.base.Preconditions
+import nl.knaw.huygens.alexandria.creole.Constructors.annotation
+import nl.knaw.huygens.alexandria.creole.Constructors.atom
+import nl.knaw.huygens.alexandria.creole.Constructors.attribute
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Constructors.concur
+import nl.knaw.huygens.alexandria.creole.Constructors.concurOneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.concurZeroOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.element
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.interleave
+import nl.knaw.huygens.alexandria.creole.Constructors.mixed
+import nl.knaw.huygens.alexandria.creole.Constructors.oneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.optional
+import nl.knaw.huygens.alexandria.creole.Constructors.partition
+import nl.knaw.huygens.alexandria.creole.Constructors.range
+import nl.knaw.huygens.alexandria.creole.Constructors.text
+import nl.knaw.huygens.alexandria.creole.Constructors.zeroOrMore
+import nl.knaw.huygens.alexandria.creole.NameClasses.anyName
+import nl.knaw.huygens.alexandria.creole.NameClasses.anyNameExcept
+import nl.knaw.huygens.alexandria.creole.NameClasses.name
+import nl.knaw.huygens.alexandria.creole.NameClasses.nameClassChoice
+import nl.knaw.huygens.alexandria.creole.NameClasses.nsName
+import nl.knaw.huygens.alexandria.creole.NameClasses.nsNameExcept
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns
 import nl.knaw.huygens.tei.Document
 import nl.knaw.huygens.tei.Element
-import nl.knaw.huygens.tei.Node
 import nl.knaw.huygens.tei.Text
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.function.BiFunction
 import java.util.function.Function
-import java.util.stream.Collectors
 
 object SchemaImporter {
-    private val LOG = LoggerFactory.getLogger(SchemaImporter::class.java!!)
+    private val LOG = LoggerFactory.getLogger(SchemaImporter::class.java)
 
     private val elementToPattern = HashMap<String, Function<Element, Pattern>>()
 
@@ -92,17 +114,17 @@ object SchemaImporter {
     private fun handleAnnotation(element: Element): Pattern {
         val children = getChildElements(element)
         val attributes = removeAttributes(children)
-        if (element.hasAttribute("name")) {
+        return if (element.hasAttribute("name")) {
             val name = element.getAttribute("name")
             Preconditions.checkState(children.size == 1)
             val pattern = toPattern(children[0])
-            return annotation(name, pattern)
+            annotation(name, pattern)
 
         } else {
             Preconditions.checkState(children.size == 2)
             val nameClass = toNameClass(children[0])
             val pattern = toPattern(children[1])
-            return annotation(nameClass, pattern)
+            annotation(nameClass, pattern)
         }
     }
 
@@ -152,7 +174,7 @@ object SchemaImporter {
         val pattern = if (children.size == 1)
             toPattern(children[0])
         else
-            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.group(pattern1, pattern2) })
+            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> group(pattern1, pattern2) })
         return element(localName, pattern)
     }
 
@@ -167,7 +189,7 @@ object SchemaImporter {
         val attributes = removeAttributes(children)
 
         val pattern1 = toPattern(children.removeAt(0))
-        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.group(pattern1, pattern2) })
+        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> group(pattern1, pattern2) })
         return group(pattern1, pattern2)
     }
 
@@ -182,11 +204,10 @@ object SchemaImporter {
 
     private fun handleMixed(element: Element): Pattern {
         val children = getChildElements(element)
-        val pattern = if (children.size == 1//
-        )
-            toPattern(children[0])//
+        val pattern = if (children.size == 1)
+            toPattern(children[0])
         else
-            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.group(pattern1, pattern2) })
+            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> group(pattern1, pattern2) })
         return mixed(pattern)
     }
 
@@ -209,23 +230,21 @@ object SchemaImporter {
         val pattern = if (children.size == 1)
             toPattern(children[0])
         else
-            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.group(pattern1, pattern2) })
+            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> group(pattern1, pattern2) })
         return partition(pattern)
     }
 
     private fun handleRange(element: Element): Pattern {
         val children = getChildElements(element)
         val attributes = removeAttributes(children)
-        val nameClass = if (element.hasAttribute("name")//
-        )
-            name(element.getAttribute("name"))//
+        val nameClass = if (element.hasAttribute("name"))
+            name(element.getAttribute("name"))
         else
             toNameClass(children.removeAt(0))
-        val childPattern = if (children.size == 1//
-        )
-            toPattern(children[0])//
+        val childPattern = if (children.size == 1)
+            toPattern(children[0])
         else
-            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.group(pattern1, pattern2) })
+            simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> group(pattern1, pattern2) })
         return range(nameClass, childPattern)
     }
 
@@ -238,32 +257,29 @@ object SchemaImporter {
 
     private fun handleText(element: Element): Pattern {
         val children = getChildElements(element)
-        Preconditions.checkState(children.size == 0)
+        Preconditions.checkState(children.isEmpty())
         return text()
     }
 
     private fun getChildElements(element: Element): MutableList<Element> {
-        return element.nodes//
-                .stream()//
-                .filter(Predicate<Node> { Element::class.java!!.isInstance(it) })//
-                .map(Function<Node, Element> { Element::class.java!!.cast(it) })//
-                .collect<List<Element>, Any>(Collectors.toList())
+        return element.nodes
+                .filterIsInstance<Element>() as MutableList<Element>
     }
 
     private fun removeAttributes(children: MutableList<Element>): List<Element> {
-        val attributes = children.stream().filter { e -> "attribute" == e.name }.collect<List<Element>, Any>(Collectors.toList())
+        val attributes = children.filter { it.name == "attribute" }
         children.removeAll(attributes)
         return attributes
     }
 
     private fun simplifyAsNeeded(children: MutableList<Element>, patternConstructor: BiFunction<Pattern, Pattern, Pattern>): Pattern {
-        if (children.size == 1) {
-            return toPattern(children.removeAt(0))
+        return if (children.size == 1) {
+            toPattern(children.removeAt(0))
 
         } else {
             val pattern1 = toPattern(children.removeAt(0))
             val pattern2 = simplifyAsNeeded(children, patternConstructor)
-            return patternConstructor.apply(pattern1, pattern2)
+            patternConstructor.apply(pattern1, pattern2)
         }
     }
 
@@ -283,14 +299,14 @@ object SchemaImporter {
 
     private fun handleAnyName(element: Element): NameClass {
         val children = getChildElements(element)
-        if (hasExcept(children)) {
+        return if (hasExcept(children)) {
             val except = children[0]
             val exceptChildren = getChildElements(except)
             Preconditions.checkState(exceptChildren.size == 1)
             val nc = toNameClass(exceptChildren[0])
-            return anyNameExcept(nc)
+            anyNameExcept(nc)
         } else {
-            return anyName()
+            anyName()
         }
     }
 
@@ -308,14 +324,14 @@ object SchemaImporter {
     private fun handleNsName(element: Element): NameClass {
         val uri = element.getAttribute("uri")
         val children = getChildElements(element)
-        if (hasExcept(children)) {
+        return if (hasExcept(children)) {
             val except = children[0]
             val exceptChildren = getChildElements(except)
             Preconditions.checkState(exceptChildren.size == 1)
             val nc = toNameClass(exceptChildren[0])
-            return nsNameExcept(uri, nc)
+            nsNameExcept(uri, nc)
         } else {
-            return nsName(uri)
+            nsName(uri)
         }
     }
 

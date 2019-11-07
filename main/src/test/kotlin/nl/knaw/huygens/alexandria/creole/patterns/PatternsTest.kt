@@ -31,7 +31,7 @@ class PatternsTest : CreoleTest() {
 
     @Test
     fun testHashCode1() {
-        Assertions.assertThat(Patterns.EMPTY.hashCode()).isNotEqualTo(Patterns.NOT_ALLOWED.hashCode())
+        assertThat(Patterns.EMPTY.hashCode()).isNotEqualTo(Patterns.NOT_ALLOWED.hashCode())
     }
 
     @Test
@@ -39,7 +39,7 @@ class PatternsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
         assertThat(p1).isNotEqualTo(p2)
-        Assertions.assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode())
+        assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode())
     }
 
     @Test
@@ -47,7 +47,7 @@ class PatternsTest : CreoleTest() {
         val d1 = DummyPattern()
         val d2 = DummyPattern()
         assertThat(d1).isNotEqualTo(d2)
-        Assertions.assertThat(d1.hashCode()).isNotEqualTo(d2.hashCode())
+        assertThat(d1.hashCode()).isNotEqualTo(d2.hashCode())
     }
 
     @Test
@@ -57,7 +57,7 @@ class PatternsTest : CreoleTest() {
         val choice = Choice(p1, p2)
         val concur = Concur(p1, p2)
         assertThat(choice).isNotEqualTo(concur)
-        Assertions.assertThat(choice.hashCode()).isNotEqualTo(concur.hashCode())
+        assertThat(choice.hashCode()).isNotEqualTo(concur.hashCode())
     }
 
     @Test
@@ -67,28 +67,28 @@ class PatternsTest : CreoleTest() {
         val choice1 = Choice(p1, p2)
         val choice2 = Choice(p1, p2)
         assertThat(choice1).isEqualTo(choice2)
-        Assertions.assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode())
+        assertThat(choice2.hashCode()).isEqualTo(choice2.hashCode())
     }
 
     @Test
     fun testHashCode6() {
         val nc1 = name("name")
         val nc2 = name("name")
-        Assertions.assertThat(nc1.hashCode()).isEqualTo(nc2.hashCode())
-        Assertions.assertThat(nc1).isEqualToComparingFieldByField(nc2)
-        Assertions.assertThat(nc1).isNotEqualTo(nc2)
+        assertThat(nc1.hashCode()).isEqualTo(nc2.hashCode())
+        assertThat(nc1).isEqualToComparingFieldByField(nc2)
+        assertThat(nc1).isNotEqualTo(nc2)
         val ncSet = HashSet<NameClass>()
         ncSet.add(nc1)
         ncSet.add(nc2)
-        Assertions.assertThat(ncSet).hasSize(2)
+        assertThat(ncSet).hasSize(2)
     }
 
     internal inner class DummyPattern : AbstractPattern() {
         init {
-            setHashcode(RANDOM.nextInt())
+            Companion.setHashcode(this, RANDOM.nextInt())
         }
 
-        fun init() {
+        override fun init() {
             nullable = false
             allowsText = false
         }

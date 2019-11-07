@@ -25,7 +25,7 @@ import nl.knaw.huygens.alexandria.creole.Pattern
 class Annotation(internal val nameClass: NameClass, internal val pattern: Pattern) : AbstractPattern() {
 
     init {
-        setHashcode(javaClass.hashCode() + nameClass.hashCode() * pattern.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() + nameClass.hashCode() * pattern.hashCode())
     }
 
     override fun init() {

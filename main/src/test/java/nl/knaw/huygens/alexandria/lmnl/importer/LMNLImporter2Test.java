@@ -20,18 +20,19 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
      */
 
-import static java.util.Arrays.asList;
-import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.events.Events;
-import static nl.knaw.huygens.alexandria.creole.events.Events.*;
-import static org.junit.Assert.fail;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
+
+import static java.util.Arrays.asList;
+import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
+import static nl.knaw.huygens.alexandria.creole.Basics.qName;
+import static nl.knaw.huygens.alexandria.creole.events.Events.*;
+import static org.junit.Assert.fail;
 
 public class LMNLImporter2Test {
   private final LMNLImporter2 importer = new LMNLImporter2();
@@ -41,7 +42,7 @@ public class LMNLImporter2Test {
     String lmnl = "[range}text{range]";
 
     Basics.QName qName = qName("range");
-    Event startRangeOpen = startTagOpenEvent(qName);
+    Event startRangeOpen = Events.startTagOpenEvent(qName);
     Event startRangeClose = startTagCloseEvent(qName);
     Event text = Events.textEvent("text");
     Event endRangeOpen = endTagOpenEvent(qName);

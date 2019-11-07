@@ -20,10 +20,18 @@ package nl.knaw.huygens.alexandria.creole
  * #L%
  */
 
+import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
+import nl.knaw.huygens.alexandria.creole.Constructors.after
+import nl.knaw.huygens.alexandria.creole.Constructors.all
+import nl.knaw.huygens.alexandria.creole.Constructors.concur
+import nl.knaw.huygens.alexandria.creole.Constructors.concurOneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.notAllowed
+import nl.knaw.huygens.alexandria.creole.Constructors.oneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.partition
 import nl.knaw.huygens.alexandria.creole.patterns.*
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns.EMPTY
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns.NOT_ALLOWED
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ConstructorsTest : CreoleTest() {
@@ -34,7 +42,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = notAllowed()
         val choice = Constructors.choice(p1, p2)
-        assertThat<Pattern>(choice).isEqualTo(p1)
+        assertThat(choice).isEqualTo(p1)
     }
 
     @Test
@@ -43,7 +51,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = notAllowed()
         val p2 = CreoleTest.TestPattern()
         val choice = Constructors.choice(p1, p2)
-        assertThat<Pattern>(choice).isEqualTo(p2)
+        assertThat(choice).isEqualTo(p2)
     }
 
     @Test
@@ -52,7 +60,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = empty()
         val p2 = empty()
         val choice = Constructors.choice(p1, p2)
-        assertThat<Pattern>(choice).isInstanceOf(Empty::class.java)
+        assertThat(choice).isInstanceOf(Empty::class.java)
     }
 
     @Test
@@ -61,7 +69,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
         val choice = Constructors.choice(p1, p2)
-        assertThat<Pattern>(choice).isEqualTo(Choice(p1, p2))
+        assertThat(choice).isEqualTo(Choice(p1, p2))
     }
 
     @Test
@@ -70,7 +78,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = notAllowed()
         val p = Constructors.group(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -79,7 +87,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = notAllowed()
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.group(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -88,7 +96,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = empty()
         val p = Constructors.group(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -97,7 +105,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = empty()
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.group(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -105,12 +113,12 @@ class ConstructorsTest : CreoleTest() {
         //  group (After p1 p2) p3 = after p1 (group p2 p3)
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
-        assertThat<Pattern>(p1).isNotEqualTo(p2)
+        assertThat(p1).isNotEqualTo(p2)
         val after = After(p1, p2)
         val p3 = CreoleTest.TestPattern()
         val p = Constructors.group(after, p3)
         val expected = After(p1, Group(p2, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -122,7 +130,7 @@ class ConstructorsTest : CreoleTest() {
         val after = After(p2, p3)
         val p = Constructors.group(p1, after)
         val expected = After(p2, Group(p1, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -132,7 +140,7 @@ class ConstructorsTest : CreoleTest() {
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.group(p1, p2)
         val expected = Group(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -141,7 +149,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = notAllowed()
         val p = Constructors.interleave(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -150,7 +158,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = notAllowed()
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.interleave(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -159,7 +167,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = empty()
         val p = Constructors.interleave(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -168,7 +176,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = empty()
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.interleave(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -180,7 +188,7 @@ class ConstructorsTest : CreoleTest() {
         val after = After(p1, p2)
         val p = Constructors.interleave(after, p3)
         val expected = After(p1, Interleave(p2, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -192,7 +200,7 @@ class ConstructorsTest : CreoleTest() {
         val after = After(p2, p3)
         val p = Constructors.interleave(p1, after)
         val expected = After(p2, Interleave(p1, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -201,7 +209,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
         val p = Constructors.interleave(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(Interleave(p1, p2))
+        assertThat(p).isEqualTo(Interleave(p1, p2))
     }
 
     @Test
@@ -210,7 +218,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = notAllowed()
         val p = concur(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -219,7 +227,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = notAllowed()
         val p2 = CreoleTest.TestPattern()
         val p = concur(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -228,7 +236,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = Text()
         val p = concur(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p1)
+        assertThat(p).isEqualTo(p1)
     }
 
     @Test
@@ -237,7 +245,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = Text()
         val p2 = CreoleTest.TestPattern()
         val p = concur(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(p2)
+        assertThat(p).isEqualTo(p2)
     }
 
     @Test
@@ -251,7 +259,7 @@ class ConstructorsTest : CreoleTest() {
         val after2 = After(p3, p4)
         val p = concur(after1, after2)
         val expected = After(All(p1, p3), Concur(p2, p4))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -263,7 +271,7 @@ class ConstructorsTest : CreoleTest() {
         val after = After(p1, p2)
         val p = concur(after, p3)
         val expected = After(p1, Concur(p2, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -275,7 +283,7 @@ class ConstructorsTest : CreoleTest() {
         val after = After(p2, p3)
         val p = concur(p1, after)
         val expected = After(p2, Concur(p1, p3))
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
@@ -285,21 +293,21 @@ class ConstructorsTest : CreoleTest() {
         val p2 = CreoleTest.TestPattern()
         val p = concur(p1, p2)
         val expected = Concur(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(expected)
+        assertThat(p).isEqualTo(expected)
     }
 
     @Test
     fun testPartition1() {
         //  partition NotAllowed = NotAllowed
         val p = partition(notAllowed())
-        assertThat<Pattern>(p).isEqualTo(NOT_ALLOWED)
+        assertThat(p).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
     fun testPartition2() {
         //  partition Empty = Empty
         val p = partition(empty())
-        assertThat<Pattern>(p).isEqualTo(EMPTY)
+        assertThat(p).isEqualTo(EMPTY)
     }
 
     @Test
@@ -307,21 +315,22 @@ class ConstructorsTest : CreoleTest() {
         //  partition p = Partition p
         val p = CreoleTest.TestPattern()
         val partition = partition(p)
-        assertThat<Pattern>(partition).isEqualToComparingFieldByField(Partition(p))
+//        assertThat(partition).isEqualToComparingFieldByField(Partition(p))
+        assertThat(partition).isEqualTo(Partition(p))
     }
 
     @Test
     fun testOneOrMore1() {
         //  oneOrMore NotAllowed = NotAllowed
         val p = oneOrMore(notAllowed())
-        assertThat<Pattern>(p).isEqualTo(NOT_ALLOWED)
+        assertThat(p).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
     fun testOneOrMore2() {
         //  oneOrMore Empty = Empty
         val p = oneOrMore(empty())
-        assertThat<Pattern>(p).isEqualTo(EMPTY)
+        assertThat(p).isEqualTo(EMPTY)
     }
 
     @Test
@@ -329,21 +338,22 @@ class ConstructorsTest : CreoleTest() {
         //  oneOrMore p = OneOrMore p
         val p = CreoleTest.TestPattern()
         val oneOrMore = oneOrMore(p)
-        assertThat<Pattern>(oneOrMore).isEqualToComparingFieldByField(OneOrMore(p))
+//        assertThat(oneOrMore).isEqualToComparingFieldByField(OneOrMore(p))
+        assertThat(oneOrMore).isEqualTo(OneOrMore(p))
     }
 
     @Test
     fun testConcurOneOrMore1() {
         //  concurOneOrMore NotAllowed = NotAllowed
         val p = concurOneOrMore(notAllowed())
-        assertThat<Pattern>(p).isEqualTo(NOT_ALLOWED)
+        assertThat(p).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
     fun testConcurOneOrMore2() {
         //  concurOneOrMore Empty = Empty
         val p = concurOneOrMore(empty())
-        assertThat<Pattern>(p).isEqualTo(EMPTY)
+        assertThat(p).isEqualTo(EMPTY)
     }
 
     @Test
@@ -351,7 +361,8 @@ class ConstructorsTest : CreoleTest() {
         //  concurOneOrMore p = ConcurOneOrMore p
         val p = CreoleTest.TestPattern()
         val concurOneOrMore = concurOneOrMore(p)
-        assertThat<Pattern>(concurOneOrMore).isEqualToComparingFieldByField(ConcurOneOrMore(p))
+//        assertThat(concurOneOrMore).isEqualToComparingFieldByField(ConcurOneOrMore(p))
+        assertThat(concurOneOrMore).isEqualTo(ConcurOneOrMore(p))
     }
 
     @Test
@@ -359,7 +370,7 @@ class ConstructorsTest : CreoleTest() {
         //  after p NotAllowed = NotAllowed
         val p = CreoleTest.TestPattern()
         val after = after(p, notAllowed())
-        assertThat<Pattern>(after).isEqualTo(NOT_ALLOWED)
+        assertThat(after).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -367,7 +378,7 @@ class ConstructorsTest : CreoleTest() {
         //  after NotAllowed p = NotAllowed
         val p = CreoleTest.TestPattern()
         val after = after(notAllowed(), p)
-        assertThat<Pattern>(after).isEqualTo(NOT_ALLOWED)
+        assertThat(after).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -375,7 +386,7 @@ class ConstructorsTest : CreoleTest() {
         //  after Empty p = p
         val p = CreoleTest.TestPattern()
         val after = after(empty(), p)
-        assertThat<Pattern>(after).isEqualTo(p)
+        assertThat(after).isEqualTo(p)
     }
 
     @Test
@@ -386,7 +397,7 @@ class ConstructorsTest : CreoleTest() {
         val p3 = CreoleTest.TestPattern()
         val after = After(p1, p2)
         val p = after(after, p3)
-        assertThat<Pattern>(p).isEqualTo(after(p1, after(p2, p3)))
+        assertThat(p).isEqualTo(after(p1, after(p2, p3)))
     }
 
     @Test
@@ -395,7 +406,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
         val p = after(p1, p2)
-        assertThat<Pattern>(p).isEqualTo(After(p1, p2))
+        assertThat(p).isEqualTo(After(p1, p2))
     }
 
     @Test
@@ -403,7 +414,7 @@ class ConstructorsTest : CreoleTest() {
         //  all p NotAllowed = NotAllowed
         val p = CreoleTest.TestPattern()
         val all = all(p, notAllowed())
-        assertThat<Pattern>(all).isEqualTo(NOT_ALLOWED)
+        assertThat(all).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -411,7 +422,7 @@ class ConstructorsTest : CreoleTest() {
         //  all NotAllowed p = NotAllowed
         val p = CreoleTest.TestPattern()
         val all = all(notAllowed(), p)
-        assertThat<Pattern>(all).isEqualTo(NOT_ALLOWED)
+        assertThat(all).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -419,7 +430,7 @@ class ConstructorsTest : CreoleTest() {
         //  all p Empty = if nullable p then Empty else NotAllowed
         val p = CreoleTest.NullablePattern()
         val all = all(p, empty())
-        assertThat<Pattern>(all).isEqualTo(EMPTY)
+        assertThat(all).isEqualTo(EMPTY)
     }
 
     @Test
@@ -427,7 +438,7 @@ class ConstructorsTest : CreoleTest() {
         //  all p Empty = if nullable p then Empty else NotAllowed
         val p = CreoleTest.NotNullablePattern()
         val all = all(p, empty())
-        assertThat<Pattern>(all).isEqualTo(NOT_ALLOWED)
+        assertThat(all).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -435,7 +446,7 @@ class ConstructorsTest : CreoleTest() {
         //  all Empty p  = if nullable p then Empty else NotAllowed
         val p = CreoleTest.NullablePattern()
         val all = all(empty(), p)
-        assertThat<Pattern>(all).isEqualTo(EMPTY)
+        assertThat(all).isEqualTo(EMPTY)
     }
 
 
@@ -444,7 +455,7 @@ class ConstructorsTest : CreoleTest() {
         //  all Empty p = if nullable p then Empty else NotAllowed
         val p = CreoleTest.NotNullablePattern()
         val all = all(empty(), p)
-        assertThat<Pattern>(all).isEqualTo(NOT_ALLOWED)
+        assertThat(all).isEqualTo(NOT_ALLOWED)
     }
 
     @Test
@@ -457,7 +468,7 @@ class ConstructorsTest : CreoleTest() {
         val after1 = After(p1, p2)
         val after2 = After(p3, p4)
         val all = all(after1, after2)
-        assertThat<Pattern>(all).isEqualTo(after(all(p1, p3), all(p2, p4)))
+        assertThat(all).isEqualTo(after(all(p1, p3), all(p2, p4)))
     }
 
     @Test
@@ -466,7 +477,7 @@ class ConstructorsTest : CreoleTest() {
         val p1 = CreoleTest.TestPattern()
         val p2 = CreoleTest.TestPattern()
         val all = all(p1, p2)
-        assertThat<Pattern>(all).isEqualTo(All(p1, p2))
+        assertThat(all).isEqualTo(All(p1, p2))
     }
 
 }

@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.creole.patterns
 import com.google.common.base.Preconditions
 import nl.knaw.huygens.alexandria.creole.Pattern
 
-internal abstract class AbstractPattern : Pattern {
+abstract class AbstractPattern : Pattern {
     var nullable: Boolean? = null
     var allowsText: Boolean? = null
     var allowsAnnotations: Boolean? = null
@@ -31,13 +31,13 @@ internal abstract class AbstractPattern : Pattern {
 
     var hashcode = javaClass.hashCode()
 
-    override//
+    override
     val isNullable: Boolean
         get() {
             if (nullable == null) {
                 init()
                 if (nullable == null) {
-                    throw RuntimeException("nullable == null! Make sure nullable is initialized in the init() of " + javaClass.getSimpleName())
+                    throw RuntimeException("nullable == null! Make sure nullable is initialized in the init() of " + javaClass.simpleName)
                 }
             }
             return nullable!!
@@ -45,17 +45,12 @@ internal abstract class AbstractPattern : Pattern {
 
     internal abstract fun init()
 
-    fun setHashcode(hashcode: Int) {
-        Preconditions.checkState(hashcode != 0, "hashCode should not be 0!")
-        this.hashcode = hashcode
-    }
-
     override fun allowsText(): Boolean {
         if (allowsText == null) {
             init()
             if (allowsText == null) {
-                throw RuntimeException("allowsText == null! Make sure allowsText is initialized in the init() of " //
-                        + javaClass.getSimpleName())
+                throw RuntimeException("allowsText == null! Make sure allowsText is initialized in the init() of "
+                        + javaClass.simpleName)
             }
         }
         return allowsText!!
@@ -65,8 +60,8 @@ internal abstract class AbstractPattern : Pattern {
         if (allowsAnnotations == null) {
             init()
             if (allowsAnnotations == null) {
-                throw RuntimeException("allowsAnnotations == null! Make sure allowsAnnotations is initialized in the init() of " //
-                        + javaClass.getSimpleName())
+                throw RuntimeException("allowsAnnotations == null! Make sure allowsAnnotations is initialized in the init() of "
+                        + javaClass.simpleName)
             }
         }
         return allowsAnnotations!!
@@ -76,8 +71,8 @@ internal abstract class AbstractPattern : Pattern {
         if (onlyAnnotations == null) {
             init()
             if (onlyAnnotations == null) {
-                throw RuntimeException("onlyAnnotations == null! Make sure onlyAnnotations is initialized in the init() of " //
-                        + javaClass.getSimpleName())
+                throw RuntimeException("onlyAnnotations == null! Make sure onlyAnnotations is initialized in the init() of "
+                        + javaClass.simpleName)
             }
         }
         return onlyAnnotations!!
@@ -85,5 +80,12 @@ internal abstract class AbstractPattern : Pattern {
 
     override fun hashCode(): Int {
         return hashcode
+    }
+
+    companion object {
+        fun setHashcode(abstractPattern: AbstractPattern, hashcode: Int) {
+            Preconditions.checkState(hashcode != 0, "hashCode should not be 0!")
+            abstractPattern.hashcode = hashcode
+        }
     }
 }

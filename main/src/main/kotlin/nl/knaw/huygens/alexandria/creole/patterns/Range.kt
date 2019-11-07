@@ -21,13 +21,16 @@ package nl.knaw.huygens.alexandria.creole.patterns
      */
 
 import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Constructors.endRange
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.notAllowed
 import nl.knaw.huygens.alexandria.creole.NameClass
 import nl.knaw.huygens.alexandria.creole.Pattern
 
 class Range(val nameClass: NameClass, val pattern: Pattern) : AbstractPattern() {
 
     init {
-        setHashcode(javaClass.hashCode() + nameClass.hashCode() * pattern.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() + nameClass.hashCode() * pattern.hashCode())
     }
 
     override fun init() {
@@ -41,17 +44,15 @@ class Range(val nameClass: NameClass, val pattern: Pattern) : AbstractPattern() 
         //    startTagDeriv (Range nc p) qn id =
         //    if contains nc qn then group p (EndRange qn id)
         //                    else NotAllowed
-        return if (nameClass.contains(qName)//
-        )
-            group(pattern, endRange(qName, id))//
+        return if (nameClass.contains(qName))
+            group(pattern, endRange(qName, id))
         else
             notAllowed()
     }
 
     override fun startTagOpenDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
-        return if (nameClass.contains(qn)//
-        )
-            group(pattern, endRange(qn, id))//
+        return if (nameClass.contains(qn))
+            group(pattern, endRange(qn, id))
         else
             notAllowed()
     }

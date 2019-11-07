@@ -25,17 +25,13 @@ import nl.knaw.huygens.alexandria.creole.patterns.NotAllowed
 import org.slf4j.LoggerFactory
 
 class Validator internal constructor(private val schemaPattern: Pattern) {
-    private val errorListener: ValidationErrorListener
-
-    init {
-        this.errorListener = ValidationErrorListener()
-    }
+    private val errorListener: ValidationErrorListener = ValidationErrorListener()
 
     fun validate(events: MutableList<Event>): ValidationResult {
         val pattern = eventsDeriv(schemaPattern, events)
         LOG.debug("end pattern = {}", pattern)
-        return ValidationResult()//
-                .setSuccess(pattern.isNullable)//
+        return ValidationResult()
+                .setSuccess(pattern.isNullable)
                 .setUnexpectedEvent(errorListener.unexpectedEvent)
     }
 
@@ -51,13 +47,13 @@ class Validator internal constructor(private val schemaPattern: Pattern) {
 
         //  eventDeriv p (h:t) = eventDeriv (eventDeriv p h) t
         val head = events.removeAt(0)
-        LOG.debug("{}: {}", head.javaClass.getSimpleName(), head)
+        LOG.debug("{}: {}", head.javaClass.simpleName, head)
         val headDeriv = head.eventDeriv(pattern)
         //    LOG.debug("\n{}", Utilities.patternTreeToDepth(headDeriv, 20));
 
         if (headDeriv is NotAllowed) {
             // fail fast
-            LOG.error("Unexpected " + head.javaClass.getSimpleName() + ": {}", head)
+            LOG.error("Unexpected " + head.javaClass.simpleName + ": {}", head)
             errorListener.unexpectedEvent = head
             return notAllowed()
         }
@@ -65,7 +61,7 @@ class Validator internal constructor(private val schemaPattern: Pattern) {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(Validator::class.java!!)
+        private val LOG = LoggerFactory.getLogger(Validator::class.java)
 
         fun ofPattern(schemaPattern: Pattern): Validator {
             return Validator(schemaPattern)

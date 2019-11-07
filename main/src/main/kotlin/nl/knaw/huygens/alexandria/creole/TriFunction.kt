@@ -27,7 +27,7 @@ internal interface TriFunction<A, B, C, R> {
 
     fun apply(a: A, b: B, c: C): R
 
-    fun <V> andThen(after: Function<in R, out V>): TriFunction<A, B, C, V> {
+    fun <V> andThen(after: Function<in R, out V>): (A, B, C) -> V {
         Objects.requireNonNull(after)
         return { a: A, b: B, c: C -> after.apply(apply(a, b, c)) }
     }

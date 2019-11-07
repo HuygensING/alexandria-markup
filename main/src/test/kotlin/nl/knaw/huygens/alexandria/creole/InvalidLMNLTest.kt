@@ -31,7 +31,6 @@ import org.junit.runners.Parameterized
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.util.stream.Collectors
 
 @RunWith(Parameterized::class)
 class InvalidLMNLTest(private val basename: String) : CreoleTest() {
@@ -47,7 +46,7 @@ class InvalidLMNLTest(private val basename: String) : CreoleTest() {
     @Throws(IOException::class)
     private fun validateLMNL(basename: String) {
         val xml = FileUtils.readFileToString(File("$ROOTDIR$basename.creole"), "UTF-8")
-        Assertions.assertThat(xml).isNotEmpty()
+        assertThat(xml).isNotEmpty()
         LOG.info("testing {}.creole", basename)
         LOG.info("{}", xml)
         val schema = SchemaImporter.fromXML(xml)
@@ -63,7 +62,7 @@ class InvalidLMNLTest(private val basename: String) : CreoleTest() {
     companion object {
         private val ROOTDIR = "src/test/resources/"
         private val LMNL_DIR = ROOTDIR + "invalid/"
-        private val LOG = LoggerFactory.getLogger(InvalidLMNLTest::class.java!!)
+        private val LOG = LoggerFactory.getLogger(InvalidLMNLTest::class.java)
 
         private val LMNL_FILE_FILTER = object : IOFileFilter {
             override fun accept(file: File): Boolean {
@@ -81,12 +80,10 @@ class InvalidLMNLTest(private val basename: String) : CreoleTest() {
 
         @Parameterized.Parameters
         fun parameters(): Collection<Array<String>> {
-            return FileUtils.listFiles(File(LMNL_DIR), LMNL_FILE_FILTER, null)//
-                    .stream()//
-                    .map<String>(Function<File, String> { it.getName() })//
-                    .map<String> { n -> n.replace(".lmnl", "") }//
-                    .map { b -> arrayOf(b) }//
-                    .collect<List<Array<String>>, Any>(Collectors.toList())
+            return FileUtils.listFiles(File(LMNL_DIR), LMNL_FILE_FILTER, null)
+                    .map { it.name }
+                    .map { n -> n.replace(".lmnl", "") }
+                    .map { b -> arrayOf(b) }
         }
     }
 

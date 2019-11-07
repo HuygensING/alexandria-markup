@@ -30,14 +30,14 @@ class After(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
 
     override fun init() {
         nullable = false
-        allowsText = if (pattern1.isNullable//
+        allowsText = if (pattern1.isNullable
         )
-            pattern1.allowsText() || pattern2.allowsText()//
+            pattern1.allowsText() || pattern2.allowsText()
         else
             pattern1.allowsText()
-        allowsAnnotations = if (pattern1.isNullable//
+        allowsAnnotations = if (pattern1.isNullable
         )
-            pattern1.allowsAnnotations() || pattern2.allowsAnnotations()//
+            pattern1.allowsAnnotations() || pattern2.allowsAnnotations()
         else
             pattern1.allowsAnnotations()
         onlyAnnotations = pattern1.onlyAnnotations() && pattern2.onlyAnnotations()
@@ -46,9 +46,9 @@ class After(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
     override fun textDeriv(cx: Basics.Context, s: String): Pattern {
         //textDeriv cx (After p1 p2) s =
         //  after (textDeriv cx p1 s) p2
-        return after(//
-                pattern1.textDeriv(cx, s), //
-                pattern2//
+        return after(
+                pattern1.textDeriv(cx, s),
+                pattern2
         )
     }
 
@@ -56,25 +56,25 @@ class After(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
         // startTagDeriv (After p1 p2) qn id =
         //   after (startTagDeriv p1 qn id)
         //         p2
-        return after(//
-                pattern1.startTagDeriv(qn, id), //
-                pattern2//
+        return after(
+                pattern1.startTagDeriv(qn, id),
+                pattern2
         )
     }
 
     override fun endTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
         // endTagDeriv (After p1 p2) qn id =
         //   after (endTagDeriv p1 qn id) p2
-        return after(//
-                pattern1.endTagDeriv(qn, id), //
-                pattern2//
+        return after(
+                pattern1.endTagDeriv(qn, id),
+                pattern2
         )
     }
 
     override fun applyAfter(f: Function<Pattern, Pattern>): Pattern {
-        return after(//
-                pattern1, //
-                f.apply(pattern2)//
+        return after(
+                pattern1,
+                f.apply(pattern2)
         )
     }
 }

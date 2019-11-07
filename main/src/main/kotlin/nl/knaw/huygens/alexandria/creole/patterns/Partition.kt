@@ -28,21 +28,21 @@ class Partition(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
 
     override fun textDeriv(cx: Basics.Context, s: String): Pattern {
         //For Partition, we create an After pattern that contains the derivative.
-        //
+
         //textDeriv cx (Partition p) s =
         //  after (textDeriv cx p s) Empty
-        return after(//
-                pattern.textDeriv(cx, s), //
-                empty()//
+        return after(
+                pattern.textDeriv(cx, s),
+                empty()
         )
     }
 
     override fun startTagDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
         // startTagDeriv (Partition p) qn id =
         //   after (startTagDeriv p qn id) Empty
-        return after(//
-                pattern.startTagDeriv(qn, id), //
-                empty()//
+        return after(
+                pattern.startTagDeriv(qn, id),
+                empty()
         )
     }
 
@@ -50,9 +50,9 @@ class Partition(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
         // endTagDeriv (Partition p) qn id =
         //   after (endTagDeriv p qn id)
         //         Empty
-        return after(//
-                pattern.endTagDeriv(qn, id), //
-                empty()//
+        return after(
+                pattern.endTagDeriv(qn, id),
+                empty()
         )
     }
 }

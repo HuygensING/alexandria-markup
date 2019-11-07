@@ -23,7 +23,7 @@ import nl.knaw.huygens.alexandria.creole.Basics
 import nl.knaw.huygens.alexandria.creole.Pattern
 
 @Deprecated("")
-internal class StartTagEvent(qName: Basics.QName, id: Basics.Id) : TagEvent(qName, id) {
+class StartTagEvent(qName: Basics.QName, id: Basics.Id) : TagEvent(qName, id) {
 
     override fun eventDeriv(p: Pattern): Pattern {
         // eventDeriv p (StartTagEvent qn id) = startTagDeriv p qn id

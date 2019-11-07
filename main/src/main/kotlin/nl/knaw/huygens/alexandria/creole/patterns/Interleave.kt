@@ -37,9 +37,9 @@ class Interleave(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternPa
         //textDeriv cx (Interleave p1 p2) s =
         //  choice (interleave (textDeriv cx p1 s) p2)
         //         (interleave p1 (textDeriv cx p2 s))
-        return choice(//
-                interleave(pattern1.textDeriv(cx, s), pattern2), //
-                interleave(pattern1, pattern2.textDeriv(cx, s))//
+        return choice(
+                interleave(pattern1.textDeriv(cx, s), pattern2),
+                interleave(pattern1, pattern2.textDeriv(cx, s))
         )
     }
 
@@ -47,16 +47,16 @@ class Interleave(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternPa
         // startTagDeriv (Interleave p1 p2) qn id =
         //   choice (interleave (startTagDeriv p1 qn id) p2)
         //          (interleave p1 (startTagDeriv p2 qn id))
-        return choice(//
-                interleave(pattern1.startTagDeriv(qn, id), pattern2), //
-                interleave(pattern1, pattern2.startTagDeriv(qn, id))//
+        return choice(
+                interleave(pattern1.startTagDeriv(qn, id), pattern2),
+                interleave(pattern1, pattern2.startTagDeriv(qn, id))
         )
     }
 
     override fun startTagOpenDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
-        return choice(//
-                interleave(pattern1.startTagOpenDeriv(qn, id), pattern2), //
-                interleave(pattern1, pattern2.startTagOpenDeriv(qn, id))//
+        return choice(
+                interleave(pattern1.startTagOpenDeriv(qn, id), pattern2),
+                interleave(pattern1, pattern2.startTagOpenDeriv(qn, id))
         )
     }
 
@@ -64,9 +64,9 @@ class Interleave(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternPa
         // endTagDeriv (Interleave p1 p2) qn id =
         //   choice (interleave (endTagDeriv p1 qn id) p2)
         //          (interleave p1 (endTagDeriv p2 qn id))
-        return choice(//
-                interleave(pattern1.endTagDeriv(qn, id), pattern2), //
-                interleave(pattern1, pattern2.endTagDeriv(qn, id))//
+        return choice(
+                interleave(pattern1.endTagDeriv(qn, id), pattern2),
+                interleave(pattern1, pattern2.endTagDeriv(qn, id))
         )
     }
 }

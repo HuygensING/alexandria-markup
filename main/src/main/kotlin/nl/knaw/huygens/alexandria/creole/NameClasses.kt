@@ -39,7 +39,7 @@ object NameClasses {
         return ANY_NAME
     }
 
-    internal class AnyName : AbstractNameClass() {
+    class AnyName : AbstractNameClass() {
         override fun contains(qName: Basics.QName): Boolean {
             return true
         }
@@ -49,7 +49,7 @@ object NameClasses {
         return AnyNameExcept(nameClassToExcept)
     }
 
-    internal class AnyNameExcept(val nameClassToExcept: NameClass) : AbstractNameClass() {
+    class AnyNameExcept(private val nameClassToExcept: NameClass) : AbstractNameClass() {
 
         override fun contains(qName: Basics.QName): Boolean {
             return !nameClassToExcept.contains(qName)
@@ -68,10 +68,10 @@ object NameClasses {
         return Name(uri, localName)
     }
 
-    internal class Name(val uri: Basics.Uri, val localName: Basics.LocalName) : AbstractNameClass() {
+    class Name(val uri: Basics.Uri, val localName: Basics.LocalName) : AbstractNameClass() {
 
         init {
-            setHashCode(javaClass.hashCode() * uri.hashCode() * localName.hashCode())
+            Companion.setHashCode(this, javaClass.hashCode() * uri.hashCode() * localName.hashCode())
         }
 
         override fun contains(qName: Basics.QName): Boolean {
@@ -91,11 +91,10 @@ object NameClasses {
         return NsNameExcept(uri, nameClass)
     }
 
-    internal class NsNameExcept(val uri: Basics.Uri, val nameClass: NameClass) : AbstractNameClass() {
+    class NsNameExcept(val uri: Basics.Uri, val nameClass: NameClass) : AbstractNameClass() {
 
         override fun contains(qName: Basics.QName): Boolean {
-            return (uri == qName.uri//
-                    && !nameClass.contains(qName))
+            return (uri == qName.uri && !nameClass.contains(qName))
         }
     }
 
@@ -107,7 +106,7 @@ object NameClasses {
         return NsName(uri)
     }
 
-    internal class NsName(private val uri: Basics.Uri) : AbstractNameClass() {
+    class NsName(private val uri: Basics.Uri) : AbstractNameClass() {
 
         val value: String
             get() = uri.value
@@ -121,28 +120,30 @@ object NameClasses {
         return NameClassChoice(nameClass1, nameClass2)
     }
 
-    internal class NameClassChoice(val nameClass1: NameClass, val nameClass2: NameClass) : AbstractNameClass() {
+    class NameClassChoice(val nameClass1: NameClass, val nameClass2: NameClass) : AbstractNameClass() {
 
         override fun contains(qName: Basics.QName): Boolean {
-            return (nameClass1.contains(qName) //
+            return (nameClass1.contains(qName)
                     || nameClass2.contains(qName))
         }
     }
 
     /* abstract classes */
-    internal abstract class AbstractNameClass : NameClass {
-        var hashCode: Int = 0
+    abstract class AbstractNameClass : NameClass {
+        var hashCode = 0
 
         init {
             hashCode = javaClass.hashCode()
         }
 
-        fun setHashCode(hashCode: Int) {
-            this.hashCode = hashCode
-        }
-
         override fun hashCode(): Int {
             return hashCode
+        }
+
+        companion object {
+            fun setHashCode(abstractNameClass: AbstractNameClass, hashCode: Int) {
+                abstractNameClass.hashCode = hashCode
+            }
         }
     }
 

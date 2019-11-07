@@ -25,7 +25,7 @@ import nl.knaw.huygens.alexandria.creole.NameClass
 class EndAnnotation(internal val nameClass: NameClass) : AbstractPattern() {
 
     init {
-        setHashcode(javaClass.hashCode() + nameClass.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() + nameClass.hashCode())
     }
 
     override fun init() {

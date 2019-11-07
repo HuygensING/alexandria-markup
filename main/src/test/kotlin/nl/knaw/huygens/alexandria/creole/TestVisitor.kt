@@ -63,7 +63,7 @@ internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            tests.add(currentTest)
+            tests.add(currentTest!!)
             currentTest = null
             return Traversal.NEXT
         }
@@ -76,9 +76,9 @@ internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            val content = context.closeLayer().trim { it <= ' ' }//
-                    .replace("^ {6}".toRegex(), "")//
-                    .replace("\n {6}".toRegex(), "\n")//
+            val content = context.closeLayer().trim { it <= ' ' }
+                    .replace("^ {6}".toRegex(), "")
+                    .replace("\n {6}".toRegex(), "\n")
                     .replace("\n\n".toRegex(), "\n")
             val name = element.getAttribute("name")
             when (name) {

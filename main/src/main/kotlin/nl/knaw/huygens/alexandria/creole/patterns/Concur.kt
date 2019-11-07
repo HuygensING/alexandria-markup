@@ -36,13 +36,13 @@ class Concur(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
     override fun textDeriv(cx: Basics.Context, s: String): Pattern {
         //For Concur, text is only allowed if it is allowed by both of the sub-patterns: we create a new Concur whose
         // sub-patterns are the derivatives of the original sub-patterns.
-        //
+
         //textDeriv cx (Concur p1 p2) s =
         //  concur (textDeriv cx p1 s)
         //         (textDeriv cx p2 s)
-        return concur(//
-                pattern1.textDeriv(cx, s), //
-                pattern2.textDeriv(cx, s)//
+        return concur(
+                pattern1.textDeriv(cx, s),
+                pattern2.textDeriv(cx, s)
         )
     }
 
@@ -54,12 +54,12 @@ class Concur(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
         //             (concur d1 d2)
         val d1 = pattern1.startTagDeriv(qn, id)
         val d2 = pattern2.startTagDeriv(qn, id)
-        return choice(//
-                choice(//
-                        concur(d1, pattern2), //
-                        concur(pattern1, d2)//
-                ), //
-                concur(d1, d2)//
+        return choice(
+                choice(
+                        concur(d1, pattern2),
+                        concur(pattern1, d2)
+                ),
+                concur(d1, d2)
         )
     }
 
@@ -72,12 +72,12 @@ class Concur(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
         //             (concur d1 d2)
         val d1 = pattern1.endTagDeriv(qn, id)
         val d2 = pattern2.endTagDeriv(qn, id)
-        return choice(//
-                choice(//
-                        concur(d1, pattern2), //
-                        concur(pattern1, d2)//
-                ), //
-                concur(d1, d2)//
+        return choice(
+                choice(
+                        concur(d1, pattern2),
+                        concur(pattern1, d2)
+                ),
+                concur(d1, d2)
         )
     }
 }

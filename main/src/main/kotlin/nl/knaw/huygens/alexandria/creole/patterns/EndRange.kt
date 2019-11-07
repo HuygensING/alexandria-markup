@@ -27,7 +27,7 @@ import nl.knaw.huygens.alexandria.creole.Pattern
 class EndRange(val qName: Basics.QName, val id: Basics.Id) : AbstractPattern() {
 
     init {
-        setHashcode(javaClass.hashCode() + qName.hashCode() * id.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() + qName.hashCode() * id.hashCode())
     }
 
     override fun init() {
@@ -49,7 +49,7 @@ class EndRange(val qName: Basics.QName, val id: Basics.Id) : AbstractPattern() {
         val ns2 = qn.uri
         val ln2 = qn.localName
         return if (id == id2 || id.isEmpty && id2.isEmpty && ns1 == ns2 && ln1 == ln2)
-            empty()//
+            empty()
         else
             notAllowed()
     }

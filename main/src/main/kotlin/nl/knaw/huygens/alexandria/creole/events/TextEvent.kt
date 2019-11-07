@@ -31,9 +31,9 @@ class TextEvent internal constructor(val text: String, val context: Basics.Conte
         //    if (whitespace s && not allowsText p)
         //    then p
         //    else (textDeriv cx p s)
-        return if (whitespace(text) && !p.allowsText()//
+        return if (whitespace(text) && !p.allowsText()
         )
-            p //
+            p
         else
             p.textDeriv(context, text)
     }
@@ -45,7 +45,7 @@ class TextEvent internal constructor(val text: String, val context: Basics.Conte
     //    public int hashCode() {
     //      return text.hashCode() * context.hashCode();
     //    }
-    //
+
     //    @Override
     //    public boolean equals(Object obj) {
     //      return (obj instanceof TextEvent)

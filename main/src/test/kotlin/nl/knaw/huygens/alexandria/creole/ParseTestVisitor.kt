@@ -79,7 +79,7 @@ class ParseTestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            tests.add(currentTest)
+            tests.add(currentTest!!)
             currentTest = null
             return Traversal.NEXT
         }
@@ -92,8 +92,8 @@ class ParseTestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            val content = context.closeLayer().trim { it <= ' ' }//
-                    .replace("\"".toRegex(), "\\\\\"")//
+            val content = context.closeLayer().trim { it <= ' ' }
+                    .replace("\"".toRegex(), "\\\\\"")
                     .replace("\n".toRegex(), "\\\\n")
             val name = element.getAttribute("name")
             when (name) {
@@ -114,9 +114,9 @@ class ParseTestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            val content = context.closeLayer().trim { it <= ' ' }//
-                    .replace("^ {6}".toRegex(), "")//
-                    .replace("\n {6}".toRegex(), "\n")//
+            val content = context.closeLayer().trim { it <= ' ' }
+                    .replace("^ {6}".toRegex(), "")
+                    .replace("\n {6}".toRegex(), "\n")
                     .replace("\n\n".toRegex(), "\n")
             if (currentTest != null) {
                 currentTest!!.title = content
@@ -134,7 +134,7 @@ class ParseTestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
         }
 
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
-            testCodeBuilder.append(");\n")//
+            testCodeBuilder.append(");\n")
                     .append("assertEventsAreExpected(lmnl, expectedEvents);\n}\n")
             return Traversal.NEXT
         }

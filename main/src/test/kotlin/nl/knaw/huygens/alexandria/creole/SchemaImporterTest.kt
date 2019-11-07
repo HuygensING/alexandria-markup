@@ -20,8 +20,20 @@ package nl.knaw.huygens.alexandria.creole
  * #L%
 */
 
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Constructors.concur
+import nl.knaw.huygens.alexandria.creole.Constructors.concurOneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.element
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.interleave
+import nl.knaw.huygens.alexandria.creole.Constructors.mixed
+import nl.knaw.huygens.alexandria.creole.Constructors.oneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.range
+import nl.knaw.huygens.alexandria.creole.Constructors.text
+import nl.knaw.huygens.alexandria.creole.Constructors.zeroOrMore
 import nl.knaw.huygens.alexandria.creole.NameClasses.name
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns
+import org.assertj.core.api.Assertions
 import org.junit.Test
 
 class SchemaImporterTest : CreoleTest() {
@@ -44,213 +56,214 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testBiblicalExampleGrammarFromXML() {
-        val xml = "<grammar xmlns=\"http://lmnl.net/ns/creole\">\n" +//
 
-                "<start>\n" +//
+        val xml = "<grammar xmlns=\"http://lmnl.net/ns/creole\">\n" +
 
-                "  <ref name=\"book\" />\n" +//
+                "<start>\n" +
 
-                "</start>\n" +//
+                "  <ref name=\"book\" />\n" +
 
-                "\n" +//
+                "</start>\n" +
 
-                "<define name=\"book\">\n" +//
+                "\n" +
 
-                "  <element name=\"book\">\n" +//
+                "<define name=\"book\">\n" +
 
-                "    <concur>\n" +//
+                "  <element name=\"book\">\n" +
 
-                "      <oneOrMore>\n" +//
+                "    <concur>\n" +
 
-                "        <ref name=\"page\" />\n" +//
+                "      <oneOrMore>\n" +
 
-                "      </oneOrMore>\n" +//
+                "        <ref name=\"page\" />\n" +
 
-                "      <group>\n" +//
+                "      </oneOrMore>\n" +
 
-                "        <ref name=\"title\" />\n" +//
+                "      <group>\n" +
 
-                "        <concur>\n" +//
+                "        <ref name=\"title\" />\n" +
 
-                "          <oneOrMore>\n" +//
+                "        <concur>\n" +
 
-                "            <ref name=\"chapter\" />\n" +//
+                "          <oneOrMore>\n" +
 
-                "          </oneOrMore>\n" +//
+                "            <ref name=\"chapter\" />\n" +
 
-                "          <oneOrMore>\n" +//
+                "          </oneOrMore>\n" +
 
-                "            <ref name=\"section\" />\n" +//
+                "          <oneOrMore>\n" +
 
-                "          </oneOrMore>\n" +//
+                "            <ref name=\"section\" />\n" +
 
-                "        </concur>\n" +//
+                "          </oneOrMore>\n" +
 
-                "      </group>\n" +//
+                "        </concur>\n" +
 
-                "    </concur>\n" +//
+                "      </group>\n" +
 
-                "  </element>\n" +//
+                "    </concur>\n" +
 
-                "</define>\n" +//
+                "  </element>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"page\">\n" +//
+                "\n" +
 
-                "  <range name=\"page\">\n" +//
+                "<define name=\"page\">\n" +
 
-                "    <attribute name=\"no\" />\n" +//
+                "  <range name=\"page\">\n" +
 
-                "    <text />\n" +//
+                "    <attribute name=\"no\" />\n" +
 
-                "  </range>\n" +//
+                "    <text />\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"title\">\n" +//
+                "\n" +
 
-                "  <element name=\"title\"><text /></element>\n" +//
+                "<define name=\"title\">\n" +
 
-                "</define>\n" +//
+                "  <element name=\"title\"><text /></element>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"chapter\">\n" +//
+                "\n" +
 
-                "  <range name=\"chapter\">\n" +//
+                "<define name=\"chapter\">\n" +
 
-                "    <attribute name=\"no\" />\n" +//
+                "  <range name=\"chapter\">\n" +
 
-                "    <oneOrMore>\n" +//
+                "    <attribute name=\"no\" />\n" +
 
-                "      <ref name=\"verse\" />\n" +//
+                "    <oneOrMore>\n" +
 
-                "    </oneOrMore>\n" +//
+                "      <ref name=\"verse\" />\n" +
 
-                "  </range>\n" +//
+                "    </oneOrMore>\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"verse\">\n" +//
+                "\n" +
 
-                "  <range name=\"verse\">\n" +//
+                "<define name=\"verse\">\n" +
 
-                "    <attribute name=\"no\" />\n" +//
+                "  <range name=\"verse\">\n" +
 
-                "    <text />\n" +//
+                "    <attribute name=\"no\" />\n" +
 
-                "  </range>\n" +//
+                "    <text />\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"section\">\n" +//
+                "\n" +
 
-                "  <range name=\"section\">\n" +//
+                "<define name=\"section\">\n" +
 
-                "    <ref name=\"heading\" />\n" +//
+                "  <range name=\"section\">\n" +
 
-                "    <oneOrMore>\n" +//
+                "    <ref name=\"heading\" />\n" +
 
-                "      <ref name=\"para\" />\n" +//
+                "    <oneOrMore>\n" +
 
-                "    </oneOrMore>\n" +//
+                "      <ref name=\"para\" />\n" +
 
-                "  </range>\n" +//
+                "    </oneOrMore>\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"heading\">\n" +//
+                "\n" +
 
-                "  <element name=\"heading\">\n" +//
+                "<define name=\"heading\">\n" +
 
-                "    <ref name=\"indexedText\" />\n" +//
+                "  <element name=\"heading\">\n" +
 
-                "  </element>\n" +//
+                "    <ref name=\"indexedText\" />\n" +
 
-                "</define>\n" +//
+                "  </element>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"indexedText\">\n" +//
+                "\n" +
 
-                "  <concurOneOrMore>\n" +//
+                "<define name=\"indexedText\">\n" +
 
-                "    <mixed>\n" +//
+                "  <concurOneOrMore>\n" +
 
-                "      <zeroOrMore>\n" +//
+                "    <mixed>\n" +
 
-                "        <ref name=\"index\" />\n" +//
+                "      <zeroOrMore>\n" +
 
-                "      </zeroOrMore>\n" +//
+                "        <ref name=\"index\" />\n" +
 
-                "    </mixed>\n" +//
+                "      </zeroOrMore>\n" +
 
-                "  </concurOneOrMore>\n" +//
+                "    </mixed>\n" +
 
-                "</define>\n" +//
+                "  </concurOneOrMore>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"para\">\n" +//
+                "\n" +
 
-                "  <range name=\"para\">\n" +//
+                "<define name=\"para\">\n" +
 
-                "    <concur>\n" +//
+                "  <range name=\"para\">\n" +
 
-                "      <oneOrMore>\n" +//
+                "    <concur>\n" +
 
-                "        <ref name=\"verse\" />\n" +//
+                "      <oneOrMore>\n" +
 
-                "      </oneOrMore>\n" +//
+                "        <ref name=\"verse\" />\n" +
 
-                "      <oneOrMore>\n" +//
+                "      </oneOrMore>\n" +
 
-                "        <ref name=\"s\" />\n" +//
+                "      <oneOrMore>\n" +
 
-                "      </oneOrMore>\n" +//
+                "        <ref name=\"s\" />\n" +
 
-                "    </concur>\n" +//
+                "      </oneOrMore>\n" +
 
-                "  </range>\n" +//
+                "    </concur>\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"s\">\n" +//
+                "\n" +
 
-                "  <range name=\"s\">\n" +//
+                "<define name=\"s\">\n" +
 
-                "    <ref name=\"indexedText\" />\n" +//
+                "  <range name=\"s\">\n" +
 
-                "  </range>\n" +//
+                "    <ref name=\"indexedText\" />\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
 
-                "<define name=\"index\">\n" +//
+                "\n" +
 
-                "  <range name=\"index\">\n" +//
+                "<define name=\"index\">\n" +
 
-                "    <attribute name=\"ref\" />\n" +//
+                "  <range name=\"index\">\n" +
 
-                "    <text />\n" +//
+                "    <attribute name=\"ref\" />\n" +
 
-                "  </range>\n" +//
+                "    <text />\n" +
 
-                "</define>\n" +//
+                "  </range>\n" +
 
-                "\n" +//
+                "</define>\n" +
+
+                "\n" +
 
                 "</grammar>"
 
@@ -261,30 +274,18 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testBiblicalExampleFromCompactGrammar() {
-        val compactGrammar = "start = book\n" +//
-
-                "book = element book { page ~ \n" +//
-
-                "                      ( title, ( chapter+ ~ section+ ) ) }\n" +//
-
-                "page = range page { attribute no { text }, text }\n" +//
-
-                "title = element title { text }\n" +//
-
-                "chapter = range chapter { attribute no { text }, verse+ }\n" +//
-
-                "verse = range verse { attribute no { text }, text }\n" +//
-
-                "section = range section { heading, para+ }\n" +//
-
-                "heading = element heading { indexedText }\n" +//
-
+        val compactGrammar = "start = book\n" +
+                "book = element book { page ~ \n" +
+                "                      ( title, ( chapter+ ~ section+ ) ) }\n" +
+                "page = range page { attribute no { text }, text }\n" +
+                "title = element title { text }\n" +
+                "chapter = range chapter { attribute no { text }, verse+ }\n" +
+                "verse = range verse { attribute no { text }, text }\n" +
+                "section = range section { heading, para+ }\n" +
+                "heading = element heading { indexedText }\n" +
                 "para = range para { verse+ ~ s+ }\n" +// wo
-
-                "s = range s { indexedText }\n" +//
-
-                "indexedText = concurOneOrMore { mixed { index* } }\n" +//
-
+                "s = range s { indexedText }\n" +
+                "indexedText = concurOneOrMore { mixed { index* } }\n" +
                 "index = range index { attribute ref { text }, text }"
 
         val schema = SchemaImporter.fromCompactGrammar(compactGrammar)
@@ -293,15 +294,14 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testInterleaveSimplification() {
-        val xml = "<start><interleave>" +//
-
-                "<range name=\"a\"><text/></range>" +//
-
-                "<range name=\"b\"><text/></range>" +//
-
-                "<range name=\"c\"><text/></range>" +//
-
-                "</interleave></start>"
+        val xml = """
+            |<start>
+            |<interleave>
+            |<range name="a"><text/></range>
+            |<range name="b"><text/></range>
+            |<range name="c"><text/></range>
+            |</interleave>
+            |</start>""".trimMargin()
         val schema = SchemaImporter.fromXML(xml)
         val expected = interleave(
                 range(name("a"), text()),
@@ -315,15 +315,14 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testGroupSimplification() {
-        val xml = "<start><group>" +//
-
-                "<range name=\"a\"><text/></range>" +//
-
-                "<range name=\"b\"><text/></range>" +//
-
-                "<range name=\"c\"><text/></range>" +//
-
-                "</group></start>"
+        val xml = """
+            |<start>
+            |<group>
+            |<range name="a"><text/></range>
+            |<range name="b"><text/></range>
+            |<range name="c"><text/></range>
+            |</group>
+            |</start>""".trimMargin()
         val schema = SchemaImporter.fromXML(xml)
         val expected = group(
                 range(name("a"), text()),
@@ -337,15 +336,14 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testChoiceSimplification() {
-        val xml = "<start><choice>" +//
-
-                "<range name=\"a\"><text/></range>" +//
-
-                "<range name=\"b\"><text/></range>" +//
-
-                "<range name=\"c\"><text/></range>" +//
-
-                "</choice></start>"
+        val xml = """
+            |<start>
+            |<choice>
+            |<range name="a"><text/></range>
+            |<range name="b"><text/></range>
+            |<range name="c"><text/></range>
+            |</choice>
+            |</start>""".trimMargin()
         val schema = SchemaImporter.fromXML(xml)
         val expected = choice(
                 range(name("a"), text()),
@@ -359,15 +357,12 @@ class SchemaImporterTest : CreoleTest() {
 
     @Test
     fun testConcurSimplification() {
-        val xml = "<start><concur>" +//
-
-                "<range name=\"a\"><text/></range>" +//
-
-                "<range name=\"b\"><text/></range>" +//
-
-                "<range name=\"c\"><text/></range>" +//
-
-                "</concur></start>"
+        val xml = """
+            |<start><concur>
+            |<range name="a"><text/></range>
+            |<range name="b"><text/></range>
+            |<range name="c"><text/></range>
+            |</concur></start>""".trimMargin()
         val schema = SchemaImporter.fromXML(xml)
         val expected = concur(
                 range(name("a"), text()),
@@ -399,29 +394,29 @@ class SchemaImporterTest : CreoleTest() {
             val indexedText = concurOneOrMore(mixed(zeroOrMore(index)))
             val heading = element("heading", indexedText)
             val s = range(name("s"), indexedText)
-            val para = range(name("para"), //
-                    concur(//
-                            oneOrMore(verse), //
+            val para = range(name("para"),
+                    concur(
+                            oneOrMore(verse),
                             oneOrMore(s)
-                    )//
+                    )
             )
-            val section = range(name("section"), //
-                    group(//
-                            heading, //
-                            oneOrMore(para)//
-                    )//
+            val section = range(name("section"),
+                    group(
+                            heading,
+                            oneOrMore(para)
+                    )
             )
-            return element("book", //
-                    concur(//
-                            oneOrMore(page), //
-                            group(//
-                                    title, //
-                                    concur(//
-                                            oneOrMore(chapter), //
-                                            oneOrMore(section)//
-                                    )//
-                            )//
-                    )//
+            return element("book",
+                    concur(
+                            oneOrMore(page),
+                            group(
+                                    title,
+                                    concur(
+                                            oneOrMore(chapter),
+                                            oneOrMore(section)
+                                    )
+                            )
+                    )
             )
         }
     }

@@ -23,15 +23,15 @@ package nl.knaw.huygens.alexandria.creole.patterns
 import nl.knaw.huygens.alexandria.creole.Basics
 import nl.knaw.huygens.alexandria.creole.Constructors.choice
 import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.nullPattern
 import nl.knaw.huygens.alexandria.creole.Pattern
 
 class Group(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParameters(pattern1, pattern2) {
 
     override fun init() {
         nullable = pattern1.isNullable && pattern2.isNullable
-        allowsText = if (pattern1.isNullable//
-        )
-            pattern1.allowsText() || pattern2.allowsText()//
+        allowsText = if (pattern1.isNullable)
+            pattern1.allowsText() || pattern2.allowsText()
         else
             pattern1.allowsText()
         allowsAnnotations = pattern1.allowsAnnotations() || pattern2.allowsAnnotations()
@@ -44,9 +44,8 @@ class Group(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
         //  in if nullable p1 then choice p (textDeriv cx p2 s)
         //                    else p
         val p = group(pattern1.textDeriv(cx, s), pattern2)
-        return if (pattern1.isNullable//
-        )
-            choice(p, pattern2.textDeriv(cx, s))//
+        return if (pattern1.isNullable)
+            choice(p, pattern2.textDeriv(cx, s))
         else
             p
     }
@@ -57,9 +56,8 @@ class Group(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
         //   in if nullable p1 then choice d (startTagDeriv p2 qn id)
         //                     else d
         val d = group(pattern1.startTagDeriv(qn, id), pattern2)
-        return if (pattern1.isNullable//
-        )
-            choice(d, pattern2.startTagDeriv(qn, id))//
+        return if (pattern1.isNullable)
+            choice(d, pattern2.startTagDeriv(qn, id))
         else
             d
     }
@@ -71,27 +69,24 @@ class Group(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
         //                             (endTagDeriv p2 qn id)
         //                  else p
         val p = group(pattern1.endTagDeriv(qn, id), pattern2)
-        return if (pattern1.isNullable//
-        )
-            choice(p, pattern2.endTagDeriv(qn, id))//
+        return if (pattern1.isNullable)
+            choice(p, pattern2.endTagDeriv(qn, id))
         else
             p
     }
 
-    override fun startAnnotationDeriv(qn: Basics.QName): Pattern? {
+    override fun startAnnotationDeriv(qn: Basics.QName): Pattern {
         val p = group(pattern1, pattern2.startAnnotationDeriv(qn))
-        return if (pattern1.allowsAnnotations()//
-        )
-            null//
+        return if (pattern1.allowsAnnotations())
+            nullPattern()
         else
             p
     }
 
     override fun endAnnotationDeriv(qn: Basics.QName): Pattern {
         val p = group(pattern1.endAnnotationDeriv(qn), pattern2)
-        return if (pattern1.isNullable//
-        )
-            choice(p, pattern2.endAnnotationDeriv(qn))//
+        return if (pattern1.isNullable)
+            choice(p, pattern2.endAnnotationDeriv(qn))
         else
             p
     }

@@ -22,6 +22,11 @@ package nl.knaw.huygens.alexandria.creole
 
 import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
 import nl.knaw.huygens.alexandria.creole.Basics.id
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Constructors.element
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.text
 import nl.knaw.huygens.alexandria.creole.patterns.*
 import org.junit.Test
 import org.slf4j.LoggerFactory
@@ -243,26 +248,26 @@ class UtilitiesTest : CreoleTest() {
     @Test
     fun testPatternTreeVisualisationForEmpty() {
         val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.EMPTY, 1)
-        Assertions.assertThat(emptyVisualisation).isEqualTo("Empty()")
+        assertThat(emptyVisualisation).isEqualTo("Empty()")
     }
 
     @Test
     fun testPatternTreeVisualisationForNotAllowed() {
         val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.NOT_ALLOWED, 1)
-        Assertions.assertThat(emptyVisualisation).isEqualTo("NotAllowed()")
+        assertThat(emptyVisualisation).isEqualTo("NotAllowed()")
     }
 
     @Test
     fun testPatternTreeVisualisationForText() {
         val emptyVisualisation = Utilities.patternTreeToDepth(Patterns.TEXT, 1)
-        Assertions.assertThat(emptyVisualisation).isEqualTo("Text()")
+        assertThat(emptyVisualisation).isEqualTo("Text()")
     }
 
     @Test
     fun testPatternTreeVisualisationForChoice() {
         val choice = choice(text(), empty())
         val emptyVisualisation = Utilities.patternTreeToDepth(choice, 15)
-        Assertions.assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
+        assertThat(emptyVisualisation).isEqualTo("Choice(\n" +
                 "| Text(),\n" +
                 "| Empty()\n" +
                 ")")
@@ -272,14 +277,10 @@ class UtilitiesTest : CreoleTest() {
     fun testPatternTreeVisualisationForElement() {
         val element = element("book", text())
         val visualisation = Utilities.patternTreeToDepth(element, 10)
-        Assertions.assertThat(visualisation).isEqualTo("Partition(\n" +//
-
-                "| Range(\"book\",\n" +//
-
-                "| | Text()\n" +//
-
-                "| )\n" +//
-
+        assertThat(visualisation).isEqualTo("Partition(\n" +
+                "| Range(\"book\",\n" +
+                "| | Text()\n" +
+                "| )\n" +
                 ")")
     }
 
@@ -291,7 +292,7 @@ class UtilitiesTest : CreoleTest() {
 
         val flipped = pattern.flip()
         LOG.info("flipped = ", Utilities.patternTreeToDepth(flipped, 10))
-        Assertions.assertThat(flipped.javaClass).isEqualTo(pattern.javaClass)
+        assertThat(flipped.javaClass).isEqualTo(pattern.javaClass)
         val group = pattern as Group
         val flippedGroup = flipped as Group
         assertThat(flippedGroup.pattern1).isEqualTo(group.pattern2)
@@ -299,7 +300,7 @@ class UtilitiesTest : CreoleTest() {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(UtilitiesTest::class.java!!)
+        private val LOG = LoggerFactory.getLogger(UtilitiesTest::class.java)
     }
 
 }

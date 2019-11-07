@@ -20,14 +20,10 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
      */
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.creole.Basics;
-import static nl.knaw.huygens.alexandria.creole.Basics.qName;
 import nl.knaw.huygens.alexandria.creole.Event;
 import nl.knaw.huygens.alexandria.creole.events.*;
-import static nl.knaw.huygens.alexandria.creole.events.Events.textEvent;
-
 import nl.knaw.huygens.alexandria.data_model.*;
 import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 import org.antlr.v4.runtime.CharStream;
@@ -40,6 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static nl.knaw.huygens.alexandria.creole.events.Events.textEvent;
 
 public class LMNLImporter2 {
   private static final Logger LOG = LoggerFactory.getLogger(LMNLImporter2.class);
@@ -252,7 +251,7 @@ public class LMNLImporter2 {
 
     private Basics.QName getQName(Markup markup) {
       checkNotNull(markup);
-      return qName(markup.getTag());
+      return Basics.qName(markup.getTag());
     }
 
     void addTextEvent(String text) {
@@ -260,22 +259,22 @@ public class LMNLImporter2 {
     }
 
     void addStartAnnotationOpenEvent(String tag) {
-      Event startAnnotationOpenEvent = Events.startAnnotationOpenEvent(qName(tag));
+      Event startAnnotationOpenEvent = Events.startAnnotationOpenEvent(Basics.qName(tag));
       eventList.add(startAnnotationOpenEvent);
     }
 
     void addStartAnnotationCloseEvent(String tag) {
-      Event startAnnotationCloseEvent = Events.startAnnotationCloseEvent(qName(tag));
+      Event startAnnotationCloseEvent = Events.startAnnotationCloseEvent(Basics.qName(tag));
       eventList.add(startAnnotationCloseEvent);
     }
 
     void addEndAnnotationOpenEvent(String tag) {
-      Event endAnnotationOpenEvent = Events.endAnnotationOpenEvent(qName(tag));
+      Event endAnnotationOpenEvent = Events.endAnnotationOpenEvent(Basics.qName(tag));
       eventList.add(endAnnotationOpenEvent);
     }
 
     void addEndAnnotationCloseEvent(String tag) {
-      Event endAnnotationCloseEvent = Events.endAnnotationCloseEvent(qName(tag));
+      Event endAnnotationCloseEvent = Events.endAnnotationCloseEvent(Basics.qName(tag));
       eventList.add(endAnnotationCloseEvent);
     }
 

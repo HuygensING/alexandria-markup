@@ -29,7 +29,7 @@ class ValidationResult {
         return this
     }
 
-    fun setUnexpectedEvent(unexpectedEvent: Event): ValidationResult {
+    fun setUnexpectedEvent(unexpectedEvent: Event?): ValidationResult {
         this.unexpectedEvent = unexpectedEvent
         return this
     }

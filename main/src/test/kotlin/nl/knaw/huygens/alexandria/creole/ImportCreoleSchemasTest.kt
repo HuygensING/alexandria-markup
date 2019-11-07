@@ -24,13 +24,13 @@ import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
 import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.IOFileFilter
+import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.util.stream.Collectors
 
 @RunWith(Parameterized::class)
 class ImportCreoleSchemasTest(private val basename: String) : CreoleTest() {
@@ -55,7 +55,7 @@ class ImportCreoleSchemasTest(private val basename: String) : CreoleTest() {
 
     companion object {
         private val ROOTDIR = "src/test/resources/"
-        private val LOG = LoggerFactory.getLogger(ImportCreoleSchemasTest::class.java!!)
+        private val LOG = LoggerFactory.getLogger(ImportCreoleSchemasTest::class.java)
 
         private val CREOLE_FILE_FILTER = object : IOFileFilter {
             override fun accept(file: File): Boolean {
@@ -73,12 +73,10 @@ class ImportCreoleSchemasTest(private val basename: String) : CreoleTest() {
 
         @Parameterized.Parameters
         fun parameters(): Collection<Array<String>> {
-            return FileUtils.listFiles(File(ROOTDIR), CREOLE_FILE_FILTER, null)//
-                    .stream()//
-                    .map<String>(Function<File, String> { it.getName() })//
-                    .map<String> { n -> n.replace(".creole", "") }//
-                    .map { b -> arrayOf(b) }//
-                    .collect<List<Array<String>>, Any>(Collectors.toList())
+            return FileUtils.listFiles(File(ROOTDIR), CREOLE_FILE_FILTER, null)
+                    .map { it.name }
+                    .map { n -> n.replace(".creole", "",true) }
+                    .map { b -> arrayOf(b) }
         }
     }
 

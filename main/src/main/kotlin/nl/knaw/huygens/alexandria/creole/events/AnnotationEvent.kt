@@ -22,4 +22,4 @@ package nl.knaw.huygens.alexandria.creole.events
 import nl.knaw.huygens.alexandria.creole.Basics
 import nl.knaw.huygens.alexandria.creole.Event
 
-internal abstract class AnnotationEvent(val qName: Basics.QName) : Event
+abstract class AnnotationEvent(val qName: Basics.QName) : Event

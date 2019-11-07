@@ -35,75 +35,75 @@ object Utilities {
     //    Set<Event> expectedEvents = new HashSet<>();
     //    if (pattern instanceof Text) {
     //      expectedEvents.add(textEvent("*"));
-    //
-    //    } else if (pattern instanceof Choice//
-    //        || pattern instanceof Interleave//
-    //        || pattern instanceof Group//
-    //        || pattern instanceof Concur//
-    //        || pattern instanceof After//
-    //        || pattern instanceof All//
+
+    //    } else if (pattern instanceof Choice
+    //        || pattern instanceof Interleave
+    //        || pattern instanceof Group
+    //        || pattern instanceof Concur
+    //        || pattern instanceof After
+    //        || pattern instanceof All
     //        ) {
     //      PatternWithTwoPatternParameters p = (PatternWithTwoPatternParameters) pattern;
     //      expectedEvents.addAll(expectedEvents(p.getPattern1()));
     //      expectedEvents.addAll(expectedEvents(p.getPattern2()));
-    //
+
     ////    } else if (pattern instanceof Group
-    ////        || pattern instanceof After//
+    ////        || pattern instanceof After
     ////        ) {
     ////      PatternWithTwoPatternParameters p = (PatternWithTwoPatternParameters) pattern;
     ////      expectedEvents.addAll(expectedEvents(p.getPattern1()));
-    //
+
     //    } else if (pattern instanceof Partition
-    //        || pattern instanceof OneOrMore//
-    //        || pattern instanceof ConcurOneOrMore//
+    //        || pattern instanceof OneOrMore
+    //        || pattern instanceof ConcurOneOrMore
     //        ) {
     //      PatternWithOnePatternParameter p = (PatternWithOnePatternParameter) pattern;
     //      expectedEvents.addAll(expectedEvents(p.getPattern()));
-    //
+
     //    } else if (pattern instanceof Range) {
     //      Range range = (Range) pattern;
     //      expectedEvents.addAll(expectedStartTagEvents(range.getNameClass()));
-    //
+
     //    } else if (pattern instanceof EndRange) {
     //      EndRange endRange = (EndRange) pattern;
     //      expectedEvents.add(new EndTagEvent(endRange.getQName(), endRange.getId()));
     //    }
-    //
+
     //    return expectedEvents;
     //  }
 
     //  private static List<StartTagEvent> expectedStartTagEvents(NameClass nameClass) {
     //    List<StartTagEvent> startTagEvents = new ArrayList<>();
-    //
+
     //    if (nameClass instanceof NameClasses.AnyName) {
     //      startTagEvents.add(startTagEvent(qName("*", "*")));
-    //
+
     //    } else if (nameClass instanceof NameClasses.AnyNameExcept) {
     //      NameClasses.AnyNameExcept anyNameExcept = (NameClasses.AnyNameExcept) nameClass;
     //      NameClass nameClassToExcept = anyNameExcept.getNameClassToExcept();
     ////      startTagEvents.add(startTagEvent(qName("*","*")));
-    //
+
     //    } else if (nameClass instanceof NameClasses.Name) {
     //      NameClasses.Name name = (NameClasses.Name) nameClass;
     //      startTagEvents.add(startTagEvent(new Basics.QName(name.getUri(), name.getLocalName())));
-    //
+
     //    } else if (nameClass instanceof NameClasses.NsName) {
     //      NameClasses.NsName nsName = (NameClasses.NsName) nameClass;
     ////      startTagEvents.add(startTagEvent(qName("*","*")));
-    //
+
     //    } else if (nameClass instanceof NameClasses.NsNameExcept) {
     //      NameClasses.NsNameExcept nsNameExcept = (NameClasses.NsNameExcept) nameClass;
     ////      startTagEvents.add(startTagEvent(qName("*","*")));
-    //
+
     //    } else if (nameClass instanceof NameClasses.NameClassChoice) {
     //      NameClasses.NameClassChoice nameClassChoice = (NameClasses.NameClassChoice) nameClass;
     //      startTagEvents.addAll(expectedStartTagEvents(nameClassChoice.getNameClass1()));
     //      startTagEvents.addAll(expectedStartTagEvents(nameClassChoice.getNameClass2()));
     //    }
-    //
+
     //    return startTagEvents;
     //  }
-    //
+
     fun patternTreeToDepth(pattern: Pattern, maxDepth: Int): String {
         return patternTreeToDepth(pattern, 0, maxDepth)
     }
@@ -134,7 +134,7 @@ object Utilities {
     /* private */
 
     private fun patternTreeToDepth(pattern: Pattern, indent: Int, maxDepth: Int): String {
-        val patternName = pattern.javaClass.getSimpleName()
+        val patternName = pattern.javaClass.simpleName
         val parameters = parametersToString(pattern, indent, maxDepth)
         return StringUtils.repeat(INDENT, indent) + patternName + parameters
     }
@@ -146,9 +146,9 @@ object Utilities {
         val nextIndent = indent + 1
         if (pattern is PatternWithOnePatternParameter) {
             if (goDeeper) {
-                parameterBuilder.append("\n")//
-                        .append(patternTreeToDepth(pattern.pattern, nextIndent, maxDepth))//
-                        .append("\n")//
+                parameterBuilder.append("\n")
+                        .append(patternTreeToDepth(pattern.pattern, nextIndent, maxDepth))
+                        .append("\n")
                         .append(innerIndent)
             } else {
                 parameterBuilder.append(ELLIPSES)
@@ -156,11 +156,11 @@ object Utilities {
 
         } else if (pattern is PatternWithTwoPatternParameters) {
             if (goDeeper) {
-                parameterBuilder.append("\n")//
-                        .append(patternTreeToDepth(pattern.pattern1, nextIndent, maxDepth))//
-                        .append(",\n")//
-                        .append(patternTreeToDepth(pattern.pattern2, nextIndent, maxDepth))//
-                        .append("\n")//
+                parameterBuilder.append("\n")
+                        .append(patternTreeToDepth(pattern.pattern1, nextIndent, maxDepth))
+                        .append(",\n")
+                        .append(patternTreeToDepth(pattern.pattern2, nextIndent, maxDepth))
+                        .append("\n")
                         .append(innerIndent)
             } else {
                 parameterBuilder.append(ELLIPSES)
@@ -169,9 +169,9 @@ object Utilities {
         } else if (pattern is Range) {
             parameterBuilder.append(nameClassVisualization(pattern.nameClass))
             if (goDeeper) {
-                parameterBuilder.append(",\n")//
-                        .append(patternTreeToDepth(pattern.pattern, nextIndent, maxDepth))//
-                        .append("\n")//
+                parameterBuilder.append(",\n")
+                        .append(patternTreeToDepth(pattern.pattern, nextIndent, maxDepth))
+                        .append("\n")
                         .append(innerIndent)
             } else {
                 parameterBuilder.append(",").append(ELLIPSES)
@@ -190,7 +190,7 @@ object Utilities {
     private fun nameClassVisualization(nameClass: NameClass): String {
         return if (nameClass is NameClasses.Name) {
             "\"" + nameClass.localName.value + "\""
-        } else nameClass.javaClass.getSimpleName()
+        } else nameClass.javaClass.simpleName
     }
 
 }

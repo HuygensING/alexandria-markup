@@ -30,11 +30,9 @@ class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     val expandedSchemaTree: String
         get() {
             var schemaTree = start
-            while (schemaTree!!.contains("<ref name=")) {
-                for (name in definitionMap.keys) {
-                    schemaTree = schemaTree!!.replace("<ref name=\"$name\"/>", definitionMap[name])
-                }
-            }
+            while (schemaTree.contains("<ref name="))
+                for ((k, v) in definitionMap)
+                    schemaTree = schemaTree.replace("<ref name=\"$k\"/>", v, false)
             return schemaTree
         }
 
@@ -49,11 +47,10 @@ class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
 
     open class DefaultElementHandler : ElementHandler<XmlContext> {
         override fun enterElement(element: Element, context: XmlContext): Traversal {
-            if (element.hasChildren()) {
+            if (element.hasChildren())
                 context.addOpenTag(element)
-            } else {
+            else
                 context.addEmptyElementTag(element)
-            }
             return Traversal.NEXT
         }
 
@@ -84,9 +81,9 @@ class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     class RefHandler : DefaultElementHandler() {
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
             val ref = element.getAttribute("name")
-            requirements.get(currentDefinition).add(ref)
+            requirements.get(currentDefinition)?.add(ref)
             (dependants as java.util.Map<String, Set<String>>).putIfAbsent(ref, HashSet())
-            dependants[ref].add(currentDefinition)
+            dependants[ref]?.add(currentDefinition)
             return super.leaveElement(element, context)
         }
     }
@@ -108,14 +105,14 @@ class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(DefinitionVisitor::class.java!!)
+        private val LOG = LoggerFactory.getLogger(DefinitionVisitor::class.java)
 
-        private var start: String? = null
         private val definitionMap = HashMap<String, String>()
-        private val requirements = HashMap<String, Set<String>>() // the definitions referred to in this definition
-        private val dependants = HashMap<String, Set<String>>() // the definitions referring to this definition
+        private val requirements = HashMap<String, MutableSet<String>>() // the definitions referred to in this definition
+        private val dependants = HashMap<String, MutableSet<String>>() // the definitions referring to this definition
 
-        private var currentDefinition: String? = null
+        private var start: String = ""
+        private var currentDefinition: String = ""
     }
 
 

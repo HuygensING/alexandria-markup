@@ -24,26 +24,32 @@ import java.util.*
 
 object Basics {
 
+    @JvmStatic
     fun qName(localName: String): QName {
         return qName("", localName)
     }
 
+    @JvmStatic
     fun qName(uri: String, localName: String): QName {
         return QName(uri(uri), localName(localName))
     }
 
+    @JvmStatic
     fun localName(localName: String): LocalName {
         return LocalName(localName)
     }
 
+    @JvmStatic
     fun uri(uri: String): Uri {
         return Uri(uri)
     }
 
+    @JvmStatic
     fun id(id: String): Id {
         return Id(id)
     }
 
+    @JvmStatic
     fun context(): Context {
         return Context(uri(""), HashMap())
     }
@@ -54,7 +60,7 @@ object Basics {
 
     class Id internal constructor(id: String) : StringWrapper(id)
 
-    private class Prefix(prefix: String) : StringWrapper(prefix)
+    class Prefix(prefix: String) : StringWrapper(prefix)
 
     class QName(val uri: Uri, val localName: LocalName) {
 
@@ -70,12 +76,12 @@ object Basics {
    */
     class Context internal constructor(val uri: Uri, private val nameSpaceURI4Prefix: Map<Prefix, Uri>) {
 
-        fun getNameSpaceURIForPrefix(prefix: Prefix): Uri {
+        fun getNameSpaceURIForPrefix(prefix: Prefix): Uri? {
             return nameSpaceURI4Prefix[prefix]
         }
     }
 
-    private open class StringWrapper internal constructor(val value: String) {
+    open class StringWrapper internal constructor(val value: String) {
         internal val hashCode: Int
 
         val isEmpty: Boolean
@@ -92,7 +98,7 @@ object Basics {
         }
 
         override fun equals(obj: Any?): Boolean {
-            return (obj!!.javaClass == this.javaClass//
+            return (obj!!.javaClass == this.javaClass
                     && value == (obj as StringWrapper).value)
         }
 

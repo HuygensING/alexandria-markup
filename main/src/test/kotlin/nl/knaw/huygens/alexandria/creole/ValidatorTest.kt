@@ -22,6 +22,18 @@ package nl.knaw.huygens.alexandria.creole
 
 import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
 import nl.knaw.huygens.alexandria.creole.Basics.qName
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Constructors.concur
+import nl.knaw.huygens.alexandria.creole.Constructors.concurOneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.element
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.interleave
+import nl.knaw.huygens.alexandria.creole.Constructors.mixed
+import nl.knaw.huygens.alexandria.creole.Constructors.oneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.range
+import nl.knaw.huygens.alexandria.creole.Constructors.text
+import nl.knaw.huygens.alexandria.creole.Constructors.zeroOrMore
 import nl.knaw.huygens.alexandria.creole.NameClasses.name
 import nl.knaw.huygens.alexandria.creole.events.Events
 import nl.knaw.huygens.tei.Document
@@ -47,9 +59,9 @@ class ValidatorTest {
         val endE = Events.endTagEvent(qName)
         val validEvents = ArrayList(asList(startE, textE, endE))
 
-        val schemaPattern = element(//
-                "text", //
-                text()//
+        val schemaPattern = element(
+                "text",
+                text()
         )
 
         val validator = Validator.ofPattern(schemaPattern)
@@ -63,12 +75,12 @@ class ValidatorTest {
 
     @Test
     fun testValidator2() {
-        val schemaPattern = element(//
-                "text", //
-                interleave(//
-                        text(), //
-                        range(name("bold"), text())//
-                )//
+        val schemaPattern = element(
+                "text",
+                interleave(
+                        text(),
+                        range(name("bold"), text())
+                )
         )
 
         val validator = Validator.ofPattern(schemaPattern)
@@ -106,9 +118,9 @@ class ValidatorTest {
         // <element name="foo">
         //   <text />
         // </element>
-        val schema = element("foo", //
-                text()//
-        )//
+        val schema = element("foo",
+                text()
+        )
 
         val someText = Events.textEvent("...")
 
@@ -123,9 +135,9 @@ class ValidatorTest {
         // <element name="foo">
         //   <text />
         // </element>
-        val schema = element("foo", //
-                text()//
-        )//
+        val schema = element("foo",
+                text()
+        )
 
         val foo = qName("foo")
         val openFoo = Events.startTagEvent(foo)
@@ -143,9 +155,9 @@ class ValidatorTest {
         // <element name="foo">
         //   <text />
         // </element>
-        val schema = element("foo", //
-                text()//
-        )//
+        val schema = element("foo",
+                text()
+        )
 
         val foo = qName("foo")
         val openFoo = Events.startTagEvent(foo)
@@ -163,8 +175,8 @@ class ValidatorTest {
         // <element name="bar">
         //   <text />
         // </element>
-        val schema = element("bar", //
-                text()//
+        val schema = element("bar",
+                text()
         )
 
         val foo = qName("foo")
@@ -183,8 +195,8 @@ class ValidatorTest {
         // <element name="foo">
         //   <empty />
         // </element>
-        val schema = element("foo", //
-                empty()//
+        val schema = element("foo",
+                empty()
         )
 
         val foo = qName("foo")
@@ -203,8 +215,8 @@ class ValidatorTest {
         // <range name="foo">
         //   <text />
         //  </range>
-        val schema = range(name("foo"), //
-                text()//
+        val schema = range(name("foo"),
+                text()
         )
 
         val foo = qName("foo")
@@ -223,8 +235,8 @@ class ValidatorTest {
         // <range name="foo">
         //   <text />
         //  </range>
-        val schema = range(name("foo"), //
-                text()//
+        val schema = range(name("foo"),
+                text()
         )
 
         val foo = qName("foo")
@@ -243,8 +255,8 @@ class ValidatorTest {
         // <range name="bar">
         //   <text />
         //  </range>
-        val schema = range(name("bar"), //
-                text()//
+        val schema = range(name("bar"),
+                text()
         )
 
         val foo = qName("foo")
@@ -263,8 +275,8 @@ class ValidatorTest {
         // <range name="foo">
         //   <empty />
         //  </range>
-        val schema = range(name("foo"), //
-                empty()//
+        val schema = range(name("foo"),
+                empty()
         )
 
         val foo = qName("foo")
@@ -289,12 +301,12 @@ class ValidatorTest {
         //  </range>
         //</choice>
         val schema = choice(
-                element("foo", //
-                        text()//
-                ), //
-                range(name("foo"), //
-                        text()//
-                )//
+                element("foo",
+                        text()
+                ),
+                range(name("foo"),
+                        text()
+                )
         )
 
         val foo = qName("foo")
@@ -319,12 +331,12 @@ class ValidatorTest {
         //  </range>
         //</choice>
         val schema = choice(
-                element("bar", //
-                        text()//
-                ), //
-                range(name("bar"), //
-                        text()//
-                )//
+                element("bar",
+                        text()
+                ),
+                range(name("bar"),
+                        text()
+                )
         )
 
         val foo = qName("foo")
@@ -399,13 +411,13 @@ class ValidatorTest {
 
         val heading = element("heading", text())
         val para = range(name("para"), text())
-        val section = range(name("section"), //
-                group(//
-                        heading, //
-                        oneOrMore(para)//
-                )//
+        val section = range(name("section"),
+                group(
+                        heading,
+                        oneOrMore(para)
+                )
         )
-        val schema = concur(//
+        val schema = concur(
                 oneOrMore(chapter),
                 oneOrMore(section)
         )
@@ -433,7 +445,7 @@ class ValidatorTest {
         // [para}...{v][v}...{v]{para]
         // {section]
         // {chapter]
-        val events = ArrayList(asList(//
+        val events = ArrayList(asList(
                 openChapter,
                 openSection, openHeading, someText, closeHeading,
                 openPara, openV, someText, closeV, openV, someText, closePara,
@@ -457,30 +469,30 @@ class ValidatorTest {
         val page = range(name("page"), text()) // TODO: How to indicate when a range can't self-overlap?
         val title = element("title", text())
         val heading = element("heading", indexedText)
-        val para = range(name("para"), //
-                concur(//
-                        //            text(),//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        //            text(),
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val section = range(name("section"), //
-                group(//
-                        heading, //
-                        oneOrMore(para)//
-                )//
+        val section = range(name("section"),
+                group(
+                        heading,
+                        oneOrMore(para)
+                )
         )
-        val book = element("book", //
-                concur(//
-                        oneOrMore(page), //
-                        group(//
-                                title, //
-                                concur(//
-                                        oneOrMore(chapter), //
-                                        oneOrMore(section)//
-                                )//
-                        )//
-                )//
+        val book = element("book",
+                concur(
+                        oneOrMore(page),
+                        group(
+                                title,
+                                concur(
+                                        oneOrMore(chapter),
+                                        oneOrMore(section)
+                                )
+                        )
+                )
         )
 
         val openBook = Events.startTagEvent(qName("book"))
@@ -519,27 +531,27 @@ class ValidatorTest {
 
         val someText = Events.textEvent("some text")
 
-        val events = ArrayList(asList(//
-                openBook, openPage, //
-                openTitle, titleText, closeTitle, //
-                openSection, //
-                openHeading, headingText, closeHeading, //
-                openChapter, //
+        val events = ArrayList(asList(
+                openBook, openPage,
+                openTitle, titleText, closeTitle,
+                openSection,
+                openHeading, headingText, closeHeading,
+                openChapter,
                 openPara, openS,
                 openVerse,
-                someText, //
-                openIndex1, someText, //
-                openIndex2, someText, closeIndex1, someText, closePage, //
-                openPage, someText, closeIndex2, someText, //
-                closeS, closeVerse, closePara, //
-                openPara, openVerse, openS, someText, //
-                closeVerse, closeChapter, //
-                openChapter, openVerse, someText, //
+                someText,
+                openIndex1, someText,
+                openIndex2, someText, closeIndex1, someText, closePage,
+                openPage, someText, closeIndex2, someText,
+                closeS, closeVerse, closePara,
+                openPara, openVerse, openS, someText,
+                closeVerse, closeChapter,
+                openChapter, openVerse, someText,
                 closeVerse,
-                closeS, closePara, //
-                closeChapter, //
-                closeSection, //
-                closePage, closeBook//
+                closeS, closePara,
+                closeChapter,
+                closeSection,
+                closePage, closeBook
                 //        , closeBook // <- huh?
         ))
         assertValidationSucceeds(book, events)
@@ -550,17 +562,17 @@ class ValidatorTest {
         val s = range(name("s"), text())
         val verse = range(name("verse"), text())
         val chapter = range(name("chapter"), oneOrMore(verse))
-        val para = range(name("para"), //
-                concur(//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val book = range(name("book"), //
-                concur(//
-                        oneOrMore(chapter), //
-                        oneOrMore(para)//
-                )//
+        val book = range(name("book"),
+                concur(
+                        oneOrMore(chapter),
+                        oneOrMore(para)
+                )
         )
 
         val openBook = Events.startTagEvent(qName("book"))
@@ -582,7 +594,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(//
+        val events = ArrayList(asList(
                 openBook,
                 openChapter,
                 openPara,
@@ -604,17 +616,17 @@ class ValidatorTest {
         val s = range(name("s"), text())
         val verse = range(name("verse"), text())
         val chapter = range(name("chapter"), oneOrMore(verse))
-        val para = range(name("para"), //
-                concur(//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val book = range(name("book"), //
-                concur(//
-                        oneOrMore(chapter), //
-                        oneOrMore(para)//
-                )//
+        val book = range(name("book"),
+                concur(
+                        oneOrMore(chapter),
+                        oneOrMore(para)
+                )
         )
 
         val openBook = Events.startTagEvent(qName("book"))
@@ -636,7 +648,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(//
+        val events = ArrayList(asList(
                 openBook,
                 openChapter,
                 openPara,
@@ -659,17 +671,17 @@ class ValidatorTest {
         val s = range(name("s"), text())
         val verse = range(name("verse"), text())
         val chapter = range(name("chapter"), oneOrMore(verse))
-        val para = range(name("para"), //
-                concur(//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val book = element("book", //
-                concur(//
-                        oneOrMore(chapter), //
-                        oneOrMore(para)//
-                )//
+        val book = element("book",
+                concur(
+                        oneOrMore(chapter),
+                        oneOrMore(para)
+                )
         )
 
         val openBook = Events.startTagEvent(qName("book"))
@@ -690,7 +702,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(//
+        val events = ArrayList(asList(
                 openBook,
                 openChapter,
                 openPara,
@@ -712,17 +724,17 @@ class ValidatorTest {
         val s = range(name("s"), text())
         val verse = range(name("verse"), text())
         val chapter = range(name("chapter"), oneOrMore(verse))
-        val para = range(name("para"), //
-                concur(//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val book = element("book", //
-                concur(//
-                        oneOrMore(chapter), //
-                        oneOrMore(para)//
-                )//
+        val book = element("book",
+                concur(
+                        oneOrMore(chapter),
+                        oneOrMore(para)
+                )
         )
 
         val openBook = Events.startTagEvent(qName("book"))
@@ -744,7 +756,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(//
+        val events = ArrayList(asList(
                 openBook,
                 openChapter,
                 openPara,
@@ -755,7 +767,7 @@ class ValidatorTest {
                 closeS,
                 closeChapter,
                 closePara,
-                closeBook//
+                closeBook
                 , closeBook // <- huh?
         ))
         assertValidationFailsWithUnexpectedEvent(book, events, closeBook)
@@ -769,7 +781,7 @@ class ValidatorTest {
         val doc = Document.createFromXml(xml, true)
         val testVisitor = TestVisitor()
         doc.accept(testVisitor)
-        val tests = testVisitor.tests
+        val tests = testVisitor.getTests()
         for (i in tests.indices) {
             val t = tests[i]
             val baseDir = "src/test/resources/"
@@ -802,15 +814,15 @@ class ValidatorTest {
 
     private fun assertValidationSucceeds(schema: Pattern, events: MutableList<Event>) {
         val validationResult = validate(schema, events)
-        assertThat(validationResult)//
-                .isSuccess//
+        assertThat(validationResult)
+                .isSuccess
                 .hasNoUnexpectedEvent()
     }
 
     private fun assertValidationFailsWithUnexpectedEvent(schema: Pattern, events: MutableList<Event>, unexpectedEvent: Event) {
         val validationResult = validate(schema, events)
-        assertThat(validationResult)//
-                .isFailure//
+        assertThat(validationResult)
+                .isFailure
                 .hasUnexpectedEvent(unexpectedEvent)
     }
 

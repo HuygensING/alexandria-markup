@@ -26,7 +26,7 @@ abstract class PatternWithOnePatternParameter internal constructor(val pattern: 
 
     init {
         Preconditions.checkNotNull(pattern)
-        setHashcode(javaClass.hashCode() * pattern.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() * pattern.hashCode())
     }
 
     override fun init() {

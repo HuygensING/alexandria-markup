@@ -27,7 +27,7 @@ abstract class PatternWithTwoPatternParameters internal constructor(val pattern1
     init {
         Preconditions.checkNotNull(pattern1)
         Preconditions.checkNotNull(pattern2)
-        setHashcode(javaClass.hashCode() + pattern1.hashCode() * pattern2.hashCode())
+        Companion.setHashcode(this, javaClass.hashCode() + pattern1.hashCode() * pattern2.hashCode())
     }
 
     override fun equals(obj: Any?): Boolean {

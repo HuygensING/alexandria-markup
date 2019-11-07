@@ -153,10 +153,10 @@ object Constructors {
     }
 
     //  partition :: Pattern -> Pattern
-    internal fun partition(pattern: Pattern): Pattern {
+    fun partition(pattern: Pattern): Pattern {
         //  partition NotAllowed = NotAllowed
         //  partition Empty = Empty
-        return if (pattern is NotAllowed //
+        return if (pattern is NotAllowed
                 || pattern is Empty) {
             pattern
         } else Partition(pattern)
@@ -167,7 +167,7 @@ object Constructors {
     internal fun oneOrMore(pattern: Pattern): Pattern {
         //  oneOrMore NotAllowed = NotAllowed
         //  oneOrMore Empty = Empty
-        return if (pattern is NotAllowed //
+        return if (pattern is NotAllowed
                 || pattern is Empty) {
             pattern
         } else OneOrMore(pattern)
@@ -178,7 +178,7 @@ object Constructors {
     internal fun concurOneOrMore(pattern: Pattern): Pattern {
         //  concurOneOrMore NotAllowed = NotAllowed
         //  concurOneOrMore Empty = Empty
-        return if (pattern is NotAllowed //
+        return if (pattern is NotAllowed
                 || pattern is Empty) {
             pattern
         } else ConcurOneOrMore(pattern)
@@ -189,7 +189,7 @@ object Constructors {
     fun after(pattern1: Pattern, pattern2: Pattern): Pattern {
         //  after p NotAllowed = NotAllowed
         //  after NotAllowed p = NotAllowed
-        if (pattern1 is NotAllowed //
+        if (pattern1 is NotAllowed
                 || pattern2 is NotAllowed) {
             return notAllowed()
         }
@@ -242,7 +242,7 @@ object Constructors {
     }
 
     // convenience method: element is a range in a partition
-    internal fun element(localName: String, pattern: Pattern): Pattern {
+    fun element(localName: String, pattern: Pattern): Pattern {
         val nameClass = name(localName)
         return partition(range(nameClass, pattern))
     }
@@ -321,11 +321,11 @@ object Constructors {
 
     private fun anyAtom(): Pattern {
         //    return atom(anyName(), anyAnnotations());
-        return Atom(anyName(), null)
+        return Atom(anyName(), listOf())
     }
 
-    //  private static Pattern anyAnnotations() {
-    //    return null;
-    //  }
+    fun nullPattern(): Pattern {
+        return Empty()
+    }
 
 }

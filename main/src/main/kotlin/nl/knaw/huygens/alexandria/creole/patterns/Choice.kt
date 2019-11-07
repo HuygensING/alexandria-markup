@@ -38,9 +38,9 @@ class Choice(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
     override fun textDeriv(cx: Basics.Context, s: String): Pattern {
         // textDeriv cx (Choice p1 p2) s =
         //  choice (textDeriv cx p1 s) (textDeriv cx p2 s)
-        return choice(//
-                pattern1.textDeriv(cx, s), //
-                pattern2.textDeriv(cx, s)//
+        return choice(
+                pattern1.textDeriv(cx, s),
+                pattern2.textDeriv(cx, s)
         )
     }
 
@@ -48,16 +48,16 @@ class Choice(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
         // startTagDeriv (Choice p1 p2) qn id =
         //   choice (startTagDeriv p1 qn id)
         //          (startTagDeriv p2 qn id)
-        return choice(//
-                pattern1.startTagDeriv(qn, id), //
-                pattern2.startTagDeriv(qn, id)//
+        return choice(
+                pattern1.startTagDeriv(qn, id),
+                pattern2.startTagDeriv(qn, id)
         )
     }
 
     override fun startTagOpenDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
-        return choice(//
-                pattern1.startTagOpenDeriv(qn, id), //
-                pattern2.startTagOpenDeriv(qn, id)//
+        return choice(
+                pattern1.startTagOpenDeriv(qn, id),
+                pattern2.startTagOpenDeriv(qn, id)
         )
     }
 
@@ -65,30 +65,30 @@ class Choice(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParame
         // endTagDeriv (Choice p1 p2) qn id =
         //   choice (endTagDeriv p1 qn id)
         //          (endTagDeriv p2 qn id)
-        return choice(//
-                pattern1.endTagDeriv(qn, id), //
-                pattern2.endTagDeriv(qn, id)//
+        return choice(
+                pattern1.endTagDeriv(qn, id),
+                pattern2.endTagDeriv(qn, id)
         )
     }
 
     override fun startAnnotationDeriv(qn: Basics.QName): Pattern {
-        return choice(//
-                pattern1.startAnnotationDeriv(qn), //
-                pattern2.startAnnotationDeriv(qn)//
+        return choice(
+                pattern1.startAnnotationDeriv(qn),
+                pattern2.startAnnotationDeriv(qn)
         )
     }
 
     override fun endAnnotationDeriv(qn: Basics.QName): Pattern {
-        return choice(//
-                pattern1.endAnnotationDeriv(qn), //
-                pattern2.endAnnotationDeriv(qn)//
+        return choice(
+                pattern1.endAnnotationDeriv(qn),
+                pattern2.endAnnotationDeriv(qn)
         )
     }
 
     override fun applyAfter(f: Function<Pattern, Pattern>): Pattern {
-        return choice(//
-                pattern1.applyAfter(f), //
-                pattern2.applyAfter(f)//
+        return choice(
+                pattern1.applyAfter(f),
+                pattern2.applyAfter(f)
         )
     }
 

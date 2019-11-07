@@ -20,6 +20,9 @@ package nl.knaw.huygens.alexandria.creole.patterns
  * #L%
  */
 import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Constructors.choice
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.group
 import nl.knaw.huygens.alexandria.creole.Pattern
 
 class OneOrMore(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
@@ -28,9 +31,9 @@ class OneOrMore(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
         // textDeriv cx (OneOrMore p) s =
         //   group (textDeriv cx p s)
         //         (choice (OneOrMore p) Empty)
-        return group(//
-                pattern.textDeriv(cx, s), //
-                choice(OneOrMore(pattern), empty())//
+        return group(
+                pattern.textDeriv(cx, s),
+                choice(OneOrMore(pattern), empty())
         )
     }
 
@@ -38,9 +41,9 @@ class OneOrMore(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
         // startTagDeriv (OneOrMore p) qn id =
         //   group (startTagDeriv p qn id)
         //         (choice (OneOrMore p) Empty)
-        return group(//
-                pattern.startTagDeriv(qn, id), //
-                choice(OneOrMore(pattern), empty())//
+        return group(
+                pattern.startTagDeriv(qn, id),
+                choice(OneOrMore(pattern), empty())
         )
     }
 
@@ -48,9 +51,9 @@ class OneOrMore(pattern: Pattern) : PatternWithOnePatternParameter(pattern) {
         // endTagDeriv (OneOrMore p) qn id =
         //   group (endTagDeriv p qn id)
         //         (choice (OneOrMore p) Empty)
-        return group(//
-                pattern.endTagDeriv(qn, id), //
-                choice(OneOrMore(pattern), empty())//
+        return group(
+                pattern.endTagDeriv(qn, id),
+                choice(OneOrMore(pattern), empty())
         )
     }
 }

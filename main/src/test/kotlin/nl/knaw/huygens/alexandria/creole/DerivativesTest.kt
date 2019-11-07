@@ -22,6 +22,17 @@ package nl.knaw.huygens.alexandria.creole
 
 import nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat
 import nl.knaw.huygens.alexandria.creole.Basics.qName
+import nl.knaw.huygens.alexandria.creole.Constructors.concur
+import nl.knaw.huygens.alexandria.creole.Constructors.concurOneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.element
+import nl.knaw.huygens.alexandria.creole.Constructors.empty
+import nl.knaw.huygens.alexandria.creole.Constructors.group
+import nl.knaw.huygens.alexandria.creole.Constructors.mixed
+import nl.knaw.huygens.alexandria.creole.Constructors.notAllowed
+import nl.knaw.huygens.alexandria.creole.Constructors.oneOrMore
+import nl.knaw.huygens.alexandria.creole.Constructors.range
+import nl.knaw.huygens.alexandria.creole.Constructors.text
+import nl.knaw.huygens.alexandria.creole.Constructors.zeroOrMore
 import nl.knaw.huygens.alexandria.creole.NameClasses.name
 import nl.knaw.huygens.alexandria.creole.events.Events
 import org.junit.Test
@@ -36,12 +47,12 @@ class DerivativesTest : CreoleTest() {
     fun testEventsDerivation() {
         val page = range(name("page"), text())
         val chapter = range(name("chapter"), text())
-        val schemaPattern = element(//
-                "text", //
+        val schemaPattern = element(
+                "text",
                 concur(
                         page,
                         chapter
-                )//
+                )
         )
 
         // [text}[page}tekst{page]{text]
@@ -73,9 +84,9 @@ class DerivativesTest : CreoleTest() {
         val endE = Events.endTagEvent(qName)
         val events = ArrayList(asList(startE, textE, endE))
 
-        val schemaPattern = element(//
-                "text", //
-                text()//
+        val schemaPattern = element(
+                "text",
+                text()
         )
 
         val pattern = Validator(schemaPattern).eventsDeriv(schemaPattern, events)
@@ -92,10 +103,10 @@ class DerivativesTest : CreoleTest() {
         val book = createSchema()
         val events = createEvents()
 
-        //    assertEventsAreValidForSchema(book, events);
+        assertEventsAreValidForSchema(book, events)
     }
 
-    private fun createEvents(): List<Event> {
+    private fun createEvents(): MutableList<Event> {
         //<book|<page no="1"|
         //  <title|Genesis|title>
         //  ...
@@ -148,24 +159,24 @@ class DerivativesTest : CreoleTest() {
         val headingText = Events.textEvent("The flood and the tower of Babel")
         val someText = Events.textEvent("some text")
 
-        return ArrayList(asList(//
-                openBook, openPage, //
-                openTitle, titleText, closeTitle, //
-                openSection, //
-                openHeading, headingText, closeHeading, //
-                openChapter, //
-                openPara, openS, openVerse, someText, //
-                openIndex1, someText, //
-                openIndex2, someText, closeIndex1, someText, closePage, //
-                openPage, someText, closeIndex2, someText, //
-                closeS, closeVerse, closePara, //
-                openPara, openVerse, openS, someText, //
-                closeVerse, closeChapter, //
-                openChapter, openVerse, someText, //
-                closeVerse, closeS, closePara, //
-                closeChapter, //
-                closeSection, //
-                closePage, closeBook//
+        return ArrayList(asList(
+                openBook, openPage,
+                openTitle, titleText, closeTitle,
+                openSection,
+                openHeading, headingText, closeHeading,
+                openChapter,
+                openPara, openS, openVerse, someText,
+                openIndex1, someText,
+                openIndex2, someText, closeIndex1, someText, closePage,
+                openPage, someText, closeIndex2, someText,
+                closeS, closeVerse, closePara,
+                openPara, openVerse, openS, someText,
+                closeVerse, closeChapter,
+                openChapter, openVerse, someText,
+                closeVerse, closeS, closePara,
+                closeChapter,
+                closeSection,
+                closePage, closeBook
                 //        , closeBook // <- huh?
         ))
     }
@@ -192,41 +203,41 @@ class DerivativesTest : CreoleTest() {
         val indexedText = concurOneOrMore(mixed(zeroOrMore(index)))
         val heading = element("heading", indexedText)
         val s = range(name("s"), indexedText)
-        val para = range(name("para"), //
-                concur(//
-                        oneOrMore(verse), //
+        val para = range(name("para"),
+                concur(
+                        oneOrMore(verse),
                         oneOrMore(s)
-                )//
+                )
         )
-        val section = range(name("section"), //
-                group(//
-                        heading, //
-                        oneOrMore(para)//
-                )//
+        val section = range(name("section"),
+                group(
+                        heading,
+                        oneOrMore(para)
+                )
         )
-        return element("book", //
-                concur(//
-                        oneOrMore(page), //
-                        group(//
-                                title, //
-                                concur(//
-                                        oneOrMore(chapter), //
-                                        oneOrMore(section)//
-                                )//
-                        )//
-                )//
+        return element("book",
+                concur(
+                        oneOrMore(page),
+                        group(
+                                title,
+                                concur(
+                                        oneOrMore(chapter),
+                                        oneOrMore(section)
+                                )
+                        )
+                )
         )
     }
 
-    private fun assertEventsAreValidForSchema(schemaPattern: Pattern, events: List<Event>) {
+    private fun assertEventsAreValidForSchema(schemaPattern: Pattern, events: MutableList<Event>) {
         val pattern1 = Validator(schemaPattern).eventsDeriv(schemaPattern, events)
         //    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
         assertThat(pattern1).isNullable
     }
 
-    private fun assertEventsAreInvalidForSchema(schemaPattern: Pattern, events: List<Event>) {
+    private fun assertEventsAreInvalidForSchema(schemaPattern: Pattern, events: MutableList<Event>) {
         val pattern1 = Validator(schemaPattern).eventsDeriv(schemaPattern, events)
-        assertThat(pattern1)//
+        assertThat(pattern1)
                 .isNotNullable
     }
 }
