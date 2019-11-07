@@ -66,10 +66,10 @@ class DerivativesTest : CreoleTest() {
         val openChapter = Events.startTagEvent(qName("chapter"))
         val closeChapter = Events.endTagEvent(qName("chapter"))
 
-        val events = ArrayList(asList(startE, openPage, openChapter, textE, closePage, closeChapter, endE))
+        val events = mutableListOf(startE, openPage, openChapter, textE, closePage, closeChapter, endE)
         assertEventsAreValidForSchema(schemaPattern, events)
 
-        val events2 = ArrayList(asList(startE, openChapter, openPage, textE, closePage, closeChapter, endE))
+        val events2 = mutableListOf(startE, openChapter, openPage, textE, closePage, closeChapter, endE)
         assertEventsAreValidForSchema(schemaPattern, events2)
 
     }
@@ -82,7 +82,7 @@ class DerivativesTest : CreoleTest() {
         val context = Basics.context()
         val textE = Events.textEvent("tekst", context)
         val endE = Events.endTagEvent(qName)
-        val events = ArrayList(asList(startE, textE, endE))
+        val events = mutableListOf(startE, textE, endE)
 
         val schemaPattern = element(
                 "text",

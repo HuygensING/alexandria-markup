@@ -80,8 +80,7 @@ internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
                     .replace("^ {6}".toRegex(), "")
                     .replace("\n {6}".toRegex(), "\n")
                     .replace("\n\n".toRegex(), "\n")
-            val name = element.getAttribute("name")
-            when (name) {
+            when (val name = element.getAttribute("name")) {
                 "lmnl" -> currentTest!!.lmnl = content
                 "schema" -> currentTest!!.creole = "<!-- " + currentTest!!.title + " -->\n<start>\n" + content + "\n</start>"
                 else -> throw RuntimeException("unexpected value for name: $name")
@@ -107,8 +106,7 @@ internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
 
     internal class TestExpectHandler : DefinitionVisitor.DefaultElementHandler() {
         override fun enterElement(element: Element, context: XmlContext): Traversal {
-            val select = element.getAttribute("select")
-            when (select) {
+            when (val select = element.getAttribute("select")) {
                 "true()" -> currentTest!!.isValid = true
                 "false()" -> currentTest!!.isValid = false
                 else -> throw RuntimeException("unexpected value for select: $select")

@@ -292,7 +292,7 @@ object Constructors {
     }
 
     internal fun atom(name: String): Pattern {
-        return Atom(name(name), ArrayList<Annotation>())
+        return Atom(name(name), ArrayList())
     }
 
     internal fun attribute(name: String): Pattern {

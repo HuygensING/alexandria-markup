@@ -85,7 +85,7 @@ class ValidLMNLTest(private val basename: String) : CreoleTest() {
         @Parameterized.Parameters
         fun parameters(): Collection<Array<String>> {
             return FileUtils.listFiles(File(LMNL_DIR), LMNL_FILE_FILTER, null)
-                    .map({ it.name })
+                    .map { it.name }
                     .map { it.replace(".lmnl", "", false) }
                     .map { b -> arrayOf(b) }
         }

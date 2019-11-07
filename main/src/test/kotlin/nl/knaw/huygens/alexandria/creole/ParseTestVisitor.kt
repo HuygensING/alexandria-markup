@@ -95,8 +95,7 @@ class ParseTestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
             val content = context.closeLayer().trim { it <= ' ' }
                     .replace("\"".toRegex(), "\\\\\"")
                     .replace("\n".toRegex(), "\\\\n")
-            val name = element.getAttribute("name")
-            when (name) {
+            when (val name = element.getAttribute("name")) {
                 "lmnl" -> {
                     currentTest!!.lmnl = content
                     testCodeBuilder.append("String lmnl=\"").append(content).append("\";\n")

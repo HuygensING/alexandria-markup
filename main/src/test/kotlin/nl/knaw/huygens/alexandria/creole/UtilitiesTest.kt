@@ -54,145 +54,145 @@ class UtilitiesTest : CreoleTest() {
 
     @Test
     fun testChoiceNullability1() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Choice(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testChoiceNullability2() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Choice(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testChoiceNullability3() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Choice(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testChoiceNullability4() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Choice(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testInterleaveNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Interleave(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testInterleaveNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Interleave(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testInterleaveNullability3() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Interleave(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testInterleaveNullability4() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Interleave(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testConcurNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Concur(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testConcurNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Concur(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testConcurNullability3() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = Concur(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testConcurNullability4() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = Concur(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testPartitionNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
         val p = Partition(p1)
         assertThat(p).isNullable
     }
 
     @Test
     fun testPartitionNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
         val p = Partition(p1)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testOneOrMoreNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
         val p = OneOrMore(p1)
         assertThat(p).isNullable
     }
 
     @Test
     fun testOneOrMoreNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
         val p = OneOrMore(p1)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testConcurOneOrMoreNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
         val p = ConcurOneOrMore(p1)
         assertThat(p).isNullable
     }
 
     @Test
     fun testConcurOneOrMoreNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
         val p = ConcurOneOrMore(p1)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testRangeIsNotNullable() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
         val nameClass = NameClasses.ANY_NAME
         val p = Range(nameClass, p1)
         assertThat(p).isNotNullable
@@ -207,40 +207,40 @@ class UtilitiesTest : CreoleTest() {
 
     @Test
     fun testAfterNullability() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = After(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testAllNullability1() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = All(p1, p2)
         assertThat(p).isNullable
     }
 
     @Test
     fun testAllNullability2() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = All(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testAllNullability3() {
-        val p1 = CreoleTest.NOT_NULLABLE_PATTERN
-        val p2 = CreoleTest.NULLABLE_PATTERN
+        val p1 = NOT_NULLABLE_PATTERN
+        val p2 = NULLABLE_PATTERN
         val p = All(p1, p2)
         assertThat(p).isNotNullable
     }
 
     @Test
     fun testAllNullability4() {
-        val p1 = CreoleTest.NULLABLE_PATTERN
-        val p2 = CreoleTest.NOT_NULLABLE_PATTERN
+        val p1 = NULLABLE_PATTERN
+        val p2 = NOT_NULLABLE_PATTERN
         val p = All(p1, p2)
         assertThat(p).isNotNullable
     }
@@ -286,8 +286,8 @@ class UtilitiesTest : CreoleTest() {
 
     @Test
     fun testFlip() {
-        val p1 = CreoleTest.TestPattern()
-        val p2 = CreoleTest.TestPattern()
+        val p1 = TestPattern()
+        val p2 = TestPattern()
         val pattern = group(p1, p2)
 
         val flipped = pattern.flip()

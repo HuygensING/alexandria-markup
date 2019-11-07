@@ -140,7 +140,7 @@ object SchemaImporter {
         val attributes = removeAttributes(children)
 
         val pattern1 = toPattern(children.removeAt(0))
-        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.choice(pattern1, pattern2) })
+        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> choice(pattern1, pattern2) })
         return choice(pattern1, pattern2)
     }
 
@@ -149,7 +149,7 @@ object SchemaImporter {
         //    List<Element> attributes = removeAttributes(children);
 
         val pattern1 = toPattern(children.removeAt(0))
-        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.concur(pattern1, pattern2) })
+        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> concur(pattern1, pattern2) })
         return concur(pattern1, pattern2)
     }
 
@@ -198,7 +198,7 @@ object SchemaImporter {
         //    List<Element> attributes = removeAttributes(children);
 
         val pattern1 = toPattern(children.removeAt(0))
-        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> Constructors.interleave(pattern1, pattern2) })
+        val pattern2 = simplifyAsNeeded(children, BiFunction { pattern1, pattern2 -> interleave(pattern1, pattern2) })
         return interleave(pattern1, pattern2)
     }
 

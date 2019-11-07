@@ -75,7 +75,7 @@ interface Pattern {
         val p2 = p0.pattern2
         try {
             val constructor = javaClass
-                    .getConstructor(*arrayOf<Class<*>>(Pattern::class.java, Pattern::class.java))
+                    .getConstructor(Pattern::class.java, Pattern::class.java)
             return constructor.newInstance(p2, p1)
         } catch (e: Exception) {
             throw RuntimeException(e)

@@ -36,8 +36,8 @@ class PatternsTest : CreoleTest() {
 
     @Test
     fun testHashCode2() {
-        val p1 = CreoleTest.TestPattern()
-        val p2 = CreoleTest.TestPattern()
+        val p1 = TestPattern()
+        val p2 = TestPattern()
         assertThat(p1).isNotEqualTo(p2)
         assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode())
     }
@@ -52,8 +52,8 @@ class PatternsTest : CreoleTest() {
 
     @Test
     fun testHashCode4() {
-        val p1 = CreoleTest.TestPattern()
-        val p2 = CreoleTest.TestPattern()
+        val p1 = TestPattern()
+        val p2 = TestPattern()
         val choice = Choice(p1, p2)
         val concur = Concur(p1, p2)
         assertThat(choice).isNotEqualTo(concur)
@@ -62,8 +62,8 @@ class PatternsTest : CreoleTest() {
 
     @Test
     fun testHashCode5() {
-        val p1 = CreoleTest.TestPattern()
-        val p2 = CreoleTest.TestPattern()
+        val p1 = TestPattern()
+        val p2 = TestPattern()
         val choice1 = Choice(p1, p2)
         val choice2 = Choice(p1, p2)
         assertThat(choice1).isEqualTo(choice2)

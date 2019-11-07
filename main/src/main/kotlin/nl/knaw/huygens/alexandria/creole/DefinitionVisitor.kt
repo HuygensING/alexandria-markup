@@ -81,7 +81,7 @@ class DefinitionVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     class RefHandler : DefaultElementHandler() {
         override fun leaveElement(element: Element, context: XmlContext): Traversal {
             val ref = element.getAttribute("name")
-            requirements.get(currentDefinition)?.add(ref)
+            requirements[currentDefinition]?.add(ref)
             (dependants as java.util.Map<String, Set<String>>).putIfAbsent(ref, HashSet())
             dependants[ref]?.add(currentDefinition)
             return super.leaveElement(element, context)
