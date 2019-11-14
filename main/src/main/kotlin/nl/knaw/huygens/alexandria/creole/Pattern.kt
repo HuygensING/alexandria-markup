@@ -62,6 +62,18 @@ interface Pattern {
         return notAllowed()
     }
 
+    fun startTagCloseDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        return notAllowed()
+    }
+
+    fun endTagOpenDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        return notAllowed()
+    }
+
+    fun endTagCloseDeriv(qn: Basics.QName, id: Basics.Id): Pattern {
+        return notAllowed()
+    }
+
     fun applyAfter(f: Function<Pattern, Pattern>): Pattern {
         return notAllowed()
     }

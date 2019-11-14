@@ -22,7 +22,6 @@ package nl.knaw.huygens.alexandria.creole
 
 import nl.knaw.huygens.alexandria.creole.patterns.*
 import org.apache.commons.lang3.StringUtils
-import java.util.*
 
 //http://www.princexml.com/howcome/2007/xtech/papers/output/0077-30/index.xhtml
 object Utilities {
@@ -109,7 +108,7 @@ object Utilities {
     }
 
     private fun leafPatterns(pattern: Pattern): List<Pattern> {
-        val leafPatterns = ArrayList<Pattern>()
+        val leafPatterns = mutableListOf<Pattern>()
         if (pattern is PatternWithoutParameters || pattern is EndRange) {
             leafPatterns.add(pattern)
             return leafPatterns

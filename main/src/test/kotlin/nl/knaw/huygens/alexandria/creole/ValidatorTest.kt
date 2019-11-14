@@ -43,8 +43,6 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.util.*
-import java.util.Arrays.asList
 
 class ValidatorTest {
     private val LOG = LoggerFactory.getLogger(javaClass)
@@ -57,7 +55,7 @@ class ValidatorTest {
         val context = Basics.context()
         val textE = Events.textEvent("tekst", context)
         val endE = Events.endTagEvent(qName)
-        val validEvents = ArrayList(asList(startE, textE, endE))
+        val validEvents = listOf(startE, textE, endE)
 
         val schemaPattern = element(
                 "text",
@@ -68,7 +66,7 @@ class ValidatorTest {
         val validationResult1 = validator.validate(validEvents)
         assertThat(validationResult1).isSuccess.hasNoUnexpectedEvent()
 
-        val invalidEvents = ArrayList(asList(textE, startE, startE, endE))
+        val invalidEvents = listOf(textE, startE, startE, endE)
         val validationResult = validator.validate(invalidEvents)
         assertThat(validationResult).isFailure.hasUnexpectedEvent(textE)
     }
@@ -94,7 +92,7 @@ class ValidatorTest {
         val endBoldE = Events.endTagEvent(qName("bold"))
         val boldTextE = Events.textEvent("Bold", context)
         val endE = Events.endTagEvent(qName)
-        val validEvents = ArrayList(asList(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE))
+        val validEvents = listOf(startE, textE, startBoldE, boldTextE, endBoldE, textE, endE)
 
         assertThat(validator.validate(validEvents)).isSuccess.hasNoUnexpectedEvent()
     }
@@ -108,7 +106,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // ...
-        val events = ArrayList<Event>(listOf<Event>(someText))
+        val events = listOf<Event>(someText)
 
         assertValidationSucceeds(schema, events)
     }
@@ -125,7 +123,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // ...
-        val events = ArrayList<Event>(listOf<Event>(someText))
+        val events = listOf<Event>(someText)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, someText)
     }
@@ -145,7 +143,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationSucceeds(schema, events)
     }
@@ -165,7 +163,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo)
     }
@@ -185,7 +183,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, openFoo)
     }
@@ -205,7 +203,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, someText)
     }
@@ -225,7 +223,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationSucceeds(schema, events)
     }
@@ -245,7 +243,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, closeFoo)
     }
@@ -265,7 +263,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, openFoo)
     }
@@ -285,7 +283,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, someText)
     }
@@ -315,7 +313,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationSucceeds(schema, events)
     }
@@ -345,7 +343,7 @@ class ValidatorTest {
         val someText = Events.textEvent("...")
 
         // [foo}...{foo]
-        val events = ArrayList(asList(openFoo, someText, closeFoo))
+        val events = listOf(openFoo, someText, closeFoo)
 
         assertValidationFailsWithUnexpectedEvent(schema, events, openFoo)
     }
@@ -372,7 +370,7 @@ class ValidatorTest {
         val closeFoo = Events.endTagEvent(foo)
 
         // [foo}[bar}...{bar]{foo]
-        val events = ArrayList(asList(openFoo, openBar, someText, closeBar, closeFoo))
+        val events = listOf(openFoo, openBar, someText, closeBar, closeFoo)
 
         assertValidationSucceeds(schema, events)
     }
@@ -399,7 +397,7 @@ class ValidatorTest {
         val closeFoo = Events.endTagEvent(foo)
 
         // [foo}[bar}...{bar]{foo]
-        val events = ArrayList(asList(openFoo, openBar, someText, closeBar, closeFoo))
+        val events = listOf(openFoo, openBar, someText, closeBar, closeFoo)
 
         assertValidationSucceeds(schema, events)
     }
@@ -445,14 +443,14 @@ class ValidatorTest {
         // [para}...{v][v}...{v]{para]
         // {section]
         // {chapter]
-        val events = ArrayList(asList(
+        val events = listOf(
                 openChapter,
                 openSection, openHeading, someText, closeHeading,
                 openPara, openV, someText, closeV, openV, someText, closePara,
                 openPara, someText, closeV, openV, someText, closeV, closePara,
                 closeSection,
                 closeChapter
-        ))
+        )
         assertValidationSucceeds(schema, events)
     }
 
@@ -531,7 +529,7 @@ class ValidatorTest {
 
         val someText = Events.textEvent("some text")
 
-        val events = ArrayList(asList(
+        val events = listOf(
                 openBook, openPage,
                 openTitle, titleText, closeTitle,
                 openSection,
@@ -553,7 +551,7 @@ class ValidatorTest {
                 closeSection,
                 closePage, closeBook
                 //        , closeBook // <- huh?
-        ))
+        )
         assertValidationSucceeds(book, events)
     }
 
@@ -594,7 +592,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(
+        val events = listOf(
                 openBook,
                 openChapter,
                 openPara,
@@ -606,7 +604,7 @@ class ValidatorTest {
                 closeChapter,
                 closePara,
                 closeBook
-        ))
+        )
         assertValidationSucceeds(book, events)
     }
 
@@ -648,7 +646,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(
+        val events = listOf(
                 openBook,
                 openChapter,
                 openPara,
@@ -661,7 +659,7 @@ class ValidatorTest {
                 closePara,
                 closeBook,
                 closeBook
-        ))
+        )
         assertValidationFailsWithUnexpectedEvent(book, events, closeBook)
     }
 
@@ -702,7 +700,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(
+        val events = listOf(
                 openBook,
                 openChapter,
                 openPara,
@@ -714,7 +712,7 @@ class ValidatorTest {
                 closeChapter,
                 closePara,
                 closeBook
-        ))
+        )
         assertValidationSucceeds(book, events)
     }
 
@@ -756,7 +754,7 @@ class ValidatorTest {
         val someText = Events.textEvent("some text")
 
         // [book}[chapter}[para}[verse}[s}...{verse]{s]{chapter]{para]{book]
-        val events = ArrayList(asList(
+        val events = listOf(
                 openBook,
                 openChapter,
                 openPara,
@@ -769,7 +767,7 @@ class ValidatorTest {
                 closePara,
                 closeBook
                 , closeBook // <- huh?
-        ))
+        )
         assertValidationFailsWithUnexpectedEvent(book, events, closeBook)
     }
 
@@ -806,20 +804,20 @@ class ValidatorTest {
 
     /* private methods*/
 
-    private fun validate(schema: Pattern, events: MutableList<Event>): ValidationResult {
+    private fun validate(schema: Pattern, events: List<Event>): ValidationResult {
         LOG.info("schema=\n{}", Utilities.patternTreeToDepth(schema, 2))
         val validator = Validator.ofPattern(schema)
         return validator.validate(events)
     }
 
-    private fun assertValidationSucceeds(schema: Pattern, events: MutableList<Event>) {
+    private fun assertValidationSucceeds(schema: Pattern, events: List<Event>) {
         val validationResult = validate(schema, events)
         assertThat(validationResult)
                 .isSuccess
                 .hasNoUnexpectedEvent()
     }
 
-    private fun assertValidationFailsWithUnexpectedEvent(schema: Pattern, events: MutableList<Event>, unexpectedEvent: Event) {
+    private fun assertValidationFailsWithUnexpectedEvent(schema: Pattern, events: List<Event>, unexpectedEvent: Event) {
         val validationResult = validate(schema, events)
         assertThat(validationResult)
                 .isFailure

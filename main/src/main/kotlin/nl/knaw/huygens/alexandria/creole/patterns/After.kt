@@ -30,13 +30,11 @@ class After(pattern1: Pattern, pattern2: Pattern) : PatternWithTwoPatternParamet
 
     override fun init() {
         nullable = false
-        allowsText = if (pattern1.isNullable
-        )
+        allowsText = if (pattern1.isNullable)
             pattern1.allowsText() || pattern2.allowsText()
         else
             pattern1.allowsText()
-        allowsAnnotations = if (pattern1.isNullable
-        )
+        allowsAnnotations = if (pattern1.isNullable)
             pattern1.allowsAnnotations() || pattern2.allowsAnnotations()
         else
             pattern1.allowsAnnotations()

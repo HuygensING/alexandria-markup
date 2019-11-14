@@ -27,7 +27,6 @@ import nl.knaw.huygens.alexandria.creole.patterns.Annotation
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns.EMPTY
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns.NOT_ALLOWED
 import nl.knaw.huygens.alexandria.creole.patterns.Patterns.TEXT
-import java.util.*
 
 object Constructors {
 
@@ -292,7 +291,7 @@ object Constructors {
     }
 
     internal fun atom(name: String): Pattern {
-        return Atom(name(name), ArrayList())
+        return Atom(name(name), listOf())
     }
 
     internal fun attribute(name: String): Pattern {

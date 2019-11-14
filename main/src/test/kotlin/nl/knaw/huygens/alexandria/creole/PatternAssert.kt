@@ -20,9 +20,9 @@ package nl.knaw.huygens.alexandria.creole
  * #L%
  */
 
-import org.assertj.core.api.AbstractAssert
+import org.assertj.core.api.AbstractObjectAssert
 
-class PatternAssert(actual: Pattern) : AbstractAssert<PatternAssert, Pattern>(actual, PatternAssert::class.java) {
+class PatternAssert(actual: Pattern) : AbstractObjectAssert<PatternAssert, Pattern>(actual, PatternAssert::class.java) {
 
     val isNullable: PatternAssert
         get() {

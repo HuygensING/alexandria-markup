@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 class Validator internal constructor(private val schemaPattern: Pattern) {
     private val errorListener: ValidationErrorListener = ValidationErrorListener()
 
-    fun validate(events: MutableList<Event>): ValidationResult {
+    fun validate(events: List<Event>): ValidationResult {
         val pattern = eventsDeriv(schemaPattern, events)
         LOG.debug("end pattern = {}", pattern)
         return ValidationResult()
@@ -35,7 +35,11 @@ class Validator internal constructor(private val schemaPattern: Pattern) {
                 .setUnexpectedEvent(errorListener.unexpectedEvent)
     }
 
-    internal fun eventsDeriv(pattern: Pattern, events: MutableList<Event>): Pattern {
+    internal fun eventsDeriv(pattern: Pattern, events: List<Event>): Pattern {
+        return eventsDerivRecurse(pattern, events.toMutableList())
+    }
+
+    private fun eventsDerivRecurse(pattern: Pattern, events: MutableList<Event>): Pattern {
         //    LOG.debug("expected events: {}", expectedEvents(pattern).stream().map(Event::toString).sorted().distinct().collect(toList()));
         //    LOG.debug("pattern:\n{}", patternTreeToDepth(pattern, 10));
         //    LOG.debug("leafpatterns:\n{}", leafPatterns(pattern).stream().map(Pattern::toString).distinct().collect(toList()));
@@ -57,7 +61,7 @@ class Validator internal constructor(private val schemaPattern: Pattern) {
             errorListener.unexpectedEvent = head
             return notAllowed()
         }
-        return eventsDeriv(headDeriv, events)
+        return eventsDerivRecurse(headDeriv, events)
     }
 
     companion object {

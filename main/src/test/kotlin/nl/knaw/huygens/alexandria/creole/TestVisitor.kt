@@ -22,7 +22,6 @@ package nl.knaw.huygens.alexandria.creole
 
 import nl.knaw.huygens.tei.*
 import nl.knaw.huygens.tei.handlers.XmlTextHandler
-import java.util.*
 
 internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     init {
@@ -116,7 +115,7 @@ internal class TestVisitor : DelegatingVisitor<XmlContext>(XmlContext()) {
     }
 
     companion object {
-        private val tests = ArrayList<LMNLTest>()
+        private val tests = mutableListOf<LMNLTest>()
 
         private var currentTest: LMNLTest? = null
     }

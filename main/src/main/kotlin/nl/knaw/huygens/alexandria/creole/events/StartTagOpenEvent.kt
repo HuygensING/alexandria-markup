@@ -26,7 +26,7 @@ class StartTagOpenEvent(qName: Basics.QName, id: Basics.Id) : TagEvent(qName, id
 
     override fun eventDeriv(p: Pattern): Pattern {
         // eventDeriv p (StartTagEvent qn id) = startTagDeriv p qn id
-        return p.startTagDeriv(qName, id)
+        return p.startTagOpenDeriv(qName, id)
     }
 
     override fun toString(): String {

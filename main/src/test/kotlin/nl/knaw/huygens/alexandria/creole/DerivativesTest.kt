@@ -37,8 +37,6 @@ import nl.knaw.huygens.alexandria.creole.NameClasses.name
 import nl.knaw.huygens.alexandria.creole.events.Events
 import org.junit.Test
 import org.slf4j.LoggerFactory
-import java.util.*
-import java.util.Arrays.asList
 
 class DerivativesTest : CreoleTest() {
     private val LOG = LoggerFactory.getLogger(javaClass)
@@ -59,7 +57,7 @@ class DerivativesTest : CreoleTest() {
         val qName = qName("text")
         val startE = Events.startTagEvent(qName)
         val context = Basics.context()
-        val textE = Events.textEvent("tekst", context)
+        val textE = Events.textEvent("text", context)
         val endE = Events.endTagEvent(qName)
         val openPage = Events.startTagEvent(qName("page"))
         val closePage = Events.endTagEvent(qName("page"))
@@ -106,7 +104,7 @@ class DerivativesTest : CreoleTest() {
         assertEventsAreValidForSchema(book, events)
     }
 
-    private fun createEvents(): MutableList<Event> {
+    private fun createEvents(): List<Event> {
         //<book|<page no="1"|
         //  <title|Genesis|title>
         //  ...
@@ -159,7 +157,7 @@ class DerivativesTest : CreoleTest() {
         val headingText = Events.textEvent("The flood and the tower of Babel")
         val someText = Events.textEvent("some text")
 
-        return ArrayList(asList(
+        return listOf(
                 openBook, openPage,
                 openTitle, titleText, closeTitle,
                 openSection,
@@ -177,8 +175,8 @@ class DerivativesTest : CreoleTest() {
                 closeChapter,
                 closeSection,
                 closePage, closeBook
-                //        , closeBook // <- huh?
-        ))
+//                , closeBook // <- huh?
+        )
     }
 
     private fun createSchema(): Pattern {
@@ -229,15 +227,15 @@ class DerivativesTest : CreoleTest() {
         )
     }
 
-    private fun assertEventsAreValidForSchema(schemaPattern: Pattern, events: MutableList<Event>) {
+    private fun assertEventsAreValidForSchema(schemaPattern: Pattern, events: List<Event>) {
         val pattern1 = Validator(schemaPattern).eventsDeriv(schemaPattern, events)
-        //    LOG.info("expected events: {}", expectedEvents(pattern1).stream().map(Event::toString).sorted().distinct().collect(toList()));
+//        LOG.info("expected events: {}", expectedEvents(pattern1).map(Event::toString).sorted().distinct()));
+//        LOG.info("{}({},{})", pattern1.javaClass.simpleName, (pattern1 as After).pattern1, (pattern1 as After).pattern2 )
         assertThat(pattern1).isNullable
     }
 
-    private fun assertEventsAreInvalidForSchema(schemaPattern: Pattern, events: MutableList<Event>) {
+    private fun assertEventsAreInvalidForSchema(schemaPattern: Pattern, events: List<Event>) {
         val pattern1 = Validator(schemaPattern).eventsDeriv(schemaPattern, events)
-        assertThat(pattern1)
-                .isNotNullable
+        assertThat(pattern1).isNotNullable
     }
 }

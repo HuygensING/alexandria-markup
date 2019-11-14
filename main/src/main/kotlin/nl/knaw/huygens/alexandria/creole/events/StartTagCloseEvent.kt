@@ -20,8 +20,14 @@ package nl.knaw.huygens.alexandria.creole.events
  * #L%
  */
 import nl.knaw.huygens.alexandria.creole.Basics
+import nl.knaw.huygens.alexandria.creole.Pattern
 
 class StartTagCloseEvent(qName: Basics.QName, id: Basics.Id) : TagEvent(qName, id) {
+
+    override fun eventDeriv(p: Pattern): Pattern {
+        // eventDeriv p (StartTagEvent qn id) = startTagDeriv p qn id
+        return p.startTagCloseDeriv(qName, id)
+    }
 
     override fun toString(): String {
         return qName.localName.value + "}"

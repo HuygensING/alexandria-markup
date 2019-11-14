@@ -315,8 +315,7 @@ class ConstructorsTest : CreoleTest() {
         //  partition p = Partition p
         val p = TestPattern()
         val partition = partition(p)
-//        assertThat(partition).isEqualToComparingFieldByField(Partition(p))
-        assertThat(partition).isEqualTo(Partition(p))
+        assertThat(partition).isEqualToComparingFieldByField(Partition(p))
     }
 
     @Test
@@ -338,8 +337,7 @@ class ConstructorsTest : CreoleTest() {
         //  oneOrMore p = OneOrMore p
         val p = TestPattern()
         val oneOrMore = oneOrMore(p)
-//        assertThat(oneOrMore).isEqualToComparingFieldByField(OneOrMore(p))
-        assertThat(oneOrMore).isEqualTo(OneOrMore(p))
+        assertThat(oneOrMore).isEqualToComparingFieldByField(OneOrMore(p))
     }
 
     @Test
@@ -361,8 +359,7 @@ class ConstructorsTest : CreoleTest() {
         //  concurOneOrMore p = ConcurOneOrMore p
         val p = TestPattern()
         val concurOneOrMore = concurOneOrMore(p)
-//        assertThat(concurOneOrMore).isEqualToComparingFieldByField(ConcurOneOrMore(p))
-        assertThat(concurOneOrMore).isEqualTo(ConcurOneOrMore(p))
+        assertThat(concurOneOrMore).isEqualToComparingFieldByField(ConcurOneOrMore(p))
     }
 
     @Test

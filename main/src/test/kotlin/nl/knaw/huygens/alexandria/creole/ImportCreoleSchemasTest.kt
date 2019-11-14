@@ -71,6 +71,7 @@ class ImportCreoleSchemasTest(private val basename: String) : CreoleTest() {
             }
         }
 
+        @JvmStatic
         @Parameterized.Parameters
         fun parameters(): Collection<Array<String>> {
             return FileUtils.listFiles(File(ROOTDIR), CREOLE_FILE_FILTER, null)

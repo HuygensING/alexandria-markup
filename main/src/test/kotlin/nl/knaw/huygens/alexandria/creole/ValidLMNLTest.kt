@@ -82,6 +82,7 @@ class ValidLMNLTest(private val basename: String) : CreoleTest() {
             }
         }
 
+        @JvmStatic
         @Parameterized.Parameters
         fun parameters(): Collection<Array<String>> {
             return FileUtils.listFiles(File(LMNL_DIR), LMNL_FILE_FILTER, null)
