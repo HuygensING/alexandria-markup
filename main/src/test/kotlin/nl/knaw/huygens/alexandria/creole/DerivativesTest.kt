@@ -35,6 +35,7 @@ import nl.knaw.huygens.alexandria.creole.Constructors.text
 import nl.knaw.huygens.alexandria.creole.Constructors.zeroOrMore
 import nl.knaw.huygens.alexandria.creole.NameClasses.name
 import nl.knaw.huygens.alexandria.creole.events.Events
+import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
@@ -96,6 +97,7 @@ class DerivativesTest : CreoleTest() {
         assertThat(pattern1).isEqualTo(notAllowed())
     }
 
+    @Ignore
     @Test
     fun testBiblicalExample() {
         val book = createSchema()
