@@ -235,7 +235,7 @@
         </configuration>
       </plugin>
 
-      <plugin><!-- java compiler should be after the kotlin compiler -->
+      <plugin><!-- java compiler should be after the kotlin compiler, see https://www.baeldung.com/kotlin-maven-java-project -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler.version}</version>
