@@ -28,4 +28,15 @@ public class TAGValidationResult {
   public boolean isValid() {
     return errors.isEmpty();
   }
+
+  public List<String> getErrors() {
+    return errors;
+  }
+
+  @Override
+  public String toString() {
+    return "TAGValidationResult{" +
+        "errors=" + errors +
+        '}';
+  }
 }

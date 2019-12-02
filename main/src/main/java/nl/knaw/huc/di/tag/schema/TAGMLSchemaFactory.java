@@ -45,7 +45,7 @@ public class TAGMLSchemaFactory {
           .forEachRemaining(
               entry -> {
                 String layerName = entry.getKey();
-                if (layerName == "$") {
+                if (layerName.equals("$")) {
                   layerName = TAGML.DEFAULT_LAYER;
                 }
                 result.schema.addLayer(layerName);
@@ -53,7 +53,9 @@ public class TAGMLSchemaFactory {
                 LOG.info("layer={}", layerName);
                 LOG.info("jsonNode={}", jsonNode);
                 if (!jsonNode.isObject()) {
-                  result.errors.add("expected list of child markup, found (as json) " + jsonNode);
+                  result.errors.add(
+                      "expected root markup with list of child markup, found (as json) "
+                          + jsonNode);
                 } else {
                   if (jsonNode.size() > 1) {
                     result.errors.add(

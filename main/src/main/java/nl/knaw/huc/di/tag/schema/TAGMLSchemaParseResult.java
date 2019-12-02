@@ -24,5 +24,5 @@ import java.util.List;
 
 public class TAGMLSchemaParseResult {
   public TAGMLSchema schema = new TAGMLSchema();
-  List<String> errors = new ArrayList<>();
+  public List<String> errors = new ArrayList<>();
 }

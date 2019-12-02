@@ -149,7 +149,7 @@ public class TAGMLSchemaTest {
     LOG.info("errors={}", result.errors);
     assertThat(result.errors)
         .contains(
-            "expected list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
+            "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
   }
 
   //  @Test

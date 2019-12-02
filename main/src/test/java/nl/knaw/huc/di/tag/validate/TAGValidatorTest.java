@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.validate;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.schema.TAGMLSchema;
 import nl.knaw.huc.di.tag.schema.TAGMLSchemaFactory;
@@ -27,13 +28,16 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGValidatorTest extends TAGBaseStoreTest {
+  static final Logger LOG = LoggerFactory.getLogger(TAGValidatorTest.class);
 
   @Test
-  public void testSimpleTAGMLValidation() {
+  public void testSimpleTAGMLValidationThatSucceeds() {
     String tagML =
         "[book>\n"
             + "[chapter>\n"
@@ -43,11 +47,35 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
             + "<chapter]\n"
             + "<book]";
     // how to address default layer?
-    String schemaYAML = "---\n" + "$:\n" + "  - book:\n" + "    - chapter:\n" + "      - paragraph";
+    String schemaYAML = "---\n" + "$:\n" + "  book:\n" + "    - chapter:\n" + "      - paragraph";
     validate(tagML, schemaYAML);
   }
 
   @Test
+  public void testSimpleTAGMLValidationThatFails() {
+    String tagML =
+        "[book>\n"
+            + "[chapter>\n"
+            + "[paragraph>It was the best of days, it was the worst of days....<paragraph]\n"
+            + "[paragraph>And then...<paragraph]\n"
+            + "[paragraph>Finally...<paragraph]\n"
+            + "<chapter]\n"
+            + "<book]";
+    // how to address default layer?
+    String schemaYAML = "---\n" + "$:\n" + "  book:\n" + "    - chapter:\n" + "      - sentence";
+    String expectedError = "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>";
+    validateWithError(tagML, schemaYAML, expectedError);
+  }
+
+  @Test
+  public void testSimpleTAGMLValidation2() {
+    String tagML = "[tagml>[l>test [w>word<w]<l]<tagml]";
+    // how to address default layer?
+    String schemaYAML = "$:\n" + "  tagml:\n" + "    - l:\n" + "      - w\n";
+    validate(tagML, schemaYAML);
+  }
+
+  //  @Test
   public void testMoreComplicatedTAGMLValidation() {
     String tagML =
         "[root>"
@@ -61,16 +89,38 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
   }
 
   private void validate(final String tagML, final String schemaYAML) {
+    LOG.info("schemaYAML={}", schemaYAML);
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
           assertThat(document).isNotNull();
           final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
           assertThat(schemaParseResult.schema).isNotNull();
+          assertThat(schemaParseResult.errors).isEmpty();
           TAGValidator validator = new TAGValidator(store);
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
+          LOG.info("validationResult={}", validationResult);
           assertThat(validationResult.isValid()).isTrue();
+        });
+  }
+
+  private void validateWithError(
+      final String tagML, final String schemaYAML, final String... expectedErrors) {
+    LOG.info("schemaYAML={}", schemaYAML);
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = parseTAGML(tagML, store);
+          assertThat(document).isNotNull();
+          final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
+          assertThat(schemaParseResult.schema).isNotNull();
+          assertThat(schemaParseResult.errors).isEmpty();
+          TAGValidator validator = new TAGValidator(store);
+          final TAGValidationResult validationResult =
+              validator.validate(document, schemaParseResult.schema);
+          LOG.info("validationResult={}", validationResult);
+          assertThat(validationResult.isValid()).isFalse();
+          assertThat(validationResult.getErrors()).contains(expectedErrors);
         });
   }
 

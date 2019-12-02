@@ -19,10 +19,19 @@ package nl.knaw.huc.di.tag.validate;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.schema.TAGMLSchema;
 import nl.knaw.huc.di.tag.schema.TreeNode;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
 public class TAGValidator {
 
@@ -40,8 +49,79 @@ public class TAGValidator {
     return result;
   }
 
-  private void validateForLayer(final TAGDocument document, final String layer, final TreeNode<String> layerHierarchyRoot, final TAGValidationResult result) {
-    String expectedRootMarkup = layerHierarchyRoot.toString();
-    document.getDTO().textGraph.getLayerRootMap().get(layer);
+  private void validateForLayer(
+      final TAGDocument document,
+      final String layer,
+      final TreeNode<String> layerHierarchyRoot,
+      final TAGValidationResult result) {
+    String expectedRootMarkup = layerHierarchyRoot.getData();
+    Long rootMarkupId = document.getDTO().textGraph.getLayerRootMap().get(layer);
+    TAGMarkup markup = store.getMarkup(rootMarkupId);
+    AtomicBoolean hasErrors = new AtomicBoolean(false);
+    if (!markup.hasTag(expectedRootMarkup)) {
+      result.errors.add(
+          "Layer "
+              + layerName(layer)
+              + ": expected root markup "
+              + expectedRootMarkup
+              + ", but was "
+              + openTag(markup));
+      hasErrors.set(true);
+    }
+
+    List<Long> markupIdsToHandle = new ArrayList<>();
+    markupIdsToHandle.add(rootMarkupId);
+    Map<String, TreeNode<String>> schemaChildNodeMap = new HashMap<>();
+    schemaChildNodeMap.put(layerHierarchyRoot.getData(), layerHierarchyRoot);
+    while (!markupIdsToHandle.isEmpty() && !hasErrors.get()) {
+      Long parentMarkupId = markupIdsToHandle.remove(0);
+      String parentTag = store.getMarkup(parentMarkupId).getTag();
+      TreeNode<String> layerHierarchyNode = schemaChildNodeMap.get(parentTag);
+      Set<String> expectedTags = new HashSet<>();
+      layerHierarchyNode
+          .iterator()
+          .forEachRemaining(
+              childNode -> {
+                String tag = childNode.getData();
+                schemaChildNodeMap.put(tag, childNode);
+                expectedTags.add(tag);
+              });
+      document
+          .getChildMarkupIdStream(parentMarkupId, layer)
+          .forEach(
+              mId -> {
+                TAGMarkup markup1 = store.getMarkup(mId);
+                String tag = markup1.getTag();
+                if (expectedTags.contains(tag)) {
+                  markupIdsToHandle.add(mId);
+                } else {
+                  result.errors.add(
+                      "Layer "
+                          + layerName(layer)
+                          + ": expected "
+                          + expectedTags.stream()
+                              .map(t -> openTag(t, layer))
+                              .collect(joining(" or "))
+                          + " as child markup of "
+                          + openTag(parentTag, layer)
+                          + ", but found "
+                          + openTag(markup1));
+                  hasErrors.set(true);
+                }
+              });
+    }
+  }
+
+  private String openTag(TAGMarkup markup) {
+    return OPEN_TAG_STARTCHAR + markup.getExtendedTag() + OPEN_TAG_ENDCHAR;
+  }
+
+  private String openTag(String parentTag, String layer) {
+    String layerInfo = layer.equals(DEFAULT_LAYER) ? "" : DIVIDER + layer;
+    return OPEN_TAG_STARTCHAR + parentTag + layerInfo + OPEN_TAG_ENDCHAR;
+  }
+
+  private String layerName(String layer) {
+    return layer.equals(TAGML.DEFAULT_LAYER) ? "(default)" : layer;
   }
 }

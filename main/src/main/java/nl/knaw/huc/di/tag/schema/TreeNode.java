@@ -19,17 +19,14 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class TreeNode<T> implements Iterable<TreeNode<T>> {
 
   T data;
   TreeNode<T> parent;
-  List<TreeNode<T>> children;
+  List<TreeNode<T>> children = new ArrayList<>();
 
   public TreeNode(T data) {
     this.data = data;
@@ -64,4 +61,7 @@ public class TreeNode<T> implements Iterable<TreeNode<T>> {
     return children.spliterator();
   }
 
+  public T getData() {
+    return data;
+  }
 }
