@@ -63,7 +63,8 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
             + "<book]";
     // how to address default layer?
     String schemaYAML = "---\n" + "$:\n" + "  book:\n" + "    - chapter:\n" + "      - sentence";
-    String expectedError = "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>";
+    String expectedError =
+        "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>";
     validateWithError(tagML, schemaYAML, expectedError);
   }
 
@@ -72,6 +73,22 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
     String tagML = "[tagml>[l>test [w>word<w]<l]<tagml]";
     // how to address default layer?
     String schemaYAML = "$:\n" + "  tagml:\n" + "    - l:\n" + "      - w\n";
+    validate(tagML, schemaYAML);
+  }
+
+  @Test
+  public void testSimpleTAGMLValidation3() {
+    String tagML =
+        "[tagml|+A,+B>[a|A>The rain [b|B>in [aa|A>Spain<aa] falls [bb|B>mainly<bb] on the plain.<b]<a]<tagml]";
+    String schemaYAML =
+        "A:\n"
+            + "  tagml:\n"
+            + "    - a:\n"
+            + "      - aa\n"
+            + "B:\n"
+            + "  tagml:\n"
+            + "    - b:\n"
+            + "      - bb\n";
     validate(tagML, schemaYAML);
   }
 
