@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.validate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ package nl.knaw.huc.di.tag.validate;
  */
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
-import nl.knaw.huc.di.tag.schema.TAGMLSchema;
 import nl.knaw.huc.di.tag.schema.TAGMLSchemaFactory;
 import nl.knaw.huc.di.tag.schema.TAGMLSchemaParseResult;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
@@ -142,8 +141,9 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
           TAGDocument document = parseTAGML(tagML, store);
           assertThat(document).isNotNull();
           final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
-          assertThat(schemaParseResult.schema).isNotNull();
-          assertThat(schemaParseResult.errors).isEmpty();
+          assertThat(schemaParseResult).hasSchema();
+          assertThat(schemaParseResult).hasNoErrors();
+
           TAGValidator validator = new TAGValidator(store);
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
@@ -163,8 +163,9 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
           TAGDocument document = parseTAGML(tagML, store);
           assertThat(document).isNotNull();
           final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
-          assertThat(schemaParseResult.schema).isNotNull();
-          assertThat(schemaParseResult.errors).isEmpty();
+          assertThat(schemaParseResult).hasSchema();
+          assertThat(schemaParseResult).hasNoErrors();
+
           TAGValidator validator = new TAGValidator(store);
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
@@ -175,7 +176,7 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
         });
   }
 
-  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
+//  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
 
   private TAGDocument parseTAGML(final String tagML, final TAGStore store) {
     //    LOG.info("TAGML=\n{}\n", tagML);

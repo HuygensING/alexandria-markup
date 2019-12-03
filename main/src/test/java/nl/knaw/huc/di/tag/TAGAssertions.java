@@ -20,6 +20,8 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
+import nl.knaw.huc.di.tag.schema.TAGMLSchemaParseResult;
+import nl.knaw.huc.di.tag.schema.TAGMLSchemaParseResultAssert;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huc.di.tag.validate.TAGValidationResult;
 import nl.knaw.huc.di.tag.validate.TAGValidationResultAssert;
@@ -53,7 +55,6 @@ public class TAGAssertions extends Assertions {
    * @return the created assertion object.
    */
   @CheckReturnValue
-
   public static TAGMarkupAssert assertThat(TAGMarkup actual) {
     return new TAGMarkupAssert(actual);
   }
@@ -91,4 +92,14 @@ public class TAGAssertions extends Assertions {
     return new TAGValidationResultAssert(actual);
   }
 
+  /**
+   * Creates a new instance of <code>{@link TAGMLSchemaParseResultAssert}</code>.
+   *
+   * @param actual the actual value.
+   * @return the created assertion object.
+   */
+  @CheckReturnValue
+  public static TAGMLSchemaParseResultAssert assertThat(TAGMLSchemaParseResult actual) {
+    return new TAGMLSchemaParseResultAssert(actual);
+  }
 }

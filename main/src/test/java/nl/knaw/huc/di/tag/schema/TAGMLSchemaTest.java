@@ -63,8 +63,8 @@ public class TAGMLSchemaTest {
             + "        - z2\n";
     System.out.println(schemaYAML);
     final TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    assertThat(result.errors).isEmpty();
-    assertThat(result.schema.getLayers()).containsExactly("L1", "L2");
+    assertThat(result).hasNoErrors();
+    assertThat(result).hasLayers("L1", "L2");
 
     TreeNode<String> layerHierarchy1 = result.schema.getLayerHierarchy("L1");
     assertThat(layerHierarchy1.data).isEqualTo("root");
@@ -117,8 +117,7 @@ public class TAGMLSchemaTest {
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
-    assertThat(result.errors)
-        .contains("only 1 root markup allowed; found 2 [root1, root2] in layer L1");
+    assertThat(result).hasErrors("only 1 root markup allowed; found 2 [root1, root2] in layer L1");
   }
 
   @Test
@@ -130,7 +129,7 @@ public class TAGMLSchemaTest {
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
-    assertThat(result.errors).contains("no layer definitions found");
+    assertThat(result).hasErrors("no layer definitions found");
   }
 
   @Test
@@ -147,8 +146,8 @@ public class TAGMLSchemaTest {
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
-    assertThat(result.errors)
-        .contains(
+    assertThat(result)
+        .hasErrors(
             "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
   }
 
@@ -161,8 +160,8 @@ public class TAGMLSchemaTest {
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     LOG.info("errors={}", result.errors);
-    assertThat(result.errors)
-        .contains(
+    assertThat(result)
+        .hasErrors(
             "while scanning a simple key\n"
                 + " in 'reader', line 2, column 1:\n"
                 + "    x\n"
