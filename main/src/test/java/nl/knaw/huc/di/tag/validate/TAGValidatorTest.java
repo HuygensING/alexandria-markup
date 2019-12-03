@@ -68,7 +68,7 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
     String schemaYAML = "---\n" + "$:\n" + "  book:\n" + "    - chapter:\n" + "      - sentence";
     List<String> expectedErrors =
         newArrayList(
-            "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>");
+            "Layer $ (default): expected [sentence> as child markup of [chapter>, but found [paragraph>");
     List<String> expectedWarnings = newArrayList();
     validateWithErrorsAndWarnings(tagML, schemaYAML, expectedErrors, expectedWarnings);
   }
@@ -91,6 +91,9 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
             + "    - chapter:\n"
             + "        - paragraph:\n"
             + "            - sentence\n"
+            + "$:\n"
+            + "  tagml:\n"
+            + "    - something\n"
             + "V:\n"
             + "  tagml:\n"
             + "    - poem:\n"
@@ -100,7 +103,7 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
         newArrayList("Layer A: expected [chapter|A> as child markup of [tagml|A>, but found [l|A>");
     final Collection<String> warnings =
         newArrayList(
-            "Layer V is defined in the schema, but not used in the document.",
+            "Layers $ (default), V are defined in the schema, but not used in the document.",
             "Layers B, C are used in the document, but not defined in the schema.");
     validateWithErrorsAndWarnings(tagML, schemaYAML, errors, warnings);
   }
@@ -140,9 +143,9 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
           assertThat(document).isNotNull();
+
           final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
-          assertThat(schemaParseResult).hasSchema();
-          assertThat(schemaParseResult).hasNoErrors();
+          assertThat(schemaParseResult).hasSchema().hasNoErrors();
 
           TAGValidator validator = new TAGValidator(store);
           final TAGValidationResult validationResult =
@@ -162,21 +165,22 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
           assertThat(document).isNotNull();
+
           final TAGMLSchemaParseResult schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML);
-          assertThat(schemaParseResult).hasSchema();
-          assertThat(schemaParseResult).hasNoErrors();
+          assertThat(schemaParseResult).hasSchema().hasNoErrors();
 
           TAGValidator validator = new TAGValidator(store);
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
           LOG.info("validationResult={}", validationResult);
-          assertThat(validationResult).isNotValid();
-          assertThat(validationResult).hasErrors(expectedErrors);
-          assertThat(validationResult).hasWarnings(expectedWarnings);
+          assertThat(validationResult)
+              .isNotValid()
+              .hasErrors(expectedErrors)
+              .hasWarnings(expectedWarnings);
         });
   }
 
-//  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
+  //  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
 
   private TAGDocument parseTAGML(final String tagML, final TAGStore store) {
     //    LOG.info("TAGML=\n{}\n", tagML);

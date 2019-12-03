@@ -62,18 +62,20 @@ public class TAGMLSchemaTest {
             + "        - z1\n"
             + "        - z2\n";
     System.out.println(schemaYAML);
+
     final TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    assertThat(result).hasNoErrors();
-    assertThat(result).hasLayers("L1", "L2");
+    assertThat(result).hasNoErrors().hasLayers("L1", "L2");
 
     TreeNode<String> layerHierarchy1 = result.schema.getLayerHierarchy("L1");
     assertThat(layerHierarchy1.data).isEqualTo("root");
+
     List<TreeNode<String>> rootChildren = layerHierarchy1.children;
     Assertions.assertThat(rootChildren).hasSize(4);
     assertThat(rootChildren.get(0).data).isEqualTo("a");
     assertThat(rootChildren.get(1).data).isEqualTo("b");
     assertThat(rootChildren.get(2).data).isEqualTo("c");
     assertThat(rootChildren.get(3).data).isEqualTo("d");
+
     List<TreeNode<String>> dChildren = rootChildren.get(3).children;
     Assertions.assertThat(dChildren).hasSize(2);
     assertThat(dChildren.get(0).data).isEqualTo("d1");
@@ -81,11 +83,13 @@ public class TAGMLSchemaTest {
 
     TreeNode<String> layerHierarchy2 = result.schema.getLayerHierarchy("L2");
     assertThat(layerHierarchy2.data).isEqualTo("root");
+
     List<TreeNode<String>> rootChildren2 = layerHierarchy2.children;
     Assertions.assertThat(rootChildren2).hasSize(3);
     assertThat(rootChildren2.get(0).data).isEqualTo("x");
     assertThat(rootChildren2.get(1).data).isEqualTo("y");
     assertThat(rootChildren2.get(2).data).isEqualTo("z");
+
     List<TreeNode<String>> zChildren = rootChildren2.get(2).children;
     Assertions.assertThat(zChildren).hasSize(2);
     assertThat(zChildren.get(0).data).isEqualTo("z1");

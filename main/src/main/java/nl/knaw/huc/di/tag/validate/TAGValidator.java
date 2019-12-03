@@ -51,23 +51,27 @@ public class TAGValidator {
       }
     }
 
-    List layersMissingInSchema = new ArrayList(layersInDocument);
+    List<String> layersMissingInSchema = new ArrayList(layersInDocument);
     layersMissingInSchema.removeAll(layersInSchema);
     if (!layersMissingInSchema.isEmpty()) {
       String warning =
           (layersMissingInSchema.size() == 1)
-              ? "Layer " + layersMissingInSchema.get(0) + " is"
-              : "Layers " + String.join(", ", layersMissingInSchema) + " are";
+              ? "Layer " + layerName(layersMissingInSchema.get(0)) + " is"
+              : "Layers "
+                  + layersMissingInSchema.stream().map(this::layerName).collect(joining(", "))
+                  + " are";
       result.warnings.add(warning + " used in the document, but not defined in the schema.");
     }
 
-    List layersMissingInDocument = new ArrayList(layersInSchema);
+    List<String> layersMissingInDocument = new ArrayList(layersInSchema);
     layersMissingInDocument.removeAll(layersInDocument);
     if (!layersMissingInDocument.isEmpty()) {
       String warning =
           (layersMissingInDocument.size() == 1)
-              ? "Layer " + layersMissingInDocument.get(0) + " is"
-              : "Layers " + String.join(", ", layersMissingInDocument) + " are";
+              ? "Layer " + layerName(layersMissingInDocument.get(0)) + " is"
+              : "Layers "
+                  + layersMissingInDocument.stream().map(this::layerName).collect(joining(", "))
+                  + " are";
       result.warnings.add(warning + " defined in the schema, but not used in the document.");
     }
 
@@ -147,6 +151,6 @@ public class TAGValidator {
   }
 
   private String layerName(String layer) {
-    return layer.equals(TAGML.DEFAULT_LAYER) ? "(default)" : layer;
+    return layer.equals(TAGML.DEFAULT_LAYER) ? "$ (default)" : layer;
   }
 }
