@@ -43,9 +43,34 @@ public class TAGValidator {
 
   public TAGValidationResult validate(TAGDocument document, TAGMLSchema schema) {
     final TAGValidationResult result = new TAGValidationResult();
-    for (String layer : schema.getLayers()) {
-      validateForLayer(document, layer, schema.getLayerHierarchy(layer), result);
+    final Set<String> layersInDocument = document.getLayerNames();
+    final List<String> layersInSchema = schema.getLayers();
+    for (String layer : layersInSchema) {
+      if (layersInDocument.contains(layer)) {
+        validateForLayer(document, layer, schema.getLayerHierarchy(layer), result);
+      }
     }
+
+    List layersMissingInSchema = new ArrayList(layersInDocument);
+    layersMissingInSchema.removeAll(layersInSchema);
+    if (!layersMissingInSchema.isEmpty()) {
+      String warning =
+          (layersMissingInSchema.size() == 1)
+              ? "Layer " + layersMissingInSchema.get(0) + " is"
+              : "Layers " + String.join(", ", layersMissingInSchema) + " are";
+      result.warnings.add(warning + " used in the document, but not defined in the schema.");
+    }
+
+    List layersMissingInDocument = new ArrayList(layersInSchema);
+    layersMissingInDocument.removeAll(layersInDocument);
+    if (!layersMissingInDocument.isEmpty()) {
+      String warning =
+          (layersMissingInDocument.size() == 1)
+              ? "Layer " + layersMissingInDocument.get(0) + " is"
+              : "Layers " + String.join(", ", layersMissingInDocument) + " are";
+      result.warnings.add(warning + " defined in the schema, but not used in the document.");
+    }
+
     return result;
   }
 

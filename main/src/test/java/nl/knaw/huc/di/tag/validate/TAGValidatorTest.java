@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.validate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGValidatorTest extends TAGBaseStoreTest {
@@ -63,9 +67,11 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
             + "<book]";
     // how to address default layer?
     String schemaYAML = "---\n" + "$:\n" + "  book:\n" + "    - chapter:\n" + "      - sentence";
-    String expectedError =
-        "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>";
-    validateWithError(tagML, schemaYAML, expectedError);
+    List<String> expectedErrors =
+        newArrayList(
+            "Layer (default): expected [sentence> as child markup of [chapter>, but found [paragraph>");
+    List<String> expectedWarnings = newArrayList();
+    validateWithErrorsAndWarnings(tagML, schemaYAML, expectedErrors, expectedWarnings);
   }
 
   @Test
@@ -74,6 +80,30 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
     // how to address default layer?
     String schemaYAML = "$:\n" + "  tagml:\n" + "    - l:\n" + "      - w\n";
     validate(tagML, schemaYAML);
+  }
+
+  @Test
+  public void testSimpleTAGMLValidation4() {
+    String tagML = "[tagml|+A,+B,+C>[l|A>[c|C>test<c] [b|B>[w|A>word<w]<b]<l]<tagml]";
+    // how to address default layer?
+    String schemaYAML =
+        "A:\n"
+            + "  tagml:\n"
+            + "    - chapter:\n"
+            + "        - paragraph:\n"
+            + "            - sentence\n"
+            + "V:\n"
+            + "  tagml:\n"
+            + "    - poem:\n"
+            + "        - verse:\n"
+            + "            - line\n";
+    final Collection<String> errors =
+        newArrayList("Layer A: expected [chapter|A> as child markup of [tagml|A>, but found [l|A>");
+    final Collection<String> warnings =
+        newArrayList(
+            "Layer V is defined in the schema, but not used in the document.",
+            "Layers B, C are used in the document, but not defined in the schema.");
+    validateWithErrorsAndWarnings(tagML, schemaYAML, errors, warnings);
   }
 
   @Test
@@ -118,12 +148,15 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
           LOG.info("validationResult={}", validationResult);
-          assertThat(validationResult.isValid()).isTrue();
+          assertThat(validationResult).isValid();
         });
   }
 
-  private void validateWithError(
-      final String tagML, final String schemaYAML, final String... expectedErrors) {
+  private void validateWithErrorsAndWarnings(
+      final String tagML,
+      final String schemaYAML,
+      final Collection<String> expectedErrors,
+      final Collection<String> expectedWarnings) {
     LOG.info("schemaYAML={}", schemaYAML);
     runInStoreTransaction(
         store -> {
@@ -136,8 +169,9 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
           final TAGValidationResult validationResult =
               validator.validate(document, schemaParseResult.schema);
           LOG.info("validationResult={}", validationResult);
-          assertThat(validationResult.isValid()).isFalse();
-          assertThat(validationResult.getErrors()).contains(expectedErrors);
+          assertThat(validationResult).isNotValid();
+          assertThat(validationResult).hasErrors(expectedErrors);
+          assertThat(validationResult).hasWarnings(expectedWarnings);
         });
   }
 

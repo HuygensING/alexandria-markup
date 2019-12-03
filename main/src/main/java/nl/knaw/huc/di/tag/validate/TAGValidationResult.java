@@ -23,20 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TAGValidationResult {
-  List<String> errors = new ArrayList<>();
+  public List<String> warnings = new ArrayList<>();
+  public List<String> errors = new ArrayList<>();
 
   public boolean isValid() {
     return errors.isEmpty();
   }
 
-  public List<String> getErrors() {
-    return errors;
-  }
-
   @Override
   public String toString() {
-    return "TAGValidationResult{" +
-        "errors=" + errors +
-        '}';
+    return "TAGValidationResult{" + "errors=" + errors + '}';
   }
 }

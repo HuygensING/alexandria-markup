@@ -21,10 +21,15 @@ package nl.knaw.huc.di.tag;
  */
 
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huc.di.tag.validate.TAGValidationResult;
+import nl.knaw.huc.di.tag.validate.TAGValidationResultAssert;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import nl.knaw.huygens.alexandria.storage.dto.*;
+import nl.knaw.huygens.alexandria.storage.dto.AnnotationInfoAssert;
+import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert;
+import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupAssert;
+import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.CheckReturnValue;
 
@@ -73,6 +78,17 @@ public class TAGAssertions extends Assertions {
   @CheckReturnValue
   public static TAGTextNodeAssert assertThat(TAGTextNode actual) {
     return new TAGTextNodeAssert(actual);
+  }
+
+  /**
+   * Creates a new instance of <code>{@link TAGValidationResultAssert}</code>.
+   *
+   * @param actual the actual value.
+   * @return the created assertion object.
+   */
+  @CheckReturnValue
+  public static TAGValidationResultAssert assertThat(TAGValidationResult actual) {
+    return new TAGValidationResultAssert(actual);
   }
 
 }
