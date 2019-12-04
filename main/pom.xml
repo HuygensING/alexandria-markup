@@ -23,7 +23,7 @@
     <dependency>
       <groupId>nl.knaw.huygens.alexandria</groupId>
       <artifactId>tagml</artifactId>
-      <version>${project.version}</version>
+      <version>${tagml.version}</version>
     </dependency>
     <dependency>
       <groupId>nl.knaw.huygens.alexandria</groupId>
