@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
-@Entity(version = 3)
+@Entity(version = 4)
 public class TAGDocumentDTO implements TAGDTO {
   @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
@@ -48,13 +48,14 @@ public class TAGDocumentDTO implements TAGDTO {
   private Date modificationDate = new Date();
   public TextGraph textGraph = new TextGraph();
   private Map<String, String> namespaces;
+  private String schemaLocation;
 
-  public TAGDocumentDTO() {
-  }
+  public TAGDocumentDTO() {}
 
   public void initialize() {
     if (id == null) {
-      throw new RuntimeException("TAGDocumentDTO needs to be persisted before it can be initialized.");
+      throw new RuntimeException(
+          "TAGDocumentDTO needs to be persisted before it can be initialized.");
     }
     textGraph.setDocumentRoot(id);
   }
@@ -120,10 +121,12 @@ public class TAGDocumentDTO implements TAGDTO {
     final Set<String> layers = new HashSet<>();
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
     return textNodeSize > 2 //
-        && getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).count() >= textNodeSize / 2d;
+        && getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).count()
+            >= textNodeSize / 2d;
   }
 
-  private Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(final Long markupId, final Set<String> layers) {
+  private Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(
+      final Long markupId, final Set<String> layers) {
     return textGraph.getTextNodeIdStreamForMarkupIdInLayers(markupId, layers);
   }
 
@@ -135,16 +138,15 @@ public class TAGDocumentDTO implements TAGDTO {
     textNodeIds.add(textNode.getDbId());
   }
 
-  public void associateTextWithMarkupForLayer(TAGTextNodeDTO textNode, TAGMarkupDTO markup, final String layerName) {
+  public void associateTextWithMarkupForLayer(
+      TAGTextNodeDTO textNode, TAGMarkupDTO markup, final String layerName) {
     textGraph.linkMarkupToTextNodeForLayer(markup.getDbId(), textNode.getDbId(), layerName);
   }
 
   public boolean markupHasTextNodes(final TAGMarkup markup) {
     final Set<String> layers = new HashSet<>();
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
-    return getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers)
-        .findAny()
-        .isPresent();
+    return getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).findAny().isPresent();
   }
 
   public void setNamespaces(final Map<String, String> namespaces) {
@@ -153,5 +155,13 @@ public class TAGDocumentDTO implements TAGDTO {
 
   public Map<String, String> getNamespaces() {
     return namespaces;
+  }
+
+  public String getSchemaLocation() {
+    return schemaLocation;
+  }
+
+  public void setSchemaLocation(final String schemaLocation) {
+    this.schemaLocation = schemaLocation;
   }
 }

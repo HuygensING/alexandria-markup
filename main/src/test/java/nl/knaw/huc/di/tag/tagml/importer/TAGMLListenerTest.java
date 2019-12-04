@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -50,122 +51,138 @@ import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 public class TAGMLListenerTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLListenerTest.class);
-//  private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
+  //  private static final LMNLExporter LMNL_EXPORTER = new LMNLExporter(store);
 
   @Test
   public void testSnarkParses() {
     String input = Files.contentOf(new File("data/tagml/snark81.tagml"), Charset.defaultCharset());
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-    });
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
+  }
+
+  @Test
+  public void testSchemaLocation() {
+    String input =
+        "[!schema http://tag.com/schemas/test-schema.yaml]\n"
+            + "[tagml>"
+            + "[a>a<a] [b>b<b]"
+            + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasSchemaLocation(URI.create("http://tag.com/schemas/test-schema.yaml"));
+        });
   }
 
   @Test
   public void testNonOverlappingMarkupWithoutLayerInfo() {
-    String input = "[tagml>" +
-        "[a>a<a] [b>b<b]" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-    });
+    String input = "[tagml>" + "[a>a<a] [b>b<b]" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
   }
 
   @Test
   public void testOverlappingMarkupWithoutLayerInfo() {
-    String input = "[tagml>" +
-        "[a>a [b>b<a]<b]" +
-        "<tagml]";
-    String expectedSyntaxErrorMessage = "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n" +
-        "parsing aborted!";
+    String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
+    String expectedSyntaxErrorMessage =
+        "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
+            + "parsing aborted!";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
   public void testNonOverlappingMarkupWithLayerInfo() {
-    String input = "[tagml|+a>" +
-        "[a|a>a<a|a] [b|a>b<b|a]" +
-        "<tagml|a]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-    });
+    String input = "[tagml|+a>" + "[a|a>a<a|a] [b|a>b<b|a]" + "<tagml|a]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
   }
 
   @Test
   public void testOverlappingMarkupWithLayerInfo() {
-    String input = "[tagml|+a,+b>" +
-        "[a|a>a [b|b>b<a|a]<b|b]" +
-        "<tagml|a,b]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-    });
+    String input = "[tagml|+a,+b>" + "[a|a>a [b|b>b<a|a]<b|b]" + "<tagml|a,b]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
   }
 
   @Test
   public void testBranchError() {
-    String input = "[tagml>[layerdef|+sem,+gen>" +
-        "[l|sem>a <|[add|gen>added<add]|[del|gen>del<del]|> line<l]" +
-        "<layerdef]<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-    });
+    String input =
+        "[tagml>[layerdef|+sem,+gen>"
+            + "[l|sem>a <|[add|gen>added<add]|[del|gen>del<del]|> line<l]"
+            + "<layerdef]<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
   }
 
   @Test
   public void testLayerShouldBeHierarchical() {
-    String input = "[tagml|+a,+b>" +
-        "[page|b>" +
-        "[book|a>book title" +
-        "[chapter|a>chapter title" +
-        "[para|a>paragraph text" +
-        "<page|b]" +
-        "<chapter|a]<book|a]" +
-        "[! para should close before chapter !]<para|a]" +
-        "<tagml|a,b]";
+    String input =
+        "[tagml|+a,+b>"
+            + "[page|b>"
+            + "[book|a>book title"
+            + "[chapter|a>chapter title"
+            + "[para|a>paragraph text"
+            + "<page|b]"
+            + "<chapter|a]<book|a]"
+            + "[! para should close before chapter !]<para|a]"
+            + "<tagml|a,b]";
 
-    String expectedSyntaxErrorMessage = "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" +
-        "parsing aborted!";
+    String expectedSyntaxErrorMessage =
+        "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" + "parsing aborted!";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
   public void testNonlinearText() {
     String input = "[o>Icecream is <|tasty|cold|sweet|>!<o]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      logDocumentGraph(document, input);
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          logDocumentGraph(document, input);
 
-      TextGraph textGraph = document.getDTO().textGraph;
+          TextGraph textGraph = document.getDTO().textGraph;
 
-      List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
-      assertThat(textNodes).hasSize(5);
+          List<TAGTextNode> textNodes = document.getTextNodeStream().collect(toList());
+          assertThat(textNodes).hasSize(5);
 
-      TAGTextNode textNode1 = textNodes.get(0);
-      assertThat(textNode1).hasText("Icecream is ");
+          TAGTextNode textNode1 = textNodes.get(0);
+          assertThat(textNode1).hasText("Icecream is ");
 
-//      TAGTextNode textNode2 = textNodes.get(1);
-//      assertThat(textNode2).isDivergence();
-//      Long divergenceNode = textNode2.getResourceId();
-//      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
-//      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
+          //      TAGTextNode textNode2 = textNodes.get(1);
+          //      assertThat(textNode2).isDivergence();
+          //      Long divergenceNode = textNode2.getResourceId();
+          //      assertThat(incomingTextEdges(textGraph, divergenceNode)).hasSize(1);
+          //      assertThat(outgoingTextEdges(textGraph, divergenceNode)).hasSize(3);
 
-      TAGTextNode textNode3 = textNodes.get(1);
-      assertThat(textNode3).hasText("tasty");
+          TAGTextNode textNode3 = textNodes.get(1);
+          assertThat(textNode3).hasText("tasty");
 
-      TAGTextNode textNode4 = textNodes.get(2);
-      assertThat(textNode4).hasText("cold");
+          TAGTextNode textNode4 = textNodes.get(2);
+          assertThat(textNode4).hasText("cold");
 
-      TAGTextNode textNode5 = textNodes.get(3);
-      assertThat(textNode5).hasText("sweet");
+          TAGTextNode textNode5 = textNodes.get(3);
+          assertThat(textNode5).hasText("sweet");
 
-//      TAGTextNode textNode6 = textNodes.get(5);
-//      assertThat(textNode6).isConvergence();
-//      Long convergenceNode = textNode6.getResourceId();
-//      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
-//      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
+          //      TAGTextNode textNode6 = textNodes.get(5);
+          //      assertThat(textNode6).isConvergence();
+          //      Long convergenceNode = textNode6.getResourceId();
+          //      assertThat(incomingTextEdges(textGraph, convergenceNode)).hasSize(3);
+          //      assertThat(outgoingTextEdges(textGraph, convergenceNode)).hasSize(1);
 
-      TAGTextNode textNode7 = textNodes.get(4);
-      assertThat(textNode7).hasText("!");
-    });
+          TAGTextNode textNode7 = textNodes.get(4);
+          assertThat(textNode7).hasText("!");
+        });
   }
 
   // private methods
@@ -191,25 +208,26 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   }
 
   private void assertTAGMLParsesWithSyntaxError(String input, String expectedSyntaxErrorMessage) {
-    runInStoreTransaction(store -> {
-      ErrorListener errorListener = new ErrorListener();
-      TAGMLParser parser = setupParser(input, errorListener);
-      ParseTree parseTree = parser.document();
-      LOG.info("parsetree: {}", parseTree.toStringTree(parser));
+    runInStoreTransaction(
+        store -> {
+          ErrorListener errorListener = new ErrorListener();
+          TAGMLParser parser = setupParser(input, errorListener);
+          ParseTree parseTree = parser.document();
+          LOG.info("parsetree: {}", parseTree.toStringTree(parser));
 
-      int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-      LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
+          int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
+          LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-      try {
-        TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
-        TAGDocument document = listener.getDocument();
-        logDocumentGraph(document, input);
-      } catch (TAGMLBreakingError e) {
-      }
-      assertThat(errorListener.hasErrors()).isTrue();
-      String errors = String.join("\n", errorListener.getErrors());
-      assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
-    });
+          try {
+            TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
+            TAGDocument document = listener.getDocument();
+            logDocumentGraph(document, input);
+          } catch (TAGMLBreakingError e) {
+          }
+          assertThat(errorListener.hasErrors()).isTrue();
+          String errors = String.join("\n", errorListener.getErrors());
+          assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
+        });
   }
 
   private TAGMLParser setupParser(final String input, final ErrorListener errorListener) {
@@ -226,7 +244,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     return parser;
   }
 
-  private TAGMLListener walkParseTree(final ErrorListener errorListener, final ParseTree parseTree, final TAGStore store) {
+  private TAGMLListener walkParseTree(
+      final ErrorListener errorListener, final ParseTree parseTree, final TAGStore store) {
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {

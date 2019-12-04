@@ -27,6 +27,7 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
+import java.net.URI;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -66,10 +67,12 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
   public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
-    List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
-//        .peek(System.out::println)
-        .filter(m -> m.hasTag(tag))
-        .collect(toList());
+    List<TAGMarkup> relevantMarkup =
+        actual
+            .getMarkupStream()
+            //        .peek(System.out::println)
+            .filter(m -> m.hasTag(tag))
+            .collect(toList());
     if (relevantMarkup.isEmpty()) {
       failWithMessage("No markup found with tag %s", tag);
     }
@@ -79,8 +82,9 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   }
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {
-    return actual.getTextNodeStream()//
-        .map(this::toTextNodeSketch)//
+    return actual
+        .getTextNodeStream() //
+        .map(this::toTextNodeSketch) //
         .collect(toSet());
   }
 
@@ -88,12 +92,26 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return textNodeSketch(textNode.getText());
   }
 
+  public TAGDocumentAssert hasSchemaLocation(final URI uri) {
+    isNotNull();
+    Optional<URI> schemaLocation = actual.getSchemaLocation();
+    if (!schemaLocation.isPresent()) {
+      failWithMessage("Expected schemaLocation %s, but no schemaLocation was found", uri);
+    }
+    final URI actualSchemaLocation = schemaLocation.get();
+    if (!actualSchemaLocation.equals(uri)) {
+      failWithMessage("Expected schemaLocation %s, but found %s", uri, actualSchemaLocation);
+    }
+
+    return myself;
+  }
+
   //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
-//    isNotNull();
-//    List<String> actualLayerIds = actual.getLayerNames();
-//    return myself;
-//  }
-//
+  //    isNotNull();
+  //    List<String> actualLayerIds = actual.getLayerNames();
+  //    return myself;
+  //  }
+  //
   public static class TextNodeSketch {
 
     private final String text;
@@ -109,8 +127,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
     @Override
     public boolean equals(Object obj) {
-      return obj instanceof TextNodeSketch
-          && ((TextNodeSketch) obj).text.equals(text);
+      return obj instanceof TextNodeSketch && ((TextNodeSketch) obj).text.equals(text);
     }
 
     @Override
@@ -168,7 +185,8 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     }
   }
 
-  public static MarkupSketch markupSketch(String tag, List<Annotation> annotations, Boolean optional) {
+  public static MarkupSketch markupSketch(
+      String tag, List<Annotation> annotations, Boolean optional) {
     return new MarkupSketch(tag, annotations, optional);
   }
 
@@ -185,13 +203,13 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   }
 
   private Set<MarkupSketch> getActualMarkupSketches() {
-    return actual.getMarkupStream()//
-        .map(this::toMarkupSketch)//
+    return actual
+        .getMarkupStream() //
+        .map(this::toMarkupSketch) //
         .collect(toSet());
   }
 
   public MarkupSketch toMarkupSketch(TAGMarkup markup) {
     return markupSketch(markup.getTag(), markup.isOptional());
   }
-
 }

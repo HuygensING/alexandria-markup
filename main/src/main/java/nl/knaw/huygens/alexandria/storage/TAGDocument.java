@@ -31,6 +31,7 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -297,6 +298,19 @@ public class TAGDocument {
 
   public Map<String, String> getNamespaces() {
     return documentDTO.getNamespaces();
+  }
+
+  public Optional<URI> getSchemaLocation() {
+    final String schemaLocationString = documentDTO.getSchemaLocation();
+    if (schemaLocationString == null) {
+      return Optional.empty();
+    } else {
+      return Optional.of(URI.create(schemaLocationString));
+    }
+  }
+
+  public void setSchemaLocation(URI schemaLocation) {
+    documentDTO.setSchemaLocation(schemaLocation.toString());
   }
 
   // If there is no markup unique to the default layer, remove the default layer
