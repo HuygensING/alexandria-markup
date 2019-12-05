@@ -31,7 +31,9 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -300,12 +302,12 @@ public class TAGDocument {
     return documentDTO.getNamespaces();
   }
 
-  public Optional<URI> getSchemaLocation() {
+  public Optional<URL> getSchemaLocation() throws MalformedURLException {
     final String schemaLocationString = documentDTO.getSchemaLocation();
     if (schemaLocationString == null) {
       return Optional.empty();
     } else {
-      return Optional.of(URI.create(schemaLocationString));
+      return Optional.of(new URL(schemaLocationString));
     }
   }
 

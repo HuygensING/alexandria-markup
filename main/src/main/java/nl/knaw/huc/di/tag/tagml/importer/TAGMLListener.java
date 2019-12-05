@@ -166,7 +166,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
 
   @Override
   public void exitSchemaLocation(final SchemaLocationContext ctx) {
-    String uriString = ctx.IS_SchemaURI().getText();
+    String uriString = ctx.IS_SchemaURL().getText();
     document.setSchemaLocation(URI.create(uriString));
   }
 
@@ -215,7 +215,7 @@ public class TAGMLListener extends TAGMLParserBaseListener {
                         l ->
                             !TAGML.DEFAULT_LAYER.equals(
                                 l)) // Once again, the default layer is special! TODO: fix default
-                                    // layer usage
+                    // layer usage
                     .collect(toSet());
             handledLayers.addAll(newParentLayers);
             goOn = !newParentLayers.isEmpty();

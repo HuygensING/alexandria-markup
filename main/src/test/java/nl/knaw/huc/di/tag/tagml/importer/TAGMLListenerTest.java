@@ -41,7 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -72,8 +73,13 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
-          assertThat(document)
-              .hasSchemaLocation(URI.create("http://tag.com/schemas/test-schema.yaml"));
+          final URL url;
+          try {
+            url = new URL("http://tag.com/schemas/test-schema.yaml");
+            assertThat(document).hasSchemaLocation(url);
+          } catch (MalformedURLException e) {
+            e.printStackTrace();
+          }
         });
   }
 

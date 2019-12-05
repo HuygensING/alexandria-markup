@@ -27,7 +27,8 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -92,13 +93,13 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return textNodeSketch(textNode.getText());
   }
 
-  public TAGDocumentAssert hasSchemaLocation(final URI uri) {
+  public TAGDocumentAssert hasSchemaLocation(final URL uri) throws MalformedURLException {
     isNotNull();
-    Optional<URI> schemaLocation = actual.getSchemaLocation();
+    Optional<URL> schemaLocation = actual.getSchemaLocation();
     if (!schemaLocation.isPresent()) {
       failWithMessage("Expected schemaLocation %s, but no schemaLocation was found", uri);
     }
-    final URI actualSchemaLocation = schemaLocation.get();
+    final URL actualSchemaLocation = schemaLocation.get();
     if (!actualSchemaLocation.equals(uri)) {
       failWithMessage("Expected schemaLocation %s, but found %s", uri, actualSchemaLocation);
     }
