@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,10 +52,15 @@ public class TAGTraverser {
     this.store = store;
     this.view = view;
     this.document = document;
-//    final AnnotationFactory annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
-    document.getMarkupStream()
+    //    final AnnotationFactory annotationFactory = new AnnotationFactory(store,
+    // document.getDTO().textGraph);
+    document
+        .getMarkupStream()
         .filter(TAGMarkup::isDiscontinuous)
-        .forEach(mw -> discontinuousMarkupTextNodesToHandle.put(mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
+        .forEach(
+            mw ->
+                discontinuousMarkupTextNodesToHandle.put(
+                    mw.getDbId(), new AtomicInteger(mw.getTextNodeCount())));
     textVariationStates.push(new TextVariationState());
     Set<String> layerNames = document.getLayerNames();
     relevantLayers = view.filterRelevantLayers(layerNames);
@@ -68,98 +73,116 @@ public class TAGTraverser {
     Set<String> openLayers = new HashSet<>();
     openLayers.add(TAGML.DEFAULT_LAYER);
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
-    document.getTextNodeStream().forEach(nodeToProcess -> {
-//      logTextNode(nodeToProcess);
-      if (!processedNodes.contains(nodeToProcess)) {
-        ExporterState state = stateRef.get();
-        Set<Long> markupIds = new LinkedHashSet<>();
-        List<TAGMarkup> markupStreamForTextNode = document.getMarkupStreamForTextNode(nodeToProcess)
-            .collect(toList());
-//        Collections.reverse(markupStreamForTextNode);
-        markupStreamForTextNode.forEach(mw -> {
-          Long id = mw.getDbId();
-          markupIds.add(id);
-          state.openTags.computeIfAbsent(id, (k) -> toOpenTag(mw, openLayers, tagVisitor));
-          state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
-          openLayers.addAll(mw.getLayers());
-          if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
-            discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
-          }
-        });
-        Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
+    document
+        .getTextNodeStream()
+        .forEach(
+            nodeToProcess -> {
+              //      logTextNode(nodeToProcess);
+              if (!processedNodes.contains(nodeToProcess)) {
+                ExporterState state = stateRef.get();
+                Set<Long> markupIds = new LinkedHashSet<>();
+                List<TAGMarkup> markupStreamForTextNode =
+                    document.getMarkupStreamForTextNode(nodeToProcess).collect(toList());
+                //        Collections.reverse(markupStreamForTextNode);
+                markupStreamForTextNode.forEach(
+                    mw -> {
+                      Long id = mw.getDbId();
+                      markupIds.add(id);
+                      state.openTags.computeIfAbsent(
+                          id, (k) -> toOpenTag(mw, openLayers, tagVisitor));
+                      state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+                      openLayers.addAll(mw.getLayers());
+                      if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
+                        discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
+                      }
+                    });
+                Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
-//        if (needsDivider(nodeToProcess)) {
-//          tagmlBuilder.append(DIVIDER);
-//        }
+                //        if (needsDivider(nodeToProcess)) {
+                //          tagmlBuilder.append(DIVIDER);
+                //        }
 
-        TextVariationState variationState = textVariationStates.peek();
-        if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
-          tagVisitor.exitTextVariation();
-//          tagmlBuilder.append(CONVERGENCE);
-          textVariationStates.pop();
-          variationState = textVariationStates.peek();
-        }
+                TextVariationState variationState = textVariationStates.peek();
+                if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
+                  tagVisitor.exitTextVariation();
+                  //          tagmlBuilder.append(CONVERGENCE);
+                  textVariationStates.pop();
+                  variationState = textVariationStates.peek();
+                }
 
-        List<Long> toClose = new ArrayList<>(state.openMarkupIds);
-        toClose.removeAll(relevantMarkupIds);
-        Collections.reverse(toClose);
-        toClose.forEach(markupId -> {
-          String closeTag = state.closeTags.get(markupId).toString();
-          closeTag = addSuspendPrefixIfRequired(closeTag, markupId, discontinuousMarkupTextNodesToHandle);
-          final TAGMarkup markup = store.getMarkup(markupId);
-          tagVisitor.exitCloseTag(markup);
-//          tagmlBuilder.append(closeTag);
-        });
+                List<Long> toClose = new ArrayList<>(state.openMarkupIds);
+                toClose.removeAll(relevantMarkupIds);
+                Collections.reverse(toClose);
+                toClose.forEach(
+                    markupId -> {
+                      String closeTag = state.closeTags.get(markupId).toString();
+                      closeTag =
+                          addSuspendPrefixIfRequired(
+                              closeTag, markupId, discontinuousMarkupTextNodesToHandle);
+                      final TAGMarkup markup = store.getMarkup(markupId);
+                      tagVisitor.exitCloseTag(markup);
+                      //          tagmlBuilder.append(closeTag);
+                    });
 
-        List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
-        toOpen.removeAll(state.openMarkupIds);
-        toOpen.forEach(markupId -> {
-          final TAGMarkup markup = store.getMarkup(markupId);
-          tagVisitor.enterOpenTag(markup);
-          String openTag = state.openTags.get(markupId).toString();
-          openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle);
-          markup.getAnnotationStream().forEach(a -> {
-            String value = serializeAnnotation(annotationFactory, a, tagVisitor);
-            tagVisitor.addAnnotation(value);
-          });
-          tagVisitor.exitOpenTag(markup);
-//          tagmlBuilder.append(openTag);
-        });
+                List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
+                toOpen.removeAll(state.openMarkupIds);
+                toOpen.forEach(
+                    markupId -> {
+                      final TAGMarkup markup = store.getMarkup(markupId);
+                      tagVisitor.enterOpenTag(markup);
+                      String openTag = state.openTags.get(markupId).toString();
+                      openTag =
+                          addResumePrefixIfRequired(
+                              openTag, markupId, discontinuousMarkupTextNodesToHandle);
+                      markup
+                          .getAnnotationStream()
+                          .forEach(
+                              a -> {
+                                String value =
+                                    serializeAnnotation(annotationFactory, a, tagVisitor);
+                                tagVisitor.addAnnotation(value);
+                              });
+                      tagVisitor.exitOpenTag(markup);
+                      //          tagmlBuilder.append(openTag);
+                    });
 
-        state.openMarkupIds.removeAll(toClose);
-        state.openMarkupIds.addAll(toOpen);
+                state.openMarkupIds.removeAll(toClose);
+                state.openMarkupIds.addAll(toOpen);
 
-        if (variationState.isBranchStartNode(nodeToProcess)) {
-          // this node starts a new branch of the current textvariation
-          stateRef.set(variationState.getStartState());
-          variationState.incrementBranchesStarted();
-        }
-        TAGTextNodeDTO textNode = nodeToProcess.getDTO();
-        String content = nodeToProcess.getText();
-//        String escapedText = variationState.inVariation()
-//            ? TAGML.escapeVariantText(content)
-//            : TAGML.escapeRegularText(content);
-        tagVisitor.exitText(content, variationState.inVariation());
-        processedNodes.add(nodeToProcess);
-        state.lastTextNodeId = nodeToProcess.getDbId();
-//        LOG.debug("TAGML={}\n", tagmlBuilder);
-      }
-    });
+                if (variationState.isBranchStartNode(nodeToProcess)) {
+                  // this node starts a new branch of the current textvariation
+                  stateRef.set(variationState.getStartState());
+                  variationState.incrementBranchesStarted();
+                }
+                TAGTextNodeDTO textNode = nodeToProcess.getDTO();
+                String content = nodeToProcess.getText();
+                //        String escapedText = variationState.inVariation()
+                //            ? TAGML.escapeVariantText(content)
+                //            : TAGML.escapeRegularText(content);
+                tagVisitor.exitText(content, variationState.inVariation());
+                processedNodes.add(nodeToProcess);
+                state.lastTextNodeId = nodeToProcess.getDbId();
+                //        LOG.debug("TAGML={}\n", tagmlBuilder);
+              }
+            });
     while (!textVariationStates.isEmpty()) {
       TextVariationState textVariationState = textVariationStates.pop();
       if (textVariationState.inVariation()) {
         tagVisitor.enterTextVariation();
-//        tagmlBuilder.append(CONVERGENCE);
+        //        tagmlBuilder.append(CONVERGENCE);
       }
     }
     final ExporterState state = stateRef.get();
-    state.openMarkupIds.descendingIterator()//
+    state
+        .openMarkupIds
+        .descendingIterator() //
         .forEachRemaining(markupId -> tagVisitor.exitCloseTag(store.getMarkup(markupId)));
-//        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
+    //        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     tagVisitor.exitDocument(document);
   }
 
-  private String serializeAnnotation(AnnotationFactory annotationFactory, AnnotationInfo a, TAGVisitor tagVisitor) {
+  private String serializeAnnotation(
+      AnnotationFactory annotationFactory, AnnotationInfo a, TAGVisitor tagVisitor) {
     StringBuilder stringBuilder = new StringBuilder();
     if (a.hasName()) {
       String annotationAssigner = tagVisitor.serializeAnnotationAssigner(a.getName());
@@ -184,23 +207,24 @@ public class TAGTraverser {
 
       case List:
         List<AnnotationInfo> listValue = annotationFactory.getListValue(a);
-        List<String> serializedItems = listValue.stream()
-            .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
-            .collect(toList());
+        List<String> serializedItems =
+            listValue.stream()
+                .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
+                .collect(toList());
         value = tagVisitor.serializeListAnnotationValue(serializedItems);
         break;
 
       case Map:
         List<AnnotationInfo> mapValue = annotationFactory.getMapValue(a);
-        List<String> serializedMapItems = mapValue.stream()
-            .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
-            .collect(toList());
+        List<String> serializedMapItems =
+            mapValue.stream()
+                .map(ai -> serializeAnnotation(annotationFactory, ai, tagVisitor))
+                .collect(toList());
         value = tagVisitor.serializeMapAnnotationValue(serializedMapItems);
         break;
 
       default:
         throw new RuntimeException("unhandled annotation type:" + a.getType());
-
     }
     return stringBuilder.append(value).toString();
   }
@@ -239,8 +263,8 @@ public class TAGTraverser {
     }
 
     public TextVariationState setBranchStartNodes(List<TAGTextNode> branchStartNodes) {
-      this.branchStartNodeIds = branchStartNodes.stream()
-          .map(TAGTextNode::getDbId).collect(toSet());
+      this.branchStartNodeIds =
+          branchStartNodes.stream().map(TAGTextNode::getDbId).collect(toSet());
       this.branchesToTraverse = branchStartNodes.size();
       return this;
     }
@@ -272,30 +296,34 @@ public class TAGTraverser {
   }
 
   private StringBuilder toCloseTag(TAGMarkup markup) {
-    String suspend = markup.isSuspended()
-        ? TAGML.SUSPEND_PREFIX
-        : "";
+    String suspend = markup.isSuspended() ? TAGML.SUSPEND_PREFIX : "";
 
-    return markup.isAnonymous()//
-        ? new StringBuilder()//
-        : new StringBuilder(CLOSE_TAG_STARTCHAR).append(suspend).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
+    return markup.isAnonymous() //
+        ? new StringBuilder() //
+        : new StringBuilder(CLOSE_TAG_STARTCHAR)
+            .append(suspend)
+            .append(markup.getExtendedTag())
+            .append(CLOSE_TAG_ENDCHAR);
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup, Set<String> openLayers, final TAGVisitor tagVisitor) {
-    String resume = markup.isResumed()
-        ? TAGML.RESUME_PREFIX
-        : "";
+  private StringBuilder toOpenTag(
+      TAGMarkup markup, Set<String> openLayers, final TAGVisitor tagVisitor) {
+    String resume = markup.isResumed() ? TAGML.RESUME_PREFIX : "";
 
     Set<String> newLayers = new HashSet<>(markup.getLayers());
     newLayers.removeAll(openLayers);
-    StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR)
-        .append(resume).append(markup.getExtendedTag(newLayers));
-    return markup.isAnonymous()//
-        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
+    StringBuilder tagBuilder =
+        new StringBuilder(OPEN_TAG_STARTCHAR)
+            .append(resume)
+            .append(markup.getExtendedTag(newLayers));
+    return markup.isAnonymous() //
+        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR) //
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 
-  private String addResumePrefixIfRequired(String openTag, Long markupId,
+  private String addResumePrefixIfRequired(
+      String openTag,
+      Long markupId,
       final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
@@ -307,7 +335,9 @@ public class TAGTraverser {
     return openTag;
   }
 
-  private String addSuspendPrefixIfRequired(String closeTag, final Long markupId,
+  private String addSuspendPrefixIfRequired(
+      String closeTag,
+      final Long markupId,
       final Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle) {
     if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
       int textNodesToHandle = discontinuousMarkupTextNodesToHandle.get(markupId).get();
@@ -317,5 +347,4 @@ public class TAGTraverser {
     }
     return closeTag;
   }
-
 }

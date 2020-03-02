@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nl.knaw.huygens.alexandria</groupId>
@@ -22,7 +22,7 @@
     <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
     <project.license.name>Apache License version 2.0</project.license.name>
-    <project.license.url>http://www.apache.org/licenses/LICENSE-2.0</project.license.url>
+    <project.license.url>https://www.apache.org/licenses/LICENSE-2.0</project.license.url>
     <java.version>1.8</java.version>
 
     <antlr.version>4.7.2</antlr.version>
@@ -213,7 +213,7 @@
       <id>central</id>
       <name>Maven Repository Switchboard</name>
       <layout>default</layout>
-      <url>http://repo1.maven.org/maven2</url>
+      <url>https://repo1.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -235,14 +235,14 @@
     <repository>
       <id>oracleReleases</id>
       <name>Oracle Released Java Packages</name>
-      <url>http://download.oracle.com/maven</url>
+      <url>https://download.oracle.com/maven</url>
       <layout>default</layout>
     </repository>
     <repository>
       <id>restlet</id>
       <name>Maven Restlet</name>
       <layout>default</layout>
-      <url>http://maven.restlet.com/</url>
+      <url>https://maven.restlet.com/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
