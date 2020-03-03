@@ -148,9 +148,9 @@ class Tokenizer {
       int length = part.length();
       for (final Long textNodeId : textNodeIds) {
         TextTokenInfo textTokenInfo = textTokenInfoMap.get(textNodeId);
-        Integer textPartEnd = textPartStart + length - 1;
+        int textPartEnd = textPartStart + length - 1;
         Integer textNodeStart = textTokenInfo.getOffset();
-        Integer textNodeEnd = textNodeStart + textTokenInfo.getLength() - 1;
+        int textNodeEnd = textNodeStart + textTokenInfo.getLength() - 1;
         boolean textPartStartIsInTextNode = textNodeStart <= textPartStart && textNodeEnd >= textPartStart;
         boolean textPartEndIsInTextNode = textNodeStart <= textPartEnd && textNodeEnd >= textPartEnd;
         if (textPartStartIsInTextNode || textPartEndIsInTextNode) {

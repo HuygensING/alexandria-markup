@@ -24,6 +24,7 @@ import org.assertj.core.internal.Iterables;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 public class TAGMLSchemaParseResultAssert
     extends AbstractObjectAssert<TAGMLSchemaParseResultAssert, TAGMLSchemaParseResult> {
@@ -49,7 +50,7 @@ public class TAGMLSchemaParseResultAssert
   }
 
   public TAGMLSchemaParseResultAssert hasErrors(final String expectedError) {
-    return hasErrors(Arrays.asList(expectedError));
+    return hasErrors(Collections.singletonList(expectedError));
   }
 
   public TAGMLSchemaParseResultAssert hasErrors(final Collection<String> expectedErrors) {

@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.xml.exporter;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,7 +72,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testXMLExportWithView() throws Exception {
+  public void testXMLExportWithView() {
     String tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]";
     final Set<String> a = new HashSet<>();
     a.add("A");
@@ -93,7 +93,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   @Test
-  public void testXMLExportWithViewAndDefaultLayer() throws Exception {
+  public void testXMLExportWithViewAndDefaultLayer() {
     String tagML =
         "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] cookies<phr|B]<r]<tagml]";
     final Set<String> a = new HashSet<>();
@@ -528,8 +528,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     return new TAGMLImporter(store).importTAGML(tagML);
   }
 
-  private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML)
-      throws Exception {
+  private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) {
     runInStore(
         store -> {
           try {
