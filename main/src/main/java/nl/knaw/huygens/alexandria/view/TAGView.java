@@ -60,12 +60,12 @@ public class TAGView {
   public Set<String> filterRelevantLayers(final Set<String> layerNames) {
     Set<String> relevantLayers = new HashSet<>(layerNames);
     if (layerRelevance.equals(RelevanceStyle.include)) {
-      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
       relevantLayers.clear();
       relevantLayers.addAll(layersToInclude);
-      if (hasDefault) {
-        relevantLayers.add(TAGML.DEFAULT_LAYER);
-      }
+//      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
+//      if (hasDefault) {
+//        relevantLayers.add(TAGML.DEFAULT_LAYER);
+//      }
 
     } else if (layerRelevance.equals(RelevanceStyle.exclude)) {
       relevantLayers.removeAll(layersToExclude);

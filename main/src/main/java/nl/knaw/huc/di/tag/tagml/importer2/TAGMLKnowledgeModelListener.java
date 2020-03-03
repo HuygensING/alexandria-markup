@@ -93,7 +93,7 @@ public class TAGMLKnowledgeModelListener extends TAGMLParserBaseListener {
     }
   }
 
-  public class TextVariationState {
+  public static class TextVariationState {
     public State startState;
     public List<State> endStates = new ArrayList<>();
     public MarkupResource startMarkup;

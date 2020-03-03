@@ -185,7 +185,6 @@ public class TAGValidatorTest extends TAGBaseStoreTest {
   private TAGDocument parseTAGML(final String tagML, final TAGStore store) {
     //    LOG.info("TAGML=\n{}\n", tagML);
     String trimmedTagML = tagML.trim();
-    TAGDocument document = new TAGMLImporter(store).importTAGML(trimmedTagML);
-    return document;
+    return new TAGMLImporter(store).importTAGML(trimmedTagML);
   }
 }

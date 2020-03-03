@@ -68,7 +68,7 @@ public class TAGMLExporter extends TAGExporter {
     }
   }
 
-  class TextVariationState {
+  static class TextVariationState {
     private ExporterState startState;
     private Set<Long> branchStartNodeIds = new HashSet<>();
     private Long convergenceSucceedingNodeId;

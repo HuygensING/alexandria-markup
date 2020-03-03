@@ -245,7 +245,7 @@ public class TAGTraverser {
     }
   }
 
-  class TextVariationState {
+  static class TextVariationState {
     private ExporterState startState;
     private Set<Long> branchStartNodeIds = new HashSet<>();
     private Long convergenceSucceedingNodeId;
