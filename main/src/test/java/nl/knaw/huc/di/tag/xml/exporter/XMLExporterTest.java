@@ -95,7 +95,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   @Test
   public void testXMLExportWithViewAndDefaultLayer() {
     String tagML =
-        "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] cookies<phr|B]<r]<tagml]";
+            "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]";
     final Set<String> a = new HashSet<>();
     a.add("A");
     runInStore(

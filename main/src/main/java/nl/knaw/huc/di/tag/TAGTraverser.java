@@ -81,21 +81,21 @@ public class TAGTraverser {
               if (!processedNodes.contains(nodeToProcess)) {
                 ExporterState state = stateRef.get();
                 Set<Long> markupIds = new LinkedHashSet<>();
-                List<TAGMarkup> markupStreamForTextNode =
-                    document.getMarkupStreamForTextNode(nodeToProcess).collect(toList());
                 //        Collections.reverse(markupStreamForTextNode);
-                markupStreamForTextNode.forEach(
-                    mw -> {
-                      Long id = mw.getDbId();
-                      markupIds.add(id);
-                      state.openTags.computeIfAbsent(
-                          id, (k) -> toOpenTag(mw, openLayers, tagVisitor));
-                      state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
-                      openLayers.addAll(mw.getLayers());
-                      if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
-                        discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
-                      }
-                    });
+                document
+                        .getMarkupStreamForTextNode(nodeToProcess)
+                        .forEach(
+                                mw -> {
+                                  Long id = mw.getDbId();
+                                  markupIds.add(id);
+                                  state.openTags.computeIfAbsent(
+                                          id, (k) -> toOpenTag(mw, openLayers, tagVisitor));
+                                  state.closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
+                                  openLayers.addAll(mw.getLayers());
+                                  if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
+                                    discontinuousMarkupTextNodesToHandle.get(id).decrementAndGet();
+                                  }
+                                });
                 Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
 
                 //        if (needsDivider(nodeToProcess)) {

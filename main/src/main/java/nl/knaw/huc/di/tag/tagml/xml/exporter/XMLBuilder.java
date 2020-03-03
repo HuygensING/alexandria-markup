@@ -47,7 +47,6 @@ public class XMLBuilder implements TAGVisitor {
   boolean useTrojanHorse = false;
   private Set<String> relevantLayers;
   private String result;
-  private TAGView tagView;
   private final AtomicInteger discontinuityCounter = new AtomicInteger(1);
   private final Map<String, Integer> discontinuityNumber = new HashMap<>();
 
@@ -57,7 +56,6 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public void setView(final TAGView tagView) {
-    this.tagView = tagView;
   }
 
   @Override
@@ -97,26 +95,26 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public void enterOpenTag(final TAGMarkup markup) {
-    boolean showMarkup = markup.getLayers().stream().anyMatch(relevantLayers::contains);
-    if (showMarkup) {
-      String markupName = getMarkupName(markup);
-      xmlBuilder.append("<").append(markupName);
-      if (markup.isOptional()) {
-        useTagNamespace = true;
-        xmlBuilder.append(" tag:optional=\"true\"");
-      }
-      String discontinuityKey = discontinuityKey(markup, markupName);
-      if (markup.isSuspended()) {
-        useTagNamespace = true;
-        final Integer n = discontinuityCounter.getAndIncrement();
-        discontinuityNumber.put(discontinuityKey, n);
-        xmlBuilder.append(" tag:n=\"").append(n).append("\"");
-
-      } else if (markup.isResumed()) {
-        final Integer n = discontinuityNumber.get(discontinuityKey);
-        xmlBuilder.append(" tag:n=\"").append(n).append("\"");
-      }
+    //    boolean showMarkup = shouldBeShown(markup);
+    //    if (showMarkup) {
+    String markupName = getMarkupName(markup);
+    xmlBuilder.append("<").append(markupName);
+    if (markup.isOptional()) {
+      useTagNamespace = true;
+      xmlBuilder.append(" tag:optional=\"true\"");
     }
+    String discontinuityKey = discontinuityKey(markup, markupName);
+    if (markup.isSuspended()) {
+      useTagNamespace = true;
+      final Integer n = discontinuityCounter.getAndIncrement();
+      discontinuityNumber.put(discontinuityKey, n);
+      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
+
+    } else if (markup.isResumed()) {
+      final Integer n = discontinuityNumber.get(discontinuityKey);
+      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
+    }
+    //    }
   }
 
   private String discontinuityKey(final TAGMarkup markup, final String markupName) {
@@ -141,29 +139,29 @@ public class XMLBuilder implements TAGVisitor {
   public void exitOpenTag(final TAGMarkup markup) {
     Set<String> layers = markup.getLayers();
     layers.retainAll(relevantLayers);
-    boolean showMarkup = markup.getLayers().stream().anyMatch(relevantLayers::contains);
-    if (showMarkup) {
-      if (useTrojanHorse) {
-        String thId = markup.getTag() + thIdCounter.getAndIncrement();
-        thIds.put(markup, thId);
-        final String thDoc = getThDoc(layers);
+    //    boolean showMarkup = shouldBeShown(markup);
+    //    if (showMarkup) {
+    if (useTrojanHorse) {
+      String thId = markup.getTag() + thIdCounter.getAndIncrement();
+      thIds.put(markup, thId);
+      final String thDoc = getThDoc(layers);
 
-        String id = markup.isAnonymous() ? "soleId" : "sId";
-        xmlBuilder
-            .append(" th:doc=\"")
-            .append(thDoc)
-            .append("\"")
-            .append(" th:")
-            .append(id)
-            .append("=\"")
-            .append(thId)
-            .append("\"/");
+      String id = markup.isAnonymous() ? "soleId" : "sId";
+      xmlBuilder
+              .append(" th:doc=\"")
+              .append(thDoc)
+              .append("\"")
+              .append(" th:")
+              .append(id)
+              .append("=\"")
+              .append(thId)
+              .append("\"/");
 
-      } else if (markup.isAnonymous()) {
-        xmlBuilder.append("/");
-      }
-      xmlBuilder.append(">");
+    } else if (markup.isAnonymous()) {
+      xmlBuilder.append("/");
     }
+    xmlBuilder.append(">");
+    //    }
   }
 
   @Override
@@ -174,28 +172,31 @@ public class XMLBuilder implements TAGVisitor {
     if (markup.isAnonymous()) {
       return;
     }
-    boolean showMarkup = markup.getLayers().stream().anyMatch(relevantLayers::contains);
-    if (showMarkup) {
-
-      xmlBuilder.append("<");
-      if (!useTrojanHorse) {
-        xmlBuilder.append("/");
-      }
-      xmlBuilder.append(markupName);
-      if (useTrojanHorse) {
-        final String thDoc = getThDoc(layers);
-        String thId = thIds.remove(markup);
-        xmlBuilder
-            .append(" th:doc=\"")
-            .append(thDoc)
-            .append("\"")
-            .append(" th:eId=\"")
-            .append(thId)
-            .append("\"/");
-      }
-      xmlBuilder.append(">");
+    //    boolean showMarkup = shouldBeShown(markup);
+    //    if (showMarkup) {
+    xmlBuilder.append("<");
+    if (!useTrojanHorse) {
+      xmlBuilder.append("/");
     }
+    xmlBuilder.append(markupName);
+    if (useTrojanHorse) {
+      final String thDoc = getThDoc(layers);
+      String thId = thIds.remove(markup);
+      xmlBuilder
+              .append(" th:doc=\"")
+              .append(thDoc)
+              .append("\"")
+              .append(" th:eId=\"")
+              .append(thId)
+              .append("\"/");
+    }
+    xmlBuilder.append(">");
+    //    }
   }
+
+  //  private boolean shouldBeShown(final TAGMarkup markup) {
+  //    return markup.getLayers().stream().anyMatch(relevantLayers::contains);
+  //  }
 
   @Override
   public void exitText(final String text, final boolean inVariation) {
@@ -248,9 +249,5 @@ public class XMLBuilder implements TAGVisitor {
         .map(l -> TAGML.DEFAULT_LAYER.equals(l) ? DEFAULT_DOC : l)
         .sorted()
         .collect(joining(" "));
-  }
-
-  private boolean test(String l) {
-    return relevantLayers.contains(l);
   }
 }

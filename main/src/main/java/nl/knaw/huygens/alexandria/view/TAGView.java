@@ -62,10 +62,10 @@ public class TAGView {
     if (layerRelevance.equals(RelevanceStyle.include)) {
       relevantLayers.clear();
       relevantLayers.addAll(layersToInclude);
-//      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
-//      if (hasDefault) {
-//        relevantLayers.add(TAGML.DEFAULT_LAYER);
-//      }
+      //      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
+      //      if (hasDefault) {
+      //        relevantLayers.add(TAGML.DEFAULT_LAYER);
+      //      }
 
     } else if (layerRelevance.equals(RelevanceStyle.exclude)) {
       relevantLayers.removeAll(layersToExclude);
@@ -77,17 +77,19 @@ public class TAGView {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
       List<Long> retain =
-          markupIds.stream() //
-              .filter(m -> hasOverlap(layersToInclude, getLayers(m)) || isInDefaultLayerOnly(m)) //
-              .collect(toList());
+              markupIds.stream() //
+                      .filter(
+                              m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/) //
+                      .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
       List<Long> remove =
-          markupIds.stream() //
-              .filter(
-                  m -> hasOverlap(layersToExclude, getLayers(m)) && !isInDefaultLayerOnly(m)) //
-              .collect(toList());
+              markupIds.stream() //
+                      .filter(
+                              m ->
+                                      hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/) //
+                      .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }

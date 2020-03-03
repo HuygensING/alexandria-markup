@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGViewTest extends AlexandriaBaseStoreTest {
 
+  @Ignore("Should the default layer always be included?")
   @Test
   public void testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]";
@@ -50,7 +51,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
       TAGViewFactory tagViewFactory = new TAGViewFactory(store);
       TAGView view = tagViewFactory.fromJsonString(viewJson);
       TAGDocument document = store.runInTransaction(() ->
-          new TAGMLImporter(store).importTAGML(tagml)
+              new TAGMLImporter(store).importTAGML(tagml)
       );
       String viewExport = store.runInTransaction(() -> new TAGMLExporter(store, view).asTAGML(document));
       assertThat(viewExport).isEqualTo(expected);
@@ -71,6 +72,7 @@ public class TAGViewTest extends AlexandriaBaseStoreTest {
     });
   }
 
+  @Ignore("Should the default layer always be included?")
   @Test // NLA-489
   public void testLayerMarkupCombinationInView() {
     String tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]";
