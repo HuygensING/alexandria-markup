@@ -1,0 +1,5 @@
+- extract layer hierarchy
+- use '!' to indicate text within markup only visible for this layer: [foo!|A,B>bar<foo] means 'bar' is only shown in layer A and B -> this implicates that [foo!|A,B>bar [x|C>bar<x] bar<foo] is not allowed!?
+- encoding of metadata, especially at the start of the tagml
+- autocomplete for alexandria cli
+- fix: xml export with default layer overlap doesn't create trojan horse xml!
