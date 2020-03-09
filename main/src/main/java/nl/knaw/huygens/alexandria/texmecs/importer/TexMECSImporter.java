@@ -21,9 +21,9 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  */
 
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import org.antlr.v4.runtime.CharStream;
@@ -87,8 +87,7 @@ public class TexMECSImporter {
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (numberOfSyntaxErrors > 0) {
-      String errors = String.join("\n", errorListener.getErrors());
-      errorMsg += "\n\nTokenizing errors:\n" + errors;
+      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getErrorMessagesAsString();
     }
     if (!errorMsg.isEmpty()) {
       throw new TexMECSSyntaxError(errorMsg);
@@ -102,10 +101,10 @@ public class TexMECSImporter {
       TAGMarkup first = markupList.get(i);
       TAGMarkup second = markupList.get(i + 1);
       if (first.getDTO().getTextNodeIds().equals(second.getDTO().getTextNodeIds())) {
-        // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
+        // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(),
+        // second.getExtendedTag());
         first.setDominatedMarkup(second);
       }
     }
   }
-
 }

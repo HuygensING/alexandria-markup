@@ -231,7 +231,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           } catch (TAGMLBreakingError e) {
           }
           assertThat(errorListener.hasErrors()).isTrue();
-          String errors = String.join("\n", errorListener.getErrors());
+          String errors = errorListener.getErrorMessagesAsString();
           assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
         });
   }
@@ -255,7 +255,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
-      LOG.error("errors: {}", errorListener.getErrors());
+      LOG.error("errors: {}", errorListener.getErrorMessagesAsString());
     }
     return listener;
   }

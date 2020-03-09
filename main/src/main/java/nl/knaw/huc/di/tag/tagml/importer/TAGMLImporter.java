@@ -76,16 +76,15 @@ public class TAGMLImporter {
     parser.addErrorListener(errorListener);
 
     TAGDocument document = usingListener(parser, errorListener);
-//    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
+    //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-//    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
+    //    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
-//      logDocumentGraph(document,"");
-      String errors = String.join("\n", errorListener.getErrors());
-      errorMsg = "Parsing errors:\n" + errors;
+      //      logDocumentGraph(document,"");
+      errorMsg = "Parsing errors:\n" + errorListener.getErrorMessagesAsString();
       throw new TAGMLSyntaxError(errorMsg);
     }
     update(document.getDTO());
@@ -95,7 +94,7 @@ public class TAGMLImporter {
   private TAGDocument usingListener(final TAGMLParser parser, final ErrorListener errorListener) {
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
-//    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
+    //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
     TAGMLListener listener = new TAGMLListener(tagStore, errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
@@ -117,9 +116,10 @@ public class TAGMLImporter {
   }
 
   protected void logDocumentGraph(final TAGDocument document, final String input) {
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
     System.out.println(new DotFactory().toDot(document, input));
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
   }
-
 }

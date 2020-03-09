@@ -35,66 +35,179 @@ import java.util.BitSet;
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class ErrorListener implements ANTLRErrorListener {
   private static final Logger LOG = LoggerFactory.getLogger(ErrorListener.class);
-  private final List<String> errors = new ArrayList<>();
+  private final List<TAGError> errors = new ArrayList<>();
   private boolean reportAmbiguity = false;
   private boolean reportAttemptingFullContext = false;
   private boolean reportContextSensitivity = true;
 
   @Override
-  public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-    errors.add(format("syntax error: line %d:%d %s", line, charPositionInLine, msg.replace("token recognition error at", "unexpected token")));
+  public void syntaxError(
+      Recognizer<?, ?> recognizer,
+      Object offendingSymbol,
+      int line,
+      int charPositionInLine,
+      String msg,
+      RecognitionException e) {
+    String message =
+        format(
+            "syntax error: line %d:%d %s",
+            line,
+            charPositionInLine,
+            msg.replace("token recognition error at", "unexpected token"));
+    errors.add(new TAGSyntaxError(message, line, charPositionInLine));
   }
 
   @Override
-  public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
+  public void reportAmbiguity(
+      Parser recognizer,
+      DFA dfa,
+      int startIndex,
+      int stopIndex,
+      boolean exact,
+      BitSet ambigAlts,
+      ATNConfigSet configs) {
     if (reportAmbiguity) {
-      errors.add("ambiguity:\n recognizer=" + recognizer //
-          + ",\n dfa=" + dfa //
-          + ",\n startIndex=" + startIndex //
-          + ",\n stopIndex=" + stopIndex//
-          + ",\n exact=" + exact //
-          + ",\n ambigAlts=" + ambigAlts //
-          + ",\n configs=" + configs);
+      String message =
+          "ambiguity:\n recognizer="
+              + recognizer //
+              + ",\n dfa="
+              + dfa //
+              + ",\n startIndex="
+              + startIndex //
+              + ",\n stopIndex="
+              + stopIndex //
+              + ",\n exact="
+              + exact //
+              + ",\n ambigAlts="
+              + ambigAlts //
+              + ",\n configs="
+              + configs;
+      errors.add(new TAGAmbiguityError(message));
     }
   }
 
   @Override
-  public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
+  public void reportAttemptingFullContext(
+      Parser recognizer,
+      DFA dfa,
+      int startIndex,
+      int stopIndex,
+      BitSet conflictingAlts,
+      ATNConfigSet configs) {
     if (reportAttemptingFullContext) {
-      errors.add("attempting full context error:\n recognizer=" + recognizer //
-          + ",\n dfa=" + dfa //
-          + ",\n startIndex=" + startIndex //
-          + ",\n stopIndex=" + stopIndex//
-          + ",\n conflictingAlts=" + conflictingAlts //
-          + ",\n configs=" + configs);
+      String message =
+          "attempting full context error:\n recognizer="
+              + recognizer //
+              + ",\n dfa="
+              + dfa //
+              + ",\n startIndex="
+              + startIndex //
+              + ",\n stopIndex="
+              + stopIndex //
+              + ",\n conflictingAlts="
+              + conflictingAlts //
+              + ",\n configs="
+              + configs;
+      errors.add(new TAGAttemptingFullContextError(message));
     }
   }
 
   @Override
-  public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
+  public void reportContextSensitivity(
+      Parser recognizer,
+      DFA dfa,
+      int startIndex,
+      int stopIndex,
+      int prediction,
+      ATNConfigSet configs) {
     if (reportContextSensitivity) {
-      errors.add("context sensitivity error:\n recognizer=" + recognizer //
-          + ",\n dfa=" + dfa //
-          + ",\n startIndex=" + startIndex //
-          + ",\n stopIndex=" + stopIndex//
-          + ",\n prediction=" + prediction //
-          + ",\n configs=" + configs);
+      String message =
+          "context sensitivity error:\n recognizer="
+              + recognizer //
+              + ",\n dfa="
+              + dfa //
+              + ",\n startIndex="
+              + startIndex //
+              + ",\n stopIndex="
+              + stopIndex //
+              + ",\n prediction="
+              + prediction //
+              + ",\n configs="
+              + configs;
+      errors.add(new TAGContextSensitivityError(message));
     }
   }
 
-  public List<String> getErrors() {
+  public List<TAGError> getErrors() {
     return errors;
+  }
+
+  public List<String> getErrorMessages() {
+    return errors.stream().map(TAGError::getMessage).collect(toList());
+  }
+
+  public String getErrorMessagesAsString() {
+    return errors.stream().map(TAGError::getMessage).collect(joining("\n"));
+  }
+
+  public void addError(String messageTemplate, Object... messageArgs) {
+    errors.add(new CustomError(format(messageTemplate, messageArgs)));
+  }
+
+  public abstract class TAGError {
+    private final String message;
+
+    public TAGError(String message) {
+      this.message = message;
+    }
+
+    public String getMessage() {
+      return message;
+    }
+  }
+
+  class TAGSyntaxError extends TAGError {
+    public final int line;
+    public final int character;
+
+    public TAGSyntaxError(String message, int line, int character) {
+      super(message);
+      this.line = line;
+      this.character = character;
+    }
+  }
+
+  private class TAGAmbiguityError extends TAGError {
+    public TAGAmbiguityError(String message) {
+      super(message);
+    }
+  }
+
+  private class TAGAttemptingFullContextError extends TAGError {
+    public TAGAttemptingFullContextError(String message) {
+      super(message);
+    }
+  }
+
+  private class TAGContextSensitivityError extends TAGError {
+    public TAGContextSensitivityError(String message) {
+      super(message);
+    }
   }
 
   public boolean hasErrors() {
     return !errors.isEmpty();
   }
 
-  public void addError(String messageTemplate, Object... messageArgs) {
-    errors.add(format(messageTemplate, messageArgs));
+  private class CustomError extends TAGError {
+    public CustomError(String message) {
+      super(message);
+    }
   }
 
   public void addBreakingError(String messageTemplate, Object... messageArgs) {
@@ -102,5 +215,4 @@ public class ErrorListener implements ANTLRErrorListener {
     addError("parsing aborted!");
     throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
   }
-
 }
