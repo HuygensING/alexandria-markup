@@ -41,6 +41,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TAGViewTest extends AlexandriaBaseStoreTest {
 
+  @Test
+  public void testLayerExclusiveTaggedText() {
+    String tagml = "[tagml>[layerdef|+A,+B>Lorem [b!|B>ipsum<b] dolor sit amet, consectetur [add!|A>adipiscing<add] elit.<layerdef]<tagml]";
+    String viewAJson = "{'includeLayers':['A']}".replace("'", "\"");
+    String viewBJson = "{'includeLayers':['B]}".replace("'", "\"");
+    String expectedA = "[tagml>[layerdef|+A,+B>Lorem dolor sit amet, consectetur [add!|A>adipiscing<add] elit.<layerdef]<tagml]";
+    String expectedB = "[tagml>[layerdef|+A,+B>Lorem [b!|B>ipsum<b] dolor sit amet, consectetur elit.<layerdef]<tagml]";
+    runInStore(store -> {
+      TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml));
+
+      TAGView viewA = tagViewFactory.fromJsonString(viewAJson);
+      String viewAExport = store.runInTransaction(() -> new TAGMLExporter(store, viewA).asTAGML(document));
+      assertThat(viewAExport).isEqualTo(expectedA);
+
+      TAGView viewB = tagViewFactory.fromJsonString(viewBJson);
+      String viewBExport = store.runInTransaction(() -> new TAGMLExporter(store, viewB).asTAGML(document));
+      assertThat(viewBExport).isEqualTo(expectedB);
+    });
+  }
+
   @Ignore("Should the default layer always be included?")
   @Test
   public void testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
