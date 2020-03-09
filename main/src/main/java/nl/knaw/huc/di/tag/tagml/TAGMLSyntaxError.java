@@ -1,5 +1,9 @@
 package nl.knaw.huc.di.tag.tagml;
 
+import nl.knaw.huygens.alexandria.ErrorListener;
+
+import java.util.List;
+
 /*-
  * #%L
  * alexandria-markup-core
@@ -21,9 +25,14 @@ package nl.knaw.huc.di.tag.tagml;
  */
 public class TAGMLSyntaxError extends RuntimeException {
   private static final long serialVersionUID = 1L;
+  private final List<ErrorListener.TAGError> errors;
 
-  public TAGMLSyntaxError(String message) {
+  public TAGMLSyntaxError(String message, List<ErrorListener.TAGError> errors) {
     super(message);
+    this.errors = errors;
   }
 
+  public List<ErrorListener.TAGError> getErrors() {
+    return errors;
+  }
 }

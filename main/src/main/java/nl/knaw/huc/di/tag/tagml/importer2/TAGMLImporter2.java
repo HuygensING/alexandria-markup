@@ -95,7 +95,7 @@ public class TAGMLImporter2 {
     if (errorListener.hasErrors()) {
       //      logDocumentGraph(document,"");
       errorMsg = "Parsing errors:\n" + errorListener.getErrorMessagesAsString();
-      throw new TAGMLSyntaxError(errorMsg);
+      throw new TAGMLSyntaxError(errorMsg, errorListener.getErrors());
     }
     return listener.getKnowledgeModel();
   }
