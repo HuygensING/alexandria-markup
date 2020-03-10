@@ -21,6 +21,7 @@ package nl.knaw.huygens.alexandria;
  */
 
 import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
+import nl.knaw.huc.di.tag.tagml.importer.Position;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -155,8 +157,36 @@ public class ErrorListener implements ANTLRErrorListener {
     return errors.stream().map(TAGError::getMessage).collect(joining("\n"));
   }
 
+  public void addError(
+          Position startPos, Position endPos, String messageTemplate, Object... messageArgs) {
+    errors.add(
+            new CustomError(
+                    Optional.of(startPos), Optional.of(endPos), format(messageTemplate, messageArgs)));
+  }
+
   public void addError(String messageTemplate, Object... messageArgs) {
-    errors.add(new CustomError(format(messageTemplate, messageArgs)));
+    errors.add(
+            new CustomError(Optional.empty(), Optional.empty(), format(messageTemplate, messageArgs)));
+  }
+
+  public void addBreakingError(
+          Position startPos, Position endPos, String messageTemplate, Object... messageArgs) {
+    addError(startPos, endPos, messageTemplate, messageArgs);
+    abortParsing(messageTemplate, messageArgs);
+  }
+
+  public void addBreakingError(String messageTemplate, Object... messageArgs) {
+    addError(messageTemplate, messageArgs);
+    abortParsing(messageTemplate, messageArgs);
+  }
+
+  private void abortParsing(final String messageTemplate, Object... messageArgs) {
+    addError("parsing aborted!");
+    throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
+  }
+
+  public boolean hasErrors() {
+    return !errors.isEmpty();
   }
 
   public abstract class TAGError {
@@ -200,19 +230,14 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  public boolean hasErrors() {
-    return !errors.isEmpty();
-  }
-
   private class CustomError extends TAGError {
-    public CustomError(String message) {
-      super(message);
-    }
-  }
+    public final Optional<Position> startPos;
+    public final Optional<Position> endPos;
 
-  public void addBreakingError(String messageTemplate, Object... messageArgs) {
-    addError(messageTemplate, messageArgs);
-    addError("parsing aborted!");
-    throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
+    public CustomError(Optional<Position> startPos, Optional<Position> endPos, String message) {
+      super(message);
+      this.startPos = startPos;
+      this.endPos = endPos;
+    }
   }
 }

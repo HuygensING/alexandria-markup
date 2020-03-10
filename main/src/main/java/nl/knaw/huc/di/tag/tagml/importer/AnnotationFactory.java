@@ -71,7 +71,8 @@ public class AnnotationFactory {
     return annotationInfo;
   }
 
-  private AnnotationInfo makeAnnotation(String aName, AnnotationValueContext annotationValueContext, Object value) {
+  private AnnotationInfo makeAnnotation(
+          String aName, AnnotationValueContext annotationValueContext, Object value) {
     AnnotationInfo annotationInfo = null;
     if (value instanceof String) {
       annotationInfo = makeStringAnnotation(aName, (String) value);
@@ -86,7 +87,8 @@ public class AnnotationFactory {
       annotationInfo = makeListAnnotation(aName, annotationValueContext, (List<Object>) value);
 
     } else if (value instanceof HashMap) {
-      annotationInfo = makeMapAnnotation(aName, annotationValueContext, (HashMap<String, Object>) value);
+      annotationInfo =
+              makeMapAnnotation(aName, annotationValueContext, (HashMap<String, Object>) value);
 
     } else {
       annotationInfo = makeOtherAnnotation(aName, annotationValueContext);
@@ -114,7 +116,10 @@ public class AnnotationFactory {
     return new AnnotationInfo(id, AnnotationType.Reference, aName);
   }
 
-  private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
+  private AnnotationInfo makeListAnnotation(
+          final String aName,
+          final AnnotationValueContext annotationValueContext,
+          final List<Object> value) {
     final AnnotationInfo annotationInfo;
     verifyListElementsAreSameType(aName, annotationValueContext, value);
     verifySeparatorsAreCommas(aName, annotationValueContext);
@@ -133,7 +138,10 @@ public class AnnotationFactory {
     return annotationInfo;
   }
 
-  private AnnotationInfo makeMapAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final HashMap<String, Object> value) {
+  private AnnotationInfo makeMapAnnotation(
+          final String aName,
+          final AnnotationValueContext annotationValueContext,
+          final HashMap<String, Object> value) {
     final AnnotationInfo annotationInfo;
     Long id = store.createMapAnnotationValue();
     annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
@@ -167,7 +175,8 @@ public class AnnotationFactory {
     return annotationInfo;
   }
 
-  private AnnotationInfo makeOtherAnnotation(final String aName, final AnnotationValueContext annotationValueContext) {
+  private AnnotationInfo makeOtherAnnotation(
+          final String aName, final AnnotationValueContext annotationValueContext) {
     final AnnotationInfo annotationInfo;
     String placeholder = annotationValueContext.getText();
     Long id = store.createStringAnnotationValue(placeholder);
@@ -175,17 +184,22 @@ public class AnnotationFactory {
     return annotationInfo;
   }
 
-  private void verifyListElementsAreSameType(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> list) {
-    Set<String> valueTypes = list.stream()
-        .map(v -> ((Object) v).getClass().getName())
-        .collect(toSet());
+  private void verifyListElementsAreSameType(
+          final String aName,
+          final AnnotationValueContext annotationValueContext,
+          final List<Object> list) {
+    Set<String> valueTypes =
+            list.stream().map(v -> ((Object) v).getClass().getName()).collect(toSet());
     if (valueTypes.size() > 1) {
-      errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
-          errorPrefix(annotationValueContext), aName);
+      addError(
+              annotationValueContext,
+              "All elements of ListAnnotation %s should be of the same type.",
+              aName);
     }
   }
 
-  private void verifySeparatorsAreCommas(final String aName, final AnnotationValueContext annotationValueContext) {
+  private void verifySeparatorsAreCommas(
+          final String aName, final AnnotationValueContext annotationValueContext) {
     ParseTree valueTree = annotationValueContext.children.get(0);
     int childCount = valueTree.getChildCount(); // children: '[' value (separator value)* ']'
     Set<String> separators = new HashSet<>();
@@ -193,22 +207,25 @@ public class AnnotationFactory {
       separators.add(valueTree.getChild(i).getText().trim());
     }
 
-    boolean allSeparatorsAreCommas = separators.isEmpty()
-        || (separators.size() == 1 && separators.contains(","));
+    boolean allSeparatorsAreCommas =
+            separators.isEmpty() || (separators.size() == 1 && separators.contains(","));
     if (!allSeparatorsAreCommas) {
-      errorListener.addError("%s The elements of ListAnnotation %s should be separated by commas.",
-          errorPrefix(annotationValueContext), aName);
+      addError(
+              annotationValueContext,
+              "The elements of ListAnnotation %s should be separated by commas.",
+              aName);
     }
   }
 
   private Object annotationValue(final AnnotationValueContext annotationValueContext) {
     if (annotationValueContext.AV_StringValue() != null) {
-      return annotationValueContext.AV_StringValue().getText()
-          .replaceFirst("^.", "")
-          .replaceFirst(".$", "")
-          .replace("\\\"", "\"")
-          .replace("\\'", "'")
-          ;
+      return annotationValueContext
+              .AV_StringValue()
+              .getText()
+              .replaceFirst("^.", "")
+              .replaceFirst(".$", "")
+              .replace("\\\"", "\"")
+              .replace("\\'", "'");
 
     } else if (annotationValueContext.booleanValue() != null) {
       return Boolean.valueOf(annotationValueContext.booleanValue().getText());
@@ -217,10 +234,9 @@ public class AnnotationFactory {
       return Double.valueOf(annotationValueContext.AV_NumberValue().getText());
 
     } else if (annotationValueContext.listValue() != null) {
-      return annotationValueContext.listValue()
-          .annotationValue().stream()
-          .map(this::annotationValue)
-          .collect(toList());
+      return annotationValueContext.listValue().annotationValue().stream()
+              .map(this::annotationValue)
+              .collect(toList());
 
     } else if (annotationValueContext.objectValue() != null) {
       return readObject(annotationValueContext.objectValue());
@@ -228,8 +244,14 @@ public class AnnotationFactory {
     } else if (annotationValueContext.richTextValue() != null) {
       return annotationValueContext.richTextValue().getText();
     }
-    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-        errorPrefix(annotationValueContext), annotationValueContext.getText());
+    final Position startPos = Position.startOf(annotationValueContext);
+    final Position endPos = Position.endOf(annotationValueContext);
+    errorListener.addBreakingError(
+            startPos,
+            endPos,
+            "%s Cannot determine the type of this annotation: %s",
+            errorPrefix(annotationValueContext),
+            annotationValueContext.getText());
     return null;
   }
 
@@ -238,7 +260,7 @@ public class AnnotationFactory {
     objectValueContext.children.stream()
         .filter(c -> !(c instanceof TerminalNode))
         .map(this::parseAttribute)
-//        .peek(System.out::println)
+            //        .peek(System.out::println)
         .forEach(kv -> map.put(kv.key, kv.value));
     return map;
   }
@@ -252,8 +274,9 @@ public class AnnotationFactory {
       return new KeyValue(aName, value);
 
     } else if (parseTree instanceof IdentifyingAnnotationContext) {
-      //TODO: deal with this identifier
-      IdentifyingAnnotationContext identifyingAnnotationContext = (IdentifyingAnnotationContext) parseTree;
+      // TODO: deal with this identifier
+      IdentifyingAnnotationContext identifyingAnnotationContext =
+              (IdentifyingAnnotationContext) parseTree;
       String value = identifyingAnnotationContext.idValue().getText();
       return new KeyValue(":id", value);
 
@@ -265,8 +288,8 @@ public class AnnotationFactory {
 
     } else {
       throw new RuntimeException("unhandled type " + parseTree.getClass().getName());
-//      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-//          errorPrefix(parseTree.), parseTree.getText());
+      //      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+      //          errorPrefix(parseTree.), parseTree.getText());
 
     }
   }
@@ -277,17 +300,20 @@ public class AnnotationFactory {
   }
 
   public String getStringValue(final AnnotationInfo annotationInfo) {
-    StringAnnotationValue stringAnnotationValue = store.getStringAnnotationValue(annotationInfo.getNodeId());
+    StringAnnotationValue stringAnnotationValue =
+            store.getStringAnnotationValue(annotationInfo.getNodeId());
     return stringAnnotationValue.getValue();
   }
 
   public Double getNumberValue(final AnnotationInfo annotationInfo) {
-    NumberAnnotationValue numberAnnotationValue = store.getNumberAnnotationValue(annotationInfo.getNodeId());
+    NumberAnnotationValue numberAnnotationValue =
+            store.getNumberAnnotationValue(annotationInfo.getNodeId());
     return numberAnnotationValue.getValue();
   }
 
   public Boolean getBooleanValue(final AnnotationInfo annotationInfo) {
-    BooleanAnnotationValue booleanAnnotationValue = store.getBooleanAnnotationValue(annotationInfo.getNodeId());
+    BooleanAnnotationValue booleanAnnotationValue =
+            store.getBooleanAnnotationValue(annotationInfo.getNodeId());
     return booleanAnnotationValue.getValue();
   }
 
@@ -329,6 +355,18 @@ public class AnnotationFactory {
     AnnotationInfo annotationInfo = new AnnotationInfo(nodeId, type, name);
     annotationInfo.setId(annotationEdge.getId());
     return annotationInfo;
+  }
+
+  private void addError(
+          final AnnotationValueContext annotationValueContext,
+          final String messageTemplate,
+          final String aName) {
+    errorListener.addError(
+            Position.startOf(annotationValueContext),
+            Position.endOf(annotationValueContext),
+            "%s " + messageTemplate,
+            errorPrefix(annotationValueContext),
+            aName);
   }
 
   private static class KeyValue {
