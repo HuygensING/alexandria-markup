@@ -46,6 +46,7 @@ public class ErrorListener implements ANTLRErrorListener {
   private boolean reportAmbiguity = false;
   private boolean reportAttemptingFullContext = false;
   private boolean reportContextSensitivity = true;
+  private boolean hasBreakingError = false;
 
   @Override
   public void syntaxError(
@@ -181,12 +182,16 @@ public class ErrorListener implements ANTLRErrorListener {
   }
 
   private void abortParsing(final String messageTemplate, Object... messageArgs) {
-    addError("parsing aborted!");
-    throw new TAGMLBreakingError(format(messageTemplate, messageArgs));
+    hasBreakingError = true;
+    throw new TAGMLBreakingError(format(messageTemplate, messageArgs) + "\nparsing aborted!");
   }
 
   public boolean hasErrors() {
     return !errors.isEmpty();
+  }
+
+  public boolean hasBreakingError() {
+    return hasBreakingError;
   }
 
   public abstract class TAGError {
@@ -201,7 +206,7 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  class TAGSyntaxError extends TAGError {
+  public class TAGSyntaxError extends TAGError {
     public final int line;
     public final int character;
 
@@ -212,25 +217,25 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  private class TAGAmbiguityError extends TAGError {
+  public class TAGAmbiguityError extends TAGError {
     public TAGAmbiguityError(String message) {
       super(message);
     }
   }
 
-  private class TAGAttemptingFullContextError extends TAGError {
+  public class TAGAttemptingFullContextError extends TAGError {
     public TAGAttemptingFullContextError(String message) {
       super(message);
     }
   }
 
-  private class TAGContextSensitivityError extends TAGError {
+  public class TAGContextSensitivityError extends TAGError {
     public TAGContextSensitivityError(String message) {
       super(message);
     }
   }
 
-  private class CustomError extends TAGError {
+  public class CustomError extends TAGError {
     public final Optional<Position> startPos;
     public final Optional<Position> endPos;
 

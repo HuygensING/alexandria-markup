@@ -48,6 +48,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class TAGMLListenerTest extends TAGBaseStoreTest {
 
@@ -94,10 +95,9 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
   @Test
   public void testOverlappingMarkupWithoutLayerInfo() {
-    String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
-    String expectedSyntaxErrorMessage =
-        "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
-            + "parsing aborted!";
+      String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
+      String expectedSyntaxErrorMessage =
+              "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
@@ -144,8 +144,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
             + "[! para should close before chapter !]<para|a]"
             + "<tagml|a,b]";
 
-    String expectedSyntaxErrorMessage =
-        "line 1:95 : Close tag <chapter|a] found, expected <para|a].\n" + "parsing aborted!";
+      String expectedSyntaxErrorMessage =
+              "line 1:95 : Close tag <chapter|a] found, expected <para|a].";
     assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
@@ -227,7 +227,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           try {
             TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
             TAGDocument document = listener.getDocument();
-            logDocumentGraph(document, input);
+              logDocumentGraph(document, input);
+              fail("expected TAGMLBreakingError");
           } catch (TAGMLBreakingError e) {
           }
           assertThat(errorListener.hasErrors()).isTrue();

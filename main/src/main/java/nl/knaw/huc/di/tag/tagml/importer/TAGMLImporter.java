@@ -85,6 +85,9 @@ public class TAGMLImporter {
     if (errorListener.hasErrors()) {
       //      logDocumentGraph(document,"");
       errorMsg = "Parsing errors:\n" + errorListener.getErrorMessagesAsString();
+      if (errorListener.hasBreakingError()) {
+        errorMsg += "\nparsing aborted!";
+      }
       throw new TAGMLSyntaxError(errorMsg, errorListener.getErrors());
     }
     update(document.getDTO());
