@@ -27,7 +27,7 @@ import nl.knaw.huygens.alexandria.exporter.ColorPicker;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,67 +38,94 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 
 public class DotFactory {
-  private ColorPicker colorPicker = new ColorPicker("red", "blue", "darkgray", "gray", "green", "lightgray", //
-      "lime", "magenta", "olive", "orange", "pink", "purple", "brown", "cyan", "teal", "violet", "black");
-  Map<String, String> layerColor = new HashMap<>();
-  private TextGraph textGraph;
+    private ColorPicker colorPicker =
+            new ColorPicker(
+                    "red",
+                    "blue",
+                    "darkgray",
+                    "gray",
+                    "green",
+                    "lightgray", //
+                    "lime",
+                    "magenta",
+                    "olive",
+                    "orange",
+                    "pink",
+                    "purple",
+                    "brown",
+                    "cyan",
+                    "teal",
+                    "violet",
+                    "black");
+    Map<String, String> layerColor = new HashMap<>();
+    private TextGraph textGraph;
 
-  public String toDot(TAGKnowledgeModel knowledgeModel, final String label) {
-    layerColor.clear();
+    public String toDot(TAGKnowledgeModel knowledgeModel, final String label) {
+        layerColor.clear();
 
-    final String dotBuilder = "digraph TextGraph{\n" +
-        "  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n" +
-        "  d [shape=doublecircle;label=\"\"]\n" +
-        "  subgraph{\n" +
-        // TODO
+        final String dotBuilder =
+                "digraph TextGraph{\n"
+                        + "  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n"
+                        + "  d [shape=doublecircle;label=\"\"]\n"
+                        + "  subgraph{\n"
+                        +
+                        // TODO
 
-        "}";
-    return dotBuilder;
-  }
+                        "}";
+        return dotBuilder;
+    }
 
   public String toDot(TAGDocument document, final String label) {
-    layerColor.clear();
-    StringBuilder dotBuilder = new StringBuilder("digraph TextGraph{\n")
-        .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
-        .append("  d [shape=doublecircle;label=\"\"]\n")
-        .append("  subgraph{\n");
-    document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
+      layerColor.clear();
+      StringBuilder dotBuilder =
+              new StringBuilder("digraph TextGraph{\n")
+                      .append("  node [font=\"helvetica\";style=\"filled\";fillcolor=\"white\"]\n")
+                      .append("  d [shape=doublecircle;label=\"\"]\n")
+                      .append("  subgraph{\n");
+      document.getTextNodeStream().map(this::toTextNodeLine).forEach(dotBuilder::append);
 
-    dotBuilder.append("    rank=same\n");
+      dotBuilder.append("    rank=same\n");
 
-    textGraph = document.getDTO().textGraph;
-    AtomicLong prevNode = new AtomicLong(-1);
-    textGraph.getTextNodeIdStream().forEach(id -> {
-      if (prevNode.get() != -1) {
-        dotBuilder.append(toNextEdgeLine(prevNode.get(), id));
-      }
-      prevNode.set(id);
-    });
+      textGraph = document.getDTO().textGraph;
+      AtomicLong prevNode = new AtomicLong(-1);
+      textGraph
+              .getTextNodeIdStream()
+              .forEach(
+                      id -> {
+                          if (prevNode.get() != -1) {
+                              dotBuilder.append(toNextEdgeLine(prevNode.get(), id));
+                          }
+                          prevNode.set(id);
+                      });
 
-    dotBuilder.append("  }\n");
+      dotBuilder.append("  }\n");
 
-    document.getMarkupStream().map(this::toMarkupNodeLine).forEach(dotBuilder::append);
+      document.getMarkupStream().map(this::toMarkupNodeLine).forEach(dotBuilder::append);
 
-    document.getMarkupStream().map(this::toMarkupContinuationLine).forEach(dotBuilder::append);
+      document.getMarkupStream().map(this::toMarkupContinuationLine).forEach(dotBuilder::append);
 
-    document.getMarkupStream()
-        .map(TAGMarkup::getDbId)
-        .flatMap(id -> textGraph
-            .getOutgoingEdges(id).stream()
-            .filter(LayerEdge.class::isInstance)
-            .map(LayerEdge.class::cast))
-        .map(e -> toOutgoingEdgeLine(e, textGraph))
-        .forEach(dotBuilder::append);
+      document
+              .getMarkupStream()
+              .map(TAGMarkup::getDbId)
+              .flatMap(
+                      id ->
+                              textGraph.getOutgoingEdges(id).stream()
+                                      .filter(LayerEdge.class::isInstance)
+                                      .map(LayerEdge.class::cast))
+              .map(e -> toOutgoingEdgeLine(e, textGraph))
+              .forEach(dotBuilder::append);
 
-    textGraph.getOutgoingEdges(textGraph.documentNode)
-        .stream()
+      textGraph.getOutgoingEdges(textGraph.documentNode).stream()
         .flatMap(e -> textGraph.getTargets(e).stream())
         .map(root -> "  d->m" + root + " [arrowhead=none]\n")
         .forEach(dotBuilder::append);
 
     String graphLabel = escape(label);
     if (!graphLabel.isEmpty()) {
-      dotBuilder.append("  label=<<font color=\"brown\" point-size=\"8\"><i>").append(graphLabel).append("</i></font>>\n");
+        dotBuilder
+                .append("  label=<<font color=\"brown\" point-size=\"8\"><i>")
+                .append(graphLabel)
+                .append("</i></font>>\n");
     }
 
     dotBuilder.append("}");
@@ -106,10 +133,9 @@ public class DotFactory {
   }
 
   private String escape(final String label) {
-    return StringEscapeUtils.escapeHtml4(label)
-        .replaceAll("\n", "\\\\n")
-//        .replace(" ", "_")
-        ;
+      return StringEscapeUtils.escapeHtml4(label).replaceAll("\n", "\\\\n")
+              //        .replace(" ", "_")
+              ;
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {
@@ -121,8 +147,13 @@ public class DotFactory {
       return format(templateStart + "\"\"" + templateEnd, textNode.getDbId(), shape);
 
     } else {
-      String textPrefix = "#PCDATA<br/>";
-      return format(templateStart + "<%s%s>" + templateEnd, textNode.getDbId(), shape, textPrefix, escape(textNode.getText()));
+        String textPrefix = "#PCDATA<br/>";
+        return format(
+                templateStart + "<%s%s>" + templateEnd,
+                textNode.getDbId(),
+                shape,
+                textPrefix,
+                escape(textNode.getText()));
     }
   }
 
@@ -143,49 +174,55 @@ public class DotFactory {
     String layerName = layerIterator.next();
     String color = getLayerColor(layerName);
     while (layerIterator.hasNext()) {
-      String otherLayer = layerIterator.next();
-      String otherColor = getLayerColor(otherLayer);
-      pre.append("  subgraph cluster_").append(markup.getDbId()).append(otherLayer).append("{\n")
-          .append("    style=rounded\n    color=").append(otherColor).append("\n  ");
-      post.append("  }\n");
+        String otherLayer = layerIterator.next();
+        String otherColor = getLayerColor(otherLayer);
+        pre.append("  subgraph cluster_")
+                .append(markup.getDbId())
+                .append(otherLayer)
+                .append("{\n")
+                .append("    style=rounded\n    color=")
+                .append(otherColor)
+                .append("\n  ");
+        post.append("  }\n");
     }
-    return format("%s  m%d [color=%s;label=<%s>]\n%s", pre, markup.getDbId(), color, markup.getExtendedTag(), post);
+      return format(
+              "%s  m%d [color=%s;label=<%s>]\n%s",
+              pre, markup.getDbId(), color, markup.getExtendedTag(), post);
   }
 
   private String toMarkupContinuationLine(final TAGMarkup tagMarkup) {
     Optional<Long> continuedMarkup = textGraph.getContinuedMarkupId(tagMarkup.getDbId());
     if (continuedMarkup.isPresent()) {
-      return format("  m%d->m%d [color=red;style=dashed;arrowhead=none]\n", tagMarkup.getDbId(), continuedMarkup.get());
+        return format(
+                "  m%d->m%d [color=red;style=dashed;arrowhead=none]\n",
+                tagMarkup.getDbId(), continuedMarkup.get());
     }
     return "";
   }
 
   private String toOutgoingEdgeLine(LayerEdge edge, TextGraph textGraph) {
-    Long source = textGraph.getSource(edge);
-    String targetPrefix = edge.hasType(EdgeType.hasText) ? "t" : "m";
-    Collection<Long> edgeTargets = textGraph.getTargets(edge);
-    String targets = edgeTargets.stream().map(i -> targetPrefix + i).collect(joining(","));
-    String layerName = edge.getLayerName();
-    String label = layerName.isEmpty()
-        ? ""
-        : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
-    String color = getLayerColor(layerName);
-    if (edgeTargets.size() == 1) {
-      return format("  m%d->%s[color=%s;arrowhead=none%s]\n", source, targets, color, label);
+      Long source = textGraph.getSource(edge);
+      String targetPrefix = edge.hasType(EdgeType.hasText) ? "t" : "m";
+      Collection<Long> edgeTargets = textGraph.getTargets(edge);
+      String targets = edgeTargets.stream().map(i -> targetPrefix + i).collect(joining(","));
+      String layerName = edge.getLayerName();
+      String label =
+              layerName.isEmpty() ? "" : ";label=<<font point-size=\"8\">" + layerName + "</font>>";
+      String color = getLayerColor(layerName);
+      if (edgeTargets.size() == 1) {
+          return format("  m%d->%s[color=%s;arrowhead=none%s]\n", source, targets, color, label);
 
-    } else {
-      String hyperId = "h" + source + layerName;
-      return format("  %s [shape=point;color=%s;label=\"\"]\n" +
-              "  m%d->%s [color=%s;arrowhead=none%s]\n" +
-              "  %s->{%s}[color=%s;arrowhead=none]\n",
-          hyperId, color,
-          source, hyperId, color, label,
-          hyperId, targets, color);
-    }
+      } else {
+          String hyperId = "h" + source + layerName;
+          return format(
+                  "  %s [shape=point;color=%s;label=\"\"]\n"
+                          + "  m%d->%s [color=%s;arrowhead=none%s]\n"
+                          + "  %s->{%s}[color=%s;arrowhead=none]\n",
+                  hyperId, color, source, hyperId, color, label, hyperId, targets, color);
+      }
   }
 
   private String getLayerColor(final String layerName) {
     return layerColor.computeIfAbsent(layerName, k -> colorPicker.nextColor());
   }
-
 }

@@ -539,7 +539,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
     //      closedMarkupInBranch.add(closedInBranch);
     //    });
 
-    String errorPrefix = errorPrefix(ctx, true);
+//    String errorPrefix = errorPrefix(ctx, true);
     checkSuspendedOrResumedMarkupBetweenBranches(
             suspendedMarkupInBranch, resumedMarkupInBranch, ctx);
     checkOpenedOrClosedMarkupBetweenBranches(openedMarkupInBranch, closedMarkupInBranch, ctx);

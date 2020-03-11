@@ -27,8 +27,6 @@ import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.*;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -249,8 +246,7 @@ public class AnnotationFactory {
     errorListener.addBreakingError(
             startPos,
             endPos,
-            "%s Cannot determine the type of this annotation: %s",
-            errorPrefix(annotationValueContext),
+            "Cannot determine the type of this annotation: %s",
             annotationValueContext.getText());
     return null;
   }
@@ -292,11 +288,6 @@ public class AnnotationFactory {
       //          errorPrefix(parseTree.), parseTree.getText());
 
     }
-  }
-
-  private String errorPrefix(ParserRuleContext ctx) {
-    Token token = ctx.start;
-    return format("line %d:%d :", token.getLine(), token.getCharPositionInLine() + 1);
   }
 
   public String getStringValue(final AnnotationInfo annotationInfo) {
@@ -364,8 +355,7 @@ public class AnnotationFactory {
     errorListener.addError(
             Position.startOf(annotationValueContext),
             Position.endOf(annotationValueContext),
-            "%s " + messageTemplate,
-            errorPrefix(annotationValueContext),
+            messageTemplate,
             aName);
   }
 

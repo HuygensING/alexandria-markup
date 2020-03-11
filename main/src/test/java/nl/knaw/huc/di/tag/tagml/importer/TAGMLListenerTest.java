@@ -98,7 +98,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
       String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
       String expectedSyntaxErrorMessage =
               "line 1:18 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.";
-    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+      assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
@@ -134,24 +134,24 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
   @Test
   public void testLayerShouldBeHierarchical() {
     String input =
-        "[tagml|+a,+b>"
-            + "[page|b>"
-            + "[book|a>book title"
-            + "[chapter|a>chapter title"
-            + "[para|a>paragraph text"
-            + "<page|b]"
-            + "<chapter|a]<book|a]"
-            + "[! para should close before chapter !]<para|a]"
-            + "<tagml|a,b]";
+            "[tagml|+a,+b>"
+                    + "[page|b>"
+                    + "[book|a>book title"
+                    + "[chapter|a>chapter title"
+                    + "[para|a>paragraph text"
+                    + "<page|b]"
+                    + "<chapter|a]<book|a]"
+                    + "[! para should close before chapter !]<para|a]"
+                    + "<tagml|a,b]";
 
       String expectedSyntaxErrorMessage =
               "line 1:95 : Close tag <chapter|a] found, expected <para|a].";
-    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+      assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
   public void testNonlinearText() {
-    String input = "[o>Icecream is <|tasty|cold|sweet|>!<o]";
+      String input = "[o>Ice cream is <|tasty|cold|sweet|>!<o]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -163,7 +163,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           assertThat(textNodes).hasSize(5);
 
           TAGTextNode textNode1 = textNodes.get(0);
-          assertThat(textNode1).hasText("Icecream is ");
+            assertThat(textNode1).hasText("Ice cream is ");
 
           //      TAGTextNode textNode2 = textNodes.get(1);
           //      assertThat(textNode2).isDivergence();
@@ -225,14 +225,14 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
           try {
-            TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
-            TAGDocument document = listener.getDocument();
+              TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
+              TAGDocument document = listener.getDocument();
               logDocumentGraph(document, input);
               fail("expected TAGMLBreakingError");
           } catch (TAGMLBreakingError e) {
           }
           assertThat(errorListener.hasErrors()).isTrue();
-          String errors = errorListener.getErrorMessagesAsString();
+            String errors = errorListener.getPrefixedErrorMessagesAsString();
           assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
         });
   }
@@ -256,7 +256,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
-      LOG.error("errors: {}", errorListener.getErrorMessagesAsString());
+        LOG.error("errors: {}", errorListener.getPrefixedErrorMessagesAsString());
     }
     return listener;
   }

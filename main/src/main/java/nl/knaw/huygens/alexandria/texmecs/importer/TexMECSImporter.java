@@ -87,7 +87,7 @@ public class TexMECSImporter {
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (numberOfSyntaxErrors > 0) {
-      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getErrorMessagesAsString();
+      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
     }
     if (!errorMsg.isEmpty()) {
       throw new TexMECSSyntaxError(errorMsg);

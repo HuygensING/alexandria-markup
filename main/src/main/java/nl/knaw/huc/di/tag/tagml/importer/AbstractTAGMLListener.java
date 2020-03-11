@@ -23,13 +23,6 @@ package nl.knaw.huc.di.tag.tagml.importer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
 import nl.knaw.huygens.alexandria.ErrorListener;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static java.lang.String.format;
 
 public class AbstractTAGMLListener extends TAGMLParserBaseListener {
   protected ErrorListener errorListener;
@@ -40,27 +33,14 @@ public class AbstractTAGMLListener extends TAGMLParserBaseListener {
 
   void addError(
           final ParserRuleContext ctx, final String messageTemplate, final Object... messageArgs) {
-    List<Object> newArgs = new ArrayList<>(Arrays.asList(messageArgs));
-    newArgs.add(0, errorPrefix(ctx));
     errorListener.addError(
-            Position.startOf(ctx), Position.endOf(ctx), "%s " + messageTemplate, newArgs.toArray());
+            Position.startOf(ctx), Position.endOf(ctx), messageTemplate, messageArgs);
   }
 
   void addBreakingError(
           final ParserRuleContext ctx, final String messageTemplate, final Object... messageArgs) {
-    List<Object> newArgs = new ArrayList<>(Arrays.asList(messageArgs));
-    newArgs.add(0, errorPrefix(ctx));
 
     errorListener.addBreakingError(
-            Position.startOf(ctx), Position.endOf(ctx), "%s " + messageTemplate, newArgs.toArray());
-  }
-
-  private String errorPrefix(ParserRuleContext ctx) {
-    return errorPrefix(ctx, false);
-  }
-
-  String errorPrefix(ParserRuleContext ctx, boolean useStopToken) {
-    Token token = useStopToken ? ctx.stop : ctx.start;
-    return format("line %d:%d :", token.getLine(), token.getCharPositionInLine() + 1);
+            Position.startOf(ctx), Position.endOf(ctx), messageTemplate, messageArgs);
   }
 }

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -57,11 +56,7 @@ public class ErrorListener implements ANTLRErrorListener {
       String msg,
       RecognitionException e) {
     String message =
-        format(
-            "syntax error: line %d:%d %s",
-            line,
-            charPositionInLine,
-            msg.replace("token recognition error at", "unexpected token"));
+            format("syntax error: %s", msg.replace("token recognition error at", "unexpected token"));
     errors.add(new TAGSyntaxError(message, line, charPositionInLine));
   }
 
@@ -154,20 +149,33 @@ public class ErrorListener implements ANTLRErrorListener {
     return errors.stream().map(TAGError::getMessage).collect(toList());
   }
 
-  public String getErrorMessagesAsString() {
-    return errors.stream().map(TAGError::getMessage).collect(joining("\n"));
+  public String getPrefixedErrorMessagesAsString() {
+    return errors.stream().map(this::prefixedErrorMessage).collect(joining("\n"));
+  }
+
+  private String prefixedErrorMessage(TAGError error) {
+    if (error instanceof CustomError) {
+      return prefix(((CustomError) error).startPos) + error.getMessage();
+    }
+    if (error instanceof TAGSyntaxError) {
+      return prefix(((TAGSyntaxError) error).position) + error.getMessage();
+    }
+    return "";
+  }
+
+  private String prefix(Position position) {
+    return String.format("line %d:%d : ", position.getLine(), position.getCharacter());
   }
 
   public void addError(
           Position startPos, Position endPos, String messageTemplate, Object... messageArgs) {
-    errors.add(
-            new CustomError(
-                    Optional.of(startPos), Optional.of(endPos), format(messageTemplate, messageArgs)));
+    errors.add(new CustomError(startPos, endPos, format(messageTemplate, messageArgs)));
   }
 
   public void addError(String messageTemplate, Object... messageArgs) {
     errors.add(
-            new CustomError(Optional.empty(), Optional.empty(), format(messageTemplate, messageArgs)));
+            new CustomError(
+                    new Position(1, 1), new Position(1, 1), format(messageTemplate, messageArgs)));
   }
 
   public void addBreakingError(
@@ -207,13 +215,11 @@ public class ErrorListener implements ANTLRErrorListener {
   }
 
   public class TAGSyntaxError extends TAGError {
-    public final int line;
-    public final int character;
+    public final Position position;
 
     public TAGSyntaxError(String message, int line, int character) {
       super(message);
-      this.line = line;
-      this.character = character;
+      this.position = new Position(line, character);
     }
   }
 
@@ -236,10 +242,10 @@ public class ErrorListener implements ANTLRErrorListener {
   }
 
   public class CustomError extends TAGError {
-    public final Optional<Position> startPos;
-    public final Optional<Position> endPos;
+    public final Position startPos;
+    public final Position endPos;
 
-    public CustomError(Optional<Position> startPos, Optional<Position> endPos, String message) {
+    public CustomError(Position startPos, Position endPos, String message) {
       super(message);
       this.startPos = startPos;
       this.endPos = endPos;

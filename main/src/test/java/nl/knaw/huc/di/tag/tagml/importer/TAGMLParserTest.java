@@ -710,7 +710,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    assertThat(errorListener.getErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
+    assertThat(errorListener.getPrefixedErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
   }
 
   private void assertExportEqualsInput(String input, TAGDocument doc, final TAGStore store) {

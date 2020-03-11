@@ -92,7 +92,7 @@ public class LMNLImporterInMemory {
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (errorListener.hasErrors()) {
-      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getErrorMessagesAsString();
+      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
     }
     if (!errorMsg.isEmpty()) {
       throw new LMNLSyntaxError(errorMsg);

@@ -352,7 +352,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingEndTagThrowsTAGMLSyntaxError() {
     String tagML = "[line>The rain";
-    String expectedErrors = "Missing close tag(s) for: [line>";
+      String expectedErrors = "line 1:1 : Missing close tag(s) for: [line>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -376,12 +376,12 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
-    String tagML = "[>The Spanish rain.<]";
-    String expectedErrors =
-        "syntax error: line 1:1 no viable alternative at input '[>'\n"
-            + "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n"
-            + "line 1:3 : No text allowed here, the root markup must be started first.\n"
-            + "parsing aborted!";
+      String tagML = "[>The Spanish rain.<]";
+      String expectedErrors =
+              "line 1:1 : syntax error: no viable alternative at input '[>'\n"
+                      + "line 1:20 : syntax error: mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n"
+                      + "line 1:3 : No text allowed here, the root markup must be started first.\n"
+                      + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -1021,7 +1021,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testUnclosedTextVariationThrowsSyntaxError() {
     String tagML = "[t>This is <|good|bad.<t]";
     String expectedErrors =
-        "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n"
+            "line 1:25 : syntax error: extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n"
             + "line 1:24 : Markup [t> opened before branch 2, should not be closed in a branch.\n"
             + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);

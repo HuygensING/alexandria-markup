@@ -38,7 +38,7 @@ public class Position {
   }
 
   public static Position endOf(final ParserRuleContext ctx) {
-    return new Position(ctx.stop.getLine(), ctx.stop.getCharPositionInLine() + 1);
+    return new Position(ctx.stop.getLine(), ctx.stop.getStopIndex() + 1);
   }
 
   public int getLine() {

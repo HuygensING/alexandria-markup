@@ -84,7 +84,7 @@ public class TAGMLImporter {
     String errorMsg = "";
     if (errorListener.hasErrors()) {
       //      logDocumentGraph(document,"");
-      errorMsg = "Parsing errors:\n" + errorListener.getErrorMessagesAsString();
+      errorMsg = "Parsing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
       if (errorListener.hasBreakingError()) {
         errorMsg += "\nparsing aborted!";
       }

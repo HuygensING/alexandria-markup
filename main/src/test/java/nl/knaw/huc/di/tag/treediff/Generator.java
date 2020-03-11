@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.treediff;
  */
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.concurrent.*;
@@ -84,6 +85,7 @@ public abstract class Generator<T> implements Iterable<T> {
   /* (non-Javadoc)
    * @see java.lang.Iterable#iterator()
    */
+  @NotNull
   public final Iterator<T> iterator() {
     return iterator;
   }
@@ -223,7 +225,7 @@ public abstract class Generator<T> implements Iterable<T> {
     private final ThreadFactory defaultThreadFactory =
         Executors.defaultThreadFactory();
 
-    public Thread newThread(final Runnable r) {
+    public Thread newThread(@NotNull final Runnable r) {
       Thread thread = defaultThreadFactory.newThread(r);
       thread.setDaemon(true);
       return thread;

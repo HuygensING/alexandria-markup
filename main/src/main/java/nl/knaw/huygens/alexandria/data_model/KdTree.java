@@ -21,6 +21,8 @@ package nl.knaw.huygens.alexandria.data_model;
  */
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -487,6 +489,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
    * @return Iterator
    * allowing to iterate through a collection containing all found entries.
    */
+  @NotNull
   public Iterator<T> iterator() {
     final Deque<T> results = new ArrayDeque<>();
     search(root, results);

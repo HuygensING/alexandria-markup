@@ -19,6 +19,8 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -46,6 +48,7 @@ public class TreeNode<T> implements Iterable<TreeNode<T>> {
     return childNode;
   }
 
+  @NotNull
   @Override
   public Iterator<TreeNode<T>> iterator() {
     return children.iterator();
