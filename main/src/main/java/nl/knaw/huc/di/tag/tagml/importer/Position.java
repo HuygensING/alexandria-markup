@@ -22,6 +22,8 @@ package nl.knaw.huc.di.tag.tagml.importer;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import java.util.Objects;
+
 import static java.lang.String.format;
 
 public class Position {
@@ -38,7 +40,9 @@ public class Position {
   }
 
   public static Position endOf(final ParserRuleContext ctx) {
-    return new Position(ctx.stop.getLine(), ctx.stop.getStopIndex() + 1);
+    return new Position(
+            ctx.stop.getLine(),
+            ctx.stop.getCharPositionInLine() + ctx.stop.getStopIndex() - ctx.stop.getStartIndex() + 2);
   }
 
   public int getLine() {
@@ -47,6 +51,19 @@ public class Position {
 
   public int getCharacter() {
     return character;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Position)) return false;
+    final Position position = (Position) o;
+    return line == position.line && character == position.character;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(line, character);
   }
 
   @Override

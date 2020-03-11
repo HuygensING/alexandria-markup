@@ -36,7 +36,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   private final Map<Long, String> textNodeVariables = new HashMap<>();
   private final SetMultimap<Long, String> edges = MultimapBuilder.hashKeys().hashSetValues().build();
   private String lastNode;
-  private final Stack<List<String>> replacements = new Stack();
+  private final Stack<List<String>> replacements = new Stack<>();
 
   @Override
   public void startVisualization() {

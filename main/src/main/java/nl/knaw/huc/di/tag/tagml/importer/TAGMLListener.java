@@ -130,29 +130,32 @@ public class TAGMLListener extends AbstractTAGMLListener {
     boolean noSuspendedMarkup =
         state.suspendedMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noSuspendedMarkup) {
-      String suspendedMarkupString =
-              state.suspendedMarkup.values().stream()
-                      .flatMap(Collection::stream) //
-                      .map(this::suspendTag) //
-                      .distinct()
-                      .collect(joining(", "));
-      errorListener.addError(
-              "Some suspended markup was not resumed: %s",
-              suspendedMarkupString); // TODO: add range of unresumed tag
+      state.suspendedMarkup.values().stream()
+              .flatMap(Collection::stream) //
+              .map(this::suspendTag) //
+              .distinct()
+              .forEach(
+                      m -> {
+                        errorListener.addError(
+                                "Some suspended markup was not resumed: %s",
+                                m); // TODO: add range of unresumed tag
+                      });
     }
   }
 
   private void verifyNoMarkupUnclosed() {
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
-      String openRanges =
-              state.openMarkup.values().stream()
-                      .flatMap(Collection::stream) //
-                      .map(this::openTag) //
-                      .distinct()
-                      .collect(joining(", "));
-      errorListener.addError(
-              "Missing close tag(s) for: %s", openRanges); // TODO: add range of unclosed tag(s)
+      state.openMarkup.values().stream()
+              .flatMap(Collection::stream) //
+              .map(this::openTag) //
+              .distinct()
+              .forEach(
+                      openRange -> {
+                        errorListener.addError(
+                                "Missing close tag(s) for: %s",
+                                openRange); // TODO: add range of unclosed tag(s)
+                      });
     }
   }
 
@@ -539,7 +542,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
     //      closedMarkupInBranch.add(closedInBranch);
     //    });
 
-//    String errorPrefix = errorPrefix(ctx, true);
+    //    String errorPrefix = errorPrefix(ctx, true);
     checkSuspendedOrResumedMarkupBetweenBranches(
             suspendedMarkupInBranch, resumedMarkupInBranch, ctx);
     checkOpenedOrClosedMarkupBetweenBranches(openedMarkupInBranch, closedMarkupInBranch, ctx);
@@ -581,7 +584,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
         String openedStatement =
             opened.isEmpty() ? "didn't open any new markup" : "opened markup " + opened;
         branchLines
-            .append("\n\tbranch ")
+                .append("\n\tbranch ")
                 .append(i + 1)
                 .append(" ")
                 .append(closedStatement)
@@ -681,20 +684,23 @@ public class TAGMLListener extends AbstractTAGMLListener {
                 .map(TAGMarkup::getExtendedTag)
                 .anyMatch(et -> emn.get().equals(et));
         if (!markupIsOpen) {
-          addError(ctx, "Close tag <%s] found without corresponding open tag.", extendedMarkupName);
+          addError(
+                  ctx.getParent(),
+                  "Close tag <%s] found without corresponding open tag.",
+                  extendedMarkupName);
           return null;
         } else if (!isSuspend) {
           TAGMarkup expected = markupStack.peek();
           if (expected.hasTag(BRANCH)) {
             addBreakingError(
-                    ctx,
+                    ctx.getParent(),
                     "Markup [%s> opened before branch %s, should not be closed in a branch.",
                     extendedMarkupName,
                     currentTextVariationState().branch + 1);
           }
           String hint = l.isEmpty() ? " Use separate layers to allow for overlap." : "";
-          addBreakingError(
-                  ctx,
+          addError(
+                  ctx.getParent(),
                   "Close tag <%s] found, expected %s.%s",
                   extendedMarkupName,
                   closeTag(expected),
@@ -746,8 +752,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
           state.allOpenMarkup.stream().filter(m -> m.hasTag(markupName)).collect(toList());
       if (correspondingOpenMarkupList.isEmpty()) {
         // nothing found? error!
-        addBreakingError(
-                ctx, "Close tag <%s] found without corresponding open tag.", extendedMarkupName);
+//        addError(ctx.getParent(), "Close tag <%s] found without corresponding open tag.", extendedMarkupName);
 
       } else if (correspondingOpenMarkupList.size() == 1) {
         // only one? then we found our corresponding start tag, and we can get the layer info from

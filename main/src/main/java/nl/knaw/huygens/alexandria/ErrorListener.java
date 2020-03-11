@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -47,28 +48,45 @@ public class ErrorListener implements ANTLRErrorListener {
   private boolean reportContextSensitivity = true;
   private boolean hasBreakingError = false;
 
-  @Override
-  public void syntaxError(
-      Recognizer<?, ?> recognizer,
-      Object offendingSymbol,
-      int line,
-      int charPositionInLine,
-      String msg,
-      RecognitionException e) {
-    String message =
-            format("syntax error: %s", msg.replace("token recognition error at", "unexpected token"));
-    errors.add(new TAGSyntaxError(message, line, charPositionInLine));
-  }
+  static final Comparator<? super TAGError> TAG_ERROR_COMPARATOR =
+          (Comparator<TAGError>)
+                  (e1, e2) -> {
+                    if (e1 instanceof CustomError && e2 instanceof CustomError) {
+                      return Comparator.comparing(ce -> ((CustomError) ce).startPos.getLine())
+                              .thenComparing(ce -> ((CustomError) ce).startPos.getCharacter())
+                              .thenComparing(ce -> ((CustomError) ce).endPos.getLine())
+                              .thenComparing(ce -> ((CustomError) ce).endPos.getCharacter())
+                              .thenComparing(e -> ((TAGError) e).getMessage())
+                              .compare(e1, e2);
+                    }
+                    if (e1 instanceof TAGSyntaxError && e2 instanceof TAGSyntaxError) {
+                      return Comparator.comparing(se -> ((TAGSyntaxError) se).position.getLine())
+                              .thenComparing(se -> ((TAGSyntaxError) se).position.getCharacter())
+                              .thenComparing(e -> ((TAGError) e).getMessage())
+                              .compare(e1, e2);
+                    }
+                    if (e1 instanceof CustomError && e2 instanceof TAGSyntaxError) {
+                      return Comparator.comparing(Position::getLine)
+                              .thenComparing(Position::getCharacter)
+                              .compare(((CustomError) e1).startPos, ((TAGSyntaxError) e2).position);
+                    }
+                    if (e1 instanceof TAGSyntaxError && e2 instanceof CustomError) {
+                      return Comparator.comparing(Position::getLine)
+                              .thenComparing(Position::getCharacter)
+                              .compare(((TAGSyntaxError) e1).position, ((CustomError) e2).startPos);
+                    }
+                    return Comparator.comparing(TAGError::getMessage).compare(e1, e2);
+                  };
 
   @Override
   public void reportAmbiguity(
-      Parser recognizer,
-      DFA dfa,
-      int startIndex,
-      int stopIndex,
-      boolean exact,
-      BitSet ambigAlts,
-      ATNConfigSet configs) {
+          Parser recognizer,
+          DFA dfa,
+          int startIndex,
+          int stopIndex,
+          boolean exact,
+          BitSet ambigAlts,
+          ATNConfigSet configs) {
     if (reportAmbiguity) {
       String message =
           "ambiguity:\n recognizer="
@@ -149,8 +167,24 @@ public class ErrorListener implements ANTLRErrorListener {
     return errors.stream().map(TAGError::getMessage).collect(toList());
   }
 
+  @Override
+  public void syntaxError(
+          Recognizer<?, ?> recognizer,
+          Object offendingSymbol,
+          int line,
+          int charPositionInLine,
+          String msg,
+          RecognitionException e) {
+    String message =
+            format("syntax error: %s", msg.replace("token recognition error at", "unexpected token"));
+    errors.add(new TAGSyntaxError(message, line, charPositionInLine));
+  }
+
   public String getPrefixedErrorMessagesAsString() {
-    return errors.stream().map(this::prefixedErrorMessage).collect(joining("\n"));
+    return errors.stream()
+            .sorted(TAG_ERROR_COMPARATOR)
+            .map(this::prefixedErrorMessage)
+            .collect(joining("\n"));
   }
 
   private String prefixedErrorMessage(TAGError error) {
@@ -202,7 +236,7 @@ public class ErrorListener implements ANTLRErrorListener {
     return hasBreakingError;
   }
 
-  public abstract class TAGError {
+  public abstract static class TAGError {
     private final String message;
 
     public TAGError(String message) {
@@ -214,7 +248,7 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  public class TAGSyntaxError extends TAGError {
+  public static class TAGSyntaxError extends TAGError {
     public final Position position;
 
     public TAGSyntaxError(String message, int line, int character) {
@@ -223,7 +257,7 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  public class TAGAmbiguityError extends TAGError {
+  public static class TAGAmbiguityError extends TAGError {
     public TAGAmbiguityError(String message) {
       super(message);
     }
@@ -249,6 +283,18 @@ public class ErrorListener implements ANTLRErrorListener {
       super(message);
       this.startPos = startPos;
       this.endPos = endPos;
+    }
+
+    @Override
+    public String toString() {
+      return "CustomError{"
+              + "startPos="
+              + startPos
+              + ", endPos="
+              + endPos
+              + ", message="
+              + getMessage()
+              + '}';
     }
   }
 }
