@@ -241,11 +241,9 @@ public class AnnotationFactory {
     } else if (annotationValueContext.richTextValue() != null) {
       return annotationValueContext.richTextValue().getText();
     }
-    final Position startPos = Position.startOf(annotationValueContext);
-    final Position endPos = Position.endOf(annotationValueContext);
-    errorListener.addBreakingError(
-            startPos,
-            endPos,
+    errorListener.addError(
+            Position.startOf(annotationValueContext.getParent()),
+            Position.endOf(annotationValueContext.getParent()),
             "Cannot determine the type of this annotation: %s",
             annotationValueContext.getText());
     return null;

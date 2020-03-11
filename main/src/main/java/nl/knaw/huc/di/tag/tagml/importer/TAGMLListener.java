@@ -315,7 +315,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
   private void checkLayerIsOpen(final StartTagContext ctx, final String layerId) {
     if (state.openMarkup.get(layerId).isEmpty()) {
       String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
-      addBreakingError(
+      addError(
               ctx,
               "%s cannot be used here, since the root markup of this layer has closed already.",
               layer);
@@ -323,9 +323,9 @@ public class TAGMLListener extends AbstractTAGMLListener {
   }
 
   private void checkLayerWasAdded(final StartTagContext ctx, final String layerId) {
-    // TODO: use stopPostition in message?
+    // TODO: use stopPosition in message?
     if (!state.openMarkup.containsKey(layerId)) {
-      addBreakingError(
+      addError(
               ctx,
               "Layer %s has not been added at this point, use +%s to add a layer.",
               layerId,
@@ -360,7 +360,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
   @Override
   public void exitMilestoneTag(MilestoneTagContext ctx) {
     if (!state.rootMarkupIsSet()) {
-      addBreakingError(ctx, "The root markup cannot be a milestone tag.");
+      addError(ctx, "The root markup cannot be a milestone tag.");
     }
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.name().getText();
@@ -737,7 +737,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
     state.eof = (markup.getDbId().equals(state.rootMarkupId));
     if (isSuspend && state.eof) {
       TAGMarkup rootMarkup = store.getMarkup(state.rootMarkupId);
-      addBreakingError(ctx, "The root markup %s cannot be suspended.", rootMarkup);
+      addBreakingError(ctx.getParent(), "The root markup %s cannot be suspended.", rootMarkup);
     }
     return markup;
   }
@@ -752,7 +752,8 @@ public class TAGMLListener extends AbstractTAGMLListener {
           state.allOpenMarkup.stream().filter(m -> m.hasTag(markupName)).collect(toList());
       if (correspondingOpenMarkupList.isEmpty()) {
         // nothing found? error!
-//        addError(ctx.getParent(), "Close tag <%s] found without corresponding open tag.", extendedMarkupName);
+        //        addError(ctx.getParent(), "Close tag <%s] found without corresponding open tag.",
+        // extendedMarkupName);
 
       } else if (correspondingOpenMarkupList.size() == 1) {
         // only one? then we found our corresponding start tag, and we can get the layer info from
@@ -773,7 +774,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
         } else {
           // not all open tags belong to the same sets of layers: ambiguous situation
           addBreakingError(
-                  ctx,
+                  ctx.getParent(),
                   "There are multiple start-tags that can correspond with end-tag <%s]; add layer information to the end-tag to solve this ambiguity.",
                   extendedMarkupName);
         }
@@ -866,7 +867,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
     Set<TAGMarkup> previousMarkup =
         document.getMarkupStreamForTextNode(previousTextNode).collect(toSet());
     if (previousMarkup.contains(suspendedMarkup)) {
-      addBreakingError(
+      addError(
               ctx,
               "There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed.",
               resumeTag(suspendedMarkup),
