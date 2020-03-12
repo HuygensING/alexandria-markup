@@ -35,6 +35,7 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.assertj.core.util.Files;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
@@ -83,25 +85,32 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         });
   }
 
-  @Test
-  public void testNonOverlappingMarkupWithoutLayerInfo() {
-    String input = "[tagml>" + "[a>a<a] [b>b<b]" + "<tagml]";
-    runInStoreTransaction(
-        store -> {
-          TAGDocument document = assertTAGMLParses(input, store);
-        });
-  }
+    @Test
+    public void testNonOverlappingMarkupWithoutLayerInfo() {
+        String input = "[tagml>" + "[a>a<a] [b>b<b]" + "<tagml]";
+        runInStoreTransaction(
+                store -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                });
+    }
 
-  @Test
-  public void testOverlappingMarkupWithoutLayerInfo() {
-      String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
-      String expectedSyntaxErrorMessage =
-              "line 1:1 : Missing close tag(s) for: [a>\n"
-                      + "line 1:1 : Missing close tag(s) for: [tagml>\n"
-                      + "line 1:17 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
-                      + "line 1:23 : Close tag <tagml] found, expected <a]. Use separate layers to allow for overlap.";
-      assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
-  }
+    @Test
+    public void testUnresumedMarkup() {
+        String input = "[tagml>[q>That<-q], she said, [q>is amazing!<q]<tagml]";
+        String expectedSyntaxErrorMessage = "line 1:15 : Some suspended markup was not resumed: <-q]";
+        assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+    }
+
+    @Test
+    public void testOverlappingMarkupWithoutLayerInfo() {
+        String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
+        String expectedSyntaxErrorMessage =
+                "line 1:1 : Missing close tag(s) for: [tagml>\n"
+                        + "line 1:8 : Missing close tag(s) for: [a>\n"
+                        + "line 1:17 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
+                        + "line 1:23 : Close tag <tagml] found, expected <a]. Use separate layers to allow for overlap.";
+        assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+    }
 
   @Test
   public void testNonOverlappingMarkupWithLayerInfo() {
@@ -147,9 +156,9 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
                       + "<tagml|a,b]";
 
       String expectedSyntaxErrorMessage =
-              "line 1:1 : Missing close tag(s) for: [book|a>\n"
-                      + "line 1:1 : Missing close tag(s) for: [chapter|a>\n"
-                      + "line 1:1 : Missing close tag(s) for: [tagml|a,b>\n"
+              "line 1:1 : Missing close tag(s) for: [tagml|a,b>\n"
+                      + "line 1:22 : Missing close tag(s) for: [book|a>\n"
+                      + "line 1:40 : Missing close tag(s) for: [chapter|a>\n"
                       + "line 1:94 : Close tag <chapter|a] found, expected <para|a].\n"
                       + "line 1:105 : Close tag <book|a] found, expected <para|a].\n"
                       + "line 1:159 : Close tag <tagml|a,b] found, expected <chapter|a].";
@@ -215,7 +224,8 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
-    String lmnl = new LMNLExporter(store).toLMNL(document);
+      final Map<Long, Tuple<Range>> markupRanges = listener.getMarkupRanges();
+      String lmnl = new LMNLExporter(store).toLMNL(document);
     LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;
   }

@@ -31,6 +31,8 @@ import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,8 @@ public class TAGMLListener extends AbstractTAGMLListener {
   private final Deque<TextVariationState> textVariationStateStack = new ArrayDeque<>();
   private static final Set<String> DEFAULT_LAYER_ONLY = singleton(TAGML.DEFAULT_LAYER);
   private boolean atDocumentStart = true;
+  public Map<Long, Range> openTagRange = new HashMap<>();
+  public Map<Long, Range> closeTagRange = new HashMap<>();
 
   public TAGMLListener(final TAGStore store, ErrorListener errorListener) {
     super(errorListener);
@@ -73,19 +77,36 @@ public class TAGMLListener extends AbstractTAGMLListener {
     return document;
   }
 
+  public Map<Long, Tuple<Range>> getMarkupRanges() {
+    final Map<Long, Tuple<Range>> markupRangeMap = new HashMap<>();
+    openTagRange
+            .keySet()
+            .forEach(
+                    markupId ->
+                            markupRangeMap.put(
+                                    markupId,
+                                    TupleFactory.create2(openTagRange.get(markupId), closeTagRange.get(markupId))));
+    return markupRangeMap;
+  }
+
   private void verifyNoSuspendedMarkupLeft() {
     boolean noSuspendedMarkup =
             state.suspendedMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noSuspendedMarkup) {
       state.suspendedMarkup.values().stream()
               .flatMap(Collection::stream) //
-              .map(this::suspendTag) //
+              //          .map(this::suspendTag) //
               .distinct()
               .forEach(
-                      m -> {
+                      markup -> {
+                        final Range range = closeTagRange.get(markup.getDbId());
+                        final Position startPosition = range.getStartPosition();
+                        final Position endPosition = range.getEndPosition();
                         errorListener.addError(
+                                startPosition,
+                                endPosition,
                                 "Some suspended markup was not resumed: %s",
-                                m); // TODO: add range of unresumed tag
+                                suspendTag(markup)); // TODO: add range of unresumed tags
                       });
     }
   }
@@ -124,13 +145,19 @@ public class TAGMLListener extends AbstractTAGMLListener {
     if (!noOpenMarkup) {
       state.openMarkup.values().stream()
               .flatMap(Collection::stream) //
-              .map(this::openTag) //
+              //          .map(this::openTag) //
               .distinct()
               .forEach(
-                      openRange -> {
+                      openMarkup -> {
+                        final Long markupId = openMarkup.getDbId();
+                        final Range range = openTagRange.get(markupId);
+                        Position startPos = range.getStartPosition();
+                        Position endPos = range.getEndPosition();
                         errorListener.addError(
+                                startPos,
+                                endPos,
                                 "Missing close tag(s) for: %s",
-                                openRange); // TODO: add range of unclosed tag(s)
+                                openTag(openMarkup)); // TODO: add range of unclosed tag(s)
                       });
     }
   }
@@ -236,6 +263,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
       Set<String> layerIds = extractLayerInfo(ctx.markupName().layerInfo());
       Set<String> layers = new HashSet<>();
       state.allOpenMarkup.push(markup);
+      openTagRange.put(markup.getDbId(), rangeOf(ctx));
       boolean firstTag = !document.getLayerNames().contains(TAGML.DEFAULT_LAYER);
       if (firstTag) {
         addDefaultLayer(markup, layers);
@@ -299,10 +327,9 @@ public class TAGMLListener extends AbstractTAGMLListener {
   }
 
   private void checkLayerWasAdded(final StartTagContext ctx, final String layerId) {
-    // TODO: use stopPosition in message?
     if (!state.openMarkup.containsKey(layerId)) {
       addError(
-              ctx,
+              ctx.markupName().layerInfo(),
               "Layer %s has not been added at this point, use +%s to add a layer.",
               layerId,
               layerId);
@@ -355,7 +382,10 @@ public class TAGMLListener extends AbstractTAGMLListener {
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.markupName().name().getText();
       //      LOG.debug("endTag.markupName=<{}>", markupName);
-      removeFromOpenMarkup(ctx.markupName());
+      final TAGMarkup markup = removeFromOpenMarkup(ctx.markupName());
+      if (markup != null) {
+        closeTagRange.put(markup.getDbId(), rangeOf(ctx));
+      }
     }
   }
 
@@ -939,6 +969,12 @@ public class TAGMLListener extends AbstractTAGMLListener {
       layers.add(TAGML.DEFAULT_LAYER);
     }
     return layers;
+  }
+
+  private Range rangeOf(final ParserRuleContext ctx) {
+    return new Range(
+            new Position(ctx.start.getLine(), ctx.start.getCharPositionInLine() + 1),
+            new Position(ctx.stop.getLine(), ctx.stop.getCharPositionInLine() + 1));
   }
 
   public static class State {

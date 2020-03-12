@@ -210,6 +210,7 @@ public class ErrorListener implements ANTLRErrorListener {
     errors.add(new CustomError(startPos, endPos, format(messageTemplate, messageArgs)));
   }
 
+  @Deprecated()
   public void addError(String messageTemplate, Object... messageArgs) {
     errors.add(
             new CustomError(
@@ -222,6 +223,7 @@ public class ErrorListener implements ANTLRErrorListener {
     abortParsing(messageTemplate, messageArgs);
   }
 
+  @Deprecated()
   public void addBreakingError(String messageTemplate, Object... messageArgs) {
     addError(messageTemplate, messageArgs);
     abortParsing(messageTemplate, messageArgs);

@@ -55,6 +55,6 @@ public class Range {
 
   @Override
   public String toString() {
-    return "Range{" + startPosition + " -" + endPosition + '}';
+    return "Range{" + startPosition + " - " + endPosition + '}';
   }
 }
