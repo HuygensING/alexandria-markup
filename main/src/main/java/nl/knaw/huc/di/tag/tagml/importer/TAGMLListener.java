@@ -974,7 +974,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
   private Range rangeOf(final ParserRuleContext ctx) {
     return new Range(
             new Position(ctx.start.getLine(), ctx.start.getCharPositionInLine() + 1),
-            new Position(ctx.stop.getLine(), ctx.stop.getCharPositionInLine() + 1));
+            new Position(ctx.stop.getLine(), ctx.stop.getCharPositionInLine() + 2));
   }
 
   public static class State {

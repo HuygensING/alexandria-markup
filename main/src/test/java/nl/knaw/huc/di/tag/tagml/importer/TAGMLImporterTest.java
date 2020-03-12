@@ -68,7 +68,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
                         final List<ErrorListener.TAGError> errors = e.getErrors();
                         assertThat(errors).hasSize(4);
 
-                        final ErrorListener.TAGError tagError = errors.get(0);
+                        final ErrorListener.TAGError tagError = errors.get(2);
                         assertThat(tagError).isInstanceOf(ErrorListener.CustomError.class);
 
                         final ErrorListener.CustomError customError = (ErrorListener.CustomError) tagError;

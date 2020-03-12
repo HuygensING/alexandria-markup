@@ -101,12 +101,12 @@ public class ErrorListener implements ANTLRErrorListener {
                       + startIndex //
                       + ",\n stopIndex="
                       + stopIndex //
-              + ",\n exact="
-              + exact //
-              + ",\n ambigAlts="
-              + ambigAlts //
-              + ",\n configs="
-              + configs;
+                      + ",\n exact="
+                      + exact //
+                      + ",\n ambigAlts="
+                      + ambigAlts //
+                      + ",\n configs="
+                      + configs;
       errors.add(new TAGAmbiguityError(message));
     }
   }
@@ -164,7 +164,7 @@ public class ErrorListener implements ANTLRErrorListener {
   }
 
   public List<TAGError> getErrors() {
-    return errors;
+    return errors.stream().sorted(TAG_ERROR_COMPARATOR).collect(toList());
   }
 
   public List<String> getErrorMessages() {
