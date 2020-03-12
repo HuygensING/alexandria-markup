@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria;
 
 import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.importer.Position;
+import nl.knaw.huc.di.tag.tagml.importer.Range;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
@@ -52,10 +53,11 @@ public class ErrorListener implements ANTLRErrorListener {
           (Comparator<TAGError>)
                   (e1, e2) -> {
                     if (e1 instanceof CustomError && e2 instanceof CustomError) {
-                      return Comparator.comparing(ce -> ((CustomError) ce).startPos.getLine())
-                              .thenComparing(ce -> ((CustomError) ce).startPos.getCharacter())
-                              .thenComparing(ce -> ((CustomError) ce).endPos.getLine())
-                              .thenComparing(ce -> ((CustomError) ce).endPos.getCharacter())
+                      return Comparator.comparing(
+                              ce -> ((CustomError) ce).range.getStartPosition().getLine())
+                              .thenComparing(ce -> ((CustomError) ce).range.getStartPosition().getCharacter())
+                              .thenComparing(ce -> ((CustomError) ce).range.getEndPosition().getLine())
+                              .thenComparing(ce -> ((CustomError) ce).range.getEndPosition().getCharacter())
                               .thenComparing(e -> ((TAGError) e).getMessage())
                               .compare(e1, e2);
                     }
@@ -68,12 +70,14 @@ public class ErrorListener implements ANTLRErrorListener {
                     if (e1 instanceof CustomError && e2 instanceof TAGSyntaxError) {
                       return Comparator.comparing(Position::getLine)
                               .thenComparing(Position::getCharacter)
-                              .compare(((CustomError) e1).startPos, ((TAGSyntaxError) e2).position);
+                              .compare(
+                                      ((CustomError) e1).range.getStartPosition(), ((TAGSyntaxError) e2).position);
                     }
                     if (e1 instanceof TAGSyntaxError && e2 instanceof CustomError) {
                       return Comparator.comparing(Position::getLine)
                               .thenComparing(Position::getCharacter)
-                              .compare(((TAGSyntaxError) e1).position, ((CustomError) e2).startPos);
+                              .compare(
+                                      ((TAGSyntaxError) e1).position, ((CustomError) e2).range.getStartPosition());
                     }
                     return Comparator.comparing(TAGError::getMessage).compare(e1, e2);
                   };
@@ -89,14 +93,14 @@ public class ErrorListener implements ANTLRErrorListener {
           ATNConfigSet configs) {
     if (reportAmbiguity) {
       String message =
-          "ambiguity:\n recognizer="
-              + recognizer //
-              + ",\n dfa="
-              + dfa //
-              + ",\n startIndex="
-              + startIndex //
-              + ",\n stopIndex="
-              + stopIndex //
+              "ambiguity:\n recognizer="
+                      + recognizer //
+                      + ",\n dfa="
+                      + dfa //
+                      + ",\n startIndex="
+                      + startIndex //
+                      + ",\n stopIndex="
+                      + stopIndex //
               + ",\n exact="
               + exact //
               + ",\n ambigAlts="
@@ -189,7 +193,7 @@ public class ErrorListener implements ANTLRErrorListener {
 
   private String prefixedErrorMessage(TAGError error) {
     if (error instanceof CustomError) {
-      return prefix(((CustomError) error).startPos) + error.getMessage();
+      return prefix(((CustomError) error).range.getStartPosition()) + error.getMessage();
     }
     if (error instanceof TAGSyntaxError) {
       return prefix(((TAGSyntaxError) error).position) + error.getMessage();
@@ -276,25 +280,16 @@ public class ErrorListener implements ANTLRErrorListener {
   }
 
   public class CustomError extends TAGError {
-    public final Position startPos;
-    public final Position endPos;
+    public final Range range;
 
     public CustomError(Position startPos, Position endPos, String message) {
       super(message);
-      this.startPos = startPos;
-      this.endPos = endPos;
+      this.range = new Range(startPos, endPos);
     }
 
     @Override
     public String toString() {
-      return "CustomError{"
-              + "startPos="
-              + startPos
-              + ", endPos="
-              + endPos
-              + ", message="
-              + getMessage()
-              + '}';
+      return "CustomError{" + "range=" + range + ", message=" + getMessage() + '}';
     }
   }
 }
