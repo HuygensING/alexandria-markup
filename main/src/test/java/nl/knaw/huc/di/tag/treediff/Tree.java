@@ -110,13 +110,13 @@ class Tree {
       @Override
       protected void run() throws Exception {
         int preorderPosition = startingPreorderPosition;
-        yield(preorderPosition);
+        provide(preorderPosition);
         TreeNode node;
         while (true) {
           node = fatherOf(preorderPosition);
           if (node != null) {
             preorderPosition = node.preorderPosition();
-            yield(preorderPosition);
+            provide(preorderPosition);
           } else
             break;
         }

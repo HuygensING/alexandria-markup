@@ -29,8 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provides a Python-style Generator in Java. Subclass this class and
- * implement the run method in subclass. Use {@link Generator#yield(Object)} to
- * return a value and {@link Generator#yield()} to receive a value.
+ * implement the run method in subclass. Use {@link Generator#provide(Object)} to
+ * return a value and {@link Generator#provide()} to receive a value.
  * This class uses Preconditions and AbstractIterator classes from the Google
  * Collections library.
  *
@@ -92,7 +92,7 @@ public abstract class Generator<T> implements Iterable<T> {
 
   /**
    * Gets a value from the generator. The generator must call
-   * {@link Generator#yield(Object)} to return this value inside the
+   * {@link Generator#provide(Object)} to return this value inside the
    * {@link Generator#run()} method.
    *
    * @return The value yielded by the generator.
@@ -112,7 +112,7 @@ public abstract class Generator<T> implements Iterable<T> {
 
   /**
    * Sends a value to the generator. The generator must call
-   * {@link Generator#yield()} to receive this value inside the
+   * {@link Generator#provide()} to receive this value inside the
    * {@link Generator#run()} method.
    *
    * @param sent The value sent to the generator.
@@ -143,8 +143,8 @@ public abstract class Generator<T> implements Iterable<T> {
    * @throws InterruptedException
    * @throws BrokenBarrierException
    */
-  final void yield(final T result)
-      throws InterruptedException, BrokenBarrierException {
+  final void provide(final T result)
+          throws InterruptedException, BrokenBarrierException {
     barrier.await();
     queue.put(result);
   }
@@ -157,8 +157,8 @@ public abstract class Generator<T> implements Iterable<T> {
    * @throws InterruptedException
    * @throws BrokenBarrierException
    */
-  protected final T yield()
-      throws InterruptedException, BrokenBarrierException {
+  protected final T provide()
+          throws InterruptedException, BrokenBarrierException {
     barrier.await();
     return queue.take();
   }

@@ -90,7 +90,7 @@ public class TreeNode {
       @Override
       protected void run() throws Exception {
         for (TreeNode node : children) {
-          yield(node);
+          provide(node);
         }
       }
     };
