@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.model.graph.edges.MarkupToTextHyperEdge;
+import nl.knaw.huc.di.tag.tagml.importer.RangePair;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
@@ -43,6 +44,7 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
 public class TAGDocument {
   Logger LOG = LoggerFactory.getLogger(TAGDocument.class);
   public final TAGStore store;
+
   private final TAGDocumentDTO documentDTO;
   private final Map<String, Deque<TAGMarkup>> openMarkupStackForLayer = new HashMap<>();
 
@@ -65,6 +67,14 @@ public class TAGDocument {
 
   public Date getModificationDate() {
     return documentDTO.getModificationDate();
+  }
+
+  public Map<Long, RangePair> getMarkupRangeMap() {
+    return documentDTO.getMarkupRangeMap();
+  }
+
+  public void setMarkupRangeMap(Map<Long, RangePair> markupRangeMap) {
+    documentDTO.setMarkupRangeMap(markupRangeMap);
   }
 
   public TAGDocument addTextNode(TAGTextNode textNode, List<TAGMarkup> lastOpenedMarkup) {

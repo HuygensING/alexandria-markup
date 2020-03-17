@@ -26,7 +26,6 @@ import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
@@ -35,7 +34,6 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.assertj.core.util.Files;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -85,32 +83,32 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
         });
   }
 
-    @Test
-    public void testNonOverlappingMarkupWithoutLayerInfo() {
-        String input = "[tagml>" + "[a>a<a] [b>b<b]" + "<tagml]";
-        runInStoreTransaction(
-                store -> {
-                    TAGDocument document = assertTAGMLParses(input, store);
-                });
-    }
+  @Test
+  public void testNonOverlappingMarkupWithoutLayerInfo() {
+    String input = "[tagml>" + "[a>a<a] [b>b<b]" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
+  }
 
-    @Test
-    public void testUnresumedMarkup() {
-        String input = "[tagml>[q>That<-q], she said, [q>is amazing!<q]<tagml]";
-        String expectedSyntaxErrorMessage = "line 1:15 : Some suspended markup was not resumed: <-q]";
-        assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
-    }
+  @Test
+  public void testUnresumedMarkup() {
+    String input = "[tagml>[q>That<-q], she said, [q>is amazing!<q]<tagml]";
+    String expectedSyntaxErrorMessage = "line 1:15 : Some suspended markup was not resumed: <-q]";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
 
-    @Test
-    public void testOverlappingMarkupWithoutLayerInfo() {
-        String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
-        String expectedSyntaxErrorMessage =
-                "line 1:1 : Missing close tag(s) for: [tagml>\n"
-                        + "line 1:8 : Missing close tag(s) for: [a>\n"
-                        + "line 1:17 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
-                        + "line 1:23 : Close tag <tagml] found, expected <a]. Use separate layers to allow for overlap.";
-        assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
-    }
+  @Test
+  public void testOverlappingMarkupWithoutLayerInfo() {
+    String input = "[tagml>" + "[a>a [b>b<a]<b]" + "<tagml]";
+    String expectedSyntaxErrorMessage =
+        "line 1:1 : Missing close tag(s) for: [tagml>\n"
+            + "line 1:8 : Missing close tag(s) for: [a>\n"
+            + "line 1:17 : Close tag <a] found, expected <b]. Use separate layers to allow for overlap.\n"
+            + "line 1:23 : Close tag <tagml] found, expected <a]. Use separate layers to allow for overlap.";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+  }
 
   @Test
   public void testNonOverlappingMarkupWithLayerInfo() {
@@ -144,30 +142,30 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
   @Test
   public void testLayerShouldBeHierarchical() {
-      String input =
-              "[tagml|+a,+b>"
-                      + "[page|b>"
-                      + "[book|a>book title"
-                      + "[chapter|a>chapter title"
-                      + "[para|a>paragraph text"
-                      + "<page|b]"
-                      + "<chapter|a]<book|a]"
-                      + "[! para should close before chapter !]<para|a]"
-                      + "<tagml|a,b]";
+    String input =
+        "[tagml|+a,+b>"
+            + "[page|b>"
+            + "[book|a>book title"
+            + "[chapter|a>chapter title"
+            + "[para|a>paragraph text"
+            + "<page|b]"
+            + "<chapter|a]<book|a]"
+            + "[! para should close before chapter !]<para|a]"
+            + "<tagml|a,b]";
 
-      String expectedSyntaxErrorMessage =
-              "line 1:1 : Missing close tag(s) for: [tagml|a,b>\n"
-                      + "line 1:22 : Missing close tag(s) for: [book|a>\n"
-                      + "line 1:40 : Missing close tag(s) for: [chapter|a>\n"
-                      + "line 1:94 : Close tag <chapter|a] found, expected <para|a].\n"
-                      + "line 1:105 : Close tag <book|a] found, expected <para|a].\n"
-                      + "line 1:159 : Close tag <tagml|a,b] found, expected <chapter|a].";
-      assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
+    String expectedSyntaxErrorMessage =
+        "line 1:1 : Missing close tag(s) for: [tagml|a,b>\n"
+            + "line 1:22 : Missing close tag(s) for: [book|a>\n"
+            + "line 1:40 : Missing close tag(s) for: [chapter|a>\n"
+            + "line 1:94 : Close tag <chapter|a] found, expected <para|a].\n"
+            + "line 1:105 : Close tag <book|a] found, expected <para|a].\n"
+            + "line 1:159 : Close tag <tagml|a,b] found, expected <chapter|a].";
+    assertTAGMLParsesWithSyntaxError(input, expectedSyntaxErrorMessage);
   }
 
   @Test
   public void testNonlinearText() {
-      String input = "[o>Ice cream is <|tasty|cold|sweet|>!<o]";
+    String input = "[o>Ice cream is <|tasty|cold|sweet|>!<o]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -179,7 +177,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           assertThat(textNodes).hasSize(5);
 
           TAGTextNode textNode1 = textNodes.get(0);
-            assertThat(textNode1).hasText("Ice cream is ");
+          assertThat(textNode1).hasText("Ice cream is ");
 
           //      TAGTextNode textNode2 = textNodes.get(1);
           //      assertThat(textNode2).isDivergence();
@@ -224,9 +222,10 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
 
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
-      final Map<Long, Tuple<Range>> markupRanges = listener.getMarkupRanges();
-      String lmnl = new LMNLExporter(store).toLMNL(document);
-    LOG.info("\nLMNL:\n{}\n", lmnl);
+    final Map<Long, RangePair> markupRanges = document.getMarkupRangeMap();
+    LOG.info("markup={}", markupRanges);
+    //    String lmnl = new LMNLExporter(store).toLMNL(document);
+    //    LOG.info("\nLMNL:\n{}\n", lmnl);
     return document;
   }
 
@@ -242,14 +241,14 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
           LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
           try {
-              TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
-              TAGDocument document = listener.getDocument();
-              logDocumentGraph(document, input);
-              //              fail("expected TAGMLBreakingError");
+            TAGMLListener listener = walkParseTree(errorListener, parseTree, store);
+            TAGDocument document = listener.getDocument();
+            logDocumentGraph(document, input);
+            //              fail("expected TAGMLBreakingError");
           } catch (TAGMLBreakingError e) {
           }
           assertThat(errorListener.hasErrors()).isTrue();
-            String errors = errorListener.getPrefixedErrorMessagesAsString();
+          String errors = errorListener.getPrefixedErrorMessagesAsString();
           assertThat(errors).isEqualTo(expectedSyntaxErrorMessage);
         });
   }
@@ -273,7 +272,7 @@ public class TAGMLListenerTest extends TAGBaseStoreTest {
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
-        LOG.error("errors: {}", errorListener.getPrefixedErrorMessagesAsString());
+      LOG.error("errors: {}", errorListener.getPrefixedErrorMessagesAsString());
     }
     return listener;
   }

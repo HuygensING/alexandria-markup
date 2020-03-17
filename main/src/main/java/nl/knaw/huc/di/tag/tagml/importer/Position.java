@@ -20,15 +20,21 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import com.sleepycat.persist.model.Persistent;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.Objects;
 
 import static java.lang.String.format;
 
+@Persistent
 public class Position {
-  private final int line;
-  private final int character;
+
+  private int line;
+  private int character;
+
+  public Position() {
+  }
 
   public Position(int line, int character) {
     this.line = line;
@@ -41,8 +47,8 @@ public class Position {
 
   public static Position endOf(final ParserRuleContext ctx) {
     return new Position(
-            ctx.stop.getLine(),
-            ctx.stop.getCharPositionInLine() + ctx.stop.getStopIndex() - ctx.stop.getStartIndex() + 2);
+        ctx.stop.getLine(),
+        ctx.stop.getCharPositionInLine() + ctx.stop.getStopIndex() - ctx.stop.getStartIndex() + 2);
   }
 
   public int getLine() {

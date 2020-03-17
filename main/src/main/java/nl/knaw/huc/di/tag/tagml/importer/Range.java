@@ -20,12 +20,18 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import com.sleepycat.persist.model.Persistent;
+
 import java.util.Objects;
 
+@Persistent
 public class Range {
 
-  private final Position startPosition;
-  private final Position endPosition;
+  private Position startPosition;
+  private Position endPosition;
+
+  public Range() {
+  }
 
   public Range(Position startPosition, Position endPosition) {
     this.startPosition = startPosition;
@@ -38,6 +44,14 @@ public class Range {
 
   public Position getStartPosition() {
     return startPosition;
+  }
+
+  public void setStartPosition(Position startPosition) {
+    this.startPosition = startPosition;
+  }
+
+  public void setEndPosition(Position endPosition) {
+    this.endPosition = endPosition;
   }
 
   @Override

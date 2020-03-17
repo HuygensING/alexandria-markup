@@ -25,6 +25,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.importer.RangePair;
 import nl.knaw.huygens.alexandria.storage.DataAccessor;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
@@ -33,7 +34,7 @@ import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
-@Entity(version = 4)
+@Entity(version = 5)
 public class TAGDocumentDTO implements TAGDTO {
   @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
@@ -49,6 +50,7 @@ public class TAGDocumentDTO implements TAGDTO {
   public TextGraph textGraph = new TextGraph();
   private Map<String, String> namespaces;
   private String schemaLocation;
+  private Map<Long, RangePair> markupRangeMap = new HashMap<>();
 
   public TAGDocumentDTO() {}
 
@@ -163,5 +165,13 @@ public class TAGDocumentDTO implements TAGDTO {
 
   public void setSchemaLocation(final String schemaLocation) {
     this.schemaLocation = schemaLocation;
+  }
+
+  public Map<Long, RangePair> getMarkupRangeMap() {
+    return markupRangeMap;
+  }
+
+  public void setMarkupRangeMap(Map<Long, RangePair> markupRangeMap) {
+    this.markupRangeMap = markupRangeMap;
   }
 }
