@@ -9,9 +9,9 @@ package nl.knaw.huygens.alexandria.view;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,6 +52,7 @@ public class TAGView {
   private Set<String> layersToExclude = new HashSet<>();
   private Set<String> markupToInclude = new HashSet<>();
   private Set<String> markupToExclude = new HashSet<>();
+  private Set<String> markupWithLayerExclusiveText = new HashSet<>();
 
   public TAGView(TAGStore store) {
     this.store = store;
@@ -77,19 +78,19 @@ public class TAGView {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
       List<Long> retain =
-              markupIds.stream() //
-                      .filter(
-                              m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/) //
-                      .collect(toList());
+          markupIds.stream() //
+              .filter(
+                  m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/) //
+              .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
       List<Long> remove =
-              markupIds.stream() //
-                      .filter(
-                              m ->
-                                      hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/) //
-                      .collect(toList());
+          markupIds.stream() //
+              .filter(
+                  m ->
+                      hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/) //
+              .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }
@@ -180,6 +181,15 @@ public class TAGView {
 
   public Set<String> getMarkupToExclude() {
     return markupToExclude;
+  }
+
+  public Set<String> getMarkupWithLayerExclusiveText() {
+    return markupWithLayerExclusiveText;
+  }
+
+  public TAGView setMarkupWithLayerExclusiveText(Set<String> markupWithLayerExclusiveText) {
+    this.markupWithLayerExclusiveText = markupWithLayerExclusiveText;
+    return this;
   }
 
   public TAGViewDefinition getDefinition() {
