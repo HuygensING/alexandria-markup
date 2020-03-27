@@ -39,7 +39,6 @@ public class AbstractTAGMLListener extends TAGMLParserBaseListener {
 
   void addBreakingError(
           final ParserRuleContext ctx, final String messageTemplate, final Object... messageArgs) {
-
     errorListener.addBreakingError(
             Position.startOf(ctx), Position.endOf(ctx), messageTemplate, messageArgs);
   }

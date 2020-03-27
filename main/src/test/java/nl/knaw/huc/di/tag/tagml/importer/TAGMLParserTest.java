@@ -57,6 +57,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   //  private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
   @Test
+  public void testAST() {
+    String input = "[TEI>[s>It seemed [?del>indeed<?del] as if<s]<TEI]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
+  }
+
+  @Test
   public void testTagWithReferenceParses() {
     String input = "[tagml pers->pers01>Some text<tagml]";
     runInStore(
