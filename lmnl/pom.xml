@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.knaw.huygens.alexandria</groupId>
     <artifactId>alexandria-markup</artifactId>
-    <version>2.3.2-trd-515-SNAPSHOT</version>
+    <version>2.3.2-SNAPSHOT</version>
   </parent>
   <artifactId>lmnl</artifactId>
   <packaging>jar</packaging>
