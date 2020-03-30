@@ -8,7 +8,6 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporter
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.util.Sets
 import org.junit.Ignore
 import org.junit.Test
 import java.util.*
@@ -32,6 +31,7 @@ import java.util.*
  * limitations under the License.
  * #L%
  */
+
 class TAGViewTest : AlexandriaBaseStoreTest() {
     @Test
     fun testMarkupWithLayerExclusiveText() {
@@ -111,15 +111,15 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             val allMarkupIds: Set<Long> = HashSet(listOf(markupId1, markupId2, markupId3, markupId4))
             val l1: Set<String> = HashSet(listOf(layer1))
             val l2: Set<String> = HashSet(listOf(layer2))
-            val viewNoL1 = TAGView(store).setLayersToExclude(l1)
+            val viewNoL1 = TAGView(store).apply { layersToExclude = l1 }
             val filteredMarkupIds = viewNoL1.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds).containsExactlyInAnyOrder(markupId2, markupId4)
 
-            val viewL2 = TAGView(store).setLayersToInclude(l2)
+            val viewL2 = TAGView(store).apply { layersToInclude = l2 }
             val filteredMarkupIds2 = viewL2.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds2).containsExactlyInAnyOrder(markupId2, markupId4)
 
-            val viewL1 = TAGView(store).setLayersToInclude(l1)
+            val viewL1 = TAGView(store).apply { layersToInclude = l1 }
             val filteredMarkupIds3 = viewL1.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3)
 
@@ -133,16 +133,18 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             val tagmlAC = exporter2.asTAGML(document1)
             assertThat(tagmlAC).isEqualTo("[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]")
 
-            val viewL1NoC = TAGView(store)
-                    .setLayersToInclude(l1)
-                    .setMarkupToExclude(Sets.newLinkedHashSet(tag3))
+            val viewL1NoC = TAGView(store).apply {
+                layersToInclude = l1
+                markupToExclude = setOf(tag3)
+            }
             val exporter3 = TAGMLExporter(store, viewL1NoC)
             val tagmlA = exporter3.asTAGML(document1)
             assertThat(tagmlA).isEqualTo("[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]")
 
-            val viewNoL1B = TAGView(store)
-                    .setLayersToExclude(l1)
-                    .setMarkupToInclude(Sets.newLinkedHashSet(tag2))
+            val viewNoL1B = TAGView(store).apply {
+                layersToExclude = l1
+                markupToInclude = setOf(tag2)
+            }
             val exporter4 = TAGMLExporter(store, viewNoL1B)
             val tagmlB = exporter4.asTAGML(document1)
             assertThat(tagmlB).isEqualTo("a[b|L2>bcdabcd<b|L2]")
@@ -165,15 +167,19 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             val allMarkupIds: Set<Long> = HashSet(listOf(markupId1, markupId2, markupId3, markupId4))
             val odds: Set<String> = HashSet(listOf(tag1, tag3))
             val evens: Set<String> = HashSet(listOf(tag2, tag4))
-            val viewNoAC = TAGView(store).setMarkupToExclude(odds)
+            val viewNoAC = TAGView(store).apply { markupToExclude = odds }
             val filteredMarkupIds = viewNoAC.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds).containsExactlyInAnyOrder(markupId2, markupId4)
 
-            val viewBD = TAGView(store).setMarkupToInclude(evens)
+            val viewBD = TAGView(store).apply {
+                markupToInclude = evens
+            }
             val filteredMarkupIds2 = viewBD.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds2).containsExactlyInAnyOrder(markupId2, markupId4)
 
-            val viewAC = TAGView(store).setMarkupToInclude(odds)
+            val viewAC = TAGView(store).apply {
+                markupToInclude = odds
+            }
             val filteredMarkupIds3 = viewAC.filterRelevantMarkup(allMarkupIds)
             assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3)
 

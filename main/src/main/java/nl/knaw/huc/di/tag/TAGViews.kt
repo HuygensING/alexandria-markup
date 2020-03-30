@@ -1,4 +1,7 @@
-package nl.knaw.huc.di.tag;
+package nl.knaw.huc.di.tag
+
+import nl.knaw.huygens.alexandria.storage.TAGStore
+import nl.knaw.huygens.alexandria.view.TAGView
 
 /*-
  * #%L
@@ -20,21 +23,18 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.view.TAGView;
+object TAGViews {
+    @JvmStatic
+    fun getShowAllMarkupView(store: TAGStore): TAGView =
+            TAGView(store).apply {
+                layersToExclude = emptySet()
+                markupToExclude = emptySet()
+            }
 
-import static java.util.Collections.emptySet;
-
-public class TAGViews {
-  public static TAGView getShowAllMarkupView(final TAGStore store) {
-    return new TAGView(store)
-        .setLayersToExclude(emptySet())
-        .setMarkupToExclude(emptySet());
-  }
-
-  public static TAGView getShowNoMarkupView(final TAGStore store) {
-    return new TAGView(store)
-        .setLayersToInclude(emptySet())
-        .setMarkupToInclude(emptySet());
-  }
+    @JvmStatic
+    fun getShowNoMarkupView(store: TAGStore): TAGView =
+            TAGView(store).apply {
+                layersToInclude = emptySet()
+                markupToInclude = emptySet()
+            }
 }

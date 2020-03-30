@@ -228,7 +228,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
       TAGDocument original = importer.importTAGML(originText);
       TAGDocument edited = importer.importTAGML(editedText);
       Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
       TAGComparison comparison = new TAGComparison(original, allTags, edited);
       LOG.info("diffLines = \n{}", comparison.getDiffLines()//

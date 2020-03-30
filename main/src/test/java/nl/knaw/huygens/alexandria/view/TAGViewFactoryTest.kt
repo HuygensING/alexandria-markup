@@ -24,16 +24,18 @@ import org.junit.Test
  * limitations under the License.
  * #L%
  */
+
 class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
-    //  private final TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+
     @Test
     fun fromJsonWithLayersInclusionAndExclusiveMarkup() {
         val included = setOf("A", "B")
-        val markupWithLayerExclusiveText = setOf("add")
+        val layerExclusiveTextMarkup = setOf("add")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store)
-                    .setLayersToInclude(included)
-                    .setMarkupWithLayerExclusiveText(markupWithLayerExclusiveText)
+            val expected = TAGView(store).apply {
+                layersToInclude = included
+                markupWithLayerExclusiveText = layerExclusiveTextMarkup
+            }
             val json = """{
                 |"includeLayers" : ["A","B"],
                 |"markupWithLayerExclusiveText" : ["add"]
@@ -47,7 +49,6 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun fromJsonWithBadDefinition() {
-        val included: Set<String> = setOf("A", "B")
         runInStore { store: TAGStore ->
             val json = ("""{
                 |"includeLayer" : ["A","B"]
@@ -61,7 +62,7 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     fun fromJsonWithLayersInclusion() {
         val included: Set<String> = setOf("A", "B")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setLayersToInclude(included)
+            val expected = TAGView(store).apply { layersToInclude = included }
             val json = "{'includeLayers':['A','B']}".replace("'", "\"")
             val view = createView(store, json)
             assertThat(view.isValid).isTrue()
@@ -77,7 +78,7 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     fun fromJsonWithLayersExclusion() {
         val excluded: Set<String> = setOf("A", "B")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setLayersToExclude(excluded)
+            val expected = TAGView(store).apply { layersToExclude = excluded }
             val json = "{'excludeLayers':['A','B']}".replace("'", "\"")
             val view = createView(store, json)
             assertThat(view.isValid).isTrue()
@@ -89,7 +90,7 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     fun fromJsonWithMarkupInclusion() {
         val included: Set<String> = setOf("chapter", "p")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setMarkupToInclude(included)
+            val expected = TAGView(store).apply { markupToInclude = included }
             val json = "{'includeMarkup':['chapter','p']}".replace("'", "\"")
             val view = createView(store, json)
             assertThat(view.isValid).isTrue()
@@ -99,9 +100,9 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun fromJsonWithMarkupExclusion() {
-        val excluded: Set<String> = setOf("verse", "l")
-        runInStore { store: TAGStore ->
-            val expected = TAGView(store).setMarkupToExclude(excluded)
+        val excluded = setOf("verse", "l")
+        runInStore { store ->
+            val expected = TAGView(store).apply { markupToExclude = excluded }
             val json = "{'excludeMarkup':['verse','l']}".replace("'", "\"")
             val view = createView(store, json)
             assertThat(view.isValid).isTrue()
@@ -111,27 +112,25 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun fromDefinitionWithMarkupInclusion() {
-        val included: Set<String> = setOf("chapter", "p")
+        val included = setOf("chapter", "p")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setMarkupToInclude(included)
-            val def = TAGViewDefinition().setIncludeMarkup(included)
+            val expected = TAGView(store).apply { markupToInclude = included }
+            val def = TAGViewDefinition().withIncludeMarkup(included)
             val view = createView(store, def)
             assertThat(view.isValid).isTrue()
             assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
-    private fun createView(store: TAGStore, def: TAGViewDefinition): TAGView {
-        val tagViewFactory = TAGViewFactory(store)
-        return tagViewFactory.fromDefinition(def)
-    }
+    private fun createView(store: TAGStore, def: TAGViewDefinition): TAGView =
+            TAGViewFactory(store).fromDefinition(def)
 
     @Test
     fun fromDefinitionWithMarkupExclusion() {
         val excluded: Set<String> = setOf("verse", "l")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setMarkupToExclude(excluded)
-            val def = TAGViewDefinition().setExcludeMarkup(excluded)
+            val expected = TAGView(store).apply { markupToExclude = excluded }
+            val def = TAGViewDefinition().withExcludeMarkup(excluded)
             val view = createView(store, def)
             assertThat(view.isValid).isTrue()
             assertThat(view).isEqualToComparingFieldByField(expected)
@@ -142,8 +141,8 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     fun fromDefinitionWithLayersInclusion() {
         val included: Set<String> = setOf("L1", "L2")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setLayersToInclude(included)
-            val def = TAGViewDefinition().setIncludeLayers(included)
+            val expected = TAGView(store).apply { layersToInclude = included }
+            val def = TAGViewDefinition().withIncludeLayers(included)
             val view = createView(store, def)
             assertThat(view.isValid).isTrue()
             assertThat(view).isEqualToComparingFieldByField(expected)
@@ -154,8 +153,8 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     fun fromDefinitionWithLayersExclusion() {
         val excluded = setOf("L3", "L4")
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).setLayersToExclude(excluded)
-            val def = TAGViewDefinition().setExcludeLayers(excluded)
+            val expected = TAGView(store).apply { layersToExclude = excluded }
+            val def = TAGViewDefinition().withExcludeLayers(excluded)
             val view = createView(store, def)
             assertThat(view.isValid).isTrue()
             assertThat(view).isEqualToComparingFieldByField(expected)

@@ -109,7 +109,7 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
       TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
       DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
 //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();

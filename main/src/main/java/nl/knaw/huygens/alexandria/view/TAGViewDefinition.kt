@@ -1,4 +1,6 @@
-package nl.knaw.huygens.alexandria.view;
+package nl.knaw.huygens.alexandria.view
+
+import java.util.*
 
 /*
  * #%L
@@ -9,9 +11,9 @@ package nl.knaw.huygens.alexandria.view;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,59 +22,45 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.Set;
+class TAGViewDefinition {
+    var includeLayers: Set<String> = HashSet()
+        private set
 
-public class TAGViewDefinition {
-  private Set<String> includeLayers = new HashSet<>();
-  private Set<String> excludeLayers = new HashSet<>();
-  private Set<String> includeMarkup = new HashSet<>();
-  private Set<String> excludeMarkup = new HashSet<>();
-  private Set<String> markupWithLayerExclusiveText = new HashSet<>();
+    var excludeLayers: Set<String> = HashSet()
+        private set
 
-  public Set<String> getIncludeLayers() {
-    return includeLayers;
-  }
+    var includeMarkup: Set<String> = HashSet()
+        private set
 
-  public TAGViewDefinition setIncludeLayers(final Set<String> includeLayers) {
-    this.includeLayers = includeLayers;
-    return this;
-  }
+    var excludeMarkup: Set<String> = HashSet()
+        private set
 
-  public Set<String> getExcludeLayers() {
-    return excludeLayers;
-  }
+    var markupWithLayerExclusiveText: Set<String> = HashSet()
+        private set
 
-  public TAGViewDefinition setExcludeLayers(final Set<String> excludeLayers) {
-    this.excludeLayers = excludeLayers;
-    return this;
-  }
+    fun withIncludeLayers(includeLayers: Set<String>): TAGViewDefinition {
+        this.includeLayers = includeLayers
+        return this
+    }
 
-  public Set<String> getIncludeMarkup() {
-    return includeMarkup;
-  }
+    fun withExcludeLayers(excludeLayers: Set<String>): TAGViewDefinition {
+        this.excludeLayers = excludeLayers
+        return this
+    }
 
-  public TAGViewDefinition setIncludeMarkup(Set<String> includeMarkup) {
-    this.includeMarkup = includeMarkup;
-    return this;
-  }
+    fun withIncludeMarkup(includeMarkup: Set<String>): TAGViewDefinition {
+        this.includeMarkup = includeMarkup
+        return this
+    }
 
-  public Set<String> getExcludeMarkup() {
-    return excludeMarkup;
-  }
+    fun withExcludeMarkup(excludeMarkup: Set<String>): TAGViewDefinition {
+        this.excludeMarkup = excludeMarkup
+        return this
+    }
 
-  public TAGViewDefinition setExcludeMarkup(Set<String> excludeMarkup) {
-    this.excludeMarkup = excludeMarkup;
-    return this;
-  }
-
-  public Set<String> getMarkupWithLayerExclusiveText() {
-    return markupWithLayerExclusiveText;
-  }
-
-  public TAGViewDefinition setMarkupWithLayerExclusiveText(
-      Set<String> markupWithLayerExclusiveText) {
-    this.markupWithLayerExclusiveText = markupWithLayerExclusiveText;
-    return this;
-  }
+    fun withMarkupWithLayerExclusiveText(
+            markupWithLayerExclusiveText: Set<String>): TAGViewDefinition {
+        this.markupWithLayerExclusiveText = markupWithLayerExclusiveText
+        return this
+    }
 }
