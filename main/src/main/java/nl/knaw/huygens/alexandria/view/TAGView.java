@@ -80,15 +80,14 @@ public class TAGView {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
       List<Long> retain =
-          markupIds.stream() //
-              .filter(
-                  m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/) //
+          markupIds.stream()
+              .filter(m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/)
               .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
       List<Long> remove =
-          markupIds.stream() //
+          markupIds.stream()
               .filter(
                   m ->
                       hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/) //
@@ -98,16 +97,12 @@ public class TAGView {
     }
     if (include.equals(markupRelevance)) {
       List<Long> retain =
-          markupIds.stream() //
-              .filter(m -> markupToInclude.contains(getTag(m))) //
-              .collect(toList());
+          markupIds.stream().filter(m -> markupToInclude.contains(getTag(m))).collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(markupRelevance)) {
       List<Long> remove =
-          markupIds.stream() //
-              .filter(m -> markupToExclude.contains(getTag(m))) //
-              .collect(toList());
+          markupIds.stream().filter(m -> markupToExclude.contains(getTag(m))).collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }
@@ -118,20 +113,16 @@ public class TAGView {
     if (markupWithLayerExclusiveText.isEmpty()) {
       return true;
     }
-    return !markupIds.stream()
+    return markupIds.stream()
         .map(store::getMarkup)
-        .anyMatch(this::markupWithIgnoredTextForThisView);
+        .noneMatch(this::markupWithIgnoredTextForThisView);
   }
 
   private boolean markupWithIgnoredTextForThisView(TAGMarkup tagMarkup) {
     // Ignore contained text if the tag name is one to watch out for,
-    String tag = tagMarkup.getTag();
-    boolean contains = markupWithLayerExclusiveText.contains(tag);
-    Set<String> layers = tagMarkup.getLayers();
-    Set<String> strings = filterRelevantLayers(layers);
-    return contains
+    return markupWithLayerExclusiveText.contains(tagMarkup.getTag())
         // and none of the layers is relevant for this view
-        && strings.isEmpty();
+        && filterRelevantLayers(tagMarkup.getLayers()).isEmpty();
   }
 
   //  private boolean isInDefaultLayerOnly(final Long markupId) {
