@@ -60,17 +60,19 @@ public class TAGView {
 
   public Set<String> filterRelevantLayers(final Set<String> layerNames) {
     Set<String> relevantLayers = new HashSet<>(layerNames);
+    Set<String> nonRelevantLayers = new HashSet<>();
     if (layerRelevance.equals(RelevanceStyle.include)) {
-      relevantLayers.clear();
-      relevantLayers.addAll(layersToInclude);
+      nonRelevantLayers = new HashSet<>(layerNames);
+      nonRelevantLayers.removeAll(layersToInclude);
       //      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
       //      if (hasDefault) {
       //        relevantLayers.add(TAGML.DEFAULT_LAYER);
       //      }
 
     } else if (layerRelevance.equals(RelevanceStyle.exclude)) {
-      relevantLayers.removeAll(layersToExclude);
+      nonRelevantLayers = layersToExclude;
     }
+    relevantLayers.removeAll(nonRelevantLayers);
     return relevantLayers;
   }
 
@@ -110,6 +112,26 @@ public class TAGView {
       relevantMarkupIds.removeAll(remove);
     }
     return relevantMarkupIds;
+  }
+
+  public boolean textIsRelevant(Set<Long> markupIds) {
+    if (markupWithLayerExclusiveText.isEmpty()) {
+      return true;
+    }
+    return !markupIds.stream()
+        .map(store::getMarkup)
+        .anyMatch(this::markupWithIgnoredTextForThisView);
+  }
+
+  private boolean markupWithIgnoredTextForThisView(TAGMarkup tagMarkup) {
+    // Ignore contained text if the tag name is one to watch out for,
+    String tag = tagMarkup.getTag();
+    boolean contains = markupWithLayerExclusiveText.contains(tag);
+    Set<String> layers = tagMarkup.getLayers();
+    Set<String> strings = filterRelevantLayers(layers);
+    return contains
+        // and none of the layers is relevant for this view
+        && strings.isEmpty();
   }
 
   //  private boolean isInDefaultLayerOnly(final Long markupId) {
