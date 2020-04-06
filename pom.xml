@@ -42,6 +42,7 @@
         <slf4j-api.version>2.0.0-alpha1</slf4j-api.version>
         <tag.version>1.0-SNAPSHOT</tag.version>
         <tagml.version>2.4-SNAPSHOT</tagml.version>
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
 
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-jar.version>3.1.2</maven-jar.version>
