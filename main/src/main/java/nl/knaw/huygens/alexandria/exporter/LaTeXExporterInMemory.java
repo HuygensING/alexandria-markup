@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.MessageFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -93,7 +93,7 @@ public class LaTeXExporterInMemory {
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
-    ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray", //
+    ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray",
         "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {

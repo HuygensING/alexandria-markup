@@ -22,8 +22,8 @@ package nl.knaw.huygens.alexandria;
  */
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

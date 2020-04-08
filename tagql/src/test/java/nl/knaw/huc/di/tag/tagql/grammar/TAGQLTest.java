@@ -65,7 +65,7 @@ public class TAGQLTest {
 
     // MyListener listener = new MyListener();
     // parser.TAGQL_script().enterRule(listener);
-    //
+
     // MyVisitor visitor = new MyVisitor();
     // Object result = visitor.visit(tree);
     // LOG.info("result={}",result);

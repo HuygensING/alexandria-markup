@@ -27,7 +27,10 @@ import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -151,7 +154,7 @@ public class TAGMarkup {
 
   public boolean hasN() {
     return getAnnotationStream()//
-        .map(AnnotationInfo::getName) //
+        .map(AnnotationInfo::getName)
         .anyMatch("n"::equals);
   }
 
@@ -279,7 +282,7 @@ public class TAGMarkup {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGMarkup //
+    return other instanceof TAGMarkup
         && markupDTO.equals(((TAGMarkup) other).getDTO());
   }
 

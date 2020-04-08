@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import static java.util.stream.Collectors.toSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toSet;
 
 public class NodeRangeIndexInMemory {
   private final Logger LOG = LoggerFactory.getLogger(NodeRangeIndexInMemory.class);

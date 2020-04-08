@@ -92,8 +92,8 @@ public class TAGMLListener extends AbstractTAGMLListener {
         state.suspendedMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noSuspendedMarkup) {
       state.suspendedMarkup.values().stream()
-          .flatMap(Collection::stream) //
-          //          .map(this::suspendTag) //
+          .flatMap(Collection::stream)
+          //          .map(this::suspendTag)
           .distinct()
           .forEach(
               markup -> {
@@ -143,8 +143,8 @@ public class TAGMLListener extends AbstractTAGMLListener {
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
       state.openMarkup.values().stream()
-          .flatMap(Collection::stream) //
-          //          .map(this::openTag) //
+          .flatMap(Collection::stream)
+          //          .map(this::openTag)
           .distinct()
           .forEach(
               openMarkup -> {
@@ -501,15 +501,15 @@ public class TAGMLListener extends AbstractTAGMLListener {
     //          .map(this::suspendTag)
     //          .collect(toList());
     //      suspendedMarkupInBranch.add(suspendedMarkup);
-    //
+
     //      // TODO: resumedMarkup
-    //
+
     //      List<String> openedInBranch = state.openMarkup.stream()
     //          .filter(m -> !openMarkupBeforeDivergence.contains(m))
     //          .map(this::openTag)
     //          .collect(toList());
     //      openedMarkupInBranch.add(openedInBranch);
-    //
+
     //      List<String> closedInBranch = openMarkupBeforeDivergence.stream()
     //          .filter(m -> !state.openMarkup.contains(m))
     //          .map(this::closeTag)

@@ -69,7 +69,7 @@ public class LMNLImporter {
     //            markupsToJoin.put(key, markup.getDTO());
     //          }
     //        });
-    //
+
     //    document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
     ////    document.getMarkupStream()//
     ////        .map(TAGMarkup::getAnnotationStream)//
@@ -230,21 +230,21 @@ public class LMNLImporter {
     //        case LMNLLexer.END_OPEN_ANNO:
     //          context.pushDocumentContext(context.currentAnnotationDocument());
     //          break;
-    //
+
     //        case LMNLLexer.ANNO_TEXT:
     //          TAGTextNodeDTO textNode = new TAGTextNodeDTO(token.getText());
     //          update(textNode);
     //          context.addTextNode(textNode);
     //          break;
-    //
+
     //        case LMNLLexer.BEGIN_ANNO_OPEN_RANGE:
     //          handleOpenRange(context);
     //          break;
-    //
+
     //        case LMNLLexer.BEGIN_ANNO_CLOSE_RANGE:
     //          handleCloseRange(context);
     //          break;
-    //
+
     //        case LMNLLexer.BEGIN_CLOSE_ANNO:
     //        case LMNLLexer.Name_Close_Annotation:
     //          break;
@@ -254,13 +254,13 @@ public class LMNLImporter {
     //          context.closeAnnotation();
     //          goOn = false;
     //          break;
-    //
+
     //        // case LMNLLexer.TagOpenStartChar:
     //        // case LMNLLexer.TagOpenEndChar:
     //        // case LMNLLexer.TagCloseStartChar:
     //        // case LMNLLexer.TagCloseEndChar:
     //        // break;
-    //
+
     //        default:
     //          handleUnexpectedToken(methodName, token, ruleName, modeName);
     //          break;
@@ -324,9 +324,9 @@ public class LMNLImporter {
 
   private void log(
       String mode, String ruleName, String modeName, Token token, ImporterContext context) {
-    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
-    // mode, context.limenContextStack.size(), //
-    // token.getText().replace("\n", "\\n"), //
+    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}",
+    // mode, context.limenContextStack.size(),
+    // token.getText().replace("\n", "\\n"),
     // ruleName, modeName);
   }
 
@@ -352,9 +352,9 @@ public class LMNLImporter {
       // LOG.info("currentDocumentContext().openMarkupDeque={}",
       // openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
       Optional<TAGMarkup> findFirst =
-          openMarkupDeque.stream() //
+          openMarkupDeque.stream()
               .map(dto -> new TAGMarkup(tagStore, dto))
-              .filter(m -> m.getExtendedTag().equals(rangeName)) //
+              .filter(m -> m.getExtendedTag().equals(rangeName))
               .findFirst();
       if (findFirst.isPresent()) {
         TAGMarkup markup = findFirst.get();
@@ -386,7 +386,7 @@ public class LMNLImporter {
 
     void addTextNode(TAGTextNodeDTO textNode) {
       openMarkupDeque
-          .descendingIterator() //
+          .descendingIterator()
           .forEachRemaining(
               m -> {
                 //            m.addTextNode(textNode);
@@ -460,9 +460,9 @@ public class LMNLImporter {
       update(documentContext.document);
       if (!documentContext.openMarkupDeque.isEmpty()) {
         String openRanges =
-            documentContext.openMarkupDeque.stream() //
+            documentContext.openMarkupDeque.stream()
                 .map(dto -> new TAGMarkup(tagStore, dto))
-                .map(m -> "[" + m.getExtendedTag() + "}") //
+                .map(m -> "[" + m.getExtendedTag() + "}")
                 .collect(Collectors.joining(", "));
         errors.add("Unclosed LMNL range(s): " + openRanges);
       }

@@ -84,8 +84,8 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {
     return actual
-        .getTextNodeStream() //
-        .map(this::toTextNodeSketch) //
+        .getTextNodeStream()
+        .map(this::toTextNodeSketch)
         .collect(toSet());
   }
 
@@ -112,7 +112,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   //    List<String> actualLayerIds = actual.getLayerNames();
   //    return myself;
   //  }
-  //
+
   public static class TextNodeSketch {
 
     private final String text;
@@ -205,8 +205,8 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
 
   private Set<MarkupSketch> getActualMarkupSketches() {
     return actual
-        .getMarkupStream() //
-        .map(this::toMarkupSketch) //
+        .getMarkupStream()
+        .map(this::toMarkupSketch)
         .collect(toSet());
   }
 

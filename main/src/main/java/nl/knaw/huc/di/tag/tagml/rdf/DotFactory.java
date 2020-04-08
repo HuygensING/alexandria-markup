@@ -29,7 +29,7 @@ public class DotFactory {
 
   public static String fromModel(Model model) {
     StringBuilder dotBuilder = new StringBuilder("digraph KnowledgeBase{\n")
-        .append("//graph [rankdir=LR]\n") //
+        .append("//graph [rankdir=LR]\n")
         .append("node [style=\"filled\";fillcolor=\"white\"]\n");
     StmtIterator stmtIterator = model.listStatements();
     AtomicInteger nodeCounter = new AtomicInteger();
