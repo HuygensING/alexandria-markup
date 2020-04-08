@@ -5,7 +5,6 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*
 import java.util.*
-import java.util.stream.Collectors
 
 /*
  * #%L
@@ -100,21 +99,22 @@ class TAGView(private val store: TAGStore) {
     fun filterRelevantMarkup(markupIds: Set<Long>): Set<Long> {
         val relevantMarkupIds: MutableSet<Long> = LinkedHashSet(markupIds)
         if (layerStyleIsInclude()) {
-            val retain = markupIds.stream()
-                    .filter { m: Long -> hasOverlap(layersToInclude, getLayersForMarkup(m)) }
-                    .collect(Collectors.toList())
+            val retain = markupIds
+                    .filter { m: Long -> layersToInclude.overlapsWith(getLayersForMarkup(m)) }
+
             relevantMarkupIds.retainAll(retain)
         } else if (layerStyleIsExclude()) {
-            val remove = markupIds.stream()
-                    .filter { m: Long -> hasOverlap(layersToExclude, getLayersForMarkup(m)) } //
-                    .collect(Collectors.toList())
+            // remove all markup whose layers are all in the layersToExclude
+            val remove = markupIds
+                    .filter { m: Long -> layersToExclude.containsAll(getLayersForMarkup(m)) }
+
             relevantMarkupIds.removeAll(remove)
         }
         if (markupStyleIsInclude()) {
-            val retain = markupIds.stream().filter { m: Long -> markupToInclude.contains(loadTag(m)) }.collect(Collectors.toList())
+            val retain = markupIds.filter { m: Long -> markupToInclude.contains(loadTag(m)) }
             relevantMarkupIds.retainAll(retain)
         } else if (markupStyleIsExclude()) {
-            val remove = markupIds.stream().filter { m: Long -> markupToExclude.contains(loadTag(m)) }.collect(Collectors.toList())
+            val remove = markupIds.filter { m: Long -> markupToExclude.contains(loadTag(m)) }
             relevantMarkupIds.removeAll(remove)
         }
         return relevantMarkupIds
@@ -141,9 +141,9 @@ class TAGView(private val store: TAGStore) {
         return layers.size == 1 && layers.iterator().next() == DEFAULT_LAYER
     }
 
-    private fun hasOverlap(layersToInclude: Set<String>, layers: Set<String>): Boolean {
-        val overlap: MutableSet<String> = HashSet(layers)
-        overlap.retainAll(layersToInclude)
+    private fun Set<String>.overlapsWith(other: Set<String>): Boolean {
+        val overlap: MutableSet<String> = other.toMutableSet()
+        overlap.retainAll(this)
         return overlap.isNotEmpty()
     }
 

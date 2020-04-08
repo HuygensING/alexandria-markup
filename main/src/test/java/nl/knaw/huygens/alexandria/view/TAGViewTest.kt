@@ -33,6 +33,7 @@ import java.util.*
  */
 
 class TAGViewTest : AlexandriaBaseStoreTest() {
+
     @Test
     fun testMarkupWithLayerExclusiveText() {
         val tagml = "[tagml|+A,+B>[add|A>Alpha<add] [add|B>Beta<add] Gamma Delta<tagml]"
@@ -41,6 +42,40 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             |"markupWithLayerExclusiveText":["add"]
             |}""".trimMargin()
         val expected = "[tagml|+A,+B>[add|A>Alpha<add|A] Gamma Delta<tagml|A,B]"
+        runInStore { store: TAGStore ->
+            val tagViewFactory = TAGViewFactory(store)
+            val view = tagViewFactory.fromJsonString(viewJson)
+            val document = store.runInTransaction<TAGDocument> { TAGMLImporter(store).importTAGML(tagml) }
+            val viewExport = store.runInTransaction<String> { TAGMLExporter(store, view).asTAGML(document) }
+            assertThat(viewExport).isEqualTo(expected)
+        }
+    }
+
+    @Test
+    fun test_TRD_535_exclude_bug() {
+        val tagml = "[tagml|+A,+B,+C> ... <| den | [del|C>d<del|C][add|C>h<add|C]e[del|C>n<del|C][add|C>t<add|C] |> ... <tagml]"
+        val viewJson = """{
+                |"excludeLayers":["C"],
+                |"markupWithLayerExclusiveText":["add", "del"]
+                |}""".trimMargin()
+        val expected = "[tagml|+A,+B,+C> ... <| den | e |> ... <tagml|A,B,C]"
+        runInStore { store: TAGStore ->
+            val tagViewFactory = TAGViewFactory(store)
+            val view = tagViewFactory.fromJsonString(viewJson)
+            val document = store.runInTransaction<TAGDocument> { TAGMLImporter(store).importTAGML(tagml) }
+            val viewExport = store.runInTransaction<String> { TAGMLExporter(store, view).asTAGML(document) }
+            assertThat(viewExport).isEqualTo(expected)
+        }
+    }
+
+    @Test
+    fun test_TRD_535_include_bug() {
+        val tagml = "[tagml|+A,+B,+C> ... <| den | [del|C>d<del|C][add|C>h<add|C]e[del|C>n<del|C][add|C>t<add|C] |> ... <tagml]"
+        val viewJson = """{
+                |"includeLayers":["B"],
+                |"markupWithLayerExclusiveText":["add", "del"]
+                |}""".trimMargin()
+        val expected = "[tagml|+A,+B,+C> ... <| den | e |> ... <tagml|A,B,C]"
         runInStore { store: TAGStore ->
             val tagViewFactory = TAGViewFactory(store)
             val view = tagViewFactory.fromJsonString(viewJson)
@@ -69,7 +104,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     fun testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
         val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
         val viewJson = "{'excludeLayers':['B']}".replace("'", "\"")
-        val expected = "[tagml>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml]"
+        val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
         runInStore { store: TAGStore ->
             val tagViewFactory = TAGViewFactory(store)
             val view = tagViewFactory.fromJsonString(viewJson)
@@ -127,7 +162,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             val document1 = importer.importTAGML("[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]")
             val exporter1 = TAGMLExporter(store, viewNoL1)
             val tagmlBD = exporter1.asTAGML(document1)
-            assertThat(tagmlBD).isEqualTo("a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]")
+            assertThat(tagmlBD).isEqualTo("[tagml|+L1,+L2>a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]<tagml|L1,L2]")
 
             val exporter2 = TAGMLExporter(store, viewL1)
             val tagmlAC = exporter2.asTAGML(document1)
