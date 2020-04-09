@@ -148,14 +148,14 @@ public class XMLBuilder implements TAGVisitor {
 
       String id = markup.isAnonymous() ? "soleId" : "sId";
       xmlBuilder
-              .append(" th:doc=\"")
-              .append(thDoc)
-              .append("\"")
-              .append(" th:")
-              .append(id)
-              .append("=\"")
-              .append(thId)
-              .append("\"/");
+          .append(" th:doc=\"")
+          .append(thDoc)
+          .append("\"")
+          .append(" th:")
+          .append(id)
+          .append("=\"")
+          .append(thId)
+          .append("\"/");
 
     } else if (markup.isAnonymous()) {
       xmlBuilder.append("/");
@@ -183,12 +183,12 @@ public class XMLBuilder implements TAGVisitor {
       final String thDoc = getThDoc(layers);
       String thId = thIds.remove(markup);
       xmlBuilder
-              .append(" th:doc=\"")
-              .append(thDoc)
-              .append("\"")
-              .append(" th:eId=\"")
-              .append(thId)
-              .append("\"/");
+          .append(" th:doc=\"")
+          .append(thDoc)
+          .append("\"")
+          .append(" th:eId=\"")
+          .append(thId)
+          .append("\"/");
     }
     xmlBuilder.append(">");
     //    }
@@ -219,13 +219,13 @@ public class XMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public String serializeNumberAnnotationValue(Double numberValue) {
+  public String serializeNumberAnnotationValue(double numberValue) {
     return serializeStringAnnotationValue(String.valueOf(numberValue).replaceFirst(".0$", ""));
   }
 
   @Override
-  public String serializeBooleanAnnotationValue(Boolean booleanValue) {
-    return serializeStringAnnotationValue(booleanValue.toString());
+  public String serializeBooleanAnnotationValue(boolean booleanValue) {
+    return serializeStringAnnotationValue(booleanValue ? "TRUE" : "FALSE");
   }
 
   @Override

@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag;
+package nl.knaw.huc.di.tag
 
 /*-
  * #%L
@@ -19,46 +19,26 @@ package nl.knaw.huc.di.tag;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.view.TAGView
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.view.TAGView;
-
-import java.util.List;
-import java.util.Set;
-
-public interface TAGVisitor {
-  void setView(TAGView tagView);
-
-  void enterDocument(TAGDocument document);
-
-  void exitDocument(TAGDocument document);
-
-  void enterOpenTag(TAGMarkup markup);
-
-  void addAnnotation(String serializedAnnotation);
-
-  String serializeAnnotationAssigner(String name);
-
-  String serializeStringAnnotationValue(String stringValue);
-
-  String serializeNumberAnnotationValue(Double numberValue);
-
-  String serializeBooleanAnnotationValue(Boolean booleanValue);
-
-  String serializeListAnnotationValue(List<String> serializedItems);
-
-  String serializeMapAnnotationValue(List<String> serializedMapItems);
-
-  void exitOpenTag(TAGMarkup markup);
-
-  void exitCloseTag(TAGMarkup markup);
-
-  void exitText(String escapedText, final boolean inVariation);
-
-  void enterTextVariation();
-
-  void exitTextVariation();
-
-  void setRelevantLayers(Set<String> relevantLayers);
+interface TAGVisitor {
+    fun setView(tagView: TAGView)
+    fun enterDocument(document: TAGDocument)
+    fun exitDocument(document: TAGDocument)
+    fun enterOpenTag(markup: TAGMarkup)
+    fun addAnnotation(serializedAnnotation: String)
+    fun serializeAnnotationAssigner(name: String): String
+    fun serializeStringAnnotationValue(stringValue: String): String
+    fun serializeNumberAnnotationValue(numberValue: Double): String
+    fun serializeBooleanAnnotationValue(booleanValue: Boolean): String
+    fun serializeListAnnotationValue(serializedItems: List<String>): String
+    fun serializeMapAnnotationValue(serializedMapItems: List<String>): String
+    fun exitOpenTag(markup: TAGMarkup)
+    fun exitCloseTag(markup: TAGMarkup)
+    fun exitText(escapedText: String, inVariation: Boolean)
+    fun enterTextVariation()
+    fun exitTextVariation()
+    fun setRelevantLayers(relevantLayers: Set<String>)
 }
