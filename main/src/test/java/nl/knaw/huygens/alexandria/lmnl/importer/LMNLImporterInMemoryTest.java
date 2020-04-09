@@ -82,14 +82,14 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
-    String input = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+    String input = "[excerpt\n"
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"
+        + "  [author\n"
+        + "    [name}Robert Frost{]\n"
+        + "    [dates}1874-1963{]] }\n"
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
         + "{excerpt]";
 
     LMNLImporterInMemory importer = new LMNLImporterInMemory();
@@ -258,10 +258,10 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     TextNode at2 = new TextNode("annotation");
     Markup ar1 = new Markup(annotationLimen, "type").addTextNode(at2);
     TextNode at3 = new TextNode(" text");
-    annotationLimen//
-        .addTextNode(at1)//
-        .addTextNode(at2)//
-        .addTextNode(at3)//
+    annotationLimen
+        .addTextNode(at1)
+        .addTextNode(at2)
+        .addTextNode(at3)
         .addMarkup(ar1);
     r1.addAnnotation(a1);
 
@@ -298,9 +298,9 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     TextNode at1 = new TextNode("");
     Markup ar11 = new Markup(annotationLimen, "ra11").addTextNode(at1);
     Markup ar12 = new Markup(annotationLimen, "ra12").addTextNode(at1);
-    annotationLimen//
-        .addTextNode(at1)//
-        .addMarkup(ar11)//
+    annotationLimen
+        .addTextNode(at1)
+        .addMarkup(ar11)
         .addMarkup(ar12);
     r1.addAnnotation(a1);
 

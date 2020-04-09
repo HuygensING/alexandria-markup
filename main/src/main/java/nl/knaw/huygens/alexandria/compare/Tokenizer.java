@@ -81,8 +81,8 @@ class Tokenizer {
     final AtomicReference<Integer> totalTextSize = new AtomicReference<>(0);
     Map<Long, TextTokenInfo> textTokenInfoMap = new HashMap<>();
     document.getTextNodeStream().forEach(tn -> {
-      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
-          .filter(tagView::isIncluded)//
+      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)
+          .filter(tagView::isIncluded)
           .collect(toList());
 
       List<TAGMarkup> toClose = new ArrayList<>(openMarkup);
@@ -101,12 +101,12 @@ class Tokenizer {
         textNodeIds.clear();
       }
 
-      toClose.stream()//
-          .map(this::toMarkupCloseToken)//
+      toClose.stream()
+          .map(this::toMarkupCloseToken)
           .forEach(tokens::add);
 
-      toOpen.stream()//
-          .map(this::toMarkupOpenToken)//
+      toOpen.stream()
+          .map(this::toMarkupOpenToken)
           .forEach(tokens::add);
 
       String text = tn.getText();
@@ -117,8 +117,8 @@ class Tokenizer {
       totalTextSize.updateAndGet(v -> v + text.length());
     });
     tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
-    stream(openMarkup.descendingIterator())//
-        .map(this::toMarkupCloseToken)//
+    stream(openMarkup.descendingIterator())
+        .map(this::toMarkupCloseToken)
         .forEach(tokens::add);
 
     return tokens;
@@ -138,8 +138,8 @@ class Tokenizer {
     if (WS_OR_PUNCT.matcher(text).matches()) {
       return new ArrayList<>(singletonList(new ExtendedTextToken(text).addTextNodeIds(textNodeIds)));
     }
-    List<String> parts = SimplePatternTokenizer.BY_WS_OR_PUNCT//
-        .apply(text)//
+    List<String> parts = SimplePatternTokenizer.BY_WS_OR_PUNCT
+        .apply(text)
         .collect(toList());
     final List<TextToken> textTokens = new ArrayList<>();
     int textPartStart = endOffset - text.length();

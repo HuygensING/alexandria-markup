@@ -98,9 +98,9 @@ public class TAGComparison {
   }
 
   private List<String> asLines(List<TAGToken> tagTokens) {
-    return asList(tagTokens.stream()//
-        .map(this::tokenContent)//
-        .collect(joining(""))//
+    return asList(tagTokens.stream()
+        .map(this::tokenContent)
+        .collect(joining(""))
         .split("\n"));
   }
 

@@ -51,13 +51,13 @@ public class LMNLImporter {
   private static void joinDiscontinuedRanges(TAGDocument document) {
     //    Map<String, TAGMarkupDTO> markupsToJoin = new HashMap<>();
     //    List<Long> markupIdsToRemove = new ArrayList<>();
-    //    document.getMarkupStream()//
-    //        .filter(TAGMarkup::hasN)//
+    //    document.getMarkupStream()
+    //        .filter(TAGMarkup::hasN)
     //        .forEach(markup -> {
     //          String tag = markup.getTag();
-    //          AnnotationInfo annotation = markup.getAnnotationStream()//
-    //              .filter(a -> a.getName().equals("n"))//
-    //              .findFirst()//
+    //          AnnotationInfo annotation = markup.getAnnotationStream()
+    //              .filter(a -> a.getName().equals("n"))
+    //              .findFirst()
     //              .get();
     //          String key = tag + "-" + annotationText(annotation);
     //          if (markupsToJoin.containsKey(key)) {
@@ -71,17 +71,17 @@ public class LMNLImporter {
     //        });
 
     //    document.getDTO().getMarkupIds().removeAll(markupIdsToRemove);
-    ////    document.getMarkupStream()//
-    ////        .map(TAGMarkup::getAnnotationStream)//
-    ////        .flatMap(Function.identity())//
-    ////        .map(TAGAnnotation::getDocument)//
+    ////    document.getMarkupStream()
+    ////        .map(TAGMarkup::getAnnotationStream)
+    ////        .flatMap(Function.identity())
+    ////        .map(TAGAnnotation::getDocument)
     ////        .forEach(LMNLImporter::joinDiscontinuedRanges);
   }
 
   private static String annotationText(TAGAnnotation annotation) {
     return "TODO";
-    //    return annotation.getDocument().getTextNodeStream()//
-    //        .map(TAGTextNode::getText)//
+    //    return annotation.getDocument().getTextNodeStream()
+    //        .map(TAGTextNode::getText)
     //        .collect(joining());
   }
 

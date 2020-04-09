@@ -103,10 +103,10 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
   public void testTokenizer() {
     runInStoreTransaction(store -> {
       TAGDocument doc = new TAGMLImporter(store).importTAGML("[l>[phr>Alas,<phr] [phr>poor Yorick!<phr]<l]");
-      TAGView onlyLines = new TAGView(store).setMarkupToInclude(singleton("l"));
+      TAGView onlyLines = new TAGView(store).withMarkupToInclude(singleton("l"));
       Tokenizer tokenizer = new Tokenizer(doc, onlyLines);
       List<TAGToken> tokens = tokenizer.getTAGTokens();
-      assertThat(tokens).extracting("content")//
+      assertThat(tokens).extracting("content")
           .containsExactly("l", "Alas", ", ", "poor ", "Yorick", "!", "/l");
 
       ExtendedTextToken alas = ((ExtendedTextToken) tokens.get(1));

@@ -61,7 +61,7 @@ public class TAGTextNode {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGTextNode//
+    return other instanceof TAGTextNode
         && ((TAGTextNode) other).getDbId().equals(getDbId());
   }
 

@@ -44,13 +44,13 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testTAGQLQuery1() throws LMNLSyntaxError {
-    String lmnl = "[excerpt}[p}\n"//
-        + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
-        + "and of having nothing to do: once or twice she had peeped into the book her sister\n"//
-        + "was reading, but it had no pictures or conversations in it, \n"//
-        + "[q [n}a{]}and what is the use of a book,{q]\n"//
-        + "thought Alice\n"//
-        + "[q [n}a{]}without pictures or conversation?{q]\n"//
+    String lmnl = "[excerpt}[p}\n"
+        + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"
+        + "and of having nothing to do: once or twice she had peeped into the book her sister\n"
+        + "was reading, but it had no pictures or conversations in it, \n"
+        + "[q [n}a{]}and what is the use of a book,{q]\n"
+        + "thought Alice\n"
+        + "[q [n}a{]}without pictures or conversation?{q]\n"
         + "{p]{excerpt]";
     runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
@@ -71,10 +71,10 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testTAGQLQuery2() throws LMNLSyntaxError {
-    String lmnl = "[text}\n"//
-        + "[l}line 1{l]\n"//
-        + "[l}line 2{l]\n"//
-        + "[l}line 3{l]\n"//
+    String lmnl = "[text}\n"
+        + "[l}line 1{l]\n"
+        + "[l}line 2{l]\n"
+        + "[l}line 3{l]\n"
         + "{text]";
     runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
@@ -150,10 +150,10 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testTAGQLQuery4() throws LMNLSyntaxError {
-    String lmnl = "[text}\n"//
-        + "[l [type}A{]}line 1{l]\n"//
-        + "[l [type}B{]}line 2{l]\n"//
-        + "[l [type}A{]}line 3{l]\n"//
+    String lmnl = "[text}\n"
+        + "[l [type}A{]}line 1{l]\n"
+        + "[l [type}B{]}line 2{l]\n"
+        + "[l [type}A{]}line 3{l]\n"
         + "{text]";
     runInStoreTransaction(store -> {
       TAGDocument alice = new LMNLImporter(store).importLMNL(lmnl);
@@ -222,10 +222,10 @@ public class TAGQLQueryHandlerTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testTAGQLQueryWithSyntaxError() throws LMNLSyntaxError {
-    String lmnl = "[text}\n"//
-        + "[l}line 1{l]\n"//
-        + "[l}line 2{l]\n"//
-        + "[l}line 3{l]\n"//
+    String lmnl = "[text}\n"
+        + "[l}line 1{l]\n"
+        + "[l}line 2{l]\n"
+        + "[l}line 3{l]\n"
         + "{text]";
     runInStoreTransaction(store -> {
       TAGDocument doc = new LMNLImporter(store).importLMNL(lmnl);

@@ -138,9 +138,9 @@ class LMNLModifier {
             newTailNode.setNextTextNode(nextTextNode);
             newTailNode.setPreviousTextNode(cursor.getCurrentTextNode());
             cursor.getCurrentTextNode().setNextTextNode(newTailNode);
-            limen.getMarkups(cursor.getCurrentTextNode())//
-                .stream()//
-                .filter(tr -> !newMarkup.equals(tr))//
+            limen.getMarkups(cursor.getCurrentTextNode())
+                .stream()
+                .filter(tr -> !newMarkup.equals(tr))
                 .forEach(tr -> {
                   limen.associateTextWithRange(newTailNode, tr);
                   tr.addTextNode(newTailNode);

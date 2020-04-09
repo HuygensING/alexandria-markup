@@ -51,11 +51,11 @@ public class NodeRangeIndexInMemory {
       for (int i = 0; i < limen.markupList.size(); i++) {
         markupIndex.put(limen.markupList.get(i), i);
       }
-      List<Markup> markupsToInvert = limen.markupList.stream()//
-          .filter(limen::containsAtLeastHalfOfAllTextNodes)//
+      List<Markup> markupsToInvert = limen.markupList.stream()
+          .filter(limen::containsAtLeastHalfOfAllTextNodes)
           .collect(Collectors.toList());
-      invertedMarkupsIndices = markupsToInvert.stream()//
-          .map(markupIndex::get)//
+      invertedMarkupsIndices = markupsToInvert.stream()
+          .map(markupIndex::get)
           .collect(Collectors.toSet());
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
@@ -67,8 +67,8 @@ public class NodeRangeIndexInMemory {
         Set<Markup> markups = limen.getMarkups(tn);
 
         // all the Markups that should be inverted and are NOT associated with this TextNode
-        List<Markup> relevantInvertedMarkups = markupsToInvert.stream()//
-            .filter(tr -> !markups.contains(tr))//
+        List<Markup> relevantInvertedMarkups = markupsToInvert.stream()
+            .filter(tr -> !markups.contains(tr))
             .collect(Collectors.toList());
 
         // ignore those Markups associated with this TextNode that should be inverted
@@ -77,8 +77,8 @@ public class NodeRangeIndexInMemory {
         // add all the Markups that should be inverted and are NOT associated with this TextNode
         markups.addAll(relevantInvertedMarkups);
 
-        markups.stream()//
-            .sorted(Comparator.comparingInt(markupIndex::get))//
+        markups.stream()
+            .sorted(Comparator.comparingInt(markupIndex::get))
             .forEach(tr -> {
               int j = markupIndex.get(tr);
               IndexPoint point = new IndexPoint(i, j);
@@ -98,7 +98,7 @@ public class NodeRangeIndexInMemory {
 
   public Set<Integer> getRanges(int i) {
     Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
-    getKdTree().indexpointsForTextNode(i)//
+    getKdTree().indexpointsForTextNode(i)
         .forEach(ip -> {
           int markupIndex = ip.getMarkupIndex();
           if (invertedMarkupsIndices.contains(markupIndex)) {
@@ -114,8 +114,8 @@ public class NodeRangeIndexInMemory {
   public Set<Integer> getTextNodes(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
 
-    Set<Integer> relevantTextNodeIndices = getKdTree().indexpointsForMarkup(i).stream()//
-        .map(IndexPoint::getTextNodeIndex)//
+    Set<Integer> relevantTextNodeIndices = getKdTree().indexpointsForMarkup(i).stream()
+        .map(IndexPoint::getTextNodeIndex)
         .collect(toSet());
 
     if (invertedMarkupsIndices.contains(i)) {
@@ -132,8 +132,8 @@ public class NodeRangeIndexInMemory {
 
   public Set<Integer> getRanges0(int i) {
     Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
-    StreamSupport.stream(getKdTree().spliterator(), true)//
-        .filter(ip -> ip.getTextNodeIndex() == i)//
+    StreamSupport.stream(getKdTree().spliterator(), true)
+        .filter(ip -> ip.getTextNodeIndex() == i)
         .forEach(ip -> {
           int markupIndex = ip.getMarkupIndex();
           if (invertedMarkupsIndices.contains(markupIndex)) {
@@ -148,9 +148,9 @@ public class NodeRangeIndexInMemory {
 
   public Set<Integer> getTextNodes0(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
-    List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)//
-        .filter(ip -> ip.getMarkupIndex() == i)//
-        .map(IndexPoint::getTextNodeIndex)//
+    List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)
+        .filter(ip -> ip.getMarkupIndex() == i)
+        .map(IndexPoint::getTextNodeIndex)
         .collect(Collectors.toList());
 
     if (invertedMarkupsIndices.contains(i)) {

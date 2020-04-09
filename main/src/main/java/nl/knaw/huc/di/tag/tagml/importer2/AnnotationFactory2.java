@@ -147,19 +147,19 @@ public class AnnotationFactory2 {
 //        final Object subValue = map.get(subName);
 //        final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
 //        textGraph.addAnnotationEdge(id, aInfo);
-//
+
 //      } else if (subValueParseTree instanceof IdValueContext) {
 //        IdValueContext idValueContext = (IdValueContext) subValueParseTree;
 //        String idValue = idValueContext.getText();
 //        LOG.warn("TODO: handle idValue {}", idValue);
 //        // TODO: handle idValue
-//
+
 //      } else if (subValueParseTree instanceof RefValueContext) {
 //        RefValueContext refValueContext = (RefValueContext) subValueParseTree;
 //        String refValue = refValueContext.getText();
 //        final AnnotationInfo aInfo = makeReferenceAnnotation(subName, refValue);
 //        textGraph.addAnnotationEdge(id, aInfo);
-//
+
 //      } else {
 //        throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
 //      }

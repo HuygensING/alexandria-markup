@@ -76,7 +76,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
 //    } else if (existingEdges.size() > 1) {
 //      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
-//
+
 //    } else {
 //      final LayerEdge existingEdge = existingEdges.get(0);
 //      addTargetsToHyperEdge(existingEdge, textNodeId);

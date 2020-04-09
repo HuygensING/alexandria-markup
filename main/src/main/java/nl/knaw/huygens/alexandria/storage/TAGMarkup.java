@@ -64,7 +64,7 @@ public class TAGMarkup {
 //  public TAGMarkup addTextNode(TAGTextNode tagTextNode) {
 //    markupDTO.getTextNodeIds().add(tagTextNode.getResourceId());
 //    Long ownerId = markupDTO.getDocumentId();
-//    new TAGDocument(store, store.getDocumentDTO(ownerId))//
+//    new TAGDocument(store, store.getDocumentDTO(ownerId))
 //        .associateTextNodeWithMarkupForLayer(tagTextNode, this, "");
 //    update();
 //    return this;
@@ -153,7 +153,7 @@ public class TAGMarkup {
   }
 
   public boolean hasN() {
-    return getAnnotationStream()//
+    return getAnnotationStream()
         .map(AnnotationInfo::getName)
         .anyMatch("n"::equals);
   }

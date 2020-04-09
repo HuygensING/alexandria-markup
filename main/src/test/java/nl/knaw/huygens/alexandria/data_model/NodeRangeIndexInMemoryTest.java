@@ -32,14 +32,14 @@ public class NodeRangeIndexInMemoryTest {
 
   @Test
   public void testRangesFromNodes() throws LMNLSyntaxError {
-    String lmnl = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+    String lmnl = "[excerpt\n"
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"
+        + "  [author\n"
+        + "    [name}Robert Frost{]\n"
+        + "    [dates}1874-1963{]] }\n"
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
         + "{excerpt]";
     NodeRangeIndexInMemory index = index(lmnl);
     // textnode 1= "He manages to keep the upper hand"
@@ -49,14 +49,14 @@ public class NodeRangeIndexInMemoryTest {
 
   @Test
   public void testNodesFromRanges() throws LMNLSyntaxError {
-    String lmnl = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+    String lmnl = "[excerpt\n"
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"
+        + "  [author\n"
+        + "    [name}Robert Frost{]\n"
+        + "    [dates}1874-1963{]] }\n"
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
         + "{excerpt]";
     NodeRangeIndexInMemory index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(0); // indices of textnodes contained in range 0: excerpt
@@ -66,12 +66,12 @@ public class NodeRangeIndexInMemoryTest {
   @Test
   public void testIndexWithAlice() throws LMNLSyntaxError {
     String lmnl = "[excerpt}[p}\n"
-        + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"//
-        + "and of having nothing to do: once or twice she had peeped into the book her sister\n"//
-        + "was reading, but it had no pictures or conversations in it, \n"//
-        + "[q [n}a{]}and what is the use of a book,{q]\n"//
-        + "thought Alice\n"//
-        + "[q [n}a{]}without pictures or conversation?{q]\n"//
+        + "Alice was beginning to get very tired of sitting by her sister on the bank,\n"
+        + "and of having nothing to do: once or twice she had peeped into the book her sister\n"
+        + "was reading, but it had no pictures or conversations in it, \n"
+        + "[q [n}a{]}and what is the use of a book,{q]\n"
+        + "thought Alice\n"
+        + "[q [n}a{]}without pictures or conversation?{q]\n"
         + "{p]{excerpt]";
     NodeRangeIndexInMemory index = index(lmnl);
     Set<Integer> textNodeIndices = index.getTextNodes(2); // indices of textnodes contained in range 2: q=a

@@ -66,11 +66,11 @@ public class ImportDataTexMECSInMemoryTest {
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)//
-        .stream()//
-        .map(File::getName)//
-        .map(n -> n.replace(".texmecs", ""))//
-        .map(b -> new String[]{b})//
+    return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)
+        .stream()
+        .map(File::getName)
+        .map(n -> n.replace(".texmecs", ""))
+        .map(b -> new String[]{b})
         .collect(Collectors.toList());
   }
 

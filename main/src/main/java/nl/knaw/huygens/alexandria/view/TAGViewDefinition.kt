@@ -1,4 +1,6 @@
-package nl.knaw.huygens.alexandria.view;
+package nl.knaw.huygens.alexandria.view
+
+import java.util.*
 
 /*
  * #%L
@@ -18,51 +20,33 @@ package nl.knaw.huygens.alexandria.view;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+ */   class TAGViewDefinition {
+    var includeLayers: Set<String?>? = HashSet()
+        private set
+    var excludeLayers: Set<String?>? = HashSet()
+        private set
+    var includeMarkup: Set<String?>? = HashSet()
+        private set
+    var excludeMarkup: Set<String?>? = HashSet()
+        private set
 
-import java.util.HashSet;
-import java.util.Set;
+    fun setIncludeLayers(includeLayers: Set<String?>?): TAGViewDefinition {
+        this.includeLayers = includeLayers
+        return this
+    }
 
-public class TAGViewDefinition {
-  private Set<String> includeLayers = new HashSet<>();
-  private Set<String> excludeLayers = new HashSet<>();
-  private Set<String> includeMarkup = new HashSet<>();
-  private Set<String> excludeMarkup = new HashSet<>();
+    fun setExcludeLayers(excludeLayers: Set<String?>?): TAGViewDefinition {
+        this.excludeLayers = excludeLayers
+        return this
+    }
 
-  public Set<String> getIncludeLayers() {
-    return includeLayers;
-  }
+    fun setIncludeMarkup(includeMarkup: Set<String?>?): TAGViewDefinition {
+        this.includeMarkup = includeMarkup
+        return this
+    }
 
-  public TAGViewDefinition setIncludeLayers(final Set<String> includeLayers) {
-    this.includeLayers = includeLayers;
-    return this;
-  }
-
-  public Set<String> getExcludeLayers() {
-    return excludeLayers;
-  }
-
-  public TAGViewDefinition setExcludeLayers(final Set<String> excludeLayers) {
-    this.excludeLayers = excludeLayers;
-    return this;
-  }
-
-  public Set<String> getIncludeMarkup() {
-    return includeMarkup;
-  }
-
-  public TAGViewDefinition setIncludeMarkup(Set<String> includeMarkup) {
-    this.includeMarkup = includeMarkup;
-    return this;
-  }
-
-  public Set<String> getExcludeMarkup() {
-    return excludeMarkup;
-  }
-
-  public TAGViewDefinition setExcludeMarkup(Set<String> excludeMarkup) {
-    this.excludeMarkup = excludeMarkup;
-    return this;
-  }
-
+    fun setExcludeMarkup(excludeMarkup: Set<String?>?): TAGViewDefinition {
+        this.excludeMarkup = excludeMarkup
+        return this
+    }
 }

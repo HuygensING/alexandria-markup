@@ -208,7 +208,7 @@ public class TAGMLExporter extends TAGExporter {
       }
     }
     final ExporterState state = stateRef.get();
-    state.openMarkupIds.descendingIterator()//
+    state.openMarkupIds.descendingIterator()
         .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     return tagmlBuilder.toString()
         .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
@@ -254,8 +254,8 @@ public class TAGMLExporter extends TAGExporter {
         ? TAGML.SUSPEND_PREFIX
         : "";
 
-    return markup.isAnonymous()//
-        ? new StringBuilder()//
+    return markup.isAnonymous()
+        ? new StringBuilder()
         : new StringBuilder(CLOSE_TAG_STARTCHAR).append(suspend).append(markup.getExtendedTag()).append(CLOSE_TAG_ENDCHAR);
   }
 
@@ -269,8 +269,8 @@ public class TAGMLExporter extends TAGExporter {
     StringBuilder tagBuilder = new StringBuilder(OPEN_TAG_STARTCHAR)
         .append(resume).append(markup.getExtendedTag(newLayers));
     markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toTAGML(a)));
-    return markup.isAnonymous()//
-        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)//
+    return markup.isAnonymous()
+        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 

@@ -1,4 +1,10 @@
-package nl.knaw.huygens.alexandria.view;
+package nl.knaw.huygens.alexandria.view
+
+import nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.storage.TAGStore
+import java.util.*
+import java.util.stream.Collectors
 
 /*
  * #%L
@@ -20,201 +26,141 @@ package nl.knaw.huygens.alexandria.view;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
+class TAGView(private val store: TAGStore) {
+    val isValid: Boolean
+        get() = !(layerRelevance == RelevanceStyle.undefined && markupRelevance == RelevanceStyle.undefined)
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*;
-
-public class TAGView {
-  private final TAGStore store;
-
-  public boolean isValid() {
-    return !((layerRelevance.equals(undefined)) && (markupRelevance.equals(undefined)));
-  }
-
-  enum RelevanceStyle {
-    include,
-    exclude,
-    undefined
-  }
-
-  private RelevanceStyle layerRelevance = undefined;
-  private RelevanceStyle markupRelevance = undefined;
-
-  private Set<String> layersToInclude = new HashSet<>();
-  private Set<String> layersToExclude = new HashSet<>();
-  private Set<String> markupToInclude = new HashSet<>();
-  private Set<String> markupToExclude = new HashSet<>();
-
-  public TAGView(TAGStore store) {
-    this.store = store;
-  }
-
-  public Set<String> filterRelevantLayers(final Set<String> layerNames) {
-    Set<String> relevantLayers = new HashSet<>(layerNames);
-    if (layerRelevance.equals(RelevanceStyle.include)) {
-      relevantLayers.clear();
-      relevantLayers.addAll(layersToInclude);
-      //      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
-      //      if (hasDefault) {
-      //        relevantLayers.add(TAGML.DEFAULT_LAYER);
-      //      }
-
-    } else if (layerRelevance.equals(RelevanceStyle.exclude)) {
-      relevantLayers.removeAll(layersToExclude);
+    internal enum class RelevanceStyle {
+        include, exclude, undefined
     }
-    return relevantLayers;
-  }
 
-  public Set<Long> filterRelevantMarkup(Set<Long> markupIds) {
-    Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
-    if (include.equals(layerRelevance)) {
-      List<Long> retain =
-              markupIds.stream()
-                      .filter(
-                          m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/)
-                      .collect(toList());
-      relevantMarkupIds.retainAll(retain);
+    private var layerRelevance = RelevanceStyle.undefined
+    private var markupRelevance = RelevanceStyle.undefined
+    var layersToInclude: Set<String?>? = HashSet()
+        internal set
+    var layersToExclude: Set<String?>? = HashSet()
+        internal set
+    var markupToInclude: Set<String?>? = HashSet()
+        internal set
+    var markupToExclude: Set<String?>? = HashSet()
+        internal set
 
-    } else if (exclude.equals(layerRelevance)) {
-      List<Long> remove =
-          markupIds.stream()
-                      .filter(
-                          m ->
-                              hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/)
-                      .collect(toList());
-
-      relevantMarkupIds.removeAll(remove);
+    fun filterRelevantLayers(layerNames: Set<String?>?): Set<String?> {
+        val relevantLayers: MutableSet<String?> = HashSet(layerNames)
+        if (layerRelevance == RelevanceStyle.include) {
+            relevantLayers.clear()
+            relevantLayers.addAll(layersToInclude!!)
+            //      boolean hasDefault = layerNames.contains(TAGML.DEFAULT_LAYER);
+            //      if (hasDefault) {
+            //        relevantLayers.add(TAGML.DEFAULT_LAYER);
+            //      }
+        } else if (layerRelevance == RelevanceStyle.exclude) {
+            relevantLayers.removeAll(layersToExclude!!)
+        }
+        return relevantLayers
     }
-    if (include.equals(markupRelevance)) {
-      List<Long> retain =
-          markupIds.stream()
-              .filter(m -> markupToInclude.contains(getTag(m)))
-              .collect(toList());
-      relevantMarkupIds.retainAll(retain);
 
-    } else if (exclude.equals(markupRelevance)) {
-      List<Long> remove =
-          markupIds.stream()
-              .filter(m -> markupToExclude.contains(getTag(m)))
-              .collect(toList());
-
-      relevantMarkupIds.removeAll(remove);
+    fun filterRelevantMarkup(markupIds: Set<Long>): Set<Long> {
+        val relevantMarkupIds: MutableSet<Long> = LinkedHashSet(markupIds)
+        if (RelevanceStyle.include == layerRelevance) {
+            val retain = markupIds.stream()
+                    .filter { m: Long -> hasOverlap(layersToInclude, getLayers(m)) }
+                    .collect(Collectors.toList())
+            relevantMarkupIds.retainAll(retain)
+        } else if (RelevanceStyle.exclude == layerRelevance) {
+            val remove = markupIds.stream()
+                    .filter { m: Long -> hasOverlap(layersToExclude, getLayers(m)) }
+                    .collect(Collectors.toList())
+            relevantMarkupIds.removeAll(remove)
+        }
+        if (RelevanceStyle.include == markupRelevance) {
+            val retain = markupIds.stream()
+                    .filter { m: Long -> markupToInclude!!.contains(getTag(m)) }
+                    .collect(Collectors.toList())
+            relevantMarkupIds.retainAll(retain)
+        } else if (RelevanceStyle.exclude == markupRelevance) {
+            val remove = markupIds.stream()
+                    .filter { m: Long -> markupToExclude!!.contains(getTag(m)) }
+                    .collect(Collectors.toList())
+            relevantMarkupIds.removeAll(remove)
+        }
+        return relevantMarkupIds
     }
-    return relevantMarkupIds;
-  }
 
-  //  private boolean isInDefaultLayerOnly(final Long markupId) {
-  //    return getLayers(markupId).stream().anyMatch(TAGML.DEFAULT_LAYER::equals);
-  //  }
-
-  private boolean isInDefaultLayerOnly(final Long markupId) {
-    Set<String> layers = getLayers(markupId);
-    return layers.size() == 1 && layers.iterator().next().equals(TAGML.DEFAULT_LAYER);
-  }
-
-  private boolean hasOverlap(Set<String> layersToInclude, Set<String> layers) {
-    Set<String> overlap = new HashSet<>(layers);
-    overlap.retainAll(layersToInclude);
-    return !overlap.isEmpty();
-  }
-
-  private Set<String> getLayers(Long markupId) {
-    return store.getMarkup(markupId).getLayers();
-  }
-
-  public TAGView setLayersToInclude(Set<String> layersToInclude) {
-    if (exclude.equals(layerRelevance)) {
-      throw new RuntimeException("This TAGView already has set layersToExclude");
+    //  private boolean isInDefaultLayerOnly(final Long markupId) {
+    //    return getLayers(markupId).stream().anyMatch(TAGML.DEFAULT_LAYER::equals);
+    //  }
+    private fun isInDefaultLayerOnly(markupId: Long): Boolean {
+        val layers = getLayers(markupId)
+        return layers.size == 1 && layers.iterator().next() == DEFAULT_LAYER
     }
-    this.layersToInclude = layersToInclude;
-    layerRelevance = include;
-    return this;
-  }
 
-  public Set<String> getLayersToInclude() {
-    return layersToInclude;
-  }
-
-  public TAGView setLayersToExclude(Set<String> layersToExclude) {
-    if (include.equals(layerRelevance)) {
-      throw new RuntimeException("This TAGView already has set layersToInclude");
+    private fun hasOverlap(layersToInclude: Set<String?>?, layers: Set<String?>): Boolean {
+        val overlap: MutableSet<String?> = HashSet(layers)
+        overlap.retainAll(layersToInclude!!)
+        return overlap.isNotEmpty()
     }
-    this.layersToExclude = layersToExclude;
-    layerRelevance = exclude;
-    return this;
-  }
 
-  public Set<String> getLayersToExclude() {
-    return layersToExclude;
-  }
+    private fun getLayers(markupId: Long): Set<String?> = store.getMarkup(markupId).layers
 
-  public TAGView setMarkupToInclude(Set<String> markupToInclude) {
-    if (exclude.equals(markupRelevance)) {
-      throw new RuntimeException("This TAGView already has set markupToExclude");
+    fun withLayersToInclude(layersToInclude: Set<String?>?): TAGView {
+        if (RelevanceStyle.exclude == layerRelevance) {
+            throw RuntimeException("This TAGView already has set layersToExclude")
+        }
+        this.layersToInclude = layersToInclude
+        layerRelevance = RelevanceStyle.include
+        return this
     }
-    this.markupToInclude = markupToInclude;
-    markupRelevance = include;
-    return this;
-  }
 
-  public Set<String> getMarkupToInclude() {
-    return markupToInclude;
-  }
-
-  public TAGView setMarkupToExclude(Set<String> markupToExclude) {
-    if (include.equals(markupRelevance)) {
-      throw new RuntimeException("This TAGView already has set markupToInclude");
+    fun withLayersToExclude(layersToExclude: Set<String?>?): TAGView {
+        if (RelevanceStyle.include == layerRelevance) {
+            throw RuntimeException("This TAGView already has set layersToInclude")
+        }
+        this.layersToExclude = layersToExclude
+        layerRelevance = RelevanceStyle.exclude
+        return this
     }
-    this.markupToExclude = markupToExclude;
-    markupRelevance = exclude;
-    return this;
-  }
 
-  public Set<String> getMarkupToExclude() {
-    return markupToExclude;
-  }
-
-  public TAGViewDefinition getDefinition() {
-    return new TAGViewDefinition()
-        .setIncludeLayers(layersToInclude)
-        .setExcludeLayers(layersToExclude)
-        .setIncludeMarkup(markupToInclude)
-        .setExcludeMarkup(markupToExclude);
-  }
-
-  public boolean markupStyleIsInclude() {
-    return include.equals(markupRelevance);
-  }
-
-  public boolean markupStyleIsExclude() {
-    return exclude.equals(markupRelevance);
-  }
-
-  public boolean layerStyleIsInclude() {
-    return include.equals(layerRelevance);
-  }
-
-  public boolean layerStyleIsExclude() {
-    return exclude.equals(layerRelevance);
-  }
-
-  public boolean isIncluded(TAGMarkup tagMarkup) {
-    String tag = tagMarkup.getTag();
-    if (include.equals(markupRelevance)) {
-      return markupToInclude.contains(tag);
+    fun withMarkupToInclude(markupToInclude: Set<String?>?): TAGView {
+        if (RelevanceStyle.exclude == markupRelevance) {
+            throw RuntimeException("This TAGView already has set markupToExclude")
+        }
+        this.markupToInclude = markupToInclude
+        markupRelevance = RelevanceStyle.include
+        return this
     }
-    return exclude.equals(markupRelevance) && !markupToExclude.contains(tag);
-  }
 
-  private String getTag(Long markupId) {
-    return store.getMarkup(markupId).getTag();
-  }
+    fun withMarkupToExclude(markupToExclude: Set<String?>?): TAGView {
+        if (RelevanceStyle.include == markupRelevance) {
+            throw RuntimeException("This TAGView already has set markupToInclude")
+        }
+        this.markupToExclude = markupToExclude
+        markupRelevance = RelevanceStyle.exclude
+        return this
+    }
+
+    val definition: TAGViewDefinition?
+        get() = TAGViewDefinition()
+                .setIncludeLayers(layersToInclude)
+                .setExcludeLayers(layersToExclude)
+                .setIncludeMarkup(markupToInclude)
+                .setExcludeMarkup(markupToExclude)
+
+    fun markupStyleIsInclude(): Boolean = RelevanceStyle.include == markupRelevance
+
+    fun markupStyleIsExclude(): Boolean = RelevanceStyle.exclude == markupRelevance
+
+    fun layerStyleIsInclude(): Boolean = RelevanceStyle.include == layerRelevance
+
+    fun layerStyleIsExclude(): Boolean = RelevanceStyle.exclude == layerRelevance
+
+    fun isIncluded(tagMarkup: TAGMarkup): Boolean {
+        val tag = tagMarkup.tag
+        return if (RelevanceStyle.include == markupRelevance) {
+            markupToInclude!!.contains(tag)
+        } else RelevanceStyle.exclude == markupRelevance && !markupToExclude!!.contains(tag)
+    }
+
+    private fun getTag(markupId: Long): String = store.getMarkup(markupId).tag
+
 }

@@ -69,22 +69,22 @@ public class LMNLExporterInMemory {
         openMarkups.addAll(toOpen);
         lmnlBuilder.append(tn.getContent());
       });
-      openMarkups.descendingIterator()//
+      openMarkups.descendingIterator()
           .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
     }
   }
 
   private StringBuilder toCloseTag(Markup markup) {
-    return markup.isAnonymous()//
-        ? new StringBuilder()//
+    return markup.isAnonymous()
+        ? new StringBuilder()
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
   private StringBuilder toOpenTag(Markup markup) {
     StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
     markup.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-    return markup.isAnonymous()//
-        ? tagBuilder.append("]")//
+    return markup.isAnonymous()
+        ? tagBuilder.append("]")
         : tagBuilder.append("}");
   }
 

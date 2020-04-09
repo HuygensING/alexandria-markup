@@ -231,7 +231,7 @@ public class BDBTAGStore implements TAGStore {
 //    assertInTransaction();
 //    return da.annotationById.get(tx, annotationId, LOCK_MODE);
 //  }
-//
+
 //  public TAGAnnotationDTO createAnnotationDTO(String tag) {
 ////    TAGDocumentDTO document = new TAGDocumentDTO();
 ////    persist(document);
@@ -244,23 +244,23 @@ public class BDBTAGStore implements TAGStore {
 //  public TAGAnnotation createStringAnnotation(String key, String value) {
 //    return createAnnotation(key, value, AnnotationType.String);
 //  }
-//
+
 //  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
 //    return createAnnotation(key, value, AnnotationType.Boolean);
 //  }
-//
+
 //  public TAGAnnotation createNumberAnnotation(String key, Double value) {
 //    return createAnnotation(key, value, AnnotationType.Number);
 //  }
-//
+
 //  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
 //    return createAnnotation(key, value, AnnotationType.List);
 //  }
-//
+
 //  public TAGAnnotation createObjectAnnotation(String key, Object value) {
 //    return createAnnotation(key, value, AnnotationType.Object);
 //  }
-//
+
 //  public TAGAnnotation createRefAnnotation(String aName, String refId) {
 //    return createAnnotation(aName, refId, AnnotationType.Reference);
 //  }
@@ -272,13 +272,13 @@ public class BDBTAGStore implements TAGStore {
 //    persist(dto);
 //    return new TAGAnnotation(this, dto);
 //  }
-//
+
 //  public TAGAnnotation createAnnotation(String tag) {
 //    assertInTransaction();
 //    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
 //    return new TAGAnnotation(this, annotation);
 //  }
-//
+
 //  public TAGAnnotation getAnnotation(Long annotationId) {
 //    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
 //  }

@@ -56,12 +56,12 @@ public class NodeRangeIndex {
       for (int i = 0; i < markupIds.size(); i++) {
         markupIndex.put(markupIds.get(i), i);
       }
-      List<TAGMarkup> markupsToInvert = document.getMarkupStream()//
-          .filter(document::containsAtLeastHalfOfAllTextNodes)//
+      List<TAGMarkup> markupsToInvert = document.getMarkupStream()
+          .filter(document::containsAtLeastHalfOfAllTextNodes)
           .collect(Collectors.toList());
-      invertedMarkupsIndices = markupsToInvert.stream()//
-          .map(TAGMarkup::getDbId)//
-          .map(markupIndex::get)//
+      invertedMarkupsIndices = markupsToInvert.stream()
+          .map(TAGMarkup::getDbId)
+          .map(markupIndex::get)
           .collect(Collectors.toSet());
 
       AtomicInteger textNodeIndex = new AtomicInteger(0);
@@ -73,8 +73,8 @@ public class NodeRangeIndex {
         Set<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn).collect(toSet());
 
         // all the Markups that should be inverted and are NOT associated with this TextNode
-        List<TAGMarkup> relevantInvertedMarkups = markupsToInvert.stream()//
-            .filter(tr -> !markups.contains(tr))//
+        List<TAGMarkup> relevantInvertedMarkups = markupsToInvert.stream()
+            .filter(tr -> !markups.contains(tr))
             .collect(Collectors.toList());
 
         // ignore those Markups associated with this TextNode that should be inverted
@@ -83,9 +83,9 @@ public class NodeRangeIndex {
         // add all the Markups that should be inverted and are NOT associated with this TextNode
         markups.addAll(relevantInvertedMarkups);
 
-        markups.stream()//
-            .map(TAGMarkup::getDbId)//
-            .sorted(Comparator.comparingInt(markupIndex::get))//
+        markups.stream()
+            .map(TAGMarkup::getDbId)
+            .sorted(Comparator.comparingInt(markupIndex::get))
             .forEach(markupId -> {
               int j = markupIndex.get(markupId);
               IndexPoint point = new IndexPoint(i, j);
@@ -105,7 +105,7 @@ public class NodeRangeIndex {
 
   public Set<Integer> getRanges(int i) {
     Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
-    getKdTree().indexpointsForTextNode(i)//
+    getKdTree().indexpointsForTextNode(i)
         .forEach(ip -> {
           int markupIndex = ip.getMarkupIndex();
           if (invertedMarkupsIndices.contains(markupIndex)) {
@@ -121,8 +121,8 @@ public class NodeRangeIndex {
   public Set<Integer> getTextNodes(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
 
-    Set<Integer> relevantTextNodeIndices = getKdTree().indexpointsForMarkup(i).stream()//
-        .map(IndexPoint::getTextNodeIndex)//
+    Set<Integer> relevantTextNodeIndices = getKdTree().indexpointsForMarkup(i).stream()
+        .map(IndexPoint::getTextNodeIndex)
         .collect(toSet());
 
     if (invertedMarkupsIndices.contains(i)) {
@@ -139,8 +139,8 @@ public class NodeRangeIndex {
 
   public Set<Integer> getRanges0(int i) {
     Set<Integer> rangeIndices = new HashSet<>(invertedMarkupsIndices);
-    StreamSupport.stream(getKdTree().spliterator(), true)//
-        .filter(ip -> ip.getTextNodeIndex() == i)//
+    StreamSupport.stream(getKdTree().spliterator(), true)
+        .filter(ip -> ip.getTextNodeIndex() == i)
         .forEach(ip -> {
           int markupIndex = ip.getMarkupIndex();
           if (invertedMarkupsIndices.contains(markupIndex)) {
@@ -155,9 +155,9 @@ public class NodeRangeIndex {
 
   public Set<Integer> getTextNodes0(int i) {
     Set<Integer> textNodeIndices = new HashSet<>();
-    List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)//
-        .filter(ip -> ip.getMarkupIndex() == i)//
-        .map(IndexPoint::getTextNodeIndex)//
+    List<Integer> relevantTextNodeIndices = StreamSupport.stream(getKdTree().spliterator(), true)
+        .filter(ip -> ip.getMarkupIndex() == i)
+        .map(IndexPoint::getTextNodeIndex)
         .collect(Collectors.toList());
 
     if (invertedMarkupsIndices.contains(i)) {

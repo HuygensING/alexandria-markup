@@ -94,15 +94,15 @@ public class LMNLExporter {
         openMarkupIds.addAll(toOpen);
         lmnlBuilder.append(tn.getText());
       });
-      openMarkupIds.descendingIterator()//
+      openMarkupIds.descendingIterator()
           .forEachRemaining(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
     }
 
   }
 
   private StringBuilder toCloseTag(TAGMarkup markup) {
-    return markup.isAnonymous()//
-        ? new StringBuilder()//
+    return markup.isAnonymous()
+        ? new StringBuilder()
         : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
   }
 
@@ -110,8 +110,8 @@ public class LMNLExporter {
     return new StringBuilder("TODO");
 //    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
 //    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-//    return markup.isAnonymous()//
-//        ? tagBuilder.append("]")//
+//    return markup.isAnonymous()
+//        ? tagBuilder.append("]")
 //        : tagBuilder.append("}");
   }
 

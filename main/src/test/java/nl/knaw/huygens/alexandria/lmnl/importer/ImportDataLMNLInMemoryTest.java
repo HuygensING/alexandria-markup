@@ -63,11 +63,11 @@ public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
 
   @Parameters
   public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null)//
-        .stream()//
-        .map(File::getName)//
-        .map(n -> n.replace(".lmnl", ""))//
-        .map(b -> new String[]{b})//
+    return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null)
+        .stream()
+        .map(File::getName)
+        .map(n -> n.replace(".lmnl", ""))
+        .map(b -> new String[]{b})
         .collect(Collectors.toList());
   }
 

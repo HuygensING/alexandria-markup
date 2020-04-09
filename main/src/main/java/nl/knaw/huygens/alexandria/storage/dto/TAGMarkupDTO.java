@@ -154,7 +154,7 @@ public class TAGMarkupDTO implements TAGDTO {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGMarkupDTO//
+    return other instanceof TAGMarkupDTO
         && getDbId().equals(((TAGMarkupDTO) other).getDbId());
   }
 

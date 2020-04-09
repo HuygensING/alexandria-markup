@@ -57,7 +57,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
   private String toText(TAGMarkup markup) {
     StringBuilder textBuilder = new StringBuilder();
-    document.getTextNodeStreamForMarkup(markup)
+    document
+        .getTextNodeStreamForMarkup(markup)
         .forEach(textNode -> textBuilder.append(textNode.getText()));
     return textBuilder.toString();
   }
@@ -74,7 +75,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     super.exitSelectStmt(ctx);
   }
 
-  private void handleSelectVariable(TAGQLSelectStatement statement, TAGQLParser.SelectVariableContext selectVariable) {
+  private void handleSelectVariable(
+      TAGQLSelectStatement statement, TAGQLParser.SelectVariableContext selectVariable) {
     TAGQLParser.PartContext part = selectVariable.part();
     if (part != null) {
       if (part instanceof TAGQLParser.TextPartContext) {
@@ -90,7 +92,8 @@ class TAGQLQueryListener extends TAGQLBaseListener {
     }
   }
 
-  private Function<? super TAGMarkup, ? super Object> toAnnotationTextMapper(String annotationIdentifier) {
+  private Function<? super TAGMarkup, ? super Object> toAnnotationTextMapper(
+      String annotationIdentifier) {
     List<String> annotationTags = Arrays.asList(annotationIdentifier.split(":"));
     return (TAGMarkup markup) -> {
       List<String> annotationTexts = new ArrayList<>();
@@ -98,16 +101,17 @@ class TAGQLQueryListener extends TAGQLBaseListener {
       List<AnnotationInfo> annotationsToFilter = markup.getAnnotationStream().collect(toList());
       while (depth < annotationTags.size() - 1) {
         String filterTag = annotationTags.get(depth);
-        annotationsToFilter = annotationsToFilter.stream()//
-            .filter(hasTag(filterTag))//
-//            .flatMap(TAGAnnotation::getAnnotationStream)//
-            .collect(toList());
+        annotationsToFilter =
+            annotationsToFilter.stream()
+                .filter(hasTag(filterTag))
+                //            .flatMap(TAGAnnotation::getAnnotationStream)
+                .collect(toList());
         depth += 1;
       }
       String filterTag = annotationTags.get(depth);
-      annotationsToFilter.stream()//
-          .filter(hasTag(filterTag))//
-          .map(this::toAnnotationText)///
+      annotationsToFilter.stream()
+          .filter(hasTag(filterTag))
+          .map(this::toAnnotationText)
           .forEach(annotationTexts::add);
       return annotationTexts;
     };
@@ -157,11 +161,19 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
       } else if (extendedIdentifier.part() instanceof AnnotationValuePartContext) {
         String annotationIdentifier = getAnnotationName(extendedIdentifier.part());
-        filter = markup -> markup.getAnnotationStream()
-            .anyMatch(a -> annotationIdentifier.equals(a.getName()) && value.equals(toAnnotationText(a)));
+        filter =
+            markup ->
+                markup
+                    .getAnnotationStream()
+                    .anyMatch(
+                        a ->
+                            annotationIdentifier.equals(a.getName())
+                                && value.equals(toAnnotationText(a)));
 
       } else {
-        unhandled(extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()", extendedIdentifier.part().getText());
+        unhandled(
+            extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()",
+            extendedIdentifier.part().getText());
       }
 
     } else if (expr instanceof JoiningExpressionContext) {
@@ -205,15 +217,16 @@ class TAGQLQueryListener extends TAGQLBaseListener {
 
   private String toAnnotationText(AnnotationInfo annotation) {
     return "TODO";
-//    return annotation.getDocument().getTextNodeStream()//
-//        .map(TAGTextNode::getText)//
-//        .collect(joining());
+    //    return annotation.getDocument().getTextNodeStream()
+    //        .map(TAGTextNode::getText)
+    //        .collect(joining());
   }
 
   private String getAnnotationName(PartContext partContext) {
-    AnnotationValuePartContext annotationValuePartContext = (AnnotationValuePartContext) partContext;
-    AnnotationIdentifierContext annotationIdentifierContext = annotationValuePartContext.annotationIdentifier();
+    AnnotationValuePartContext annotationValuePartContext =
+        (AnnotationValuePartContext) partContext;
+    AnnotationIdentifierContext annotationIdentifierContext =
+        annotationValuePartContext.annotationIdentifier();
     return stringValue(annotationIdentifierContext);
   }
-
 }

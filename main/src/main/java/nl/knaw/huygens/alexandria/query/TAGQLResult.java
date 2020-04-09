@@ -58,8 +58,8 @@ public class TAGQLResult {
     if (results.size() == 1) {
       return results.get(0).getValues();
     }
-    return results.stream()//
-        .map(TAGQLResult::getValues)//
+    return results.stream()
+        .map(TAGQLResult::getValues)
         .collect(Collectors.toList());
   }
 
