@@ -137,7 +137,7 @@ public class Markup {
 
   public boolean hasN() {
     return annotations.parallelStream()//
-        .map(Annotation::getTag) //
+        .map(Annotation::getTag)
         .anyMatch(t -> t.equals("n"));
   }
 

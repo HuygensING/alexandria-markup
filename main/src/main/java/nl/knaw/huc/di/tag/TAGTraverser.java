@@ -175,7 +175,7 @@ public class TAGTraverser {
     final ExporterState state = stateRef.get();
     state
         .openMarkupIds
-        .descendingIterator() //
+        .descendingIterator()
         .forEachRemaining(markupId -> tagVisitor.exitCloseTag(store.getMarkup(markupId)));
     //        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
     tagVisitor.exitDocument(document);
@@ -298,12 +298,12 @@ public class TAGTraverser {
   private StringBuilder toCloseTag(TAGMarkup markup) {
     String suspend = markup.isSuspended() ? TAGML.SUSPEND_PREFIX : "";
 
-    return markup.isAnonymous() //
-        ? new StringBuilder() //
+    return markup.isAnonymous()
+        ? new StringBuilder()
         : new StringBuilder(CLOSE_TAG_STARTCHAR)
-            .append(suspend)
-            .append(markup.getExtendedTag())
-            .append(CLOSE_TAG_ENDCHAR);
+        .append(suspend)
+        .append(markup.getExtendedTag())
+        .append(CLOSE_TAG_ENDCHAR);
   }
 
   private StringBuilder toOpenTag(
@@ -316,8 +316,8 @@ public class TAGTraverser {
         new StringBuilder(OPEN_TAG_STARTCHAR)
             .append(resume)
             .append(markup.getExtendedTag(newLayers));
-    return markup.isAnonymous() //
-        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR) //
+    return markup.isAnonymous()
+        ? tagBuilder.append(MILESTONE_TAG_ENDCHAR)
         : tagBuilder.append(OPEN_TAG_ENDCHAR);
   }
 

@@ -57,8 +57,8 @@ public class TAGQLQueryHandler {
     List<TAGQLStatement> statements = listener.getStatements();
 
     TAGQLResult result = new TAGQLResult(statement);
-    statements.stream() //
-        .map(this::execute) //
+    statements.stream()
+        .map(this::execute)
         .forEach(result::addResult);
     result.getErrors().addAll(errorListener.getErrorMessages());
     return result;
@@ -66,7 +66,7 @@ public class TAGQLQueryHandler {
 
   private TAGQLResult execute(TAGQLStatement statement) {
     return statement
-        .getLimenProcessor() //
+        .getLimenProcessor()
         .apply(document);
   }
 }

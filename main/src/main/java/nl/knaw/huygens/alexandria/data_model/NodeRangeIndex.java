@@ -21,9 +21,9 @@ package nl.knaw.huygens.alexandria.data_model;
  */
 
 
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

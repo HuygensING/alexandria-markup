@@ -26,7 +26,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;

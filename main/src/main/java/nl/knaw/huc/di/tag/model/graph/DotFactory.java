@@ -40,22 +40,22 @@ import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 public class DotFactory {
     private ColorPicker colorPicker =
             new ColorPicker(
-                    "red",
-                    "blue",
-                    "darkgray",
-                    "gray",
-                    "green",
-                    "lightgray", //
-                    "lime",
-                    "magenta",
-                    "olive",
-                    "orange",
-                    "pink",
-                    "purple",
-                    "brown",
-                    "cyan",
-                    "teal",
-                    "violet",
+                "red",
+                "blue",
+                "darkgray",
+                "gray",
+                "green",
+                "lightgray",
+                "lime",
+                "magenta",
+                "olive",
+                "orange",
+                "pink",
+                "purple",
+                "brown",
+                "cyan",
+                "teal",
+                "violet",
                     "black");
     Map<String, String> layerColor = new HashMap<>();
     private TextGraph textGraph;

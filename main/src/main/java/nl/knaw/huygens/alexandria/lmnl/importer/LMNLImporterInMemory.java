@@ -42,17 +42,17 @@ public class LMNLImporterInMemory {
   private static void joinDiscontinuedRanges(Limen limen) {
     Map<String, Markup> markupsToJoin = new HashMap<>();
     List<Markup> markupsToRemove = new ArrayList<>();
-    limen.markupList.stream() //
-        .filter(Markup::hasN) //
+    limen.markupList.stream()
+        .filter(Markup::hasN)
         .forEach(
             markup -> {
               String tag = markup.getTag();
               Annotation nAnnotation =
                   markup
                       .getAnnotations()
-                      .parallelStream() //
-                      .filter(a -> a.getTag().equals("n")) //
-                      .findFirst() //
+                      .parallelStream()
+                      .filter(a -> a.getTag().equals("n"))
+                      .findFirst()
                       .get();
               String key = tag + "-" + annotationText(nAnnotation);
               if (markupsToJoin.containsKey(key)) {
@@ -66,10 +66,10 @@ public class LMNLImporterInMemory {
             });
 
     limen.markupList.removeAll(markupsToRemove);
-    limen.markupList.stream() //
-        .map(Markup::getAnnotations) //
-        .flatMap(List::stream) //
-        .map(Annotation::value) //
+    limen.markupList.stream()
+        .map(Markup::getAnnotations)
+        .flatMap(List::stream)
+        .map(Annotation::value)
         .forEach(LMNLImporterInMemory::joinDiscontinuedRanges);
   }
 
@@ -303,9 +303,9 @@ public class LMNLImporterInMemory {
 
   private void log(
       String mode, String ruleName, String modeName, Token token, ImporterContext context) {
-    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
-    // mode, context.limenContextStack.size(), //
-    // token.getText().replace("\n", "\\n"), //
+    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}",
+    // mode, context.limenContextStack.size(),
+    // token.getText().replace("\n", "\\n"),
     // ruleName, modeName);
   }
 
@@ -335,8 +335,8 @@ public class LMNLImporterInMemory {
       // LOG.info("currentDocumentContext().openMarkupDeque={}",
       // openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
       Optional<Markup> findFirst =
-          openMarkupDeque.stream() //
-              .filter(tr -> tr.getExtendedTag().equals(rangeName)) //
+          openMarkupDeque.stream()
+              .filter(tr -> tr.getExtendedTag().equals(rangeName))
               .findFirst();
       if (findFirst.isPresent()) {
         Markup markup = findFirst.get();
@@ -365,7 +365,7 @@ public class LMNLImporterInMemory {
 
     void addTextNode(TextNode textNode) {
       openMarkupDeque
-          .descendingIterator() //
+          .descendingIterator()
           .forEachRemaining(tr -> tr.addTextNode(textNode));
       limen.addTextNode(textNode);
     }
@@ -432,8 +432,8 @@ public class LMNLImporterInMemory {
       LimenContext limenContext = limenContextStack.pop();
       if (!limenContext.openMarkupDeque.isEmpty()) {
         String openRanges =
-            limenContext.openMarkupDeque.stream() //
-                .map(m -> "[" + m.getExtendedTag() + "}") //
+            limenContext.openMarkupDeque.stream()
+                .map(m -> "[" + m.getExtendedTag() + "}")
                 .collect(joining(", "));
         errors.add("Unclosed LMNL range(s): " + openRanges);
       }

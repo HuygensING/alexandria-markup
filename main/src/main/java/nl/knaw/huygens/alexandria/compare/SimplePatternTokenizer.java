@@ -57,10 +57,10 @@ public class SimplePatternTokenizer {
 
   //  public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(
 //      "\\s*\\W+[\\s]*|\\s*[^\\W\\s]+[\\s]*"));
-  static final String TEMPLATE = //
-      "\\s*[%s]+[\\s]*"+
-      "|"+
-      "\\s*[^%s\\s]+[\\s]*";
+  static final String TEMPLATE =
+      "\\s*[%s]+[\\s]*" +
+          "|" +
+          "\\s*[^%s\\s]+[\\s]*";
   public static final Function<String, Stream<String>> BY_WS_OR_PUNCT = tokenizer(Pattern.compile(format(
       TEMPLATE, PUNCT_REGEX, PUNCT_REGEX), Pattern.UNICODE_CHARACTER_CLASS));
 

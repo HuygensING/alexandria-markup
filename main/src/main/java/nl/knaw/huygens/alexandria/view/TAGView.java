@@ -77,33 +77,33 @@ public class TAGView {
     Set<Long> relevantMarkupIds = new LinkedHashSet<>(markupIds);
     if (include.equals(layerRelevance)) {
       List<Long> retain =
-              markupIds.stream() //
+              markupIds.stream()
                       .filter(
-                              m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/) //
+                          m -> hasOverlap(layersToInclude, getLayers(m)) /*|| isInDefaultLayerOnly(m)*/)
                       .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(layerRelevance)) {
       List<Long> remove =
-              markupIds.stream() //
+          markupIds.stream()
                       .filter(
-                              m ->
-                                      hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/) //
+                          m ->
+                              hasOverlap(layersToExclude, getLayers(m)) /*&& !isInDefaultLayerOnly(m)*/)
                       .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
     }
     if (include.equals(markupRelevance)) {
       List<Long> retain =
-          markupIds.stream() //
-              .filter(m -> markupToInclude.contains(getTag(m))) //
+          markupIds.stream()
+              .filter(m -> markupToInclude.contains(getTag(m)))
               .collect(toList());
       relevantMarkupIds.retainAll(retain);
 
     } else if (exclude.equals(markupRelevance)) {
       List<Long> remove =
-          markupIds.stream() //
-              .filter(m -> markupToExclude.contains(getTag(m))) //
+          markupIds.stream()
+              .filter(m -> markupToExclude.contains(getTag(m)))
               .collect(toList());
 
       relevantMarkupIds.removeAll(remove);
