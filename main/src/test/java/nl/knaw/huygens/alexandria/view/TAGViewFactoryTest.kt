@@ -1,11 +1,5 @@
 package nl.knaw.huygens.alexandria.view
 
-import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest
-import nl.knaw.huygens.alexandria.storage.TAGStore
-import org.assertj.core.api.Assertions
-import org.junit.Test
-import java.util.*
-
 /*
  * #%L
  * alexandria-markup-core
@@ -24,28 +18,35 @@ import java.util.*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
-    //  private final TAGViewFactory tagViewFactory = new TAGViewFactory(store);
+ */
+
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest
+import nl.knaw.huygens.alexandria.storage.TAGStore
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
+
+class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
+
     @Test
     fun fromJsonWithBadDefinition() {
-        val included: Set<String> = HashSet(Arrays.asList("A", "B"))
         runInStore { store: TAGStore ->
-            val expected = TAGView(store).withLayersToInclude(included)
-            val json = "{'includeLayer':['A','B']}".replace("'", "\"") // missing 's'
+            val json = ("""{
+                |"includeLayer" : ["A","B"]
+                |}""".trimMargin())
             val view = createView(store, json)
-            Assertions.assertThat(view.isValid).isFalse()
+            assertThat(view.isValid).isFalse()
         }
     }
 
     @Test
     fun fromJsonWithLayersInclusion() {
-        val included: Set<String> = HashSet(Arrays.asList("A", "B"))
+        val included: Set<String> = setOf("A", "B")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withLayersToInclude(included)
             val json = "{'includeLayers':['A','B']}".replace("'", "\"")
             val view = createView(store, json)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
@@ -55,90 +56,88 @@ import java.util.*
 
     @Test
     fun fromJsonWithLayersExclusion() {
-        val excluded: Set<String> = HashSet(Arrays.asList("A", "B"))
+        val excluded: Set<String> = setOf("A", "B")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withLayersToExclude(excluded)
             val json = "{'excludeLayers':['A','B']}".replace("'", "\"")
             val view = createView(store, json)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
     @Test
     fun fromJsonWithMarkupInclusion() {
-        val included: Set<String> = HashSet(Arrays.asList("chapter", "p"))
+        val included: Set<String> = setOf("chapter", "p")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withMarkupToInclude(included)
             val json = "{'includeMarkup':['chapter','p']}".replace("'", "\"")
             val view = createView(store, json)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
     @Test
     fun fromJsonWithMarkupExclusion() {
-        val excluded: Set<String> = HashSet(Arrays.asList("verse", "l"))
+        val excluded: Set<String> = setOf("verse", "l")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withMarkupToExclude(excluded)
             val json = "{'excludeMarkup':['verse','l']}".replace("'", "\"")
             val view = createView(store, json)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
     @Test
     fun fromDefinitionWithMarkupInclusion() {
-        val included: Set<String> = HashSet(Arrays.asList("chapter", "p"))
+        val included: Set<String> = setOf("chapter", "p")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withMarkupToInclude(included)
-            val def = TAGViewDefinition().setIncludeMarkup(included)
+            val def = TAGViewDefinition().withIncludeMarkup(included)
             val view = createView(store, def)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
-    private fun createView(store: TAGStore, def: TAGViewDefinition): TAGView {
-        val tagViewFactory = TAGViewFactory(store)
-        return tagViewFactory.fromDefinition(def)
-    }
+    private fun createView(store: TAGStore, def: TAGViewDefinition): TAGView =
+            TAGViewFactory(store).fromDefinition(def)
 
     @Test
     fun fromDefinitionWithMarkupExclusion() {
-        val excluded: Set<String> = HashSet(Arrays.asList("verse", "l"))
+        val excluded: Set<String> = setOf("verse", "l")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withMarkupToExclude(excluded)
-            val def = TAGViewDefinition().setExcludeMarkup(excluded)
+            val def = TAGViewDefinition().withExcludeMarkup(excluded)
             val view = createView(store, def)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
     @Test
     fun fromDefinitionWithLayersInclusion() {
-        val included: Set<String> = HashSet(Arrays.asList("L1", "L2"))
+        val included: Set<String> = setOf("L1", "L2")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withLayersToInclude(included)
-            val def = TAGViewDefinition().setIncludeLayers(included)
+            val def = TAGViewDefinition().withIncludeLayers(included)
             val view = createView(store, def)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 
     @Test
     fun fromDefinitionWithLayersExclusion() {
-        val excluded: Set<String> = HashSet(Arrays.asList("L3", "L4"))
+        val excluded: Set<String> = setOf("L3", "L4")
         runInStore { store: TAGStore ->
             val expected = TAGView(store).withLayersToExclude(excluded)
-            val def = TAGViewDefinition().setExcludeLayers(excluded)
+            val def = TAGViewDefinition().withExcludeLayers(excluded)
             val view = createView(store, def)
-            Assertions.assertThat(view.isValid).isTrue()
-            Assertions.assertThat(view).isEqualToComparingFieldByField(expected)
+            assertThat(view.isValid).isTrue()
+            assertThat(view).isEqualToComparingFieldByField(expected)
         }
     }
 }

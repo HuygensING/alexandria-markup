@@ -1,13 +1,5 @@
 package nl.knaw.huygens.alexandria.view
 
-import nl.knaw.huygens.alexandria.storage.TAGStore
-import java.io.StringReader
-import java.util.stream.Collectors
-import javax.json.Json
-import javax.json.JsonArray
-import javax.json.JsonObject
-import javax.json.JsonString
-
 /*
  * #%L
  * alexandria-markup-core
@@ -26,7 +18,24 @@ import javax.json.JsonString
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class TAGViewFactory(private val store: TAGStore) {
+ */
+
+import nl.knaw.huygens.alexandria.storage.TAGStore
+import java.io.StringReader
+import javax.json.Json
+import javax.json.JsonArray
+import javax.json.JsonObject
+import javax.json.JsonString
+
+class TAGViewFactory(private val store: TAGStore) {
+
+    fun fromJsonString(json: String): TAGView {
+        val reader = Json.createReader(StringReader(json))
+        val jsonObject = reader.readObject()
+        reader.close()
+        return toTagView(jsonObject)
+    }
+
     fun fromDefinition(definition: TAGViewDefinition): TAGView {
         return createTAGView(
                 definition.includeLayers, definition.excludeLayers,
@@ -34,22 +43,15 @@ import javax.json.JsonString
         )
     }
 
-    fun fromJsonString(json: String?): TAGView {
-        val reader = Json.createReader(StringReader(json))
-        val jsonObject = reader.readObject()
-        reader.close()
-        return toTagView(jsonObject)
-    }
-
     private fun toTagView(jsonObject: JsonObject): TAGView {
         val includeLayerArray = jsonObject.getJsonArray(INCLUDE_LAYERS)
         val excludeLayerArray = jsonObject.getJsonArray(EXCLUDE_LAYERS)
         val includeMarkupArray = jsonObject.getJsonArray(INCLUDE_MARKUP)
         val excludeMarkupArray = jsonObject.getJsonArray(EXCLUDE_MARKUP)
-        var includeLayers: Set<String?>? = null
-        var excludeLayers: Set<String?>? = null
-        var includeMarkup: Set<String?>? = null
-        var excludeMarkup: Set<String?>? = null
+        var includeLayers: Set<String> = setOf()
+        var excludeLayers: Set<String> = setOf()
+        var includeMarkup: Set<String> = setOf()
+        var excludeMarkup: Set<String> = setOf()
         if (includeLayerArray != null) {
             includeLayers = getElements(includeLayerArray)
         }
@@ -65,7 +67,11 @@ import javax.json.JsonString
         return createTAGView(includeLayers, excludeLayers, includeMarkup, excludeMarkup)
     }
 
-    private fun createTAGView(includeLayers: Set<String?>?, excludeLayers: Set<String?>?, includeMarkup: Set<String?>?, excludeMarkup: Set<String?>?): TAGView {
+    private fun notEmpty(stringSet: Set<String>?): Boolean {
+        return stringSet != null && stringSet.isNotEmpty()
+    }
+
+    private fun createTAGView(includeLayers: Set<String>, excludeLayers: Set<String>, includeMarkup: Set<String>, excludeMarkup: Set<String>): TAGView {
         val tagView = TAGView(store)
         if (notEmpty(includeLayers)) {
             tagView.layersToInclude = includeLayers
@@ -82,10 +88,6 @@ import javax.json.JsonString
         return tagView
     }
 
-    private fun notEmpty(stringSet: Set<String?>?): Boolean {
-        return stringSet != null && !stringSet.isEmpty()
-    }
-
     val defaultView: TAGView
         get() = TAGView(store)
 
@@ -94,12 +96,11 @@ import javax.json.JsonString
         const val EXCLUDE_LAYERS = "excludeLayers"
         const val INCLUDE_MARKUP = "includeMarkup"
         const val EXCLUDE_MARKUP = "excludeMarkup"
-        private fun getElements(jsonArray: JsonArray): Set<String?> {
-            return jsonArray.getValuesAs(JsonString::class.java) //
-                    .stream() //
-                    .map { obj: JsonString -> obj.string } //
-                    .collect(Collectors.toSet())
-        }
+
+        private fun getElements(jsonArray: JsonArray): Set<String> =
+                jsonArray.getValuesAs(JsonString::class.java)
+                        .map { obj: JsonString -> obj.string }
+                        .toSet()
     }
 
 }

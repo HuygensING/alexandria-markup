@@ -1,7 +1,5 @@
 package nl.knaw.huygens.alexandria.view
 
-import java.util.*
-
 /*
  * #%L
  * alexandria-markup-core
@@ -20,32 +18,39 @@ import java.util.*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class TAGViewDefinition {
-    var includeLayers: Set<String?>? = HashSet()
-        private set
-    var excludeLayers: Set<String?>? = HashSet()
-        private set
-    var includeMarkup: Set<String?>? = HashSet()
-        private set
-    var excludeMarkup: Set<String?>? = HashSet()
+ */
+
+import java.util.*
+
+class TAGViewDefinition {
+    var includeLayers: Set<String> = HashSet()
         private set
 
-    fun setIncludeLayers(includeLayers: Set<String?>?): TAGViewDefinition {
+    var excludeLayers: Set<String> = HashSet()
+        private set
+
+    var includeMarkup: Set<String> = HashSet()
+        private set
+
+    var excludeMarkup: Set<String> = HashSet()
+        private set
+
+    fun withIncludeLayers(includeLayers: Set<String>): TAGViewDefinition {
         this.includeLayers = includeLayers
         return this
     }
 
-    fun setExcludeLayers(excludeLayers: Set<String?>?): TAGViewDefinition {
+    fun withExcludeLayers(excludeLayers: Set<String>): TAGViewDefinition {
         this.excludeLayers = excludeLayers
         return this
     }
 
-    fun setIncludeMarkup(includeMarkup: Set<String?>?): TAGViewDefinition {
+    fun withIncludeMarkup(includeMarkup: Set<String>): TAGViewDefinition {
         this.includeMarkup = includeMarkup
         return this
     }
 
-    fun setExcludeMarkup(excludeMarkup: Set<String?>?): TAGViewDefinition {
+    fun withExcludeMarkup(excludeMarkup: Set<String>): TAGViewDefinition {
         this.excludeMarkup = excludeMarkup
         return this
     }
