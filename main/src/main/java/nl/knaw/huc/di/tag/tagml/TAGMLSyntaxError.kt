@@ -1,8 +1,4 @@
-package nl.knaw.huc.di.tag.tagml;
-
-import nl.knaw.huygens.alexandria.ErrorListener;
-
-import java.util.List;
+package nl.knaw.huc.di.tag.tagml
 
 /*-
  * #%L
@@ -23,16 +19,13 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
-public class TAGMLSyntaxError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
-  private final List<ErrorListener.TAGError> errors;
 
-  public TAGMLSyntaxError(String message, List<ErrorListener.TAGError> errors) {
-    super(message);
-    this.errors = errors;
-  }
+import nl.knaw.huygens.alexandria.ErrorListener.TAGError
 
-  public List<ErrorListener.TAGError> getErrors() {
-    return errors;
-  }
+class TAGMLSyntaxError(message: String, val errors: List<TAGError>) : RuntimeException(message) {
+
+    companion object {
+        private const val serialVersionUID = 1L
+    }
+
 }

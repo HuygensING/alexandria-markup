@@ -60,7 +60,7 @@ public class TAGValidator {
               : "Layers "
                   + layersMissingInSchema.stream().map(this::layerName).collect(joining(", "))
                   + " are";
-      result.warnings.add(warning + " used in the document, but not defined in the schema.");
+      result.getWarnings().add(warning + " used in the document, but not defined in the schema.");
     }
 
     List<String> layersMissingInDocument = new ArrayList(layersInSchema);
@@ -72,7 +72,7 @@ public class TAGValidator {
               : "Layers "
                   + layersMissingInDocument.stream().map(this::layerName).collect(joining(", "))
                   + " are";
-      result.warnings.add(warning + " defined in the schema, but not used in the document.");
+      result.getWarnings().add(warning + " defined in the schema, but not used in the document.");
     }
 
     return result;
@@ -88,13 +88,15 @@ public class TAGValidator {
     TAGMarkup markup = store.getMarkup(rootMarkupId);
     AtomicBoolean hasErrors = new AtomicBoolean(false);
     if (!markup.hasTag(expectedRootMarkup)) {
-      result.errors.add(
-          "Layer "
-              + layerName(layer)
-              + ": expected root markup "
-              + expectedRootMarkup
-              + ", but was "
-              + openTag(markup));
+      result
+          .getErrors()
+          .add(
+              "Layer "
+                  + layerName(layer)
+                  + ": expected root markup "
+                  + expectedRootMarkup
+                  + ", but was "
+                  + openTag(markup));
       hasErrors.set(true);
     }
 
@@ -124,17 +126,19 @@ public class TAGValidator {
                 if (expectedTags.contains(tag)) {
                   markupIdsToHandle.add(mId);
                 } else {
-                  result.errors.add(
-                      "Layer "
-                          + layerName(layer)
-                          + ": expected "
-                          + expectedTags.stream()
+                  result
+                      .getErrors()
+                      .add(
+                          "Layer "
+                              + layerName(layer)
+                              + ": expected "
+                              + expectedTags.stream()
                               .map(t -> openTag(t, layer))
                               .collect(joining(" or "))
-                          + " as child markup of "
-                          + openTag(parentTag, layer)
-                          + ", but found "
-                          + openTag(markup1));
+                              + " as child markup of "
+                              + openTag(parentTag, layer)
+                              + ", but found "
+                              + openTag(markup1));
                   hasErrors.set(true);
                 }
               });

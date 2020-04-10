@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml;
+package nl.knaw.huc.di.tag.validate
 
 /*-
  * #%L
@@ -19,11 +19,15 @@ package nl.knaw.huc.di.tag.tagml;
  * limitations under the License.
  * #L%
  */
-public class TAGMLBreakingError extends RuntimeException {
-  private static final long serialVersionUID = 1L;
 
-  public TAGMLBreakingError(String message) {
-    super(message);
-  }
+class TAGValidationResult {
+    val warnings: MutableList<String> = mutableListOf()
+    val errors: MutableList<String> = mutableListOf()
 
+    val isValid: Boolean
+        get() = errors.isEmpty()
+
+    override fun toString(): String {
+        return "TAGValidationResult{errors=$errors}"
+    }
 }

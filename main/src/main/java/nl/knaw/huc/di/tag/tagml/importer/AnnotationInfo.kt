@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.validate;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -19,19 +19,28 @@ package nl.knaw.huc.di.tag.validate;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.List;
 
-public class TAGValidationResult {
-  public List<String> warnings = new ArrayList<>();
-  public List<String> errors = new ArrayList<>();
+import nl.knaw.huygens.alexandria.storage.AnnotationType
+import org.apache.commons.lang3.StringUtils
+import java.util.*
 
-  public boolean isValid() {
-    return errors.isEmpty();
-  }
+class AnnotationInfo(val nodeId: Long, val type: AnnotationType, val name: String) {
+    private var id: String? = null
 
-  @Override
-  public String toString() {
-    return "TAGValidationResult{" + "errors=" + errors + '}';
-  }
+    fun hasName(name: String): Boolean {
+        return this.name == name
+    }
+
+    fun hasName(): Boolean {
+        return StringUtils.isNotEmpty(name)
+    }
+
+    fun setId(id: String) {
+        this.id = id
+    }
+
+    fun getId(): Optional<String> {
+        return Optional.ofNullable(id)
+    }
+
 }

@@ -51,12 +51,12 @@ public class TAGValidationResultAssert
   protected Iterables iterables = Iterables.instance();
 
   public TAGValidationResultAssert hasErrors(Collection<String> expectedErrors) {
-    iterables.assertContainsAll(info, actual.errors, expectedErrors);
+    iterables.assertContainsAll(info, actual.getErrors(), expectedErrors);
     return myself;
   }
 
   public TAGValidationResultAssert hasWarnings(Collection<String> expectedWarnings) {
-    iterables.assertContainsAll(info, actual.warnings, expectedWarnings);
+    iterables.assertContainsAll(info, actual.getWarnings(), expectedWarnings);
     return myself;
   }
 }
