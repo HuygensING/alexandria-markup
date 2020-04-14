@@ -225,7 +225,7 @@ public class XMLBuilder implements TAGVisitor {
 
   @Override
   public String serializeBooleanAnnotationValue(boolean booleanValue) {
-    return serializeStringAnnotationValue(booleanValue ? "TRUE" : "FALSE");
+    return serializeStringAnnotationValue(booleanValue ? "true" : "false");
   }
 
   @Override
