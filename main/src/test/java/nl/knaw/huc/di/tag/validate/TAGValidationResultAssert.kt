@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.validate;
+package nl.knaw.huc.di.tag.validate
 
 /*-
  * #%L
@@ -19,44 +19,40 @@ package nl.knaw.huc.di.tag.validate;
  * limitations under the License.
  * #L%
  */
-import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.internal.Iterables;
 
-import java.util.Collection;
+import org.assertj.core.api.AbstractObjectAssert
+import org.assertj.core.internal.Iterables
 
-public class TAGValidationResultAssert
-    extends AbstractObjectAssert<TAGValidationResultAssert, TAGValidationResult> {
-  public TAGValidationResultAssert(final TAGValidationResult actual) {
-    super(actual, TAGValidationResultAssert.class);
-  }
+class TAGValidationResultAssert(actual: TAGValidationResult?) : AbstractObjectAssert<TAGValidationResultAssert?, TAGValidationResult?>(actual, TAGValidationResultAssert::class.java) {
 
-  public TAGValidationResultAssert isValid() {
-    isNotNull();
-    String errorMessage = "\n expected isValid to be true, but was false";
-    if (!actual.isValid()) {
-      failWithMessage(errorMessage);
+  val isValid: TAGValidationResultAssert
+    get() {
+      isNotNull
+      val errorMessage = "\n expected isValid to be true, but was false"
+      if (!actual!!.isValid) {
+        failWithMessage(errorMessage)
+      }
+      return myself!!
     }
-    return myself;
-  }
 
-  public TAGValidationResultAssert isNotValid() {
-    isNotNull();
-    String errorMessage = "\n expected isValid to be false, but was true";
-    if (actual.isValid()) {
-      failWithMessage(errorMessage);
+  val isNotValid: TAGValidationResultAssert
+    get() {
+      isNotNull
+      val errorMessage = "\n expected isValid to be false, but was true"
+      if (actual!!.isValid) {
+        failWithMessage(errorMessage)
+      }
+      return myself!!
     }
-    return myself;
+
+  private var iterables = Iterables.instance()
+  fun hasErrors(expectedErrors: Collection<String?>?): TAGValidationResultAssert {
+    iterables.assertContainsAll(info, actual!!.errors, expectedErrors)
+    return myself!!
   }
 
-  protected Iterables iterables = Iterables.instance();
-
-  public TAGValidationResultAssert hasErrors(Collection<String> expectedErrors) {
-    iterables.assertContainsAll(info, actual.getErrors(), expectedErrors);
-    return myself;
-  }
-
-  public TAGValidationResultAssert hasWarnings(Collection<String> expectedWarnings) {
-    iterables.assertContainsAll(info, actual.getWarnings(), expectedWarnings);
-    return myself;
+  fun hasWarnings(expectedWarnings: Collection<String?>?): TAGValidationResultAssert {
+    iterables.assertContainsAll(info, actual!!.warnings, expectedWarnings)
+    return myself!!
   }
 }

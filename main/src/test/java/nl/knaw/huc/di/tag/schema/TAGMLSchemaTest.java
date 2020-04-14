@@ -40,6 +40,7 @@ import java.util.List;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 
 public class TAGMLSchemaTest {
+
   private Logger LOG = LoggerFactory.getLogger(TAGMLSchemaTest.class);
 
   @Test
@@ -66,7 +67,7 @@ public class TAGMLSchemaTest {
     final TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
     assertThat(result).hasNoErrors().hasLayers("L1", "L2");
 
-    TreeNode<String> layerHierarchy1 = result.schema.getLayerHierarchy("L1");
+    TreeNode<String> layerHierarchy1 = result.getSchema().getLayerHierarchy("L1");
     assertThat(layerHierarchy1.data).isEqualTo("root");
 
     List<TreeNode<String>> rootChildren = layerHierarchy1.children;
@@ -81,7 +82,7 @@ public class TAGMLSchemaTest {
     assertThat(dChildren.get(0).data).isEqualTo("d1");
     assertThat(dChildren.get(1).data).isEqualTo("d2");
 
-    TreeNode<String> layerHierarchy2 = result.schema.getLayerHierarchy("L2");
+    TreeNode<String> layerHierarchy2 = result.getSchema().getLayerHierarchy("L2");
     assertThat(layerHierarchy2.data).isEqualTo("root");
 
     List<TreeNode<String>> rootChildren2 = layerHierarchy2.children;
@@ -120,7 +121,7 @@ public class TAGMLSchemaTest {
     assertThat(report.isSuccess()).isFalse();
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    LOG.info("errors={}", result.errors);
+    LOG.info("errors={}", result.getErrors());
     assertThat(result).hasErrors("only 1 root markup allowed; found 2 [root1, root2] in layer L1");
   }
 
@@ -132,7 +133,7 @@ public class TAGMLSchemaTest {
     assertThat(report.isSuccess()).isFalse();
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    LOG.info("errors={}", result.errors);
+    LOG.info("errors={}", result.getErrors());
     assertThat(result).hasErrors("no layer definitions found");
   }
 
@@ -149,7 +150,7 @@ public class TAGMLSchemaTest {
     assertThat(report.isSuccess()).isFalse();
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    LOG.info("errors={}", result.errors);
+    LOG.info("errors={}", result.getErrors());
     assertThat(result)
         .hasErrors(
             "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]");
@@ -163,7 +164,7 @@ public class TAGMLSchemaTest {
     assertThat(report.isSuccess()).isFalse();
 
     TAGMLSchemaParseResult result = TAGMLSchemaFactory.parseYAML(schemaYAML);
-    LOG.info("errors={}", result.errors);
+    LOG.info("errors={}", result.getErrors());
     assertThat(result)
         .hasErrors(
             "while scanning a simple key\n"
@@ -181,6 +182,7 @@ public class TAGMLSchemaTest {
   @Ignore("fix tagschemaschema.json first: find 'or' function")
   @Test
   public void testSchemaValidator() throws ProcessingException, IOException {
+    // because y = yes = TRUE according to the jackson parser
     String yaml =
         "---\n"
             + "L1:\n"
@@ -194,7 +196,7 @@ public class TAGMLSchemaTest {
             + "L2:\n"
             + "  root:\n"
             + "    - x\n"
-            + "    - 'y'\n" // because y = yes = TRUE according to the jackson parser
+            + "    - 'y'\n"
             + "    - z:\n"
             + "        - z1\n"
             + "        - z2\n";

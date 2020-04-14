@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.schema;
+package nl.knaw.huc.di.tag.schema
 
 /*-
  * #%L
@@ -19,10 +19,8 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.List;
 
-public class TAGMLSchemaParseResult {
-  public TAGMLSchema schema = new TAGMLSchema();
-  public List<String> errors = new ArrayList<>();
+class TAGMLSchemaParseResult {
+  val schema = TAGMLSchema()
+  val errors: MutableList<String> = mutableListOf()
 }

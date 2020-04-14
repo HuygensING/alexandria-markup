@@ -35,7 +35,7 @@ class AnnotationInfo(val nodeId: Long, val type: AnnotationType, val name: Strin
         return StringUtils.isNotEmpty(name)
     }
 
-    fun setId(id: String) {
+    fun setId(id: String?) {
         this.id = id
     }
 

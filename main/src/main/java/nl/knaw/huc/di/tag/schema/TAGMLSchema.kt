@@ -25,9 +25,8 @@ import java.util.*
 class TAGMLSchema {
     private var layers: MutableList<String> = ArrayList()
     private val layerHierarchies = HashMap<String, TreeNode<String>>()
-    fun getLayers(): List<String> {
-        return layers
-    }
+
+    fun getLayers(): List<String> = layers
 
     fun setLayers(layers: MutableList<String>) {
         this.layers = layers
@@ -41,7 +40,5 @@ class TAGMLSchema {
         layerHierarchies[key] = layerHierarchy
     }
 
-    fun getLayerHierarchy(layer: String): TreeNode<String> {
-        return layerHierarchies[layer]!!
-    }
+    fun getLayerHierarchy(layer: String): TreeNode<String> = layerHierarchies[layer]!!
 }

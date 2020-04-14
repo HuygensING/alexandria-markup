@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.schema;
+package nl.knaw.huc.di.tag.schema
 
 /*-
  * #%L
@@ -19,51 +19,42 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
-import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.internal.Iterables;
+import org.assertj.core.api.AbstractObjectAssert
+import org.assertj.core.internal.Iterables
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+class TAGMLSchemaParseResultAssert(actual: TAGMLSchemaParseResult?) : AbstractObjectAssert<TAGMLSchemaParseResultAssert, TAGMLSchemaParseResult>(actual, TAGMLSchemaParseResultAssert::class.java) {
 
-public class TAGMLSchemaParseResultAssert
-    extends AbstractObjectAssert<TAGMLSchemaParseResultAssert, TAGMLSchemaParseResult> {
-
-  public TAGMLSchemaParseResultAssert(final TAGMLSchemaParseResult actual) {
-    super(actual, TAGMLSchemaParseResultAssert.class);
-  }
-
-  public TAGMLSchemaParseResultAssert hasNoErrors() {
-    isNotNull();
-    String errorMessage = "\nExpected errors to be empty, but was %s";
-    if (!actual.errors.isEmpty()) {
-      failWithMessage(errorMessage, actual.errors);
+  fun hasNoErrors(): TAGMLSchemaParseResultAssert {
+    isNotNull
+    val errorMessage = "\nExpected errors to be empty, but was %s"
+    if (actual!!.errors.isNotEmpty()) {
+      failWithMessage(errorMessage, actual.errors)
     }
-    return myself;
+    return myself!!
   }
 
-  protected Iterables iterables = Iterables.instance();
-
-  public TAGMLSchemaParseResultAssert hasLayers(final String... expectedLayers) {
-    iterables.assertContainsAll(info, actual.schema.getLayers(), Arrays.asList(expectedLayers));
-    return myself;
+  private var iterables = Iterables.instance()
+  fun hasLayers(vararg expectedLayers: String): TAGMLSchemaParseResultAssert {
+    iterables.assertContainsAll(
+        info, actual!!.schema.getLayers(), listOf(*expectedLayers))
+    return myself!!
   }
 
-  public TAGMLSchemaParseResultAssert hasErrors(final String expectedError) {
-    return hasErrors(Collections.singletonList(expectedError));
+  fun hasErrors(expectedError: String): TAGMLSchemaParseResultAssert {
+    return hasErrors(listOf(expectedError))
   }
 
-  public TAGMLSchemaParseResultAssert hasErrors(final Collection<String> expectedErrors) {
-    iterables.assertContainsAll(info, actual.errors, expectedErrors);
-    return myself;
+  fun hasErrors(expectedErrors: Collection<String>): TAGMLSchemaParseResultAssert {
+    iterables.assertContainsAll(info, actual!!.errors, expectedErrors)
+    return myself!!
   }
 
-  public TAGMLSchemaParseResultAssert hasSchema() {
-    isNotNull();
-    String errorMessage = "\nExpected schema to not be null, but it was.";
-    if (actual.schema == null) {
-      failWithMessage(errorMessage);
+  fun hasSchema(): TAGMLSchemaParseResultAssert {
+    isNotNull
+    val errorMessage = "\nExpected schema to not be null, but it was."
+    if (actual?.schema == null) {
+      failWithMessage(errorMessage)
     }
-    return myself;
+    return myself!!
   }
 }

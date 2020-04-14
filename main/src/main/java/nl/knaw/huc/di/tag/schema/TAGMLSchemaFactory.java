@@ -48,34 +48,38 @@ public class TAGMLSchemaFactory {
                 if (layerName.equals("$")) {
                   layerName = TAGML.DEFAULT_LAYER;
                 }
-                result.schema.addLayer(layerName);
+                result.getSchema().addLayer(layerName);
                 JsonNode jsonNode = entry.getValue();
                 LOG.info("layer={}", layerName);
                 LOG.info("jsonNode={}", jsonNode);
                 if (!jsonNode.isObject()) {
-                  result.errors.add(
-                      "expected root markup with list of child markup, found (as json) "
-                          + jsonNode);
+                  result
+                      .getErrors()
+                      .add(
+                          "expected root markup with list of child markup, found (as json) "
+                              + jsonNode);
                 } else {
                   if (jsonNode.size() > 1) {
-                    result.errors.add(
-                        "only 1 root markup allowed; found "
-                            + jsonNode.size()
-                            + " "
-                            + Lists.newArrayList(jsonNode.fieldNames())
-                            + " in layer "
-                            + layerName);
+                    result
+                        .getErrors()
+                        .add(
+                            "only 1 root markup allowed; found "
+                                + jsonNode.size()
+                                + " "
+                                + Lists.newArrayList(jsonNode.fieldNames())
+                                + " in layer "
+                                + layerName);
                   } else {
                     TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode);
-                    result.schema.setLayerHierarchy(layerName, layerHierarchy);
+                    result.getSchema().setLayerHierarchy(layerName, layerHierarchy);
                   }
                 }
               });
     } catch (Exception e) {
-      result.errors.add(e.getMessage());
+      result.getErrors().add(e.getMessage());
     }
-    if (result.schema.getLayers().isEmpty()) {
-      result.errors.add("no layer definitions found");
+    if (result.getSchema().getLayers().isEmpty()) {
+      result.getErrors().add("no layer definitions found");
     }
     LOG.info("result={}", result);
     return result;
