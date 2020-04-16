@@ -33,11 +33,14 @@ import org.junit.Ignore
 import org.junit.Test
 
 class TAGViewTest : AlexandriaBaseStoreTest() {
-  @Ignore("Should the default layer always be included?")
+
+  //  @Ignore("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
-    val viewJson = "{'includeLayers':['A']}".replace("'", "\"")
+    val viewJson = """{
+      |"includeLayers" : ["A"]
+      |}""".trimMargin()
     val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
@@ -48,12 +51,14 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  @Ignore("Should the default layer always be included?")
+  //  @Ignore("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
-    val viewJson = "{'excludeLayers':['B']}".replace("'", "\"")
-    val expected = "[tagml>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<tagml]"
+    val viewJson = """{
+      |"excludeLayers" : ["B"]
+      |}""".trimMargin()
+    val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
       val view = tagViewFactory.fromJsonString(viewJson)
@@ -67,7 +72,10 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
   @Test // NLA-489
   fun testLayerMarkupCombinationInView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
-    val viewJson = "{'includeLayers':['A'],'excludeMarkup':['b']}".replace("'", "\"")
+    val viewJson = """{
+      |"includeLayers" : ["A"],
+      |"excludeMarkup" : ["b"]
+      |}""".trimMargin()
     val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
@@ -78,7 +86,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  @Ignore("Should the default layer always be included?")
+  //  @Ignore("Should the default layer always be included?")
   @Test
   fun testFilterRelevantMarkup0() {
     runInStoreTransaction { store: TAGStore ->
@@ -112,7 +120,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
       val document1 = importer.importTAGML("[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]")
       val exporter1 = TAGMLExporter(store, viewNoL1)
       val tagmlBD = exporter1.asTAGML(document1)
-      assertThat(tagmlBD).isEqualTo("a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]")
+      assertThat(tagmlBD).isEqualTo("[tagml|+L1,+L2>a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]<tagml|L1,L2]")
 
       val exporter2 = TAGMLExporter(store, viewL1)
       val tagmlAC = exporter2.asTAGML(document1)
