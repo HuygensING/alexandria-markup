@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagql.grammar;
+package nl.knaw.huc.di.tag.tagql.grammar
 
 /*
  * #%L
@@ -20,48 +20,40 @@ package nl.knaw.huc.di.tag.tagql.grammar;
  * #L%
  */
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.tree.ParseTree
+import org.assertj.core.api.Assertions
+import org.junit.Test
+import org.slf4j.LoggerFactory
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class TAGQLTest {
-  private final Logger LOG = LoggerFactory.getLogger(getClass());
+class TAGQLTest {
+  private val LOG = LoggerFactory.getLogger(javaClass)
 
   @Test
-  public void testCorrectTAGQLStatement() {
-    String statement = "select m.text from markup m where m.name='q' and m.id='a'";
-    CharStream stream = CharStreams.fromString(statement);
-    TAGQLLexer lex = new TAGQLLexer(stream);
-    List<? extends Token> allTokens = lex.getAllTokens();
-    for (Token token : allTokens) {
-      LOG.info("token: [{}] <<{}>>", lex.getRuleNames()[token.getType() - 1], token.getText());
+  fun testCorrectTAGQLStatement() {
+    val statement = "select m.text from markup m where m.name='q' and m.id='a'"
+    val stream: CharStream = CharStreams.fromString(statement)
+    val lex = TAGQLLexer(stream)
+    val allTokens = lex.allTokens
+    for (token in allTokens) {
+      LOG.info("token: [{}] <<{}>>", lex.ruleNames[token.type - 1], token.text)
     }
-    lex.reset();
-
-    CommonTokenStream tokens = new CommonTokenStream(lex);
-    TAGQLParser parser = new TAGQLParser(tokens);
-    parser.setBuildParseTree(true);
-    ParseTree tree = parser.query();
-    LOG.info("tree={}", tree.toStringTree(parser));
-    assertThat(tree.getChildCount()).isEqualTo(2);
-
-    int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
-    assertThat(numberOfSyntaxErrors).isEqualTo(0); // no syntax errors
-    LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors);
-
-    for (int i = 0; i < tree.getChildCount(); i++) {
-      LOG.info("root.child={}", tree.getChild(i).getText());
+    lex.reset()
+    val tokens = CommonTokenStream(lex)
+    val parser = TAGQLParser(tokens)
+    parser.buildParseTree = true
+    val tree: ParseTree = parser.query()
+    LOG.info("tree={}", tree.toStringTree(parser))
+    Assertions.assertThat(tree.childCount).isEqualTo(2)
+    val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
+    Assertions.assertThat(numberOfSyntaxErrors).isEqualTo(0) // no syntax errors
+    LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors)
+    for (i in 0 until tree.childCount) {
+      LOG.info("root.child={}", tree.getChild(i).text)
     }
-    assertThat(allTokens).hasSize(19);
+    Assertions.assertThat(allTokens).hasSize(19)
 
     // MyListener listener = new MyListener();
     // parser.TAGQL_script().enterRule(listener);
@@ -69,7 +61,5 @@ public class TAGQLTest {
     // MyVisitor visitor = new MyVisitor();
     // Object result = visitor.visit(tree);
     // LOG.info("result={}",result);
-
   }
-
 }
