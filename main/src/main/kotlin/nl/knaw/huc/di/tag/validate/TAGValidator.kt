@@ -49,7 +49,7 @@ class TAGValidator(private val store: TAGStore) {
       val warning = if (layersMissingInSchema.size == 1)
         "Layer ${layerName(layersMissingInSchema[0])} is"
       else
-        "Layers ${layersMissingInSchema.map { layerName(it) }.joinToString { ", " }} are"
+        "Layers ${layersMissingInSchema.joinToString(separator = ", ") { layerName(it) }} are"
       result.warnings.add("$warning used in the document, but not defined in the schema.")
     }
     val layersMissingInDocument: MutableList<String> = layersInSchema.toMutableList()
@@ -58,7 +58,7 @@ class TAGValidator(private val store: TAGStore) {
       val warning = if (layersMissingInDocument.size == 1)
         "Layer ${layerName(layersMissingInDocument[0])} is"
       else
-        "Layers ${layersMissingInDocument.map { layerName(it) }.joinToString { ", " }} are"
+        "Layers ${layersMissingInDocument.joinToString(separator = ", ") { layerName(it) }} are"
       result.warnings.add("$warning defined in the schema, but not used in the document.")
     }
     return result
@@ -103,19 +103,11 @@ class TAGValidator(private val store: TAGStore) {
             if (expectedTags.contains(tag)) {
               markupIdsToHandle.add(mId)
             } else {
+              val expectedTagString = expectedTags.joinToString(separator = " or ") { openTag(it, layer) }
               result
                   .errors
                   .add(
-                      "Layer "
-                          + layerName(layer)
-                          + ": expected "
-                          + expectedTags
-                          .map { openTag(it, layer) }
-                          .joinToString { " or " }
-                          + " as child markup of "
-                          + openTag(parentTag, layer)
-                          + ", but found "
-                          + openTag(markup1))
+                      "Layer ${layerName(layer)}: expected $expectedTagString as child markup of ${openTag(parentTag, layer)}, but found ${openTag(markup1)}")
               hasErrors.set(true)
             }
           }
