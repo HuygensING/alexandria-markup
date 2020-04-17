@@ -65,10 +65,10 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     if (part != null) {
       when (part) {
         is TextPartContext -> {
-          statement.setMarkupMapper(Function { markup: TAGMarkup -> toText(markup) })
+          statement.setMarkupMapper { markup: TAGMarkup -> toText(markup) }
         }
         is NamePartContext -> {
-          statement.setMarkupMapper(Function { obj: TAGMarkup -> obj.extendedTag })
+          statement.setMarkupMapper { obj: TAGMarkup -> obj.extendedTag }
         }
         is AnnotationValuePartContext -> {
           val annotationIdentifier = getAnnotationName(part)
@@ -104,15 +104,14 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     }
   }
 
-  private fun hasTag(filterTag: String): Predicate<AnnotationInfo> {
-    return Predicate { a: AnnotationInfo -> filterTag == a.name }
-  }
+  private fun hasTag(filterTag: String): Predicate<AnnotationInfo> =
+      Predicate { a: AnnotationInfo -> filterTag == a.name }
 
   private fun handleSource(statement: TAGQLSelectStatement, source: SourceContext) {
     when (source) {
       is ParameterizedMarkupSourceContext -> {
         val markupName = stringValue(source.markupName())
-        statement.setMarkupFilter(Predicate { tr: TAGMarkup -> tr.tag == markupName })
+        statement.setMarkupFilter({ tr: TAGMarkup -> tr.tag == markupName })
         if (source.indexValue() != null) {
           val index = toInteger(source.indexValue())
           statement.setIndex(index)
@@ -136,40 +135,44 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
 
   private fun handleExpression(expr: ExprContext): Predicate<TAGMarkup> {
     var filter: Predicate<TAGMarkup>? = null
-    if (expr is EqualityComparisonExpressionContext) {
-      val ecec = expr as EqualityComparisonExpressionContext
-      val extendedIdentifier = ecec.extendedIdentifier()
-      val value = stringValue(ecec.literalValue())
-      if (extendedIdentifier.part() is NamePartContext) {
-        filter = Predicate { markup: TAGMarkup -> markup.extendedTag == value }
-      } else if (extendedIdentifier.part() is AnnotationValuePartContext) {
-        val annotationIdentifier = getAnnotationName(extendedIdentifier.part())
-        filter = Predicate { markup: TAGMarkup ->
-          markup
-              .annotationStream
-              .anyMatch { a: AnnotationInfo -> annotationIdentifier == a.name && value == toAnnotationText(a) }
+    when (expr) {
+      is EqualityComparisonExpressionContext -> {
+        val ecec = expr
+        val extendedIdentifier = ecec.extendedIdentifier()
+        val value = stringValue(ecec.literalValue())
+        if (extendedIdentifier.part() is NamePartContext) {
+          filter = Predicate { markup: TAGMarkup -> markup.extendedTag == value }
+        } else if (extendedIdentifier.part() is AnnotationValuePartContext) {
+          val annotationIdentifier = getAnnotationName(extendedIdentifier.part())
+          filter = Predicate { markup: TAGMarkup ->
+            markup
+                .annotationStream
+                .anyMatch { a: AnnotationInfo -> annotationIdentifier == a.name && value == toAnnotationText(a) }
+          }
+        } else {
+          unhandled(
+              extendedIdentifier.part().javaClass.name + " extendedIdentifier.part()",
+              extendedIdentifier.part().text)
         }
-      } else {
-        unhandled(
-            extendedIdentifier.part().javaClass.name + " extendedIdentifier.part()",
-            extendedIdentifier.part().text)
       }
-    } else if (expr is JoiningExpressionContext) {
-      val jec = expr as JoiningExpressionContext
-      val predicate0 = handleExpression(jec.expr(0))
-      val predicate1 = handleExpression(jec.expr(1))
-      filter = predicate0.and(predicate1)
-    } else if (expr is CombiningExpressionContext) {
-      val context = expr as CombiningExpressionContext
-      val predicate0 = handleExpression(context.expr(0))
-      val predicate1 = handleExpression(context.expr(2))
-      filter = predicate0.or(predicate1)
-    } else if (expr is TextContainsExpressionContext) {
-      val context = expr as TextContainsExpressionContext
-      val substring = stringValue(context.STRING_LITERAL())
-      filter = Predicate { tr: TAGMarkup -> toText(tr).contains(substring) }
-    } else {
-      unhandled(expr.javaClass.name + " expression", expr.getText())
+      is JoiningExpressionContext -> {
+        val predicate0 = handleExpression(expr.expr(0))
+        val predicate1 = handleExpression(expr.expr(1))
+        filter = predicate0.and(predicate1)
+      }
+      is CombiningExpressionContext -> {
+        val context = expr
+        val predicate0 = handleExpression(context.expr(0))
+        val predicate1 = handleExpression(context.expr(2))
+        filter = predicate0.or(predicate1)
+      }
+      is TextContainsExpressionContext -> {
+        val substring = stringValue(expr.STRING_LITERAL())
+        filter = Predicate { tr: TAGMarkup -> toText(tr).contains(substring) }
+      }
+      else -> {
+        unhandled(expr.javaClass.name + " expression", expr.text)
+      }
     }
     return filter!!
   }

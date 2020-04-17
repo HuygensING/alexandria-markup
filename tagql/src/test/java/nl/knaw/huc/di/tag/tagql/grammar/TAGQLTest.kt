@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
@@ -46,14 +46,16 @@ class TAGQLTest {
     parser.buildParseTree = true
     val tree: ParseTree = parser.query()
     LOG.info("tree={}", tree.toStringTree(parser))
-    Assertions.assertThat(tree.childCount).isEqualTo(2)
+    assertThat(tree.childCount).isEqualTo(2)
+
     val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
-    Assertions.assertThat(numberOfSyntaxErrors).isEqualTo(0) // no syntax errors
+    assertThat(numberOfSyntaxErrors).isEqualTo(0) // no syntax errors
+
     LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors)
     for (i in 0 until tree.childCount) {
       LOG.info("root.child={}", tree.getChild(i).text)
     }
-    Assertions.assertThat(allTokens).hasSize(19)
+    assertThat(allTokens).hasSize(19)
 
     // MyListener listener = new MyListener();
     // parser.TAGQL_script().enterRule(listener);

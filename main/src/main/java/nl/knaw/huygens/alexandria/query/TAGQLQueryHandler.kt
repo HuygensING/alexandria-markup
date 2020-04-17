@@ -46,17 +46,16 @@ class TAGQLQueryHandler(private val document: TAGDocument) {
     parseTreeWalker.walk(listener, parseTree)
     val statements = listener.statements
     val result = TAGQLResult(statement)
-    statements.stream()
-        .map { statement: TAGQLStatement -> this.execute(statement) }
-        .forEach { subresult: TAGQLResult -> result.addResult(subresult) }
+    statements
+        .map { this.execute(it) }
+        .forEach { subResult: TAGQLResult -> result.addResult(subResult) }
     result.errors.addAll(errorListener.errorMessages)
     return result
   }
 
-  private fun execute(statement: TAGQLStatement): TAGQLResult {
-    return statement
-        .limenProcessor
-        .apply(document)
-  }
+  private fun execute(statement: TAGQLStatement): TAGQLResult =
+      statement
+          .limenProcessor
+          .apply(document)
 
 }
