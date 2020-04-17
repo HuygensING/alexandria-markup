@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.schema;
+package nl.knaw.huc.di.tag.schema
 
 /*-
  * #%L
@@ -19,52 +19,42 @@ package nl.knaw.huc.di.tag.schema;
  * limitations under the License.
  * #L%
  */
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.*
+import java.util.function.Consumer
 
-public class TreeNode<T> implements Iterable<TreeNode<T>> {
+class TreeNode<T>(var data: T) : Iterable<TreeNode<T>> {
+  var parent: TreeNode<T>? = null
 
-  T data;
-  TreeNode<T> parent;
-  List<TreeNode<T>> children = new ArrayList<>();
+  @JvmField
+  var children: MutableList<TreeNode<T>> = ArrayList()
 
-  public TreeNode(T data) {
-    this.data = data;
-    this.children = new LinkedList<>();
+  fun addChild(child: T): TreeNode<T> {
+    val childNode = TreeNode(child)
+    childNode.parent = this
+    children.add(childNode)
+    return childNode
   }
 
-  public TreeNode<T> addChild(T child) {
-    TreeNode<T> childNode = new TreeNode<>(child);
-    childNode.parent = this;
-    this.children.add(childNode);
-    return childNode;
+  fun addChild(childNode: TreeNode<T>): TreeNode<T> {
+    childNode.parent = this
+    children.add(childNode)
+    return childNode
   }
 
-  public TreeNode<T> addChild(TreeNode<T> childNode) {
-    childNode.parent = this;
-    this.children.add(childNode);
-    return childNode;
+  override fun iterator(): MutableIterator<TreeNode<T>> {
+    return children.iterator()
   }
 
-  @NotNull
-  @Override
-  public Iterator<TreeNode<T>> iterator() {
-    return children.iterator();
+  override fun forEach(action: Consumer<in TreeNode<T>>) {
+    children.forEach(action)
   }
 
-  @Override
-  public void forEach(Consumer<? super TreeNode<T>> action) {
-    children.forEach(action);
+  override fun spliterator(): Spliterator<TreeNode<T>> {
+    return children.spliterator()
   }
 
-  @Override
-  public Spliterator<TreeNode<T>> spliterator() {
-    return children.spliterator();
-  }
-
-  public T getData() {
-    return data;
+  init {
+    children = LinkedList()
   }
 }

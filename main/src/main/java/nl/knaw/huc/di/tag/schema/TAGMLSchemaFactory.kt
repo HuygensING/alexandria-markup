@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.schema;
+package nl.knaw.huc.di.tag.schema
 
 /*-
  * #%L
@@ -20,80 +20,71 @@ package nl.knaw.huc.di.tag.schema;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.collect.Lists;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.google.common.collect.Lists
+import nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import java.util.Map;
+object TAGMLSchemaFactory {
+  var LOG: Logger = LoggerFactory.getLogger(TAGMLSchemaFactory::class.java)
+  private val YAML_F = YAMLFactory()
+  private val mapper = ObjectMapper(YAML_F)
 
-public class TAGMLSchemaFactory {
-  static Logger LOG = LoggerFactory.getLogger(TAGMLSchemaFactory.class);
-
-  static final YAMLFactory YAML_F = new YAMLFactory();
-  static final ObjectMapper mapper = new ObjectMapper(YAML_F);
-
-  public static TAGMLSchemaParseResult parseYAML(String schemaYAML) {
-    final TAGMLSchemaParseResult result = new TAGMLSchemaParseResult();
+  @JvmStatic
+  fun parseYAML(schemaYAML: String): TAGMLSchemaParseResult {
+    val result = TAGMLSchemaParseResult()
     try {
       mapper
           .readTree(schemaYAML)
           .fields()
-          .forEachRemaining(
-              entry -> {
-                String layerName = entry.getKey();
-                if (layerName.equals("$")) {
-                  layerName = TAGML.DEFAULT_LAYER;
-                }
-                result.getSchema().addLayer(layerName);
-                JsonNode jsonNode = entry.getValue();
-                LOG.info("layer={}", layerName);
-                LOG.info("jsonNode={}", jsonNode);
-                if (!jsonNode.isObject()) {
-                  result
-                      .getErrors()
-                      .add(
-                          "expected root markup with list of child markup, found (as json) "
-                              + jsonNode);
-                } else {
-                  if (jsonNode.size() > 1) {
-                    result
-                        .getErrors()
-                        .add(
-                            "only 1 root markup allowed; found "
-                                + jsonNode.size()
-                                + " "
-                                + Lists.newArrayList(jsonNode.fieldNames())
-                                + " in layer "
-                                + layerName);
-                  } else {
-                    TreeNode<String> layerHierarchy = buildLayerHierarchy(jsonNode);
-                    result.getSchema().setLayerHierarchy(layerName, layerHierarchy);
-                  }
-                }
-              });
-    } catch (Exception e) {
-      result.getErrors().add(e.getMessage());
+          .forEachRemaining { entry: Map.Entry<String, JsonNode> ->
+            var layerName = entry.key
+            if (layerName == "$") {
+              layerName = DEFAULT_LAYER
+            }
+            result.schema.addLayer(layerName)
+            val jsonNode = entry.value
+            LOG.info("layer={}", layerName)
+            LOG.info("jsonNode={}", jsonNode)
+            if (!jsonNode.isObject) {
+              result
+                  .errors
+                  .add("expected root markup with list of child markup, found (as json) $jsonNode")
+            } else {
+              if (jsonNode.size() > 1) {
+                result
+                    .errors
+                    .add(
+                        "only 1 root markup allowed; found ${jsonNode.size()} ${Lists.newArrayList(jsonNode.fieldNames())} in layer $layerName")
+              } else {
+                val layerHierarchy = buildLayerHierarchy(jsonNode)
+                result.schema.setLayerHierarchy(layerName, layerHierarchy)
+              }
+            }
+          }
+    } catch (e: Exception) {
+      result.errors.add(e.message!!)
     }
-    if (result.getSchema().getLayers().isEmpty()) {
-      result.getErrors().add("no layer definitions found");
+    if (result.schema.getLayers().isEmpty()) {
+      result.errors.add("no layer definitions found")
     }
-    LOG.info("result={}", result);
-    return result;
+    LOG.info("result={}", result)
+    return result
   }
 
-  private static TreeNode<String> buildLayerHierarchy(JsonNode jsonNode) {
-    String content = jsonNode.textValue();
-    if (jsonNode.isObject()) {
-      Map.Entry<String, JsonNode> next = jsonNode.fields().next();
-      content = next.getKey();
-      jsonNode = next.getValue();
+  private fun buildLayerHierarchy(jsonNode: JsonNode): TreeNode<String> {
+    var newJsonNode = jsonNode
+    var content = newJsonNode.textValue()
+    if (newJsonNode.isObject) {
+      val next = newJsonNode.fields().next()
+      content = next.key
+      newJsonNode = next.value
     }
-    TreeNode<String> hierarchy = new TreeNode<>(content);
-    jsonNode.elements().forEachRemaining(n -> hierarchy.addChild(buildLayerHierarchy(n)));
-    return hierarchy;
+    val hierarchy = TreeNode(content)
+    newJsonNode.elements().forEachRemaining { n: JsonNode -> hierarchy.addChild(buildLayerHierarchy(n)) }
+    return hierarchy
   }
 }
