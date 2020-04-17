@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.compare;
+package nl.knaw.huygens.alexandria.compare
 
 /*-
  * #%L
@@ -20,95 +20,74 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.view.TAGView;
-import prioritised_xml_collation.*;
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.view.TAGView
+import prioritised_xml_collation.*
+import java.util.*
+import java.util.function.Consumer
+import java.util.stream.Collectors
 
-import java.util.ArrayList;
-import java.util.List;
+class TAGComparison(originalDocument: TAGDocument?, tagView: TAGView?, otherDocument: TAGDocument?) {
+  private val diffLines: MutableList<String> = ArrayList()
+  fun getDiffLines(): List<String> {
+    return diffLines
+  }
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
+  fun hasDifferences(): Boolean {
+    return diffLines.isNotEmpty()
+  }
 
-public class TAGComparison {
-  private final List<String> diffLines = new ArrayList<>();
+  private fun handleOmission(segment: Segment) {
+    asLines(segment.tokensWa).forEach(Consumer { l: String -> diffLines.add("-$l") })
+  }
 
-  public TAGComparison(TAGDocument originalDocument, TAGView tagView, TAGDocument otherDocument) {
-    List<TAGToken> originalTokens = new Tokenizer(originalDocument, tagView).getTAGTokens();
-    List<TAGToken> editedTokens = new Tokenizer(otherDocument, tagView).getTAGTokens();
-    SegmenterInterface segmenter = new AlignedNonAlignedSegmenter();
-    List<Segment> segments = new TypeAndContentAligner().alignTokens(originalTokens, editedTokens, segmenter);
-    if (segments.size() > 1) {
-      for (Segment segment : segments) {
-        switch (segment.type) {
-          case aligned:
-            handleAligned(segment);
-            break;
+  private fun handleAddition(segment: Segment) {
+    asLines(segment.tokensWb).forEach(Consumer { l: String -> diffLines.add("+$l") })
+  }
 
-          case addition:
-            handleAddition(segment);
-            break;
+  private fun handleReplacement(segment: Segment) {
+    handleOmission(segment)
+    handleAddition(segment)
+  }
 
-          case omission:
-            handleOmission(segment);
-            break;
+  private fun handleAligned(segment: Segment) {
+    val lines = asLines(segment.tokensWa)
+    diffLines.add(" " + lines[0])
+    if (lines.size > 2) {
+      diffLines.add(" ...")
+    }
+    if (lines.size > 1) {
+      val last = lines.size - 1
+      diffLines.add(" " + lines[last])
+    }
+  }
 
-          case replacement:
-            handleReplacement(segment);
-            break;
+  private fun asLines(tagTokens: List<TAGToken>): List<String> {
+    return Arrays.asList(*tagTokens.stream()
+        .map { tagToken: TAGToken -> tokenContent(tagToken) }
+        .collect(Collectors.joining(""))
+        .split("\n".toRegex()).toTypedArray())
+  }
 
-          default:
-            throw new RuntimeException("unexpected type:" + segment.type);
+  private fun tokenContent(tagToken: TAGToken): String {
+    return (tagToken as? MarkupCloseToken)?.toString()?.replace("/", "") ?: tagToken.toString()
+  }
+
+  init {
+    val originalTokens = Tokenizer(originalDocument, tagView).tagTokens
+    val editedTokens = Tokenizer(otherDocument, tagView).tagTokens
+    val segmenter: SegmenterInterface = AlignedNonAlignedSegmenter()
+    val segments = TypeAndContentAligner().alignTokens(originalTokens, editedTokens, segmenter)
+    if (segments.size > 1) {
+      for (segment in segments) {
+        when (segment.type) {
+          Segment.Type.aligned -> handleAligned(segment)
+          Segment.Type.addition -> handleAddition(segment)
+          Segment.Type.omission -> handleOmission(segment)
+          Segment.Type.replacement -> handleReplacement(segment)
+          else -> throw RuntimeException("unexpected type:" + segment.type)
         }
       }
     }
   }
-
-  public List<String> getDiffLines() {
-    return diffLines;
-  }
-
-  public boolean hasDifferences() {
-    return !diffLines.isEmpty();
-  }
-
-  private void handleOmission(Segment segment) {
-    asLines(segment.tokensWa).forEach(l -> diffLines.add("-" + l));
-  }
-
-  private void handleAddition(Segment segment) {
-    asLines(segment.tokensWb).forEach(l -> diffLines.add("+" + l));
-  }
-
-  private void handleReplacement(Segment segment) {
-    handleOmission(segment);
-    handleAddition(segment);
-  }
-
-  private void handleAligned(Segment segment) {
-    List<String> lines = asLines(segment.tokensWa);
-    diffLines.add(" " + lines.get(0));
-    if (lines.size() > 2) {
-      diffLines.add(" ...");
-    }
-    if (lines.size() > 1) {
-      int last = lines.size() - 1;
-      diffLines.add(" " + lines.get(last));
-    }
-  }
-
-  private List<String> asLines(List<TAGToken> tagTokens) {
-    return asList(tagTokens.stream()
-        .map(this::tokenContent)
-        .collect(joining(""))
-        .split("\n"));
-  }
-
-  private String tokenContent(TAGToken tagToken) {
-    return tagToken instanceof MarkupCloseToken
-        ? tagToken.toString().replace("/", "")
-        : tagToken.toString();
-  }
-
-
 }

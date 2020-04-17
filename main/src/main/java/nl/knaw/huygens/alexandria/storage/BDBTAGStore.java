@@ -55,7 +55,7 @@ public class BDBTAGStore implements TAGStore {
   private Transaction tx;
 
   public BDBTAGStore(String dbDir, boolean readOnly) {
-//    LOG.debug("db dir={}", dbDir);
+    //    LOG.debug("db dir={}", dbDir);
     this.dbDir = dbDir;
     this.readOnly = readOnly;
     open();
@@ -64,20 +64,19 @@ public class BDBTAGStore implements TAGStore {
   @Override
   public void open() {
     try {
-      EnvironmentConfig envConfig = new EnvironmentConfig()
-          .setReadOnly(readOnly)
-          .setAllowCreate(!readOnly)
-          .setTransactional(true)
-          .setConfigParam(EnvironmentConfig.FREE_DISK, "0");
+      EnvironmentConfig envConfig =
+          new EnvironmentConfig()
+              .setReadOnly(readOnly)
+              .setAllowCreate(!readOnly)
+              .setTransactional(true)
+              .setConfigParam(EnvironmentConfig.FREE_DISK, "0");
 
       bdbEnvironment = new Environment(new File(dbDir), envConfig);
 
       EntityModel model = new AnnotationModel();
       model.registerClass(LinkedHashSetProxy.class);
-      StoreConfig storeConfig = new StoreConfig()
-          .setAllowCreate(true)
-          .setTransactional(true)
-          .setModel(model);
+      StoreConfig storeConfig =
+          new StoreConfig().setAllowCreate(true).setTransactional(true).setModel(model);
       store = new EntityStore(bdbEnvironment, "TAGStore", storeConfig);
 
       da = new DataAccessor(store);
@@ -227,61 +226,61 @@ public class BDBTAGStore implements TAGStore {
   }
 
   // Annotation
-//  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
-//    assertInTransaction();
-//    return da.annotationById.get(tx, annotationId, LOCK_MODE);
-//  }
+  //  public TAGAnnotationDTO getAnnotationDTO(Long annotationId) {
+  //    assertInTransaction();
+  //    return da.annotationById.get(tx, annotationId, LOCK_MODE);
+  //  }
 
-//  public TAGAnnotationDTO createAnnotationDTO(String tag) {
-////    TAGDocumentDTO document = new TAGDocumentDTO();
-////    persist(document);
-//    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
-////    annotation.setDocumentId(document.getResourceId());
-//    persist(annotation);
-//    return annotation;
-//  }
+  //  public TAGAnnotationDTO createAnnotationDTO(String tag) {
+  ////    TAGDocumentDTO document = new TAGDocumentDTO();
+  ////    persist(document);
+  //    TAGAnnotationDTO annotation = new TAGAnnotationDTO(tag);
+  ////    annotation.setDocumentId(document.getResourceId());
+  //    persist(annotation);
+  //    return annotation;
+  //  }
 
-//  public TAGAnnotation createStringAnnotation(String key, String value) {
-//    return createAnnotation(key, value, AnnotationType.String);
-//  }
+  //  public TAGAnnotation createStringAnnotation(String key, String value) {
+  //    return createAnnotation(key, value, AnnotationType.String);
+  //  }
 
-//  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
-//    return createAnnotation(key, value, AnnotationType.Boolean);
-//  }
+  //  public TAGAnnotation createBooleanAnnotation(String key, Boolean value) {
+  //    return createAnnotation(key, value, AnnotationType.Boolean);
+  //  }
 
-//  public TAGAnnotation createNumberAnnotation(String key, Double value) {
-//    return createAnnotation(key, value, AnnotationType.Number);
-//  }
+  //  public TAGAnnotation createNumberAnnotation(String key, Double value) {
+  //    return createAnnotation(key, value, AnnotationType.Number);
+  //  }
 
-//  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
-//    return createAnnotation(key, value, AnnotationType.List);
-//  }
+  //  public TAGAnnotation createListAnnotation(final String key, final List<?> value) {
+  //    return createAnnotation(key, value, AnnotationType.List);
+  //  }
 
-//  public TAGAnnotation createObjectAnnotation(String key, Object value) {
-//    return createAnnotation(key, value, AnnotationType.Object);
-//  }
+  //  public TAGAnnotation createObjectAnnotation(String key, Object value) {
+  //    return createAnnotation(key, value, AnnotationType.Object);
+  //  }
 
-//  public TAGAnnotation createRefAnnotation(String aName, String refId) {
-//    return createAnnotation(aName, refId, AnnotationType.Reference);
-//  }
+  //  public TAGAnnotation createRefAnnotation(String aName, String refId) {
+  //    return createAnnotation(aName, refId, AnnotationType.Reference);
+  //  }
 
-//  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
-//    TAGAnnotationDTO dto = createAnnotationDTO(aName);
-//    dto.setType(type);
-//    dto.setValue(value);
-//    persist(dto);
-//    return new TAGAnnotation(this, dto);
-//  }
+  //  private TAGAnnotation createAnnotation(String aName, Object value, AnnotationType type) {
+  //    TAGAnnotationDTO dto = createAnnotationDTO(aName);
+  //    dto.setType(type);
+  //    dto.setValue(value);
+  //    persist(dto);
+  //    return new TAGAnnotation(this, dto);
+  //  }
 
-//  public TAGAnnotation createAnnotation(String tag) {
-//    assertInTransaction();
-//    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
-//    return new TAGAnnotation(this, annotation);
-//  }
+  //  public TAGAnnotation createAnnotation(String tag) {
+  //    assertInTransaction();
+  //    TAGAnnotationDTO annotation = createAnnotationDTO(tag);
+  //    return new TAGAnnotation(this, annotation);
+  //  }
 
-//  public TAGAnnotation getAnnotation(Long annotationId) {
-//    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
-//  }
+  //  public TAGAnnotation getAnnotation(Long annotationId) {
+  //    return new TAGAnnotation(this, getAnnotationDTO(annotationId));
+  //  }
 
   // transaction
   @Override
@@ -380,18 +379,17 @@ public class BDBTAGStore implements TAGStore {
   }
 
   private void assertInTransaction() {
-    Preconditions.checkState(getTransactionIsOpen(),
+    Preconditions.checkState(
+        getTransactionIsOpen(),
         "We should be in an open transaction at this point, use runInTransaction()!");
   }
 
   private void assertTransactionIsClosed() {
-    Preconditions.checkState(!getTransactionIsOpen(),
-        "We're already inside an open transaction!");
+    Preconditions.checkState(!getTransactionIsOpen(), "We're already inside an open transaction!");
   }
 
   private void assertTransactionIsOpen() {
-    Preconditions.checkState(getTransactionIsOpen(),
-        "We're not in an open transaction!");
+    Preconditions.checkState(getTransactionIsOpen(), "We're not in an open transaction!");
   }
 
   @Override
@@ -455,6 +453,4 @@ public class BDBTAGStore implements TAGStore {
   public ReferenceValue getReferenceValue(final Long id) {
     return da.referenceValueById.get(id);
   }
-
-
 }

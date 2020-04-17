@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.exporter;
+package nl.knaw.huygens.alexandria.exporter
 
 /*
  * #%L
@@ -20,34 +20,30 @@ package nl.knaw.huygens.alexandria.exporter;
  * #L%
  */
 
+import java.awt.Color
 
-import java.awt.*;
-
-class ColorUtil {
-
-  public static Color interpolate(Color start, Color end, float p) {
-    float[] startHSB = Color.RGBtoHSB(start.getRed(), start.getGreen(), start.getBlue(), null);
-    float[] endHSB = Color.RGBtoHSB(end.getRed(), end.getGreen(), end.getBlue(), null);
-
-    float brightness = (startHSB[2] + endHSB[2]) / 2;
-    float saturation = (startHSB[1] + endHSB[1]) / 2;
-
-    float hueMax = 0;
-    float hueMin = 0;
+internal object ColorUtil {
+  @JvmStatic
+  fun interpolate(start: Color, end: Color, p: Float): Color {
+    val startHSB = Color.RGBtoHSB(start.red, start.green, start.blue, null)
+    val endHSB = Color.RGBtoHSB(end.red, end.green, end.blue, null)
+    val brightness = (startHSB[2] + endHSB[2]) / 2
+    val saturation = (startHSB[1] + endHSB[1]) / 2
+    var hueMax = 0f
+    var hueMin = 0f
     if (startHSB[0] > endHSB[0]) {
-      hueMax = startHSB[0];
-      hueMin = endHSB[0];
+      hueMax = startHSB[0]
+      hueMin = endHSB[0]
     } else {
-      hueMin = startHSB[0];
-      hueMax = endHSB[0];
+      hueMin = startHSB[0]
+      hueMax = endHSB[0]
     }
-
-    float hue = ((hueMax - hueMin) * p) + hueMin;
-
-    return Color.getHSBColor(hue, saturation, brightness);
+    val hue = (hueMax - hueMin) * p + hueMin
+    return Color.getHSBColor(hue, saturation, brightness)
   }
 
-  public static String toLaTeX(Color color) {
-    return "{rgb,255:red," + color.getRed() + ";green," + color.getGreen() + ";blue," + color.getBlue() + "}";
+  @JvmStatic
+  fun toLaTeX(color: Color): String {
+    return "{rgb,255:red," + color.red + ";green," + color.green + ";blue," + color.blue + "}"
   }
 }

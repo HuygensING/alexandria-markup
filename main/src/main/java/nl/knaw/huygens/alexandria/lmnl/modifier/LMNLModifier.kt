@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.modifier;
+package nl.knaw.huygens.alexandria.lmnl.modifier
 
 /*
  * #%L
@@ -20,225 +20,197 @@ package nl.knaw.huygens.alexandria.lmnl.modifier;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.Limen;
-import nl.knaw.huygens.alexandria.data_model.Markup;
-import nl.knaw.huygens.alexandria.data_model.TextNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.knaw.huygens.alexandria.data_model.Limen
+import nl.knaw.huygens.alexandria.data_model.Markup
+import nl.knaw.huygens.alexandria.data_model.TextNode
+import org.slf4j.LoggerFactory
+import java.util.function.Consumer
 
-import java.util.Collection;
-import java.util.List;
+internal class LMNLModifier(private val limen: Limen) {
+  private val LOG = LoggerFactory.getLogger(LMNLModifier::class.java)
 
-class LMNLModifier {
-  private final Logger LOG = LoggerFactory.getLogger(LMNLModifier.class);
-
-  private final Limen limen;
-
-  public LMNLModifier(Limen limen) {
-    this.limen = limen;
-  }
-
-  public void addMarkup(Markup newMarkup, Position position) {
+  fun addMarkup(newMarkup: Markup, position: Position) {
     // logTextNodes(limen.textNodeList);
     // logMarkups(limen.markupList);
-    TextNodeCursor cursor = new TextNodeCursor(limen);
-    int startOffset = position.getOffset();
-    int endOffset = position.getOffset() + position.getLength();
+    val cursor = TextNodeCursor(limen)
+    val startOffset = position.offset
+    val endOffset = position.offset + position.length
     // get to starting TextNode
     // logTextNodes(limen.textNodeList);
-    boolean findEndingTextNode = handleStartingTextNode(newMarkup, cursor, startOffset);
+    val findEndingTextNode = handleStartingTextNode(newMarkup, cursor, startOffset)
     // logMarkups(limen.markupList);
     // logTextNodes(limen.textNodeList);
     if (findEndingTextNode) {
-      handleEndingTextNode(newMarkup, cursor, endOffset);
+      handleEndingTextNode(newMarkup, cursor, endOffset)
     }
     // logTextNodes(limen.textNodeList);
     // limen.markupList.add(newMarkup);
     // logMarkups(limen.markupList);
   }
 
-  private boolean handleStartingTextNode(Markup newMarkup, TextNodeCursor cursor, int startOffset) {
-    boolean findStartingTextNode = true;
-    boolean findEndingTextNode = true;
+  private fun handleStartingTextNode(newMarkup: Markup, cursor: TextNodeCursor, startOffset: Int): Boolean {
+    var findStartingTextNode = true
+    var findEndingTextNode = true
     while (findStartingTextNode) {
-      String currentText = cursor.getCurrentText();
-      int currentTextNodeLength = cursor.getCurrentTextLength();
-      int offsetAtEndOfCurrentTextNode = cursor.getOffsetAtEndOfCurrentTextNode();
+      val currentText = cursor.currentText
+      val currentTextNodeLength = cursor.currentTextLength
+      val offsetAtEndOfCurrentTextNode: Int = cursor.offsetAtEndOfCurrentTextNode
       if (startOffset < offsetAtEndOfCurrentTextNode) {
         // newMarkup starts in this TextNode
-        int tailLength = Math.min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset);
-        int headLength = currentTextNodeLength - tailLength;
+        val tailLength = Math.min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset)
+        val headLength = currentTextNodeLength - tailLength
         if (headLength == 0) {
           // newMarkup exactly covers current TextNode
-          newMarkup.addTextNode(cursor.getCurrentTextNode());
-          limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
-          findEndingTextNode = false;
-
+          newMarkup.addTextNode(cursor.currentTextNode)
+          limen.associateTextWithRange(cursor.currentTextNode, newMarkup)
+          findEndingTextNode = false
         } else {
           if (tailLength > 0) {
             // detach tail
-            String headText = currentText.substring(0, headLength);
-            String tailText = currentText.substring(headLength);
-            cursor.getCurrentTextNode().setContent(headText);
-            TextNode newTailNode = new TextNode(tailText);
-            TextNode nextTextNode = cursor.getCurrentTextNode().getNextTextNode();
-            newTailNode.setPreviousTextNode(cursor.getCurrentTextNode());
-            newTailNode.setNextTextNode(nextTextNode);
+            val headText = currentText.substring(0, headLength)
+            val tailText = currentText.substring(headLength)
+            cursor.currentTextNode.content = headText
+            val newTailNode = TextNode(tailText)
+            val nextTextNode = cursor.currentTextNode.nextTextNode
+            newTailNode.previousTextNode = cursor.currentTextNode
+            newTailNode.nextTextNode = nextTextNode
             if (nextTextNode != null) {
-              nextTextNode.setPreviousTextNode(newTailNode);
+              nextTextNode.previousTextNode = newTailNode
             }
-            cursor.getCurrentTextNode().setNextTextNode(newTailNode);
-            limen.getMarkups(cursor.getCurrentTextNode()).forEach(tr -> {
-              tr.addTextNode(newTailNode);
-              limen.associateTextWithRange(newTailNode, tr);
-            });
-            newMarkup.addTextNode(newTailNode);
-            limen.associateTextWithRange(newTailNode, newMarkup);
-            limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
-
+            cursor.currentTextNode.nextTextNode = newTailNode
+            limen.getMarkups(cursor.currentTextNode).forEach(Consumer { tr: Markup ->
+              tr.addTextNode(newTailNode)
+              limen.associateTextWithRange(newTailNode, tr)
+            })
+            newMarkup.addTextNode(newTailNode)
+            limen.associateTextWithRange(newTailNode, newMarkup)
+            limen.textNodeList.add(cursor.textNodeIndex + 1, newTailNode)
           } else {
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
             // limen.associateTextNodeWithMarkupForLayer(cursor.getCurrentTextNode(), newMarkup);
-            throw new RuntimeException("tail=empty!");
+            throw RuntimeException("tail=empty!")
           }
         }
-        findStartingTextNode = false;
-
+        findStartingTextNode = false
       } else {
-        findStartingTextNode = cursor.canAdvance();
+        findStartingTextNode = cursor.canAdvance()
       }
-      cursor.advance();
+      cursor.advance()
     }
-    return findEndingTextNode;
+    return findEndingTextNode
   }
 
-  private void handleEndingTextNode(Markup newMarkup, TextNodeCursor cursor, int endOffset) {
-    boolean findEndingTextNode = true;
+  private fun handleEndingTextNode(newMarkup: Markup, cursor: TextNodeCursor, endOffset: Int) {
+    var findEndingTextNode = true
     while (findEndingTextNode) {
-      int offsetAtEndOfCurrentTextNode = cursor.getOffsetAtEndOfCurrentTextNode();
+      val offsetAtEndOfCurrentTextNode: Int = cursor.offsetAtEndOfCurrentTextNode
       if (offsetAtEndOfCurrentTextNode < endOffset) {
         // this is not the TextNode where newMarkup ends, but it is part of newMarkup
-        limen.associateTextWithRange(cursor.getCurrentTextNode(), newMarkup);
-        findEndingTextNode = cursor.canAdvance();
-        cursor.advance();
-
+        limen.associateTextWithRange(cursor.currentTextNode, newMarkup)
+        findEndingTextNode = cursor.canAdvance()
+        cursor.advance()
       } else {
         // this is the TextNode where newMarkup ends
-        int tailLength = offsetAtEndOfCurrentTextNode - endOffset;
-        int headLength = cursor.getCurrentTextLength() - tailLength;
-
+        val tailLength = offsetAtEndOfCurrentTextNode - endOffset
+        val headLength = cursor.currentTextLength - tailLength
         if (tailLength > 0) {
           if (headLength > 0) {
             // detach tail
-            String headText = cursor.getCurrentText().substring(0, headLength);
-            String tailText = cursor.getCurrentText().substring(headLength);
-            cursor.getCurrentTextNode().setContent(headText);
-            TextNode newTailNode = new TextNode(tailText);
-            TextNode nextTextNode = cursor.getCurrentTextNode().getNextTextNode();
-            newTailNode.setNextTextNode(nextTextNode);
-            newTailNode.setPreviousTextNode(cursor.getCurrentTextNode());
-            cursor.getCurrentTextNode().setNextTextNode(newTailNode);
-            limen.getMarkups(cursor.getCurrentTextNode())
+            val headText = cursor.currentText.substring(0, headLength)
+            val tailText = cursor.currentText.substring(headLength)
+            cursor.currentTextNode.content = headText
+            val newTailNode = TextNode(tailText)
+            val nextTextNode = cursor.currentTextNode.nextTextNode
+            newTailNode.nextTextNode = nextTextNode
+            newTailNode.previousTextNode = cursor.currentTextNode
+            cursor.currentTextNode.nextTextNode = newTailNode
+            limen.getMarkups(cursor.currentTextNode)
                 .stream()
-                .filter(tr -> !newMarkup.equals(tr))
-                .forEach(tr -> {
-                  limen.associateTextWithRange(newTailNode, tr);
-                  tr.addTextNode(newTailNode);
-                });
-            limen.textNodeList.add(cursor.getTextNodeIndex() + 1, newTailNode);
-
+                .filter { tr: Markup -> newMarkup != tr }
+                .forEach { tr: Markup ->
+                  limen.associateTextWithRange(newTailNode, tr)
+                  tr.addTextNode(newTailNode)
+                }
+            limen.textNodeList.add(cursor.textNodeIndex + 1, newTailNode)
           } else {
             // limen.associateTextNodeWithMarkupForLayer(cursor.getCurrentTextNode(), newMarkup);
             // newMarkup.addTextNode(cursor.getCurrentTextNode());
-            throw new RuntimeException("head=empty!");
+            throw RuntimeException("head=empty!")
           }
         }
-        findEndingTextNode = false;
+        findEndingTextNode = false
       }
     }
   }
 
-  public void addMarkup(Markup newMarkup, Collection<Position> positions) {
+  fun addMarkup(newMarkup: Markup, positions: Collection<Position>) {
     if (!newMarkup.hasId()) {
-      throw new RuntimeException("Markup " + newMarkup.getTag() + " should have an id.");
+      throw RuntimeException("Markup " + newMarkup.tag + " should have an id.")
     }
-    positions.forEach(position -> {
-      LOG.debug("position={}", position);
-      logTextNodes(limen.textNodeList);
-      logMarkups(limen.markupList);
-      addMarkup(newMarkup, position);
-    });
-
-    logTextNodes(limen.textNodeList);
-    logMarkups(limen.markupList);
+    positions.forEach(Consumer { position: Position ->
+      LOG.debug("position={}", position)
+      logTextNodes(limen.textNodeList)
+      logMarkups(limen.markupList)
+      addMarkup(newMarkup, position)
+    })
+    logTextNodes(limen.textNodeList)
+    logMarkups(limen.markupList)
     // LMNLImporter.joinDiscontinuedRanges(limen);
   }
 
-  private void logTextNodes(List<TextNode> list) {
-    StringBuilder textnodes = new StringBuilder();
-    list.forEach(tn -> {
-      if (tn.getPreviousTextNode() != null) {
-        textnodes.append("\"").append(tn.getPreviousTextNode().getContent()).append("\" -> ");
+  private fun logTextNodes(list: List<TextNode>) {
+    val textnodes = StringBuilder()
+    list.forEach(Consumer { tn: TextNode ->
+      if (tn.previousTextNode != null) {
+        textnodes.append("\"").append(tn.previousTextNode.content).append("\" -> ")
       }
-      textnodes.append("[").append(tn.getContent()).append("]");
-      if (tn.getNextTextNode() != null) {
-        textnodes.append(" -> \"").append(tn.getNextTextNode().getContent()).append("\"");
+      textnodes.append("[").append(tn.content).append("]")
+      if (tn.nextTextNode != null) {
+        textnodes.append(" -> \"").append(tn.nextTextNode.content).append("\"")
       }
-      textnodes.append("\n");
-    });
-    LOG.debug("\nTextNodes:\n{}", textnodes);
+      textnodes.append("\n")
+    })
+    LOG.debug("\nTextNodes:\n{}", textnodes)
   }
 
-  private void logMarkups(List<Markup> list) {
-    StringBuilder markups = new StringBuilder();
-    list.forEach(tr -> {
-      markups.append("[").append(tr.getTag()).append("}\n");
-      tr.textNodes.forEach(tn -> markups.append("  \"").append(tn.getContent()).append("\"\n"));
-    });
-    LOG.debug("\nMarkups:\n{}", markups);
+  private fun logMarkups(list: List<Markup>) {
+    val markups = StringBuilder()
+    list.forEach(Consumer { tr: Markup ->
+      markups.append("[").append(tr.tag).append("}\n")
+      tr.textNodes.forEach(Consumer { tn: TextNode -> markups.append("  \"").append(tn.content).append("\"\n") })
+    })
+    LOG.debug("\nMarkups:\n{}", markups)
   }
 
-  static class TextNodeCursor {
-    private TextNode currentTextNode;
-    private int textNodeIndex = 0;
-    private int offset = 0;
+  internal class TextNodeCursor(limen: Limen) {
+    var currentTextNode: TextNode
+      private set
+    var textNodeIndex = 0
+      private set
+    var offset = 0
+      private set
 
-    TextNodeCursor(Limen limen) {
-      currentTextNode = limen.textNodeList.get(0);
+    fun advance() {
+      offset += currentTextLength
+      currentTextNode = currentTextNode.nextTextNode
+      textNodeIndex++
     }
 
-    void advance() {
-      offset += getCurrentTextLength();
-      currentTextNode = currentTextNode.getNextTextNode();
-      textNodeIndex++;
+    val currentText: String
+      get() = currentTextNode.content
+
+    val currentTextLength: Int
+      get() = currentText.length
+
+    fun canAdvance(): Boolean {
+      return currentTextNode.nextTextNode != null
     }
 
-    TextNode getCurrentTextNode() {
-      return currentTextNode;
-    }
+    internal val offsetAtEndOfCurrentTextNode: Int
+      get() = offset + currentTextLength
 
-    String getCurrentText() {
-      return currentTextNode.getContent();
-    }
-
-    int getCurrentTextLength() {
-      return getCurrentText().length();
-    }
-
-    int getTextNodeIndex() {
-      return textNodeIndex;
-    }
-
-    boolean canAdvance() {
-      return currentTextNode.getNextTextNode() != null;
-    }
-
-    public int getOffset() {
-      return offset;
-    }
-
-    private int getOffsetAtEndOfCurrentTextNode() {
-      return offset + getCurrentTextLength();
+    init {
+      currentTextNode = limen.textNodeList[0]
     }
   }
 

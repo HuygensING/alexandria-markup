@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.lmnl.exporter;
+package nl.knaw.huygens.alexandria.lmnl.exporter
 
 /*
  * #%L
@@ -20,104 +20,93 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
-import nl.knaw.huygens.alexandria.storage.TAGAnnotation;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.view.TAGView;
-import nl.knaw.huygens.alexandria.view.TAGViewFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
 /**
  * Created by bramb on 07/02/2017.
  */
-public class LMNLExporter {
-  private static Logger LOG = LoggerFactory.getLogger(LMNLExporter.class);
 
-  private boolean useShorthand = false;
-  private final TAGStore store;
-  private final TAGView view;
+import com.google.common.base.Preconditions
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter
+import nl.knaw.huygens.alexandria.storage.*
+import nl.knaw.huygens.alexandria.view.TAGView
+import nl.knaw.huygens.alexandria.view.TAGViewFactory
+import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.function.Consumer
 
-  public LMNLExporter(TAGStore store, TAGView view) {
-    Preconditions.checkNotNull(store);
-    this.store = store;
-    this.view = view;
+class LMNLExporter {
+  private var useShorthand = false
+  private val store: TAGStore
+  private val view: TAGView
+
+  constructor(store: TAGStore, view: TAGView) {
+    Preconditions.checkNotNull(store)
+    this.store = store
+    this.view = view
   }
 
-  public LMNLExporter(TAGStore store) {
-    Preconditions.checkNotNull(store);
-    this.store = store;
-    this.view = new TAGViewFactory(store).getDefaultView();
+  constructor(store: TAGStore) {
+    Preconditions.checkNotNull(store)
+    this.store = store
+    view = TAGViewFactory(store).defaultView
   }
 
-  public LMNLExporter useShorthand() {
-    useShorthand = true;
-    return this;
+  fun useShorthand(): LMNLExporter {
+    useShorthand = true
+    return this
   }
 
-  public String toLMNL(TAGDocument document) {
-    StringBuilder lmnlBuilder = new StringBuilder();
-    store.runInTransaction(() -> appendLimen(lmnlBuilder, document));
+  fun toLMNL(document: TAGDocument?): String {
+    val lmnlBuilder = StringBuilder()
+    store.runInTransaction { appendLimen(lmnlBuilder, document) }
     // LOG.info("LMNL={}", lmnlBuilder);
-    return lmnlBuilder.toString();
+    return lmnlBuilder.toString()
   }
 
-  private void appendLimen(StringBuilder lmnlBuilder, TAGDocument document) {
+  private fun appendLimen(lmnlBuilder: StringBuilder, document: TAGDocument?) {
     if (document != null) {
-      Deque<Long> openMarkupIds = new ArrayDeque<>();
-      Map<Long, StringBuilder> openTags = new HashMap<>();
-      Map<Long, StringBuilder> closeTags = new HashMap<>();
-      document.getTextNodeStream().forEach(tn -> {
-        Set<Long> markupIds = new HashSet<>();
-        document.getMarkupStreamForTextNode(tn).forEach(mw -> {
-          Long id = mw.getDbId();
-          markupIds.add(id);
-          openTags.computeIfAbsent(id, (k) -> toOpenTag(mw));
-          closeTags.computeIfAbsent(id, (k) -> toCloseTag(mw));
-        });
-        Set<Long> relevantMarkupIds = view.filterRelevantMarkup(markupIds);
-
-        List<Long> toClose = new ArrayList<>(openMarkupIds);
-        toClose.removeAll(relevantMarkupIds);
-        Collections.reverse(toClose);
-        toClose.forEach(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
-
-        List<Long> toOpen = new ArrayList<>(relevantMarkupIds);
-        toOpen.removeAll(openMarkupIds);
-        toOpen.forEach(markupId -> lmnlBuilder.append(openTags.get(markupId)));
-
-        openMarkupIds.removeAll(toClose);
-        openMarkupIds.addAll(toOpen);
-        lmnlBuilder.append(tn.getText());
-      });
+      val openMarkupIds: Deque<Long?> = ArrayDeque()
+      val openTags: MutableMap<Long?, StringBuilder> = HashMap()
+      val closeTags: MutableMap<Long?, StringBuilder> = HashMap()
+      document.textNodeStream.forEach { tn: TAGTextNode ->
+        val markupIds: MutableSet<Long> = HashSet()
+        document.getMarkupStreamForTextNode(tn).forEach { mw: TAGMarkup ->
+          val id = mw.dbId
+          markupIds.add(id)
+          openTags.computeIfAbsent(id) { k: Long? -> toOpenTag(mw) }
+          closeTags.computeIfAbsent(id) { k: Long? -> toCloseTag(mw) }
+        }
+        val relevantMarkupIds: Set<Long?> = view.filterRelevantMarkup(markupIds)
+        val toClose: MutableList<Long?> = ArrayList(openMarkupIds)
+        toClose.removeAll(relevantMarkupIds)
+        toClose.reverse()
+        toClose.forEach(Consumer { markupId: Long? -> lmnlBuilder.append(closeTags[markupId]) })
+        val toOpen: MutableList<Long?> = ArrayList(relevantMarkupIds)
+        toOpen.removeAll(openMarkupIds)
+        toOpen.forEach(Consumer { markupId: Long? -> lmnlBuilder.append(openTags[markupId]) })
+        openMarkupIds.removeAll(toClose)
+        openMarkupIds.addAll(toOpen)
+        lmnlBuilder.append(tn.text)
+      }
       openMarkupIds.descendingIterator()
-          .forEachRemaining(markupId -> lmnlBuilder.append(closeTags.get(markupId)));
+          .forEachRemaining { markupId: Long? -> lmnlBuilder.append(closeTags[markupId]) }
     }
-
   }
 
-  private StringBuilder toCloseTag(TAGMarkup markup) {
-    return markup.isAnonymous()
-        ? new StringBuilder()
-        : new StringBuilder("{").append(markup.getExtendedTag()).append("]");
+  private fun toCloseTag(markup: TAGMarkup): StringBuilder {
+    return if (markup.isAnonymous) StringBuilder() else StringBuilder("{").append(markup.extendedTag).append("]")
   }
 
-  private StringBuilder toOpenTag(TAGMarkup markup) {
-    return new StringBuilder("TODO");
-//    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
+  private fun toOpenTag(markup: TAGMarkup): StringBuilder {
+    return StringBuilder("TODO")
+    //    StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
 //    markup.getAnnotationStream().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
 //    return markup.isAnonymous()
 //        ? tagBuilder.append("]")
 //        : tagBuilder.append("}");
   }
 
-  public StringBuilder toLMNL(TAGAnnotation annotation) {
-    StringBuilder annotationBuilder = new StringBuilder("[").append(annotation.getKey());
-//    annotation.getAnnotationStream()
+  fun toLMNL(annotation: TAGAnnotation): StringBuilder {
+    //    annotation.getAnnotationStream()
 //        .forEach(a1 -> annotationBuilder.append(" ").append(toLMNL(a1)));
 //    TAGDocument document = annotation.getDocument();
 //    if (document.hasTextNodes()) {
@@ -131,7 +120,10 @@ public class LMNLExporter {
 //    } else {
 //      annotationBuilder.append("]");
 //    }
-    return annotationBuilder;
+    return StringBuilder("[").append(annotation.key)
   }
 
+  companion object {
+    private val LOG = LoggerFactory.getLogger(LMNLExporter::class.java)
+  }
 }

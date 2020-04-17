@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.query;
+package nl.knaw.huygens.alexandria.query
 
 /*
  * #%L
@@ -19,54 +19,44 @@ package nl.knaw.huygens.alexandria.query;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huc.di.tag.tagql.TAGQLStatement
+import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer
+import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser
+import nl.knaw.huygens.alexandria.ErrorListener
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+class TAGQLQueryHandler(private val document: TAGDocument) {
 
-import java.util.List;
-
-public class TAGQLQueryHandler {
-
-  private final TAGDocument document;
-
-  public TAGQLQueryHandler(TAGDocument document) {
-    this.document = document;
-  }
-
-  public TAGQLResult execute(String statement) {
-    CharStream stream = CharStreams.fromString(statement);
-    ErrorListener errorListener = new ErrorListener();
-    TAGQLLexer lexer = new TAGQLLexer(stream);
-    lexer.addErrorListener(errorListener);
-
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    TAGQLParser tagqlParser = new TAGQLParser(tokens);
-    tagqlParser.addErrorListener(errorListener);
-    ParseTree parseTree = tagqlParser.query();
-    ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-    TAGQLQueryListener listener = new TAGQLQueryListener(document);
-    parseTreeWalker.walk(listener, parseTree);
-    List<TAGQLStatement> statements = listener.getStatements();
-
-    TAGQLResult result = new TAGQLResult(statement);
+  fun execute(statement: String): TAGQLResult {
+    val stream: CharStream? = CharStreams.fromString(statement)
+    val errorListener = ErrorListener()
+    val lexer = TAGQLLexer(stream)
+    lexer.addErrorListener(errorListener)
+    val tokens = CommonTokenStream(lexer)
+    val tagqlParser = TAGQLParser(tokens)
+    tagqlParser.addErrorListener(errorListener)
+    val parseTree: ParseTree? = tagqlParser.query()
+    val parseTreeWalker = ParseTreeWalker()
+    val listener = TAGQLQueryListener(document)
+    parseTreeWalker.walk(listener, parseTree)
+    val statements = listener.statements
+    val result = TAGQLResult(statement)
     statements.stream()
-        .map(this::execute)
-        .forEach(result::addResult);
-    result.getErrors().addAll(errorListener.getErrorMessages());
-    return result;
+        .map { statement: TAGQLStatement -> this.execute(statement) }
+        .forEach { subresult: TAGQLResult -> result.addResult(subresult) }
+    result.errors.addAll(errorListener.errorMessages)
+    return result
   }
 
-  private TAGQLResult execute(TAGQLStatement statement) {
+  private fun execute(statement: TAGQLStatement): TAGQLResult {
     return statement
-        .getLimenProcessor()
-        .apply(document);
+        .limenProcessor
+        .apply(document)
   }
+
 }

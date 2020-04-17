@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.query;
+package nl.knaw.huygens.alexandria.query
 
 /*
  * #%L
@@ -20,59 +20,54 @@ package nl.knaw.huygens.alexandria.query;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*
+import java.util.stream.Collectors
 
-public class TAGQLResult {
+class TAGQLResult {
+  private val query: String
+  private val results: MutableList<TAGQLResult> = ArrayList()
+  internal val errors: MutableList<String> = ArrayList()
 
-  private final String query;
-  private final List<TAGQLResult> results = new ArrayList<>();
-  private final List<String> errors = new ArrayList<>();
-
-  public TAGQLResult(String query) {
-    this.query = query;
+  constructor(query: String) {
+    this.query = query
   }
 
-  public TAGQLResult() {
-    this.query = "";
+  constructor() {
+    query = ""
   }
 
-  private final List<Object> values = new ArrayList<>();
-
-  public void addResult(TAGQLResult subresult) {
-    results.add(subresult);
+  private val values: MutableList<Any> = ArrayList()
+  fun addResult(subresult: TAGQLResult) {
+    results.add(subresult)
   }
 
-  public void addValue(Object value) {
-    values.add(value);
+  fun addValue(value: Any) {
+    values.add(value)
   }
 
-  public List<Object> getValues() {
+  fun getValues(): MutableList<Any> {
     if (!isOk()) {
-      return new ArrayList<>();
+      return ArrayList()
     }
     if (results.isEmpty()) {
-      return values;
+      return values
     }
-    if (results.size() == 1) {
-      return results.get(0).getValues();
-    }
-    return results.stream()
-        .map(TAGQLResult::getValues)
-        .collect(Collectors.toList());
+    return if (results.size == 1) {
+      results[0].getValues()
+    } else results.stream()
+        .map { obj: TAGQLResult -> obj.getValues() }
+        .collect(Collectors.toList())
   }
 
-  public boolean isOk() {
-    return errors.isEmpty();
+  fun isOk(): Boolean {
+    return errors.isEmpty()
   }
 
-  public List<String> getErrors() {
-    return errors;
+  fun getErrors(): MutableList<String> {
+    return errors
   }
 
-  public String getQuery() {
-    return query;
+  fun getQuery(): String {
+    return query
   }
-
 }

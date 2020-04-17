@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.model.graph.nodes;
+package nl.knaw.huc.di.tag.model.graph.nodes
 
 /*-
  * #%L
@@ -19,26 +19,22 @@ package nl.knaw.huc.di.tag.model.graph.nodes;
  * limitations under the License.
  * #L%
  */
-public class TextNode implements TAGTextNode {
-  public static final String LABEL = "Text";
-  private String content;
 
-  public TextNode(String content) {
-    this.content = content;
+class TextNode(private var content: String) : TAGTextNode {
+
+  fun withContent(content: String): TextNode {
+    this.content = content
+    return this
   }
 
-  public TextNode setContent(final String content) {
-    this.content = content;
-    return this;
+  override fun getContent(): String {
+    return content
   }
 
-  @Override
-  public String getContent() {
-    return content;
-  }
+  fun getLabel(): String = label
 
-  public String getLabel() {
-    return LABEL;
+  companion object {
+    const val label = "Text"
   }
 
 }

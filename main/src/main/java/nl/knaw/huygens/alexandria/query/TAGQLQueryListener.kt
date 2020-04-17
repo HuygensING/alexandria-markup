@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.query;
+package nl.knaw.huygens.alexandria.query
 
 /*
  * #%L
@@ -20,213 +20,183 @@ package nl.knaw.huygens.alexandria.query;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huc.di.tag.tagql.TAGQLSelectStatement;
-import nl.knaw.huc.di.tag.tagql.TAGQLStatement;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo
+import nl.knaw.huc.di.tag.tagql.TAGQLSelectStatement
+import nl.knaw.huc.di.tag.tagql.TAGQLStatement
+import nl.knaw.huc.di.tag.tagql.grammar.TAGQLBaseListener
+import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser.*
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.storage.TAGTextNode
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.tree.ParseTree
+import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.function.Function
+import java.util.function.Predicate
+import java.util.stream.Collectors
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
+internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBaseListener() {
 
-import static java.util.stream.Collectors.toList;
+  private val LOG = LoggerFactory.getLogger(javaClass)
 
-class TAGQLQueryListener extends TAGQLBaseListener {
-  private Logger LOG = LoggerFactory.getLogger(getClass());
+  val statements: MutableList<TAGQLStatement> = mutableListOf()
 
-  private final List<TAGQLStatement> statements = new ArrayList<>();
-  private TAGDocument document;
-
-  TAGQLQueryListener(TAGDocument document) {
-    this.document = document;
-  }
-
-  public List<TAGQLStatement> getStatements() {
-    return statements;
-  }
-
-  private String toText(TAGMarkup markup) {
-    StringBuilder textBuilder = new StringBuilder();
+  private fun toText(markup: TAGMarkup): String {
+    val textBuilder = StringBuilder()
     document
         .getTextNodeStreamForMarkup(markup)
-        .forEach(textNode -> textBuilder.append(textNode.getText()));
-    return textBuilder.toString();
+        .forEach { textNode: TAGTextNode -> textBuilder.append(textNode.text) }
+    return textBuilder.toString()
   }
 
-  @Override
-  public void exitSelectStmt(TAGQLParser.SelectStmtContext ctx) {
-    TAGQLSelectStatement statement = new TAGQLSelectStatement();
-
-    handleSource(statement, ctx.source());
-    handleWhereClause(statement, ctx.whereClause());
-    handleSelectVariable(statement, ctx.selectVariable());
-
-    getStatements().add(statement);
-    super.exitSelectStmt(ctx);
+  override fun exitSelectStmt(ctx: SelectStmtContext) {
+    val statement = TAGQLSelectStatement()
+    handleSource(statement, ctx.source())
+    handleWhereClause(statement, ctx.whereClause())
+    handleSelectVariable(statement, ctx.selectVariable())
+    statements.add(statement)
+    super.exitSelectStmt(ctx)
   }
 
-  private void handleSelectVariable(
-      TAGQLSelectStatement statement, TAGQLParser.SelectVariableContext selectVariable) {
-    TAGQLParser.PartContext part = selectVariable.part();
+  private fun handleSelectVariable(
+      statement: TAGQLSelectStatement, selectVariable: SelectVariableContext) {
+    val part = selectVariable.part()
     if (part != null) {
-      if (part instanceof TAGQLParser.TextPartContext) {
-        statement.setMarkupMapper(this::toText);
-      } else if (part instanceof TAGQLParser.NamePartContext) {
-        statement.setMarkupMapper(TAGMarkup::getExtendedTag);
-      } else if (part instanceof TAGQLParser.AnnotationValuePartContext) {
-        String annotationIdentifier = getAnnotationName(part);
-        statement.setMarkupMapper(toAnnotationTextMapper(annotationIdentifier));
-      } else {
-        unhandled("selectVariable", selectVariable.getText());
+      when (part) {
+        is TextPartContext -> {
+          statement.setMarkupMapper(Function { markup: TAGMarkup -> toText(markup) })
+        }
+        is NamePartContext -> {
+          statement.setMarkupMapper(Function { obj: TAGMarkup -> obj.extendedTag })
+        }
+        is AnnotationValuePartContext -> {
+          val annotationIdentifier = getAnnotationName(part)
+          statement.setMarkupMapper(toAnnotationTextMapper(annotationIdentifier))
+        }
+        else -> {
+          unhandled("selectVariable", selectVariable.text)
+        }
       }
     }
   }
 
-  private Function<? super TAGMarkup, ? super Object> toAnnotationTextMapper(
-      String annotationIdentifier) {
-    List<String> annotationTags = Arrays.asList(annotationIdentifier.split(":"));
-    return (TAGMarkup markup) -> {
-      List<String> annotationTexts = new ArrayList<>();
-      int depth = 0;
-      List<AnnotationInfo> annotationsToFilter = markup.getAnnotationStream().collect(toList());
-      while (depth < annotationTags.size() - 1) {
-        String filterTag = annotationTags.get(depth);
-        annotationsToFilter =
-            annotationsToFilter.stream()
-                .filter(hasTag(filterTag))
-                //            .flatMap(TAGAnnotation::getAnnotationStream)
-                .collect(toList());
-        depth += 1;
+  private fun toAnnotationTextMapper(
+      annotationIdentifier: String): Function<in TAGMarkup, in Any> {
+    val annotationTags = listOf(*annotationIdentifier.split(":".toRegex()).toTypedArray())
+    return Function { markup: TAGMarkup ->
+      val annotationTexts: MutableList<String?> = ArrayList()
+      var depth = 0
+      var annotationsToFilter = markup.annotationStream.collect(Collectors.toList())
+      while (depth < annotationTags.size - 1) {
+        val filterTag = annotationTags[depth]
+        annotationsToFilter = annotationsToFilter.stream()
+            .filter(hasTag(filterTag)) //            .flatMap(TAGAnnotation::getAnnotationStream)
+            .collect(Collectors.toList())
+        depth += 1
       }
-      String filterTag = annotationTags.get(depth);
+      val filterTag = annotationTags[depth]
       annotationsToFilter.stream()
           .filter(hasTag(filterTag))
-          .map(this::toAnnotationText)
-          .forEach(annotationTexts::add);
-      return annotationTexts;
-    };
+          .map { annotation: AnnotationInfo -> toAnnotationText(annotation) }
+          .forEach { e: String? -> annotationTexts.add(e) }
+      annotationTexts
+    }
   }
 
-  private Predicate<AnnotationInfo> hasTag(String filterTag) {
-    return a -> filterTag.equals(a.getName());
+  private fun hasTag(filterTag: String): Predicate<AnnotationInfo> {
+    return Predicate { a: AnnotationInfo -> filterTag == a.name }
   }
 
-  private void handleSource(TAGQLSelectStatement statement, TAGQLParser.SourceContext source) {
-    if (source != null) {
-      if (source instanceof ParameterizedMarkupSourceContext) {
-        ParameterizedMarkupSourceContext pmsc = (ParameterizedMarkupSourceContext) source;
-        String markupName = stringValue(pmsc.markupName());
-        statement.setMarkupFilter(tr -> tr.getTag().equals(markupName));
-        if (pmsc.indexValue() != null) {
-          int index = toInteger(pmsc.indexValue());
-          statement.setIndex(index);
+  private fun handleSource(statement: TAGQLSelectStatement, source: SourceContext) {
+    when (source) {
+      is ParameterizedMarkupSourceContext -> {
+        val markupName = stringValue(source.markupName())
+        statement.setMarkupFilter(Predicate { tr: TAGMarkup -> tr.tag == markupName })
+        if (source.indexValue() != null) {
+          val index = toInteger(source.indexValue())
+          statement.setIndex(index)
         }
-
-      } else if (source instanceof SimpleMarkupSourceContext) {
-        SimpleMarkupSourceContext smsc = (SimpleMarkupSourceContext) source;
-        // TODO
+      }
+      is SimpleMarkupSourceContext -> {
+        val smsc = source
+        TODO()
       }
     }
   }
 
-  private void handleWhereClause(TAGQLSelectStatement statement, WhereClauseContext whereClause) {
-    if (whereClause != null) {
-      Predicate<TAGMarkup> filter = handleExpression(whereClause.expr());
-      if (filter != null) {
-        statement.setMarkupFilter(filter);
-      } else {
-        unhandled("whereClause", whereClause.getText());
-      }
+  private fun handleWhereClause(statement: TAGQLSelectStatement, whereClause: WhereClauseContext) {
+    val filter = handleExpression(whereClause.expr())
+    if (filter != null) {
+      statement.setMarkupFilter(filter)
+    } else {
+      unhandled("whereClause", whereClause.text)
     }
   }
 
-  private Predicate<TAGMarkup> handleExpression(ExprContext expr) {
-    Predicate<TAGMarkup> filter = null;
-    if (expr instanceof EqualityComparisonExpressionContext) {
-      EqualityComparisonExpressionContext ecec = (EqualityComparisonExpressionContext) expr;
-      ExtendedIdentifierContext extendedIdentifier = ecec.extendedIdentifier();
-      String value = stringValue(ecec.literalValue());
-      if (extendedIdentifier.part() instanceof NamePartContext) {
-        filter = markup -> markup.getExtendedTag().equals(value);
-
-      } else if (extendedIdentifier.part() instanceof AnnotationValuePartContext) {
-        String annotationIdentifier = getAnnotationName(extendedIdentifier.part());
-        filter =
-            markup ->
-                markup
-                    .getAnnotationStream()
-                    .anyMatch(
-                        a ->
-                            annotationIdentifier.equals(a.getName())
-                                && value.equals(toAnnotationText(a)));
-
+  private fun handleExpression(expr: ExprContext): Predicate<TAGMarkup> {
+    var filter: Predicate<TAGMarkup>? = null
+    if (expr is EqualityComparisonExpressionContext) {
+      val ecec = expr as EqualityComparisonExpressionContext
+      val extendedIdentifier = ecec.extendedIdentifier()
+      val value = stringValue(ecec.literalValue())
+      if (extendedIdentifier.part() is NamePartContext) {
+        filter = Predicate { markup: TAGMarkup -> markup.extendedTag == value }
+      } else if (extendedIdentifier.part() is AnnotationValuePartContext) {
+        val annotationIdentifier = getAnnotationName(extendedIdentifier.part())
+        filter = Predicate { markup: TAGMarkup ->
+          markup
+              .annotationStream
+              .anyMatch { a: AnnotationInfo -> annotationIdentifier == a.name && value == toAnnotationText(a) }
+        }
       } else {
         unhandled(
-            extendedIdentifier.part().getClass().getName() + " extendedIdentifier.part()",
-            extendedIdentifier.part().getText());
+            extendedIdentifier.part().javaClass.name + " extendedIdentifier.part()",
+            extendedIdentifier.part().text)
       }
-
-    } else if (expr instanceof JoiningExpressionContext) {
-      JoiningExpressionContext jec = (JoiningExpressionContext) expr;
-      Predicate<TAGMarkup> predicate0 = handleExpression(jec.expr(0));
-      Predicate<TAGMarkup> predicate1 = handleExpression(jec.expr(1));
-      filter = predicate0.and(predicate1);
-
-    } else if (expr instanceof CombiningExpressionContext) {
-      CombiningExpressionContext context = (CombiningExpressionContext) expr;
-      Predicate<TAGMarkup> predicate0 = handleExpression(context.expr(0));
-      Predicate<TAGMarkup> predicate1 = handleExpression(context.expr(2));
-      filter = predicate0.or(predicate1);
-
-    } else if (expr instanceof TextContainsExpressionContext) {
-      TextContainsExpressionContext context = (TextContainsExpressionContext) expr;
-      String substring = stringValue(context.STRING_LITERAL());
-      filter = tr -> toText(tr).contains(substring);
-
+    } else if (expr is JoiningExpressionContext) {
+      val jec = expr as JoiningExpressionContext
+      val predicate0 = handleExpression(jec.expr(0))
+      val predicate1 = handleExpression(jec.expr(1))
+      filter = predicate0.and(predicate1)
+    } else if (expr is CombiningExpressionContext) {
+      val context = expr as CombiningExpressionContext
+      val predicate0 = handleExpression(context.expr(0))
+      val predicate1 = handleExpression(context.expr(2))
+      filter = predicate0.or(predicate1)
+    } else if (expr is TextContainsExpressionContext) {
+      val context = expr as TextContainsExpressionContext
+      val substring = stringValue(context.STRING_LITERAL())
+      filter = Predicate { tr: TAGMarkup -> toText(tr).contains(substring) }
     } else {
-      unhandled(expr.getClass().getName() + " expression", expr.getText());
+      unhandled(expr.javaClass.name + " expression", expr.getText())
     }
-    return filter;
+    return filter!!
   }
 
-  private void unhandled(String variable, String value) {
-    throw new RuntimeException("unhandled: " + variable + " = " + value);
-  }
+  private fun unhandled(variable: String, value: String): Unit =
+      throw RuntimeException("unhandled: $variable = $value")
 
-  private int toInteger(ParserRuleContext ctx) {
-    return Integer.parseInt(ctx.getText());
-  }
+  private fun toInteger(ctx: ParserRuleContext): Int =
+      ctx.text.toInt()
 
-  private String stringLiteral(ParserRuleContext ctx) {
-    return ctx.getText();
-  }
+  private fun stringLiteral(ctx: ParserRuleContext): String =
+      ctx.text
 
-  private String stringValue(ParseTree parseTree) {
-    return parseTree.getText().replaceAll("'", "");
-  }
+  private fun stringValue(parseTree: ParseTree): String =
+      parseTree.text.replace("'".toRegex(), "")
 
-  private String toAnnotationText(AnnotationInfo annotation) {
-    return "TODO";
+  private fun toAnnotationText(annotation: AnnotationInfo): String {
+    TODO()
     //    return annotation.getDocument().getTextNodeStream()
     //        .map(TAGTextNode::getText)
     //        .collect(joining());
   }
 
-  private String getAnnotationName(PartContext partContext) {
-    AnnotationValuePartContext annotationValuePartContext =
-        (AnnotationValuePartContext) partContext;
-    AnnotationIdentifierContext annotationIdentifierContext =
-        annotationValuePartContext.annotationIdentifier();
-    return stringValue(annotationIdentifierContext);
+  private fun getAnnotationName(partContext: PartContext): String {
+    val annotationValuePartContext = partContext as AnnotationValuePartContext
+    val annotationIdentifierContext = annotationValuePartContext.annotationIdentifier()
+    return stringValue(annotationIdentifierContext)
   }
+
 }
