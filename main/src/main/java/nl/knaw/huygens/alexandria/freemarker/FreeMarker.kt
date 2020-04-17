@@ -1,4 +1,4 @@
-package nl.knaw.huygens.alexandria.freemarker;
+package nl.knaw.huygens.alexandria.freemarker
 
 /*
  * #%L
@@ -20,42 +20,42 @@ package nl.knaw.huygens.alexandria.freemarker;
  * #L%
  */
 
+import freemarker.template.Configuration
+import freemarker.template.DefaultObjectWrapper
+import freemarker.template.TemplateException
+import java.io.*
 
-import freemarker.template.*;
+object FreeMarker {
+  private val VERSION = Configuration.VERSION_2_3_25
+  private val FREEMARKER = Configuration(VERSION)
 
-import java.io.*;
+  @JvmStatic
+  fun templateToString(fmTemplate: String, fmRootMap: Any, clazz: Class<*>): String =
+      processTemplate(fmTemplate, fmRootMap, clazz, StringWriter())
 
-public class FreeMarker {
-  private static final Version VERSION = Configuration.VERSION_2_3_25;
-  private static final Configuration FREEMARKER = new Configuration(VERSION);
+  @JvmStatic
+  fun templateToFile(fmTemplate: String, file: File, fmRootMap: Any, clazz: Class<*>): String =
+      try {
+        val out = FileWriter(file)
+        processTemplate(fmTemplate, fmRootMap, clazz, out)
+      } catch (e: IOException) {
+        throw UncheckedIOException(e)
+      }
 
-  static {
-    FREEMARKER.setObjectWrapper(new DefaultObjectWrapper(VERSION));
-  }
+  private fun processTemplate(fmTemplate: String, fmRootMap: Any, clazz: Class<*>, out: Writer): String =
+      try {
+        FREEMARKER.setClassForTemplateLoading(clazz, "")
+        val template = FREEMARKER.getTemplate(fmTemplate)
+        template.outputEncoding = "UTF-8"
+        template.process(fmRootMap, out)
+        out.toString()
+      } catch (e1: IOException) {
+        throw RuntimeException(e1)
+      } catch (e1: TemplateException) {
+        throw RuntimeException(e1)
+      }
 
-  public static String templateToString(String fmTemplate, Object fmRootMap, Class<?> clazz) {
-    StringWriter out = new StringWriter();
-    return processTemplate(fmTemplate, fmRootMap, clazz, out);
-  }
-
-  private static String processTemplate(String fmTemplate, Object fmRootMap, Class<?> clazz, Writer out) {
-    try {
-      FREEMARKER.setClassForTemplateLoading(clazz, "");
-      Template template = FREEMARKER.getTemplate(fmTemplate);
-      template.setOutputEncoding("UTF-8");
-      template.process(fmRootMap, out);
-      return out.toString();
-    } catch (IOException | TemplateException e1) {
-      throw new RuntimeException(e1);
-    }
-  }
-
-  public static String templateToFile(String fmTemplate, File file, Object fmRootMap, Class<?> clazz) {
-    try {
-      FileWriter out = new FileWriter(file);
-      return processTemplate(fmTemplate, fmRootMap, clazz, out);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+  init {
+    FREEMARKER.objectWrapper = DefaultObjectWrapper(VERSION)
   }
 }
