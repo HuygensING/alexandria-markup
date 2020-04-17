@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.schema
  * limitations under the License.
  * #L%
  */
+
 import org.assertj.core.api.AbstractObjectAssert
 import org.assertj.core.internal.Iterables
 
@@ -34,6 +35,7 @@ class TAGMLSchemaParseResultAssert(actual: TAGMLSchemaParseResult?) : AbstractOb
   }
 
   private var iterables = Iterables.instance()
+
   fun hasLayers(vararg expectedLayers: String): TAGMLSchemaParseResultAssert {
     iterables.assertContainsAll(
         info, actual!!.schema.getLayers(), listOf(*expectedLayers))

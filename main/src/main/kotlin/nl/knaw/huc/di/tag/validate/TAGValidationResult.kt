@@ -27,7 +27,5 @@ class TAGValidationResult {
     val isValid: Boolean
         get() = errors.isEmpty()
 
-    override fun toString(): String {
-        return "TAGValidationResult{errors=$errors}"
-    }
+    override fun toString(): String = "TAGValidationResult{errors=$errors}"
 }
