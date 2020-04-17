@@ -122,9 +122,9 @@ public class TAGDocumentDTO implements TAGDTO {
     int textNodeSize = textNodeIds.size();
     final Set<String> layers = new HashSet<>();
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
-    return textNodeSize > 2 //
+    return textNodeSize > 2
         && getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).count()
-            >= textNodeSize / 2d;
+        >= textNodeSize / 2d;
   }
 
   private Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(

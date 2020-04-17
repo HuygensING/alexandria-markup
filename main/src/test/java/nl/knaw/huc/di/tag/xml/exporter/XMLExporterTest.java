@@ -78,7 +78,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     a.add("A");
     runInStore(
         store -> {
-          TAGView justA = new TAGView(store).setLayersToInclude(a);
+          TAGView justA = new TAGView(store).withLayersToInclude(a);
           String expectedXML =
               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                   + "<xml>\n"
@@ -100,7 +100,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     a.add("A");
     runInStore(
         store -> {
-          TAGView justA = new TAGView(store).setLayersToInclude(a);
+          TAGView justA = new TAGView(store).withLayersToInclude(a);
           String expectedXML =
               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                   + "<xml>\n"

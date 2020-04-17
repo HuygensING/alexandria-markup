@@ -125,8 +125,8 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     if (!noSuspendedMarkup) {
       String suspendedMarkupString =
               state.suspendedMarkup.values().stream()
-                      .flatMap(Collection::stream) //
-                      .map(this::suspendTag) //
+                  .flatMap(Collection::stream)
+                  .map(this::suspendTag)
                       .distinct()
                       .collect(joining(", "));
       errorListener.addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
@@ -137,11 +137,11 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     boolean noOpenMarkup = state.openMarkup.values().stream().allMatch(Collection::isEmpty);
     if (!noOpenMarkup) {
       String openRanges =
-              state.openMarkup.values().stream()
-                      .flatMap(Collection::stream) //
-                      .map(this::openTag) //
-                      .distinct()
-                      .collect(joining(", "));
+          state.openMarkup.values().stream()
+              .flatMap(Collection::stream)
+              .map(this::openTag)
+              .distinct()
+              .collect(joining(", "));
       errorListener.addError("Missing close tag(s) for: %s", openRanges);
     }
   }
@@ -728,7 +728,7 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
         //          // all open tags have the same layer set (which could be empty (just the default
         // layer))
         //          layers = correspondingLayers.get(0);
-        //
+
         //        } else {
         //          // not all open tags belong to the same sets of layers: ambiguous situation
         //          errorListener.addBreakingError(

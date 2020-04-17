@@ -1031,7 +1031,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
                     //      List<TAGTextNode> annotationTextNodes =
                     // annotationPrimes.getDocument().getTextNodeStream().collect(toList());
                     //      assertThat(annotationTextNodes).hasSize(1);
-                    //
+
                     // assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
 
                     return document;

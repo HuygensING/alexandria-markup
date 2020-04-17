@@ -85,19 +85,19 @@ public class SnarkTest extends AlexandriaBaseStoreTest {
       assertThat(document).isNotNull();
 
       Set<String> linguisticMarkup = new HashSet<>(asList("text", "phr", "phr=a", "phr=b", "word", "s", "m", "c", "w"));
-      TAGView viewL = new TAGView(store).setMarkupToInclude(linguisticMarkup);
+      TAGView viewL = new TAGView(store).withMarkupToInclude(linguisticMarkup);
       LMNLExporter exporterL = new LMNLExporter(store, viewL).useShorthand();
       String lmnlL = exporterL.toLMNL(document).replaceAll("\n\\s*\n", "\n").trim();
       LOG.info("linguistic view: lmnlL=\n{}", lmnlL);
 
       Set<String> materialMarkup = new HashSet<>(asList("page", "page-nr", "line", "p", "el"));
-      TAGView viewM = new TAGView(store).setMarkupToInclude(materialMarkup);
+      TAGView viewM = new TAGView(store).withMarkupToInclude(materialMarkup);
       LMNLExporter exporterM = new LMNLExporter(store, viewM).useShorthand();
       String lmnlM = exporterM.toLMNL(document).replaceAll("\n\\s*\n", "\n").trim();
       LOG.info("material view: lmnlM=\n{}", lmnlM);
 
       Set<String> poeticMarkup = new HashSet<>(asList("poem", "canto", "stanza", "l"));
-      TAGView viewP = new TAGView(store).setMarkupToInclude(poeticMarkup);
+      TAGView viewP = new TAGView(store).withMarkupToInclude(poeticMarkup);
       LMNLExporter exporterP = new LMNLExporter(store, viewP).useShorthand();
       String lmnlP = exporterP.toLMNL(document).replaceAll("\n\\s*\n", "\n").trim();
       LOG.info("poetic view: lmnlP=\n{}", lmnlP);

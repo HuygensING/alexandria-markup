@@ -82,14 +82,14 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
-    String input = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+    String input = "[excerpt\n"
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"
+        + "  [author\n"
+        + "    [name}Robert Frost{]\n"
+        + "    [dates}1874-1963{]] }\n"
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+        + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
         + "{excerpt]";
 
     LMNLImporterInMemory importer = new LMNLImporterInMemory();
@@ -99,14 +99,14 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     // Markup markup = new Markup(getDocumentId, "excerpt");
     // assertThat(getDocumentId.markupList).hasSize(7);
     // List<Markup> markupList = getDocumentId.markupList;
-    //
+
     // markupList.stream().map(Markup::getKey).map(t -> "[" + t + "}").forEach(System.out::print);
     // Markup markup1 = markupList.get(0);
     // assertThat(markup1.getKey()).isEqualTo("excerpt");
-    //
+
     // Markup markup2 = markupList.get(1);
     // assertThat(markup2.getKey()).isEqualTo("s");
-    //
+
     // Markup markup3 = markupList.get(2);
     // assertThat(markup3.getKey()).isEqualTo("l");
 
@@ -258,10 +258,10 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     TextNode at2 = new TextNode("annotation");
     Markup ar1 = new Markup(annotationLimen, "type").addTextNode(at2);
     TextNode at3 = new TextNode(" text");
-    annotationLimen//
-        .addTextNode(at1)//
-        .addTextNode(at2)//
-        .addTextNode(at3)//
+    annotationLimen
+        .addTextNode(at1)
+        .addTextNode(at2)
+        .addTextNode(at3)
         .addMarkup(ar1);
     r1.addAnnotation(a1);
 
@@ -298,9 +298,9 @@ public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
     TextNode at1 = new TextNode("");
     Markup ar11 = new Markup(annotationLimen, "ra11").addTextNode(at1);
     Markup ar12 = new Markup(annotationLimen, "ra12").addTextNode(at1);
-    annotationLimen//
-        .addTextNode(at1)//
-        .addMarkup(ar11)//
+    annotationLimen
+        .addTextNode(at1)
+        .addMarkup(ar11)
         .addMarkup(ar12);
     r1.addAnnotation(a1);
 

@@ -73,73 +73,12 @@ class Tokenizer {
     }
   }
 
-  public List<TAGToken> getTAGTokens() {
-    List<TAGToken> tokens = new ArrayList<>();
-    Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
-    StringBuilder textBuilder = new StringBuilder();
-    List<Long> textNodeIds = new ArrayList<>();
-    final AtomicReference<Integer> totalTextSize = new AtomicReference<>(0);
-    Map<Long, TextTokenInfo> textTokenInfoMap = new HashMap<>();
-    document.getTextNodeStream().forEach(tn -> {
-      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)//
-          .filter(tagView::isIncluded)//
-          .collect(toList());
-
-      List<TAGMarkup> toClose = new ArrayList<>(openMarkup);
-      toClose.removeAll(markups);
-      Collections.reverse(toClose);
-
-      List<TAGMarkup> toOpen = new ArrayList<>(markups);
-      toOpen.removeAll(openMarkup);
-
-      openMarkup.removeAll(toClose);
-      openMarkup.addAll(toOpen);
-
-      if (!toClose.isEmpty() || !toOpen.isEmpty()) {
-        tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
-        textBuilder.delete(0, textBuilder.length());
-        textNodeIds.clear();
-      }
-
-      toClose.stream()//
-          .map(this::toMarkupCloseToken)//
-          .forEach(tokens::add);
-
-      toOpen.stream()//
-          .map(this::toMarkupOpenToken)//
-          .forEach(tokens::add);
-
-      String text = tn.getText();
-      textBuilder.append(text);
-      Long textNodeId = tn.getDbId();
-      textNodeIds.add(textNodeId);
-      textTokenInfoMap.put(textNodeId, new TextTokenInfo(totalTextSize.get(), text.length()));
-      totalTextSize.updateAndGet(v -> v + text.length());
-    });
-    tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
-    stream(openMarkup.descendingIterator())//
-        .map(this::toMarkupCloseToken)//
-        .forEach(tokens::add);
-
-    return tokens;
-  }
-
-  private MarkupOpenToken toMarkupOpenToken(TAGMarkup tagMarkup) {
-    return new MarkupOpenToken(tagMarkup.getTag());
-  }
-
-  private MarkupCloseToken toMarkupCloseToken(TAGMarkup tagMarkup) {
-    return new MarkupCloseToken("/" + tagMarkup.getTag());
-  }
-
-  private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
-
   static List<TextToken> tokenizeText(String text, Integer endOffset, List<Long> textNodeIds, final Map<Long, TextTokenInfo> textTokenInfoMap) {
     if (WS_OR_PUNCT.matcher(text).matches()) {
       return new ArrayList<>(singletonList(new ExtendedTextToken(text).addTextNodeIds(textNodeIds)));
     }
-    List<String> parts = SimplePatternTokenizer.BY_WS_OR_PUNCT//
-        .apply(text)//
+    List<String> parts = SimplePatternTokenizer.BY_WS_OR_PUNCT
+        .apply(text)
         .collect(toList());
     final List<TextToken> textTokens = new ArrayList<>();
     int textPartStart = endOffset - text.length();
@@ -161,6 +100,67 @@ class Tokenizer {
       textTokens.add(textToken);
     }
     return textTokens;
+  }
+
+  private MarkupOpenToken toMarkupOpenToken(TAGMarkup tagMarkup) {
+    return new MarkupOpenToken(tagMarkup.getTag());
+  }
+
+  private MarkupCloseToken toMarkupCloseToken(TAGMarkup tagMarkup) {
+    return new MarkupCloseToken("/" + tagMarkup.getTag());
+  }
+
+  private static final Pattern WS_OR_PUNCT = Pattern.compile(format("[%s]+[\\s]*|[\\s]+", PUNCT));
+
+  public List<TAGToken> getTAGTokens() {
+    List<TAGToken> tokens = new ArrayList<>();
+    Deque<TAGMarkup> openMarkup = new ArrayDeque<>();
+    StringBuilder textBuilder = new StringBuilder();
+    List<Long> textNodeIds = new ArrayList<>();
+    final AtomicReference<Integer> totalTextSize = new AtomicReference<>(0);
+    Map<Long, TextTokenInfo> textTokenInfoMap = new HashMap<>();
+    document.getTextNodeStream().forEach(tn -> {
+      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(tn)
+          .filter(tagView::isIncluded)
+          .collect(toList());
+
+      List<TAGMarkup> toClose = new ArrayList<>(openMarkup);
+      toClose.removeAll(markups);
+      Collections.reverse(toClose);
+
+      List<TAGMarkup> toOpen = new ArrayList<>(markups);
+      toOpen.removeAll(openMarkup);
+
+      openMarkup.removeAll(toClose);
+      openMarkup.addAll(toOpen);
+
+      if (!toClose.isEmpty() || !toOpen.isEmpty()) {
+        tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
+        textBuilder.delete(0, textBuilder.length());
+        textNodeIds.clear();
+      }
+
+      toClose.stream()
+          .map(this::toMarkupCloseToken)
+          .forEach(tokens::add);
+
+      toOpen.stream()
+          .map(this::toMarkupOpenToken)
+          .forEach(tokens::add);
+
+      String text = tn.getText();
+      textBuilder.append(text);
+      Long textNodeId = tn.getDbId();
+      textNodeIds.add(textNodeId);
+      textTokenInfoMap.put(textNodeId, new TextTokenInfo(totalTextSize.get(), text.length()));
+      totalTextSize.updateAndGet(v -> v + text.length());
+    });
+    tokens.addAll(tokenizeText(textBuilder.toString(), totalTextSize.get(), textNodeIds, textTokenInfoMap));
+    stream(openMarkup.descendingIterator())
+        .map(this::toMarkupCloseToken)
+        .forEach(tokens::add);
+
+    return tokens;
   }
 
 }

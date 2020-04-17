@@ -94,14 +94,14 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
-      String input = "[excerpt\n"//
-          + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-          + "  [author\n"//
-          + "    [name}Robert Frost{]\n"//
-          + "    [dates}1874-1963{]] }\n"//
-          + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-          + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-          + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+      String input = "[excerpt\n"
+          + "  [source [date}1915{][title}The Housekeeper{]]\n"
+          + "  [author\n"
+          + "    [name}Robert Frost{]\n"
+          + "    [dates}1874-1963{]] }\n"
+          + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+          + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+          + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
           + "{excerpt]";
 
       LMNLImporter importer = new LMNLImporter(store);
@@ -129,9 +129,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       AnnotationInfo dates = simpleAnnotation("dates", "1874-1963");
       AnnotationInfo author = simpleAnnotation("author")/*.addAnnotation(name).addAnnotation(dates)*/;
 
-      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")//
-          .addAnnotation(source)//
-          .addAnnotation(author)//
+      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")
+          .addAnnotation(source)
+          .addAnnotation(author)
           .setFirstAndLastTextNode(tn00, tn10);
       expected.associateTextNodeWithMarkupForLayer(tn00, excerpt);
       // 3 sentences
@@ -149,23 +149,23 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       AnnotationInfo n146 = simpleAnnotation("n", "146");
       TAGMarkup l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
 
-      expected.addTextNode(tn00, null)//
-          .addTextNode(tn01, null)//
-          .addTextNode(tn02, null)//
-          .addTextNode(tn03, null)//
-          .addTextNode(tn04, null)//
-          .addTextNode(tn05, null)//
-          .addTextNode(tn06, null)//
-          .addTextNode(tn07, null)//
-          .addTextNode(tn08, null)//
-          .addTextNode(tn09, null)//
-          .addTextNode(tn10, null)//
-          .addMarkup(excerpt)//
-          .addMarkup(s1)//
-          .addMarkup(l1)//
-          .addMarkup(l2)//
-          .addMarkup(s2)//
-          .addMarkup(s3)//
+      expected.addTextNode(tn00, null)
+          .addTextNode(tn01, null)
+          .addTextNode(tn02, null)
+          .addTextNode(tn03, null)
+          .addTextNode(tn04, null)
+          .addTextNode(tn05, null)
+          .addTextNode(tn06, null)
+          .addTextNode(tn07, null)
+          .addTextNode(tn08, null)
+          .addTextNode(tn09, null)
+          .addTextNode(tn10, null)
+          .addMarkup(excerpt)
+          .addMarkup(s1)
+          .addMarkup(l1)
+          .addMarkup(l2)
+          .addMarkup(s2)
+          .addMarkup(s3)
           .addMarkup(l3);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(tn00, excerpt, layerName);
@@ -326,25 +326,25 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //      TAGTextNode at2 = store.createTextNode("annotation");
 //      TAGMarkup am1 = store.createMarkup(annotationDocument, "type")/*.addTextNode(at2)*/;
 //      TAGTextNode at3 = store.createTextNode(" text");
-//      annotationDocument//
-//          .addTextNode(at1)//
-//          .addTextNode(at2)//
-//          .addTextNode(at3)//
+//      annotationDocument
+//          .addTextNode(at1)
+//          .addTextNode(at2)
+//          .addTextNode(at3)
 //          .addMarkup(am1);
 //      String layerName = "";
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at2, am1, layerName);
 //      m1.addAnnotation(a1);
-//
+
 //      TAGTextNode t1 = store.createTextNode("This is the main text");
 ////      m1.addTextNode(t1);
 //      expected.addTextNode(t1);
 //      expected.addMarkup(m1);
 //      expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
-//
+
 //      logTAGML(actual);
 //      compareTAGML(expected, actual);
 //      assertThat(compareDocuments(expected, actual)).isTrue();
-//
+
 //      logKdTree(actual);
 //      NodeRangeIndex index = new NodeRangeIndex(store, actual);
 //      List<IndexPoint> indexPoints = index.getIndexPoints();
@@ -371,21 +371,21 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //      TAGTextNode at1 = store.createTextNode("");
 //      TAGMarkup ar11 = store.createMarkup(annotationDocument, "ra11")/*.addTextNode(at1)*/;
 //      TAGMarkup ar12 = store.createMarkup(annotationDocument, "ra12")/*.addTextNode(at1)*/;
-//      annotationDocument//
-//          .addTextNode(at1)//
-//          .addMarkup(ar11)//
+//      annotationDocument
+//          .addTextNode(at1)
+//          .addMarkup(ar11)
 //          .addMarkup(ar12);
 //      m1.addAnnotation(a1);
 //      String layerName = "";
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at1, ar11, layerName);
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at1, ar12, layerName);
-//
+
 //      TAGTextNode t1 = store.createTextNode("");
 ////      m1.addTextNode(t1);
 //      expected.addTextNode(t1);
 //      expected.addMarkup(m1);
 //      expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
-//
+
 //      logTAGML(actual);
 //      compareTAGML(expected, actual);
 //      assertThat(compareDocuments(expected, actual)).isTrue();

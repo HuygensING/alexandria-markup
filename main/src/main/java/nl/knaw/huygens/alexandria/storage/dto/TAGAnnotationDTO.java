@@ -36,7 +36,7 @@ public class TAGAnnotationDTO implements TAGDTO {
 
 //  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
 //  private Long documentId;
-//
+
 //  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
 //  private final List<Long> annotationIds = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public class TAGAnnotationDTO implements TAGDTO {
 //  public void setDocumentId(long documentId) {
 //    this.documentId = documentId;
 //  }
-//
+
 //  public Long getDocumentId() {
 //    return documentId;
 //  }
@@ -91,7 +91,7 @@ public class TAGAnnotationDTO implements TAGDTO {
 //    annotationIds.add(annotation.getResourceId());
 //    return this;
 //  }
-//
+
 //  public List<Long> getAnnotationIds() {
 //    return annotationIds;
 //  }

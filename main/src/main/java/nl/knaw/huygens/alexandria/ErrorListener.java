@@ -93,20 +93,20 @@ public class ErrorListener implements ANTLRErrorListener {
           ATNConfigSet configs) {
     if (reportAmbiguity) {
       String message =
-              "ambiguity:\n recognizer="
-                      + recognizer //
-                      + ",\n dfa="
-                      + dfa //
-                      + ",\n startIndex="
-                      + startIndex //
-                      + ",\n stopIndex="
-                      + stopIndex //
-                      + ",\n exact="
-                      + exact //
-                      + ",\n ambigAlts="
-                      + ambigAlts //
-                      + ",\n configs="
-                      + configs;
+          "ambiguity:\n recognizer="
+              + recognizer
+              + ",\n dfa="
+              + dfa
+              + ",\n startIndex="
+              + startIndex
+              + ",\n stopIndex="
+              + stopIndex
+              + ",\n exact="
+              + exact
+              + ",\n ambigAlts="
+              + ambigAlts
+              + ",\n configs="
+              + configs;
       errors.add(new TAGAmbiguityError(message));
     }
   }
@@ -122,15 +122,15 @@ public class ErrorListener implements ANTLRErrorListener {
     if (reportAttemptingFullContext) {
       String message =
           "attempting full context error:\n recognizer="
-              + recognizer //
+              + recognizer
               + ",\n dfa="
-              + dfa //
+              + dfa
               + ",\n startIndex="
-              + startIndex //
+              + startIndex
               + ",\n stopIndex="
-              + stopIndex //
+              + stopIndex
               + ",\n conflictingAlts="
-              + conflictingAlts //
+              + conflictingAlts
               + ",\n configs="
               + configs;
       errors.add(new TAGAttemptingFullContextError(message));
@@ -148,15 +148,15 @@ public class ErrorListener implements ANTLRErrorListener {
     if (reportContextSensitivity) {
       String message =
           "context sensitivity error:\n recognizer="
-              + recognizer //
+              + recognizer
               + ",\n dfa="
-              + dfa //
+              + dfa
               + ",\n startIndex="
-              + startIndex //
+              + startIndex
               + ",\n stopIndex="
-              + stopIndex //
+              + stopIndex
               + ",\n prediction="
-              + prediction //
+              + prediction
               + ",\n configs="
               + configs;
       errors.add(new TAGContextSensitivityError(message));

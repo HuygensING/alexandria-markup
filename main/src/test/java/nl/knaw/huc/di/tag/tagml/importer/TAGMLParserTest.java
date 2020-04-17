@@ -554,7 +554,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
                     ch.put("name", "Constantijn Huygens");
 
                     List<Map<String, Object>> expected = Lists.newArrayList(ch);
-                    //
+
                     // assertThat(document).hasMarkupWithTag("text").withObjectAnnotation("meta",
                     // expected);
                     return document;

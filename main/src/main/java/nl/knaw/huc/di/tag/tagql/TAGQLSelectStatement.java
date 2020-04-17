@@ -50,10 +50,10 @@ public class TAGQLSelectStatement implements TAGQLStatement {
   public Function<TAGDocument, TAGQLResult> getLimenProcessor() {
     return (TAGDocument document) -> {
       TAGQLResult result = new TAGQLResult();
-      document.getMarkupStream()//
-          .filter(markupFilter)//
-          .map(markupMapper)//
-          // .peek(this::logger)//
+      document.getMarkupStream()
+          .filter(markupFilter)
+          .map(markupMapper)
+          // .peek(this::logger)
           .forEach(result::addValue);
       if (index != null) {
         Object selectedValue = result.getValues().get(index);

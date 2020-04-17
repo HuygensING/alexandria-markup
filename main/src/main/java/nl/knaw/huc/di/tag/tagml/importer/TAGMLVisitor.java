@@ -22,8 +22,8 @@ package nl.knaw.huc.di.tag.tagml.importer;
 
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseVisitor;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 public class TAGMLVisitor extends TAGMLParserBaseVisitor {
   private final TAGStore tagStore;

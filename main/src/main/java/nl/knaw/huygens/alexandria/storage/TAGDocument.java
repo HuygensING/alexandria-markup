@@ -141,7 +141,7 @@ public class TAGDocument {
   }
 
   public Iterator<TAGTextNodeDTO> getTextNodeIterator() {
-    return getTagTextNodeStream() //
+    return getTagTextNodeStream()
         .iterator();
   }
 
@@ -262,7 +262,7 @@ public class TAGDocument {
   /* private methods */
 
   private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
-    return documentDTO.getTextNodeIds().stream() //
+    return documentDTO.getTextNodeIds().stream()
         .map(store::getTextNodeDTO);
   }
 

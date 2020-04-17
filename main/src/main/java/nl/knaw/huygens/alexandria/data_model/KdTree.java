@@ -324,10 +324,10 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // public <T extends IndexPoint> Collection<T> nearestNeighbourSearch(int K, T getDocumentId) {
   // if (getDocumentId == null || root == null)
   // return Collections.EMPTY_LIST;
-  //
+
   // // Map used for results
   // TreeSet<KdNode> results = new TreeSet<KdNode>(new EuclideanComparator(getDocumentId));
-  //
+
   // // Find the closest leaf node
   // KdNode prev = null;
   // KdNode node = root;
@@ -343,11 +343,11 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // }
   // }
   // KdNode leaf = prev;
-  //
+
   // if (leaf != null) {
   // // Used to not re-examine nodes
   // Set<KdNode> examined = new HashSet<KdNode>();
-  //
+
   // // Go up the tree, looking for better solutions
   // node = leaf;
   // while (node != null) {
@@ -356,7 +356,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // node = node.parent;
   // }
   // }
-  //
+
   // // Load up the collection of the results
   // Collection<T> collection = new ArrayList<T>(K);
   // for (KdNode kdNode : results)
@@ -366,7 +366,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
 
   // private static final <T extends IndexPoint> void searchNode(T getDocumentId, KdNode node, int K, TreeSet<KdNode> results, Set<KdNode> examined) {
   // examined.add(node);
-  //
+
   // // Search node
   // KdNode lastNode = null;
   // Double lastDistance = Double.MAX_VALUE;
@@ -386,16 +386,16 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   // }
   // lastNode = results.last();
   //// lastDistance = lastNode.id.euclideanDistance(getDocumentId);
-  //
+
   // int axis = node.depth % node.k;
   // KdNode lesser = node.lesser;
   // KdNode greater = node.greater;
-  //
+
   // // Search children branches, if axis aligned distance is less than
   // // current distance
   // if (lesser != null && !examined.contains(lesser)) {
   // examined.add(lesser);
-  //
+
   // double nodePoint = Double.MIN_VALUE;
   // double valuePlusDistance = Double.MIN_VALUE;
   // if (axis == TEXTNODE_AXIS) {
@@ -409,14 +409,14 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   //// valuePlusDistance = getDocumentId.z - lastDistance;
   // }
   // boolean lineIntersectsCube = ((valuePlusDistance <= nodePoint) ? true : false);
-  //
+
   // // Continue down lesser branch
   // if (lineIntersectsCube)
   // searchNode(getDocumentId, lesser, K, results, examined);
   // }
   // if (greater != null && !examined.contains(greater)) {
   // examined.add(greater);
-  //
+
   // double nodePoint = Double.MIN_VALUE;
   // double valuePlusDistance = Double.MIN_VALUE;
   // if (axis == TEXTNODE_AXIS) {
@@ -430,7 +430,7 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   //// valuePlusDistance = getDocumentId.z + lastDistance;
   // }
   // boolean lineIntersectsCube = ((valuePlusDistance >= nodePoint) ? true : false);
-  //
+
   // // Continue down greater branch
   // if (lineIntersectsCube)
   // searchNode(getDocumentId, greater, K, results, examined);
@@ -461,13 +461,13 @@ public class KdTree<T extends IndexPoint> implements Iterable<T> {
   }
 
   // protected static class EuclideanComparator implements Comparator<KdNode> {
-  //
+
   // private final IndexPoint point;
-  //
+
   // public EuclideanComparator(IndexPoint point) {
   // this.point = point;
   // }
-  //
+
   //// /**
   //// * {@inheritDoc}
   //// */
