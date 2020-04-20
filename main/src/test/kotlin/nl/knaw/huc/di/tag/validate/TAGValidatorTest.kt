@@ -26,162 +26,171 @@ import nl.knaw.huc.di.tag.schema.TAGMLSchemaFactory
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
+import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class TAGValidatorTest : TAGBaseStoreTest() {
 
-  @Test
-  fun testSimpleTAGMLValidationThatSucceeds() {
-    val tagML = """
-      [book>
-      [chapter>
-      [paragraph>It was the best of days, it was the worst of days....<paragraph]
-      [paragraph>And then...<paragraph]
-      [paragraph>Finally...<paragraph]
-      <chapter]
-      <book]
-      """.trimIndent()
-    // how to address default layer?
-    val schemaYAML = """---
-      |$:
-      |  book:
-      |    - chapter:
-      |      - paragraph""".trimMargin()
-    validate(tagML, schemaYAML)
-  }
-
-  @Test
-  fun testSimpleTAGMLValidationThatFails() {
-    val tagML = """
-      [book>
-      [chapter>
-      [paragraph>It was the best of days, it was the worst of days....<paragraph]
-      [paragraph>And then...<paragraph]
-      [paragraph>Finally...<paragraph]
-      <chapter]
-      <book]
-      """.trimIndent()
-    val schemaYAML = """---
-      |$:
-      |  book:
-      |    - chapter:
-      |      - sentence""".trimMargin()
-    val expectedErrors = listOf(
-        "Layer $ (default): expected [sentence> as child markup of [chapter>, but found [paragraph>")
-    val expectedWarnings = listOf<String>()
-    validateWithErrorsAndWarnings(tagML, schemaYAML, expectedErrors, expectedWarnings)
-  }
-
-  @Test
-  fun testSimpleTAGMLValidation2() {
-    val tagML = "[tagml>[l>test [w>word<w]<l]<tagml]"
-    val schemaYAML = """$:
-      |  tagml:
-      |    - l:
-      |      - w
-      """.trimMargin()
-    validate(tagML, schemaYAML)
-  }
-
-  @Test
-  fun testSimpleTAGMLValidation4() {
-    val tagML = "[tagml|+A,+B,+C>[l|A>[c|C>test<c] [b|B>[w|A>word<w]<b]<l]<tagml]"
-    val schemaYAML = """A:
-      |  tagml:
-      |    - chapter:
-      |        - paragraph:
-      |            - sentence
-      |$:
-      |  tagml:
-      |    - something
-      |V:
-      |  tagml:
-      |    - poem:
-      |        - verse:
-      |            - line
-      """.trimMargin()
-    val errors = listOf("Layer A: expected [chapter|A> as child markup of [tagml|A>, but found [l|A>")
-    val warnings = listOf(
-        "Layers $ (default), V are defined in the schema, but not used in the document.",
-        "Layers B, C are used in the document, but not defined in the schema.")
-    validateWithErrorsAndWarnings(tagML, schemaYAML, errors, warnings)
-  }
-
-  @Test
-  fun testSimpleTAGMLValidation3() {
-    val tagML = "[tagml|+A,+B>[a|A>The rain [b|B>in [aa|A>Spain<aa] falls [bb|B>mainly<bb] on the plain.<b]<a]<tagml]"
-    val schemaYAML = """A:
-      |  tagml:
-      |    - a:
-      |      - aa
-      |B:
-      |  tagml:
-      |    - b:
-      |      - bb
-      """.trimMargin()
-    validate(tagML, schemaYAML)
-  }
-
-  //  @Test
-  fun testMoreComplicatedTAGMLValidation() {
-    val tagML = ("[root>"
-        + "[s><|[del>Dit kwam van een<del]|[del>[add>Gevolg van een<add]<del]|[add>De<add]|>"
-        + " te streng doorgedreven rationalisatie van zijne "
-        + "<|[del>opvoeding<del]|[del>[add>prinselijke jeugd<add]<del]|[add>prinsenjeugd [?del>bracht<?del] had dit met zich meegebracht<add]|><s]"
-        + "<root]")
-    // how to address default layer?
-    val schemaYAML = ""
-    validate(tagML, schemaYAML)
-  }
-
-  private fun validate(tagML: String, schemaYAML: String) {
-    LOG.info("schemaYAML={}", schemaYAML)
-    runInStoreTransaction { store: TAGStore ->
-      val document = parseTAGML(tagML, store)
-      assertThat(document).isNotNull
-
-      val schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML)
-      assertThat(schemaParseResult).hasSchema().hasNoErrors()
-
-      val validator = TAGValidator(store)
-      val validationResult = validator.validate(document, schemaParseResult.schema)
-      LOG.info("validationResult={}", validationResult)
-      assertThat(validationResult).isValid
+    @Test
+    fun testSimpleTAGMLValidationThatSucceeds() {
+        val body = """
+            [book>
+            [chapter>
+            [paragraph>It was the best of days, it was the worst of days....<paragraph]
+            [paragraph>And then...<paragraph]
+            [paragraph>Finally...<paragraph]
+            <chapter]
+            <book]
+            """.trimIndent()
+        // how to address default layer?
+        val schemaYAML = """
+            |---
+            |$:
+            |  book:
+            |    - chapter:
+            |      - paragraph""".trimMargin()
+        validate(body, schemaYAML)
     }
-  }
 
-  private fun validateWithErrorsAndWarnings(
-      tagML: String,
-      schemaYAML: String,
-      expectedErrors: Collection<String>,
-      expectedWarnings: Collection<String>) {
-    LOG.info("schemaYAML={}", schemaYAML)
-    runInStoreTransaction { store: TAGStore ->
-      val document = parseTAGML(tagML, store)
-      assertThat(document).isNotNull
-
-      val schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML)
-      assertThat(schemaParseResult).hasSchema().hasNoErrors()
-
-      val validator = TAGValidator(store)
-      val validationResult = validator.validate(document, schemaParseResult.schema)
-      LOG.info("validationResult={}", validationResult)
-      assertThat(validationResult)
-          .isNotValid
-          .hasErrors(expectedErrors)
-          .hasWarnings(expectedWarnings)
+    @Test
+    fun testSimpleTAGMLValidationThatFails() {
+        val body = """
+            [book>
+            [chapter>
+            [paragraph>It was the best of days, it was the worst of days....<paragraph]
+            [paragraph>And then...<paragraph]
+            [paragraph>Finally...<paragraph]
+            <chapter]
+            <book]
+            """.trimIndent()
+        val schemaYAML = """
+            |---
+            |$:
+            |  book:
+            |    - chapter:
+            |      - sentence""".trimMargin()
+        val expectedErrors = listOf(
+                "Layer $ (default): expected [sentence> as child markup of [chapter>, but found [paragraph>")
+        val expectedWarnings = listOf<String>()
+        validateWithErrorsAndWarnings(body, schemaYAML, expectedErrors, expectedWarnings)
     }
-  }
 
-  //  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
-  private fun parseTAGML(tagML: String, store: TAGStore): TAGDocument {
-    //    LOG.info("TAGML=\n{}\n", tagML);
-    val trimmedTagML = tagML.trim { it <= ' ' }
-    return TAGMLImporter(store).importTAGML(trimmedTagML)
-  }
+    @Test
+    fun testSimpleTAGMLValidation2() {
+        val body = "[tagml>[l>test [w>word<w]<l]<tagml]"
+        val schemaYAML = """
+            |$:
+            |  tagml:
+            |    - l:
+            |      - w
+            """.trimMargin()
+        validate(body, schemaYAML)
+    }
 
-  companion object {
-    val LOG = LoggerFactory.getLogger(TAGValidatorTest::class.java)
-  }
+    @Test
+    fun testSimpleTAGMLValidation4() {
+        val body = "[tagml|+A,+B,+C>[l|A>[c|C>test<c] [b|B>[w|A>word<w]<b]<l]<tagml]"
+        val schemaYAML = """
+            |A:
+            |  tagml:
+            |    - chapter:
+            |        - paragraph:
+            |            - sentence
+            |$:
+            |  tagml:
+            |    - something
+            |V:
+            |  tagml:
+            |    - poem:
+            |        - verse:
+            |            - line
+            """.trimMargin()
+        val errors = listOf("Layer A: expected [chapter|A> as child markup of [tagml|A>, but found [l|A>")
+        val warnings = listOf(
+                "Layers $ (default), V are defined in the schema, but not used in the document.",
+                "Layers B, C are used in the document, but not defined in the schema.")
+        validateWithErrorsAndWarnings(body, schemaYAML, errors, warnings)
+    }
+
+    @Test
+    fun testSimpleTAGMLValidation3() {
+        val body = "[tagml|+A,+B>[a|A>The rain [b|B>in [aa|A>Spain<aa] falls [bb|B>mainly<bb] on the plain.<b]<a]<tagml]"
+        val schemaYAML = """
+            |A:
+            |  tagml:
+            |    - a:
+            |      - aa
+            |B:
+            |  tagml:
+            |    - b:
+            |      - bb
+            """.trimMargin()
+        validate(body, schemaYAML)
+    }
+
+    @Ignore
+    @Test
+    fun testMoreComplicatedTAGMLValidation() {
+        val body = ("[root>"
+                + "[s><|[del>Dit kwam van een<del]|[del>[add>Gevolg van een<add]<del]|[add>De<add]|>"
+                + " te streng doorgedreven rationalisatie van zijne "
+                + "<|[del>opvoeding<del]|[del>[add>prinselijke jeugd<add]<del]|[add>prinsenjeugd [?del>bracht<?del] had dit met zich meegebracht<add]|><s]"
+                + "<root]")
+        // how to address default layer?
+        val schemaYAML = ""
+        validate(body, schemaYAML)
+    }
+
+    private fun validate(tagmlBody: String, schemaYAML: String) {
+        log.info("schemaYAML={}", schemaYAML)
+        val tagml = addTAGMLHeader(tagmlBody)
+        runInStoreTransaction { store: TAGStore ->
+            val document = parseTAGML(tagml, store)
+            assertThat(document).isNotNull
+
+            val schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML)
+            assertThat(schemaParseResult).hasSchema().hasNoErrors()
+
+            val validator = TAGValidator(store)
+            val validationResult = validator.validate(document, schemaParseResult.schema)
+            log.info("validationResult={}", validationResult)
+            assertThat(validationResult).isValid
+        }
+    }
+
+    private fun validateWithErrorsAndWarnings(
+            tagmlBody: String,
+            schemaYAML: String,
+            expectedErrors: Collection<String>,
+            expectedWarnings: Collection<String>) {
+        log.info("schemaYAML={}", schemaYAML)
+        val tagml = addTAGMLHeader(tagmlBody)
+        runInStoreTransaction { store: TAGStore ->
+            val document = parseTAGML(tagml, store)
+            assertThat(document).isNotNull
+
+            val schemaParseResult = TAGMLSchemaFactory.parseYAML(schemaYAML)
+            assertThat(schemaParseResult).hasSchema().hasNoErrors()
+
+            val validator = TAGValidator(store)
+            val validationResult = validator.validate(document, schemaParseResult.schema)
+            log.info("validationResult={}", validationResult)
+            assertThat(validationResult)
+                    .isNotValid
+                    .hasErrors(expectedErrors)
+                    .hasWarnings(expectedWarnings)
+        }
+    }
+
+    //  private void validate(final TAGDocument document, final TAGMLSchema schema) {}
+    private fun parseTAGML(tagml: String, store: TAGStore): TAGDocument {
+        //    LOG.info("TAGML=\n{}\n", tagML);
+        val trimmedTagML = tagml.trim { it <= ' ' }
+        return TAGMLImporter(store).importTAGML(trimmedTagML)
+    }
+
+    companion object {
+        val log = LoggerFactory.getLogger(TAGValidatorTest::class.java)
+    }
 }

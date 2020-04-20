@@ -48,4 +48,7 @@ public class TAGMLBaseTest {
     LOG.info("\nTokens:\n{}\n", table);
   }
 
+  public String addTAGMLHeader(String body) {
+    return "[!schema file:///tmp/dummy.yaml]\n" + body;
+  }
 }

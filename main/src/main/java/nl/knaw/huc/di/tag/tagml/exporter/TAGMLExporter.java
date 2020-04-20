@@ -69,6 +69,7 @@ public class TAGMLExporter extends TAGExporter {
   }
 
   public String asTAGML(TAGDocument document) {
+    // TODO: Add Schema header
     annotationFactory = new AnnotationFactory(store, document.getDTO().textGraph);
     Map<Long, AtomicInteger> discontinuousMarkupTextNodesToHandle = new HashMap<>();
     document

@@ -1,6 +1,5 @@
 package nl.knaw.huygens.alexandria;
 
-
 /*
  * #%L
  * alexandria-markup-core
@@ -21,7 +20,7 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
@@ -36,14 +35,14 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
+public class AlexandriaBaseStoreTest extends TAGMLBaseTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
   private static Path tmpDir;
 
   @BeforeClass
   public static void beforeClass() throws IOException {
-//    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
+    //    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
@@ -80,5 +79,4 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   private TAGStore getStore() {
     return new BDBTAGStore(tmpDir.toString(), false);
   }
-
 }

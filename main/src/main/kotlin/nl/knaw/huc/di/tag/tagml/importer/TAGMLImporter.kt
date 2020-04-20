@@ -40,84 +40,82 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 
 class TAGMLImporter(private val tagStore: TAGStore) {
-  @Throws(TAGMLSyntaxError::class)
-  fun importTAGML(input: String?): TAGDocument {
-    val antlrInputStream: CharStream = CharStreams.fromString(input)
-    return importTAGML(antlrInputStream)
-  }
 
-  @Throws(TAGMLSyntaxError::class)
-  fun importTAGML(input: InputStream?): TAGDocument {
-    return try {
-      val antlrInputStream = CharStreams.fromStream(input)
-      importTAGML(antlrInputStream)
-    } catch (e: IOException) {
-      e.printStackTrace()
-      throw UncheckedIOException(e)
+    @Throws(TAGMLSyntaxError::class)
+    fun importTAGML(input: String?): TAGDocument {
+        val antlrInputStream: CharStream = CharStreams.fromString(input)
+        return importTAGML(antlrInputStream)
     }
-  }
 
-  @Throws(TAGMLSyntaxError::class)
-  private fun importTAGML(antlrInputStream: CharStream): TAGDocument {
-    val lexer = TAGMLLexer(antlrInputStream)
-    val errorListener = ErrorListener()
-    lexer.addErrorListener(errorListener)
-    val tokens = CommonTokenStream(lexer)
-    val parser = TAGMLParser(tokens)
-    parser.addErrorListener(errorListener)
-    val document = usingListener(parser, errorListener)
-    //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
-    val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
-    //    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
-    var errorMsg = ""
-    if (errorListener.hasErrors()) {
-      //      logDocumentGraph(document,"");
-      errorMsg = """
-        Parsing errors:
-        ${errorListener.prefixedErrorMessagesAsString}
-        """.trimIndent()
-      if (errorListener.hasBreakingError()) {
-        errorMsg += "\nparsing aborted!"
-      }
-      throw TAGMLSyntaxError(errorMsg, errorListener.errors)
+    @Throws(TAGMLSyntaxError::class)
+    fun importTAGML(input: InputStream?): TAGDocument =
+            try {
+                val antlrInputStream = CharStreams.fromStream(input)
+                importTAGML(antlrInputStream)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw UncheckedIOException(e)
+            }
+
+    @Throws(TAGMLSyntaxError::class)
+    private fun importTAGML(antlrInputStream: CharStream): TAGDocument {
+        val lexer = TAGMLLexer(antlrInputStream)
+        val errorListener = ErrorListener()
+        lexer.addErrorListener(errorListener)
+        val tokens = CommonTokenStream(lexer)
+        val parser = TAGMLParser(tokens)
+        parser.addErrorListener(errorListener)
+        val document = usingListener(parser, errorListener)
+        //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
+        val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
+        //    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
+        var errorMsg = ""
+        if (errorListener.hasErrors()) {
+            //      logDocumentGraph(document,"");
+            errorMsg = """
+                Parsing errors:
+                ${errorListener.prefixedErrorMessagesAsString}
+                """.trimIndent()
+            if (errorListener.hasBreakingError()) {
+                errorMsg += "\nparsing aborted!"
+            }
+            throw TAGMLSyntaxError(errorMsg, errorListener.errors)
+        }
+        update(document.dto)
+        return document
     }
-    update(document.dto)
-    return document
-  }
 
-  private fun usingListener(parser: TAGMLParser, errorListener: ErrorListener): TAGDocument {
-    parser.buildParseTree = true
-    val parseTree: ParseTree = parser.document()
-    //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
-    val listener = TAGMLListener(tagStore, errorListener)
-    try {
-      ParseTreeWalker.DEFAULT.walk(listener, parseTree)
-    } catch (ignored: TAGMLBreakingError) {
+    private fun usingListener(parser: TAGMLParser, errorListener: ErrorListener): TAGDocument {
+        parser.buildParseTree = true
+        val parseTree: ParseTree = parser.document()
+        //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
+        val listener = TAGMLListener(tagStore, errorListener)
+        try {
+            ParseTreeWalker.DEFAULT.walk(listener, parseTree)
+        } catch (ignored: TAGMLBreakingError) {
+        }
+        return listener.document
     }
-    return listener.document
-  }
 
-  private fun usingVisitor(parser: TAGMLParser, errorListener: ErrorListener): TAGDocument {
-    val documentContext = parser.document()
-    val visitor = TAGMLVisitor(tagStore, errorListener)
-    visitor.visit(documentContext)
-    return visitor.document
-  }
+    private fun usingVisitor(parser: TAGMLParser, errorListener: ErrorListener): TAGDocument {
+        val documentContext = parser.document()
+        val visitor = TAGMLVisitor(tagStore, errorListener)
+        visitor.visit(documentContext)
+        return visitor.document
+    }
 
-  private fun update(tagdto: TAGDTO): Long {
-    return tagStore.persist(tagdto)
-  }
+    private fun update(tagdto: TAGDTO): Long = tagStore.persist(tagdto)
 
-  protected fun logDocumentGraph(document: TAGDocument?, input: String?) {
-    println(
-        "\n------------8<------------------------------------------------------------------------------------\n")
-    println(DotFactory().toDot(document, input))
-    println(
-        "\n------------8<------------------------------------------------------------------------------------\n")
-  }
+    private fun logDocumentGraph(document: TAGDocument?, input: String?) {
+        println(
+                "\n------------8<------------------------------------------------------------------------------------\n")
+        println(DotFactory().toDot(document, input))
+        println(
+                "\n------------8<------------------------------------------------------------------------------------\n")
+    }
 
-  companion object {
-    private val LOG = LoggerFactory.getLogger(TAGMLImporter::class.java)
-  }
+    companion object {
+        private val log = LoggerFactory.getLogger(TAGMLImporter::class.java)
+    }
 
 }

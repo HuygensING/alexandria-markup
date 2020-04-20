@@ -101,7 +101,9 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
     visualizeDiff("A-4", originText, "B-4", editedText);
   }
 
-  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+  private void visualizeDiff(final String witness1, final String body1, final String witness2, final String body2) {
+    String tagml1 = addTAGMLHeader(body1);
+    String tagml2 = addTAGMLHeader(body2);
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);
     runInStoreTransaction(store -> {
