@@ -476,7 +476,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" + "[m l=[3,true,'string']>text<m]" + "<tagml]";
 
     final String expectedError =
-        "line 1:13 : All elements of ListAnnotation l should be of the same type.";
+        "line 2:13 : All elements of ListAnnotation l should be of the same type.";
     runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
@@ -484,7 +484,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   public void testListElementSeparatorShouldBeComma() {
     String input = "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
     final String expectedError =
-        "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
+        "line 2:13 : The elements of ListAnnotation l should be separated by commas.";
     runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
@@ -645,7 +645,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     runInStoreTransaction(
         store ->
             assertTAGMLParsesWithSyntaxError(
-                input, "line 1:1 : Namespace z has not been defined.", store));
+                input, "line 2:1 : Namespace z has not been defined.", store));
   }
 
   @Test
@@ -660,7 +660,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         });
   }
 
-  private TAGDocument assertTAGMLParses(final String input, final TAGStore store) {
+  private TAGDocument assertTAGMLParses(final String body, final TAGStore store) {
+    String input = addTAGMLHeader(body);
     printTokens(input);
 
     CodePointCharStream antlrInputStream = CharStreams.fromString(input);
@@ -695,7 +696,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   }
 
   private void assertTAGMLParsesWithSyntaxError(
-      String input, String expectedSyntaxErrorMessage, final TAGStore store) {
+      String body, String expectedSyntaxErrorMessage, final TAGStore store) {
+    String input = addTAGMLHeader(body);
     printTokens(input);
 
     CodePointCharStream antlrInputStream = CharStreams.fromString(input);
@@ -719,7 +721,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    assertThat(errorListener.getPrefixedErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
+    assertThat(errorListener.getPrefixedErrorMessagesAsString())
+        .contains(expectedSyntaxErrorMessage);
   }
 
   private void assertExportEqualsInput(String input, TAGDocument doc, final TAGStore store) {

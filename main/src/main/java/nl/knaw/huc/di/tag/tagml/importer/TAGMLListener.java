@@ -181,6 +181,25 @@ public class TAGMLListener extends AbstractTAGMLListener {
   }
 
   @Override
+  public void exitWhitespace(WhitespaceContext ctx) {
+    String text = unEscape(ctx.getText());
+    //    LOG.debug("text=<{}>", text);
+    atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
+    // TODO: smarter whitespace handling
+    boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
+    if (useText) {
+      if (StringUtils.isNotBlank(text)) {
+        checkEOF(ctx);
+      }
+      if (state.rootMarkupIsNotSet()) {
+        addBreakingError(ctx, "No text allowed here, the root markup must be started first.");
+      }
+      TAGTextNode tn = store.createTextNode(text);
+      addAndConnectToMarkup(tn);
+    }
+  }
+
+  @Override
   public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
     String ns = ctx.IN_NamespaceIdentifier().getText();
     String url = ctx.IN_NamespaceURI().getText();

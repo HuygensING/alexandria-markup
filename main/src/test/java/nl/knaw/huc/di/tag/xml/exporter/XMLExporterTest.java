@@ -95,7 +95,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   @Test
   public void testXMLExportWithViewAndDefaultLayer() {
     String tagML =
-            "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]";
+        "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]";
     final Set<String> a = new HashSet<>();
     a.add("A");
     runInStore(
@@ -124,7 +124,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
             + "<excerpt]";
     String expectedXML =
         "<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='L S'>\n"
+            + "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='_default L S'>\n"
             + "<excerpt source='The Housekeeper' author='Robert Frost' th:doc='L S' th:sId='excerpt0'/><s th:doc='S' th:sId='s1'/><l n='144' th:doc='L' th:sId='l2'/>He manages to keep the upper hand<l th:doc='L' th:eId='l2'/>\n"
             + "<l n='145' th:doc='L' th:sId='l3'/>On his own farm.<s th:doc='S' th:eId='s1'/> <s th:doc='S' th:sId='s4'/>He&apos;s boss.<s th:doc='S' th:eId='s4'/> <s th:doc='S' th:sId='s5'/>But as to hens:<l th:doc='L' th:eId='l3'/>\n"
             + "<l n='146' th:doc='L' th:sId='l6'/>We fence our flowers in and the hens range.<l th:doc='L' th:eId='l6'/><s th:doc='S' th:eId='s5'/>\n"
@@ -192,7 +192,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
             + "<tagml]";
     String expectedXML =
         "<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='A B _default'>\n"
+            + "<xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='_default A B'>\n"
             + "<tagml th:doc='_default' th:sId='tagml0'/><text th:doc='A B' th:sId='text1'/><line th:doc='_default' th:sId='line2'/><page th:doc='A' th:sId='page3'/><p th:doc='B' th:sId='p4'/>1st. Voice from the Springs<line th:doc='_default' th:eId='line2'/>\n"
             + "<line th:doc='_default' th:sId='line5'/>Thrice three hundred thousand years<line th:doc='_default' th:eId='line5'/>\n"
             + "<line th:doc='_default' th:sId='line6'/>We had been stained with bitter blood<line th:doc='_default' th:eId='line6'/>\n"
@@ -277,7 +277,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     String tagML = "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]";
     String expectedXML =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"la lb\">\n"
+            + "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"la lb _default\">\n"
             + "<x th:doc=\"la lb\" th:sId=\"x0\"/><a th:doc=\"la\" th:sId=\"a1\"/>J&apos;onn J&apos;onzz "
             + "<b th:doc=\"lb\" th:sId=\"b2\"/>likes<a th:doc=\"la\" th:eId=\"a1\"/> Oreos<b th:doc=\"lb\" th:eId=\"b2\"/>"
             + "<x th:doc=\"la lb\" th:eId=\"x0\"/>\n"
@@ -458,7 +458,7 @@ public class XMLExporterTest extends TAGBaseStoreTest {
         "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]";
     String expectedXML =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"p1 p2\">\n"
+            + "<xml xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\" th:doc=\"p1 p2 _default\">\n"
             + "<x th:doc=\"p1 p2\" th:sId=\"x0\"/>word1 <phr th:doc=\"p1\" th:sId=\"phr1\"/>word2 "
             + "<phr th:doc=\"p2\" th:sId=\"phr2\"/>word3<phr th:doc=\"p1\" th:eId=\"phr1\"/> word4"
             + "<phr th:doc=\"p2\" th:eId=\"phr2\"/> word5<x th:doc=\"p1 p2\" th:eId=\"x0\"/>\n"
@@ -528,12 +528,12 @@ public class XMLExporterTest extends TAGBaseStoreTest {
     return new TAGMLImporter(store).importTAGML(tagML);
   }
 
-  private void assertXMLExportIsAsExpected(final String tagML, final String expectedXML) {
+  private void assertXMLExportIsAsExpected(final String body, final String expectedXML) {
     runInStore(
         store -> {
           try {
             assertXMLExportIsAsExpected(
-                tagML, TAGViews.getShowAllMarkupView(store), expectedXML, store);
+                body, TAGViews.getShowAllMarkupView(store), expectedXML, store);
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -541,9 +541,10 @@ public class XMLExporterTest extends TAGBaseStoreTest {
   }
 
   private void assertXMLExportIsAsExpected(
-      final String tagML, TAGView view, final String expectedXML, final TAGStore store)
+      final String body, TAGView view, final String expectedXML, final TAGStore store)
       throws Exception {
-    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagML, store));
+    String tagml = addTAGMLHeader(body);
+    TAGDocument document = store.runInTransaction(() -> parseTAGML(tagml, store));
     assertThat(document).isNotNull();
 
     String xml = store.runInTransaction(() -> new XMLExporter(store, view).asXML(document));

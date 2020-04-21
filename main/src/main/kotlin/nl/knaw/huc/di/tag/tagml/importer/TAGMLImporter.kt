@@ -73,9 +73,9 @@ class TAGMLImporter(private val tagStore: TAGStore) {
         if (errorListener.hasErrors()) {
             //      logDocumentGraph(document,"");
             errorMsg = """
-                Parsing errors:
-                ${errorListener.prefixedErrorMessagesAsString}
-                """.trimIndent()
+                |Parsing errors:
+                |${errorListener.prefixedErrorMessagesAsString}
+                """.trimMargin()
             if (errorListener.hasBreakingError()) {
                 errorMsg += "\nparsing aborted!"
             }

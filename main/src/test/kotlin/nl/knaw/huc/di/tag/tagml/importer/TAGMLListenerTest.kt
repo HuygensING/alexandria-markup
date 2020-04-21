@@ -180,7 +180,7 @@ class TAGMLListenerTest : TAGBaseStoreTest() {
         LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors)
         assertThat(numberOfSyntaxErrors).isEqualTo(0)
         val listener = walkParseTree(errorListener, parseTree, store)
-        assertThat(errorListener.hasErrors()).isFalse
+        assertThat(errorListener.hasErrors()).isFalse()
         val document = listener.document
         logDocumentGraph(document, body)
         val markupRanges = document.markupRangeMap
@@ -205,7 +205,7 @@ class TAGMLListenerTest : TAGBaseStoreTest() {
                 //              fail("expected TAGMLBreakingError");
             } catch (e: TAGMLBreakingError) {
             }
-            assertThat(errorListener.hasErrors()).isTrue
+            assertThat(errorListener.hasErrors()).isTrue()
             val errors = errorListener.prefixedErrorMessagesAsString
             assertThat(errors).isEqualTo(expectedSyntaxErrorMessage)
         }

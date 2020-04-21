@@ -24,7 +24,7 @@
         <project.license.url>https://www.apache.org/licenses/LICENSE-2.0</project.license.url>
         <java.version>1.8</java.version>
 
-        <antlr.version>4.7.2</antlr.version>
+        <antlr.version>4.8-1</antlr.version>
         <antlr4.visitor>true</antlr4.visitor>
         <asciitable.version>0.3.2</asciitable.version>
         <assertj.version>3.14.0</assertj.version>

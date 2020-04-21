@@ -41,19 +41,22 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   @Ignore
   @Test
   public void testMarkupDiff0() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]\n";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]\n";
+    String originText =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]\n";
+    String editedText =
+        "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
+    assertThat(markupInfoDiffs)
+        .containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
   }
 
   @Test
@@ -78,7 +81,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
-//    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
+    //    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
   }
 
   @Ignore
@@ -99,51 +102,58 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     assertThat(markupInfoDiffs).containsExactly("{[l](1,1),[l](2,1)} joined to [l](1,2)");
   }
 
-  private List<String> getMarkupDiffs(final String originText, final String editedText) {
+  private List<String> getMarkupDiffs(final String originBody, final String editedBody) {
+    String originText = addTAGMLHeader(originBody);
+    String editedText = addTAGMLHeader(editedBody);
     visualizeDiff("A", originText, "B", editedText);
-    return runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView tagView = new TAGView(store).withMarkupToExclude(none);
-      TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
-      List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
-      assertThat(markupInfoLists).hasSize(2);
-      for (int i = 0; i < 2; i++) {
-        for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
-          LOG.info("{}: {}", i, mi);
-        }
-      }
-      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
-      LOG.info("{}", diffMarkupInfo);
-      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
-      LOG.info("{}", mrDiffMarkupInfo);
-      return diffMarkupInfo;
-    });
+    return runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView tagView = new TAGView(store).withMarkupToExclude(none);
+          TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
+          List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
+          assertThat(markupInfoLists).hasSize(2);
+          for (int i = 0; i < 2; i++) {
+            for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
+              LOG.info("{}: {}", i, mi);
+            }
+          }
+          List<String> diffMarkupInfo =
+              differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
+          LOG.info("{}", diffMarkupInfo);
+          List<String> mrDiffMarkupInfo =
+              differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
+          LOG.info("{}", mrDiffMarkupInfo);
+          return diffMarkupInfo;
+        });
   }
 
-  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+  private void visualizeDiff(
+      final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);
-    runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
+    runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
-      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
-//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
-      new VariantGraphVisualizer(visualizer)
-          .visualizeVariation(witness1, original, witness2, edited, allTags);
-      String result = visualizer.getResult();
-      LOG.info("result=\n" +
-          "------8<---------------------------------------\n" +
-          "{}\n" +
-          "------8<---------------------------------------\n", result);
-    });
+          DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+          //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+          new VariantGraphVisualizer(visualizer)
+              .visualizeVariation(witness1, original, witness2, edited, allTags);
+          String result = visualizer.getResult();
+          LOG.info(
+              "result=\n"
+                  + "------8<---------------------------------------\n"
+                  + "{}\n"
+                  + "------8<---------------------------------------\n",
+              result);
+        });
   }
-
 }
-
