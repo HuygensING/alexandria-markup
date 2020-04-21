@@ -1,3 +1,4 @@
+[!schema http://example.org/schema.yaml]
 [poem|+p title='The Hunting of the Snark (An Agony in 8 Fits)' voice='Narrator'>
 [text|+l,+pr title='The Hunting of the Snark (An Agony in 8 Fits)'>
 [canto|p title='The Vanishing'>

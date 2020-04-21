@@ -1,1 +1,2 @@
+[!schema http://example.org/schema.yaml]
 [tagml>[img src='http://example.com/img.png']<tagml]

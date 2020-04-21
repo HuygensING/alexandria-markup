@@ -1,3 +1,4 @@
+[!schema http://example.org/schema.yaml]
 [text>
 [body|+Q,+L>
   [lg|L type="verse">

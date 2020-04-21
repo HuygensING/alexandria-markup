@@ -1,3 +1,4 @@
+[!schema http://example.org/schema.yaml]
 [act>
 [head>ACT FIRST<head]
 [scene|+V,+D>

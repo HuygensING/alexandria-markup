@@ -1,3 +1,4 @@
+[!schema http://example.org/schema.yaml]
 [book title={lang='en' content='Genesis'}>
 [chapter>
 [section title="The creation of the world.">

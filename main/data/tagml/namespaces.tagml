@@ -1,2 +1,3 @@
+[!schema http://example.org/schema.yaml]
 [!ns p http://tag.com/poetry]
 [p:poem>Roses are red, .....<p:poem]
