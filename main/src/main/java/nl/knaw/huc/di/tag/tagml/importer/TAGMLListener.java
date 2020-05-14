@@ -227,8 +227,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
                     .filter(
                         l ->
                             !TAGML.DEFAULT_LAYER.equals(
-                                l)) // Once again, the default layer is special! TODO: fix default
-                    // layer usage
+                                l)) // Once again, the default layer is special! TODO: fix default layer usage
                     .collect(toSet());
             handledLayers.addAll(newParentLayers);
             goOn = !newParentLayers.isEmpty();
@@ -327,7 +326,7 @@ public class TAGMLListener extends AbstractTAGMLListener {
 
   private void checkLayerWasAdded(final StartTagContext ctx, final String layerId) {
     if (!state.openMarkup.containsKey(layerId)) {
-      addError(
+      addBreakingError(
           ctx.markupName().layerInfo(),
           "Layer %s has not been added at this point, use +%s to add a layer.",
           layerId,
