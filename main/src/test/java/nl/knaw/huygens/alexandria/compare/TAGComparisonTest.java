@@ -41,6 +41,7 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
 
+  @Ignore("TODO")
   @Test
   public void testSplitCase() {
     String originText = "[TAGML|+M>\n" +
@@ -100,7 +101,6 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
   @Test
   public void testAddition() {
     String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
@@ -153,7 +153,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("change to TAGML first")
+  @Ignore("TODO")
   @Test
   public void testJoin() {
     String originText = "[t>[l>one two<l]\n[l>three four<l]<t]";
@@ -171,7 +171,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("change to TAGML first")
+  @Ignore("TODO")
   @Test
   public void testSplit() {
     String originText = "[t>[l>one two three four<l]<t]";
@@ -189,7 +189,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  //@Ignore("change to TAGML first")
+  @Ignore("TODO")
   @Test
   public void testAddedNewlines() {
     String originText = "[t>one two three four<t]";
