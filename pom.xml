@@ -3,7 +3,7 @@
 
     <groupId>nl.knaw.huygens.alexandria</groupId>
     <artifactId>alexandria-markup</artifactId>
-    <version>2.3.3-SNAPSHOT</version>
+    <version>3.0-trd-560</version>
     <packaging>pom</packaging>
     <inceptionYear>2016</inceptionYear>
 
@@ -53,7 +53,7 @@
         <mockito-core.version>3.2.4</mockito-core.version>
         <slf4j-api.version>2.0.0-alpha1</slf4j-api.version>
         <tag.version>1.0-SNAPSHOT</tag.version>
-        <tagml.version>2.4</tagml.version>
+        <tagml.version>3.0-trd-560</tagml.version>
         <wagon-ssh.version>3.3.3</wagon-ssh.version>
         <xmlcalabash.version>1.1.30-99</xmlcalabash.version>
     </properties>
