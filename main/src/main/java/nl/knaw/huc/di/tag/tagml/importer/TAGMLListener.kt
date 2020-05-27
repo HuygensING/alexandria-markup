@@ -1,22 +1,5 @@
 package nl.knaw.huc.di.tag.tagml.importer
 
-import nl.knaw.huc.di.tag.tagml.TAGML.unEscape
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*
-import nl.knaw.huygens.alexandria.ErrorListener
-import nl.knaw.huygens.alexandria.storage.TAGDocument
-import nl.knaw.huygens.alexandria.storage.TAGMarkup
-import nl.knaw.huygens.alexandria.storage.TAGStore
-import nl.knaw.huygens.alexandria.storage.TAGTextNode
-import nl.knaw.huygens.alexandria.storage.dto.TAGDTO
-import org.antlr.v4.runtime.ParserRuleContext
-import org.apache.commons.lang3.StringUtils
-import org.slf4j.LoggerFactory
-import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
-import java.util.stream.Collectors
-
 /*-
  * #%L
  * alexandria-markup-core
@@ -35,19 +18,52 @@ import java.util.stream.Collectors
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) : AbstractTAGMLListener(errorListener) {
+ */
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCH
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES
+import nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_ENDCHAR
+import nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_STARTCHAR
+import nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE
+import nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER
+import nl.knaw.huc.di.tag.tagml.TAGML.DIVERGENCE
+import nl.knaw.huc.di.tag.tagml.TAGML.DIVIDER
+import nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_ENDCHAR
+import nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_STARTCHAR
+import nl.knaw.huc.di.tag.tagml.TAGML.OPTIONAL_PREFIX
+import nl.knaw.huc.di.tag.tagml.TAGML.RESUME_PREFIX
+import nl.knaw.huc.di.tag.tagml.TAGML.SUSPEND_PREFIX
+import nl.knaw.huc.di.tag.tagml.TAGML.unEscape
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*
+import nl.knaw.huygens.alexandria.ErrorListener
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.storage.TAGStore
+import nl.knaw.huygens.alexandria.storage.TAGTextNode
+import nl.knaw.huygens.alexandria.storage.dto.TAGDTO
+import org.antlr.v4.runtime.ParserRuleContext
+import org.apache.commons.lang3.StringUtils
+import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Consumer
+import java.util.stream.Collectors
+
+class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) : AbstractTAGMLListener(errorListener) {
+
     var document: TAGDocument
         private set
+
     private val idsInUse = HashMap<String, String>()
-    private val namespaces: Map<String, String> = HashMap()
+    private val namespaces: MutableMap<String, String> = mutableMapOf()
     private val annotationFactory: AnnotationFactory
     private var state = State()
     private val stateStack: Deque<State> = ArrayDeque()
     private val documentStack: Deque<TAGDocument> = ArrayDeque() // TODO: move to state
     private val textVariationStateStack: Deque<TextVariationState> = ArrayDeque()
     private var atDocumentStart = true
-    var openTagRange: MutableMap<Long, Range> = HashMap()
-    var closeTagRange: MutableMap<Long, Range> = HashMap()
+    private var openTagRange: MutableMap<Long, Range> = mutableMapOf()
+    private var closeTagRange: MutableMap<Long, Range> = mutableMapOf()
 
     private val markupRanges: Map<Long, RangePair>
         private get() {
@@ -62,22 +78,21 @@ import java.util.stream.Collectors
         }
 
     private fun verifyNoSuspendedMarkupLeft() {
-        val noSuspendedMarkup = state.suspendedMarkup.values.stream().allMatch { obj: Deque<TAGMarkup?>? -> obj!!.isEmpty() }
+        val noSuspendedMarkup = state.suspendedMarkup.values.stream().allMatch { obj: Deque<TAGMarkup> -> obj.isEmpty() }
         if (!noSuspendedMarkup) {
             state.suspendedMarkup.values.stream()
-                    .flatMap { obj: Deque<TAGMarkup?>? -> obj!!.stream() } //          .map(this::suspendTag)
+                    .flatMap { obj: Deque<TAGMarkup> -> obj.stream() } //          .map(this::suspendTag)
                     .distinct()
-                    .forEach(
-                            Consumer { markup: TAGMarkup ->
-                                val range = closeTagRange[markup.dbId]
-                                val startPosition = range!!.startPosition
-                                val endPosition = range.endPosition
-                                errorListener.addError(
-                                        startPosition,
-                                        endPosition,
-                                        "Some suspended markup was not resumed: %s",
-                                        suspendTag(markup)) // TODO: add range of unresumed tags
-                            })
+                    .forEach { markup: TAGMarkup ->
+                        val range = closeTagRange[markup.dbId]
+                        val startPosition = range!!.startPosition
+                        val endPosition = range.endPosition
+                        errorListener.addError(
+                                startPosition,
+                                endPosition,
+                                "Some suspended markup was not resumed: %s",
+                                suspendTag(markup)) // TODO: add range of unresumed tags
+                    }
         }
     }
 
@@ -87,9 +102,9 @@ import java.util.stream.Collectors
         var startMarkup: TAGMarkup? = null
 
         //    public List<TAGTextNode> endNodes = new ArrayList<>();
-        var openMarkup: MutableMap<Int, MutableList<TAGMarkup?>> = HashMap()
+        private var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = HashMap()
         var branch = 0
-        fun addOpenMarkup(markup: TAGMarkup?) {
+        fun addOpenMarkup(markup: TAGMarkup) {
             openMarkup.computeIfAbsent(branch) { b: Int? -> ArrayList() }
             openMarkup[branch]!!.add(markup)
         }
@@ -111,23 +126,22 @@ import java.util.stream.Collectors
     }
 
     private fun verifyNoMarkupUnclosed() {
-        val noOpenMarkup = state.openMarkup.values.stream().allMatch { obj: Deque<TAGMarkup?> -> obj.isEmpty() }
+        val noOpenMarkup = state.openMarkup.values.stream().allMatch { obj: Deque<TAGMarkup> -> obj.isEmpty() }
         if (!noOpenMarkup) {
             state.openMarkup.values.stream()
-                    .flatMap { obj: Deque<TAGMarkup?> -> obj.stream() } //          .map(this::openTag)
+                    .flatMap { obj: Deque<TAGMarkup> -> obj.stream() } //          .map(this::openTag)
                     .distinct()
-                    .forEach(
-                            Consumer { openMarkup: TAGMarkup ->
-                                val markupId = openMarkup.dbId
-                                val range = openTagRange[markupId]
-                                val startPos = range!!.startPosition
-                                val endPos = range.endPosition
-                                errorListener.addError(
-                                        startPos,
-                                        endPos,
-                                        "Missing close tag(s) for: %s",
-                                        openTag(openMarkup)) // TODO: add range of unclosed tag(s)
-                            })
+                    .forEach { openMarkup: TAGMarkup ->
+                        val markupId = openMarkup.dbId
+                        val range = openTagRange[markupId]
+                        val startPos = range!!.startPosition
+                        val endPos = range.endPosition
+                        errorListener.addError(
+                                startPos,
+                                endPos,
+                                "Missing close tag(s) for: %s",
+                                openTag(openMarkup)) // TODO: add range of unclosed tag(s)
+                    }
         }
     }
 
@@ -166,29 +180,28 @@ import java.util.stream.Collectors
 
     // Once again, the default layer is special! TODO: fix default
     // layer usage
-    private val relevantOpenMarkup: List<TAGMarkup?>
-        private get() {
-            val relevantMarkup: MutableList<TAGMarkup?> = ArrayList()
+    private val relevantOpenMarkup: List<TAGMarkup>
+        get() {
+            val relevantMarkup: MutableList<TAGMarkup> = ArrayList()
             if (!state.allOpenMarkup.isEmpty()) {
-                val handledLayers: MutableSet<String?> = HashSet()
+                val handledLayers: MutableSet<String> = HashSet()
                 for (m in state.allOpenMarkup) {
                     val layers = m!!.layers
-                    val markupHasNoHandledLayer = layers.stream().noneMatch { o: String? -> handledLayers.contains(o) }
+                    val markupHasNoHandledLayer = layers.stream().noneMatch { o: String -> handledLayers.contains(o) }
                     if (markupHasNoHandledLayer) {
                         relevantMarkup.add(m)
                         handledLayers.addAll(layers)
                         var goOn = true
                         while (goOn) {
                             val newParentLayers = handledLayers.stream()
-                                    .map { l: String? -> document.dto.textGraph.parentLayerMap[l] }
-                                    .filter { l: String? -> !handledLayers.contains(l) }
-                                    .filter { l: String? ->
+                                    .map { l: String -> document.dto.textGraph.parentLayerMap[l]!! }
+                                    .filter { l: String -> !handledLayers.contains(l) }
+                                    .filter { l: String ->
                                         DEFAULT_LAYER != l
-                                    } // Once again, the default layer is special! TODO: fix default
-                                    // layer usage
+                                    }
                                     .collect(Collectors.toSet())
                             handledLayers.addAll(newParentLayers)
-                            goOn = !newParentLayers.isEmpty()
+                            goOn = newParentLayers.isNotEmpty()
                         }
                     }
                 }
@@ -333,28 +346,28 @@ import java.util.stream.Collectors
 
     private fun checkForOpenMarkupInBranch(ctx: ParserRuleContext) {
         val branch = currentTextVariationState().branch + 1
-        val openMarkupAtStart: Map<String, Deque<TAGMarkup?>> = currentTextVariationState().startState!!.openMarkup
-        val currentOpenMarkup: Map<String, Deque<TAGMarkup?>> = state.openMarkup
+        val openMarkupAtStart: Map<String, Deque<TAGMarkup>> = currentTextVariationState().startState!!.openMarkup
+        val currentOpenMarkup: Map<String, Deque<TAGMarkup>> = state.openMarkup
         for (layerName in openMarkupAtStart.keys) {
-            val openMarkupAtStartInLayer = openMarkupAtStart[layerName]!!
-            val currentOpenMarkupInLayer = currentOpenMarkup[layerName]!!
-            val closedInBranch: MutableList<TAGMarkup?> = ArrayList(openMarkupAtStartInLayer)
-            closedInBranch.removeAll(currentOpenMarkupInLayer)
-            if (!closedInBranch.isEmpty()) {
-                val openTags = closedInBranch.stream().map { m: TAGMarkup? -> openTag(m) }.collect(Collectors.joining(","))
+            val openMarkupAtStartInLayer = openMarkupAtStart[layerName]
+            val currentOpenMarkupInLayer = currentOpenMarkup[layerName]
+            val closedInBranch: MutableList<TAGMarkup> = ArrayList(openMarkupAtStartInLayer)
+            closedInBranch.removeAll(currentOpenMarkupInLayer!!)
+            if (closedInBranch.isNotEmpty()) {
+                val openTags = closedInBranch.stream().map { m: TAGMarkup -> openTag(m) }.collect(Collectors.joining(","))
                 addBreakingError(
                         ctx,
                         "Markup %s opened before branch %s, should not be closed in a branch.",
                         openTags,
                         branch)
             }
-            val openedInBranch: MutableList<TAGMarkup?> = ArrayList(currentOpenMarkupInLayer)
-            openedInBranch.removeAll(openMarkupAtStartInLayer)
+            val openedInBranch: MutableList<TAGMarkup> = ArrayList(currentOpenMarkupInLayer)
+            openedInBranch.removeAll(openMarkupAtStartInLayer!!)
             val openTags = openedInBranch.stream()
-                    .filter { m: TAGMarkup? -> !m!!.tag.startsWith(":") }
-                    .map { m: TAGMarkup? -> openTag(m) }
+                    .filter { m: TAGMarkup -> !m.tag.startsWith(":") }
+                    .map { m: TAGMarkup -> openTag(m) }
                     .collect(Collectors.joining(","))
-            if (!openTags.isEmpty()) {
+            if (openTags.isNotEmpty()) {
                 addBreakingError(
                         ctx,
                         "Markup %s opened in branch %s must be closed before starting a new branch.",
@@ -408,11 +421,10 @@ import java.util.stream.Collectors
 
     private fun closeTextVariationMarkup(extendedMarkupName: String, layers: Set<String>) {
         removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup)
-        var markup: TAGMarkup?
         for (l in layers) {
             state.openMarkup.putIfAbsent(l, ArrayDeque())
             val markupStack = state.openMarkup[l]!!
-            markup = removeFromMarkupStack2(extendedMarkupName, markupStack)
+            val markup = removeFromMarkupStack2(extendedMarkupName, markupStack)
             document.closeMarkupInLayer(markup, l)
         }
     }
@@ -538,11 +550,12 @@ import java.util.stream.Collectors
         val isSuspend = ctx.prefix() != null && ctx.prefix().text == SUSPEND_PREFIX
         val layers = deduceLayers(ctx, markupName, extendedMarkupName)
         val layerSuffixNeeded = !(layers.size == 1 && layers.iterator().next() == DEFAULT_LAYER)
-        val foundLayerSuffix = if (layerSuffixNeeded) DIVIDER
-        +layers.stream()
-                .filter { l: String -> DEFAULT_LAYER != l }
-                .sorted()
-                .collect(Collectors.joining(",")) else ""
+        val foundLayerSuffix = if (layerSuffixNeeded)
+            DIVIDER + layers.stream()
+                    .filter { l: String -> DEFAULT_LAYER != l }
+                    .sorted()
+                    .collect(Collectors.joining(","))
+        else ""
         extendedMarkupName += foundLayerSuffix
         removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup)
         var markup: TAGMarkup? = null
@@ -641,9 +654,8 @@ import java.util.stream.Collectors
             val id = actx.idValue().text
             markup.markupId = id
         } else if (actx is RefAnnotationContext) {
-            val refAnnotationContext = actx
-            val aName = refAnnotationContext.annotationName().text
-            val refId = refAnnotationContext.refValue().text
+            val aName = actx.annotationName().text
+            val refId = actx.refValue().text
             val annotationInfo = annotationFactory.makeReferenceAnnotation(aName, refId)
             val markupNode = markup.dbId
             document.dto.textGraph.addAnnotationEdge(markupNode, annotationInfo)
@@ -724,7 +736,7 @@ import java.util.stream.Collectors
         return extendedMarkupName
     }
 
-    private fun removeFromMarkupStack(extendedTag: String, markupStack: Deque<TAGMarkup?>?): TAGMarkup? {
+    private fun removeFromMarkupStack(extendedTag: String, markupStack: Deque<TAGMarkup>?): TAGMarkup? {
         if (markupStack == null || markupStack.isEmpty()) {
             return null
         }
@@ -737,7 +749,7 @@ import java.util.stream.Collectors
         return null
     }
 
-    private fun removeFromMarkupStack2(extendedTag: String, markupStack: Deque<TAGMarkup?>): TAGMarkup? {
+    private fun removeFromMarkupStack2(extendedTag: String, markupStack: Deque<TAGMarkup>): TAGMarkup? {
         val iterator: Iterator<TAGMarkup?> = markupStack.iterator()
         var markup: TAGMarkup? = null
         while (iterator.hasNext()) {
@@ -759,10 +771,10 @@ import java.util.stream.Collectors
         var suspendedMarkup: TAGMarkup? = null
         val layers = extractLayerInfo(ctx.markupName().layerInfo())
         for (layer in layers) {
-            suspendedMarkup = removeFromMarkupStack(tag, state.suspendedMarkup[layer])
+            suspendedMarkup = removeFromMarkupStack(tag, state.suspendedMarkup[layer]!!)
             checkForCorrespondingSuspendTag(ctx, tag, suspendedMarkup)
-            checkForTextBetweenSuspendAndResumeTags(suspendedMarkup, ctx)
-            suspendedMarkup!!.setIsDiscontinuous(true)
+            checkForTextBetweenSuspendAndResumeTags(suspendedMarkup!!, ctx)
+            suspendedMarkup.setIsDiscontinuous(true)
         }
         val textGraph = document.dto.textGraph
         val resumedMarkup = store.createMarkup(document, suspendedMarkup!!.tag).addAllLayers(layers)
@@ -773,7 +785,7 @@ import java.util.stream.Collectors
     }
 
     private fun checkForTextBetweenSuspendAndResumeTags(
-            suspendedMarkup: TAGMarkup?, ctx: StartTagContext) {
+            suspendedMarkup: TAGMarkup, ctx: StartTagContext) {
         val previousTextNode = document.lastTextNode
         val previousMarkup = document.getMarkupStreamForTextNode(previousTextNode).collect(Collectors.toSet())
         if (previousMarkup.contains(suspendedMarkup)) {
@@ -824,25 +836,20 @@ import java.util.stream.Collectors
         return valid.get()
     }
 
-    private fun currentTextVariationState(): TextVariationState {
-        return textVariationStateStack.peek()
-    }
+    private fun currentTextVariationState(): TextVariationState =
+            textVariationStateStack.peek()
 
-    private fun openTag(m: TAGMarkup?): String {
-        return OPEN_TAG_STARTCHAR + m!!.extendedTag + OPEN_TAG_ENDCHAR
-    }
+    private fun openTag(m: TAGMarkup): String =
+            OPEN_TAG_STARTCHAR + m.extendedTag + OPEN_TAG_ENDCHAR
 
-    private fun closeTag(m: TAGMarkup?): String {
-        return CLOSE_TAG_STARTCHAR + m!!.extendedTag + CLOSE_TAG_ENDCHAR
-    }
+    private fun closeTag(m: TAGMarkup): String =
+            CLOSE_TAG_STARTCHAR + m.extendedTag + CLOSE_TAG_ENDCHAR
 
-    private fun suspendTag(tagMarkup: TAGMarkup?): String {
-        return CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX + tagMarkup!!.extendedTag + CLOSE_TAG_ENDCHAR
-    }
+    private fun suspendTag(tagMarkup: TAGMarkup): String =
+            CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX + tagMarkup.extendedTag + CLOSE_TAG_ENDCHAR
 
-    private fun resumeTag(tagMarkup: TAGMarkup?): String {
-        return OPEN_TAG_STARTCHAR + RESUME_PREFIX + tagMarkup!!.extendedTag + OPEN_TAG_ENDCHAR
-    }
+    private fun resumeTag(tagMarkup: TAGMarkup): String =
+            OPEN_TAG_STARTCHAR + RESUME_PREFIX + tagMarkup.extendedTag + OPEN_TAG_ENDCHAR
 
     private fun logTextNode(textNode: TAGTextNode) {
         val dto = textNode.dto
@@ -852,7 +859,7 @@ import java.util.stream.Collectors
     private fun extractLayerInfo(layerInfoContext: LayerInfoContext?): Set<String> {
         val layers: MutableSet<String> = HashSet()
         if (layerInfoContext != null) {
-            val explicitLayers = layerInfoContext.layerName().stream().map { obj: LayerNameContext -> obj.text }.collect(Collectors.toList())
+            val explicitLayers = layerInfoContext.layerName().map { it.text }
             layers.addAll(explicitLayers)
         }
         if (layers.isEmpty()) {
@@ -861,24 +868,24 @@ import java.util.stream.Collectors
         return layers
     }
 
-    private fun rangeOf(ctx: ParserRuleContext): Range {
-        return Range(
-                Position(ctx.start.line, ctx.start.charPositionInLine + 1),
-                Position(ctx.stop.line, ctx.stop.charPositionInLine + 2))
-    }
+    private fun rangeOf(ctx: ParserRuleContext): Range =
+            Range(
+                    Position(ctx.start.line, ctx.start.charPositionInLine + 1),
+                    Position(ctx.stop.line, ctx.stop.charPositionInLine + 2))
 
     class State {
-        var openMarkup: MutableMap<String, Deque<TAGMarkup?>> = HashMap()
-        var suspendedMarkup: MutableMap<String?, Deque<TAGMarkup?>?> = HashMap<Any?, Any?>()
-        var allOpenMarkup: Deque<TAGMarkup?> = ArrayDeque()
+        var openMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
+        var suspendedMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
+        var allOpenMarkup: Deque<TAGMarkup> = ArrayDeque()
         var rootMarkupId: Long? = null
         var eof = false
+
         fun copy(): State {
             val copy = State()
             copy.openMarkup = HashMap()
-            openMarkup.forEach { (k: String, v: Deque<TAGMarkup?>?) -> copy.openMarkup[k] = ArrayDeque(v) }
+            openMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.openMarkup[k] = ArrayDeque(v) }
             copy.suspendedMarkup = HashMap()
-            suspendedMarkup.forEach { (k: String?, v: Deque<TAGMarkup?>?) -> copy.suspendedMarkup[k] = ArrayDeque(v) }
+            suspendedMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.suspendedMarkup[k] = ArrayDeque(v) }
             copy.allOpenMarkup = ArrayDeque(allOpenMarkup)
             copy.rootMarkupId = rootMarkupId
             copy.eof = eof
@@ -893,7 +900,7 @@ import java.util.stream.Collectors
     companion object {
         private val LOG = LoggerFactory.getLogger(TAGMLListener::class.java)
         const val TILDE = "~"
-        private val DEFAULT_LAYER_ONLY = setOf<String>(DEFAULT_LAYER)
+        private val DEFAULT_LAYER_ONLY = setOf(DEFAULT_LAYER)
     }
 
     init {
