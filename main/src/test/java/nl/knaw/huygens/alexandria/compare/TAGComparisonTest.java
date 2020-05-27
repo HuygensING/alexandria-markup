@@ -44,42 +44,51 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   @Ignore("TODO")
   @Test
   public void testSplitCase() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M>malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]";
-    String editedText = "[TAGML|+M,+N>\n" +
-        "[text|M,N>\n" +
-        "[l|M>\n" +
-        "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<l]\n" +
-        "<text]<TAGML]";
+    String originText =
+        DUMMY_HEADER
+            + "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine<l] [l|M>malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
+    String editedText =
+        DUMMY_HEADER
+            + "[TAGML|+M,+N>\n"
+            + "[text|M,N>\n"
+            + "[l|M>\n"
+            + "[s|N>Une [del|M>[add|M>jolie<add]<del][add|M>belle<add] main de femme, élégante et fine.<l]<s] [l|M>[s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<l]\n"
+            + "<text]<TAGML]";
 
     TAGComparison comparison = compare(originText, editedText);
 
-    List<String> expected = new ArrayList<>(asList(
-        " [TAGML>[text>[l>",
-        "+[s>",
-        " Une [del>[add>jolie<add]<del][add>belle<add] main de femme, élégante et fine",
-        "+.<s]",
-        " <l] [l>",
-        "-malgré ",
-        "+[s>Malgré ",
-        " l'agrandissement du close-up.",
-        "+<s]",
-        " <l]",
-        " <text]<TAGML]"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(
+                " [TAGML>[text>[l>",
+                "+[s>",
+                " Une [del>[add>jolie<add]<del][add>belle<add] main de femme, élégante et fine",
+                "+.<s]",
+                " <l] [l>",
+                "-malgré ",
+                "+[s>Malgré ",
+                " l'agrandissement du close-up.",
+                "+<s]",
+                " <l]",
+                " <text]<TAGML]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
   public void testNoChanges() {
-    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
-    String editedText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String originText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
@@ -88,154 +97,159 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void testOmission() {
-    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
-    String editedText = "[quote>Any sufficiently advanced technology is magic.<quote]";
+    String originText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText =
+        DUMMY_HEADER + "[quote>Any sufficiently advanced technology is magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
-    List<String> expected = new ArrayList<>(asList(
-        " [quote>Any sufficiently advanced technology is ",
-        "-indistinguishable from ",
-        " magic.<quote]"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(
+                " [quote>Any sufficiently advanced technology is ",
+                "-indistinguishable from ",
+                " magic.<quote]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
   public void testAddition() {
-    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
-    String editedText = "[quote>Any sufficiently advanced technology is virtually indistinguishable from magic.<quote]";
+    String originText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is virtually indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
-    List<String> expected = new ArrayList<>(asList(
-        " [quote>Any sufficiently advanced technology is ",
-        "+virtually ",
-        " indistinguishable from magic.<quote]"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(
+                " [quote>Any sufficiently advanced technology is ",
+                "+virtually ",
+                " indistinguishable from magic.<quote]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
   public void testReplacement() {
-    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
-    String editedText = "[quote>Any sufficiently advanced code is indistinguishable from magic.<quote]";
+    String originText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced code is indistinguishable from magic.<quote]";
 
     TAGComparison comparison = compare(originText, editedText);
 
-    List<String> expected = new ArrayList<>(asList(
-        " [quote>Any sufficiently advanced ",
-        "-technology ",
-        "+code ",
-        " is indistinguishable from magic.<quote]"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(
+                " [quote>Any sufficiently advanced ",
+                "-technology ",
+                "+code ",
+                " is indistinguishable from magic.<quote]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Test
   public void testReplacement2() {
-    String originText = "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
-    String editedText = "[s>Any sufficiently advanced code is indistinguishable from magic.<s]";
+    String originText =
+        DUMMY_HEADER
+            + "[quote>Any sufficiently advanced technology is indistinguishable from magic.<quote]";
+    String editedText =
+        DUMMY_HEADER + "[s>Any sufficiently advanced code is indistinguishable from magic.<s]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(asList(
-        "-[quote>",
-        "+[s>",
-        " Any sufficiently advanced ",
-        "-technology ",
-        "+code ",
-        " is indistinguishable from magic.",
-        "-<quote]",
-        "+<s]"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(
+                "-[quote>",
+                "+[s>",
+                " Any sufficiently advanced ",
+                "-technology ",
+                "+code ",
+                " is indistinguishable from magic.",
+                "-<quote]",
+                "+<s]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Ignore("TODO")
   @Test
   public void testJoin() {
-    String originText = "[t>[l>one two<l]\n[l>three four<l]<t]";
-    String editedText = "[t>[l>one two three four<l]<t]";
+    String originText = DUMMY_HEADER + "[t>[l>one two<l]\n[l>three four<l]<t]";
+    String editedText = DUMMY_HEADER + "[t>[l>one two three four<l]<t]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(asList(
-        " [t>[l>one two",
-        "-<l]",
-        "-[l>",
-        " three four<l]<t]"
-    ));
+    List<String> expected =
+        new ArrayList<>(asList(" [t>[l>one two", "-<l]", "-[l>", " three four<l]<t]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Ignore("TODO")
   @Test
   public void testSplit() {
-    String originText = "[t>[l>one two three four<l]<t]";
-    String editedText = "[t>[l>one two<l]\n[l>five three four<l]<t]";
+    String originText = DUMMY_HEADER + "[t>[l>one two three four<l]<t]";
+    String editedText = DUMMY_HEADER + "[t>[l>one two<l]\n[l>five three four<l]<t]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(asList(
-        " [t>[l>one two ",
-        "+<l]",
-        "+[l>five ",
-        " three four<l]<t]"
-    ));
+    List<String> expected =
+        new ArrayList<>(asList(" [t>[l>one two ", "+<l]", "+[l>five ", " three four<l]<t]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Ignore("TODO")
   @Test
   public void testAddedNewlines() {
-    String originText = "[t>one two three four<t]";
-    String editedText = "[t>one two three four<t]\n";
+    String originText = DUMMY_HEADER + "[t>one two three four<t]";
+    String editedText = DUMMY_HEADER + "[t>one two three four<t]\n";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(Collections.singletonList(
-        " [t>one two three four<t]"
-    ));
+    List<String> expected = new ArrayList<>(Collections.singletonList(" [t>one two three four<t]"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   @Ignore
   @Test
   public void testNewlinesInText() {
-    String originText = "[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]";
-    String editedText = "[l>line 1<l]\n[l>line 1a<l]\n[l>line 2<l]\n[l>line 3<l]";
+    String originText = DUMMY_HEADER + "[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]";
+    String editedText = DUMMY_HEADER + "[l>line 1<l]\n[l>line 1a<l]\n[l>line 2<l]\n[l>line 3<l]";
 
     TAGComparison comparison = compare(originText, editedText);
     assertThat(comparison.hasDifferences()).isTrue();
 
-    List<String> expected = new ArrayList<>(asList(
-        " [l>line 1<l]\n",
-        "+[l>line 1a<l]\n",
-        " [l>line 2<l]\n",
-        " [l>line 3<l]\n"
-    ));
+    List<String> expected =
+        new ArrayList<>(
+            asList(" [l>line 1<l]\n", "+[l>line 1a<l]\n", " [l>line 2<l]\n", " [l>line 3<l]\n"));
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
   private TAGComparison compare(String originText, String editedText) {
-    return runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(originText);
-      TAGDocument edited = importer.importTAGML(editedText);
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
+    return runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(originText);
+          TAGDocument edited = importer.importTAGML(editedText);
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
-      TAGComparison comparison = new TAGComparison(original, allTags, edited);
-      LOG.info("diffLines = \n{}", comparison.getDiffLines()
-          .stream()
-          .map(l -> "'" + l + "'")
-          .collect(joining("\n")));
-      return comparison;
-    });
+          TAGComparison comparison = new TAGComparison(original, allTags, edited);
+          LOG.info(
+              "diffLines = \n{}",
+              comparison.getDiffLines().stream().map(l -> "'" + l + "'").collect(joining("\n")));
+          return comparison;
+        });
   }
 }

@@ -37,7 +37,7 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun testSPARQLQuerySelect() {
-        val tagml = "[x>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<x]"
+        val tagml = "$DUMMY_HEADER[x>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<x]"
         runInStoreTransaction { store: TAGStore ->
             val alice = TAGMLImporter(store).importTAGML(tagml)
             val h = SPARQLQueryHandler(alice)
@@ -69,7 +69,7 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun testSPARQLQueryAsk() {
-        val tagml = "[x>some text<x]"
+        val tagml = "$DUMMY_HEADER[x>some text<x]"
         runInStoreTransaction { store: TAGStore ->
             val alice = TAGMLImporter(store).importTAGML(tagml)
             val h = SPARQLQueryHandler(alice)
@@ -93,7 +93,7 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun testSPARQLQueryDescribe() {
-        val tagml = "[l>[w>Just<w] [w>some<w] [w>words<w]<l]"
+        val tagml = "$DUMMY_HEADER[l>[w>Just<w] [w>some<w] [w>words<w]<l]"
         runInStoreTransaction { store: TAGStore ->
             val alice = TAGMLImporter(store).importTAGML(tagml)
             val h = SPARQLQueryHandler(alice)
@@ -129,7 +129,7 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
 
     @Test
     fun testSPARQLQueryConstruct() {
-        val tagml = "[l>[person>John<person] went to [country>Spain<country], [person>Rachel<person] went to [country>Peru<country]<l]"
+        val tagml = "$DUMMY_HEADER[l>[person>John<person] went to [country>Spain<country], [person>Rachel<person] went to [country>Peru<country]<l]"
         runInStoreTransaction { store: TAGStore ->
             val alice = TAGMLImporter(store).importTAGML(tagml)
             val h = SPARQLQueryHandler(alice)

@@ -38,6 +38,8 @@ import java.util.function.Consumer;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
+  public static final String DUMMY_HEADER = "{{}}\n";
+
   private static Path tmpDir;
   DotFactory dotFactory = new DotFactory();
 
@@ -71,10 +73,8 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     }
   }
 
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-    System.out.println(dotFactory.toDot(document, input));
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+  private static void rmTmpDir(final Path tmpPath) throws IOException {
+    Files.walk(tmpPath).map(Path::toFile).forEach(File::deleteOnExit);
   }
 
   private static Path mkTmpDir() throws IOException {
@@ -86,10 +86,11 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     return tmpPath;
   }
 
-  private static void rmTmpDir(final Path tmpPath) throws IOException {
-    Files.walk(tmpPath)
-        .map(Path::toFile)
-        .forEach(File::deleteOnExit);
+  protected void logDocumentGraph(final TAGDocument document, final String input) {
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(dotFactory.toDot(document, input));
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
   }
-
 }

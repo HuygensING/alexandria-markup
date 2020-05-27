@@ -193,13 +193,12 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
                         handledLayers.addAll(layers)
                         var goOn = true
                         while (goOn) {
-                            val newParentLayers = handledLayers.stream()
-                                    .map { l: String -> document.dto.textGraph.parentLayerMap[l]!! }
+                            val newParentLayers = handledLayers
+                                    .map { l: String -> document.dto.textGraph.parentLayerMap[l] }
+                                    .filterNotNull()
                                     .filter { l: String -> !handledLayers.contains(l) }
-                                    .filter { l: String ->
-                                        DEFAULT_LAYER != l
-                                    }
-                                    .collect(Collectors.toSet())
+                                    .filter { l: String -> DEFAULT_LAYER != l }
+                                    .toSet()
                             handledLayers.addAll(newParentLayers)
                             goOn = newParentLayers.isNotEmpty()
                         }

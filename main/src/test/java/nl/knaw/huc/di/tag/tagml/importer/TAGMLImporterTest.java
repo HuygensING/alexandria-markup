@@ -57,7 +57,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testReturnedError() {
-    String tagML = "[a>\n[a1 pi=3.14>AAAAA\n<wrong_closing_tag]\n<a]";
+    String tagML = DUMMY_HEADER + "[a>\n[a1 pi=3.14>AAAAA\n<wrong_closing_tag]\n<a]";
     runInStoreTransaction(
         store -> {
           try {
@@ -83,7 +83,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void test() {
     String tagML =
-        "[root>"
+        DUMMY_HEADER
+            + "[root>"
             + "[s><|[del>Dit kwam van een<del]|[del>[add>Gevolg van een<add]<del]|[add>De<add]|>"
             + " te streng doorgedreven rationalisatie van zijne "
             + "<|[del>opvoeding<del]|[del>[add>prinselijke jeugd<add]<del]|[add>prinsenjeugd [?del>bracht<?del] had dit met zich meegebracht<add]|><s]"
@@ -99,7 +100,10 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void test1() {
     String tagML =
-        "[a>" + "<|[del>We [?del>feel<?del]<del]|[add>How many in England<add]|>" + "<a]";
+        DUMMY_HEADER
+            + "[a>"
+            + "<|[del>We [?del>feel<?del]<del]|[add>How many in England<add]|>"
+            + "<a]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -111,7 +115,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test // RD-206
   public void testRD206_1() {
     String tagML =
-        "[root metadata={"
+        DUMMY_HEADER
+            + "[root metadata={"
             + "stages=["
             + "{:id=stage1 medium={tool=\"typewriter\" color=\"black\"} desc=\"xxx\"}, "
             + "{:id=stage2 medium={tool=\"pencil\" color=\"grey\"} desc=\"xxxx\"}, "
@@ -132,7 +137,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test // RD-206
   public void testRD206_2() {
     String tagML =
-        "[root metadata={"
+        DUMMY_HEADER
+            + "[root metadata={"
             + "persons=["
             + "{:id=rou001 name='Gustave Roud'}, "
             + "{:id=doe002 name='Jane Doe'}"
@@ -180,7 +186,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testFrostQuote() {
     String tagML =
-        "[excerpt|+S,+L source=\"The Housekeeper\" author=\"Robert Frost\">\n"
+        DUMMY_HEADER
+            + "[excerpt|+S,+L source=\"The Housekeeper\" author=\"Robert Frost\">\n"
             + "[s|S>[l|L n=144>He manages to keep the upper hand<l]\n"
             + "[l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]\n"
             + "[l|L n=146>We fence our flowers in and the hens range.<l]<s]\n"
@@ -195,7 +202,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCMLHTS18() {
     String tagML =
-        "[tagml>\n"
+        DUMMY_HEADER
+            + "[tagml>\n"
             + "[page>\n"
             + "[p>\n"
             + "[line>1st. Voice from the Springs<line]\n"
@@ -220,7 +228,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testLayerIdentifiersAreOptionalInEndTags() {
     String tagML =
-        "[tagml>\n"
+        DUMMY_HEADER
+            + "[tagml>\n"
             + "[text|+A,+B>\n"
             + "[page|A>\n"
             + "[p|B>\n"
@@ -245,7 +254,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testLayerIdentifiersAreRequiredInEndTagsWhenThereIsAmbiguity() {
     String tagML =
-        "[tagml>\n"
+        DUMMY_HEADER
+            + "[tagml>\n"
             + "[text|+A,+B,+C>\n"
             + "[page|A>\n"
             + "[p|B>\n"
@@ -275,14 +285,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMissingOpenTagLeadsToError() {
-    String tagML = "[tagml>Some text<t]<tagml]";
+    String tagML = DUMMY_HEADER + "[tagml>Some text<t]<tagml]";
     String expectedErrors = "line 1:17 : Close tag <t] found without corresponding open tag.";
     runInStoreTransaction(store -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
   public void testLayerIdentifiersAreOptionalInEndTagWhenNotAmbiguous() {
-    String tagML = "[tagml|+A>Some text<tagml]";
+    String tagML = DUMMY_HEADER + "[tagml|+A>Some text<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -292,7 +302,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNoLayerInfoOnEndTagWithMultipleStartTagsInDifferentLayers() {
-    String tagML = "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
+    String tagML = DUMMY_HEADER + "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
     String expectedErrors =
         "line 1:33 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n"
             + "parsing aborted!";
@@ -301,7 +311,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNoLayerInfoOnEndTagWithMultipleStartTagsInSameLayers() {
-    String tagML = "[tagml|+A>[p|A>[p|A>Some text<p]<p]<tagml]";
+    String tagML = DUMMY_HEADER + "[tagml|+A>[p|A>[p|A>Some text<p]<p]<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -311,7 +321,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testSimpleTAGML() {
-    String tagML = "[line>The rain in Spain falls mainly on the plain.<line]";
+    String tagML = DUMMY_HEADER + "[line>The rain in Spain falls mainly on the plain.<line]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -337,7 +347,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCharacterEscapingInRegularText() {
     String tagML =
-        "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]";
+        DUMMY_HEADER
+            + "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -355,7 +366,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCharacterEscapingInTextVariation() {
     String tagML =
-        "[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.<t]";
+        DUMMY_HEADER
+            + "[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -376,14 +388,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testMissingEndTagThrowsTAGMLSyntaxError() {
-    String tagML = "[line>The rain";
+    String tagML = DUMMY_HEADER + "[line>The rain";
     String expectedErrors = "line 1:1 : Missing close tag(s) for: [line>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testMissingOpenTagThrowsTAGMLSyntaxError() {
-    String tagML = "on the plain.<line]";
+    String tagML = DUMMY_HEADER + "on the plain.<line]";
     String expectedErrors =
         "line 1:1 : No text allowed here, the root markup must be started first.\n"
             + "parsing aborted!";
@@ -392,7 +404,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
-    String tagML = "[line>The Spanish rain.<paragraph]";
+    String tagML = DUMMY_HEADER + "[line>The Spanish rain.<paragraph]";
     String expectedErrors =
         "line 1:1 : Missing close tag(s) for: [line>\n"
             + "line 1:24 : Close tag <paragraph] found without corresponding open tag.";
@@ -401,7 +413,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
-    String tagML = "[>The Spanish rain.<]";
+    String tagML = DUMMY_HEADER + "[>The Spanish rain.<]";
     String expectedErrors =
         "line 1:1 : syntax error: no viable alternative at input '[>'\n"
             + "line 1:3 : No text allowed here, the root markup must be started first.\n"
@@ -412,7 +424,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testOverlap() {
-    String tagML = "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]";
+    String tagML =
+        DUMMY_HEADER + "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -430,7 +443,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testTAGML2() {
     String tagML =
-        "[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]<line|a,b]";
+        DUMMY_HEADER
+            + "[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]<line|a,b]";
     //    String tagML = "[line|+A,+B,+N>[a|A>[name|N>Trump<name|N] [b|B>likes<a|A]
     // [name|N>Kim<name|N]<b|B]<line|A,B,N]";
     runInStoreTransaction(
@@ -478,7 +492,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testCommentsAreIgnored() {
-    String tagML = "[! before !][a>Ah![! within !]<a][! after !]";
+    String tagML = DUMMY_HEADER + "[! before !][a>Ah![! within !]<a][! after !]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -499,6 +513,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         });
   }
 
+  @Ignore("TODO: refactror to new header")
   @Test
   public void testNamespace() {
     String tagML = "[!ns a http://tag.com/a][a:a>Ah!<a:a]";
@@ -522,6 +537,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         });
   }
 
+  @Ignore("TODO: refactror to new header")
   @Test
   public void testMultipleNamespaces() {
     String tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<b:b]<a:a]";
@@ -547,7 +563,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testTextVariation() {
-    String tagML = "[t>This is a <|lame|dope|> test!<t]";
+    String tagML = DUMMY_HEADER + "[t>This is a <|lame|dope|> test!<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -576,7 +592,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMilestone() {
     // TODO: check the graph: has an extra edge between <t> and the milestone content text node
-    String tagML = "[t>This is a [space chars=10] test!<t]";
+    String tagML = DUMMY_HEADER + "[t>This is a [space chars=10] test!<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -601,7 +617,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testDiscontinuity() {
-    String tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
+    String tagML = DUMMY_HEADER + "[x>[t>This is<-t], he said, [+t>a test!<t]<x]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -634,7 +650,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testDiscontinuity2() {
     String tagML =
-        "[x>When [t>Could<-t] can [+t>you<-t] I [+t>stop<-t] say [+t>interrupting<-t] something? [+t>me?<t]<x]";
+        DUMMY_HEADER
+            + "[x>When [t>Could<-t] can [+t>you<-t] I [+t>stop<-t] say [+t>interrupting<-t] something? [+t>me?<t]<x]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -657,37 +674,37 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testUnclosedDiscontinuityLeadsToError() {
-    String tagML = "[t>This is<-t], he said...";
+    String tagML = DUMMY_HEADER + "[t>This is<-t], he said...";
     String expectedErrors =
-        "line 1:11 : The root markup [t] cannot be suspended.\n" + "parsing aborted!";
+        "line 2:11 : The root markup [t] cannot be suspended.\n" + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testFalseDiscontinuityLeadsToError() {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
-    String tagML = "[x>[markup>Cookie <-markup][+markup> Monster<markup]<x]";
+    String tagML = DUMMY_HEADER + "[x>[markup>Cookie <-markup][+markup> Monster<markup]<x]";
     String expectedErrors =
-        "line 1:28 : There is no text between this resume tag: [+markup> and its corresponding suspend tag: <-markup]. This is not allowed.";
+        "line 2:28 : There is no text between this resume tag: [+markup> and its corresponding suspend tag: <-markup]. This is not allowed.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testResumeInInnerDocumentLeadsToError() {
     String tagML =
-        "[text> [q>Hello my name is "
+        DUMMY_HEADER
+            + "[text> [q>Hello my name is "
             + "[gloss addition=[>that's<-q] [qualifier>mrs.<qualifier] to you<]>"
             + "Doubtfire, [+q>how do you do?<q]<gloss]<text] ";
     String expectedErrors =
-        "line 1:46 : No text allowed here, the root markup must be started first.\n"
+        "line 2:46 : No text allowed here, the root markup must be started first.\n"
             + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  //  @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
-    String tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]";
+    String tagML = DUMMY_HEADER + "[t>This [x>is <|a failing|an excellent|><x] test<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -726,7 +743,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testIllegalMarkupDifferenceInNonLinearity() {
-    String tagML = "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
+    String tagML = DUMMY_HEADER + "[t>This [x>is <|a [y>failing|an<x] [y>excellent|> test<y]<t]";
     String expectedErrors =
         "line 1:29 : Markup [y> opened in branch 1 must be closed before starting a new branch.\n"
             + "parsing aborted!";
@@ -735,7 +752,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
-    String tagML = "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
+    String tagML = DUMMY_HEADER + "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
     String expectedErrors =
         "line 1:18 : Markup [l> opened before branch 1, should not be closed in a branch.\n"
             + "parsing aborted!";
@@ -745,7 +762,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIncorrectOverlapNonLinearityCombination() {
     String tagML =
-        "[text|+w>It is a truth universally acknowledged that every "
+        DUMMY_HEADER
+            + "[text|+w>It is a truth universally acknowledged that every "
             + "<|"
             + "[add>young [b|w>woman<add]"
             + "|"
@@ -787,7 +805,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCorrectOverlapNonLinearityCombination2() {
     String tagML =
-        "[text>It is a truth universally acknowledged that every "
+        DUMMY_HEADER
+            + "[text>It is a truth universally acknowledged that every "
             + "<|[add>young [b>woman<b]<add]"
             + "|[b>[del>rich<del]<b]|>"
             + " [b>man<b] is in need of a maid.<text]";
@@ -814,7 +833,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testIncorrectDiscontinuityNonLinearityCombination() {
     String tagML =
-        "[x>[q>and what is the use of a "
+        DUMMY_HEADER
+            + "[x>[q>and what is the use of a "
             + "<|[del>book,<del]<-q]"
             + "| [add>thought Alice<add]|>"
             + " [+q>without pictures or conversation?<q]<x]";
@@ -828,7 +848,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
     String tagML =
-        "[x>[q>and what is the use of a book"
+        DUMMY_HEADER
+            + "[x>[q>and what is the use of a book"
             + "<|[del>, really,<del]"
             + "|[add|+A>,\"<-q] thought Alice [+q>\"<add|A]|>"
             + "without pictures or conversation?<q]<x]";
@@ -871,7 +892,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testEscapeSpecialCharactersInTextVariation() {
-    String tagML = "[t>bla <|\\||!|> bla<t]";
+    String tagML = DUMMY_HEADER + "[t>bla <|\\||!|> bla<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -888,7 +909,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testOptionalMarkup() {
-    String tagML = "[t>this is [?del>always<?del] optional<t]";
+    String tagML = DUMMY_HEADER + "[t>this is [?del>always<?del] optional<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -915,7 +936,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testContainmentIsDefault() {
-    String tagML = "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]";
+    String tagML = DUMMY_HEADER + "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -949,7 +970,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testUseLayersForSelfOverlap() {
     String tagML =
-        "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]";
+        DUMMY_HEADER
+            + "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -982,7 +1004,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testStringAnnotations() {
-    String tagML = "[markup a='string' b=\"string\">text<markup]";
+    String tagML = DUMMY_HEADER + "[markup a='string' b=\"string\">text<markup]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -1007,7 +1029,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testListAnnotations() {
-    String tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]";
+    String tagML = DUMMY_HEADER + "[markup primes=[1,2,3,5,7,11]>text<markup]";
     runInStore(
         store -> {
           TAGDocument doc =
@@ -1043,7 +1065,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testUnclosedTextVariationThrowsSyntaxError() {
-    String tagML = "[t>This is <|good|bad.<t]";
+    String tagML = DUMMY_HEADER + "[t>This is <|good|bad.<t]";
     String expectedErrors =
         "line 1:23 : Markup [t> opened before branch 2, should not be closed in a branch.\n"
             + "line 1:25 : syntax error: extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n"
@@ -1053,7 +1075,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testJustTextIsNotValidTAGML() {
-    String tagML = "This is not valid TAGML";
+    String tagML = DUMMY_HEADER + "This is not valid TAGML";
     String expectedErrors =
         "line 1:1 : No text allowed here, the root markup must be started first.\n"
             + "parsing aborted!";
@@ -1062,14 +1084,14 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testJustAMilestoneIsNotValidTAGML() {
-    String tagML = "[miles stone='rock']";
+    String tagML = DUMMY_HEADER + "[miles stone='rock']";
     String expectedErrors = "line 1:1 : The root markup cannot be a milestone tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
   @Test
   public void testOpeningMarkupShouldBeClosedLast() {
-    String tagML = "[a|+A>AAA AA [b|+B>BBBAAA<a]BBBB<b]";
+    String tagML = DUMMY_HEADER + "[a|+A>AAA AA [b|+B>BBBAAA<a]BBBB<b]";
     String expectedErrors =
         "line 1:29 : No text or markup allowed after the root markup [a] has been ended.\n"
             + "parsing aborted!";
@@ -1078,7 +1100,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testRootMarkupMayNotBeSuspended() {
-    String tagML = "[m>foo<-m] fie [+m>bar<m]";
+    String tagML = DUMMY_HEADER + "[m>foo<-m] fie [+m>bar<m]";
     String expectedErrors =
         "line 1:7 : The root markup [m] cannot be suspended.\n" + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
@@ -1086,7 +1108,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testLayerNeedsToBeAddedBeforeUse() {
-    String tagML = "[text|W>Lorem Ipsum [w|W>Dolor<w] Dulcet<text]";
+    String tagML = DUMMY_HEADER + "[text|W>Lorem Ipsum [w|W>Dolor<w] Dulcet<text]";
     String expectedErrors =
         "line 1:6 : Layer W has not been added at this point, use +W to add a layer.\n"
             + "parsing aborted!";

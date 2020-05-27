@@ -46,100 +46,110 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
 
   @Test
   public void testBasic() {
-    String tagml = "[line>The rain in Spain falls mainly on the plain.<line]";
-    testRDFConversionContains(tagml,
-        "");
-//        "tag:document0  a   tag:Document ;\n" +
-//            "        tag:layer  tag:layer_ ;\n" +
-//            "        tag:root   tag:markup2 .",
-//        "tag:layer_  a           tag:LayerNode ;\n" +
-//            "        tag:layer_name  \"\" .",
-//        "tag:markup2  a           tag:MarkupNode ;\n" +
-//            "        tag:elements     ( tag:text3 ) ;\n" +
-//            "        tag:layer        tag:layer_ ;\n" +
-//            "        tag:markup_name  \"line\" .",
-//        "tag:text3  a         tag:TextNode ;\n" +
-//            "        tag:content  \"The rain in Spain falls mainly on the plain.\" .");
+    String tagml = DUMMY_HEADER + "[line>The rain in Spain falls mainly on the plain.<line]";
+    testRDFConversionContains(tagml, "");
+    //        "tag:document0  a   tag:Document ;\n" +
+    //            "        tag:layer  tag:layer_ ;\n" +
+    //            "        tag:root   tag:markup2 .",
+    //        "tag:layer_  a           tag:LayerNode ;\n" +
+    //            "        tag:layer_name  \"\" .",
+    //        "tag:markup2  a           tag:MarkupNode ;\n" +
+    //            "        tag:elements     ( tag:text3 ) ;\n" +
+    //            "        tag:layer        tag:layer_ ;\n" +
+    //            "        tag:markup_name  \"line\" .",
+    //        "tag:text3  a         tag:TextNode ;\n" +
+    //            "        tag:content  \"The rain in Spain falls mainly on the plain.\" .");
   }
 
   @Test
   public void testLayers() {
-    String tagml = "[line|+A>Cookie Monster likes cookies.<line|A]";
-    testRDFConversionContains(tagml,
-        "tag:content  \"Cookie Monster likes cookies.\"");
-//        "tag:document0  a   tag:Document ;\n" +
-//            "        tag:layer  tag:layer_A ;\n" +
-//            "        tag:root   tag:markup2 .",
-//        "tag:layer_A  a          tag:LayerNode ;\n" +
-//            "        tag:layer_name  \"A\" .",
-//        "tag:markup2  a           tag:MarkupNode ;\n" +
-//            "        tag:elements     ( tag:text3 ) ;\n" +
-//            "        tag:layer        tag:layer_A ;\n" +
-//            "        tag:markup_name  \"line\" .",
-//        "tag:text3  a         tag:TextNode ;\n" +
-//            "        tag:content  \"Cookie Monster likes cookies.\" .");
+    String tagml = DUMMY_HEADER + "[line|+A>Cookie Monster likes cookies.<line|A]";
+    testRDFConversionContains(tagml, "tag:content  \"Cookie Monster likes cookies.\"");
+    //        "tag:document0  a   tag:Document ;\n" +
+    //            "        tag:layer  tag:layer_A ;\n" +
+    //            "        tag:root   tag:markup2 .",
+    //        "tag:layer_A  a          tag:LayerNode ;\n" +
+    //            "        tag:layer_name  \"A\" .",
+    //        "tag:markup2  a           tag:MarkupNode ;\n" +
+    //            "        tag:elements     ( tag:text3 ) ;\n" +
+    //            "        tag:layer        tag:layer_A ;\n" +
+    //            "        tag:markup_name  \"line\" .",
+    //        "tag:text3  a         tag:TextNode ;\n" +
+    //            "        tag:content  \"Cookie Monster likes cookies.\" .");
   }
 
   @Test
   public void testAnnotations() {
-    String tagml = "[line month_1='November' month_2=11>In the eleventh month...<line]";
+    String tagml =
+        DUMMY_HEADER + "[line month_1='November' month_2=11>In the eleventh month...<line]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testBooleanAnnotation() {
-    String tagml = "[line rhyme=false>There once was a vicar in [place real=true>Slough<place]<line]";
-    testRDFConversionContains(tagml, "tag:value            true",
-        "tag:value            false");
+    String tagml =
+        DUMMY_HEADER
+            + "[line rhyme=false>There once was a vicar in [place real=true>Slough<place]<line]";
+    testRDFConversionContains(tagml, "tag:value            true", "tag:value            false");
   }
 
   @Test
   public void testListAnnotation() {
-    String tagml = "[line>Donald and [group names=['Huey','Louie','Dewey']>his nephews<group] went for a ride.<line]";
-    testRDFConversionContains(tagml, "tag:value  \"Huey\"",
-        "tag:value  \"Louie\"",
-        "tag:value  \"Dewey\"");
+    String tagml =
+        DUMMY_HEADER
+            + "[line>Donald and [group names=['Huey','Louie','Dewey']>his nephews<group] went for a ride.<line]";
+    testRDFConversionContains(
+        tagml, "tag:value  \"Huey\"", "tag:value  \"Louie\"", "tag:value  \"Dewey\"");
   }
 
   @Test
   public void testMapAnnotation() {
-    String tagml = "[quote>Van de maan af gezien zijn we allen even groot.\n[by>[alias person={first_name='Eduard' middle_name='Douwes' last_name='Dekker'}>Multatuli<alias]<by]<quote]";
-    testRDFConversionContains(tagml, "tag:content  \"Van de maan af gezien zijn we allen even groot.\\n\"");
+    String tagml =
+        DUMMY_HEADER
+            + "[quote>Van de maan af gezien zijn we allen even groot.\n[by>[alias person={first_name='Eduard' middle_name='Douwes' last_name='Dekker'}>Multatuli<alias]<by]<quote]";
+    testRDFConversionContains(
+        tagml, "tag:content  \"Van de maan af gezien zijn we allen even groot.\\n\"");
   }
 
   @Test
   public void testRichTextAnnotation() {
-    String tagml = "[text>Hello, my name is [gloss addition=[>[p>that’s [qualifier>Mrs.<qualifier] to you<p]<]>Doubtfire. How do you do?<gloss]<text]";
+    String tagml =
+        DUMMY_HEADER
+            + "[text>Hello, my name is [gloss addition=[>[p>that’s [qualifier>Mrs.<qualifier] to you<p]<]>Doubtfire. How do you do?<gloss]<text]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testReferenceAnnotation() {
-    String tagml = "[text meta={persons=[{:id=huyg0001 name='Constantijn Huygens'}]}>[title>De Zee-Straet<title] door [author pers->huyg0001>Constantijn Huygens<author] ....... <text]";
+    String tagml =
+        DUMMY_HEADER
+            + "[text meta={persons=[{:id=huyg0001 name='Constantijn Huygens'}]}>[title>De Zee-Straet<title] door [author pers->huyg0001>Constantijn Huygens<author] ....... <text]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testOverlap() {
-    String tagml = "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
+    String tagml = DUMMY_HEADER + "[line>[a|+A>Cookie Monster [b|+B>likes<a|A] cookies.<b|B]<line]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testHierarchical() {
-    String tagml = "[line>[a>Cookie Monster [b>likes<b] cookies.<a]<line]";
+    String tagml = DUMMY_HEADER + "[line>[a>Cookie Monster [b>likes<b] cookies.<a]<line]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testDiscontinuity() {
-    String tagml = "[ex>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<ex]";
+    String tagml =
+        DUMMY_HEADER
+            + "[ex>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<ex]";
     testRDFConversionContains(tagml, "");
   }
 
   @Test
   public void testNonLinearity() {
-    String tagml = "[q>To be, or <|to be not|not to be|>.<q]";
+    String tagml = DUMMY_HEADER + "[q>To be, or <|to be not|not to be|>.<q]";
     testRDFConversionContains(tagml, "");
   }
 
@@ -151,44 +161,49 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
   }
 
   private void testRDFConversionContains(String tagml, final String... turtleStatements) {
-    runInStore(store -> {
-      TAGDocument document = store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml.trim()));
-      Model model = store.runInTransaction(() -> RDFFactory.fromDocument(document));
+    runInStore(
+        store -> {
+          TAGDocument document =
+              store.runInTransaction(() -> new TAGMLImporter(store).importTAGML(tagml.trim()));
+          Model model = store.runInTransaction(() -> RDFFactory.fromDocument(document));
 
-//      String queryString = "prefix tag: <" + TAG.getURI() + "> "
-//          + "select ?s ?o "
-//          + "where { ?s <" + TAG.markupName + "> ?o . }";
-//      System.out.println(queryString);
-//      List<Map<String, String>> resultList = getResults(model, queryString);
-//      System.out.println(resultList);
+          //      String queryString = "prefix tag: <" + TAG.getURI() + "> "
+          //          + "select ?s ?o "
+          //          + "where { ?s <" + TAG.markupName + "> ?o . }";
+          //      System.out.println(queryString);
+          //      List<Map<String, String>> resultList = getResults(model, queryString);
+          //      System.out.println(resultList);
 
-      String dot = DotFactory.fromModel(model);
+          String dot = DotFactory.fromModel(model);
 
-      System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
-      model.write(System.out, "TURTLE");
-      System.out.println("\n------------TTL------------------------------------------------------------------------------------\n");
+          System.out.println(
+              "\n------------TTL------------------------------------------------------------------------------------\n");
+          model.write(System.out, "TURTLE");
+          System.out.println(
+              "\n------------TTL------------------------------------------------------------------------------------\n");
 
-      System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-      System.out.println(dot);
-      System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+          System.out.println(
+              "\n------------8<------------------------------------------------------------------------------------\n");
+          System.out.println(dot);
+          System.out.println(
+              "\n------------8<------------------------------------------------------------------------------------\n");
 
-      final OutputStream baos = new ByteArrayOutputStream();
-      model.write(baos, "TURTLE");
-      String ttl = baos.toString();
-      assertThat(ttl).contains(turtleStatements);
-    });
-
+          final OutputStream baos = new ByteArrayOutputStream();
+          model.write(baos, "TURTLE");
+          String ttl = baos.toString();
+          assertThat(ttl).contains(turtleStatements);
+        });
   }
 
   private List<Map<String, String>> getResults(final Model model, final String queryString) {
     Query query = QueryFactory.create(queryString);
     PrefixMapping prefixMapping = query.getPrefixMapping();
     QueryExecution qe = QueryExecutionFactory.create(query, model);
-//    if (query.isSelectType()){
+    //    if (query.isSelectType()){
     ResultSet results = qe.execSelect();
-//    boolean b = qe.execAsk();
-//    Model model1 = qe.execConstruct();
-//    Model model2 = qe.execDescribe();
+    //    boolean b = qe.execAsk();
+    //    Model model1 = qe.execConstruct();
+    //    Model model2 = qe.execDescribe();
     System.out.println("----------------------------------------------------------------");
     ResultSetFormatter.out(System.out, results, query);
     System.out.println("----------------------------------------------------------------");
@@ -204,16 +219,20 @@ public class RDFFactoryTest extends TAGBaseStoreTest {
     while (results.hasNext()) {
       QuerySolution querySolution = results.next();
       Map<String, String> result = new HashMap<>();
-      querySolution.varNames().forEachRemaining((String varName) -> {
-        RDFNode node = querySolution.get(varName);
-        String val = node.isResource() ? "<" + prefixMapping.shortForm(node.asResource().getURI()) + ">"
-            : node.toString();
-        result.put(varName, val);
-      });
+      querySolution
+          .varNames()
+          .forEachRemaining(
+              (String varName) -> {
+                RDFNode node = querySolution.get(varName);
+                String val =
+                    node.isResource()
+                        ? "<" + prefixMapping.shortForm(node.asResource().getURI()) + ">"
+                        : node.toString();
+                result.put(varName, val);
+              });
       resultList.add(result);
     }
     qe.close();
     return resultList;
   }
-
 }

@@ -58,7 +58,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testAST() {
-    String input = "[TEI>[s>It seemed [?del>indeed<?del] as if<s]<TEI]";
+    String input = DUMMY_HEADER + "[TEI>[s>It seemed [?del>indeed<?del] as if<s]<TEI]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -67,7 +67,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testTagWithReferenceParses() {
-    String input = "[tagml pers->pers01>Some text<tagml]";
+    String input = DUMMY_HEADER + "[tagml pers->pers01>Some text<tagml]";
     runInStore(
         store -> {
           AnnotationInfo pers =
@@ -96,7 +96,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // Rd-205
   public void testDefaultLayerIsAlwaysOpen() {
-    String input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
+    String input = DUMMY_HEADER + "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -116,7 +116,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-131
   public void testSimpleTextWithRoot() {
-    String input = "[tagml>simple text<tagml]";
+    String input = DUMMY_HEADER + "[tagml>simple text<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -128,7 +128,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-132
   public void testTextWithMultipleLayersOfMarkup() {
-    String input = "[text>[some|+L1>[all|+L2>word1<some|L1] word2<all|L2]<text]";
+    String input = DUMMY_HEADER + "[text>[some|+L1>[all|+L2>word1<some|L1] word2<all|L2]<text]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -144,7 +144,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test // RD-133
   public void testTextWithMultipleLayersAndDiscontinuity() {
     String input =
-        "[tagml>"
+        DUMMY_HEADER
+            + "[tagml>"
             + "[pre|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<pre|L1,L2]"
             + "― "
             + "[post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]"
@@ -186,7 +187,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
     String input =
-        "[tagml>[pre|+L1,+L2>"
+        DUMMY_HEADER
+            + "[tagml>[pre|+L1,+L2>"
             + "[q|L1>“Man,\"<-q|L1][s|L2> I "
             + "<|cried|pleaded|>"
             + ", <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]"
@@ -239,7 +241,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testOptionalMarkup() {
-    String input = "[tagml>" + "[?optional>optional<?optional]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[?optional>optional<?optional]" + "<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -252,7 +254,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testDiscontinuity() {
     String input =
-        "[tagml>"
+        DUMMY_HEADER
+            + "[tagml>"
             + "[discontinuity>yes<-discontinuity]no[+discontinuity>yes<discontinuity]"
             + "<tagml]";
     runInStoreTransaction(
@@ -265,7 +268,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testMilestone() {
-    String input = "[tagml>pre " + "[milestone x=4]" + " post<tagml]";
+    String input = DUMMY_HEADER + "[tagml>pre " + "[milestone x=4]" + " post<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -275,7 +278,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testMarkupIdentifier() {
-    String input = "[tagml>" + "[id~1>identified<id~1]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[id~1>identified<id~1]" + "<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -285,7 +288,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testStringAnnotation() {
-    String input = "[text author='somebody'>some text.<text]";
+    String input = DUMMY_HEADER + "[text author='somebody'>some text.<text]";
     runInStore(
         store -> {
           TAGDocument doc =
@@ -305,7 +308,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testStringAnnotation1() {
-    String input = "[tagml>" + "[m s=\"string\">text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m s=\"string\">text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -323,7 +326,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testStringAnnotation2() {
-    String input = "[tagml>" + "[m s='string'>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m s='string'>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -341,7 +344,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testNumberAnnotation() {
-    String input = "[text pi=3.1415926>some text.<text]";
+    String input = DUMMY_HEADER + "[text pi=3.1415926>some text.<text]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -361,7 +364,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testNumberAnnotation1() {
-    String input = "[text n=1>some text.<text]";
+    String input = DUMMY_HEADER + "[text n=1>some text.<text]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -379,7 +382,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testBooleanAnnotation() {
-    String input = "[text test=true>some text.<text]";
+    String input = DUMMY_HEADER + "[text test=true>some text.<text]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -399,7 +402,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testBooleanAnnotation1() {
-    String input = "[tagml>" + "[m b=true>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m b=true>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -417,7 +420,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testBooleanAnnotation2() {
-    String input = "[tagml>" + "[m b=FALSE>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m b=FALSE>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -435,7 +438,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // NLA-468
   public void testStringListAnnotation() {
-    String input = "[tagml>" + "[m l=['a','b','c']>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m l=['a','b','c']>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -454,7 +457,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // NLA-468
   public void testNumberListAnnotation() {
-    String input = "[tagml>" + "[m l=[3,5,7,11]>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m l=[3,5,7,11]>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -473,7 +476,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // NLA-468
   public void testListAnnotationEntriesShouldAllBeOfTheSameType() {
-    String input = "[tagml>" + "[m l=[3,true,'string']>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m l=[3,true,'string']>text<m]" + "<tagml]";
 
     final String expectedError =
         "line 1:13 : All elements of ListAnnotation l should be of the same type.";
@@ -482,7 +485,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // RD-206
   public void testListElementSeparatorShouldBeComma() {
-    String input = "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
     final String expectedError =
         "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
     runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
@@ -490,7 +493,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // NLA-467
   public void testObjectAnnotation0() {
-    String input = "[tagml>" + "[m p={valid=false}>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m p={valid=false}>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -510,7 +513,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test // NLA-467
   public void testObjectAnnotation1() {
-    String input = "[tagml>" + "[m p={x=1 y=2}>text<m]" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "[m p={x=1 y=2}>text<m]" + "<tagml]";
     runInStore(
         store -> {
           final TAGDocument doc =
@@ -532,7 +535,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test // NLA-467
   public void testNestedObjectAnnotation() {
     String input =
-        "[text meta={\n"
+        DUMMY_HEADER
+            + "[text meta={\n"
             + "    persons=[\n"
             + "      {:id=huyg0001 name='Constantijn Huygens'}\n"
             + "    ]\n"
@@ -565,7 +569,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testSimpleTextVariation() {
-    String input = "[tagml>" + "pre <|to be|not to be|> post" + "<tagml]";
+    String input = DUMMY_HEADER + "[tagml>" + "pre <|to be|not to be|> post" + "<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -575,7 +579,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testTextVariationWithMarkup() {
-    String input = "[tagml>" + "pre <|[del>to be<del]|[add>not to be<add]|> post" + "<tagml]";
+    String input =
+        DUMMY_HEADER + "[tagml>" + "pre <|[del>to be<del]|[add>not to be<add]|> post" + "<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -587,7 +592,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testNestedTextVariationWithMarkup() {
     String input =
-        "[tagml>"
+        DUMMY_HEADER
+            + "[tagml>"
             + "pre <|"
             + "[del>to be<del]"
             + "|"
@@ -611,7 +617,10 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   @Test
   public void testElementLinking() {
     String input =
-        "[tagml meta={:id=meta01 name='test'}>" + "pre [x ref->meta01>text<x] post" + "<tagml]";
+        DUMMY_HEADER
+            + "[tagml meta={:id=meta01 name='test'}>"
+            + "pre [x ref->meta01>text<x] post"
+            + "<tagml]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -621,7 +630,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testNestedObjectAnnotation2() {
-    String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" + "text" + "<t]";
+    String input = DUMMY_HEADER + "[t meta={:id=meta01 obj={t='test'} n=1}>" + "text" + "<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -631,7 +640,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testRichTextAnnotation1() {
-    String input = "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]";
+    String input =
+        DUMMY_HEADER + "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -641,7 +651,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testNamespaceNeedsToBeDefinedBeforeUsage() {
-    String input = "[z:t>text<z:t]";
+    String input = DUMMY_HEADER + "[z:t>text<z:t]";
     runInStoreTransaction(
         store ->
             assertTAGMLParsesWithSyntaxError(
@@ -650,7 +660,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   @Test
   public void testIdentifyingMarkup() {
-    String input = "[m :id=m1>" + "pre [x ref->m1>text<x] post" + "<m]";
+    String input = DUMMY_HEADER + "[m :id=m1>" + "pre [x ref->m1>text<x] post" + "<m]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = assertTAGMLParses(input, store);
@@ -719,7 +729,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    assertThat(errorListener.getPrefixedErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
+    assertThat(errorListener.getPrefixedErrorMessagesAsString())
+        .contains(expectedSyntaxErrorMessage);
   }
 
   private void assertExportEqualsInput(String input, TAGDocument doc, final TAGStore store) {

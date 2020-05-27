@@ -37,7 +37,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
   //  @Ignore("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
-    val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
+    val tagml = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
     val viewJson = """{
       |"includeLayers" : ["A"]
       |}""".trimMargin()
@@ -54,7 +54,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
   //  @Ignore("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
-    val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
+    val tagml = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
     val viewJson = """{
       |"excludeLayers" : ["B"]
       |}""".trimMargin()
@@ -71,7 +71,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
   @Ignore("Should the default layer always be included?")
   @Test // NLA-489
   fun testLayerMarkupCombinationInView() {
-    val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
+    val tagml = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
     val viewJson = """{
       |"includeLayers" : ["A"],
       |"excludeMarkup" : ["b"]
@@ -117,7 +117,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
       assertThat(filteredMarkupIds3).containsExactlyInAnyOrder(markupId1, markupId3)
 
       val importer = TAGMLImporter(store)
-      val document1 = importer.importTAGML("[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]")
+      val document1 = importer.importTAGML("$DUMMY_HEADER[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]")
       val exporter1 = TAGMLExporter(store, viewNoL1)
       val tagmlBD = exporter1.asTAGML(document1)
       assertThat(tagmlBD).isEqualTo("[tagml|+L1,+L2>a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]<tagml|L1,L2]")

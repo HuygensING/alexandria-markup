@@ -36,90 +36,108 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
 
   @Test
   public void test1() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]\n";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]\n";
+    String originText =
+        DUMMY_HEADER
+            + "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]\n";
+    String editedText =
+        DUMMY_HEADER
+            + "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]\n";
 
     visualizeDiff("A-1", originText, "B-1", editedText);
   }
 
   @Test
   public void test2() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une belle<l|M][l|M>main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]\n";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]\n";
+    String originText =
+        DUMMY_HEADER
+            + "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une belle<l|M][l|M>main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]\n";
+    String editedText =
+        DUMMY_HEADER
+            + "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]\n";
 
     visualizeDiff("A-2", originText, "B-2", editedText);
   }
 
   @Test
   public void test3() {
-    String originText = "[TAGML|+M>\n" +
-        "[body|M>\n" +
-        "[s|M>Une belle main de femme, élégante et fine, malgré [del|M>l'agrandissement du<del] close-up.\n" +
-        "<s]\n" +
-        "<body]\n" +
-        "<TAGML]\n";
-    String editedText = "[TAGML|+M>\n" +
-        "[body|M>\n" +
-        "[s|M>Une [add|M>belle<add] main de femme, élégante et fine.<s]\n" +
-        "[s|M>Malgré l'agrandissement du close-up.<s]\n" +
-        "<body]\n" +
-        "<TAGML]\n";
+    String originText =
+        DUMMY_HEADER
+            + "[TAGML|+M>\n"
+            + "[body|M>\n"
+            + "[s|M>Une belle main de femme, élégante et fine, malgré [del|M>l'agrandissement du<del] close-up.\n"
+            + "<s]\n"
+            + "<body]\n"
+            + "<TAGML]\n";
+    String editedText =
+        DUMMY_HEADER
+            + "[TAGML|+M>\n"
+            + "[body|M>\n"
+            + "[s|M>Une [add|M>belle<add] main de femme, élégante et fine.<s]\n"
+            + "[s|M>Malgré l'agrandissement du close-up.<s]\n"
+            + "<body]\n"
+            + "<TAGML]\n";
 
     visualizeDiff("A-3", originText, "B-3", editedText);
   }
 
   @Test
   public void test4() {
-    String originText = "[line>The rain in Spain falls mainly on the plain.<line]";
-    String editedText = "[markup annotation_1='string value' annotation_2=2.718>Some text<markup]";
+    String originText = DUMMY_HEADER + "[line>The rain in Spain falls mainly on the plain.<line]";
+    String editedText =
+        DUMMY_HEADER + "[markup annotation_1='string value' annotation_2=2.718>Some text<markup]";
     visualizeDiff("A-4", originText, "B-4", editedText);
   }
 
   @Test
   public void test5() {
-    String originText = "[TAGML|+M>Leentje leerde Lotje lopen<TAGML]\n";
-    String editedText = "[TAGML|+M>leerde Lotje lopen langs de lange Lindelaan.<TAGML]\n";
+    String originText = DUMMY_HEADER + "[TAGML|+M>Leentje leerde Lotje lopen<TAGML]\n";
+    String editedText =
+        DUMMY_HEADER + "[TAGML|+M>leerde Lotje lopen langs de lange Lindelaan.<TAGML]\n";
 
     visualizeDiff("A-4", originText, "B-4", editedText);
   }
 
-  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+  private void visualizeDiff(
+      final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);
-    runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
+    runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
-      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
-//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
-      new VariantGraphVisualizer(visualizer)
-          .visualizeVariation(witness1, original, witness2, edited, allTags);
-      String result = visualizer.getResult();
-      LOG.info("result=\n" +
-          "------8<---------------------------------------\n" +
-          "{}\n" +
-          "------8<---------------------------------------\n", result);
-    });
+          DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+          //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+          new VariantGraphVisualizer(visualizer)
+              .visualizeVariation(witness1, original, witness2, edited, allTags);
+          String result = visualizer.getResult();
+          LOG.info(
+              "result=\n"
+                  + "------8<---------------------------------------\n"
+                  + "{}\n"
+                  + "------8<---------------------------------------\n",
+              result);
+        });
   }
 }
