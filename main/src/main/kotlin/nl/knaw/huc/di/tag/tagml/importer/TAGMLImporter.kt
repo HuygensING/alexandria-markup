@@ -40,22 +40,22 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 
 class TAGMLImporter(private val tagStore: TAGStore) {
+
     @Throws(TAGMLSyntaxError::class)
-    fun importTAGML(input: String?): TAGDocument {
+    fun importTAGML(input: String): TAGDocument {
         val antlrInputStream: CharStream = CharStreams.fromString(input)
         return importTAGML(antlrInputStream)
     }
 
     @Throws(TAGMLSyntaxError::class)
-    fun importTAGML(input: InputStream?): TAGDocument {
-        return try {
-            val antlrInputStream = CharStreams.fromStream(input)
-            importTAGML(antlrInputStream)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw UncheckedIOException(e)
-        }
-    }
+    fun importTAGML(input: InputStream): TAGDocument =
+            try {
+                val antlrInputStream = CharStreams.fromStream(input)
+                importTAGML(antlrInputStream)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw UncheckedIOException(e)
+            }
 
     @Throws(TAGMLSyntaxError::class)
     private fun importTAGML(antlrInputStream: CharStream): TAGDocument {
@@ -104,11 +104,10 @@ class TAGMLImporter(private val tagStore: TAGStore) {
         return visitor.document
     }
 
-    private fun update(tagdto: TAGDTO): Long {
-        return tagStore.persist(tagdto)
-    }
+    private fun update(tagdto: TAGDTO): Long =
+            tagStore.persist(tagdto)
 
-    protected fun logDocumentGraph(document: TAGDocument?, input: String?) {
+    protected fun logDocumentGraph(document: TAGDocument, input: String) {
         println(
                 "\n------------8<------------------------------------------------------------------------------------\n")
         println(DotFactory().toDot(document, input))
