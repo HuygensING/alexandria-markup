@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -20,22 +20,15 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseVisitor;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseVisitor
+import nl.knaw.huygens.alexandria.ErrorListener
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGStore
 
-public class TAGMLVisitor extends TAGMLParserBaseVisitor {
-  private final TAGStore tagStore;
-  private final ErrorListener errorListener;
-
-  public TAGMLVisitor(final TAGStore tagStore, final ErrorListener errorListener) {
-    this.tagStore = tagStore;
-    this.errorListener = errorListener;
-  }
-
-  public TAGDocument getDocument() {
+class TAGMLVisitor(private val tagStore: TAGStore, private val errorListener: ErrorListener) : TAGMLParserBaseVisitor<Any>() {
     // TODO
-    return null;
-  }
+    val document: TAGDocument?
+        get() =// TODO
+            null
+
 }
