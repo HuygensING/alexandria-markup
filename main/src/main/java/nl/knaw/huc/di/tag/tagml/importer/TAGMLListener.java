@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -180,19 +179,6 @@ public class TAGMLListener extends AbstractTAGMLListener {
     }
   }
 
-  @Override
-  public void exitNamespaceDefinition(NamespaceDefinitionContext ctx) {
-    String ns = ctx.IN_NamespaceIdentifier().getText();
-    String url = ctx.IN_NamespaceURI().getText();
-    namespaces.put(ns, url);
-  }
-
-  @Override
-  public void exitSchemaLocation(final SchemaLocationContext ctx) {
-    String uriString = ctx.IS_SchemaURL().getText();
-    document.setSchemaLocation(URI.create(uriString));
-  }
-
   private void checkLayerIsOpen(final StartTagContext ctx, final String layerId) {
     if (state.openMarkup.get(layerId).isEmpty()) {
       String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
@@ -227,7 +213,8 @@ public class TAGMLListener extends AbstractTAGMLListener {
                     .filter(
                         l ->
                             !TAGML.DEFAULT_LAYER.equals(
-                                l)) // Once again, the default layer is special! TODO: fix default layer usage
+                                l)) // Once again, the default layer is special! TODO: fix default
+                    // layer usage
                     .collect(toSet());
             handledLayers.addAll(newParentLayers);
             goOn = !newParentLayers.isEmpty();
