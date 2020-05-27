@@ -27,8 +27,7 @@ import nl.knaw.huygens.alexandria.storage.TAGStore
 
 class TAGMLVisitor(private val tagStore: TAGStore, private val errorListener: ErrorListener) : TAGMLParserBaseVisitor<Any>() {
     // TODO
-    val document: TAGDocument?
-        get() =// TODO
-            null
+    val document: TAGDocument
+        get() = TODO()
 
 }
