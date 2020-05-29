@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
-@Entity(version = 5)
+@Entity(version = 6)
 public class TAGDocumentDTO implements TAGDTO {
   @PrimaryKey(sequence = DataAccessor.SEQUENCE)
   private Long id;
@@ -51,6 +51,7 @@ public class TAGDocumentDTO implements TAGDTO {
   private Map<String, String> namespaces;
   private String schemaLocation;
   private Map<Long, RangePair> markupRangeMap = new HashMap<>();
+  private String rawHeader;
 
   public TAGDocumentDTO() {}
 
@@ -173,5 +174,13 @@ public class TAGDocumentDTO implements TAGDTO {
 
   public void setMarkupRangeMap(Map<Long, RangePair> markupRangeMap) {
     this.markupRangeMap = markupRangeMap;
+  }
+
+  public String getRawHeader() {
+    return rawHeader;
+  }
+
+  public void setRawHeader(String rawHeader) {
+    this.rawHeader = rawHeader;
   }
 }

@@ -34,7 +34,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
 
   @Test
   public void testReferenceAnnotation() {
-    String tagmlIn = "[x>[p pers->p42>Donald<p] likes KFC<x]";
+    String tagmlIn = DUMMY_HEADER + "[x>[p pers->p42>Donald<p] likes KFC<x]";
     assertTAGMLOutIsIn(tagmlIn);
   }
 
@@ -297,7 +297,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML =
         DUMMY_HEADER
             + "[phrase>[phrase>Oscar the Grouch is<phrase] a trash can-dwelling creature.<phrase]";
-    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+    assertTAGMLOutIsIn(tagML);
   }
 
   @Test
@@ -305,7 +305,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML =
         DUMMY_HEADER
             + "[phrase>Oscar the Grouch [phrase>is<phrase] a trash can-dwelling creature.<phrase]";
-    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+    assertTAGMLOutIsIn(tagML);
   }
 
   @Test
@@ -313,7 +313,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML =
         DUMMY_HEADER
             + "[tagml>[phrase|+P1>[phrase|+P2>Rosita is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
-    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+    assertTAGMLOutIsIn(tagML);
   }
 
   @Test
@@ -321,7 +321,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     String tagML =
         DUMMY_HEADER
             + "[tagml>[phrase|+P1>Rosita [phrase|+P2>is<phrase|P1] a bilingual monster.<phrase|P2]<tagml]";
-    assertTAGMLOutIsIn(tagML.replaceAll("\\n", ""));
+    assertTAGMLOutIsIn(tagML);
   }
 
   // --- private methods ---

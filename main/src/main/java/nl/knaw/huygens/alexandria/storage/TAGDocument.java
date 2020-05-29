@@ -61,6 +61,14 @@ public class TAGDocument {
     return documentDTO.getDbId();
   }
 
+  public String getRawHeader() {
+    return documentDTO.getRawHeader();
+  }
+
+  public void setRawHeader(String rawHeader) {
+    documentDTO.setRawHeader(rawHeader);
+  }
+
   public Date getCreationDate() {
     return documentDTO.getCreationDate();
   }
@@ -141,8 +149,7 @@ public class TAGDocument {
   }
 
   public Iterator<TAGTextNodeDTO> getTextNodeIterator() {
-    return getTagTextNodeStream()
-        .iterator();
+    return getTagTextNodeStream().iterator();
   }
 
   public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup) {
@@ -262,8 +269,7 @@ public class TAGDocument {
   /* private methods */
 
   private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
-    return documentDTO.getTextNodeIds().stream()
-        .map(store::getTextNodeDTO);
+    return documentDTO.getTextNodeIds().stream().map(store::getTextNodeDTO);
   }
 
   private void update() {

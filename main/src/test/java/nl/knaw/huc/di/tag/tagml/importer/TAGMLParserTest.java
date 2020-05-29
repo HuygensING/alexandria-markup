@@ -479,7 +479,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = DUMMY_HEADER + "[tagml>" + "[m l=[3,true,'string']>text<m]" + "<tagml]";
 
     final String expectedError =
-        "line 1:13 : All elements of ListAnnotation l should be of the same type.";
+        "line 2:13 : All elements of ListAnnotation l should be of the same type.";
     runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
@@ -487,7 +487,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   public void testListElementSeparatorShouldBeComma() {
     String input = DUMMY_HEADER + "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
     final String expectedError =
-        "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
+        "line 2:13 : The elements of ListAnnotation l should be separated by commas.";
     runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
@@ -655,7 +655,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     runInStoreTransaction(
         store ->
             assertTAGMLParsesWithSyntaxError(
-                input, "line 1:1 : Namespace z has not been defined.", store));
+                input, "line 2:1 : Namespace z has not been defined.", store));
   }
 
   @Test

@@ -41,7 +41,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     val viewJson = """{
       |"includeLayers" : ["A"]
       |}""".trimMargin()
-    val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
+    val expected = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
       val view = tagViewFactory.fromJsonString(viewJson)
@@ -58,7 +58,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     val viewJson = """{
       |"excludeLayers" : ["B"]
       |}""".trimMargin()
-    val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
+    val expected = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
       val view = tagViewFactory.fromJsonString(viewJson)
@@ -76,7 +76,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
       |"includeLayers" : ["A"],
       |"excludeMarkup" : ["b"]
       |}""".trimMargin()
-    val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]"
+    val expected = "$DUMMY_HEADER[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette six saucissons-ci?<layerdef|A,B]<tagml]"
     runInStore { store: TAGStore ->
       val tagViewFactory = TAGViewFactory(store)
       val view = tagViewFactory.fromJsonString(viewJson)
@@ -120,25 +120,25 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
       val document1 = importer.importTAGML("$DUMMY_HEADER[tagml|+L1,+L2>[a|L1>a[b|L2>b[c|L1>c[d|L2>da<c]b<d]c<a]d<b]<tagml]")
       val exporter1 = TAGMLExporter(store, viewNoL1)
       val tagmlBD = exporter1.asTAGML(document1)
-      assertThat(tagmlBD).isEqualTo("[tagml|+L1,+L2>a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]<tagml|L1,L2]")
+      assertThat(tagmlBD).isEqualTo("$DUMMY_HEADER[tagml|+L1,+L2>a[b|L2>bc[d|L2>dab<d|L2]cd<b|L2]<tagml|L1,L2]")
 
       val exporter2 = TAGMLExporter(store, viewL1)
       val tagmlAC = exporter2.asTAGML(document1)
-      assertThat(tagmlAC).isEqualTo("[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]")
+      assertThat(tagmlAC).isEqualTo("$DUMMY_HEADER[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]")
 
       val viewL1NoC = TAGView(store)
           .withLayersToInclude(l1)
           .withMarkupToExclude(Sets.newLinkedHashSet(tag3))
       val exporter3 = TAGMLExporter(store, viewL1NoC)
       val tagmlA = exporter3.asTAGML(document1)
-      assertThat(tagmlA).isEqualTo("[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]")
+      assertThat(tagmlA).isEqualTo("$DUMMY_HEADER[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]")
 
       val viewNoL1B = TAGView(store)
           .withLayersToExclude(l1)
           .withMarkupToInclude(Sets.newLinkedHashSet(tag2))
       val exporter4 = TAGMLExporter(store, viewNoL1B)
       val tagmlB = exporter4.asTAGML(document1)
-      assertThat(tagmlB).isEqualTo("a[b|L2>bcdabcd<b|L2]")
+      assertThat(tagmlB).isEqualTo("${DUMMY_HEADER}a[b|L2>bcdabcd<b|L2]")
     }
   }
 

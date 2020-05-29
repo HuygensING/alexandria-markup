@@ -64,10 +64,10 @@ class TAGMLImporter(private val tagStore: TAGStore) {
         lexer.addErrorListener(errorListener)
         val tokens = CommonTokenStream(lexer)
         val parser = TAGMLParser(tokens)
-        parser.addErrorListener(errorListener)
+                .apply { addErrorListener(errorListener) }
         val document = usingListener(parser, errorListener)
-        //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
-        val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
+        //    val document = usingVisitor(parser, errorListener); // alternative
+//        val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
         //    LOG.info("parsed with {} parser syntax errors", numberOfSyntaxErrors);
         var errorMsg = ""
         if (errorListener.hasErrors()) {

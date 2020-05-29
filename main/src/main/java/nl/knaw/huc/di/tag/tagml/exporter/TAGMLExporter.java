@@ -88,6 +88,7 @@ public class TAGMLExporter extends TAGExporter {
     Set<TAGTextNode> processedNodes = new HashSet<>();
     final AtomicReference<ExporterState> stateRef = new AtomicReference<>(new ExporterState());
     StringBuilder tagmlBuilder = new StringBuilder();
+    tagmlBuilder.append(document.getRawHeader()).append("\n");
     document
         .getTextNodeStream()
         .forEach(

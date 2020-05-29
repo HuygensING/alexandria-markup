@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag.tagml.importer
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huc.di.tag.tagml.TAGML.BRANCH
 import nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES
 import nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_ENDCHAR
@@ -66,7 +67,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     private var closeTagRange: MutableMap<Long, Range> = mutableMapOf()
 
     private val markupRanges: Map<Long, RangePair>
-        private get() {
+        get() {
             val markupRangeMap: MutableMap<Long, RangePair> = HashMap()
             openTagRange
                     .keys
@@ -76,6 +77,49 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
                             })
             return markupRangeMap
         }
+
+    class State {
+        var openMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
+        var suspendedMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
+        var allOpenMarkup: Deque<TAGMarkup> = ArrayDeque()
+        var rootMarkupId: Long? = null
+        var eof = false
+
+        fun copy(): State {
+            val copy = State()
+            copy.openMarkup = HashMap()
+            openMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.openMarkup[k] = ArrayDeque(v) }
+            copy.suspendedMarkup = HashMap()
+            suspendedMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.suspendedMarkup[k] = ArrayDeque(v) }
+            copy.allOpenMarkup = ArrayDeque(allOpenMarkup)
+            copy.rootMarkupId = rootMarkupId
+            copy.eof = eof
+            return copy
+        }
+
+        fun rootMarkupIsNotSet(): Boolean {
+            return rootMarkupId == null
+        }
+    }
+
+    class TextVariationState {
+        var startState: State? = null
+        var endStates: MutableList<State> = mutableListOf()
+        var startMarkup: TAGMarkup? = null
+
+        //    public List<TAGTextNode> endNodes = new ArrayList<>();
+        private var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = mutableMapOf()
+        var branch = 0
+        fun addOpenMarkup(markup: TAGMarkup) {
+            openMarkup.computeIfAbsent(branch) { ArrayList() }
+            openMarkup[branch]!!.add(markup)
+        }
+
+        fun removeOpenMarkup(markup: TAGMarkup?) {
+            openMarkup.computeIfAbsent(branch) { ArrayList() }
+            openMarkup[branch]!!.remove(markup)
+        }
+    }
 
     private fun verifyNoSuspendedMarkupLeft() {
         val noSuspendedMarkup = state.suspendedMarkup.values.stream().allMatch { obj: Deque<TAGMarkup> -> obj.isEmpty() }
@@ -93,25 +137,6 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
                                 "Some suspended markup was not resumed: %s",
                                 suspendTag(markup)) // TODO: add range of unresumed tags
                     }
-        }
-    }
-
-    class TextVariationState {
-        var startState: State? = null
-        var endStates: MutableList<State> = ArrayList()
-        var startMarkup: TAGMarkup? = null
-
-        //    public List<TAGTextNode> endNodes = new ArrayList<>();
-        private var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = HashMap()
-        var branch = 0
-        fun addOpenMarkup(markup: TAGMarkup) {
-            openMarkup.computeIfAbsent(branch) { b: Int? -> ArrayList() }
-            openMarkup[branch]!!.add(markup)
-        }
-
-        fun removeOpenMarkup(markup: TAGMarkup?) {
-            openMarkup.computeIfAbsent(branch) { b: Int? -> ArrayList() }
-            openMarkup[branch]!!.remove(markup)
         }
     }
 
@@ -274,6 +299,10 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         document = documentStack.pop()
     }
 
+    override fun exitHeader(ctx: HeaderContext) {
+        document.rawHeader = ctx.text
+    }
+
     private fun addSuffix(markupNameContext: MarkupNameContext, markup: TAGMarkup) {
         val suffix = markupNameContext.suffix()
         if (suffix != null) {
@@ -297,10 +326,12 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             addError(ctx, "The root markup cannot be a milestone tag.")
         }
         if (tagNameIsValid(ctx)) {
-            val markupName = ctx.name().text
+//            val markupName = ctx.name().text
             //      LOG.debug("milestone.markupName=<{}>", markupName);
             ctx.annotation()
-                    .forEach(Consumer { annotation: AnnotationContext -> LOG.debug("milestone.annotation={{}}", annotation.text) })
+                    .forEach(Consumer { annotation: AnnotationContext ->
+                        LOG.debug("milestone.annotation={{}}", annotation.text)
+                    })
             val layers = extractLayerInfo(ctx.layerInfo())
             val tn = store.createTextNode("")
             addAndConnectToMarkup(tn)
@@ -334,7 +365,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     override fun exitEndTag(ctx: EndTagContext) {
         checkEOF(ctx)
         if (tagNameIsValid(ctx)) {
-            val markupName = ctx.markupName().name().text
+//            val markupName = ctx.markupName().name().text
             //      LOG.debug("endTag.markupName=<{}>", markupName);
             val markup = removeFromOpenMarkup(ctx.markupName())
             if (markup != null) {
@@ -353,7 +384,9 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             val closedInBranch: MutableList<TAGMarkup> = ArrayList(openMarkupAtStartInLayer)
             closedInBranch.removeAll(currentOpenMarkupInLayer!!)
             if (closedInBranch.isNotEmpty()) {
-                val openTags = closedInBranch.stream().map { m: TAGMarkup -> openTag(m) }.collect(Collectors.joining(","))
+                val openTags = closedInBranch.stream()
+                        .map { m: TAGMarkup -> openTag(m) }
+                        .collect(Collectors.joining(","))
                 addBreakingError(
                         ctx,
                         "Markup %s opened before branch %s, should not be closed in a branch.",
@@ -382,10 +415,11 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         //    LOG.debug("<|
         // lastTextNodeInTextVariationStack.size()={}",lastTextNodeInTextVariationStack.size());
         val branches = openTextVariationMarkup(BRANCHES, DEFAULT_LAYER_ONLY)
-        val textVariationState = TextVariationState()
-        textVariationState.startMarkup = branches
-        textVariationState.startState = state.copy()
-        textVariationState.branch = 0
+        val textVariationState = TextVariationState().apply {
+            startMarkup = branches
+            startState = state.copy()
+            branch = 0
+        }
         textVariationStateStack.push(textVariationState)
         openTextVariationMarkup(BRANCH, DEFAULT_LAYER_ONLY)
     }
@@ -433,7 +467,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         val resumedMarkupInBranch: List<List<String>> = ArrayList()
         val openedMarkupInBranch: List<List<String>> = ArrayList()
         val closedMarkupInBranch: List<List<String>> = ArrayList()
-        val startState = currentTextVariationState().startState
+//        val startState = currentTextVariationState().startState
         //    Map<String, Deque<TAGMarkup>> suspendedMarkupBeforeDivergence =
         // startState.suspendedMarkup;
         //    Map<String, Deque<TAGMarkup>> openMarkupBeforeDivergence = startState.openMarkup;
@@ -461,8 +495,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         //    });
 
         //    String errorPrefix = errorPrefix(ctx, true);
-        checkSuspendedOrResumedMarkupBetweenBranches(
-                suspendedMarkupInBranch, resumedMarkupInBranch, ctx)
+        checkSuspendedOrResumedMarkupBetweenBranches(suspendedMarkupInBranch, resumedMarkupInBranch, ctx)
         checkOpenedOrClosedMarkupBetweenBranches(openedMarkupInBranch, closedMarkupInBranch, ctx)
     }
 
@@ -489,7 +522,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     }
 
     private val openLayers: Set<String>
-        private get() = relevantOpenMarkup.stream()
+        get() = relevantOpenMarkup.stream()
                 .map { obj: TAGMarkup? -> obj!!.layers }
                 .flatMap { obj: Set<String> -> obj.stream() }
                 .collect(Collectors.toSet())
@@ -645,19 +678,23 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     }
 
     private fun addAnnotation(markup: TAGMarkup, actx: AnnotationContext) {
-        if (actx is BasicAnnotationContext) {
-            val aInfo = annotationFactory.makeAnnotation(actx)
-            val markupNode = markup.dbId
-            document.dto.textGraph.addAnnotationEdge(markupNode, aInfo)
-        } else if (actx is IdentifyingAnnotationContext) {
-            val id = actx.idValue().text
-            markup.markupId = id
-        } else if (actx is RefAnnotationContext) {
-            val aName = actx.annotationName().text
-            val refId = actx.refValue().text
-            val annotationInfo = annotationFactory.makeReferenceAnnotation(aName, refId)
-            val markupNode = markup.dbId
-            document.dto.textGraph.addAnnotationEdge(markupNode, annotationInfo)
+        when (actx) {
+            is BasicAnnotationContext -> {
+                val aInfo = annotationFactory.makeAnnotation(actx)
+                val markupNode = markup.dbId
+                document.dto.textGraph.addAnnotationEdge(markupNode, aInfo)
+            }
+            is IdentifyingAnnotationContext -> {
+                val id = actx.idValue().text
+                markup.markupId = id
+            }
+            is RefAnnotationContext -> {
+                val aName = actx.annotationName().text
+                val refId = actx.refValue().text
+                val annotationInfo = annotationFactory.makeReferenceAnnotation(aName, refId)
+                val markupNode = markup.dbId
+                document.dto.textGraph.addAnnotationEdge(markupNode, annotationInfo)
+            }
         }
     }
 
@@ -871,30 +908,6 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             Range(
                     Position(ctx.start.line, ctx.start.charPositionInLine + 1),
                     Position(ctx.stop.line, ctx.stop.charPositionInLine + 2))
-
-    class State {
-        var openMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
-        var suspendedMarkup: MutableMap<String, Deque<TAGMarkup>> = mutableMapOf()
-        var allOpenMarkup: Deque<TAGMarkup> = ArrayDeque()
-        var rootMarkupId: Long? = null
-        var eof = false
-
-        fun copy(): State {
-            val copy = State()
-            copy.openMarkup = HashMap()
-            openMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.openMarkup[k] = ArrayDeque(v) }
-            copy.suspendedMarkup = HashMap()
-            suspendedMarkup.forEach { (k: String, v: Deque<TAGMarkup>) -> copy.suspendedMarkup[k] = ArrayDeque(v) }
-            copy.allOpenMarkup = ArrayDeque(allOpenMarkup)
-            copy.rootMarkupId = rootMarkupId
-            copy.eof = eof
-            return copy
-        }
-
-        fun rootMarkupIsNotSet(): Boolean {
-            return rootMarkupId == null
-        }
-    }
 
     companion object {
         private val LOG = LoggerFactory.getLogger(TAGMLListener::class.java)

@@ -45,7 +45,7 @@ object AntlrUtils {
       if (token.type != Token.EOF) {
         val pos = token.line.toString() + ":" + token.charPositionInLine
         val text = "'" + token.text + "'"
-        val rule = lexer.ruleNames[token.type - 1]
+        val rule = lexer.vocabulary.getSymbolicName(token.type)
         val mode = lexer.modeNames[lexer._mode]
         table.addRow(pos, text, rule, mode, token)
       }
