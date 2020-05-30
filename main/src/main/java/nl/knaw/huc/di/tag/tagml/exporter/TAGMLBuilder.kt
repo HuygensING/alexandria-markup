@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.exporter;
+package nl.knaw.huc.di.tag.tagml.exporter
 
 /*-
  * #%L
@@ -20,107 +20,69 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.TAGVisitor;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.view.TAGView;
-import org.jetbrains.annotations.NotNull;
+import nl.knaw.huc.di.tag.TAGVisitor
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_END
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_START
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_END
+import nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_START
+import nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE
+import nl.knaw.huc.di.tag.tagml.TAGML.DIVERGENCE
+import nl.knaw.huc.di.tag.tagml.TAGML.DIVIDER
+import nl.knaw.huc.di.tag.tagml.TAGML.escapeRegularText
+import nl.knaw.huc.di.tag.tagml.TAGML.escapeVariantText
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.view.TAGView
 
-import java.util.List;
-import java.util.Set;
+class TAGMLBuilder : TAGVisitor {
+    var result = ""
+    var tagmlBuilder = StringBuilder()
 
-import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+    override fun setView(tagView: TAGView) {}
 
-public class TAGMLBuilder implements TAGVisitor {
-  String result = "";
-  StringBuilder tagmlBuilder = new StringBuilder();
+    override fun enterDocument(document: TAGDocument) {}
 
-  @Override
-  public void setView(final TAGView tagView) {
-  }
+    override fun exitDocument(document: TAGDocument) {
+        result = tagmlBuilder
+                .toString()
+                .replace(BRANCHES_START + BRANCH_START, DIVERGENCE)
+                .replace(BRANCH_END + BRANCH_START, DIVIDER)
+                .replace(BRANCH_END + BRANCHES_END, CONVERGENCE)
+    }
 
-  @Override
-  public void enterDocument(final TAGDocument document) {
-  }
+    override fun enterOpenTag(markup: TAGMarkup) {}
 
-  @Override
-  public void exitDocument(final TAGDocument document) {
-    result =
-        tagmlBuilder
-            .toString()
-            .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
-            .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
-            .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE);
-  }
+    override fun addAnnotation(serializedAnnotation: String) {}
 
-  @Override
-  public void enterOpenTag(final TAGMarkup markup) {
-  }
+    override fun serializeAnnotationAssigner(name: String): String {
+        TODO()
+    }
 
-  @Override
-  public void addAnnotation(String serializedAnnotation) {
-  }
+    override fun exitOpenTag(markup: TAGMarkup) {}
 
-  @Override
-  public String serializeAnnotationAssigner(String name) {
-    return null;
-  }
+    override fun exitCloseTag(markup: TAGMarkup) {}
 
-  @Override
-  public void exitOpenTag(final TAGMarkup markup) {
-  }
+    override fun exitText(text: String, inVariation: Boolean) {
+        val escapedText = if (inVariation)
+            escapeVariantText(text)
+        else
+            escapeRegularText(text)
+        tagmlBuilder.append(escapedText)
+    }
 
-  @Override
-  public void exitCloseTag(final TAGMarkup markup) {
-  }
+    override fun enterTextVariation() {}
 
-  @Override
-  public void exitText(final String text, final boolean inVariation) {
-    String escapedText =
-        inVariation ? TAGML.escapeVariantText(text) : TAGML.escapeRegularText(text);
-    tagmlBuilder.append(escapedText);
-  }
+    override fun exitTextVariation() {}
 
-  @Override
-  public void enterTextVariation() {
-  }
+    override fun setRelevantLayers(relevantLayers: Set<String>) {}
 
-  @Override
-  public void exitTextVariation() {
-  }
+    override fun serializeStringAnnotationValue(stringValue: String): String = ""
 
-  @Override
-  public void setRelevantLayers(final Set<String> relevantLayers) {
-  }
+    override fun serializeNumberAnnotationValue(numberValue: Double): String = ""
 
-  @NotNull
-  @Override
-  public String serializeStringAnnotationValue(String stringValue) {
-    return "";
-  }
+    override fun serializeBooleanAnnotationValue(booleanValue: Boolean): String = ""
 
-  @NotNull
-  @Override
-  public String serializeNumberAnnotationValue(double numberValue) {
-    return "";
-  }
+    override fun serializeListAnnotationValue(serializedItems: List<String>): String = ""
 
-  @NotNull
-  @Override
-  public String serializeBooleanAnnotationValue(boolean booleanValue) {
-    return "";
-  }
-
-  @NotNull
-  @Override
-  public String serializeListAnnotationValue(@NotNull List<String> serializedItems) {
-    return "";
-  }
-
-  @NotNull
-  @Override
-  public String serializeMapAnnotationValue(@NotNull List<String> serializedMapItems) {
-    return "";
-  }
+    override fun serializeMapAnnotationValue(serializedMapItems: List<String>): String = ""
 }
