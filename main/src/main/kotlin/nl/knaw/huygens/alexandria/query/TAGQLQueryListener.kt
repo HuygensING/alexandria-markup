@@ -173,7 +173,7 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
                 filter = Predicate { tr: TAGMarkup -> toText(tr).contains(substring) }
             }
             else -> {
-                unhandled(expr?.javaClass?.name + " expression", expr?.text)
+                unhandled(expr.javaClass.name + " expression", expr.text)
             }
         }
         return filter!!

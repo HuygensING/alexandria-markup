@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
 import java.util.stream.Collectors
 import java.util.stream.Collectors.joining
 import java.util.stream.Collectors.toList
@@ -138,12 +137,12 @@ class TAGMLExporter : TAGExporter {
             val markupIds: MutableSet<Long> = LinkedHashSet()
             val markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess).collect(toList())
             //        Collections.reverse(markupForTextNode);
-            markupForTextNode.forEach {
-                val id = it.dbId
+            for (markup in markupForTextNode) {
+                val id = markup.dbId
                 markupIds.add(id)
-                state!!.openTags.computeIfAbsent(id) { k: Long? -> toOpenTag(it, openLayers) }
-                state.closeTags.computeIfAbsent(id) { k: Long? -> toCloseTag(it) }
-                openLayers.addAll(it.layers)
+                state!!.openTags.computeIfAbsent(id) { toOpenTag(markup, openLayers) }
+                state.closeTags.computeIfAbsent(id) { toCloseTag(markup) }
+                openLayers.addAll(markup.layers)
                 if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
                     discontinuousMarkupTextNodesToHandle[id]?.decrementAndGet()
                 }
@@ -161,21 +160,19 @@ class TAGMLExporter : TAGExporter {
             val toClose: MutableList<Long> = ArrayList(state!!.openMarkupIds)
             toClose.removeAll(relevantMarkupIds)
             toClose.reverse()
-            toClose.forEach(
-                    Consumer { markupId: Long ->
-                        var closeTag = state.closeTags[markupId].toString()
-                        closeTag = addSuspendPrefixIfRequired(
-                                closeTag, markupId, discontinuousMarkupTextNodesToHandle)
-                        tagmlBuilder.append(closeTag)
-                    })
+            for (markupId: Long in toClose) {
+                var closeTag = state.closeTags[markupId].toString()
+                closeTag = addSuspendPrefixIfRequired(
+                        closeTag, markupId, discontinuousMarkupTextNodesToHandle)
+                tagmlBuilder.append(closeTag)
+            }
             val toOpen: MutableList<Long> = ArrayList(relevantMarkupIds)
             toOpen.removeAll(state.openMarkupIds)
-            toOpen.forEach(
-                    Consumer { markupId: Long ->
-                        var openTag = state.openTags[markupId].toString()
-                        openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle)
-                        tagmlBuilder.append(openTag)
-                    })
+            for (markupId: Long in toOpen) {
+                var openTag = state.openTags[markupId].toString()
+                openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle)
+                tagmlBuilder.append(openTag)
+            }
             state.openMarkupIds.removeAll(toClose)
             state.openMarkupIds.addAll(toOpen)
             if (variationState.isBranchStartNode(nodeToProcess)) {

@@ -36,7 +36,6 @@ import nl.knaw.huygens.alexandria.view.TAGView
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
 import java.util.stream.Collectors
 
 class TAGTraverser(private val store: TAGStore, private val view: TAGView, private val document: TAGDocument) {
@@ -85,34 +84,28 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
                             textVariationStates.pop()
                             variationState = textVariationStates.peek()
                         }
-                        val toClose: MutableList<Long> = ArrayList(state.openMarkupIds)
-                        toClose.removeAll(relevantMarkupIds)
-                        toClose.reverse()
-                        toClose.forEach(
-                                Consumer { markupId: Long ->
-//                                    var closeTag = state.closeTags[markupId].toString()
-//                                    closeTag = addSuspendPrefixIfRequired(
-//                                            closeTag, markupId, discontinuousMarkupTextNodesToHandle)
-                                    val markup = store.getMarkup(markupId)
-                                    tagVisitor.exitCloseTag(markup)
-                                })
-                        val toOpen: MutableList<Long> = ArrayList(relevantMarkupIds)
-                        toOpen.removeAll(state.openMarkupIds)
-                        toOpen.forEach(
-                                Consumer { markupId: Long ->
-                                    val markup = store.getMarkup(markupId)
-                                    tagVisitor.enterOpenTag(markup)
-//                                    var openTag = state.openTags[markupId].toString()
-//                                    openTag = addResumePrefixIfRequired(
-//                                            openTag, markupId, discontinuousMarkupTextNodesToHandle)
-                                    markup
-                                            .annotationStream
-                                            .forEach { a: AnnotationInfo ->
-                                                val value = serializeAnnotation(annotationFactory, a, tagVisitor)
-                                                tagVisitor.addAnnotation(value)
-                                            }
-                                    tagVisitor.exitOpenTag(markup)
-                                })
+                        val toClose: MutableList<Long> = ArrayList(state.openMarkupIds).apply {
+                            removeAll(relevantMarkupIds)
+                            reverse()
+                        }
+                        for (markupId: Long in toClose) {
+                            val markup = store.getMarkup(markupId)
+                            tagVisitor.exitCloseTag(markup)
+                        }
+                        val toOpen: MutableList<Long> = ArrayList(relevantMarkupIds).apply {
+                            removeAll(state.openMarkupIds)
+                        }
+                        for (markupId: Long in toOpen) {
+                            val markup = store.getMarkup(markupId)
+                            tagVisitor.enterOpenTag(markup)
+                            markup
+                                    .annotationStream
+                                    .forEach { a: AnnotationInfo ->
+                                        val value = serializeAnnotation(annotationFactory, a, tagVisitor)
+                                        tagVisitor.addAnnotation(value)
+                                    }
+                            tagVisitor.exitOpenTag(markup)
+                        }
                         state.openMarkupIds.removeAll(toClose)
                         state.openMarkupIds.addAll(toOpen)
                         if (variationState.isBranchStartNode(nodeToProcess)) {

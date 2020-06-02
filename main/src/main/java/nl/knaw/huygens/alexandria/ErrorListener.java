@@ -213,8 +213,8 @@ public class ErrorListener implements ANTLRErrorListener {
   @Deprecated()
   public void addError(String messageTemplate, Object... messageArgs) {
     errors.add(
-            new CustomError(
-                    new Position(1, 1), new Position(1, 1), format(messageTemplate, messageArgs)));
+        new CustomError(
+            new Position(1, 1), new Position(1, 1), format(messageTemplate, messageArgs)));
   }
 
   public void addBreakingError(
@@ -269,19 +269,19 @@ public class ErrorListener implements ANTLRErrorListener {
     }
   }
 
-  public class TAGAttemptingFullContextError extends TAGError {
+  public static class TAGAttemptingFullContextError extends TAGError {
     public TAGAttemptingFullContextError(String message) {
       super(message);
     }
   }
 
-  public class TAGContextSensitivityError extends TAGError {
+  public static class TAGContextSensitivityError extends TAGError {
     public TAGContextSensitivityError(String message) {
       super(message);
     }
   }
 
-  public class CustomError extends TAGError {
+  public static class CustomError extends TAGError {
     public final Range range;
 
     public CustomError(Position startPos, Position endPos, String message) {

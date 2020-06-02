@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
 import java.util.stream.Collectors
 
 class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) : AbstractTAGMLListener(errorListener) {
@@ -69,12 +68,9 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     private val markupRanges: Map<Long, RangePair>
         get() {
             val markupRangeMap: MutableMap<Long, RangePair> = HashMap()
-            openTagRange
-                    .keys
-                    .forEach(
-                            Consumer { markupId: Long ->
-                                markupRangeMap[markupId] = RangePair(openTagRange[markupId], closeTagRange[markupId])
-                            })
+            for (markupId: Long in openTagRange.keys) {
+                markupRangeMap[markupId] = RangePair(openTagRange[markupId], closeTagRange[markupId])
+            }
             return markupRangeMap
         }
 
@@ -97,9 +93,8 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             return copy
         }
 
-        fun rootMarkupIsNotSet(): Boolean {
-            return rootMarkupId == null
-        }
+        fun rootMarkupIsNotSet(): Boolean =
+                rootMarkupId == null
     }
 
     class TextVariationState {
@@ -111,13 +106,13 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         private var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = mutableMapOf()
         var branch = 0
         fun addOpenMarkup(markup: TAGMarkup) {
-            openMarkup.computeIfAbsent(branch) { ArrayList() }
-            openMarkup[branch]!!.add(markup)
+            openMarkup.getOrPut(branch) { mutableListOf() }
+                    .add(markup)
         }
 
         fun removeOpenMarkup(markup: TAGMarkup?) {
-            openMarkup.computeIfAbsent(branch) { ArrayList() }
-            openMarkup[branch]!!.remove(markup)
+            openMarkup.getOrPut(branch) { mutableListOf() }
+                    .remove(markup)
         }
     }
 
@@ -240,8 +235,9 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             val markupName = markupNameContext.name().text
             //      LOG.debug("startTag.markupName=<{}>", markupName);
             checkNameSpace(ctx, markupName)
-            ctx.annotation()
-                    .forEach(Consumer { annotation: AnnotationContext -> LOG.debug("  startTag.annotation={{}}", annotation.text) })
+            for (annotation: AnnotationContext in ctx.annotation()) {
+                LOG.debug("  startTag.annotation={{}}", annotation.text)
+            }
             val prefix = markupNameContext.prefix()
             val optional = prefix != null && prefix.text == OPTIONAL_PREFIX
             val resume = prefix != null && prefix.text == RESUME_PREFIX
@@ -255,31 +251,27 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
                 addDefaultLayer(markup, layers)
                 state.rootMarkupId = markup.dbId
             }
-            layerIds.forEach(
-                    Consumer { layerId: String ->
-                        if (layerId.contains("+")) {
-                            val parts = layerId.split("\\+".toRegex()).toTypedArray()
-                            val parentLayer = parts[0]
-                            val newLayerId = parts[1]
-                            document.addLayer(newLayerId, markup, parentLayer)
-                            //          layers.add(parentLayer);
-                            layers.add(newLayerId)
-                        } else if (!(firstTag && DEFAULT_LAYER == layerId)) {
-                            checkLayerWasAdded(ctx, layerId)
-                            checkLayerIsOpen(ctx, layerId)
-                            document.openMarkupInLayer(markup, layerId)
-                            layers.add(layerId)
-                        }
-                    })
+            for (layerId: String in layerIds) {
+                if (layerId.contains("+")) {
+                    val parts = layerId.split("\\+".toRegex()).toTypedArray()
+                    val parentLayer = parts[0]
+                    val newLayerId = parts[1]
+                    document.addLayer(newLayerId, markup, parentLayer)
+                    //          layers.add(parentLayer);
+                    layers.add(newLayerId)
+                } else if (!(firstTag && DEFAULT_LAYER == layerId)) {
+                    checkLayerWasAdded(ctx, layerId)
+                    checkLayerIsOpen(ctx, layerId)
+                    document.openMarkupInLayer(markup, layerId)
+                    layers.add(layerId)
+                }
+            }
             markup.addAllLayers(layers)
             addSuffix(markupNameContext, markup)
-            markup
-                    .layers
-                    .forEach(
-                            Consumer { l: String ->
-                                state.openMarkup.putIfAbsent(l, ArrayDeque())
-                                state.openMarkup[l]!!.push(markup)
-                            })
+            for (layer in markup.layers) {
+                state.openMarkup.getOrPut(layer) { ArrayDeque() }
+                        .push(markup)
+            }
             currentTextVariationState().addOpenMarkup(markup)
             store.persist(markup.dto)
         }
@@ -300,7 +292,36 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     }
 
     override fun exitHeader(ctx: HeaderContext) {
+        parseHeader(ctx)
+    }
+
+    private fun parseHeader(ctx: HeaderContext) {
         document.rawHeader = ctx.text
+        val headerMap = mutableMapOf<String, String>()
+        for (pair in ctx.json_pair()) {
+            val field = pair.JSON_STRING().text
+            val value = pair.json_value()
+            when (field) {
+                ":ontology" -> parseOntology(value)
+            }
+            headerMap[field] = value.text
+//            when (pair.json_value()) {
+//                is Json_arrContext -> TODO()
+//                is Json_objContext -> TODO()
+//                is Json_pairContext -> TODO()
+//                is Json_valueContext -> TODO()
+//            }
+        }
+        LOG.info("header={}", headerMap)
+    }
+
+    private fun parseOntology(value: Json_valueContext) {
+        if (value is Json_objContext) {
+            val pairs = value.json_pair()
+
+        } else {
+            TODO("invalid format")
+        }
     }
 
     private fun addSuffix(markupNameContext: MarkupNameContext, markup: TAGMarkup) {
@@ -328,22 +349,20 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         if (tagNameIsValid(ctx)) {
 //            val markupName = ctx.name().text
             //      LOG.debug("milestone.markupName=<{}>", markupName);
-            ctx.annotation()
-                    .forEach(Consumer { annotation: AnnotationContext ->
-                        LOG.debug("milestone.annotation={{}}", annotation.text)
-                    })
+            for (annotation: AnnotationContext in ctx.annotation()) {
+                LOG.debug("milestone.annotation={{}}", annotation.text)
+            }
             val layers = extractLayerInfo(ctx.layerInfo())
             val tn = store.createTextNode("")
             addAndConnectToMarkup(tn)
             //      logTextNode(tn);
             val markup = addMarkup(ctx.name().text, ctx.annotation(), ctx)
             markup.addAllLayers(layers)
-            layers.forEach(
-                    Consumer { layerName: String ->
-                        linkTextToMarkupForLayer(tn, markup, layerName)
-                        document.openMarkupInLayer(markup, layerName)
-                        document.closeMarkupInLayer(markup, layerName)
-                    })
+            for (layerName: String in layers) {
+                linkTextToMarkupForLayer(tn, markup, layerName)
+                document.openMarkupInLayer(markup, layerName)
+                document.closeMarkupInLayer(markup, layerName)
+            }
             store.persist(markup.dto)
         }
     }
@@ -429,14 +448,10 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         document.addMarkup(markup)
         markup.addAllLayers(layers)
         state.allOpenMarkup.push(markup)
-        markup
-                .layers
-                .forEach(
-                        Consumer { l: String ->
-                            document.openMarkupInLayer(markup, l)
-                            state.openMarkup.putIfAbsent(l, ArrayDeque())
-                            state.openMarkup[l]!!.push(markup)
-                        })
+        for (layer in markup.layers) {
+            document.openMarkupInLayer(markup, layer)
+            state.openMarkup.getOrPut(layer) { ArrayDeque() }.push(markup)
+        }
         currentTextVariationState().addOpenMarkup(markup)
         store.persist(markup.dto)
         return markup
@@ -455,8 +470,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     private fun closeTextVariationMarkup(extendedMarkupName: String, layers: Set<String>) {
         removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup)
         for (l in layers) {
-            state.openMarkup.putIfAbsent(l, ArrayDeque())
-            val markupStack = state.openMarkup[l]!!
+            val markupStack = state.openMarkup.getOrPut(l) { ArrayDeque() }
             val markup = removeFromMarkupStack2(extendedMarkupName, markupStack)
             document.closeMarkupInLayer(markup, l)
         }
@@ -592,8 +606,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         removeFromMarkupStack2(extendedMarkupName, state.allOpenMarkup)
         var markup: TAGMarkup? = null
         for (l in layers) {
-            state.openMarkup.putIfAbsent(l, ArrayDeque())
-            val markupStack = state.openMarkup[l]!!
+            val markupStack = state.openMarkup.getOrPut(l) { ArrayDeque() }
             markup = removeFromMarkupStack(extendedMarkupName, markupStack)
             if (markup == null) {
                 val emn = AtomicReference(extendedMarkupName)
@@ -640,12 +653,11 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
             val prefixNodeText = prefixNode.text
             if (prefixNodeText == OPTIONAL_PREFIX) {
                 // optional
-                // TODO
+//                TODO()
             } else if (prefixNodeText == SUSPEND_PREFIX) {
                 // suspend
                 for (l in layers) {
-                    state.suspendedMarkup.putIfAbsent(l, ArrayDeque())
-                    state.suspendedMarkup[l]!!.add(markup)
+                    state.suspendedMarkup.getOrPut(l) { ArrayDeque() }.add(markup)
                 }
             }
         }
@@ -674,7 +686,9 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
     }
 
     private fun addAnnotations(annotationContexts: List<AnnotationContext>, markup: TAGMarkup) {
-        annotationContexts.forEach(Consumer { actx: AnnotationContext -> addAnnotation(markup, actx) })
+        for (actx: AnnotationContext in annotationContexts) {
+            addAnnotation(markup, actx)
+        }
     }
 
     private fun addAnnotation(markup: TAGMarkup, actx: AnnotationContext) {
