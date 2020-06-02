@@ -49,20 +49,23 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Consumer
 import java.util.stream.Collectors
+import java.util.stream.Collectors.joining
+import java.util.stream.Collectors.toList
 
 // TODO: only output layer info on end-tag when needed
 // TODO: only show layer info as defined in view
 class TAGMLExporter : TAGExporter {
     private var annotationFactory: AnnotationFactory? = null
 
-    constructor(store: TAGStore?) : super(store) {}
-    constructor(store: TAGStore?, view: TAGView?) : super(store, view) {}
+    constructor(store: TAGStore) : super(store) {}
+    constructor(store: TAGStore, view: TAGView) : super(store, view) {}
 
     internal class ExporterState {
-        var openMarkupIds: Deque<Long?> = ArrayDeque()
-        var openTags: MutableMap<Long?, StringBuilder> = LinkedHashMap()
-        var closeTags: MutableMap<Long?, StringBuilder> = LinkedHashMap()
+        var openMarkupIds: Deque<Long> = ArrayDeque()
+        var openTags: MutableMap<Long, StringBuilder> = LinkedHashMap()
+        var closeTags: MutableMap<Long, StringBuilder> = LinkedHashMap()
         var lastTextNodeId: Long? = null
+
         fun copy(): ExporterState {
             val copy = ExporterState()
             copy.openMarkupIds = openMarkupIds
@@ -75,7 +78,7 @@ class TAGMLExporter : TAGExporter {
 
     fun asTAGML(document: TAGDocument): String {
         annotationFactory = AnnotationFactory(store, document.dto.textGraph)
-        val discontinuousMarkupTextNodesToHandle: MutableMap<Long?, AtomicInteger> = HashMap()
+        val discontinuousMarkupTextNodesToHandle: MutableMap<Long, AtomicInteger> = HashMap()
         document
                 .markupStream
                 .filter { obj: TAGMarkup -> obj.isDiscontinuous }
@@ -103,16 +106,16 @@ class TAGMLExporter : TAGExporter {
                             stateRef,
                             tagmlBuilder)
                 }
-        while (!textVariationStates.isEmpty()) {
+        while (textVariationStates.isNotEmpty()) {
             val textVariationState = textVariationStates.pop()
             if (textVariationState.inVariation()) {
                 tagmlBuilder.append(CONVERGENCE)
             }
         }
-        val state = stateRef.get()
-        state!!.openMarkupIds
+        val state = stateRef.get()!!
+        state.openMarkupIds
                 .descendingIterator()
-                .forEachRemaining { markupId: Long? -> tagmlBuilder.append(state.closeTags[markupId]) }
+                .forEachRemaining { markupId: Long -> tagmlBuilder.append(state.closeTags[markupId]) }
         return tagmlBuilder
                 .toString()
                 .replace(BRANCHES_START + BRANCH_START, DIVERGENCE)
@@ -123,7 +126,7 @@ class TAGMLExporter : TAGExporter {
     private fun handleTextNode(
             nodeToProcess: TAGTextNode,
             document: TAGDocument,
-            discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>,
+            discontinuousMarkupTextNodesToHandle: Map<Long, AtomicInteger>,
             textVariationStates: Deque<TextVariationState>,
             openLayers: MutableSet<String>,
             processedNodes: MutableSet<TAGTextNode>,
@@ -133,20 +136,19 @@ class TAGMLExporter : TAGExporter {
         if (!processedNodes.contains(nodeToProcess)) {
             val state = stateRef.get()
             val markupIds: MutableSet<Long> = LinkedHashSet()
-            val markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess).collect(Collectors.toList())
+            val markupForTextNode = document.getMarkupStreamForTextNode(nodeToProcess).collect(toList())
             //        Collections.reverse(markupForTextNode);
-            markupForTextNode.forEach(
-                    Consumer { mw: TAGMarkup ->
-                        val id = mw.dbId
-                        markupIds.add(id)
-                        state!!.openTags.computeIfAbsent(id) { k: Long? -> toOpenTag(mw, openLayers) }
-                        state.closeTags.computeIfAbsent(id) { k: Long? -> toCloseTag(mw) }
-                        openLayers.addAll(mw.layers)
-                        if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
-                            discontinuousMarkupTextNodesToHandle[id]!!.decrementAndGet()
-                        }
-                    })
-            val relevantMarkupIds: Set<Long?> = view.filterRelevantMarkup(markupIds)
+            markupForTextNode.forEach {
+                val id = it.dbId
+                markupIds.add(id)
+                state!!.openTags.computeIfAbsent(id) { k: Long? -> toOpenTag(it, openLayers) }
+                state.closeTags.computeIfAbsent(id) { k: Long? -> toCloseTag(it) }
+                openLayers.addAll(it.layers)
+                if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
+                    discontinuousMarkupTextNodesToHandle[id]?.decrementAndGet()
+                }
+            }
+            val relevantMarkupIds: Set<Long> = view.filterRelevantMarkup(markupIds)
             if (needsDivider(nodeToProcess)) {
                 tagmlBuilder.append(DIVIDER)
             }
@@ -156,20 +158,20 @@ class TAGMLExporter : TAGExporter {
                 textVariationStates.pop()
                 variationState = textVariationStates.peek()
             }
-            val toClose: MutableList<Long?> = ArrayList(state!!.openMarkupIds)
+            val toClose: MutableList<Long> = ArrayList(state!!.openMarkupIds)
             toClose.removeAll(relevantMarkupIds)
             toClose.reverse()
             toClose.forEach(
-                    Consumer { markupId: Long? ->
+                    Consumer { markupId: Long ->
                         var closeTag = state.closeTags[markupId].toString()
                         closeTag = addSuspendPrefixIfRequired(
                                 closeTag, markupId, discontinuousMarkupTextNodesToHandle)
                         tagmlBuilder.append(closeTag)
                     })
-            val toOpen: MutableList<Long?> = ArrayList(relevantMarkupIds)
+            val toOpen: MutableList<Long> = ArrayList(relevantMarkupIds)
             toOpen.removeAll(state.openMarkupIds)
             toOpen.forEach(
-                    Consumer { markupId: Long? ->
+                    Consumer { markupId: Long ->
                         var openTag = state.openTags[markupId].toString()
                         openTag = addResumePrefixIfRequired(openTag, markupId, discontinuousMarkupTextNodesToHandle)
                         tagmlBuilder.append(openTag)
@@ -192,32 +194,32 @@ class TAGMLExporter : TAGExporter {
     }
 
     private fun addResumePrefixIfRequired(
-            openTag: String,
-            markupId: Long?,
-            discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>): String {
-        var openTag = openTag
+            openTagIn: String,
+            markupId: Long,
+            discontinuousMarkupTextNodesToHandle: Map<Long, AtomicInteger>): String {
+        var openTagOut = openTagIn
         if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
             val textNodesToHandle = discontinuousMarkupTextNodesToHandle[markupId]!!.get()
             val markup = store.getMarkup(markupId)
             if (textNodesToHandle < markup.textNodeCount - 1) {
-                openTag = openTag.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX)
+                openTagOut = openTagOut.replace(OPEN_TAG_STARTCHAR, OPEN_TAG_STARTCHAR + RESUME_PREFIX)
             }
         }
-        return openTag
+        return openTagOut
     }
 
     private fun addSuspendPrefixIfRequired(
-            closeTag: String,
-            markupId: Long?,
-            discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>): String {
-        var closeTag = closeTag
+            closeTagIn: String,
+            markupId: Long,
+            discontinuousMarkupTextNodesToHandle: Map<Long, AtomicInteger>): String {
+        var closeTagOut = closeTagIn
         if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
             val textNodesToHandle = discontinuousMarkupTextNodesToHandle[markupId]!!.get()
             if (textNodesToHandle > 0) {
-                closeTag = closeTag.replace(CLOSE_TAG_STARTCHAR, CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX)
+                closeTagOut = closeTagOut.replace(CLOSE_TAG_STARTCHAR, CLOSE_TAG_STARTCHAR + SUSPEND_PREFIX)
             }
         }
-        return closeTag
+        return closeTagOut
     }
 
     private fun needsDivider(textNode: TAGTextNode): Boolean {
@@ -239,8 +241,9 @@ class TAGMLExporter : TAGExporter {
 
     private fun toOpenTag(markup: TAGMarkup, openLayers: Set<String>): StringBuilder {
         val resume = if (markup.isResumed) RESUME_PREFIX else ""
-        val newLayers: MutableSet<String> = HashSet(markup.layers)
-        newLayers.removeAll(openLayers)
+        val newLayers: MutableSet<String> = HashSet(markup.layers).apply {
+            removeAll(openLayers)
+        }
         val tagBuilder: StringBuilder = StringBuilder(OPEN_TAG_STARTCHAR)
                 .append(resume)
                 .append(markup.getExtendedTag(newLayers))
@@ -271,13 +274,13 @@ class TAGMLExporter : TAGExporter {
             AnnotationType.List -> {
                 stringBuilder.append("[")
                 val listValue = annotationFactory!!.getListValue(a)
-                stringBuilder.append(listValue.stream().map { a: AnnotationInfo -> toTAGML(a) }.collect(Collectors.joining(",")))
+                stringBuilder.append(listValue.stream().map { a: AnnotationInfo -> toTAGML(a) }.collect(joining(",")))
                 stringBuilder.append("]")
             }
             AnnotationType.Map -> {
                 stringBuilder.append("{")
                 val mapValue = annotationFactory!!.getMapValue(a)
-                stringBuilder.append(mapValue.stream().map { a: AnnotationInfo -> toTAGML(a) }.collect(Collectors.joining(" ")))
+                stringBuilder.append(mapValue.stream().map { a: AnnotationInfo -> toTAGML(a) }.collect(joining(" ")))
                 stringBuilder.append("}")
             }
             AnnotationType.Reference -> {

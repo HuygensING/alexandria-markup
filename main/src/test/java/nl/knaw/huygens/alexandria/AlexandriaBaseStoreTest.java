@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
-  public static final String DUMMY_HEADER = "{{}}\n";
+  public static final String DUMMY_HEADER = "[{}]\n";
 
   private static final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
   private static Path tmpDir;

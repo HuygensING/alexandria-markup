@@ -48,7 +48,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_minimal_header() {
         val tagML = ("""
-            |{{}}
+            |[{}]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
@@ -60,14 +60,14 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_medium_header() {
         val tagML = ("""
-            |{{
+            |[{
             |  ":authors": [ "me", "you", "them" ],
             |  "title": "test",
             |  "version": 0.1,
             |  "tags": {
             |    "tagml": "this is the root markup"
             |  }
-            |}}
+            |}]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
@@ -79,9 +79,9 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_faulty_header() {
         val tagML = ("""
-            |{{
+            |[{
             |  you can't just write stuff here!
-            |}}
+            |}]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction {
@@ -116,7 +116,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_large_header() {
         val tagML = ("""
-            |{{
+            |[{
             |  ":ontology": {
             |    "root": "excerpt",
             |    "elements": {
@@ -230,7 +230,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             |  ":authors": [ "me", "you", "them" ],
             |  "title": "test",
             |  "version": 0.2
-            |}}
+            |}]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
