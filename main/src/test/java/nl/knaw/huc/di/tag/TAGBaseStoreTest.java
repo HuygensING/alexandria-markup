@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
-  public static final String DUMMY_HEADER = "[{}]\n";
+  public static final String DUMMY_HEADER = "[!{}!]\n";
 
   private static Path tmpDir;
   DotFactory dotFactory = new DotFactory();

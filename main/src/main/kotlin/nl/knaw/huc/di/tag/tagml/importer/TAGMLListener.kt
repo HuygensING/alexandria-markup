@@ -299,10 +299,11 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         document.rawHeader = ctx.text
         val headerMap = mutableMapOf<String, String>()
         for (pair in ctx.json_pair()) {
-            val field = pair.JSON_STRING().text
+            val field = pair.stringValue()
             val value = pair.json_value()
             when (field) {
                 ":ontology" -> parseOntology(value)
+                ":namespaces" -> parseNameSpaces(value)
             }
             headerMap[field] = value.text
 //            when (pair.json_value()) {
@@ -315,12 +316,25 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener?) 
         LOG.info("header={}", headerMap)
     }
 
+    private fun parseNameSpaces(value: Json_valueContext) {
+        value.json_obj().json_pair().forEach {
+            namespaces[it.stringValue()] = it.json_value().stringValue()
+        }
+    }
+
+    private fun Json_pairContext.stringValue() =
+            this.JSON_STRING().text.replace("\"", "")
+
+    private fun Json_valueContext.stringValue() =
+            this.JSON_STRING().text.replace("\"", "")
+
     private fun parseOntology(value: Json_valueContext) {
-        if (value is Json_objContext) {
-            val pairs = value.json_pair()
+        val ontologyJsonObject = value.json_obj()
+        if (ontologyJsonObject != null) {
+            val pairs = value.json_obj().json_pair()
 
         } else {
-            TODO("invalid format")
+            TODO("invalid format: ${value.javaClass}")
         }
     }
 

@@ -1,4 +1,4 @@
-[{
-  ":namespaces": [ { "p": "http://tag.com/poetry" } ]
-}]
+[!{
+  ":namespaces": {"p": "http://tag.com/poetry"}
+}!]
 [p:poem>Roses are red, .....<p:poem]

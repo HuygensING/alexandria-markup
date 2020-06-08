@@ -48,40 +48,59 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_minimal_header() {
         val tagML = ("""
-            |[{}]
+            |[!{}!]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assertThat(document.rawHeader).isEqualTo("[!{}!]")
+        }
+    }
+
+    @Test
+    fun test_namespaces_in_header() {
+        val tagML = ("""
+            |[!{
+            |    ":namespaces": {
+            |       "a": "http://example.org/a",
+            |       "b": "http://example.org/b"
+            |    }
+            |}!]
+            |[a:tagml>[b:b>body<b:b]<a:tagml]
+            |""".trimMargin())
+        runInStoreTransaction { store: TAGStore ->
+            val document = parseTAGML(tagML, store)
+            assertThat(document.namespaces).isEqualTo(mapOf(
+                    "a" to "http://example.org/a",
+                    "b" to "http://example.org/b"
+            ))
         }
     }
 
     @Test
     fun test_medium_header() {
         val tagML = ("""
-            |[{
+            |[!{
             |  ":authors": [ "me", "you", "them" ],
             |  "title": "test",
             |  "version": 0.1,
             |  "tags": {
             |    "tagml": "this is the root markup"
             |  }
-            |}]
+            |}!]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
         }
     }
 
     @Test
     fun test_faulty_header() {
         val tagML = ("""
-            |[{
+            |[!{
             |  you can't just write stuff here!
-            |}]
+            |}!]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction {
@@ -116,7 +135,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     @Test
     fun test_large_header() {
         val tagML = ("""
-            |[{
+            |[!{
             |  ":ontology": {
             |    "root": "excerpt",
             |    "elements": {
@@ -230,12 +249,12 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             |  ":authors": [ "me", "you", "them" ],
             |  "title": "test",
             |  "version": 0.2
-            |}]
+            |}!]
             |[tagml>body<tagml]
             |""".trimMargin())
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -273,7 +292,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "<root]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             testRDFConversion(document)
         }
     }
@@ -286,7 +305,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "<a]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             testRDFConversion(document)
         }
     }
@@ -302,7 +321,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             <root]""".trimIndent()
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -316,7 +335,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             <root]""".trimIndent()
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -329,7 +348,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             val tvf = TAGViewFactory(store)
             val tagView = tvf.fromJsonString(view)
             val document = store.runInTransaction<TAGDocument> { parseTAGML(tagML, store) }
-            assertThat(document).isNotNull()
+            assert(document != null)
 
             store.runInTransaction {
                 val exporter = TAGMLExporter(store, tagView)
@@ -351,7 +370,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             <excerpt]""".trimIndent()
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -378,7 +397,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             """.trimIndent()
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -404,7 +423,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             """.trimIndent()
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -451,7 +470,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[tagml|+A>Some text<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -470,7 +489,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[tagml|+A>[p|A>[p|A>Some text<p]<p]<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
         }
     }
 
@@ -479,7 +498,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[line>The rain in Spain falls mainly on the plain.<line]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(textNodeSketch("The rain in Spain falls mainly on the plain."))
             assertThat(document).hasMarkupMatching(markupSketch("line"))
@@ -503,7 +522,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasTextNodesMatching(
                     textNodeSketch(
                             "In regular text, <, [ and \\ need to be escaped, |, !, \", and ' don't."))
@@ -519,7 +538,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped|!, \" and ' don't|>.<t]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("In text in between textVariation tags, "),  //          textDivergenceSketch(),
@@ -543,7 +562,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     fun testMissingOpenTagThrowsTAGMLSyntaxError() {
         val tagML = DUMMY_HEADER + "on the plain.<line]"
         val expectedErrors = """
-            line 1:5 : No text allowed here, the root markup must be started first.
+            line 1:7 : No text allowed here, the root markup must be started first.
             parsing aborted!
             """.trimIndent()
         parseWithExpectedErrors(tagML, expectedErrors)
@@ -595,7 +614,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         // [name|N>Kim<name|N]<b|B]<line|A,B,N]";
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("The rain in "),
@@ -636,7 +655,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[! before !][a>Ah![! within !]<a][! after !]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasTextNodesMatching(textNodeSketch("Ah!"))
             assertThat(document).hasMarkupMatching(markupSketch("a"))
 
@@ -658,7 +677,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "[!ns a http://tag.com/a][a:a>Ah!<a:a]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasTextNodesMatching(textNodeSketch("Ah!"))
             assertThat(document).hasMarkupMatching(markupSketch("a:a"))
 
@@ -680,7 +699,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<b:b]<a:a]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasTextNodesMatching(textNodeSketch("Ah!"))
             assertThat(document).hasMarkupMatching(markupSketch("a:a"), markupSketch("b:b"))
 
@@ -701,7 +720,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[t>This is a <|lame|dope|> test!<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("This is a "),
@@ -728,7 +747,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[t>This is a [space chars=10] test!<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("This is a "),
@@ -757,7 +776,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[x>[t>This is<-t], he said, [+t>a test!<t]<x]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("This is"),
@@ -791,7 +810,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "[x>When [t>Could<-t] can [+t>you<-t] I [+t>stop<-t] say [+t>interrupting<-t] something? [+t>me?<t]<x]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasMarkupMatching(markupSketch("t"))
 
             val markups = document.markupStream.collect(toList())
@@ -844,7 +863,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[t>This [x>is <|a failing|an excellent|><x] test<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
 
             val tagTextNodes = document.textNodeStream.collect(toList())
             assertThat(tagTextNodes)
@@ -922,7 +941,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     //        " man <b] is in need of a maid.<text]";
     //    runInStoreTransaction(store -> {
     //      TAGDocument document = parseTAGML(tagML);
-    //      assertThat(document).isNotNull()();
+    //      assert(document != null)();
     //      assertThat(document).hasTextNodesMatching(
     //          textNodeSketch("It is a truth universally acknowledged that every "),
     //          textNodeSketch("young "),
@@ -949,7 +968,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + " [b>man<b] is in need of a maid.<text]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("It is a truth universally acknowledged that every "),
@@ -1011,7 +1030,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         // thought Alice [q>\"<add|A]without pictures or conversation?<q]<x]";
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("and what is the use of a book"),
@@ -1029,7 +1048,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[t>bla <|\\||!|> bla<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("bla "),
@@ -1045,7 +1064,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[t>this is [?del>always<?del] optional<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("this is "),
@@ -1071,7 +1090,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("word1 "),
@@ -1107,7 +1126,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
                 + "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]")
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document)
                     .hasTextNodesMatching(
                             textNodeSketch("word1 "),
@@ -1140,7 +1159,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         val tagML = "$DUMMY_HEADER[markup a='string' b=\"string\">text<markup]"
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
-            assertThat(document).isNotNull()
+            assert(document != null)
             assertThat(document).hasTextNodesMatching(textNodeSketch("text"))
             assertThat(document).hasMarkupMatching(markupSketch("markup"))
 
@@ -1166,7 +1185,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = parseTAGML(tagML, store)
-                assertThat(document).isNotNull()
+                assert(document != null)
                 assertThat(document).hasTextNodesMatching(textNodeSketch("text"))
                 assertThat(document).hasMarkupMatching(markupSketch("markup"))
 
@@ -1202,7 +1221,7 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
     fun testJustTextIsNotValidTAGML() {
         val tagML = DUMMY_HEADER + "This is not valid TAGML"
         val expectedErrors = """
-            line 1:5 : No text allowed here, the root markup must be started first.
+            line 1:7 : No text allowed here, the root markup must be started first.
             parsing aborted!
             """.trimIndent()
         parseWithExpectedErrors(tagML, expectedErrors)
