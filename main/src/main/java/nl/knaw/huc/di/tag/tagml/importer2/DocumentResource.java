@@ -25,7 +25,7 @@ import org.apache.jena.rdf.model.*;
 
 public class DocumentResource implements Resource {
 
-  private Resource delegate;
+  private final Resource delegate;
 
   DocumentResource(Resource resource) {
     delegate = resource;
@@ -61,6 +61,11 @@ public class DocumentResource implements Resource {
   @Override
   public String getURI() {
     return delegate.getURI();
+  }
+
+  @Override
+  public Statement getStmtTerm() {
+    return delegate.getStmtTerm();
   }
 
   @Override
@@ -164,7 +169,8 @@ public class DocumentResource implements Resource {
   }
 
   @Override
-  public Resource addProperty(final Property p, final String lexicalForm, final RDFDatatype datatype) {
+  public Resource addProperty(
+      final Property p, final String lexicalForm, final RDFDatatype datatype) {
     return delegate.addProperty(p, lexicalForm, datatype);
   }
 
@@ -274,6 +280,11 @@ public class DocumentResource implements Resource {
   }
 
   @Override
+  public boolean isStmtResource() {
+    return delegate.isStmtResource();
+  }
+
+  @Override
   public <T extends RDFNode> T as(final Class<T> view) {
     return delegate.as(view);
   }
@@ -307,5 +318,4 @@ public class DocumentResource implements Resource {
   public Node asNode() {
     return delegate.asNode();
   }
-
 }

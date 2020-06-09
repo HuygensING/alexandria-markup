@@ -27,7 +27,7 @@ public class TextResource implements Resource {
 
   private String resourceId;
   private String text;
-  private Resource delegate;
+  private final Resource delegate;
 
   TextResource(Resource resource) {
     delegate = resource;
@@ -69,6 +69,11 @@ public class TextResource implements Resource {
   @Override
   public String getURI() {
     return delegate.getURI();
+  }
+
+  @Override
+  public Statement getStmtTerm() {
+    return delegate.getStmtTerm();
   }
 
   @Override
@@ -172,7 +177,8 @@ public class TextResource implements Resource {
   }
 
   @Override
-  public Resource addProperty(final Property p, final String lexicalForm, final RDFDatatype datatype) {
+  public Resource addProperty(
+      final Property p, final String lexicalForm, final RDFDatatype datatype) {
     return delegate.addProperty(p, lexicalForm, datatype);
   }
 
@@ -282,6 +288,11 @@ public class TextResource implements Resource {
   }
 
   @Override
+  public boolean isStmtResource() {
+    return delegate.isStmtResource();
+  }
+
+  @Override
   public <T extends RDFNode> T as(final Class<T> view) {
     return delegate.as(view);
   }
@@ -315,5 +326,4 @@ public class TextResource implements Resource {
   public Node asNode() {
     return delegate.asNode();
   }
-
 }

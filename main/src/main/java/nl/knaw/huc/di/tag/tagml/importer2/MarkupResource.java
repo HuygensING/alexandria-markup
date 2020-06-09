@@ -31,7 +31,7 @@ public class MarkupResource implements Resource {
   private boolean isDiscontinuous;
   private String tag;
 
-  private Resource delegate;
+  private final Resource delegate;
 
   MarkupResource(Resource resource) {
     this.delegate = resource;
@@ -110,6 +110,11 @@ public class MarkupResource implements Resource {
   @Override
   public String getURI() {
     return delegate.getURI();
+  }
+
+  @Override
+  public Statement getStmtTerm() {
+    return delegate.getStmtTerm();
   }
 
   @Override
@@ -213,7 +218,8 @@ public class MarkupResource implements Resource {
   }
 
   @Override
-  public Resource addProperty(final Property p, final String lexicalForm, final RDFDatatype datatype) {
+  public Resource addProperty(
+      final Property p, final String lexicalForm, final RDFDatatype datatype) {
     return delegate.addProperty(p, lexicalForm, datatype);
   }
 
@@ -320,6 +326,11 @@ public class MarkupResource implements Resource {
   @Override
   public boolean isResource() {
     return delegate.isResource();
+  }
+
+  @Override
+  public boolean isStmtResource() {
+    return delegate.isStmtResource();
   }
 
   @Override
