@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
@@ -71,10 +72,14 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     }
   }
 
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-    System.out.println(dotFactory.toDot(document, input));
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+  private static void rmTmpDir(final Path tmpPath) throws IOException {
+    Files.walk(tmpPath).map(Path::toFile).forEach(File::deleteOnExit);
+  }
+
+  public <A> A runInStoreTransaction(Function<TAGStore, A> storeFunction) {
+    try (TAGStore store = getStore()) {
+      return store.runInTransaction(() -> storeFunction.apply(store));
+    }
   }
 
   private static Path mkTmpDir() throws IOException {
@@ -86,10 +91,11 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     return tmpPath;
   }
 
-  private static void rmTmpDir(final Path tmpPath) throws IOException {
-    Files.walk(tmpPath)
-        .map(Path::toFile)
-        .forEach(File::deleteOnExit);
+  protected void logDocumentGraph(final TAGDocument document, final String input) {
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(dotFactory.toDot(document, input));
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
   }
-
 }

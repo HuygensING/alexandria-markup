@@ -54,628 +54,608 @@ import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
 public class TAGMLParserTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
-//  private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
+  //  private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
 
   @Test
   public void testTagWithReferenceParses() {
     String input = "[tagml pers->pers01>Some text<tagml]";
-    runInStore(store -> {
-      AnnotationInfo pers = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml")
-        );
-        assertThat(document).hasTextNodesMatching(
-            textNodeSketch("Some text")
-        );
-        assertThat(document.getLayerNames()).containsExactly("");
+    runInStore(
+        store -> {
+          AnnotationInfo pers =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document).hasMarkupMatching(markupSketch("tagml"));
+                    assertThat(document).hasTextNodesMatching(textNodeSketch("Some text"));
+                    assertThat(document.getLayerNames()).containsExactly("");
 
-        TAGMarkup tagmlMarkup = document.getMarkupStream().findFirst().get();
-        assertThat(tagmlMarkup).hasTag("tagml");
+                    TAGMarkup tagmlMarkup = document.getMarkupStream().findFirst().get();
+                    assertThat(tagmlMarkup).hasTag("tagml");
 
-        AnnotationInfo persInfo = tagmlMarkup.getAnnotation("pers");
-        assertThat(persInfo).isReference();
-        return persInfo;
-      });
+                    AnnotationInfo persInfo = tagmlMarkup.getAnnotation("pers");
+                    assertThat(persInfo).isReference();
+                    return persInfo;
+                  });
 
-      store.runInTransaction(() -> {
-        String persValue = store.getReferenceValue(pers.getNodeId()).getValue();
-        assertThat(persValue).isEqualTo("pers01");
-      });
-    });
+          store.runInTransaction(
+              () -> {
+                String persValue = store.getReferenceValue(pers.getNodeId()).getValue();
+                assertThat(persValue).isEqualTo("pers01");
+              });
+        });
   }
 
   @Test // Rd-205
   public void testDefaultLayerIsAlwaysOpen() {
     String input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("x"),
-          markupSketch("t"),
-          markupSketch("t")
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("simple"),
-          textNodeSketch(" "),
-          textNodeSketch("text"),
-          textNodeSketch(" "),
-          textNodeSketch("test")
-      );
-      assertThat(document.getLayerNames()).containsExactly("", "A");
-    });
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(
+                  markupSketch("tagml"), markupSketch("x"), markupSketch("t"), markupSketch("t"));
+          assertThat(document)
+              .hasTextNodesMatching(
+                  textNodeSketch("simple"),
+                  textNodeSketch(" "),
+                  textNodeSketch("text"),
+                  textNodeSketch(" "),
+                  textNodeSketch("test"));
+          assertThat(document.getLayerNames()).containsExactly("", "A");
+        });
   }
 
   @Test // RD-131
   public void testSimpleTextWithRoot() {
     String input = "[tagml>simple text<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml")
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("simple text")
-      );
-      assertThat(document.getLayerNames()).containsExactly("");
-    });
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("tagml"));
+          assertThat(document).hasTextNodesMatching(textNodeSketch("simple text"));
+          assertThat(document.getLayerNames()).containsExactly("");
+        });
   }
 
   @Test // RD-132
   public void testTextWithMultipleLayersOfMarkup() {
     String input = "[text>[some|+L1>[all|+L2>word1<some|L1] word2<all|L2]<text]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("text"),
-          markupSketch("some"),
-          markupSketch("all")
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(markupSketch("text"), markupSketch("some"), markupSketch("all"));
 
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("word1"),
-          textNodeSketch(" word2")
-      );
-      assertThat(document.getLayerNames()).containsExactly("", "L1", "L2");
-    });
+          assertThat(document)
+              .hasTextNodesMatching(textNodeSketch("word1"), textNodeSketch(" word2"));
+          assertThat(document.getLayerNames()).containsExactly("", "L1", "L2");
+        });
   }
 
   @Test // RD-133
   public void testTextWithMultipleLayersAndDiscontinuity() {
-    String input = "[tagml>" +
-        "[pre|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<pre|L1,L2]" +
-        "― " +
-        "[post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("pre"),
-          markupSketch("q"),
-          markupSketch("s"),
-          markupSketch("post")
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("“Man,\""),
-          textNodeSketch(" I cried, "),
-          textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
-          textNodeSketch("― "),
-          textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
-      );
-      assertThat(document.getLayerNames()).containsExactly(TAGML.DEFAULT_LAYER, "L1", "L2", "L3");
+    String input =
+        "[tagml>"
+            + "[pre|+L1,+L2>[q|L1>“Man,\"<-q|L1][s|L2> I cried, <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]<pre|L1,L2]"
+            + "― "
+            + "[post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]"
+            + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(
+                  markupSketch("tagml"),
+                  markupSketch("pre"),
+                  markupSketch("q"),
+                  markupSketch("s"),
+                  markupSketch("post"));
+          assertThat(document)
+              .hasTextNodesMatching(
+                  textNodeSketch("“Man,\""),
+                  textNodeSketch(" I cried, "),
+                  textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
+                  textNodeSketch("― "),
+                  textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein"));
+          assertThat(document.getLayerNames())
+              .containsExactly(TAGML.DEFAULT_LAYER, "L1", "L2", "L3");
 
-      List<TAGMarkup> markups = document.getMarkupStream().filter(m -> m.hasTag("q")).collect(toList());
-      assertThat(markups).hasSize(2);
-      final TAGMarkup q = markups.get(0);
+          List<TAGMarkup> markups =
+              document.getMarkupStream().filter(m -> m.hasTag("q")).collect(toList());
+          assertThat(markups).hasSize(2);
+          final TAGMarkup q = markups.get(0);
 
-      List<TAGTextNode> qTextNodes = document.getTextNodeStreamForMarkupInLayer(q, "L1").collect(toList());
-      assertThat(qTextNodes).extracting("text")
-          .containsExactly("“Man,\"", "\"how ignorant art thou in thy pride of wisdom!”");
-    });
+          List<TAGTextNode> qTextNodes =
+              document.getTextNodeStreamForMarkupInLayer(q, "L1").collect(toList());
+          assertThat(qTextNodes)
+              .extracting("text")
+              .containsExactly("“Man,\"", "\"how ignorant art thou in thy pride of wisdom!”");
+        });
   }
 
   @Ignore
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
-    String input = "[tagml>[pre|+L1,+L2>" +
-        "[q|L1>“Man,\"<-q|L1][s|L2> I " +
-        "<|cried|pleaded|>" +
-        ", <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]" +
-        "<pre|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
+    String input =
+        "[tagml>[pre|+L1,+L2>"
+            + "[q|L1>“Man,\"<-q|L1][s|L2> I "
+            + "<|cried|pleaded|>"
+            + ", <s|L2][+q|L1>\"how ignorant art thou in thy pride of wisdom!”<q|L1]"
+            + "<pre|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
 
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("pre"),
-          markupSketch("q"),
-          markupSketch("s"),
-          markupSketch("post")
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("“Man,\""),
-          textNodeSketch(" I "),
-          textNodeSketch("cried"),
-          textNodeSketch("pleaded"),
-          textNodeSketch(", "),
-          textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
-          textNodeSketch("― "),
-          textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein")
-      );
-      assertThat(document.getLayerNames()).containsExactly("", "L1", "L2", "L3");
-      TAGTextNode pleaded = document.getTextNodeStream()
-          .filter(tn -> tn.getText().equals("pleaded"))
-          .findFirst()
-          .get();
-      List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
-      assertThat(markups).extracting("tag").containsExactly(BRANCH, BRANCHES, "s", "pre", "tagml");
+          assertThat(document)
+              .hasMarkupMatching(
+                  markupSketch("tagml"),
+                  markupSketch("pre"),
+                  markupSketch("q"),
+                  markupSketch("s"),
+                  markupSketch("post"));
+          assertThat(document)
+              .hasTextNodesMatching(
+                  textNodeSketch("“Man,\""),
+                  textNodeSketch(" I "),
+                  textNodeSketch("cried"),
+                  textNodeSketch("pleaded"),
+                  textNodeSketch(", "),
+                  textNodeSketch("\"how ignorant art thou in thy pride of wisdom!”"),
+                  textNodeSketch("― "),
+                  textNodeSketch("Mary Wollstonecraft Shelley, Frankenstein"));
+          assertThat(document.getLayerNames()).containsExactly("", "L1", "L2", "L3");
+          TAGTextNode pleaded =
+              document
+                  .getTextNodeStream()
+                  .filter(tn -> tn.getText().equals("pleaded"))
+                  .findFirst()
+                  .get();
+          List<TAGMarkup> markups = document.getMarkupStreamForTextNode(pleaded).collect(toList());
+          assertThat(markups)
+              .extracting("tag")
+              .containsExactly(BRANCH, BRANCHES, "s", "pre", "tagml");
 
-      List<TAGMarkup> preMarkups = document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
-      assertThat(preMarkups).hasSize(1);
-      final TAGMarkup l1RootMarkup = preMarkups.get(0);
+          List<TAGMarkup> preMarkups =
+              document.getMarkupStream().filter(m -> m.hasTag("pre")).collect(toList());
+          assertThat(preMarkups).hasSize(1);
+          final TAGMarkup l1RootMarkup = preMarkups.get(0);
 
-      List<TAGTextNode> l1TextNodes = document.getTextNodeStreamForMarkupInLayer(l1RootMarkup, "L1").collect(toList());
-      assertThat(l1TextNodes).extracting("text")
-          .containsExactly(
-              "“Man,\"",
-              "\"how ignorant art thou in thy pride of wisdom!”"
-          );
-    });
+          List<TAGTextNode> l1TextNodes =
+              document.getTextNodeStreamForMarkupInLayer(l1RootMarkup, "L1").collect(toList());
+          assertThat(l1TextNodes)
+              .extracting("text")
+              .containsExactly("“Man,\"", "\"how ignorant art thou in thy pride of wisdom!”");
+        });
   }
 
   @Test
   public void testOptionalMarkup() {
-    String input = "[tagml>" +
-        "[?optional>optional<?optional]" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          optionalMarkupSketch("optional")
-      );
-      assertThat(document).hasTextNodesMatching(
-          textNodeSketch("optional")
-      );
-    });
+    String input = "[tagml>" + "[?optional>optional<?optional]" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(markupSketch("tagml"), optionalMarkupSketch("optional"));
+          assertThat(document).hasTextNodesMatching(textNodeSketch("optional"));
+        });
   }
 
   @Test
   public void testDiscontinuity() {
-    String input = "[tagml>" +
-        "[discontinuity>yes<-discontinuity]no[+discontinuity>yes<discontinuity]" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("discontinuity")
-      );
-    });
+    String input =
+        "[tagml>"
+            + "[discontinuity>yes<-discontinuity]no[+discontinuity>yes<discontinuity]"
+            + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(markupSketch("tagml"), markupSketch("discontinuity"));
+        });
   }
 
   @Test
   public void testMilestone() {
-    String input = "[tagml>pre " +
-        "[milestone x=4]" +
-        " post<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("milestone")
-      );
-    });
+    String input = "[tagml>pre " + "[milestone x=4]" + " post<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("tagml"), markupSketch("milestone"));
+        });
   }
 
   @Test
   public void testMarkupIdentifier() {
-    String input = "[tagml>" +
-        "[id~1>identified<id~1]" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("id")
-      );
-    });
+    String input = "[tagml>" + "[id~1>identified<id~1]" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("tagml"), markupSketch("id"));
+        });
   }
 
   @Test
   public void testStringAnnotation() {
     String input = "[text author='somebody'>some text.<text]";
-    runInStore(store -> {
-      TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("text")
-        );
-        assertThat(document).hasTextNodesMatching(
-            textNodeSketch("some text.")
-        );
-        assertThat(document).hasMarkupWithTag("text").withStringAnnotation("author", "somebody");
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    runInStore(
+        store -> {
+          TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document).hasMarkupMatching(markupSketch("text"));
+                    assertThat(document).hasTextNodesMatching(textNodeSketch("some text."));
+                    assertThat(document)
+                        .hasMarkupWithTag("text")
+                        .withStringAnnotation("author", "somebody");
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testStringAnnotation1() {
-    String input = "[tagml>" +
-        "[m s=\"string\">text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
-        return document;
-      });
-      assertExportEqualsInput(input.replace("\"", "'"), doc, store);
-    });
+    String input = "[tagml>" + "[m s=\"string\">text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
+                    return document;
+                  });
+          assertExportEqualsInput(input.replace("\"", "'"), doc, store);
+        });
   }
 
   @Test
   public void testStringAnnotation2() {
-    String input = "[tagml>" +
-        "[m s='string'>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m s='string'>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string");
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testNumberAnnotation() {
     String input = "[text pi=3.1415926>some text.<text]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("text")
-        );
-        assertThat(document).hasTextNodesMatching(
-            textNodeSketch("some text.")
-        );
-        assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("pi", 3.1415926);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document).hasMarkupMatching(markupSketch("text"));
+                    assertThat(document).hasTextNodesMatching(textNodeSketch("some text."));
+                    assertThat(document)
+                        .hasMarkupWithTag("text")
+                        .withNumberAnnotation("pi", 3.1415926);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testNumberAnnotation1() {
     String input = "[text n=1>some text.<text]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("text")
-        );
-        assertThat(document).hasTextNodesMatching(
-            textNodeSketch("some text.")
-        );
-        assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("n", 1.0);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document).hasMarkupMatching(markupSketch("text"));
+                    assertThat(document).hasTextNodesMatching(textNodeSketch("some text."));
+                    assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("n", 1.0);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testBooleanAnnotation() {
     String input = "[text test=true>some text.<text]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("text")
-        );
-        assertThat(document).hasTextNodesMatching(
-            textNodeSketch("some text.")
-        );
-        assertThat(document).hasMarkupWithTag("text").withBooleanAnnotation("test", true);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document).hasMarkupMatching(markupSketch("text"));
+                    assertThat(document).hasTextNodesMatching(textNodeSketch("some text."));
+                    assertThat(document)
+                        .hasMarkupWithTag("text")
+                        .withBooleanAnnotation("test", true);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testBooleanAnnotation1() {
-    String input = "[tagml>" +
-        "[m b=true>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m b=true>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test
   public void testBooleanAnnotation2() {
-    String input = "[tagml>" +
-        "[m b=FALSE>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false);
-        return document;
-      });
-      assertExportEqualsInput(input.replace("FALSE", "false"), doc, store);
-    });
+    String input = "[tagml>" + "[m b=FALSE>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false);
+                    return document;
+                  });
+          assertExportEqualsInput(input.replace("FALSE", "false"), doc, store);
+        });
   }
 
   @Test // NLA-468
   public void testStringListAnnotation() {
-    String input = "[tagml>" +
-        "[m l=['a','b','c']>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        List<String> expected = Lists.newArrayList("a", "b", "c");
-        assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m l=['a','b','c']>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    List<String> expected = Lists.newArrayList("a", "b", "c");
+                    assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test // NLA-468
   public void testNumberListAnnotation() {
-    String input = "[tagml>" +
-        "[m l=[3,5,7,11]>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
-        assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m l=[3,5,7,11]>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    List<Float> expected = Lists.newArrayList(3F, 5F, 7F, 11F);
+                    assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test // NLA-468
   public void testListAnnotationEntriesShouldAllBeOfTheSameType() {
-    String input = "[tagml>" +
-        "[m l=[3,true,'string']>text<m]" +
-        "<tagml]";
+    String input = "[tagml>" + "[m l=[3,true,'string']>text<m]" + "<tagml]";
 
-    final String expectedError = "line 1:13 : All elements of ListAnnotation l should be of the same type.";
-    runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
+    final String expectedError =
+        "line 1:13 : All elements of ListAnnotation l should be of the same type.";
+    runInStoreTransaction(
+        store -> {
+          assertTAGMLParsesWithSyntaxError(input, expectedError, store);
+        });
   }
 
   @Test // RD-206
   public void testListElementSeparatorShouldBeComma() {
-    String input = "[tagml>" +
-        "[m l=[3 5 7 11]>text<m]" +
-        "<tagml]";
-    final String expectedError = "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
-    runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
+    String input = "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
+    final String expectedError =
+        "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
+    runInStoreTransaction(
+        store -> {
+          assertTAGMLParsesWithSyntaxError(input, expectedError, store);
+        });
   }
 
   @Test // NLA-467
   public void testObjectAnnotation0() {
-    String input = "[tagml>" +
-        "[m p={valid=false}>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        Map<String, Object> expected = new HashMap();
-        expected.put("valid", false);
-        assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m p={valid=false}>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    Map<String, Object> expected = new HashMap();
+                    expected.put("valid", false);
+                    assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test // NLA-467
   public void testObjectAnnotation1() {
-    String input = "[tagml>" +
-        "[m p={x=1 y=2}>text<m]" +
-        "<tagml]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("tagml"),
-            markupSketch("m")
-        );
-        Map<String, Object> expected = new HashMap();
-        expected.put("x", 1D);
-        expected.put("y", 2D);
-        assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
-        return document;
-      });
-      assertExportEqualsInput(input, doc, store);
-    });
+    String input = "[tagml>" + "[m p={x=1 y=2}>text<m]" + "<tagml]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(markupSketch("tagml"), markupSketch("m"));
+                    Map<String, Object> expected = new HashMap();
+                    expected.put("x", 1D);
+                    expected.put("y", 2D);
+                    assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected);
+                    return document;
+                  });
+          assertExportEqualsInput(input, doc, store);
+        });
   }
 
   @Test // NLA-467
   public void testNestedObjectAnnotation() {
-    String input = "[text meta={\n" +
-        "    persons=[\n" +
-        "      {:id=huyg0001 name='Constantijn Huygens'}\n" +
-        "    ]\n" +
-        "  }>[title>De Zee-Straet<title]\n" +
-        "  door [author pers->huyg0001>Constantijn Huygens<author]\n" +
-        "  .......\n" +
-        "<text]";
-    runInStore(store -> {
-      final TAGDocument doc = store.runInTransaction(() -> {
-        TAGDocument document = assertTAGMLParses(input, store);
-        assertThat(document).hasMarkupMatching(
-            markupSketch("text"),
-            markupSketch("title"),
-            markupSketch("author")
-        );
-        Map<String, Object> ch = new HashMap<>();
-        ch.put(":id", "huyg001");
-        ch.put("name", "Constantijn Huygens");
+    String input =
+        "[text meta={\n"
+            + "    persons=[\n"
+            + "      {:id=huyg0001 name='Constantijn Huygens'}\n"
+            + "    ]\n"
+            + "  }>[title>De Zee-Straet<title]\n"
+            + "  door [author pers->huyg0001>Constantijn Huygens<author]\n"
+            + "  .......\n"
+            + "<text]";
+    runInStore(
+        store -> {
+          final TAGDocument doc =
+              store.runInTransaction(
+                  () -> {
+                    TAGDocument document = assertTAGMLParses(input, store);
+                    assertThat(document)
+                        .hasMarkupMatching(
+                            markupSketch("text"), markupSketch("title"), markupSketch("author"));
+                    Map<String, Object> ch = new HashMap<>();
+                    ch.put(":id", "huyg001");
+                    ch.put("name", "Constantijn Huygens");
 
-        List<Map<String, Object>> expected = Lists.newArrayList(ch);
-//      assertThat(document).hasMarkupWithTag("text").withObjectAnnotation("meta", expected);
-        return document;
-      });
-      LOG.info("export={}", export(doc, store));
-    });
+                    List<Map<String, Object>> expected = Lists.newArrayList(ch);
+                    //
+                    // assertThat(document).hasMarkupWithTag("text").withObjectAnnotation("meta",
+                    // expected);
+                    return document;
+                  });
+          LOG.info("export={}", export(doc, store));
+        });
   }
 
   @Test
   public void testSimpleTextVariation() {
-    String input = "[tagml>" +
-        "pre <|to be|not to be|> post" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(markupSketch("tagml"));
-    });
+    String input = "[tagml>" + "pre <|to be|not to be|> post" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("tagml"));
+        });
   }
 
   @Test
   public void testTextVariationWithMarkup() {
-    String input = "[tagml>" +
-        "pre <|[del>to be<del]|[add>not to be<add]|> post" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("del"),
-          markupSketch("add")
-      );
-    });
+    String input = "[tagml>" + "pre <|[del>to be<del]|[add>not to be<add]|> post" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(markupSketch("tagml"), markupSketch("del"), markupSketch("add"));
+        });
   }
 
   @Test
   public void testNestedTextVariationWithMarkup() {
-    String input = "[tagml>" +
-        "pre <|" +
-        "[del>to be<del]" +
-        "|" +
-        "[add>not to <|[del>completely<del]|[add>utterly<add]|> be<add]" +
-        "|> post" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("del"),
-          markupSketch("del"),
-          markupSketch("add"),
-          markupSketch("add")
-      );
-    });
+    String input =
+        "[tagml>"
+            + "pre <|"
+            + "[del>to be<del]"
+            + "|"
+            + "[add>not to <|[del>completely<del]|[add>utterly<add]|> be<add]"
+            + "|> post"
+            + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document)
+              .hasMarkupMatching(
+                  markupSketch("tagml"),
+                  markupSketch("del"),
+                  markupSketch("del"),
+                  markupSketch("add"),
+                  markupSketch("add"));
+        });
   }
 
   @Ignore
   @Test
   public void testElementLinking() {
-    String input = "[tagml meta={:id=meta01 name='test'}>" +
-        "pre [x ref->meta01>text<x] post" +
-        "<tagml]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("tagml"),
-          markupSketch("x")
-      );
-    });
+    String input =
+        "[tagml meta={:id=meta01 name='test'}>" + "pre [x ref->meta01>text<x] post" + "<tagml]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("tagml"), markupSketch("x"));
+        });
   }
 
   @Test
   public void testNestedObjectAnnotation2() {
-    String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" +
-        "text" +
-        "<t]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("t")
-      );
-    });
+    String input = "[t meta={:id=meta01 obj={t='test'} n=1}>" + "text" + "<t]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("t"));
+        });
   }
 
   @Test
   public void testRichTextAnnotation1() {
     String input = "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("t")
-      );
-    });
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("t"));
+        });
   }
 
   @Test
   public void testNamespaceNeedsToBeDefinedBeforeUsage() {
     String input = "[z:t>text<z:t]";
-    runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, "line 1:1 : Namespace z has not been defined.", store));
+    runInStoreTransaction(
+        store -> {
+          assertTAGMLParsesWithSyntaxError(
+              input, "line 1:1 : Namespace z has not been defined.", store);
+        });
   }
 
   @Test
   public void testIdentifyingMarkup() {
-    String input = "[m :id=m1>" +
-        "pre [x ref->m1>text<x] post" +
-        "<m]";
-    runInStoreTransaction(store -> {
-      TAGDocument document = assertTAGMLParses(input, store);
-      assertThat(document).hasMarkupMatching(
-          markupSketch("m"),
-          markupSketch("x")
-      );
-      TAGMarkup m1 = document.getMarkupStream()
-          .filter(m -> m.hasTag("m"))
-          .findFirst().get();
-      assertThat(m1).hasMarkupId("m1");
-    });
+    String input = "[m :id=m1>" + "pre [x ref->m1>text<x] post" + "<m]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+          assertThat(document).hasMarkupMatching(markupSketch("m"), markupSketch("x"));
+          TAGMarkup m1 = document.getMarkupStream().filter(m -> m.hasTag("m")).findFirst().get();
+          assertThat(m1).hasMarkupId("m1");
+        });
   }
 
   private TAGDocument assertTAGMLParses(final String input, final TAGStore store) {
@@ -707,12 +687,13 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     TAGDocument document = listener.getDocument();
     logDocumentGraph(document, input);
 
-//    export(document);
+    //    export(document);
 
     return document;
   }
 
-  private void assertTAGMLParsesWithSyntaxError(String input, String expectedSyntaxErrorMessage, final TAGStore store) {
+  private void assertTAGMLParsesWithSyntaxError(
+      String input, String expectedSyntaxErrorMessage, final TAGStore store) {
     printTokens(input);
 
     CodePointCharStream antlrInputStream = CharStreams.fromString(input);
@@ -730,7 +711,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("parsed with {} syntax errors", numberOfSyntaxErrors);
 
-//    TAGMLListener listener = new TAGMLListener(store, errorListener);
+    //    TAGMLListener listener = new TAGMLListener(store, errorListener);
     TAGMLListener listener = new TAGMLListener(store, errorListener);
     ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     if (errorListener.hasErrors()) {
@@ -749,5 +730,4 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     LOG.info("\nTAGML:\n{}\n", tagml);
     return tagml;
   }
-
 }
