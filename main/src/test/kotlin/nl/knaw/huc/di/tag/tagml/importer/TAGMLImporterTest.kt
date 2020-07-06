@@ -242,8 +242,8 @@ class TAGMLImporterTest : TAGBaseStoreTest() {
             |      "par > s+",
             |      "s > (sic, corr)*",
             |      "said > persName+, emph+, said*",
-            |      "said may-not-overlap-with s",
-            |      "sic is-non-linear-with corr"
+            |      ":may-not-overlap(said,s)",
+            |      ":non-linear(sic,corr)"
             |    ]
             |  },
             |  ":authors": [ "me", "you", "them" ],
