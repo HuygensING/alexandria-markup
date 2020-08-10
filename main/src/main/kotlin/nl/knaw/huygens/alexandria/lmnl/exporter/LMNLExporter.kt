@@ -31,7 +31,6 @@ import nl.knaw.huygens.alexandria.view.TAGView
 import nl.knaw.huygens.alexandria.view.TAGViewFactory
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.function.Consumer
 
 class LMNLExporter {
   private var useShorthand = false
@@ -79,10 +78,10 @@ class LMNLExporter {
         val toClose: MutableList<Long?> = ArrayList(openMarkupIds)
         toClose.removeAll(relevantMarkupIds)
         toClose.reverse()
-        toClose.forEach(Consumer { markupId: Long? -> lmnlBuilder.append(closeTags[markupId]) })
+        toClose.forEach { markupId: Long? -> lmnlBuilder.append(closeTags[markupId]) }
         val toOpen: MutableList<Long?> = ArrayList(relevantMarkupIds)
         toOpen.removeAll(openMarkupIds)
-        toOpen.forEach(Consumer { markupId: Long? -> lmnlBuilder.append(openTags[markupId]) })
+        toOpen.forEach { markupId: Long? -> lmnlBuilder.append(openTags[markupId]) }
         openMarkupIds.removeAll(toClose)
         openMarkupIds.addAll(toOpen)
         lmnlBuilder.append(tn.text)

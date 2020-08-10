@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -20,26 +20,25 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import org.antlr.v4.runtime.ParserRuleContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParserBaseListener
+import nl.knaw.huygens.alexandria.ErrorListener
+import org.antlr.v4.runtime.ParserRuleContext
 
-public class AbstractTAGMLListener extends TAGMLParserBaseListener {
-  protected ErrorListener errorListener;
+open class AbstractTAGMLListener(var errorListener: ErrorListener) : TAGMLParserBaseListener() {
 
-  protected AbstractTAGMLListener(ErrorListener errorListener) {
-    this.errorListener = errorListener;
-  }
+    fun addError(
+            ctx: ParserRuleContext,
+            messageTemplate: String,
+            vararg messageArgs: Any?
+    ) =
+            errorListener.addError(
+                    Position.startOf(ctx), Position.endOf(ctx), messageTemplate, *messageArgs)
 
-  void addError(
-          final ParserRuleContext ctx, final String messageTemplate, final Object... messageArgs) {
-    errorListener.addError(
-            Position.startOf(ctx), Position.endOf(ctx), messageTemplate, messageArgs);
-  }
-
-  void addBreakingError(
-          final ParserRuleContext ctx, final String messageTemplate, final Object... messageArgs) {
-    errorListener.addBreakingError(
-            Position.startOf(ctx), Position.endOf(ctx), messageTemplate, messageArgs);
-  }
+    fun addBreakingError(
+            ctx: ParserRuleContext,
+            messageTemplate: String,
+            vararg messageArgs: Any?
+    ) =
+            errorListener.addBreakingError(
+                    Position.startOf(ctx), Position.endOf(ctx), messageTemplate, *messageArgs)
 }

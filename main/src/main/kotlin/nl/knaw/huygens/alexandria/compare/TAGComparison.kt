@@ -24,70 +24,61 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.view.TAGView
 import prioritised_xml_collation.*
 import java.util.*
-import java.util.function.Consumer
-import java.util.stream.Collectors
 
 class TAGComparison(originalDocument: TAGDocument?, tagView: TAGView?, otherDocument: TAGDocument?) {
-  private val diffLines: MutableList<String> = ArrayList()
-  fun getDiffLines(): List<String> {
-    return diffLines
-  }
+    private val diffLines: MutableList<String> = ArrayList()
 
-  fun hasDifferences(): Boolean {
-    return diffLines.isNotEmpty()
-  }
+    fun getDiffLines(): List<String> =
+            diffLines
 
-  private fun handleOmission(segment: Segment) {
-    asLines(segment.tokensWa).forEach(Consumer { l: String -> diffLines.add("-$l") })
-  }
+    fun hasDifferences(): Boolean =
+            diffLines.isNotEmpty()
 
-  private fun handleAddition(segment: Segment) {
-    asLines(segment.tokensWb).forEach(Consumer { l: String -> diffLines.add("+$l") })
-  }
+    private fun handleOmission(segment: Segment) =
+            asLines(segment.tokensWa).forEach { l: String -> diffLines.add("-$l") }
 
-  private fun handleReplacement(segment: Segment) {
-    handleOmission(segment)
-    handleAddition(segment)
-  }
+    private fun handleAddition(segment: Segment) =
+            asLines(segment.tokensWb).forEach { l: String -> diffLines.add("+$l") }
 
-  private fun handleAligned(segment: Segment) {
-    val lines = asLines(segment.tokensWa)
-    diffLines.add(" " + lines[0])
-    if (lines.size > 2) {
-      diffLines.add(" ...")
+    private fun handleReplacement(segment: Segment) {
+        handleOmission(segment)
+        handleAddition(segment)
     }
-    if (lines.size > 1) {
-      val last = lines.size - 1
-      diffLines.add(" " + lines[last])
-    }
-  }
 
-  private fun asLines(tagTokens: List<TAGToken>): List<String> {
-    return Arrays.asList(*tagTokens.stream()
-        .map { tagToken: TAGToken -> tokenContent(tagToken) }
-        .collect(Collectors.joining(""))
-        .split("\n".toRegex()).toTypedArray())
-  }
-
-  private fun tokenContent(tagToken: TAGToken): String {
-    return (tagToken as? MarkupCloseToken)?.toString()?.replace("/", "") ?: tagToken.toString()
-  }
-
-  init {
-    val originalTokens = Tokenizer(originalDocument, tagView).tagTokens
-    val editedTokens = Tokenizer(otherDocument, tagView).tagTokens
-    val segmenter: SegmenterInterface = AlignedNonAlignedSegmenter()
-    val segments = TypeAndContentAligner().alignTokens(originalTokens, editedTokens, segmenter)
-    if (segments.size > 1) {
-      for (segment in segments) {
-        when (segment.type) {
-          Segment.Type.aligned -> handleAligned(segment)
-          Segment.Type.addition -> handleAddition(segment)
-          Segment.Type.omission -> handleOmission(segment)
-          Segment.Type.replacement -> handleReplacement(segment)
-          else -> throw RuntimeException("unexpected type:" + segment.type)
+    private fun handleAligned(segment: Segment) {
+        val lines = asLines(segment.tokensWa)
+        diffLines.add(" " + lines[0])
+        if (lines.size > 2) {
+            diffLines.add(" ...")
         }
-      }
+        if (lines.size > 1) {
+            val last = lines.size - 1
+            diffLines.add(" " + lines[last])
+        }
     }
-  }
+
+    private fun asLines(tagTokens: List<TAGToken>): List<String> =
+            tagTokens.joinToString("", transform = this::tokenContent)
+                    .split("\n".toRegex())
+
+    private fun tokenContent(tagToken: TAGToken): String =
+            (tagToken as? MarkupCloseToken)?.toString()?.replace("/", "") ?: tagToken.toString()
+
+    init {
+        val originalTokens = Tokenizer(originalDocument, tagView).tagTokens
+        val editedTokens = Tokenizer(otherDocument, tagView).tagTokens
+        val segmenter: SegmenterInterface = AlignedNonAlignedSegmenter()
+        val segments = TypeAndContentAligner().alignTokens(originalTokens, editedTokens, segmenter)
+        if (segments.size > 1) {
+            for (segment in segments) {
+                when (segment.type) {
+                    Segment.Type.aligned -> handleAligned(segment)
+                    Segment.Type.addition -> handleAddition(segment)
+                    Segment.Type.omission -> handleOmission(segment)
+                    Segment.Type.replacement -> handleReplacement(segment)
+                    else -> throw RuntimeException("unexpected type:" + segment.type)
+                }
+            }
+        }
+    }
 }
