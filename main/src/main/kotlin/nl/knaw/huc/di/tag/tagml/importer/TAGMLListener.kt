@@ -67,7 +67,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener) :
         get() {
             val markupRangeMap: MutableMap<Long, RangePair> = HashMap()
             openTagRange.keys.forEach { markupId: Long ->
-                markupRangeMap[markupId] = RangePair(openTagRange[markupId]!!, closeTagRange[markupId]!!)
+                markupRangeMap[markupId] = RangePair(openTagRange[markupId], closeTagRange[markupId])
             }
             return markupRangeMap
         }

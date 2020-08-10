@@ -22,7 +22,6 @@ package nl.knaw.huc.di.tag.tagml.importer
 
 import nl.knaw.huc.di.tag.model.graph.TextGraph
 import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge
-import nl.knaw.huc.di.tag.model.graph.edges.Edge
 import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*
 import nl.knaw.huygens.alexandria.ErrorListener
@@ -32,7 +31,6 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.stream.Collectors
 
 class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, private val textGraph: TextGraph, private val errorListener: ErrorListener? = null) {
     fun makeAnnotation(basicAnnotationContext: BasicAnnotationContext): AnnotationInfo {
@@ -43,6 +41,7 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
                 ?: throw RuntimeException("unhandled basic annotation " + basicAnnotationContext.text)
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun makeAnnotation(
             aName: String,
             annotationValueContext: AnnotationValueContext,
@@ -125,20 +124,24 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
         for (i in 1 until childCount - 1) {
             val hashElement = valueTree.getChild(i)
             val subName = hashElement.getChild(0).text
-            val subValueParseTree = hashElement.getChild(2)
-            if (subValueParseTree is AnnotationValueContext) {
-                val subValue = value[subName]
-                val aInfo = makeAnnotation(subName, subValueParseTree, subValue)
-                textGraph.addAnnotationEdge(id, aInfo)
-            } else if (subValueParseTree is IdValueContext) {
-                val idValue = subValueParseTree.text
-                annotationInfo.setId(idValue)
-            } else if (subValueParseTree is RefValueContext) {
-                val refValue = subValueParseTree.text
-                val aInfo = makeReferenceAnnotation(subName, refValue)
-                textGraph.addAnnotationEdge(id, aInfo)
-            } else {
-                throw RuntimeException("TODO: handle " + subValueParseTree.javaClass)
+            when (val subValueParseTree = hashElement.getChild(2)) {
+                is AnnotationValueContext -> {
+                    val subValue = value[subName]
+                    val aInfo = makeAnnotation(subName, subValueParseTree, subValue)
+                    textGraph.addAnnotationEdge(id, aInfo)
+                }
+                is IdValueContext -> {
+                    val idValue = subValueParseTree.text
+                    annotationInfo.setId(idValue)
+                }
+                is RefValueContext -> {
+                    val refValue = subValueParseTree.text
+                    val aInfo = makeReferenceAnnotation(subName, refValue)
+                    textGraph.addAnnotationEdge(id, aInfo)
+                }
+                else -> {
+                    throw RuntimeException("TODO: handle " + subValueParseTree.javaClass)
+                }
             }
         }
         return annotationInfo
@@ -157,7 +160,7 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
             aName: String,
             annotationValueContext: AnnotationValueContext,
             list: List<Any>) {
-        val valueTypes = list.stream().map { v: Any -> v.javaClass.name }.collect(Collectors.toSet())
+        val valueTypes = list.map { v: Any -> v.javaClass.name }.toSet()
         if (valueTypes.size > 1) {
             addError(
                     annotationValueContext,
@@ -186,64 +189,76 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
     }
 
     private fun annotationValue(annotationValueContext: AnnotationValueContext): Any? {
-        if (annotationValueContext.AV_StringValue() != null) {
-            return annotationValueContext
-                    .AV_StringValue()
-                    .text
-                    .replaceFirst("^.".toRegex(), "")
-                    .replaceFirst(".$".toRegex(), "")
-                    .replace("\\\"", "\"")
-                    .replace("\\'", "'")
-        } else if (annotationValueContext.booleanValue() != null) {
-            return java.lang.Boolean.valueOf(annotationValueContext.booleanValue().text)
-        } else if (annotationValueContext.AV_NumberValue() != null) {
-            return java.lang.Double.valueOf(annotationValueContext.AV_NumberValue().text)
-        } else if (annotationValueContext.listValue() != null) {
-            return annotationValueContext.listValue().annotationValue().stream()
-                    .map { annotationValueContext: AnnotationValueContext -> annotationValue(annotationValueContext) }
-                    .collect(Collectors.toList())
-        } else if (annotationValueContext.objectValue() != null) {
-            return readObject(annotationValueContext.objectValue())
-        } else if (annotationValueContext.richTextValue() != null) {
-            return annotationValueContext.richTextValue().text
+        when {
+            annotationValueContext.AV_StringValue() != null -> {
+                return annotationValueContext
+                        .AV_StringValue()
+                        .text
+                        .replaceFirst("^.".toRegex(), "")
+                        .replaceFirst(".$".toRegex(), "")
+                        .replace("\\\"", "\"")
+                        .replace("\\'", "'")
+            }
+            annotationValueContext.booleanValue() != null -> {
+                return java.lang.Boolean.valueOf(annotationValueContext.booleanValue().text)
+            }
+            annotationValueContext.AV_NumberValue() != null -> {
+                return java.lang.Double.valueOf(annotationValueContext.AV_NumberValue().text)
+            }
+            annotationValueContext.listValue() != null -> {
+                return annotationValueContext.listValue().annotationValue()
+                        .map { annotationValue(it) }
+            }
+            annotationValueContext.objectValue() != null -> {
+                return readObject(annotationValueContext.objectValue())
+            }
+            annotationValueContext.richTextValue() != null -> {
+                return annotationValueContext.richTextValue().text
+            }
+            else -> {
+                errorListener!!.addError(
+                        Position.startOf(annotationValueContext.getParent()),
+                        Position.endOf(annotationValueContext.getParent()),
+                        "Cannot determine the type of this annotation: %s",
+                        annotationValueContext.text)
+                return null
+            }
         }
-        errorListener!!.addError(
-                Position.startOf(annotationValueContext.getParent()),
-                Position.endOf(annotationValueContext.getParent()),
-                "Cannot determine the type of this annotation: %s",
-                annotationValueContext.text)
-        return null
     }
 
     private fun readObject(objectValueContext: ObjectValueContext): Map<String, Any?> {
         val map: MutableMap<String, Any?> = LinkedHashMap()
-        objectValueContext.children.stream()
+        objectValueContext.children
                 .filter { c: ParseTree? -> c !is TerminalNode }
                 .map { parseTree: ParseTree -> parseAttribute(parseTree) } //        .peek(System.out::println)
                 .forEach { kv: KeyValue -> map[kv.key] = kv.value }
         return map
     }
 
-    private fun parseAttribute(parseTree: ParseTree): KeyValue {
-        return if (parseTree is BasicAnnotationContext) {
-            val aName = parseTree.annotationName().text
-            val annotationValueContext = parseTree.annotationValue()
-            val value = annotationValue(annotationValueContext)
-            KeyValue(aName, value)
-        } else if (parseTree is IdentifyingAnnotationContext) {
-            // TODO: deal with this identifier
-            val value = parseTree.idValue().text
-            KeyValue(":id", value)
-        } else if (parseTree is RefAnnotationContext) {
-            val aName = parseTree.annotationName().text
-            val value = parseTree.refValue().text
-            KeyValue("!$aName", value)
-        } else {
-            throw RuntimeException("unhandled type " + parseTree.javaClass.name)
-            //      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-            //          errorPrefix(parseTree.), parseTree.getText());
-        }
-    }
+    private fun parseAttribute(parseTree: ParseTree): KeyValue =
+            when (parseTree) {
+                is BasicAnnotationContext -> {
+                    val aName = parseTree.annotationName().text
+                    val annotationValueContext = parseTree.annotationValue()
+                    val value = annotationValue(annotationValueContext)
+                    KeyValue(aName, value)
+                }
+                is IdentifyingAnnotationContext -> {
+                    // TODO: deal with this identifier
+                    val value = parseTree.idValue().text
+                    KeyValue(":id", value)
+                }
+                is RefAnnotationContext -> {
+                    val aName = parseTree.annotationName().text
+                    val value = parseTree.refValue().text
+                    KeyValue("!$aName", value)
+                }
+                else -> {
+                    throw RuntimeException("unhandled type " + parseTree.javaClass.name)
+                    //      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+                    //          errorPrefix(parseTree.), parseTree.getText());
+                }
+            }
 
     fun getStringValue(annotationInfo: AnnotationInfo): String {
         val stringAnnotationValue = store.getStringAnnotationValue(annotationInfo.nodeId)
@@ -262,20 +277,20 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
 
     fun getListValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> {
         val nodeId = annotationInfo.nodeId
-        return textGraph.getOutgoingEdges(nodeId).stream()
-                .filter { obj: Edge? -> ListItemEdge::class.java.isInstance(obj) }
-                .map { obj: Edge? -> ListItemEdge::class.java.cast(obj) }
-                .map { listItemEdge: ListItemEdge -> this.toAnnotationInfo(listItemEdge) }
-                .collect(Collectors.toList())
+        return textGraph.getOutgoingEdges(nodeId)
+                .asSequence()
+                .filterIsInstance<ListItemEdge>()
+                .map { toAnnotationInfo(it) }
+                .toList()
     }
 
     fun getMapValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> {
         val nodeId = annotationInfo.nodeId
-        return textGraph.getOutgoingEdges(nodeId).stream()
-                .filter { obj: Edge? -> AnnotationEdge::class.java.isInstance(obj) }
-                .map { obj: Edge? -> AnnotationEdge::class.java.cast(obj) }
-                .map { annotationEdge: AnnotationEdge -> this.toAnnotationInfo(annotationEdge) }
-                .collect(Collectors.toList())
+        return textGraph.getOutgoingEdges(nodeId)
+                .asSequence()
+                .filterIsInstance<AnnotationEdge>()
+                .map { toAnnotationInfo(it) }
+                .toList()
     }
 
     fun getReferenceValue(annotationInfo: AnnotationInfo): String {

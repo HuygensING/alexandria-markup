@@ -27,15 +27,12 @@ class RangePair {
     var startRange: Range? = null
     var endRange: Range? = null
 
-    constructor(startRange: Range, endRange: Range) {
+    constructor() {}
+    constructor(startRange: Range?, endRange: Range?) {
         this.startRange = startRange
         this.endRange = endRange
     }
 
-    override fun toString(): String {
-        return "RangePair{" +
-                "startRange=" + startRange +
-                ", endRange=" + endRange +
-                '}'
-    }
+    override fun toString(): String =
+            """RangePair{startRange=$startRange, endRange=$endRange}"""
 }
