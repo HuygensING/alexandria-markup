@@ -164,7 +164,7 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
         if (valueTypes.size > 1) {
             addError(
                     annotationValueContext,
-                    "All elements of ListAnnotation %s should be of the same type.",
+                    ErrorMessages.MIXED_ELEMENT_TYPES,
                     aName)
         }
     }
@@ -181,10 +181,7 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
         }
         val allSeparatorsAreCommas = separators.isEmpty() || separators.size == 1 && separators.contains(",")
         if (!allSeparatorsAreCommas) {
-            addError(
-                    annotationValueContext,
-                    "The elements of ListAnnotation %s should be separated by commas.",
-                    aName)
+            addError(annotationValueContext, ErrorMessages.COMMA_SEPARATORS, aName)
         }
     }
 
@@ -219,7 +216,7 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
                 errorListener!!.addError(
                         Position.startOf(annotationValueContext.getParent()),
                         Position.endOf(annotationValueContext.getParent()),
-                        "Cannot determine the type of this annotation: %s",
+                        ErrorMessages.UNKNOWN_ANNOTATION_TYPE,
                         annotationValueContext.text)
                 return null
             }
