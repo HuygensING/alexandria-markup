@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -20,55 +20,32 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
-import com.sleepycat.persist.model.Persistent;
-
-import java.util.Objects;
+import com.sleepycat.persist.model.Persistent
+import java.util.*
 
 @Persistent
-public class Range {
+class Range {
+    var startPosition: Position? = null
+    var endPosition: Position? = null
 
-  private Position startPosition;
-  private Position endPosition;
+    constructor() {}
+    constructor(startPosition: Position?, endPosition: Position?) {
+        this.startPosition = startPosition
+        this.endPosition = endPosition
+    }
 
-  public Range() {
-  }
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o !is Range) return false
+        val range = o
+        return startPosition == range.startPosition && endPosition == range.endPosition
+    }
 
-  public Range(Position startPosition, Position endPosition) {
-    this.startPosition = startPosition;
-    this.endPosition = endPosition;
-  }
+    override fun hashCode(): Int {
+        return Objects.hash(startPosition, endPosition)
+    }
 
-  public Position getEndPosition() {
-    return endPosition;
-  }
-
-  public Position getStartPosition() {
-    return startPosition;
-  }
-
-  public void setStartPosition(Position startPosition) {
-    this.startPosition = startPosition;
-  }
-
-  public void setEndPosition(Position endPosition) {
-    this.endPosition = endPosition;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Range)) return false;
-    final Range range = (Range) o;
-    return startPosition.equals(range.startPosition) && endPosition.equals(range.endPosition);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(startPosition, endPosition);
-  }
-
-  @Override
-  public String toString() {
-    return "Range{" + startPosition + " - " + endPosition + '}';
-  }
+    override fun toString(): String {
+        return "Range{$startPosition - $endPosition}"
+    }
 }

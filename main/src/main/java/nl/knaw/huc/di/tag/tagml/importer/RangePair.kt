@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -20,42 +20,23 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
-import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.Persistent
 
 @Persistent
-public class RangePair {
-  private Range startRange;
-  private Range endRange;
+class RangePair {
+    var startRange: Range? = null
+    var endRange: Range? = null
 
-  public RangePair() {
-  }
+    constructor() {}
+    constructor(startRange: Range?, endRange: Range?) {
+        this.startRange = startRange
+        this.endRange = endRange
+    }
 
-  public RangePair(Range startRange, Range endRange) {
-    this.startRange = startRange;
-    this.endRange = endRange;
-  }
-
-  public Range getStartRange() {
-    return startRange;
-  }
-
-  public void setStartRange(Range startRange) {
-    this.startRange = startRange;
-  }
-
-  public Range getEndRange() {
-    return endRange;
-  }
-
-  public void setEndRange(Range endRange) {
-    this.endRange = endRange;
-  }
-
-  @Override
-  public String toString() {
-    return "RangePair{" +
-        "startRange=" + startRange +
-        ", endRange=" + endRange +
-        '}';
-  }
+    override fun toString(): String {
+        return "RangePair{" +
+                "startRange=" + startRange +
+                ", endRange=" + endRange +
+                '}'
+    }
 }

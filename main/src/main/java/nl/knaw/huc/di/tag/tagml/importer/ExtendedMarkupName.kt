@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -19,81 +19,46 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
-import static java.util.regex.Pattern.quote;
-import static nl.knaw.huc.di.tag.tagml.TAGML.*;
 
-public class ExtendedMarkupName {
-  private String tagName;
-  private boolean optional = false;
-  private boolean resume = false;
-  private boolean suspend = false;
-  private String id;
+import nl.knaw.huc.di.tag.tagml.TAGML.OPTIONAL_PREFIX
+import nl.knaw.huc.di.tag.tagml.TAGML.RESUME_PREFIX
+import nl.knaw.huc.di.tag.tagml.TAGML.SUSPEND_PREFIX
+import java.util.regex.Pattern
 
-  public static ExtendedMarkupName of(String text) {
-    ExtendedMarkupName extendedMarkupName = new ExtendedMarkupName();
-    if (text.startsWith(OPTIONAL_PREFIX)) {
-      text = text.replaceFirst(quote(OPTIONAL_PREFIX), "");
-      extendedMarkupName.setOptional(true);
+class ExtendedMarkupName {
+    var tagName: String? = null
+    var isOptional = false
+    var isResume = false
+    var isSuspend = false
+    var id: String? = null
+
+    val extendedMarkupName: String
+        get() = if (id != null) "$tagName=$id" else tagName!!
+
+    companion object {
+        fun of(text: String): ExtendedMarkupName {
+            var text = text
+            val extendedMarkupName = ExtendedMarkupName()
+            if (text.startsWith(OPTIONAL_PREFIX)) {
+                text = text.replaceFirst(Pattern.quote(OPTIONAL_PREFIX).toRegex(), "")
+                extendedMarkupName.isOptional = true
+            }
+            if (text.startsWith(SUSPEND_PREFIX)) {
+                text = text.replaceFirst(Pattern.quote(SUSPEND_PREFIX).toRegex(), "")
+                extendedMarkupName.isSuspend = true
+            }
+            if (text.startsWith(RESUME_PREFIX)) {
+                text = text.replaceFirst(Pattern.quote(RESUME_PREFIX).toRegex(), "")
+                extendedMarkupName.isResume = true
+            }
+            if (text.contains("~")) {
+                val parts = text.split("~".toRegex()).toTypedArray()
+                text = parts[0]
+                val id = parts[1]
+                extendedMarkupName.id = id
+            }
+            extendedMarkupName.tagName = text
+            return extendedMarkupName
+        }
     }
-    if (text.startsWith(SUSPEND_PREFIX)) {
-      text = text.replaceFirst(quote(SUSPEND_PREFIX), "");
-      extendedMarkupName.setSuspend(true);
-    }
-    if (text.startsWith(RESUME_PREFIX)) {
-      text = text.replaceFirst(quote(RESUME_PREFIX), "");
-      extendedMarkupName.setResume(true);
-    }
-    if (text.contains("~")) {
-      String[] parts = text.split("~");
-      text = parts[0];
-      String id = parts[1];
-      extendedMarkupName.setId(id);
-    }
-    extendedMarkupName.setTagName(text);
-    return extendedMarkupName;
-  }
-
-  public String getTagName() {
-    return tagName;
-  }
-
-  public void setTagName(String tagName) {
-    this.tagName = tagName;
-  }
-
-  public void setOptional(boolean optional) {
-    this.optional = optional;
-  }
-
-  public boolean isOptional() {
-    return optional;
-  }
-
-  public void setResume(boolean resume) {
-    this.resume = resume;
-  }
-
-  public boolean isResume() {
-    return resume;
-  }
-
-  public void setSuspend(boolean suspend) {
-    this.suspend = suspend;
-  }
-
-  public boolean isSuspend() {
-    return suspend;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public String getExtendedMarkupName() {
-    return id != null ? tagName + "=" + id : tagName;
-  }
 }

@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.importer;
+package nl.knaw.huc.di.tag.tagml.importer
 
 /*-
  * #%L
@@ -20,60 +20,47 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
-import com.sleepycat.persist.model.Persistent;
-import org.antlr.v4.runtime.ParserRuleContext;
-
-import java.util.Objects;
-
-import static java.lang.String.format;
+import com.sleepycat.persist.model.Persistent
+import org.antlr.v4.runtime.ParserRuleContext
+import java.util.*
 
 @Persistent
-public class Position {
+class Position {
+    var line = 0
+        private set
+    var character = 0
+        private set
 
-  private int line;
-  private int character;
+    constructor() {}
+    constructor(line: Int, character: Int) {
+        this.line = line
+        this.character = character
+    }
 
-  public Position() {
-  }
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o !is Position) return false
+        val position = o
+        return line == position.line && character == position.character
+    }
 
-  public Position(int line, int character) {
-    this.line = line;
-    this.character = character;
-  }
+    override fun hashCode(): Int {
+        return Objects.hash(line, character)
+    }
 
-  public static Position startOf(final ParserRuleContext ctx) {
-    return new Position(ctx.start.getLine(), ctx.start.getCharPositionInLine() + 1);
-  }
+    override fun toString(): String {
+        return String.format("%d:%d", line, character)
+    }
 
-  public static Position endOf(final ParserRuleContext ctx) {
-    return new Position(
-        ctx.stop.getLine(),
-        ctx.stop.getCharPositionInLine() + ctx.stop.getStopIndex() - ctx.stop.getStartIndex() + 2);
-  }
+    companion object {
+        fun startOf(ctx: ParserRuleContext): Position {
+            return Position(ctx.start.line, ctx.start.charPositionInLine + 1)
+        }
 
-  public int getLine() {
-    return line;
-  }
-
-  public int getCharacter() {
-    return character;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Position)) return false;
-    final Position position = (Position) o;
-    return line == position.line && character == position.character;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(line, character);
-  }
-
-  @Override
-  public String toString() {
-    return format("%d:%d", line, character);
-  }
+        fun endOf(ctx: ParserRuleContext): Position {
+            return Position(
+                    ctx.stop.line,
+                    ctx.stop.charPositionInLine + ctx.stop.stopIndex - ctx.stop.startIndex + 2)
+        }
+    }
 }

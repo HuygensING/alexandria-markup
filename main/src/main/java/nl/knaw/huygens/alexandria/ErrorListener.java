@@ -69,9 +69,9 @@ public class ErrorListener implements ANTLRErrorListener {
                     }
                     if (e1 instanceof CustomError && e2 instanceof TAGSyntaxError) {
                       return Comparator.comparing(Position::getLine)
-                              .thenComparing(Position::getCharacter)
-                              .compare(
-                                      ((CustomError) e1).range.getStartPosition(), ((TAGSyntaxError) e2).position);
+                          .thenComparing(Position::getCharacter)
+                          .compare(
+                              ((CustomError) e1).range.getStartPosition(), ((TAGSyntaxError) e2).position);
                     }
                     if (e1 instanceof TAGSyntaxError && e2 instanceof CustomError) {
                       return Comparator.comparing(Position::getLine)

@@ -103,7 +103,7 @@ class TAGMLImporter(private val tagStore: TAGStore) {
         val visitor = TAGMLVisitor(tagStore, errorListener).also {
             it.visit(documentContext)
         }
-        return visitor.document
+        return visitor.document!!
     }
 
     private fun update(tagdto: TAGDTO): Long = tagStore.persist(tagdto)
