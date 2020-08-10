@@ -38,7 +38,7 @@ class XMLBuilder : TAGVisitor {
     var useTagNamespace = false
     var useTrojanHorse = false
     private var relevantLayers: Set<String>? = null
-    var result: String? = null
+    var result: String = ""
         private set
     private val discontinuityCounter = AtomicInteger(1)
     private val discontinuityNumber: MutableMap<String, Int> = HashMap()
