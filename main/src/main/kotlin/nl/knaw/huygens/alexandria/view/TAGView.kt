@@ -28,167 +28,167 @@ import java.util.*
 
 class TAGView(private val store: TAGStore) {
 
-  internal enum class RelevanceStyle {
-    INCLUDE, EXCLUDE, UNDEFINED
-  }
-
-  val isValid: Boolean
-    get() = !(layerRelevance == UNDEFINED && markupRelevance == UNDEFINED)
-
-  private var layerRelevance = UNDEFINED
-  private var markupRelevance = UNDEFINED
-
-  var layersToInclude: Set<String> = HashSet()
-    set(layers) {
-      if (layerStyleIsExclude()) {
-        throw RuntimeException("This TAGView already has set layersToExclude")
-      }
-      field = layers + DEFAULT_LAYER
-      this.layerRelevance = INCLUDE
+    internal enum class RelevanceStyle {
+        INCLUDE, EXCLUDE, UNDEFINED
     }
 
-  var layersToExclude: Set<String> = HashSet()
-    set(layers) {
-      if (layerStyleIsInclude()) {
-        throw RuntimeException("This TAGView already has set layersToInclude")
-      }
-      field = layers
-      this.layerRelevance = EXCLUDE
+    val isValid: Boolean
+        get() = !(layerRelevance == UNDEFINED && markupRelevance == UNDEFINED)
 
+    private var layerRelevance = UNDEFINED
+    private var markupRelevance = UNDEFINED
+
+    var layersToInclude: Set<String> = HashSet()
+        set(layers) {
+            if (layerStyleIsExclude()) {
+                throw RuntimeException("This TAGView already has set layersToExclude")
+            }
+            field = layers + DEFAULT_LAYER
+            this.layerRelevance = INCLUDE
+        }
+
+    var layersToExclude: Set<String> = HashSet()
+        set(layers) {
+            if (layerStyleIsInclude()) {
+                throw RuntimeException("This TAGView already has set layersToInclude")
+            }
+            field = layers
+            this.layerRelevance = EXCLUDE
+
+        }
+
+    var markupToInclude: Set<String> = HashSet()
+        set(markup) {
+            if (markupStyleIsExclude()) {
+                throw RuntimeException("This TAGView already has set markupToExclude")
+            }
+            field = markup
+            this.markupRelevance = INCLUDE
+        }
+
+    var markupToExclude: Set<String> = HashSet()
+        set(markup) {
+            if (markupStyleIsInclude()) {
+                throw RuntimeException("This TAGView already has set markupToInclude")
+            }
+            field = markup
+            this.markupRelevance = EXCLUDE
+        }
+
+    fun filterRelevantLayers(layerNames: Set<String>): Set<String> {
+        val relevantLayers: MutableSet<String> = HashSet(layerNames)
+        val nonRelevantLayers = when (layerRelevance) {
+            INCLUDE -> {
+                val layers = layerNames.toMutableSet()
+                layers.removeAll(layersToInclude)
+                layers
+            }
+            EXCLUDE -> {
+                layersToExclude.toMutableSet()
+            }
+            else -> {
+                mutableSetOf()
+            }
+        }
+        relevantLayers.removeAll(nonRelevantLayers)
+        relevantLayers.add(DEFAULT_LAYER)
+        return relevantLayers.toSet()
     }
 
-  var markupToInclude: Set<String> = HashSet()
-    set(markup) {
-      if (markupStyleIsExclude()) {
-        throw RuntimeException("This TAGView already has set markupToExclude")
-      }
-      field = markup
-      this.markupRelevance = INCLUDE
+    fun filterRelevantMarkup(markupIds: Set<Long>): Set<Long> {
+        val relevantMarkupIds: MutableSet<Long> = LinkedHashSet(markupIds)
+        when (layerRelevance) {
+            INCLUDE -> {
+                val retain = markupIds
+                        .filter { m: Long -> layersToInclude.overlapsWith(getLayersForMarkup(m)) }
+                relevantMarkupIds.retainAll(retain)
+            }
+            EXCLUDE -> {
+                // remove all markup whose layers are all in the layersToExclude
+                val remove = markupIds
+                        .filter { m: Long -> layersToExclude.containsAll(getLayersForMarkup(m)) }
+                relevantMarkupIds.removeAll(remove)
+            }
+            UNDEFINED -> {
+                // no action needed
+            }
+        }
+
+        when (markupRelevance) {
+            INCLUDE -> {
+                val retain = markupIds.filter { m: Long -> loadTag(m) in markupToInclude }
+                relevantMarkupIds.retainAll(retain)
+            }
+            EXCLUDE -> {
+                val remove = markupIds.filter { m: Long -> loadTag(m) in markupToExclude }
+                relevantMarkupIds -= remove
+            }
+            UNDEFINED -> {
+                // no action needed
+            }
+        }
+
+        return relevantMarkupIds
     }
 
-  var markupToExclude: Set<String> = HashSet()
-    set(markup) {
-      if (markupStyleIsInclude()) {
-        throw RuntimeException("This TAGView already has set markupToInclude")
-      }
-      field = markup
-      this.markupRelevance = EXCLUDE
+    private fun isInDefaultLayerOnly(markupId: Long): Boolean {
+        val layers = getLayersForMarkup(markupId)
+        return layers.size == 1 && layers.iterator().next() == DEFAULT_LAYER
     }
 
-  fun filterRelevantLayers(layerNames: Set<String>): Set<String> {
-    val relevantLayers: MutableSet<String> = HashSet(layerNames)
-    val nonRelevantLayers = when (layerRelevance) {
-      INCLUDE -> {
-        val layers = layerNames.toMutableSet()
-        layers.removeAll(layersToInclude)
-        layers
-      }
-      EXCLUDE -> {
-        layersToExclude.toMutableSet()
-      }
-      else -> {
-        mutableSetOf()
-      }
-    }
-    relevantLayers.removeAll(nonRelevantLayers)
-    relevantLayers.add(DEFAULT_LAYER)
-    return relevantLayers.toSet()
-  }
-
-  fun filterRelevantMarkup(markupIds: Set<Long>): Set<Long> {
-    val relevantMarkupIds: MutableSet<Long> = LinkedHashSet(markupIds)
-    when (layerRelevance) {
-      INCLUDE -> {
-        val retain = markupIds
-            .filter { m: Long -> layersToInclude.overlapsWith(getLayersForMarkup(m)) }
-        relevantMarkupIds.retainAll(retain)
-      }
-      EXCLUDE -> {
-        // remove all markup whose layers are all in the layersToExclude
-        val remove = markupIds
-            .filter { m: Long -> layersToExclude.containsAll(getLayersForMarkup(m)) }
-        relevantMarkupIds.removeAll(remove)
-      }
-      UNDEFINED -> {
-        // no action needed
-      }
+    private fun Set<String>.overlapsWith(other: Set<String>): Boolean {
+        val overlap: MutableSet<String> = other.toMutableSet()
+        overlap.retainAll(this)
+        return overlap.isNotEmpty()
     }
 
-    when (markupRelevance) {
-      INCLUDE -> {
-        val retain = markupIds.filter { m: Long -> markupToInclude.contains(loadTag(m)) }
-        relevantMarkupIds.retainAll(retain)
-      }
-      EXCLUDE -> {
-        val remove = markupIds.filter { m: Long -> markupToExclude.contains(loadTag(m)) }
-        relevantMarkupIds.removeAll(remove)
-      }
-      UNDEFINED -> {
-        // no action needed
-      }
+    private fun getLayersForMarkup(markupId: Long): Set<String> =
+            store.getMarkup(markupId).layers
+
+    val definition: TAGViewDefinition
+        get() = TAGViewDefinition()
+                .withIncludeLayers(layersToInclude)
+                .withExcludeLayers(layersToExclude)
+                .withIncludeMarkup(markupToInclude)
+                .withExcludeMarkup(markupToExclude)
+
+    private fun markupStyleIsInclude() = markupRelevance == INCLUDE
+
+    private fun markupStyleIsExclude() = markupRelevance == EXCLUDE
+
+    private fun layerStyleIsInclude() = layerRelevance == INCLUDE
+
+    private fun layerStyleIsExclude() = layerRelevance == EXCLUDE
+
+    fun isIncluded(tagMarkup: TAGMarkup): Boolean {
+        val tag = tagMarkup.tag
+        return if (markupStyleIsInclude()) {
+            tag in markupToInclude
+        } else EXCLUDE == markupRelevance && tag !in markupToExclude
     }
 
-    return relevantMarkupIds
-  }
+    private fun loadTag(markupId: Long): String {
+        return store.getMarkup(markupId).tag
+    }
 
-  private fun isInDefaultLayerOnly(markupId: Long): Boolean {
-    val layers = getLayersForMarkup(markupId)
-    return layers.size == 1 && layers.iterator().next() == DEFAULT_LAYER
-  }
+    fun withMarkupToInclude(markup: Set<String>): TAGView {
+        markupToInclude = markup
+        return this
+    }
 
-  private fun Set<String>.overlapsWith(other: Set<String>): Boolean {
-    val overlap: MutableSet<String> = other.toMutableSet()
-    overlap.retainAll(this)
-    return overlap.isNotEmpty()
-  }
+    fun withMarkupToExclude(markup: Set<String>): TAGView {
+        markupToExclude = markup
+        return this
+    }
 
-  private fun getLayersForMarkup(markupId: Long): Set<String> =
-      store.getMarkup(markupId).layers
+    fun withLayersToInclude(layers: Set<String>): TAGView {
+        layersToInclude = layers
+        return this
+    }
 
-  val definition: TAGViewDefinition
-    get() = TAGViewDefinition()
-        .withIncludeLayers(layersToInclude)
-        .withExcludeLayers(layersToExclude)
-        .withIncludeMarkup(markupToInclude)
-        .withExcludeMarkup(markupToExclude)
-
-  fun markupStyleIsInclude(): Boolean = markupRelevance == INCLUDE
-
-  fun markupStyleIsExclude(): Boolean = markupRelevance == EXCLUDE
-
-  fun layerStyleIsInclude(): Boolean = layerRelevance == INCLUDE
-
-  fun layerStyleIsExclude(): Boolean = layerRelevance == EXCLUDE
-
-  fun isIncluded(tagMarkup: TAGMarkup): Boolean {
-    val tag = tagMarkup.tag
-    return if (markupStyleIsInclude()) {
-      markupToInclude.contains(tag)
-    } else EXCLUDE == markupRelevance && !markupToExclude.contains(tag)
-  }
-
-  private fun loadTag(markupId: Long): String {
-    return store.getMarkup(markupId).tag
-  }
-
-  fun withMarkupToInclude(markup: Set<String>): TAGView {
-    markupToInclude = markup
-    return this
-  }
-
-  fun withMarkupToExclude(markup: Set<String>): TAGView {
-    markupToExclude = markup
-    return this
-  }
-
-  fun withLayersToInclude(layers: Set<String>): TAGView {
-    layersToInclude = layers
-    return this
-  }
-
-  fun withLayersToExclude(layers: Set<String>): TAGView {
-    layersToExclude = layers
-    return this
-  }
+    fun withLayersToExclude(layers: Set<String>): TAGView {
+        layersToExclude = layers
+        return this
+    }
 
 }

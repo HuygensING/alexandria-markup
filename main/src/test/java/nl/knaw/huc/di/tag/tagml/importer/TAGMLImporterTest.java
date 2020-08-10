@@ -81,6 +81,18 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   }
 
   @Test
+  public void test_simple() {
+    String tagML =
+        "[s|+T,+D>This is an [del|D>easy<del] example of [add|T,D>the<add] TAGML syntax.<s]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = parseTAGML(tagML, store);
+          assertThat(document).isNotNull();
+          //          testRDFConversion(document);
+        });
+  }
+
+  @Test
   public void test() {
     String tagML =
         "[root>"

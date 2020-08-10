@@ -170,7 +170,7 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
             }
             is TextContainsExpressionContext -> {
                 val substring = stringValue(expr.STRING_LITERAL())
-                filter = Predicate { tr: TAGMarkup -> toText(tr).contains(substring) }
+                filter = Predicate { tr: TAGMarkup -> substring in toText(tr) }
             }
             else -> {
                 unhandled(expr?.javaClass?.name + " expression", expr?.text)

@@ -57,17 +57,17 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         .textNodeStream
         .forEach { nodeToProcess: TAGTextNode ->
           //      logTextNode(nodeToProcess);
-          if (!processedNodes.contains(nodeToProcess)) {
+          if (nodeToProcess !in processedNodes) {
             val state = stateRef.get()
             val markupIds: MutableSet<Long> = LinkedHashSet()
             //        Collections.reverse(markupStreamForTextNode);
             document
-                .getMarkupStreamForTextNode(nodeToProcess)
-                .forEach { mw: TAGMarkup ->
-                  val id = mw.dbId
-                  markupIds.add(id)
-                  state!!.openTags.computeIfAbsent(
-                      id) { k: Long? -> toOpenTag(mw, openLayers, tagVisitor) }
+                    .getMarkupStreamForTextNode(nodeToProcess)
+                    .forEach { mw: TAGMarkup ->
+                      val id = mw.dbId
+                      markupIds.add(id)
+                      state!!.openTags.computeIfAbsent(
+                              id) { k: Long? -> toOpenTag(mw, openLayers, tagVisitor) }
                   state.closeTags.computeIfAbsent(id) { k: Long? -> toCloseTag(mw) }
                   openLayers.addAll(mw.layers)
                   if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
@@ -207,6 +207,7 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
     private var branchStartNodeIds: Set<Long> = HashSet()
     private var convergenceSucceedingNodeId: Long? = null
     private var branchesToTraverse: Int = 0
+
     fun setStartState(startState: ExporterState): TextVariationState {
       Preconditions.checkNotNull(startState)
       this.startState = startState
@@ -224,30 +225,26 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
       return this
     }
 
-    fun isBranchStartNode(node: TAGTextNode): Boolean {
-      return branchStartNodeIds.contains(node.dbId)
-    }
+    fun isBranchStartNode(node: TAGTextNode): Boolean =
+            node.dbId in branchStartNodeIds
 
     fun setConvergenceSucceedingNodeId(convergenceSucceedingNodeId: Long?): TextVariationState {
       this.convergenceSucceedingNodeId = convergenceSucceedingNodeId
       return this
     }
 
-    fun isFirstNodeAfterConvergence(node: TAGTextNode): Boolean {
-      return node.dbId == convergenceSucceedingNodeId
-    }
+    fun isFirstNodeAfterConvergence(node: TAGTextNode): Boolean =
+            node.dbId == convergenceSucceedingNodeId
 
     fun incrementBranchesStarted() {
       branchesToTraverse--
     }
 
-    fun allBranchesTraversed(): Boolean {
-      return branchesToTraverse == 0
-    }
+    fun allBranchesTraversed(): Boolean =
+            branchesToTraverse == 0
 
-    fun inVariation(): Boolean {
-      return !branchStartNodeIds.isEmpty()
-    }
+    fun inVariation(): Boolean =
+            !branchStartNodeIds.isEmpty()
   }
 
   private fun toCloseTag(markup: TAGMarkup): StringBuilder {

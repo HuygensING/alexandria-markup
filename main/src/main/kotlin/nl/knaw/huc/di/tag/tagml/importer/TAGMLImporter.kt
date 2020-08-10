@@ -41,30 +41,31 @@ import java.io.UncheckedIOException
 
 class TAGMLImporter(private val tagStore: TAGStore) {
     @Throws(TAGMLSyntaxError::class)
-    fun importTAGML(input: String?): TAGDocument {
+    fun importTAGML(input: String): TAGDocument {
         val antlrInputStream: CharStream = CharStreams.fromString(input)
         return importTAGML(antlrInputStream)
     }
 
     @Throws(TAGMLSyntaxError::class)
-    fun importTAGML(input: InputStream?): TAGDocument {
-        return try {
-            val antlrInputStream = CharStreams.fromStream(input)
-            importTAGML(antlrInputStream)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw UncheckedIOException(e)
-        }
-    }
+    fun importTAGML(input: InputStream): TAGDocument =
+            try {
+                val antlrInputStream = CharStreams.fromStream(input)
+                importTAGML(antlrInputStream)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw UncheckedIOException(e)
+            }
 
     @Throws(TAGMLSyntaxError::class)
     private fun importTAGML(antlrInputStream: CharStream): TAGDocument {
-        val lexer = TAGMLLexer(antlrInputStream)
         val errorListener = ErrorListener()
-        lexer.addErrorListener(errorListener)
+        val lexer = TAGMLLexer(antlrInputStream).apply {
+            addErrorListener(errorListener)
+        }
         val tokens = CommonTokenStream(lexer)
-        val parser = TAGMLParser(tokens)
-        parser.addErrorListener(errorListener)
+        val parser = TAGMLParser(tokens).apply {
+            addErrorListener(errorListener)
+        }
         val document = usingListener(parser, errorListener)
         //    DocumentWrapper documentWrapper = usingVisitor(parser, errorListener);
         val numberOfSyntaxErrors = parser.numberOfSyntaxErrors
@@ -99,21 +100,18 @@ class TAGMLImporter(private val tagStore: TAGStore) {
 
     private fun usingVisitor(parser: TAGMLParser, errorListener: ErrorListener): TAGDocument {
         val documentContext = parser.document()
-        val visitor = TAGMLVisitor(tagStore, errorListener)
-        visitor.visit(documentContext)
+        val visitor = TAGMLVisitor(tagStore, errorListener).also {
+            it.visit(documentContext)
+        }
         return visitor.document
     }
 
-    private fun update(tagdto: TAGDTO): Long {
-        return tagStore.persist(tagdto)
-    }
+    private fun update(tagdto: TAGDTO): Long = tagStore.persist(tagdto)
 
-    protected fun logDocumentGraph(document: TAGDocument?, input: String?) {
-        println(
-                "\n------------8<------------------------------------------------------------------------------------\n")
+    private fun logDocumentGraph(document: TAGDocument, input: String) {
+        println("\n------------8<------------------------------------------------------------------------------------\n")
         println(DotFactory().toDot(document, input))
-        println(
-                "\n------------8<------------------------------------------------------------------------------------\n")
+        println("\n------------8<------------------------------------------------------------------------------------\n")
     }
 
     companion object {

@@ -34,95 +34,89 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class TAGValidator(private val store: TAGStore) {
 
-  fun validate(document: TAGDocument, schema: TAGMLSchema): TAGValidationResult {
-    val result = TAGValidationResult()
-    val layersInDocument = document.layerNames
-    val layersInSchema: List<String> = schema.getLayers()
-    for (layer in layersInSchema) {
-      if (layersInDocument.contains(layer)) {
-        validateForLayer(document, layer, schema.getLayerHierarchy(layer), result)
-      }
+    fun validate(document: TAGDocument, schema: TAGMLSchema): TAGValidationResult {
+        val result = TAGValidationResult()
+        val layersInDocument = document.layerNames
+        val layersInSchema: List<String> = schema.getLayers()
+        layersInSchema
+                .asSequence()
+                .filter { it in layersInDocument }
+                .forEach { validateForLayer(document, it, schema.getLayerHierarchy(it), result) }
+        val layersMissingInSchema: MutableList<String> = layersInDocument.toMutableList()
+        layersMissingInSchema.removeAll(layersInSchema)
+        if (layersMissingInSchema.isNotEmpty()) {
+            val warning = if (layersMissingInSchema.size == 1)
+                "Layer ${layerName(layersMissingInSchema[0])} is"
+            else
+                "Layers ${layersMissingInSchema.joinToString(separator = ", ") { layerName(it) }} are"
+            result.warnings.add("$warning used in the document, but not defined in the schema.")
+        }
+        val layersMissingInDocument: MutableList<String> = layersInSchema.toMutableList()
+        layersMissingInDocument.removeAll(layersInDocument)
+        if (layersMissingInDocument.isNotEmpty()) {
+            val warning = if (layersMissingInDocument.size == 1)
+                "Layer ${layerName(layersMissingInDocument[0])} is"
+            else
+                "Layers ${layersMissingInDocument.joinToString(separator = ", ") { layerName(it) }} are"
+            result.warnings.add("$warning defined in the schema, but not used in the document.")
+        }
+        return result
     }
-    val layersMissingInSchema: MutableList<String> = layersInDocument.toMutableList()
-    layersMissingInSchema.removeAll(layersInSchema)
-    if (layersMissingInSchema.isNotEmpty()) {
-      val warning = if (layersMissingInSchema.size == 1)
-        "Layer ${layerName(layersMissingInSchema[0])} is"
-      else
-        "Layers ${layersMissingInSchema.joinToString(separator = ", ") { layerName(it) }} are"
-      result.warnings.add("$warning used in the document, but not defined in the schema.")
-    }
-    val layersMissingInDocument: MutableList<String> = layersInSchema.toMutableList()
-    layersMissingInDocument.removeAll(layersInDocument)
-    if (layersMissingInDocument.isNotEmpty()) {
-      val warning = if (layersMissingInDocument.size == 1)
-        "Layer ${layerName(layersMissingInDocument[0])} is"
-      else
-        "Layers ${layersMissingInDocument.joinToString(separator = ", ") { layerName(it) }} are"
-      result.warnings.add("$warning defined in the schema, but not used in the document.")
-    }
-    return result
-  }
 
-  private fun validateForLayer(
-      document: TAGDocument,
-      layer: String,
-      layerHierarchyRoot: TreeNode<String>,
-      result: TAGValidationResult) {
-    val expectedRootMarkup = layerHierarchyRoot.data
-    val rootMarkupId = document.dto.textGraph.layerRootMap[layer]
-    val markup = store.getMarkup(rootMarkupId)
-    val hasErrors = AtomicBoolean(false)
-    if (!markup.hasTag(expectedRootMarkup)) {
-      result
-          .errors
-          .add("Layer ${layerName(layer)}: expected root markup $expectedRootMarkup, but was ${openTag(markup)}")
-      hasErrors.set(true)
+    private fun validateForLayer(
+            document: TAGDocument,
+            layer: String,
+            layerHierarchyRoot: TreeNode<String>,
+            result: TAGValidationResult) {
+        val expectedRootMarkup = layerHierarchyRoot.data
+        val rootMarkupId = document.dto.textGraph.layerRootMap[layer]
+        val markup = store.getMarkup(rootMarkupId)
+        val hasErrors = AtomicBoolean(false)
+        if (!markup.hasTag(expectedRootMarkup)) {
+            result.errors += "Layer ${layerName(layer)}: expected root markup $expectedRootMarkup, but was ${openTag(markup)}"
+            hasErrors.set(true)
+        }
+        val markupIdsToHandle: MutableList<Long?> = ArrayList()
+        markupIdsToHandle.add(rootMarkupId)
+        val schemaChildNodeMap: MutableMap<String, TreeNode<String>> = HashMap()
+        schemaChildNodeMap[layerHierarchyRoot.data] = layerHierarchyRoot
+        while (markupIdsToHandle.isNotEmpty() && !hasErrors.get()) {
+            val parentMarkupId = markupIdsToHandle.removeAt(0)
+            val parentTag = store.getMarkup(parentMarkupId).tag
+            val layerHierarchyNode = schemaChildNodeMap[parentTag]!!
+            val expectedTags: MutableSet<String> = HashSet()
+            layerHierarchyNode
+                    .iterator()
+                    .forEachRemaining { childNode: TreeNode<String> ->
+                        val tag = childNode.data
+                        schemaChildNodeMap[tag] = childNode
+                        expectedTags.add(tag)
+                    }
+            document
+                    .getChildMarkupIdStream(parentMarkupId, layer)
+                    .forEach { mId: Long ->
+                        val markup1 = store.getMarkup(mId)
+                        val tag = markup1.tag
+                        if (tag in expectedTags) {
+                            markupIdsToHandle.add(mId)
+                        } else {
+                            val expectedTagString = expectedTags.joinToString(separator = " or ") { openTag(it, layer) }
+                            result.errors += "Layer ${layerName(layer)}: expected $expectedTagString as child markup of ${openTag(parentTag, layer)}, but found ${openTag(markup1)}"
+                            hasErrors.set(true)
+                        }
+                    }
+        }
     }
-    val markupIdsToHandle: MutableList<Long?> = ArrayList()
-    markupIdsToHandle.add(rootMarkupId)
-    val schemaChildNodeMap: MutableMap<String, TreeNode<String>> = HashMap()
-    schemaChildNodeMap[layerHierarchyRoot.data] = layerHierarchyRoot
-    while (markupIdsToHandle.isNotEmpty() && !hasErrors.get()) {
-      val parentMarkupId = markupIdsToHandle.removeAt(0)
-      val parentTag = store.getMarkup(parentMarkupId).tag
-      val layerHierarchyNode = schemaChildNodeMap[parentTag]!!
-      val expectedTags: MutableSet<String> = HashSet()
-      layerHierarchyNode
-          .iterator()
-          .forEachRemaining { childNode: TreeNode<String> ->
-            val tag = childNode.data
-            schemaChildNodeMap[tag] = childNode
-            expectedTags.add(tag)
-          }
-      document
-          .getChildMarkupIdStream(parentMarkupId, layer)
-          .forEach { mId: Long ->
-            val markup1 = store.getMarkup(mId)
-            val tag = markup1.tag
-            if (expectedTags.contains(tag)) {
-              markupIdsToHandle.add(mId)
-            } else {
-              val expectedTagString = expectedTags.joinToString(separator = " or ") { openTag(it, layer) }
-              result
-                  .errors
-                  .add(
-                      "Layer ${layerName(layer)}: expected $expectedTagString as child markup of ${openTag(parentTag, layer)}, but found ${openTag(markup1)}")
-              hasErrors.set(true)
-            }
-          }
+
+    private fun openTag(markup: TAGMarkup): String =
+            OPEN_TAG_STARTCHAR + markup.extendedTag + OPEN_TAG_ENDCHAR
+
+    private fun openTag(parentTag: String, layer: String): String {
+        val layerInfo = if (layer == DEFAULT_LAYER) "" else DIVIDER + layer
+        return OPEN_TAG_STARTCHAR + parentTag + layerInfo + OPEN_TAG_ENDCHAR
     }
-  }
 
-  private fun openTag(markup: TAGMarkup): String =
-      OPEN_TAG_STARTCHAR + markup.extendedTag + OPEN_TAG_ENDCHAR
-
-  private fun openTag(parentTag: String, layer: String): String {
-    val layerInfo = if (layer == DEFAULT_LAYER) "" else DIVIDER + layer
-    return OPEN_TAG_STARTCHAR + parentTag + layerInfo + OPEN_TAG_ENDCHAR
-  }
-
-  private fun layerName(layer: String): String =
-      (if (layer == DEFAULT_LAYER) "$ (default)" else layer)!!
+    private fun layerName(layer: String): String =
+            (if (layer == DEFAULT_LAYER) "$ (default)" else layer)!!
 
 }
