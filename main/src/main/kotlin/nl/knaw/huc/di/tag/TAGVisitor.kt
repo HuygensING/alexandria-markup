@@ -19,6 +19,7 @@ package nl.knaw.huc.di.tag
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGMarkup
 import nl.knaw.huygens.alexandria.view.TAGView

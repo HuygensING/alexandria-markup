@@ -28,7 +28,7 @@ class Range {
     var startPosition: Position? = null
     var endPosition: Position? = null
 
-    constructor() {}
+    constructor()
     constructor(startPosition: Position?, endPosition: Position?) {
         this.startPosition = startPosition
         this.endPosition = endPosition
@@ -37,8 +37,7 @@ class Range {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o !is Range) return false
-        val range = o
-        return startPosition == range.startPosition && endPosition == range.endPosition
+        return startPosition == o.startPosition && endPosition == o.endPosition
     }
 
     override fun hashCode(): Int {

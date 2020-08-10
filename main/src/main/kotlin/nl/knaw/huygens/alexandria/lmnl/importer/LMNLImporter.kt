@@ -81,7 +81,7 @@ class LMNLImporter(tagStore: TAGStore?) {
         ${errorListener.prefixedErrorMessagesAsString}
         """.trimIndent()
     }
-    if (!errorMsg.isEmpty()) {
+    if (errorMsg.isNotEmpty()) {
       throw LMNLSyntaxError(errorMsg)
     }
     update(dto)
@@ -339,7 +339,8 @@ class LMNLImporter(tagStore: TAGStore?) {
 
   internal class ImporterContext(private val lexer: LMNLLexer) {
     private val documentContextStack: Deque<DocumentContext> = ArrayDeque()
-    val _errors: MutableList<String> = ArrayList()
+    private val _errors: MutableList<String> = ArrayList()
+
     fun nextToken(): Token {
       return lexer.nextToken()
     }

@@ -31,7 +31,7 @@ class Position {
     var character = 0
         private set
 
-    constructor() {}
+    constructor()
     constructor(line: Int, character: Int) {
         this.line = line
         this.character = character
@@ -40,8 +40,7 @@ class Position {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o !is Position) return false
-        val position = o
-        return line == position.line && character == position.character
+        return line == o.line && character == o.character
     }
 
     override fun hashCode(): Int {

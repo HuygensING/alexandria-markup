@@ -38,7 +38,7 @@ import java.util.stream.Collectors
 
 internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBaseListener() {
 
-    private val LOG = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     val statements: MutableList<TAGQLStatement> = mutableListOf()
 
@@ -111,7 +111,7 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
         when (source) {
             is ParameterizedMarkupSourceContext -> {
                 val markupName = stringValue(source.markupName())
-                statement.setMarkupFilter({ tr: TAGMarkup -> tr.tag == markupName })
+                statement.setMarkupFilter { tr: TAGMarkup -> tr.tag == markupName }
                 if (source.indexValue() != null) {
                     val index = toInteger(source.indexValue())
                     statement.setIndex(index)
@@ -139,9 +139,8 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
         var filter: Predicate<TAGMarkup>? = null
         when (expr) {
             is EqualityComparisonExpressionContext -> {
-                val ecec = expr
-                val extendedIdentifier = ecec.extendedIdentifier()
-                val value = stringValue(ecec.literalValue())
+                val extendedIdentifier = expr.extendedIdentifier()
+                val value = stringValue(expr.literalValue())
                 if (extendedIdentifier.part() is NamePartContext) {
                     filter = Predicate { markup: TAGMarkup -> markup.extendedTag == value }
                 } else if (extendedIdentifier.part() is AnnotationValuePartContext) {
@@ -163,9 +162,8 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
                 filter = predicate0.and(predicate1)
             }
             is CombiningExpressionContext -> {
-                val context = expr
-                val predicate0 = handleExpression(context.expr(0))
-                val predicate1 = handleExpression(context.expr(2))
+                val predicate0 = handleExpression(expr.expr(0))
+                val predicate1 = handleExpression(expr.expr(2))
                 filter = predicate0.or(predicate1)
             }
             is TextContainsExpressionContext -> {
@@ -173,7 +171,7 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
                 filter = Predicate { tr: TAGMarkup -> substring in toText(tr) }
             }
             else -> {
-                unhandled(expr?.javaClass?.name + " expression", expr?.text)
+                unhandled(expr.javaClass.name + " expression", expr.text)
             }
         }
         return filter!!

@@ -29,8 +29,8 @@ import nl.knaw.huygens.alexandria.view.TAGView
 import org.slf4j.LoggerFactory
 
 class XMLExporter : TAGExporter {
-    constructor(store: TAGStore) : super(store) {}
-    constructor(store: TAGStore, view: TAGView) : super(store, view) {}
+    constructor(store: TAGStore) : super(store)
+    constructor(store: TAGStore, view: TAGView) : super(store, view)
 
     fun asXML(document: TAGDocument): String {
         val xmlBuilder = XMLBuilder()

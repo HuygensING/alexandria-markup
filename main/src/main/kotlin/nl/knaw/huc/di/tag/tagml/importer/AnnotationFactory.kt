@@ -25,7 +25,6 @@ import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge
 import nl.knaw.huc.di.tag.model.graph.edges.Edge
 import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory
 import nl.knaw.huygens.alexandria.ErrorListener
 import nl.knaw.huygens.alexandria.storage.AnnotationType
 import nl.knaw.huygens.alexandria.storage.TAGStore
@@ -45,23 +44,30 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
     }
 
     private fun makeAnnotation(
-            aName: String, annotationValueContext: AnnotationValueContext, value: Any?): AnnotationInfo? {
-        var annotationInfo: AnnotationInfo? = null
-        annotationInfo = if (value is String) {
-            makeStringAnnotation(aName, value)
-        } else if (value is Boolean) {
-            makeBooleanAnnotation(aName, value)
-        } else if (value is Double) {
-            makeDoubleAnnotation(aName, value)
-        } else if (value is List<*>) {
-            makeListAnnotation(aName, annotationValueContext, value as List<Any>)
-        } else if (value is HashMap<*, *>) {
-            makeMapAnnotation(aName, annotationValueContext, value as HashMap<String, Any>)
-        } else {
-            makeOtherAnnotation(aName, annotationValueContext)
-        }
-        return annotationInfo
-    }
+            aName: String,
+            annotationValueContext: AnnotationValueContext,
+            value: Any?
+    ): AnnotationInfo =
+            when (value) {
+                is String -> {
+                    makeStringAnnotation(aName, value)
+                }
+                is Boolean -> {
+                    makeBooleanAnnotation(aName, value)
+                }
+                is Double -> {
+                    makeDoubleAnnotation(aName, value)
+                }
+                is List<*> -> {
+                    makeListAnnotation(aName, annotationValueContext, value as List<Any>)
+                }
+                is HashMap<*, *> -> {
+                    makeMapAnnotation(aName, annotationValueContext, value as HashMap<String, Any>)
+                }
+                else -> {
+                    makeOtherAnnotation(aName, annotationValueContext)
+                }
+            }
 
     private fun makeStringAnnotation(aName: String, value: String): AnnotationInfo {
         val id = store.createStringAnnotationValue(value)
@@ -202,8 +208,8 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
             return annotationValueContext.richTextValue().text
         }
         errorListener!!.addError(
-                Position.Companion.startOf(annotationValueContext.getParent()),
-                Position.Companion.endOf(annotationValueContext.getParent()),
+                Position.startOf(annotationValueContext.getParent()),
+                Position.endOf(annotationValueContext.getParent()),
                 "Cannot determine the type of this annotation: %s",
                 annotationValueContext.text)
         return null
@@ -220,9 +226,8 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
 
     private fun parseAttribute(parseTree: ParseTree): KeyValue {
         return if (parseTree is BasicAnnotationContext) {
-            val basicAnnotationContext = parseTree
-            val aName = basicAnnotationContext.annotationName().text
-            val annotationValueContext = basicAnnotationContext.annotationValue()
+            val aName = parseTree.annotationName().text
+            val annotationValueContext = parseTree.annotationValue()
             val value = annotationValue(annotationValueContext)
             KeyValue(aName, value)
         } else if (parseTree is IdentifyingAnnotationContext) {
@@ -230,9 +235,8 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
             val value = parseTree.idValue().text
             KeyValue(":id", value)
         } else if (parseTree is RefAnnotationContext) {
-            val refAnnotationContext = parseTree
-            val aName = refAnnotationContext.annotationName().text
-            val value = refAnnotationContext.refValue().text
+            val aName = parseTree.annotationName().text
+            val value = parseTree.refValue().text
             KeyValue("!$aName", value)
         } else {
             throw RuntimeException("unhandled type " + parseTree.javaClass.name)
@@ -301,8 +305,8 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
             messageTemplate: String,
             aName: String) {
         errorListener!!.addError(
-                Position.Companion.startOf(annotationValueContext),
-                Position.Companion.endOf(annotationValueContext),
+                Position.startOf(annotationValueContext),
+                Position.endOf(annotationValueContext),
                 messageTemplate,
                 aName)
     }

@@ -34,7 +34,6 @@ import nl.knaw.huc.di.tag.tagml.TAGML.OPTIONAL_PREFIX
 import nl.knaw.huc.di.tag.tagml.TAGML.RESUME_PREFIX
 import nl.knaw.huc.di.tag.tagml.TAGML.SUSPEND_PREFIX
 import nl.knaw.huc.di.tag.tagml.TAGML.unEscape
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*
 import nl.knaw.huygens.alexandria.ErrorListener
 import nl.knaw.huygens.alexandria.storage.TAGDocument
@@ -61,14 +60,14 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener) :
     private val documentStack: Deque<TAGDocument> = ArrayDeque() // TODO: move to state
     private val textVariationStateStack: Deque<TextVariationState> = ArrayDeque()
     private var atDocumentStart = true
-    var openTagRange: MutableMap<Long, Range> = HashMap()
+    private var openTagRange: MutableMap<Long, Range> = HashMap()
     var closeTagRange: MutableMap<Long, Range> = HashMap()
 
     private val markupRanges: Map<Long, RangePair>
         get() {
             val markupRangeMap: MutableMap<Long, RangePair> = HashMap()
             openTagRange.keys.forEach { markupId: Long ->
-                markupRangeMap[markupId] = RangePair(openTagRange[markupId], closeTagRange[markupId])
+                markupRangeMap[markupId] = RangePair(openTagRange[markupId]!!, closeTagRange[markupId]!!)
             }
             return markupRangeMap
         }
@@ -98,7 +97,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener) :
         var startMarkup: TAGMarkup? = null
 
         //    public List<TAGTextNode> endNodes = new ArrayList<>();
-        var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = HashMap()
+        private var openMarkup: MutableMap<Int, MutableList<TAGMarkup>> = HashMap()
         var branch = 0
 
         fun addOpenMarkup(markup: TAGMarkup) {
@@ -142,7 +141,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener) :
         }
     }
 
-    override fun exitText(ctx: TAGMLParser.TextContext) {
+    override fun exitText(ctx: TextContext) {
         val text = unEscape(ctx.text)
         //    LOG.debug("text=<{}>", text);
         atDocumentStart = atDocumentStart && StringUtils.isBlank(text)
@@ -879,7 +878,7 @@ class TAGMLListener(private val store: TAGStore, errorListener: ErrorListener) :
     companion object {
         private val LOG = LoggerFactory.getLogger(TAGMLListener::class.java)
         const val TILDE = "~"
-        private val DEFAULT_LAYER_ONLY = setOf<String>(DEFAULT_LAYER)
+        private val DEFAULT_LAYER_ONLY = setOf(DEFAULT_LAYER)
     }
 
     init {

@@ -24,9 +24,10 @@ import nl.knaw.huygens.alexandria.data_model.Limen
 import nl.knaw.huygens.alexandria.data_model.Markup
 import nl.knaw.huygens.alexandria.data_model.TextNode
 import org.slf4j.LoggerFactory
+import kotlin.math.min
 
 internal class LMNLModifier(private val limen: Limen) {
-    private val LOG = LoggerFactory.getLogger(LMNLModifier::class.java)
+    private val log = LoggerFactory.getLogger(LMNLModifier::class.java)
 
     fun addMarkup(newMarkup: Markup, position: Position) {
         // logTextNodes(limen.textNodeList);
@@ -56,7 +57,7 @@ internal class LMNLModifier(private val limen: Limen) {
             val offsetAtEndOfCurrentTextNode: Int = cursor.offsetAtEndOfCurrentTextNode
             if (startOffset < offsetAtEndOfCurrentTextNode) {
                 // newMarkup starts in this TextNode
-                val tailLength = Math.min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset)
+                val tailLength = min(offsetAtEndOfCurrentTextNode, offsetAtEndOfCurrentTextNode - startOffset)
                 val headLength = currentTextNodeLength - tailLength
                 if (headLength == 0) {
                     // newMarkup exactly covers current TextNode
@@ -147,7 +148,7 @@ internal class LMNLModifier(private val limen: Limen) {
             throw RuntimeException("Markup " + newMarkup.tag + " should have an id.")
         }
         positions.forEach { position: Position ->
-            LOG.debug("position={}", position)
+            log.debug("position={}", position)
             logTextNodes(limen.textNodeList)
             logMarkups(limen.markupList)
             addMarkup(newMarkup, position)
@@ -169,7 +170,7 @@ internal class LMNLModifier(private val limen: Limen) {
             }
             textnodes.append("\n")
         }
-        LOG.debug("\nTextNodes:\n{}", textnodes)
+        log.debug("\nTextNodes:\n{}", textnodes)
     }
 
     private fun logMarkups(list: List<Markup>) {
@@ -178,7 +179,7 @@ internal class LMNLModifier(private val limen: Limen) {
             markups.append("[").append(tr.tag).append("}\n")
             tr.textNodes.forEach { tn: TextNode -> markups.append("  \"").append(tn.content).append("\"\n") }
         }
-        LOG.debug("\nMarkups:\n{}", markups)
+        log.debug("\nMarkups:\n{}", markups)
     }
 
     internal class TextNodeCursor(limen: Limen) {

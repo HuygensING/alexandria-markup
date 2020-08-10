@@ -29,7 +29,7 @@ import java.io.UnsupportedEncodingException
 import java.nio.charset.StandardCharsets
 
 class SPARQLQueryHandler(document: TAGDocument) {
-  private val model: Model
+  private val model: Model = document.store.runInTransaction<Model> { RDFFactory.fromDocument(document) }
 
   fun execute(sparqlQuery: String): SPARQLResult {
     val result = SPARQLResult(sparqlQuery)
@@ -89,7 +89,6 @@ class SPARQLQueryHandler(document: TAGDocument) {
 //    System.out.println("before RDF.list");
 //    Resource list = RDFS.Container;
 //    System.out.println("before fromDocument");
-    model = document.store.runInTransaction<Model> { RDFFactory.fromDocument(document) }
     //    System.out.println("after");
   }
 }

@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 
 class XMLBuilder : TAGVisitor {
-    val xmlBuilder = StringBuilder()
+    private val xmlBuilder = StringBuilder()
     val thIds: MutableMap<Any, String> = HashMap()
     val thIdCounter = AtomicInteger(0)
     val namespaceDefinitions: MutableList<String> = ArrayList()
-    var useTagNamespace = false
+    private var useTagNamespace = false
     var useTrojanHorse = false
     private var relevantLayers: Set<String>? = null
     var result: String = ""
@@ -44,6 +44,7 @@ class XMLBuilder : TAGVisitor {
     private val discontinuityNumber: MutableMap<String, Int> = HashMap()
 
     override fun setView(tagView: TAGView) {}
+
     override fun setRelevantLayers(relevantLayers: Set<String>) {
         useTrojanHorse = relevantLayers.size > 1
         this.relevantLayers = relevantLayers
@@ -54,11 +55,10 @@ class XMLBuilder : TAGVisitor {
         if (relevantLayers!!.size > 1) {
             namespaceDefinitions.add(TH_NAMESPACE)
         }
-        document
-                .namespaces
+        document.namespaces
                 .forEach { (ns: String, url: String) -> namespaceDefinitions.add("xmlns:$ns=\"$url\"") }
         xmlBuilder.append("<xml")
-        if (!namespaceDefinitions.isEmpty()) {
+        if (namespaceDefinitions.isNotEmpty()) {
             xmlBuilder.append(" ").append(java.lang.String.join(" ", namespaceDefinitions))
         }
         if (useTrojanHorse) {
@@ -72,7 +72,7 @@ class XMLBuilder : TAGVisitor {
         xmlBuilder.append("\n</xml>")
         result = xmlBuilder.toString()
         if (useTagNamespace) {
-            result = result!!.replaceFirst("<xml".toRegex(), "<xml $TAG_NAMESPACE")
+            result = result.replaceFirst("<xml".toRegex(), "<xml $TAG_NAMESPACE")
         }
     }
 
@@ -98,9 +98,8 @@ class XMLBuilder : TAGVisitor {
         //    }
     }
 
-    private fun discontinuityKey(markup: TAGMarkup, markupName: String): String {
-        return markup.layers.stream().sorted().collect(Collectors.joining(",", "$markupName|", ""))
-    }
+    private fun discontinuityKey(markup: TAGMarkup, markupName: String): String =
+            markup.layers.stream().sorted().collect(Collectors.joining(",", "$markupName|", ""))
 
     private fun getMarkupName(markup: TAGMarkup): String {
         var markupName = markup.tag
@@ -171,8 +170,8 @@ class XMLBuilder : TAGVisitor {
     //  private boolean shouldBeShown(final TAGMarkup markup) {
     //    return markup.getLayers().stream().anyMatch(relevantLayers::contains);
     //  }
-    override fun exitText(text: String, inVariation: Boolean) {
-        val xmlEscapedText = StringEscapeUtils.escapeXml11(text)
+    override fun exitText(escapedText: String, inVariation: Boolean) {
+        val xmlEscapedText = StringEscapeUtils.escapeXml11(escapedText)
         xmlBuilder.append(xmlEscapedText)
     }
 
@@ -181,37 +180,29 @@ class XMLBuilder : TAGVisitor {
     }
 
     override fun exitTextVariation() {}
-    override fun serializeStringAnnotationValue(stringValue: String): String {
-        return "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
-    }
+    override fun serializeStringAnnotationValue(stringValue: String): String =
+            "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
 
-    override fun serializeNumberAnnotationValue(numberValue: Double): String {
-        return serializeStringAnnotationValue(numberValue.toString().replaceFirst(".0$".toRegex(), ""))
-    }
+    override fun serializeNumberAnnotationValue(numberValue: Double): String =
+            serializeStringAnnotationValue(numberValue.toString().replaceFirst(".0$".toRegex(), ""))
 
-    override fun serializeBooleanAnnotationValue(booleanValue: Boolean): String {
-        return serializeStringAnnotationValue(if (booleanValue) "true" else "false")
-    }
+    override fun serializeBooleanAnnotationValue(booleanValue: Boolean): String =
+            serializeStringAnnotationValue(if (booleanValue) "true" else "false")
 
-    override fun serializeListAnnotationValue(serializedItems: List<String>): String {
-        return serializeStringAnnotationValue(serializedItems.stream().collect(Collectors.joining(",", "[", "]")))
-    }
+    override fun serializeListAnnotationValue(serializedItems: List<String>): String =
+            serializeStringAnnotationValue(serializedItems.stream().collect(Collectors.joining(",", "[", "]")))
 
-    override fun serializeMapAnnotationValue(serializedMapItems: List<String>): String {
-        return serializeStringAnnotationValue(
-                serializedMapItems.stream().collect(Collectors.joining(",", "{", "}")))
-    }
+    override fun serializeMapAnnotationValue(serializedMapItems: List<String>): String =
+            serializeStringAnnotationValue(
+                    serializedMapItems.stream().collect(Collectors.joining(",", "{", "}")))
 
-    override fun serializeAnnotationAssigner(name: String): String {
-        return "$name="
-    }
+    override fun serializeAnnotationAssigner(name: String): String = "$name="
 
-    private fun getThDoc(layerNames: Set<String>?): String {
-        return layerNames!!.stream()
-                .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
-                .sorted()
-                .collect(Collectors.joining(" "))
-    }
+    private fun getThDoc(layerNames: Set<String>?): String =
+            layerNames!!.stream()
+                    .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
+                    .sorted()
+                    .collect(Collectors.joining(" "))
 
     companion object {
         const val TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\""

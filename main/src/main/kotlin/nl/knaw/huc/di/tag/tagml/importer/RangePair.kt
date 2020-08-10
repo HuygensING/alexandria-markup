@@ -27,8 +27,7 @@ class RangePair {
     var startRange: Range? = null
     var endRange: Range? = null
 
-    constructor() {}
-    constructor(startRange: Range?, endRange: Range?) {
+    constructor(startRange: Range, endRange: Range) {
         this.startRange = startRange
         this.endRange = endRange
     }

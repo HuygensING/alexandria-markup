@@ -52,16 +52,14 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         val openLayers: MutableSet<String> = HashSet()
         openLayers.add(DEFAULT_LAYER)
         val stateRef = AtomicReference(ExporterState())
-        document
-                .textNodeStream
+        document.textNodeStream
                 .forEach { nodeToProcess: TAGTextNode ->
                     //      logTextNode(nodeToProcess);
                     if (nodeToProcess !in processedNodes) {
                         val state = stateRef.get()!!
                         val markupIds: MutableSet<Long> = LinkedHashSet()
                         //        Collections.reverse(markupStreamForTextNode);
-                        document
-                                .getMarkupStreamForTextNode(nodeToProcess)
+                        document.getMarkupStreamForTextNode(nodeToProcess)
                                 .forEach { mw: TAGMarkup ->
                                     val id = mw.dbId
                                     markupIds.add(id)
@@ -84,7 +82,7 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
                             textVariationStates.pop()
                             variationState = textVariationStates.peek()
                         }
-                        val toClose: MutableList<Long?> = ArrayList(state!!.openMarkupIds)
+                        val toClose: MutableList<Long?> = ArrayList(state.openMarkupIds)
                         toClose.removeAll(relevantMarkupIds)
                         toClose.reverse()
                         toClose.forEach { markupId: Long? ->
@@ -102,8 +100,7 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
 //                            var openTag = state.openTags[markupId].toString()
 //                            openTag = addResumePrefixIfRequired(
 //                                    openTag, markupId, discontinuousMarkupTextNodesToHandle)
-                            markup
-                                    .annotationStream
+                            markup.annotationStream
                                     .forEach { a: AnnotationInfo ->
                                         val value = serializeAnnotation(annotationFactory, a, tagVisitor)
                                         tagVisitor.addAnnotation(value)
@@ -240,7 +237,7 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
                 branchesToTraverse == 0
 
         fun inVariation(): Boolean =
-                !branchStartNodeIds.isEmpty()
+                branchStartNodeIds.isNotEmpty()
     }
 
     private fun toCloseTag(markup: TAGMarkup): StringBuilder {

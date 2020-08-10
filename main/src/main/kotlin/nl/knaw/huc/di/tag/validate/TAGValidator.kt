@@ -117,6 +117,6 @@ class TAGValidator(private val store: TAGStore) {
     }
 
     private fun layerName(layer: String): String =
-            (if (layer == DEFAULT_LAYER) "$ (default)" else layer)!!
+            (if (layer == DEFAULT_LAYER) "$ (default)" else layer)
 
 }
