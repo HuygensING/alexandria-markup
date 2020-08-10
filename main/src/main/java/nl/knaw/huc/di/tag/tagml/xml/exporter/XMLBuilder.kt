@@ -1,4 +1,4 @@
-package nl.knaw.huc.di.tag.tagml.xml.exporter;
+package nl.knaw.huc.di.tag.tagml.xml.exporter
 
 /*-
  * #%L
@@ -20,234 +20,202 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.TAGVisitor;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.view.TAGView;
-import org.apache.commons.text.StringEscapeUtils;
+import nl.knaw.huc.di.tag.TAGVisitor
+import nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER
+import nl.knaw.huygens.alexandria.storage.TAGDocument
+import nl.knaw.huygens.alexandria.storage.TAGMarkup
+import nl.knaw.huygens.alexandria.view.TAGView
+import org.apache.commons.text.StringEscapeUtils
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.stream.Collectors
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+class XMLBuilder : TAGVisitor {
+    val xmlBuilder = StringBuilder()
+    val thIds: MutableMap<Any, String> = HashMap()
+    val thIdCounter = AtomicInteger(0)
+    val namespaceDefinitions: MutableList<String> = ArrayList()
+    var useTagNamespace = false
+    var useTrojanHorse = false
+    private var relevantLayers: Set<String>? = null
+    var result: String? = null
+        private set
+    private val discontinuityCounter = AtomicInteger(1)
+    private val discontinuityNumber: MutableMap<String, Int> = HashMap()
 
-import static java.lang.String.join;
-import static java.util.stream.Collectors.joining;
-
-public class XMLBuilder implements TAGVisitor {
-  public static final String TH_NAMESPACE =
-      "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\"";
-  public static final String TAG_NAMESPACE = "xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\"";
-  public static final String DEFAULT_DOC = "_default";
-
-  final StringBuilder xmlBuilder = new StringBuilder();
-  final Map<Object, String> thIds = new HashMap<>();
-  final AtomicInteger thIdCounter = new AtomicInteger(0);
-  final List<String> namespaceDefinitions = new ArrayList<>();
-  boolean useTagNamespace = false;
-  boolean useTrojanHorse = false;
-  private Set<String> relevantLayers;
-  private String result;
-  private final AtomicInteger discontinuityCounter = new AtomicInteger(1);
-  private final Map<String, Integer> discontinuityNumber = new HashMap<>();
-
-  public String getResult() {
-    return result;
-  }
-
-  @Override
-  public void setView(final TAGView tagView) {
-  }
-
-  @Override
-  public void setRelevantLayers(final Set<String> relevantLayers) {
-    useTrojanHorse = relevantLayers.size() > 1;
-    this.relevantLayers = relevantLayers;
-  }
-
-  @Override
-  public void enterDocument(TAGDocument document) {
-    xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    if (relevantLayers.size() > 1) {
-      namespaceDefinitions.add(TH_NAMESPACE);
+    override fun setView(tagView: TAGView) {}
+    override fun setRelevantLayers(relevantLayers: Set<String>) {
+        useTrojanHorse = relevantLayers.size > 1
+        this.relevantLayers = relevantLayers
     }
-    document
-        .getNamespaces()
-        .forEach((ns, url) -> namespaceDefinitions.add("xmlns:" + ns + "=\"" + url + "\""));
-    xmlBuilder.append("<xml");
-    if (!namespaceDefinitions.isEmpty()) {
-      xmlBuilder.append(" ").append(join(" ", namespaceDefinitions));
+
+    override fun enterDocument(document: TAGDocument) {
+        xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        if (relevantLayers!!.size > 1) {
+            namespaceDefinitions.add(TH_NAMESPACE)
+        }
+        document
+                .namespaces
+                .forEach { (ns: String, url: String) -> namespaceDefinitions.add("xmlns:$ns=\"$url\"") }
+        xmlBuilder.append("<xml")
+        if (!namespaceDefinitions.isEmpty()) {
+            xmlBuilder.append(" ").append(java.lang.String.join(" ", namespaceDefinitions))
+        }
+        if (useTrojanHorse) {
+            val thDoc = getThDoc(relevantLayers)
+            xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"")
+        }
+        xmlBuilder.append(">\n")
     }
-    if (useTrojanHorse) {
-      final String thDoc = getThDoc(relevantLayers);
-      xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"");
+
+    override fun exitDocument(document: TAGDocument) {
+        xmlBuilder.append("\n</xml>")
+        result = xmlBuilder.toString()
+        if (useTagNamespace) {
+            result = result!!.replaceFirst("<xml".toRegex(), "<xml $TAG_NAMESPACE")
+        }
     }
-    xmlBuilder.append(">\n");
-  }
 
-  @Override
-  public void exitDocument(final TAGDocument document) {
-    xmlBuilder.append("\n</xml>");
-    result = xmlBuilder.toString();
-    if (useTagNamespace) {
-      result = result.replaceFirst("<xml", "<xml " + TAG_NAMESPACE);
+    override fun enterOpenTag(markup: TAGMarkup) {
+        //    boolean showMarkup = shouldBeShown(markup);
+        //    if (showMarkup) {
+        val markupName = getMarkupName(markup)
+        xmlBuilder.append("<").append(markupName)
+        if (markup.isOptional) {
+            useTagNamespace = true
+            xmlBuilder.append(" tag:optional=\"true\"")
+        }
+        val discontinuityKey = discontinuityKey(markup, markupName)
+        if (markup.isSuspended) {
+            useTagNamespace = true
+            val n = discontinuityCounter.getAndIncrement()
+            discontinuityNumber[discontinuityKey] = n
+            xmlBuilder.append(" tag:n=\"").append(n).append("\"")
+        } else if (markup.isResumed) {
+            val n = discontinuityNumber[discontinuityKey]
+            xmlBuilder.append(" tag:n=\"").append(n).append("\"")
+        }
+        //    }
     }
-  }
 
-  @Override
-  public void enterOpenTag(final TAGMarkup markup) {
-    //    boolean showMarkup = shouldBeShown(markup);
-    //    if (showMarkup) {
-    String markupName = getMarkupName(markup);
-    xmlBuilder.append("<").append(markupName);
-    if (markup.isOptional()) {
-      useTagNamespace = true;
-      xmlBuilder.append(" tag:optional=\"true\"");
+    private fun discontinuityKey(markup: TAGMarkup, markupName: String): String {
+        return markup.layers.stream().sorted().collect(Collectors.joining(",", "$markupName|", ""))
     }
-    String discontinuityKey = discontinuityKey(markup, markupName);
-    if (markup.isSuspended()) {
-      useTagNamespace = true;
-      final Integer n = discontinuityCounter.getAndIncrement();
-      discontinuityNumber.put(discontinuityKey, n);
-      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
 
-    } else if (markup.isResumed()) {
-      final Integer n = discontinuityNumber.get(discontinuityKey);
-      xmlBuilder.append(" tag:n=\"").append(n).append("\"");
+    private fun getMarkupName(markup: TAGMarkup): String {
+        var markupName = markup.tag
+        if (markupName.startsWith(":")) {
+            markupName = "tag$markupName"
+            useTagNamespace = true
+        }
+        return markupName
     }
-    //    }
-  }
 
-  private String discontinuityKey(final TAGMarkup markup, final String markupName) {
-    return markup.getLayers().stream().sorted().collect(joining(",", markupName + "|", ""));
-  }
-
-  private String getMarkupName(final TAGMarkup markup) {
-    String markupName = markup.getTag();
-    if (markupName.startsWith(":")) {
-      markupName = "tag" + markupName;
-      useTagNamespace = true;
+    override fun addAnnotation(serializedAnnotation: String) {
+        xmlBuilder.append(" ").append(serializedAnnotation)
     }
-    return markupName;
-  }
 
-  @Override
-  public void addAnnotation(String serializedAnnotation) {
-    xmlBuilder.append(" ").append(serializedAnnotation);
-  }
-
-  @Override
-  public void exitOpenTag(final TAGMarkup markup) {
-    Set<String> layers = markup.getLayers();
-    layers.retainAll(relevantLayers);
-    //    boolean showMarkup = shouldBeShown(markup);
-    //    if (showMarkup) {
-    if (useTrojanHorse) {
-      String thId = markup.getTag() + thIdCounter.getAndIncrement();
-      thIds.put(markup, thId);
-      final String thDoc = getThDoc(layers);
-
-      String id = markup.isAnonymous() ? "soleId" : "sId";
-      xmlBuilder
-          .append(" th:doc=\"")
-          .append(thDoc)
-          .append("\"")
-          .append(" th:")
-          .append(id)
-          .append("=\"")
-          .append(thId)
-          .append("\"/");
-
-    } else if (markup.isAnonymous()) {
-      xmlBuilder.append("/");
+    override fun exitOpenTag(markup: TAGMarkup) {
+        val layers = markup.layers intersect relevantLayers!!
+        //    boolean showMarkup = shouldBeShown(markup);
+        //    if (showMarkup) {
+        if (useTrojanHorse) {
+            val thId = markup.tag + thIdCounter.getAndIncrement()
+            thIds[markup] = thId
+            val thDoc = getThDoc(layers)
+            val id = if (markup.isAnonymous) "soleId" else "sId"
+            xmlBuilder
+                    .append(" th:doc=\"")
+                    .append(thDoc)
+                    .append("\"")
+                    .append(" th:")
+                    .append(id)
+                    .append("=\"")
+                    .append(thId)
+                    .append("\"/")
+        } else if (markup.isAnonymous) {
+            xmlBuilder.append("/")
+        }
+        xmlBuilder.append(">")
+        //    }
     }
-    xmlBuilder.append(">");
-    //    }
-  }
 
-  @Override
-  public void exitCloseTag(final TAGMarkup markup) {
-    String markupName = getMarkupName(markup);
-    Set<String> layers = markup.getLayers();
-    layers.retainAll(relevantLayers);
-    if (markup.isAnonymous()) {
-      return;
+    override fun exitCloseTag(markup: TAGMarkup) {
+        val markupName = getMarkupName(markup)
+        val layers = markup.layers intersect relevantLayers!!
+        if (markup.isAnonymous) {
+            return
+        }
+        //    boolean showMarkup = shouldBeShown(markup);
+        //    if (showMarkup) {
+        xmlBuilder.append("<")
+        if (!useTrojanHorse) {
+            xmlBuilder.append("/")
+        }
+        xmlBuilder.append(markupName)
+        if (useTrojanHorse) {
+            val thDoc = getThDoc(layers)
+            val thId = thIds.remove(markup)
+            xmlBuilder
+                    .append(" th:doc=\"")
+                    .append(thDoc)
+                    .append("\"")
+                    .append(" th:eId=\"")
+                    .append(thId)
+                    .append("\"/")
+        }
+        xmlBuilder.append(">")
+        //    }
     }
-    //    boolean showMarkup = shouldBeShown(markup);
-    //    if (showMarkup) {
-    xmlBuilder.append("<");
-    if (!useTrojanHorse) {
-      xmlBuilder.append("/");
+
+    //  private boolean shouldBeShown(final TAGMarkup markup) {
+    //    return markup.getLayers().stream().anyMatch(relevantLayers::contains);
+    //  }
+    override fun exitText(text: String, inVariation: Boolean) {
+        val xmlEscapedText = StringEscapeUtils.escapeXml11(text)
+        xmlBuilder.append(xmlEscapedText)
     }
-    xmlBuilder.append(markupName);
-    if (useTrojanHorse) {
-      final String thDoc = getThDoc(layers);
-      String thId = thIds.remove(markup);
-      xmlBuilder
-          .append(" th:doc=\"")
-          .append(thDoc)
-          .append("\"")
-          .append(" th:eId=\"")
-          .append(thId)
-          .append("\"/");
+
+    override fun enterTextVariation() {
+        useTagNamespace = true
     }
-    xmlBuilder.append(">");
-    //    }
-  }
 
-  //  private boolean shouldBeShown(final TAGMarkup markup) {
-  //    return markup.getLayers().stream().anyMatch(relevantLayers::contains);
-  //  }
+    override fun exitTextVariation() {}
+    override fun serializeStringAnnotationValue(stringValue: String): String {
+        return "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
+    }
 
-  @Override
-  public void exitText(final String text, final boolean inVariation) {
-    String xmlEscapedText = StringEscapeUtils.escapeXml11(text);
-    xmlBuilder.append(xmlEscapedText);
-  }
+    override fun serializeNumberAnnotationValue(numberValue: Double): String {
+        return serializeStringAnnotationValue(numberValue.toString().replaceFirst(".0$".toRegex(), ""))
+    }
 
-  @Override
-  public void enterTextVariation() {
-    useTagNamespace = true;
-  }
+    override fun serializeBooleanAnnotationValue(booleanValue: Boolean): String {
+        return serializeStringAnnotationValue(if (booleanValue) "true" else "false")
+    }
 
-  @Override
-  public void exitTextVariation() {
-  }
+    override fun serializeListAnnotationValue(serializedItems: List<String>): String {
+        return serializeStringAnnotationValue(serializedItems.stream().collect(Collectors.joining(",", "[", "]")))
+    }
 
-  @Override
-  public String serializeStringAnnotationValue(String stringValue) {
-    return "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\"";
-  }
+    override fun serializeMapAnnotationValue(serializedMapItems: List<String>): String {
+        return serializeStringAnnotationValue(
+                serializedMapItems.stream().collect(Collectors.joining(",", "{", "}")))
+    }
 
-  @Override
-  public String serializeNumberAnnotationValue(double numberValue) {
-    return serializeStringAnnotationValue(String.valueOf(numberValue).replaceFirst(".0$", ""));
-  }
+    override fun serializeAnnotationAssigner(name: String): String {
+        return "$name="
+    }
 
-  @Override
-  public String serializeBooleanAnnotationValue(boolean booleanValue) {
-    return serializeStringAnnotationValue(booleanValue ? "true" : "false");
-  }
+    private fun getThDoc(layerNames: Set<String>?): String {
+        return layerNames!!.stream()
+                .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
+                .sorted()
+                .collect(Collectors.joining(" "))
+    }
 
-  @Override
-  public String serializeListAnnotationValue(List<String> serializedItems) {
-    return serializeStringAnnotationValue(serializedItems.stream().collect(joining(",", "[", "]")));
-  }
-
-  @Override
-  public String serializeMapAnnotationValue(List<String> serializedMapItems) {
-    return serializeStringAnnotationValue(
-        serializedMapItems.stream().collect(joining(",", "{", "}")));
-  }
-
-  @Override
-  public String serializeAnnotationAssigner(String name) {
-    return name + "=";
-  }
-
-  private String getThDoc(final Set<String> layerNames) {
-    return layerNames.stream()
-        .map(l -> TAGML.DEFAULT_LAYER.equals(l) ? DEFAULT_DOC : l)
-        .sorted()
-        .collect(joining(" "));
-  }
+    companion object {
+        const val TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\""
+        const val TAG_NAMESPACE = "xmlns:tag=\"http://tag.di.huc.knaw.nl/ns/tag\""
+        const val DEFAULT_DOC = "_default"
+    }
 }
