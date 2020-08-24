@@ -35,8 +35,8 @@ import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.rdf.model.Model;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {
 
@@ -696,7 +696,6 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  //  @Ignore
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]";
@@ -836,7 +835,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
     String tagML =

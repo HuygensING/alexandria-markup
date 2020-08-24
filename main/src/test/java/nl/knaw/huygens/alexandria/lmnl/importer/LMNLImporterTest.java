@@ -32,8 +32,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +47,13 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@Ignore
+@Disabled
 public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -90,7 +90,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -257,7 +257,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testLMNLOzymandias() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
@@ -281,7 +281,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testDiscontinuousRanges() throws LMNLSyntaxError {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
@@ -304,7 +304,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnnotationTextWithRanges() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -355,7 +355,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnnotationTextInAnnotationWithRanges() throws LMNLSyntaxError {
     String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
@@ -392,7 +392,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnonymousAnnotationRangeOpener() throws LMNLSyntaxError {
     String input = "[range1 [}annotation text{]}bla{range1]";
@@ -420,7 +420,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAtomsAreIgnored() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -445,7 +445,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testEmptyRange() throws LMNLSyntaxError {
     String input = "[empty}{empty]";
@@ -467,7 +467,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testComments() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {

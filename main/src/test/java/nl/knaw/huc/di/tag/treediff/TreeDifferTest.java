@@ -22,8 +22,8 @@ package nl.knaw.huc.di.tag.treediff;
 
 import nl.knaw.huc.di.tag.treediff.TreeDiffer.Mapping;
 import nl.knaw.huc.di.tag.treediff.TreeDiffer.TreeMapping;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ import static java.util.Arrays.asList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huc.di.tag.treediff.TreeDiffer.computeDiff;
 import static nl.knaw.huc.di.tag.treediff.TreeDiffer.produceHumanFriendlyMapping;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TreeDifferTest {
   private static final Logger LOG = LoggerFactory.getLogger(TreeDifferTest.class);
@@ -43,7 +43,7 @@ public class TreeDifferTest {
   private Tree treeThree;
   private Tree treeFour;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     TreeNode a = new TreeNode("A");
     TreeNode b = new TreeNode("B");

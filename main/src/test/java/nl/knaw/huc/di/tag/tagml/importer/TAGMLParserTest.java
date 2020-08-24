@@ -36,8 +36,8 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +182,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         });
   }
 
-  @Ignore
+  @Disabled
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
     String input =
@@ -607,7 +607,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testElementLinking() {
     String input =

@@ -24,58 +24,33 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class TAGQLStatementTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private final String statement;
-  private final Boolean ok;
-
-  public TAGQLStatementTest(String statement, Boolean ok) {
-    this.statement = statement;
-    this.ok = ok;
-  }
-
-  @Parameters
-  public static Collection<Object[]> generateData() throws IOException {
-    List<Object[]> data = new ArrayList<>();
-
-    addLines(data, "correct_statements.tagql", true);
-    addLines(data, "incorrect_statements.tagql", false);
-
-    return data;
-  }
-
-  private static void addLines(List<Object[]> data, String name, boolean b) throws IOException {
-    InputStream inputStream = TAGQLStatementTest.class.getResourceAsStream(name);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-    String line;
-    while ((line = reader.readLine()) != null) {
-      data.add(new Object[]{line, b});
-    }
-  }
-
-  @Test
-  public void testTAGQLStatementHasExpectedValidity() {
-    LOG.info("TAGQL={}", this.statement);
-    CharStream stream = CharStreams.fromString(this.statement);
+  @ParameterizedTest(name = "#{index} - TAGQL statement: \"{0}\" should be valid: {1}")
+  @ArgumentsSource(CustomArgumentsProvider.class)
+  public void testTAGQLStatementHasExpectedValidity(String statement, Boolean isValid) {
+    LOG.info("TAGQL={}", statement);
+    CharStream stream = CharStreams.fromString(statement);
     TAGQLLexer lex = new TAGQLLexer(stream);
     // List<? extends Token> allTokens = lex.getAllTokens();
     // for (Token token : allTokens) {
@@ -93,6 +68,32 @@ public class TAGQLStatementTest {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors);
     boolean isOk = numberOfSyntaxErrors == 0;
-    assertThat(isOk).isEqualTo(this.ok);
+    assertThat(isOk).isEqualTo(isValid);
+  }
+
+  private static class CustomArgumentsProvider implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+      Stream<Arguments> correctStatements =
+          loadStatements("correct_statements.tagql").stream().map(it -> Arguments.of(it, true));
+      Stream<Arguments> incorrectStatements =
+          loadStatements("incorrect_statements.tagql").stream().map(it -> Arguments.of(it, false));
+      return concat(correctStatements, incorrectStatements);
+    }
+
+    private Collection<String> loadStatements(String name) {
+      List<String> statements = new ArrayList<>();
+      InputStream inputStream = TAGQLStatementTest.class.getResourceAsStream(name);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+      String line;
+      try {
+        while ((line = reader.readLine()) != null) {
+          statements.add(line);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return statements;
+    }
   }
 }

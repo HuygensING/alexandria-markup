@@ -25,8 +25,8 @@ import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SnarkTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(SnarkTest.class);
 
-  @Ignore
+  @Disabled
   @Test
   public void testSnark81Master() throws LMNLSyntaxError {
     String input = "[poem [title}The Hunting of the Snark (An Agony in 8 Fits){title] [voice}Narrator{voice]}\n" +

@@ -28,10 +28,11 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,48 +41,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class ImportDataTAGMLTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataTAGMLTest.class);
-  private static final IOFileFilter TAGML_FILE_FILTER = new IOFileFilter() {
-    @Override
-    public boolean accept(File file) {
-      return isTAGML(file.getName());
-    }
 
-    @Override
-    public boolean accept(File dir, String name) {
-      return isTAGML(name);
-    }
-
-    private boolean isTAGML(String name) {
-      return name.endsWith(".tagml");
-    }
-  };
-  private final String basename;
-
-  public ImportDataTAGMLTest(String basename) {
-    this.basename = basename;
-  }
-
-  @Parameters
-  public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/tagml"), TAGML_FILE_FILTER, null)
-        .stream()
-        .map(File::getName)
-        .map(n -> n.replace(".tagml", ""))
-        .map(b -> new String[]{b})
-        .collect(Collectors.toList());
-  }
-
-  @Test
-  public void testTAGMLFile() throws TAGMLSyntaxError {
+  @ParameterizedTest(name = "[{index}] testing data/tagml/{0}.tagml")
+  @ArgumentsSource(CustomArgumentsProvider.class)
+  public void testTAGMLFile(String basename) throws TAGMLSyntaxError {
     LOG.info("testing data/tagml/{}.tagml", basename);
     processTAGMLFile(basename);
     LOG.info("done testing data/tagml/{}.tagml", basename);
@@ -143,4 +113,30 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
     FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
   }
 
+  private static class CustomArgumentsProvider implements ArgumentsProvider {
+    private static final IOFileFilter TAGML_FILE_FILTER = new IOFileFilter() {
+      @Override
+      public boolean accept(File file) {
+        return isTAGML(file.getName());
+      }
+
+      @Override
+      public boolean accept(File dir, String name) {
+        return isTAGML(name);
+      }
+
+      private boolean isTAGML(String name) {
+        return name.endsWith(".tagml");
+      }
+    };
+
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+      return FileUtils.listFiles(new File("data/tagml"), TAGML_FILE_FILTER, null)
+          .stream()
+          .map(File::getName)
+          .map(n -> n.replace(".tagml", ""))
+          .map(Arguments::of);
+    }
+  }
 }

@@ -29,12 +29,12 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.util.Sets
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
 class TAGViewTest : AlexandriaBaseStoreTest() {
 
-  //  @Ignore("Should the default layer always be included?")
+    //  @Disabled("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
@@ -51,7 +51,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  //  @Ignore("Should the default layer always be included?")
+    //  @Disabled("Should the default layer always be included?")
   @Test
   fun testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
@@ -68,8 +68,8 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  @Ignore("Should the default layer always be included?")
-  @Test // NLA-489
+    @Disabled("Should the default layer always be included?")
+    @Test // NLA-489
   fun testLayerMarkupCombinationInView() {
     val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
     val viewJson = """{
@@ -86,7 +86,7 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  //  @Ignore("Should the default layer always be included?")
+    //  @Disabled("Should the default layer always be included?")
   @Test
   fun testFilterRelevantMarkup0() {
     runInStoreTransaction { store: TAGStore ->
@@ -142,8 +142,8 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     }
   }
 
-  @Ignore
-  @Test
+    @Disabled
+    @Test
   fun testFilterRelevantMarkup() {
     runInStoreTransaction { store: TAGStore ->
       val document = store.createDocument()

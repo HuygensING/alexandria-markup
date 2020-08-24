@@ -25,58 +25,27 @@ import nl.knaw.huygens.alexandria.exporter.LaTeXExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataLMNLInMemoryTest.class);
 
-  private final String basename;
-  private static final IOFileFilter LMNL_FILE_FILTER = new IOFileFilter() {
-    @Override
-    public boolean accept(File file) {
-      return isLMNL(file.getName());
-    }
-
-    @Override
-    public boolean accept(File dir, String name) {
-      return isLMNL(name);
-    }
-
-    private boolean isLMNL(String name) {
-      return name.endsWith(".lmnl") && name.startsWith("f");
-    }
-  };
-
-  @Parameters
-  public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null)
-        .stream()
-        .map(File::getName)
-        .map(n -> n.replace(".lmnl", ""))
-        .map(b -> new String[]{b})
-        .collect(Collectors.toList());
-  }
-
-  public ImportDataLMNLInMemoryTest(String basename) {
-    this.basename = basename;
-  }
-
-  @Test
-  public void testLMNLFile() throws IOException, LMNLSyntaxError {
+  @ParameterizedTest(name = "[{index}] testing {0}.lmnl")
+  @ArgumentsSource(CustomArgumentsProvider.class)
+  public void testLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     LOG.info("testing data/lmnl/{}.lmnl", basename);
     processLMNLFile(basename);
     LOG.info("done testing data/lmnl/{}.lmnl", basename);
@@ -84,8 +53,8 @@ public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
 
   private void processLMNLFile(String basename) throws IOException, LMNLSyntaxError {
     InputStream input = getInputStream(basename);
-//    LOG.info("showTokens\n");
-//    printTokens(input);
+    //    LOG.info("showTokens\n");
+    //    printTokens(input);
 
     input = getInputStream(basename);
     LOG.info("testing data/lmnl/{}.lmnl", basename);
@@ -115,7 +84,8 @@ public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
 
     String coloredText = exporter.exportMarkupOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
+    FileUtils.writeStringToFile(
+        new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
@@ -128,4 +98,30 @@ public class ImportDataLMNLInMemoryTest extends AlexandriaLMNLBaseTest {
     FileUtils.writeStringToFile(new File(outDir + basename + "-kdtree.tex"), kdTree, "UTF-8");
   }
 
+  private static class CustomArgumentsProvider implements ArgumentsProvider {
+    private final IOFileFilter LMNL_FILE_FILTER =
+        new IOFileFilter() {
+          @Override
+          public boolean accept(File file) {
+            return isLMNL(file.getName());
+          }
+
+          @Override
+          public boolean accept(File dir, String name) {
+            return isLMNL(name);
+          }
+
+          private boolean isLMNL(String name) {
+            return name.endsWith(".lmnl") && name.startsWith("f");
+          }
+        };
+
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+      return FileUtils.listFiles(new File("data/lmnl"), LMNL_FILE_FILTER, null).stream()
+          .map(File::getName)
+          .map(n -> n.replace(".lmnl", ""))
+          .map(Arguments::of);
+    }
+  }
 }

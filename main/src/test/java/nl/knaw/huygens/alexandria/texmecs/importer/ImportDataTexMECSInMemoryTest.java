@@ -28,58 +28,27 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class ImportDataTexMECSInMemoryTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSInMemoryTest.class);
 
-  private final String basename;
-  private static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
-    @Override
-    public boolean accept(File file) {
-      return isTexMECS(file.getName());
-    }
-
-    @Override
-    public boolean accept(File dir, String name) {
-      return isTexMECS(name);
-    }
-
-    private boolean isTexMECS(String name) {
-      return name.endsWith(".texmecs") && !name.contains("syntax-error");
-    }
-  };
-
-  @Parameters
-  public static Collection<String[]> parameters() {
-    return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)
-        .stream()
-        .map(File::getName)
-        .map(n -> n.replace(".texmecs", ""))
-        .map(b -> new String[]{b})
-        .collect(Collectors.toList());
-  }
-
-  public ImportDataTexMECSInMemoryTest(String basename) {
-    this.basename = basename;
-  }
-
-  @Test
-  public void testTexMECSFile() throws IOException {
+  @ParameterizedTest(name = "[{index}] testing data/texmecs/{0}.texmecs")
+  @ArgumentsSource(CustomArgumentsProvider.class)
+  public void testTexMECSFile(String basename) throws IOException {
     LOG.info("testing data/texmecs/{}.texmecs", basename);
     processTexMECSFile(basename);
     LOG.info("done testing data/texmecs/{}.texmecs", basename);
@@ -118,7 +87,8 @@ public class ImportDataTexMECSInMemoryTest {
 
     String coloredText = exporter.exportMarkupOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
+    FileUtils.writeStringToFile(
+        new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();
@@ -148,9 +118,40 @@ public class ImportDataTexMECSInMemoryTest {
     do {
       token = lexer.nextToken();
       if (token.getType() != Token.EOF) {
-        System.out.println(token + ": " + lexer.getRuleNames()[token.getType() - 1] + ": " + lexer.getModeNames()[lexer._mode]);
+        System.out.println(
+            token
+                + ": "
+                + lexer.getRuleNames()[token.getType() - 1]
+                + ": "
+                + lexer.getModeNames()[lexer._mode]);
       }
     } while (token.getType() != Token.EOF);
   }
 
+  private static class CustomArgumentsProvider implements ArgumentsProvider {
+    private static final IOFileFilter MECS_FILE_FILTER =
+        new IOFileFilter() {
+          @Override
+          public boolean accept(File file) {
+            return isTexMECS(file.getName());
+          }
+
+          @Override
+          public boolean accept(File dir, String name) {
+            return isTexMECS(name);
+          }
+
+          private boolean isTexMECS(String name) {
+            return name.endsWith(".texmecs") && !name.contains("syntax-error");
+          }
+        };
+
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+      return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null).stream()
+          .map(File::getName)
+          .map(n -> n.replace(".texmecs", ""))
+          .map(Arguments::of);
+    }
+  }
 }

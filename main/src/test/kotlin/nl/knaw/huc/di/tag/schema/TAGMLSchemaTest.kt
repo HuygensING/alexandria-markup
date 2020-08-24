@@ -28,8 +28,8 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import nl.knaw.huc.di.tag.TAGAssertions.assertThat
 import nl.knaw.huc.di.tag.schema.TAGMLSchemaFactory.parseYAML
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
@@ -147,8 +147,8 @@ class TAGMLSchemaTest {
             "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]")
   }
 
-  @Ignore
-  @Test
+    @Disabled
+    @Test
   @Throws(IOException::class, ProcessingException::class)
   fun testInCorrectSchema() {
     val schemaYAML = """
@@ -174,8 +174,8 @@ class TAGMLSchemaTest {
             | at [Source: (StringReader); line: 1, column: 9]""".trimMargin())
   }
 
-  @Ignore("fix tagschemaschema.json first: find 'or' function")
-  @Test
+    @Disabled("fix tagschemaschema.json first: find 'or' function")
+    @Test
   @Throws(ProcessingException::class, IOException::class)
   fun testSchemaValidator() {
     // because y = yes = TRUE according to the jackson parser

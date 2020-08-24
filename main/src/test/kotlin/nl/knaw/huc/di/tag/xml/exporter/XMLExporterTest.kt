@@ -30,8 +30,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore
 import nl.knaw.huygens.alexandria.view.TAGView
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.xml.sax.SAXException
 import java.io.IOException
@@ -41,7 +41,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
 class XMLExporterTest : TAGBaseStoreTest() {
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     @Throws(Exception::class)
     fun testMilestonesShouldGetSoleIdInTrojanHorse() {
@@ -54,7 +54,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     fun testXMLExportWithView() {
         val tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]"
@@ -74,7 +74,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
         }
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     fun testXMLExportWithViewAndDefaultLayer() {
         val tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]"
@@ -193,7 +193,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML.replace("'", "\""))
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     @Throws(Exception::class)
     fun testLayerIdentifiersAreOptionalInEndTagWhenNotAmbiguous() {
@@ -205,7 +205,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     @Throws(Exception::class)
     fun testNoLayerInfoOnEndTagWithMultipleStartTagsInSameLayers() {
@@ -365,7 +365,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(Exception::class)
     fun testCorrectDiscontinuityNonLinearityCombination() {

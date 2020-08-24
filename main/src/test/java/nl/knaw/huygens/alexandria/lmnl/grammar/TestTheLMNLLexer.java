@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.lmnl.grammar;
 
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

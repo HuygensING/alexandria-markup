@@ -27,8 +27,8 @@ import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import org.apache.commons.io.FileUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -37,7 +37,7 @@ import java.util.*
 class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
     private val LOG = LoggerFactory.getLogger(javaClass)
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(LMNLSyntaxError::class)
     fun testTAGQLQuery1() {
@@ -66,7 +66,7 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(LMNLSyntaxError::class)
     fun testTAGQLQuery2() {
@@ -106,7 +106,7 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(LMNLSyntaxError::class)
     fun testTAGQLQuery3() {
@@ -133,7 +133,7 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(LMNLSyntaxError::class)
     fun testTAGQLQuery4() {
@@ -164,7 +164,7 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(IOException::class, LMNLSyntaxError::class)
     fun testLuminescentQuery1() {
@@ -184,7 +184,7 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     @Throws(IOException::class, LMNLSyntaxError::class)
     fun testLuminescentQuery2() {
