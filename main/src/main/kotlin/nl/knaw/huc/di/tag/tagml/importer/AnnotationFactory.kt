@@ -185,43 +185,42 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
         }
     }
 
-    private fun annotationValue(annotationValueContext: AnnotationValueContext): Any? {
-        when {
-            annotationValueContext.AV_StringValue() != null -> {
-                return annotationValueContext
-                        .AV_StringValue()
-                        .text
-                        .replaceFirst("^.".toRegex(), "")
-                        .replaceFirst(".$".toRegex(), "")
-                        .replace("\\\"", "\"")
-                        .replace("\\'", "'")
+    private fun annotationValue(annotationValueContext: AnnotationValueContext): Any? =
+            when {
+                annotationValueContext.AV_StringValue() != null -> {
+                    annotationValueContext
+                            .AV_StringValue()
+                            .text
+                            .replaceFirst("^.".toRegex(), "")
+                            .replaceFirst(".$".toRegex(), "")
+                            .replace("\\\"", "\"")
+                            .replace("\\'", "'")
+                }
+                annotationValueContext.booleanValue() != null -> {
+                    java.lang.Boolean.valueOf(annotationValueContext.booleanValue().text)
+                }
+                annotationValueContext.AV_NumberValue() != null -> {
+                    java.lang.Double.valueOf(annotationValueContext.AV_NumberValue().text)
+                }
+                annotationValueContext.listValue() != null -> {
+                    annotationValueContext.listValue().annotationValue()
+                            .map { annotationValue(it) }
+                }
+                annotationValueContext.objectValue() != null -> {
+                    readObject(annotationValueContext.objectValue())
+                }
+                annotationValueContext.richTextValue() != null -> {
+                    annotationValueContext.richTextValue().text
+                }
+                else -> {
+                    errorListener!!.addError(
+                            Position.startOf(annotationValueContext.getParent()),
+                            Position.endOf(annotationValueContext.getParent()),
+                            ErrorMessages.UNKNOWN_ANNOTATION_TYPE,
+                            annotationValueContext.text)
+                    null
+                }
             }
-            annotationValueContext.booleanValue() != null -> {
-                return java.lang.Boolean.valueOf(annotationValueContext.booleanValue().text)
-            }
-            annotationValueContext.AV_NumberValue() != null -> {
-                return java.lang.Double.valueOf(annotationValueContext.AV_NumberValue().text)
-            }
-            annotationValueContext.listValue() != null -> {
-                return annotationValueContext.listValue().annotationValue()
-                        .map { annotationValue(it) }
-            }
-            annotationValueContext.objectValue() != null -> {
-                return readObject(annotationValueContext.objectValue())
-            }
-            annotationValueContext.richTextValue() != null -> {
-                return annotationValueContext.richTextValue().text
-            }
-            else -> {
-                errorListener!!.addError(
-                        Position.startOf(annotationValueContext.getParent()),
-                        Position.endOf(annotationValueContext.getParent()),
-                        ErrorMessages.UNKNOWN_ANNOTATION_TYPE,
-                        annotationValueContext.text)
-                return null
-            }
-        }
-    }
 
     private fun readObject(objectValueContext: ObjectValueContext): Map<String, Any?> {
         val map: MutableMap<String, Any?> = LinkedHashMap()
@@ -257,43 +256,31 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
                 }
             }
 
-    fun getStringValue(annotationInfo: AnnotationInfo): String {
-        val stringAnnotationValue = store.getStringAnnotationValue(annotationInfo.nodeId)
-        return stringAnnotationValue.value
-    }
+    fun getStringValue(annotationInfo: AnnotationInfo): String =
+            store.getStringAnnotationValue(annotationInfo.nodeId).value
 
-    fun getNumberValue(annotationInfo: AnnotationInfo): Double {
-        val numberAnnotationValue = store.getNumberAnnotationValue(annotationInfo.nodeId)
-        return numberAnnotationValue.value
-    }
+    fun getNumberValue(annotationInfo: AnnotationInfo): Double =
+            store.getNumberAnnotationValue(annotationInfo.nodeId).value
 
-    fun getBooleanValue(annotationInfo: AnnotationInfo): Boolean {
-        val booleanAnnotationValue = store.getBooleanAnnotationValue(annotationInfo.nodeId)
-        return booleanAnnotationValue.value
-    }
+    fun getBooleanValue(annotationInfo: AnnotationInfo): Boolean =
+            store.getBooleanAnnotationValue(annotationInfo.nodeId).value
 
-    fun getListValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> {
-        val nodeId = annotationInfo.nodeId
-        return textGraph.getOutgoingEdges(nodeId)
-                .asSequence()
-                .filterIsInstance<ListItemEdge>()
-                .map { toAnnotationInfo(it) }
-                .toList()
-    }
+    fun getListValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> =
+            textGraph.getOutgoingEdges(annotationInfo.nodeId)
+                    .asSequence()
+                    .filterIsInstance<ListItemEdge>()
+                    .map { toAnnotationInfo(it) }
+                    .toList()
 
-    fun getMapValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> {
-        val nodeId = annotationInfo.nodeId
-        return textGraph.getOutgoingEdges(nodeId)
-                .asSequence()
-                .filterIsInstance<AnnotationEdge>()
-                .map { toAnnotationInfo(it) }
-                .toList()
-    }
+    fun getMapValue(annotationInfo: AnnotationInfo): List<AnnotationInfo> =
+            textGraph.getOutgoingEdges(annotationInfo.nodeId)
+                    .asSequence()
+                    .filterIsInstance<AnnotationEdge>()
+                    .map { toAnnotationInfo(it) }
+                    .toList()
 
-    fun getReferenceValue(annotationInfo: AnnotationInfo): String {
-        val nodeId = annotationInfo.nodeId
-        return store.getReferenceValue(nodeId).value
-    }
+    fun getReferenceValue(annotationInfo: AnnotationInfo): String =
+            store.getReferenceValue(annotationInfo.nodeId).value
 
     private fun toAnnotationInfo(listItemEdge: ListItemEdge): AnnotationInfo {
         val nodeId = textGraph.getTargets(listItemEdge).iterator().next()
@@ -307,9 +294,9 @@ class AnnotationFactory @JvmOverloads constructor(private val store: TAGStore, p
         val nodeId = textGraph.getTargets(annotationEdge).iterator().next()
         val type = annotationEdge.annotationType
         val name = annotationEdge.field
-        val annotationInfo = AnnotationInfo(nodeId, type, name)
-        annotationInfo.setId(annotationEdge.id)
-        return annotationInfo
+        return AnnotationInfo(nodeId, type, name).apply {
+            setId(annotationEdge.id)
+        }
     }
 
     private fun addError(

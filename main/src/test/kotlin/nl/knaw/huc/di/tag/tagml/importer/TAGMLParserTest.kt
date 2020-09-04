@@ -20,7 +20,7 @@ package nl.knaw.huc.di.tag.tagml.importer
 * #L%
 */
 
-import nl.knaw.huc.di.tag.TAGAssertions
+import nl.knaw.huc.di.tag.TAGAssertions.assertThat
 import nl.knaw.huc.di.tag.TAGBaseStoreTest
 import nl.knaw.huc.di.tag.tagml.TAGML.BRANCH
 import nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES
@@ -38,7 +38,6 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.ParseTreeWalker
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -59,13 +58,13 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val pers = store.runInTransaction<AnnotationInfo> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
-                TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("Some text"))
+                assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
+                assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("Some text"))
                 assertThat(document.layerNames).containsExactly("")
                 val tagmlMarkup = document.markupStream.findFirst().get()
-                TAGAssertions.assertThat(tagmlMarkup).hasTag("tagml")
+                assertThat(tagmlMarkup).hasTag("tagml")
                 val persInfo = tagmlMarkup.getAnnotation("pers")
-                TAGAssertions.assertThat(persInfo).isReference
+                assertThat(persInfo).isReference
                 persInfo
             }
             store.runInTransaction {
@@ -80,10 +79,10 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml|+A>[x|A>simple<x] [t>text<t] [t>test<t]<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(
                             TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("x"), TAGDocumentAssert.markupSketch("t"), TAGDocumentAssert.markupSketch("t"))
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasTextNodesMatching(
                             TAGDocumentAssert.textNodeSketch("simple"),
                             TAGDocumentAssert.textNodeSketch(" "),
@@ -99,8 +98,8 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>simple text<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
-            TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("simple text"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
+            assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("simple text"))
             assertThat(document.layerNames).containsExactly("")
         }
     }
@@ -110,9 +109,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[text>[some|+L1>[all|+L2>word1<some|L1] word2<all|L2]<text]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(TAGDocumentAssert.markupSketch("text"), TAGDocumentAssert.markupSketch("some"), TAGDocumentAssert.markupSketch("all"))
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("word1"), TAGDocumentAssert.textNodeSketch(" word2"))
             assertThat(document.layerNames).containsExactly("", "L1", "L2")
         }
@@ -127,14 +126,14 @@ class TAGMLParserTest : TAGBaseStoreTest() {
                 + "<tagml]")
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(
                             TAGDocumentAssert.markupSketch("tagml"),
                             TAGDocumentAssert.markupSketch("pre"),
                             TAGDocumentAssert.markupSketch("q"),
                             TAGDocumentAssert.markupSketch("s"),
                             TAGDocumentAssert.markupSketch("post"))
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasTextNodesMatching(
                             TAGDocumentAssert.textNodeSketch("“Man,\""),
                             TAGDocumentAssert.textNodeSketch(" I cried, "),
@@ -163,14 +162,14 @@ class TAGMLParserTest : TAGBaseStoreTest() {
                 + "<pre|L1,L2]― [post|+L3>Mary Wollstonecraft Shelley, Frankenstein<post|L3]<tagml]")
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(
                             TAGDocumentAssert.markupSketch("tagml"),
                             TAGDocumentAssert.markupSketch("pre"),
                             TAGDocumentAssert.markupSketch("q"),
                             TAGDocumentAssert.markupSketch("s"),
                             TAGDocumentAssert.markupSketch("post"))
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasTextNodesMatching(
                             TAGDocumentAssert.textNodeSketch("“Man,\""),
                             TAGDocumentAssert.textNodeSketch(" I "),
@@ -205,9 +204,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>" + "[?optional>optional<?optional]" + "<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.optionalMarkupSketch("optional"))
-            TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("optional"))
+            assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("optional"))
         }
     }
 
@@ -218,7 +217,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
                 + "<tagml]")
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("discontinuity"))
         }
     }
@@ -228,7 +227,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>pre " + "[milestone x=4]" + " post<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("milestone"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("milestone"))
         }
     }
 
@@ -237,7 +236,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>" + "[id~1>identified<id~1]" + "<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("id"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("id"))
         }
     }
 
@@ -247,9 +246,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
-                TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
-                TAGAssertions.assertThat(document)
+                assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
+                assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
+                assertThat(document)
                         .hasMarkupWithTag("text")
                         .withStringAnnotation("author", "somebody")
                 document
@@ -264,9 +263,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string")
+                assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string")
                 document
             }
             assertExportEqualsInput(input.replace("\"", "'"), doc, store)
@@ -279,9 +278,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string")
+                assertThat(document).hasMarkupWithTag("m").withStringAnnotation("s", "string")
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -294,9 +293,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
-                TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
-                TAGAssertions.assertThat(document)
+                assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
+                assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
+                assertThat(document)
                         .hasMarkupWithTag("text")
                         .withNumberAnnotation("pi", 3.1415926)
                 document
@@ -311,9 +310,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
-                TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
-                TAGAssertions.assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("n", 1.0)
+                assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
+                assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
+                assertThat(document).hasMarkupWithTag("text").withNumberAnnotation("n", 1.0)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -326,9 +325,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
-                TAGAssertions.assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
-                TAGAssertions.assertThat(document)
+                assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("text"))
+                assertThat(document).hasTextNodesMatching(TAGDocumentAssert.textNodeSketch("some text."))
+                assertThat(document)
                         .hasMarkupWithTag("text")
                         .withBooleanAnnotation("test", true)
                 document
@@ -343,9 +342,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true)
+                assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", true)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -358,9 +357,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false)
+                assertThat(document).hasMarkupWithTag("m").withBooleanAnnotation("b", false)
                 document
             }
             assertExportEqualsInput(input.replace("FALSE", "false"), doc, store)
@@ -373,10 +372,10 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
                 val expected: List<String> = listOf("a", "b", "c")
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected)
+                assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -389,10 +388,10 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
                 val expected: List<Float> = listOf(3f, 5f, 7f, 11f)
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected)
+                assertThat(document).hasMarkupWithTag("m").withListAnnotation("l", expected)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -419,11 +418,11 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
                 val expected: MutableMap<String, Any> = mutableMapOf()
                 expected["valid"] = false
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected)
+                assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -436,12 +435,12 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("m"))
                 val expected: MutableMap<String, Any> = mutableMapOf()
                 expected["x"] = 1.0
                 expected["y"] = 2.0
-                TAGAssertions.assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected)
+                assertThat(document).hasMarkupWithTag("m").withObjectAnnotation("p", expected)
                 document
             }
             assertExportEqualsInput(input, doc, store)
@@ -461,7 +460,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             val doc = store.runInTransaction<TAGDocument> {
                 val document = assertTAGMLParses(input, store)
-                TAGAssertions.assertThat(document)
+                assertThat(document)
                         .hasMarkupMatching(
                                 TAGDocumentAssert.markupSketch("text"), TAGDocumentAssert.markupSketch("title"), TAGDocumentAssert.markupSketch("author"))
                 val ch: MutableMap<String, Any> = HashMap()
@@ -479,7 +478,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>" + "pre <|to be|not to be|> post" + "<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"))
         }
     }
 
@@ -488,7 +487,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml>" + "pre <|[del>to be<del]|[add>not to be<add]|> post" + "<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("del"), TAGDocumentAssert.markupSketch("add"))
         }
     }
@@ -504,7 +503,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
                 + "<tagml]")
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document)
+            assertThat(document)
                     .hasMarkupMatching(
                             TAGDocumentAssert.markupSketch("tagml"),
                             TAGDocumentAssert.markupSketch("del"),
@@ -520,7 +519,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[tagml meta={:id=meta01 name='test'}>" + "pre [x ref->meta01>text<x] post" + "<tagml]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("x"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("tagml"), TAGDocumentAssert.markupSketch("x"))
         }
     }
 
@@ -529,7 +528,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[t meta={:id=meta01 obj={t='test'} n=1}>" + "text" + "<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("t"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("t"))
         }
     }
 
@@ -538,7 +537,7 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[t note=[>[p>This is a [n>note<n] about this text<p]<]>main text<t]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("t"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("t"))
         }
     }
 
@@ -556,9 +555,9 @@ class TAGMLParserTest : TAGBaseStoreTest() {
         val input = "[m :id=m1>" + "pre [x ref->m1>text<x] post" + "<m]"
         runInStoreTransaction { store: TAGStore ->
             val document = assertTAGMLParses(input, store)
-            TAGAssertions.assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("m"), TAGDocumentAssert.markupSketch("x"))
+            assertThat(document).hasMarkupMatching(TAGDocumentAssert.markupSketch("m"), TAGDocumentAssert.markupSketch("x"))
             val m1 = document.markupStream.filter { m: TAGMarkup -> m.hasTag("m") }.findFirst().get()
-            TAGAssertions.assertThat(m1).hasMarkupId("m1")
+            assertThat(m1).hasMarkupId("m1")
         }
     }
 
