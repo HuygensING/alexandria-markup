@@ -180,6 +180,7 @@ class XMLBuilder : TAGVisitor {
     }
 
     override fun exitTextVariation() {}
+
     override fun serializeStringAnnotationValue(stringValue: String): String =
             "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
 
