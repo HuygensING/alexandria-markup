@@ -28,10 +28,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +44,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class ImportDataTAGMLTest extends TAGBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataTAGMLTest.class);
+
   private static final IOFileFilter TAGML_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
@@ -64,14 +62,8 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
       return name.endsWith(".tagml");
     }
   };
-  private final String basename;
 
-  public ImportDataTAGMLTest(String basename) {
-    this.basename = basename;
-  }
-
-  @Parameters
-  public static Collection<String[]> parameters() {
+  public static Collection<String[]> filenameProvider() {
     return FileUtils.listFiles(new File("data/tagml"), TAGML_FILE_FILTER, null)
         .stream()
         .map(File::getName)
@@ -80,8 +72,9 @@ public class ImportDataTAGMLTest extends TAGBaseStoreTest {
         .collect(Collectors.toList());
   }
 
-  @Test
-  public void testTAGMLFile() throws TAGMLSyntaxError {
+  @ParameterizedTest(name = "#{index} - data/tagml/{0}.tagml")
+  @MethodSource("filenameProvider")
+  public void testTAGMLFile(String basename) throws TAGMLSyntaxError {
     LOG.info("testing data/tagml/{}.tagml", basename);
     processTAGMLFile(basename);
     LOG.info("done testing data/tagml/{}.tagml", basename);

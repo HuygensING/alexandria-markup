@@ -49,7 +49,7 @@
         <maven-license.version>1.16</maven-license.version>
         <maven-resources.version>3.1.0</maven-resources.version>
         <maven-shade.version>3.2.1</maven-shade.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-surefire.version>3.0.0-M5</maven-surefire.version>
         <mockito-core.version>3.2.4</mockito-core.version>
         <slf4j-api.version>2.0.0-alpha1</slf4j-api.version>
         <tag.version>1.0-SNAPSHOT</tag.version>
@@ -122,6 +122,18 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${junit-jupiter.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>

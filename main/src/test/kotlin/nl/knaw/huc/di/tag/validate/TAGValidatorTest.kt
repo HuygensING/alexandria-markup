@@ -26,7 +26,7 @@ import nl.knaw.huc.di.tag.schema.TAGMLSchemaFactory
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 class TAGValidatorTest : TAGBaseStoreTest() {

@@ -30,7 +30,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 
-class XMLBuilder : TAGVisitor {
+class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
     private val xmlBuilder = StringBuilder()
     val thIds: MutableMap<Any, String> = HashMap()
     val thIdCounter = AtomicInteger(0)
@@ -38,8 +38,10 @@ class XMLBuilder : TAGVisitor {
     private var useTagNamespace = false
     var useTrojanHorse = false
     private var relevantLayers: Set<String>? = null
+
     var result: String = ""
         private set
+
     private val discontinuityCounter = AtomicInteger(1)
     private val discontinuityNumber: MutableMap<String, Int> = HashMap()
 
@@ -62,7 +64,7 @@ class XMLBuilder : TAGVisitor {
             xmlBuilder.append(" ").append(java.lang.String.join(" ", namespaceDefinitions))
         }
         if (useTrojanHorse) {
-            val thDoc = getThDoc(relevantLayers)
+            val thDoc = getThDoc(relevantLayers!!)
             xmlBuilder.append(" th:doc=\"").append(thDoc).append("\"")
         }
         xmlBuilder.append(">\n")
@@ -118,7 +120,7 @@ class XMLBuilder : TAGVisitor {
         val layers = markup.layers intersect relevantLayers!!
         //    boolean showMarkup = shouldBeShown(markup);
         //    if (showMarkup) {
-        if (useTrojanHorse) {
+        if (useTrojanHorse && leadingLayer !in layers) {
             val thId = markup.tag + thIdCounter.getAndIncrement()
             thIds[markup] = thId
             val thDoc = getThDoc(layers)
@@ -148,11 +150,11 @@ class XMLBuilder : TAGVisitor {
         //    boolean showMarkup = shouldBeShown(markup);
         //    if (showMarkup) {
         xmlBuilder.append("<")
-        if (!useTrojanHorse) {
+        if (!useTrojanHorse || leadingLayer in layers) {
             xmlBuilder.append("/")
         }
         xmlBuilder.append(markupName)
-        if (useTrojanHorse) {
+        if (useTrojanHorse && leadingLayer !in layers) {
             val thDoc = getThDoc(layers)
             val thId = thIds.remove(markup)
             xmlBuilder
@@ -199,11 +201,12 @@ class XMLBuilder : TAGVisitor {
 
     override fun serializeAnnotationAssigner(name: String): String = "$name="
 
-    private fun getThDoc(layerNames: Set<String>?): String =
-            layerNames!!.stream()
+    private fun getThDoc(layerNames: Set<String>): String =
+            layerNames
+                    .filter { it != leadingLayer }
                     .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
                     .sorted()
-                    .collect(Collectors.joining(" "))
+                    .joinToString(" ")
 
     companion object {
         const val TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\""

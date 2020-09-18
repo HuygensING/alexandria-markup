@@ -27,7 +27,7 @@ import nl.knaw.huygens.alexandria.storage.TAGStore
 import org.apache.jena.sparql.vocabulary.FOAF
 import org.apache.jena.vocabulary.RDF
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.*
 

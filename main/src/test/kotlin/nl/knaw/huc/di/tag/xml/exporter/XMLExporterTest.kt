@@ -23,38 +23,132 @@ package nl.knaw.huc.di.tag.xml.exporter
 import nl.knaw.huc.di.tag.TAGAssertions.assertThat
 import nl.knaw.huc.di.tag.TAGBaseStoreTest
 import nl.knaw.huc.di.tag.TAGViews.getShowAllMarkupView
+import nl.knaw.huc.di.tag.tagml.TAGML
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import nl.knaw.huygens.alexandria.view.TAGView
 import org.apache.commons.io.IOUtils
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import org.xml.sax.SAXException
-import java.io.IOException
 import java.nio.charset.Charset
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 class XMLExporterTest : TAGBaseStoreTest() {
-    @Ignore("re-examine after the tagml header has been implemented")
-    @Test
-    @Throws(Exception::class)
-    fun testMilestonesShouldGetSoleIdInTrojanHorse() {
-        val tagML = ("[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] [bookmark|B user='Jane']cookies<phr|B]"
-                + "<tagml]")
-        val expectedXML = """
+
+    @Nested
+    inner class TrojanHorseXMLTests() {
+        @Test
+        fun testOverlap() {
+            val tagML = "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="_default lb">
+                <x><a>J&apos;onn J&apos;onzz <b th:doc="lb" th:sId="b0"/>likes</a> Oreos<b th:doc="lb" th:eId="b0"/></x>
+                </xml>""".trimIndent()
+            assertXMLExportWithLeadingLayerIsAsExpected(tagML, "la", expectedXML)
+        }
+
+        @Test
+        fun testLayerIdentifiersAreOptionalInEndTags() {
+            val tagML = """
+                [tagml>
+                [text|+A,+B>
+                [page|A>
+                [p|B>
+                [line>1st. Voice from the Springs<line]
+                [line>Thrice three hundred thousand years<line]
+                [line>We had been stained with bitter blood<line]
+                <page]
+                [page|A>
+                [line>And had ran mute 'mid shrieks of slaugter\[sic]<line]
+                [line>Thro' a city & a multitude<line]
+                <p]
+                <page]
+                <text]
+                <tagml]
+                """.trimIndent()
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="A B">
+                <tagml><text th:doc="A B" th:sId="text0"/><line><page th:doc="A" th:sId="page1"/><p th:doc="B" th:sId="p2"/>1st. Voice from the Springs</line>
+                <line>Thrice three hundred thousand years</line>
+                <line>We had been stained with bitter blood</line>
+                <page th:doc="A" th:eId="page1"/>
+                <page th:doc="A" th:sId="page3"/>
+                <line>And had ran mute &apos;mid shrieks of slaugter[sic]</line>
+                <line>Thro&apos; a city &amp; a multitude</line>
+                <p th:doc="B" th:eId="p2"/>
+                <page th:doc="A" th:eId="page3"/>
+                <text th:doc="A B" th:eId="text0"/>
+                </tagml>
+                </xml>
+                """.trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testFrostQuote() {
+            val tagML = """
+                [excerpt|+S,+L source="The Housekeeper" author="Robert Frost">
+                [s|S>[l|L n=144>He manages to keep the upper hand<l]
+                [l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]
+                [l|L n=146>We fence our flowers in and the hens range.<l]<s]
+                <excerpt]""".trimIndent()
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="L _default">
+                <excerpt source="The Housekeeper" author="Robert Frost"><s><l n="144" th:doc="L" th:sId="l0"/>He manages to keep the upper hand<l th:doc="L" th:eId="l0"/>
+                <l n="145" th:doc="L" th:sId="l1"/>On his own farm.</s> <s>He&apos;s boss.</s> <s>But as to hens:<l th:doc="L" th:eId="l1"/>
+                <l n="146" th:doc="L" th:sId="l2"/>We fence our flowers in and the hens range.<l th:doc="L" th:eId="l2"/></s>
+                </excerpt>
+                </xml>
+                """.trimIndent()
+            assertXMLExportWithLeadingLayerIsAsExpected(tagML, "S", expectedXML)
+        }
+
+        @Test
+        fun testUseLayersForSelfOverlap() {
+            val tagML = "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="_default p1">
+                <x>word1 <phr th:doc="p1" th:sId="phr0"/>word2 <phr>word3<phr th:doc="p1" th:eId="phr0"/> word4</phr> word5</x>
+                </xml>""".trimIndent()
+            assertXMLExportWithLeadingLayerIsAsExpected(tagML, "p2", expectedXML)
+        }
+
+        @Disabled("re-examine after the tagml header has been implemented")
+        @Test
+        fun testMilestonesShouldGetSoleIdInTrojanHorse() {
+            val tagML = ("[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] [bookmark|B user='Jane']cookies<phr|B]"
+                    + "<tagml]")
+            val expectedXML = """
             <?xml version="1.0" encoding="UTF-8"?>
             <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="A B">
             <tagml th:doc="A B" th:sId="tagml0"/><phr th:doc="A" th:sId="phr1"/>Cookie Monster <phr th:doc="B" th:sId="phr2"/>likes<phr th:doc="A" th:eId="phr1"/> <bookmark user="Jane" th:doc="B" th:soleId="bookmark3"/>cookies<phr th:doc="B" th:eId="phr2"/><tagml th:doc="A B" th:eId="tagml0"/>
             </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testTAGML2() {
+            val tagML = ("[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]"
+                    + "<line|a,b]")
+            val expectedXML = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="a b">
+            <line><a th:doc="a" th:sId="a0"/>The rain in <country>Spain</country> <b th:doc="b" th:sId="b1"/>falls<a th:doc="a" th:eId="a0"/> mainly on the plain.<b th:doc="b" th:eId="b1"/></line>
+            </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     fun testXMLExportWithView() {
         val tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [phr|B>likes<phr|A] cookies<phr|B]<tagml]"
@@ -68,14 +162,14 @@ class XMLExporterTest : TAGBaseStoreTest() {
                 <tagml><phr>Cookie Monster likes</phr> cookies</tagml>
                 </xml>""".trimIndent()
             try {
-                assertXMLExportIsAsExpected(tagML, justA, expectedXML, store)
+                assertXMLExportIsAsExpected(tagML, justA, TAGML.DEFAULT_LAYER, expectedXML, store)
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
         }
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
     fun testXMLExportWithViewAndDefaultLayer() {
         val tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]"
@@ -89,7 +183,7 @@ class XMLExporterTest : TAGBaseStoreTest() {
                 <tagml><phr>Cookie Monster really likes</phr> cookies</tagml>
                 </xml>""".trimIndent()
             try {
-                assertXMLExportIsAsExpected(tagML, justA, expectedXML, store)
+                assertXMLExportIsAsExpected(tagML, justA, TAGML.DEFAULT_LAYER, expectedXML, store)
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -97,28 +191,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
-    fun testFrostQuote() {
-        val tagML = """
-            [excerpt|+S,+L source="The Housekeeper" author="Robert Frost">
-            [s|S>[l|L n=144>He manages to keep the upper hand<l]
-            [l|L n=145>On his own farm.<s] [s|S>He's boss.<s] [s|S>But as to hens:<l]
-            [l|L n=146>We fence our flowers in and the hens range.<l]<s]
-            <excerpt]""".trimIndent()
-        val expectedXML = """
-            <?xml version='1.0' encoding='UTF-8'?>
-            <xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='L S _default'>
-            <excerpt source='The Housekeeper' author='Robert Frost' th:doc='L S' th:sId='excerpt0'/><s th:doc='S' th:sId='s1'/><l n='144' th:doc='L' th:sId='l2'/>He manages to keep the upper hand<l th:doc='L' th:eId='l2'/>
-            <l n='145' th:doc='L' th:sId='l3'/>On his own farm.<s th:doc='S' th:eId='s1'/> <s th:doc='S' th:sId='s4'/>He&apos;s boss.<s th:doc='S' th:eId='s4'/> <s th:doc='S' th:sId='s5'/>But as to hens:<l th:doc='L' th:eId='l3'/>
-            <l n='146' th:doc='L' th:sId='l6'/>We fence our flowers in and the hens range.<l th:doc='L' th:eId='l6'/><s th:doc='S' th:eId='s5'/>
-            <excerpt th:doc='L S' th:eId='excerpt0'/>
-            </xml>
-            """.trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML.replace("'".toRegex(), "\""))
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun testCMLHTS18() {
         val tagML = """
             [tagml>
@@ -158,48 +230,8 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
-    @Throws(Exception::class)
-    fun testLayerIdentifiersAreOptionalInEndTags() {
-        val tagML = """
-            [tagml>
-            [text|+A,+B>
-            [page|A>
-            [p|B>
-            [line>1st. Voice from the Springs<line]
-            [line>Thrice three hundred thousand years<line]
-            [line>We had been stained with bitter blood<line]
-            <page]
-            [page|A>
-            [line>And had ran mute 'mid shrieks of slaugter\[sic]<line]
-            [line>Thro' a city & a multitude<line]
-            <p]
-            <page]
-            <text]
-            <tagml]
-            """.trimIndent()
-        val expectedXML = """
-            <?xml version='1.0' encoding='UTF-8'?>
-            <xml xmlns:th='http://www.blackmesatech.com/2017/nss/trojan-horse' th:doc='A B _default'>
-            <tagml th:doc='_default' th:sId='tagml0'/><text th:doc='A B' th:sId='text1'/><line th:doc='_default' th:sId='line2'/><page th:doc='A' th:sId='page3'/><p th:doc='B' th:sId='p4'/>1st. Voice from the Springs<line th:doc='_default' th:eId='line2'/>
-            <line th:doc='_default' th:sId='line5'/>Thrice three hundred thousand years<line th:doc='_default' th:eId='line5'/>
-            <line th:doc='_default' th:sId='line6'/>We had been stained with bitter blood<line th:doc='_default' th:eId='line6'/>
-            <page th:doc='A' th:eId='page3'/>
-            <page th:doc='A' th:sId='page7'/>
-            <line th:doc='_default' th:sId='line8'/>And had ran mute &apos;mid shrieks of slaugter[sic]<line th:doc='_default' th:eId='line8'/>
-            <line th:doc='_default' th:sId='line9'/>Thro&apos; a city &amp; a multitude<line th:doc='_default' th:eId='line9'/>
-            <p th:doc='B' th:eId='p4'/>
-            <page th:doc='A' th:eId='page7'/>
-            <text th:doc='A B' th:eId='text1'/>
-            <tagml th:doc='_default' th:eId='tagml0'/>
-            </xml>
-            """.trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML.replace("'", "\""))
-    }
-
-    @Ignore("re-examine after the tagml header has been implemented")
-    @Test
-    @Throws(Exception::class)
     fun testLayerIdentifiersAreOptionalInEndTagWhenNotAmbiguous() {
         val tagML = "[tagml|+A>Some text<tagml]"
         val expectedXML = """
@@ -210,9 +242,8 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Ignore("re-examine after the tagml header has been implemented")
+    @Disabled("re-examine after the tagml header has been implemented")
     @Test
-    @Throws(Exception::class)
     fun testNoLayerInfoOnEndTagWithMultipleStartTagsInSameLayers() {
         val tagML = "[tagml|+A>[p|A>Paragraph starts [p|A>Nested Paragraph<p] paragraph ends<p]<tagml]"
         val expectedXML = """
@@ -224,7 +255,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testSimpleTAGML() {
         val tagML = "[line>The rain in Spain falls mainly on the plain.<line]"
         val expectedXML = """
@@ -236,7 +266,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testCharacterEscapingInRegularText() {
         val tagML = "[tagml>In regular text, \\<, \\[ and \\\\ need to be escaped, |, !, \", and ' don't.<tagml]"
         val expectedXML = """
@@ -248,7 +277,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testCharacterEscapingInTextVariation() {
         val tagML = ("[t>In text in between textVariation tags, <|\\<, \\[, \\| and \\\\ need to be escaped"
                 + "|!, \" and ' don't|>.<t]")
@@ -261,32 +289,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
-    fun testOverlap() {
-        val tagML = "[x|+la,+lb>[a|la>J'onn J'onzz [b|lb>likes<a|la] Oreos<b|lb]<x|la,lb]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="_default la lb">
-            <x th:doc="la lb" th:sId="x0"/><a th:doc="la" th:sId="a1"/>J&apos;onn J&apos;onzz <b th:doc="lb" th:sId="b2"/>likes<a th:doc="la" th:eId="a1"/> Oreos<b th:doc="lb" th:eId="b2"/><x th:doc="la lb" th:eId="x0"/>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testTAGML2() {
-        val tagML = ("[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]"
-                + "<line|a,b]")
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="_default a b">
-            <line th:doc="_default a b" th:sId="line0"/><a th:doc="a" th:sId="a1"/>The rain in <country th:doc="_default" th:sId="country2"/>Spain<country th:doc="_default" th:eId="country2"/> <b th:doc="b" th:sId="b3"/>falls<a th:doc="a" th:eId="a1"/> mainly on the plain.<b th:doc="b" th:eId="b3"/><line th:doc="_default a b" th:eId="line0"/>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun testCommentsAreIgnored() {
         val tagML = "[! before !][a>Ah![! within !]<a][! after !]"
         val expectedXML = """
@@ -298,7 +300,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testNamespace() {
         val tagML = "[!ns a http://tag.com/a][a:a>Ah!<a:a]"
         val expectedXML = """
@@ -310,7 +311,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testMultipleNamespaces() {
         val tagML = "[!ns a http://tag.com/a]\n[!ns b http://tag.com/b]\n[a:a>[b:b>Ah!<b:b]<a:a]"
         val expectedXML = """
@@ -322,7 +322,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testTextVariation() {
         val tagML = "[t>This is a <|lame|dope|> test!<t]"
         val expectedXML = """
@@ -334,7 +333,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testMilestone() {
         val tagML = "[t>This is a [space chars=10] test!<t]"
         val expectedXML = """
@@ -346,7 +344,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testDiscontinuity() {
         val tagML = "[x>[t>This is<-t], he said, [+t>a test!<t]<x]"
         val expectedXML = """
@@ -358,7 +355,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testAcceptedMarkupDifferenceInNonLinearity() {
         val tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]"
         val expectedXML = """
@@ -370,7 +366,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testCorrectOverlapNonLinearityCombination2() {
         val tagML = ("[text>It is a truth universally acknowledged that every "
                 + "<|[add>young [b>woman<b]<add]"
@@ -384,9 +379,8 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Ignore
+    @Disabled
     @Test
-    @Throws(Exception::class)
     fun testCorrectDiscontinuityNonLinearityCombination() {
         val tagML = ("[x>[q>and what is the use of a book"
                 + "<|[del>, really,<del]"
@@ -397,7 +391,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testEscapeSpecialCharactersInTextVariation() {
         val tagML = "[t>bla <|\\||!|> bla<t]"
         val expectedXML = """
@@ -409,7 +402,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testOptionalMarkup() {
         val tagML = "[t>this is [?del>always<?del] optional<t]"
         val expectedXML = """
@@ -421,7 +413,6 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testContainmentIsDefault() {
         val tagML = "[tag>word1 [phr>word2 [phr>word3<phr] word4<phr] word5<tag]"
         val expectedXML = """
@@ -432,84 +423,72 @@ class XMLExporterTest : TAGBaseStoreTest() {
         assertXMLExportIsAsExpected(tagML, expectedXML)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun testUseLayersForSelfOverlap() {
-        val tagML = "[x|+p1,+p2>word1 [phr|p1>word2 [phr|p2>word3<phr|p1] word4<phr|p2] word5<x|p1,p2]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="_default p1 p2">
-            <x th:doc="p1 p2" th:sId="x0"/>word1 <phr th:doc="p1" th:sId="phr1"/>word2 <phr th:doc="p2" th:sId="phr2"/>word3<phr th:doc="p1" th:eId="phr1"/> word4<phr th:doc="p2" th:eId="phr2"/> word5<x th:doc="p1 p2" th:eId="x0"/>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
+    @Nested
+    inner class AnnotationTests() {
+        @Test
+        fun testStringAnnotations() {
+            val tagML = "[markup a='string' b=\"string\">text<markup]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml>
+                <markup a="string" b="string">text</markup>
+                </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testBooleanAnnotations() {
+            val tagML = "[markup a=TRUE b=false>text<markup]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml>
+                <markup a="true" b="false">text</markup>
+                </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testNumberAnnotations() {
+            val tagML = "[markup a=1 b=3.14>text<markup]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml>
+                <markup a="1" b="3.14">text</markup>
+                </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testListAnnotations() {
+            val tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml>
+                <markup primes="[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;5&quot;,&quot;7&quot;,&quot;11&quot;]">text</markup>
+                </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
+        @Test
+        fun testMapAnnotations() {
+            val tagML = "[markup author={first='Harley' last='Quinn'}>text<markup]"
+            val expectedXML = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xml>
+                <markup author="{first=&quot;Harley&quot;,last=&quot;Quinn&quot;}">text</markup>
+                </xml>""".trimIndent()
+            assertXMLExportIsAsExpected(tagML, expectedXML)
+        }
+
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun testStringAnnotations() {
-        val tagML = "[markup a='string' b=\"string\">text<markup]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml>
-            <markup a="string" b="string">text</markup>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testBooleanAnnotations() {
-        val tagML = "[markup a=TRUE b=false>text<markup]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml>
-            <markup a="true" b="false">text</markup>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testNumberAnnotations() {
-        val tagML = "[markup a=1 b=3.14>text<markup]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml>
-            <markup a="1" b="3.14">text</markup>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testListAnnotations() {
-        val tagML = "[markup primes=[1,2,3,5,7,11]>text<markup]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml>
-            <markup primes="[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;5&quot;,&quot;7&quot;,&quot;11&quot;]">text</markup>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testMapAnnotations() {
-        val tagML = "[markup author={first='Harley' last='Quinn'}>text<markup]"
-        val expectedXML = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xml>
-            <markup author="{first=&quot;Harley&quot;,last=&quot;Quinn&quot;}">text</markup>
-            </xml>""".trimIndent()
-        assertXMLExportIsAsExpected(tagML, expectedXML)
-    }
-
-    private fun assertXMLExportIsAsExpected(tagML: String, expectedXML: String) {
+    private fun assertXMLExportWithLeadingLayerIsAsExpected(tagML: String, leadingLayer: String, expectedXML: String) {
         runInStore { store: TAGStore ->
             try {
                 assertXMLExportIsAsExpected(
                         tagML,
                         getShowAllMarkupView(store),
+                        leadingLayer,
                         expectedXML,
                         store
                 )
@@ -519,30 +498,38 @@ class XMLExporterTest : TAGBaseStoreTest() {
         }
     }
 
-    @Throws(Exception::class)
+    private fun assertXMLExportIsAsExpected(tagML: String, expectedXML: String) =
+            assertXMLExportWithLeadingLayerIsAsExpected(tagML, TAGML.DEFAULT_LAYER, expectedXML)
+
     private fun assertXMLExportIsAsExpected(
-            tagML: String, view: TAGView, expectedXML: String, store: TAGStore) {
-        val document = store.runInTransaction<TAGDocument> { Companion.parseTAGML(tagML, store) }
+            tagML: String,
+            view: TAGView,
+            leadingLayer: String,
+            expectedXML: String,
+            store: TAGStore
+    ) {
+        val document = store.runInTransaction<TAGDocument> { parseTAGML(tagML, store) }
         assertThat(document).isNotNull
-        val xml = store.runInTransaction<String> { XMLExporter(store, view).asXML(document) }
+
+        val xml = store.runInTransaction<String> { XMLExporter(store, view).asXML(document, leadingLayer) }
         LOG.info("XML=\n\n{}\n", xml)
         assertThat(xml).isEqualTo(expectedXML)
         validateXML(xml)
     }
 
-    @Throws(SAXException::class, IOException::class, ParserConfigurationException::class)
-    private fun validateXML(xml: String) {
-        val inputStream = IOUtils.toInputStream(xml, Charset.defaultCharset())
-        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
-    }
-
     companion object {
         private val LOG = LoggerFactory.getLogger(XMLExporterTest::class.java)
+
         private fun parseTAGML(tagML: String, store: TAGStore): TAGDocument {
             LOG.info("TAGML=\n\n{}\n", tagML)
             //    printTokens(tagML);
             //    logDocumentGraph(document, tagML);
             return TAGMLImporter(store).importTAGML(tagML)
+        }
+
+        private fun validateXML(xml: String) {
+            val inputStream = IOUtils.toInputStream(xml, Charset.defaultCharset())
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream)
         }
     }
 }

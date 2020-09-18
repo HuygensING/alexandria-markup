@@ -26,8 +26,8 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,12 +41,12 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
   private static Path tmpDir;
   DotFactory dotFactory = new DotFactory();
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws IOException {
     tmpDir = mkTmpDir();
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws IOException {
     rmTmpDir(tmpDir);
   }
@@ -71,10 +71,8 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     }
   }
 
-  protected void logDocumentGraph(final TAGDocument document, final String input) {
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-    System.out.println(dotFactory.toDot(document, input));
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
+  private static void rmTmpDir(final Path tmpPath) throws IOException {
+    Files.walk(tmpPath).map(Path::toFile).forEach(File::deleteOnExit);
   }
 
   private static Path mkTmpDir() throws IOException {
@@ -86,10 +84,11 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     return tmpPath;
   }
 
-  private static void rmTmpDir(final Path tmpPath) throws IOException {
-    Files.walk(tmpPath)
-        .map(Path::toFile)
-        .forEach(File::deleteOnExit);
+  protected void logDocumentGraph(final TAGDocument document, final String input) {
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(dotFactory.toDot(document, input));
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
   }
-
 }

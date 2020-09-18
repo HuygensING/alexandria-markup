@@ -28,10 +28,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +41,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class ImportDataTexMECSInMemoryTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportDataTexMECSInMemoryTest.class);
 
-  private final String basename;
   private static final IOFileFilter MECS_FILE_FILTER = new IOFileFilter() {
     @Override
     public boolean accept(File file) {
@@ -64,8 +60,7 @@ public class ImportDataTexMECSInMemoryTest {
     }
   };
 
-  @Parameters
-  public static Collection<String[]> parameters() {
+  public static Collection<String[]> basenameProvider() {
     return FileUtils.listFiles(new File("data/texmecs"), MECS_FILE_FILTER, null)
         .stream()
         .map(File::getName)
@@ -74,12 +69,9 @@ public class ImportDataTexMECSInMemoryTest {
         .collect(Collectors.toList());
   }
 
-  public ImportDataTexMECSInMemoryTest(String basename) {
-    this.basename = basename;
-  }
-
-  @Test
-  public void testTexMECSFile() throws IOException {
+  @ParameterizedTest(name = "#{index} - data/texmecs/{0}.texmecs")
+  @MethodSource("basenameProvider")
+  public void testTexMECSFile(String basename) throws IOException {
     LOG.info("testing data/texmecs/{}.texmecs", basename);
     processTexMECSFile(basename);
     LOG.info("done testing data/texmecs/{}.texmecs", basename);

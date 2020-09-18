@@ -22,6 +22,7 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter
 
 import nl.knaw.huc.di.tag.TAGExporter
 import nl.knaw.huc.di.tag.TAGTraverser
+import nl.knaw.huc.di.tag.tagml.TAGML
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import nl.knaw.huygens.alexandria.view.TAGView
@@ -31,8 +32,8 @@ class XMLExporter : TAGExporter {
     constructor(store: TAGStore) : super(store)
     constructor(store: TAGStore, view: TAGView) : super(store, view)
 
-    fun asXML(document: TAGDocument): String {
-        val xmlBuilder = XMLBuilder()
+    fun asXML(document: TAGDocument, leadingLayer: String = TAGML.DEFAULT_LAYER): String {
+        val xmlBuilder = XMLBuilder(leadingLayer)
         TAGTraverser(store, view, document).accept(xmlBuilder)
         return xmlBuilder.result
     }

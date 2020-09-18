@@ -23,8 +23,8 @@ package nl.knaw.huc.di.tag.tagml.exporter;
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -56,7 +56,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagML);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testBrulez() {
     String tagmlIn = "[doc source=\"typescript-tg_lhhs_107\">\n" +
@@ -167,7 +167,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testCombiningOverlapAndNonLinearity1() {
     String tagmlIn = "[text>It is a truth universally acknowledged that every " +
@@ -186,7 +186,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagmlIn);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testCombiningDiscontinuityAndNonLinearity1() {
     String tagML = "[x>[q>and what is the use of a " +
@@ -254,7 +254,7 @@ public class TAGMLExporterTest extends TAGBaseStoreTest {
     assertTAGMLOutIsIn(tagML);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void balisageSlide4() {
     String tagML =

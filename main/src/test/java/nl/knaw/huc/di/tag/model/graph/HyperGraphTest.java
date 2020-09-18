@@ -25,7 +25,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 import nl.knaw.huc.di.tag.model.graph.nodes.DocumentNode;
 import nl.knaw.huc.di.tag.model.graph.nodes.Node;
 import nl.knaw.huc.di.tag.model.graph.nodes.TextNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 
@@ -74,10 +74,8 @@ public class HyperGraphTest {
 
     assertThat(hg.getTargets(dogs)).containsExactlyInAnyOrder(poodle, labrador, husky);
 
-    hg.removeTargetsFromHyperEdge(dogs,poodle, labrador, husky);
+    hg.removeTargetsFromHyperEdge(dogs, poodle, labrador, husky);
 
     assertThat(hg.getOutgoingEdges(dog)).isEmpty();
-
   }
-
 }

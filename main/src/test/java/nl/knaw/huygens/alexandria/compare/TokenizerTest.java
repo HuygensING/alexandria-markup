@@ -26,8 +26,8 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import prioritised_xml_collation.TAGToken;
 import prioritised_xml_collation.TextToken;
 
@@ -98,7 +98,7 @@ public class TokenizerTest extends AlexandriaBaseStoreTest {
         .containsExactly("main ", "de ", "femme", ", ", "élégante ", "et ", "fine");
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testTokenizer() {
     runInStoreTransaction(store -> {

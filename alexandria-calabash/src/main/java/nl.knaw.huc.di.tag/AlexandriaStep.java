@@ -30,6 +30,7 @@ import com.xmlcalabash.util.XProcURIResolver;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
+import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
@@ -57,13 +58,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-@XMLCalabash(
-    name = "tag:load",
-    type = "{https://huygensing.github.io/TAG/TAGML/ns/tag}load")
-
+@XMLCalabash(name = "tag:load", type = "{https://huygensing.github.io/TAG/TAGML/ns/tag}load")
 public class AlexandriaStep extends DefaultStep {
   private static final QName _tagmlfile = new QName("", "tagmlfile");
-  private static final String library_xpl = "https://huygensing.github.io/TAG/TAGML/calabash-steps.xpl";
+  private static final String library_xpl =
+      "https://huygensing.github.io/TAG/TAGML/calabash-steps.xpl";
   private static final String library_url = "/nl/knaw/huc/di/tag/library.xpl";
   private static final String STEP_NAME = "tag:load";
   private WritablePipe result = null;
@@ -90,15 +89,18 @@ public class AlexandriaStep extends DefaultStep {
       Path tmpPath = mkTmpDir();
       TAGStore store = new BDBTAGStore(tmpPath.toString(), false);
       store.open();
-      TAGDocument document = store.runInTransaction(() -> {
-        try {
-          return new TAGMLImporter(store).importTAGML(stream);
-        } catch (TAGMLSyntaxError se) {
-//          runtime.error(se);
-          throw new XProcException(se.getMessage());
-        }
-      });
-      String xml = store.runInTransaction(() -> new XMLExporter(store).asXML(document));
+      TAGDocument document =
+          store.runInTransaction(
+              () -> {
+                try {
+                  return new TAGMLImporter(store).importTAGML(stream);
+                } catch (TAGMLSyntaxError se) {
+                  //          runtime.error(se);
+                  throw new XProcException(se.getMessage());
+                }
+              });
+      String xml =
+          store.runInTransaction(() -> new XMLExporter(store).asXML(document, TAGML.DEFAULT_LAYER));
       store.close();
       rmTmpDir(tmpPath);
 
@@ -172,8 +174,6 @@ public class AlexandriaStep extends DefaultStep {
   }
 
   private void rmTmpDir(final Path tmpPath) throws IOException {
-    Files.walk(tmpPath)
-        .map(Path::toFile)
-        .forEach(File::deleteOnExit);
+    Files.walk(tmpPath).map(Path::toFile).forEach(File::deleteOnExit);
   }
 }

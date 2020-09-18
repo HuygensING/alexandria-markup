@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.storage;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 

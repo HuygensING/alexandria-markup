@@ -24,8 +24,8 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ import static nl.knaw.huygens.alexandria.AlexandriaAssertions.assertThat;
 public class TAGComparisonTest extends AlexandriaBaseStoreTest {
   private static final Logger LOG = LoggerFactory.getLogger(TAGComparisonTest.class);
 
-  @Ignore("TODO")
+  @Disabled("TODO")
   @Test
   public void testSplitCase() {
     String originText = "[TAGML|+M>\n" +
@@ -153,7 +153,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("TODO")
+  @Disabled("TODO")
   @Test
   public void testJoin() {
     String originText = "[t>[l>one two<l]\n[l>three four<l]<t]";
@@ -171,7 +171,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("TODO")
+  @Disabled("TODO")
   @Test
   public void testSplit() {
     String originText = "[t>[l>one two three four<l]<t]";
@@ -189,7 +189,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore("TODO")
+  @Disabled("TODO")
   @Test
   public void testAddedNewlines() {
     String originText = "[t>one two three four<t]";
@@ -204,7 +204,7 @@ public class TAGComparisonTest extends AlexandriaBaseStoreTest {
     assertThat(comparison.getDiffLines()).containsExactlyElementsOf(expected);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testNewlinesInText() {
     String originText = "[l>line 1<l]\n[l>line 2<l]\n[l>line 3<l]";

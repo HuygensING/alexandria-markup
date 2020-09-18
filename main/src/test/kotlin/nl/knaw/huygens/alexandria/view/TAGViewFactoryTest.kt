@@ -23,7 +23,7 @@ package nl.knaw.huygens.alexandria.view
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
 

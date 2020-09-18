@@ -25,8 +25,8 @@ import nl.knaw.huygens.alexandria.exporter.LaTeXExporterInMemory;
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
 import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +39,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LMNLImporterInMemoryTest extends AlexandriaLMNLBaseTest {
   private final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemoryTest.class);
   private final LMNLExporterInMemory lmnlExporterInMemory = new LMNLExporterInMemory().useShorthand();
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {
     String input = "[l [n}144{n]}He manages to keep the upper hand{l]";

@@ -32,8 +32,8 @@ import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +45,9 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@Ignore
+@Disabled
 public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
@@ -159,7 +159,7 @@ public class TexMECSImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  //  @Ignore
+  //  @Disabled
   @Test
   public void testVirtualElement() {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
