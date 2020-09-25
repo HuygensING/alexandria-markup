@@ -23,6 +23,7 @@
         <project.license.name>Apache License version 2.0</project.license.name>
         <project.license.url>https://www.apache.org/licenses/LICENSE-2.0</project.license.url>
         <java.version>1.8</java.version>
+        <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <antlr.version>4.8-1</antlr.version>
         <antlr4.visitor>true</antlr4.visitor>

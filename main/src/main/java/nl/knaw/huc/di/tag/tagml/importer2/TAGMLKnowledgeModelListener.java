@@ -67,27 +67,25 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     return knowledgeModel;
   }
 
-  public static class State {
-    public Map<String, Deque<MarkupResource>> openMarkup = new HashMap<>();
-    public Map<String, Deque<MarkupResource>> suspendedMarkup = new HashMap();
-    public Deque<MarkupResource> allOpenMarkup = new ArrayDeque<>();
-    public Long rootMarkupId = null;
-    public boolean eof = false;
-
-    public State copy() {
-      State copy = new State();
-      copy.openMarkup = new HashMap<>();
-      openMarkup.forEach((k, v) -> copy.openMarkup.put(k, new ArrayDeque<>(v)));
-      copy.suspendedMarkup = new HashMap<>();
-      suspendedMarkup.forEach((k, v) -> copy.suspendedMarkup.put(k, new ArrayDeque<>(v)));
-      copy.allOpenMarkup = new ArrayDeque<>(allOpenMarkup);
-      copy.rootMarkupId = rootMarkupId;
-      copy.eof = eof;
-      return copy;
-    }
-
-    public boolean rootMarkupIsSet() {
-      return rootMarkupId != null;
+  @Override
+  public void exitText(TAGMLParser.TextContext ctx) {
+    String text = unEscape(ctx.getText());
+    //    LOG.debug("text=<{}>", text);
+    atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
+    // TODO: smarter whitespace handling
+    boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
+    if (useText) {
+      if (StringUtils.isNotBlank(text)) {
+        checkEOF(ctx);
+      }
+      if (state.rootMarkupIsNotSet()) {
+        getErrorListener().addBreakingError(
+            "%s No text allowed here, the root markup must be started first.", errorPrefix(ctx));
+      }
+      Resource textResource = knowledgeModel.createTextResource(text);
+      for (final MarkupResource markupResource : getRelevantOpenMarkup()) {
+        knowledgeModel.connectTextNodeAndMarkup(textResource, markupResource);
+      }
     }
   }
 
@@ -154,24 +152,31 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   }
 
   @Override
-  public void exitText(TAGMLParser.TextContext ctx) {
-    String text = unEscape(ctx.getText());
-    //    LOG.debug("text=<{}>", text);
-    atDocumentStart = atDocumentStart && StringUtils.isBlank(text);
-    // TODO: smarter whitespace handling
-    boolean useText = !atDocumentStart /*&& !StringUtils.isBlank(text)*/;
-    if (useText) {
-      if (StringUtils.isNotBlank(text)) {
-        checkEOF(ctx);
+  public void exitMilestoneTag(TAGMLParser.MilestoneTagContext ctx) {
+    if (state.rootMarkupIsNotSet()) {
+      getErrorListener().addBreakingError(
+          "%s The root markup cannot be a milestone tag.", errorPrefix(ctx));
+    }
+    if (tagNameIsValid(ctx)) {
+      String markupName = ctx.name().getText();
+      //      LOG.debug("milestone.markupName=<{}>", markupName);
+      ctx.annotation()
+          .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
+      Set<String> layers = extractLayerInfo(ctx.layerInfo());
+      TextResource tn = knowledgeModel.createTextResource("");
+      for (MarkupResource m : getRelevantOpenMarkup()) {
+        knowledgeModel.connectTextNodeAndMarkup(tn, m);
       }
-      if (!state.rootMarkupIsSet()) {
-        getErrorListener().addBreakingError(
-            "%s No text allowed here, the root markup must be started first.", errorPrefix(ctx));
-      }
-      Resource textResource = knowledgeModel.createTextResource(text);
-      for (final MarkupResource markupResource : getRelevantOpenMarkup()) {
-        knowledgeModel.connectTextNodeAndMarkup(textResource, markupResource);
-      }
+
+      //      logTextNode(tn);
+      MarkupResource markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
+      //      markup.addAllLayers(layers);
+      layers.forEach(
+          layerName -> {
+            linkTextToMarkupForLayer(tn, markup, layerName);
+            //        document.openMarkupInLayer(markup, layerName);
+            //        document.closeMarkupInLayer(markup, layerName);
+          });
     }
   }
 
@@ -334,32 +339,27 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     }
   }
 
-  @Override
-  public void exitMilestoneTag(TAGMLParser.MilestoneTagContext ctx) {
-    if (!state.rootMarkupIsSet()) {
-      getErrorListener().addBreakingError(
-          "%s The root markup cannot be a milestone tag.", errorPrefix(ctx));
-    }
-    if (tagNameIsValid(ctx)) {
-      String markupName = ctx.name().getText();
-      //      LOG.debug("milestone.markupName=<{}>", markupName);
-      ctx.annotation()
-              .forEach(annotation -> LOG.debug("milestone.annotation={{}}", annotation.getText()));
-      Set<String> layers = extractLayerInfo(ctx.layerInfo());
-      TextResource tn = knowledgeModel.createTextResource("");
-      for (MarkupResource m : getRelevantOpenMarkup()) {
-        knowledgeModel.connectTextNodeAndMarkup(tn, m);
-      }
+  public static class State {
+    public Map<String, Deque<MarkupResource>> openMarkup = new HashMap<>();
+    public Map<String, Deque<MarkupResource>> suspendedMarkup = new HashMap();
+    public Deque<MarkupResource> allOpenMarkup = new ArrayDeque<>();
+    public Long rootMarkupId = null;
+    public boolean eof = false;
 
-      //      logTextNode(tn);
-      MarkupResource markup = addMarkup(ctx.name().getText(), ctx.annotation(), ctx);
-      //      markup.addAllLayers(layers);
-      layers.forEach(
-              layerName -> {
-                linkTextToMarkupForLayer(tn, markup, layerName);
-                //        document.openMarkupInLayer(markup, layerName);
-                //        document.closeMarkupInLayer(markup, layerName);
-              });
+    public State copy() {
+      State copy = new State();
+      copy.openMarkup = new HashMap<>();
+      openMarkup.forEach((k, v) -> copy.openMarkup.put(k, new ArrayDeque<>(v)));
+      copy.suspendedMarkup = new HashMap<>();
+      suspendedMarkup.forEach((k, v) -> copy.suspendedMarkup.put(k, new ArrayDeque<>(v)));
+      copy.allOpenMarkup = new ArrayDeque<>(allOpenMarkup);
+      copy.rootMarkupId = rootMarkupId;
+      copy.eof = eof;
+      return copy;
+    }
+
+    public boolean rootMarkupIsNotSet() {
+      return rootMarkupId == null;
     }
   }
 
