@@ -152,13 +152,13 @@ class TAGView(private val store: TAGStore) {
                 .withIncludeMarkup(markupToInclude)
                 .withExcludeMarkup(markupToExclude)
 
-    private fun markupStyleIsInclude() = markupRelevance == INCLUDE
+    fun markupStyleIsInclude() = markupRelevance == INCLUDE
 
-    private fun markupStyleIsExclude() = markupRelevance == EXCLUDE
+    fun markupStyleIsExclude() = markupRelevance == EXCLUDE
 
-    private fun layerStyleIsInclude() = layerRelevance == INCLUDE
+    fun layerStyleIsInclude() = layerRelevance == INCLUDE
 
-    private fun layerStyleIsExclude() = layerRelevance == EXCLUDE
+    fun layerStyleIsExclude() = layerRelevance == EXCLUDE
 
     fun isIncluded(tagMarkup: TAGMarkup): Boolean {
         val tag = tagMarkup.tag
