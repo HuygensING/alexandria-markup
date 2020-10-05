@@ -9,9 +9,9 @@ package nl.knaw.huc.di.tag.treediff;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,16 @@ package nl.knaw.huc.di.tag.treediff;
  * limitations under the License.
  * #L%
  */
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * Tests the functionality of Tree
@@ -39,7 +39,7 @@ public class TreeTest {
   private Tree treeTwo;
   private Tree treeThree;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     TreeNode a_node = new TreeNode("A");
     TreeNode b_node = new TreeNode("B");
@@ -77,15 +77,22 @@ public class TreeTest {
     // Successfully produce the list of visited node labels
     TreeNodeVisitor visitor = new TreeNodeVisitor();
     treeOne.performPreorderTraversal(visitor);
-    String[] expString = {"label: A, preorderPosition: 1", "label: B, preorderPosition: 2",
-        "label: C, preorderPosition: 3"};
+    String[] expString = {
+        "label: A, preorderPosition: 1",
+        "label: B, preorderPosition: 2",
+        "label: C, preorderPosition: 3"
+    };
     List<String> expected = new ArrayList<>(Arrays.asList(expString));
     assertEquals(expected, visitor.traversal);
 
     visitor = new TreeNodeVisitor();
     treeTwo.performPreorderTraversal(visitor);
-    String[] expString2 = {"label: A, preorderPosition: 1", "label: B, preorderPosition: 2",
-        "label: C, preorderPosition: 3", "label: D, preorderPosition: 4"};
+    String[] expString2 = {
+        "label: A, preorderPosition: 1",
+        "label: B, preorderPosition: 2",
+        "label: C, preorderPosition: 3",
+        "label: D, preorderPosition: 4"
+    };
     expected = new ArrayList<>(Arrays.asList(expString2));
     assertEquals(expected.toString(), visitor.traversal.toString());
   }
@@ -131,9 +138,11 @@ public class TreeTest {
   /*
    * Raise error when father of a non-existing node requested
    */
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testFatherOf_when_no_such_node() {
-    treeTwo.fatherOf(5);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> treeTwo.fatherOf(5));
   }
 
   /*
@@ -181,11 +190,15 @@ public class TreeTest {
   /*
    * Trying to iterate from non-existing node is erroneous
    */
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAncestorIterator_from_non_existing_position() {
-    for (Integer i : treeTwo.ancestorIterator(100)) {
-      System.out.println("Should not yield even once");
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          for (Integer i : treeTwo.ancestorIterator(100)) {
+            System.out.println("Should not yield even once");
+          }
+        });
   }
 
   /*
@@ -209,8 +222,10 @@ public class TreeTest {
   /*
    * No node between ancestor and descendant
    */
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testChildOnPathFromDescendant_when_no_such_node() {
-    treeTwo.childOnPathFromDescendant(1, 1);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> treeTwo.childOnPathFromDescendant(1, 1));
   }
 }

@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
@@ -37,31 +38,28 @@ public class TAGMLBuilder implements TAGVisitor {
 
   @Override
   public void setView(final TAGView tagView) {
-
   }
 
   @Override
   public void enterDocument(final TAGDocument document) {
-
   }
 
   @Override
   public void exitDocument(final TAGDocument document) {
-    result = tagmlBuilder.toString()
-        .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
-        .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
-        .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE)
-    ;
+    result =
+        tagmlBuilder
+            .toString()
+            .replace(BRANCHES_START + BRANCH_START, TAGML.DIVERGENCE)
+            .replace(BRANCH_END + BRANCH_START, TAGML.DIVIDER)
+            .replace(BRANCH_END + BRANCHES_END, TAGML.CONVERGENCE);
   }
 
   @Override
   public void enterOpenTag(final TAGMarkup markup) {
-
   }
 
   @Override
   public void addAnnotation(String serializedAnnotation) {
-
   }
 
   @Override
@@ -71,59 +69,58 @@ public class TAGMLBuilder implements TAGVisitor {
 
   @Override
   public void exitOpenTag(final TAGMarkup markup) {
-
   }
 
   @Override
   public void exitCloseTag(final TAGMarkup markup) {
-
   }
 
   @Override
   public void exitText(final String text, final boolean inVariation) {
-    String escapedText = inVariation
-        ? TAGML.escapeVariantText(text)
-        : TAGML.escapeRegularText(text);
+    String escapedText =
+        inVariation ? TAGML.escapeVariantText(text) : TAGML.escapeRegularText(text);
     tagmlBuilder.append(escapedText);
   }
 
   @Override
   public void enterTextVariation() {
-
   }
 
   @Override
   public void exitTextVariation() {
-
   }
 
   @Override
   public void setRelevantLayers(final Set<String> relevantLayers) {
-
   }
 
+  @NotNull
   @Override
   public String serializeStringAnnotationValue(String stringValue) {
-    return null;
+    return "";
   }
 
+  @NotNull
   @Override
-  public String serializeNumberAnnotationValue(Double numberValue) {
-    return null;
+  public String serializeNumberAnnotationValue(double numberValue) {
+    return "";
   }
 
+  @NotNull
   @Override
-  public String serializeBooleanAnnotationValue(Boolean booleanValue) {
-    return null;
+  public String serializeBooleanAnnotationValue(boolean booleanValue) {
+    return "";
   }
 
+  @NotNull
   @Override
-  public String serializeListAnnotationValue(List<String> serializedItems) {
-    return null;
+  public String serializeListAnnotationValue(@NotNull List<String> serializedItems) {
+    return "";
   }
 
+  @NotNull
   @Override
-  public String serializeMapAnnotationValue(List<String> serializedMapItems) {
-    return null;
+  public String serializeMapAnnotationValue(@NotNull List<String> serializedMapItems) {
+    return "";
   }
 }

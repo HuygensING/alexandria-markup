@@ -36,8 +36,8 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +55,15 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLParserTest.class);
   //  private static final TAGMLExporter TAGML_EXPORTER = new TAGMLExporter(store);
+
+  @Test
+  public void testAST() {
+    String input = "[TEI>[s>It seemed [?del>indeed<?del] as if<s]<TEI]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = assertTAGMLParses(input, store);
+        });
+  }
 
   @Test
   public void testTagWithReferenceParses() {
@@ -173,7 +182,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         });
   }
 
-  @Ignore
+  @Disabled
   @Test // RD-134
   public void testTextWithMultipleLayersDiscontinuityAndNonLinearity() {
     String input =
@@ -468,10 +477,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
 
     final String expectedError =
         "line 1:13 : All elements of ListAnnotation l should be of the same type.";
-    runInStoreTransaction(
-        store -> {
-          assertTAGMLParsesWithSyntaxError(input, expectedError, store);
-        });
+    runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
   @Test // RD-206
@@ -479,10 +485,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     String input = "[tagml>" + "[m l=[3 5 7 11]>text<m]" + "<tagml]";
     final String expectedError =
         "line 1:13 : The elements of ListAnnotation l should be separated by commas.";
-    runInStoreTransaction(
-        store -> {
-          assertTAGMLParsesWithSyntaxError(input, expectedError, store);
-        });
+    runInStoreTransaction(store -> assertTAGMLParsesWithSyntaxError(input, expectedError, store));
   }
 
   @Test // NLA-467
@@ -551,7 +554,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
                     ch.put("name", "Constantijn Huygens");
 
                     List<Map<String, Object>> expected = Lists.newArrayList(ch);
-                    //
+
                     // assertThat(document).hasMarkupWithTag("text").withObjectAnnotation("meta",
                     // expected);
                     return document;
@@ -604,7 +607,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
         });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testElementLinking() {
     String input =
@@ -640,10 +643,9 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
   public void testNamespaceNeedsToBeDefinedBeforeUsage() {
     String input = "[z:t>text<z:t]";
     runInStoreTransaction(
-        store -> {
-          assertTAGMLParsesWithSyntaxError(
-              input, "line 1:1 : Namespace z has not been defined.", store);
-        });
+        store ->
+            assertTAGMLParsesWithSyntaxError(
+                input, "line 1:1 : Namespace z has not been defined.", store));
   }
 
   @Test
@@ -717,7 +719,7 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    assertThat(errorListener.getErrors()).contains(expectedSyntaxErrorMessage);
+    assertThat(errorListener.getPrefixedErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
   }
 
   private void assertExportEqualsInput(String input, TAGDocument doc, final TAGStore store) {

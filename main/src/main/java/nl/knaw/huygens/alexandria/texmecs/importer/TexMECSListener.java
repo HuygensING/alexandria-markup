@@ -20,7 +20,10 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
 import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
@@ -138,15 +141,15 @@ class TexMECSListener extends TexMECSParserBaseListener {
   @Override
   public void exitDocument(TexMECSParser.DocumentContext ctx) {
     if (!openMarkup.isEmpty()) {
-      String openMarkupString = openMarkup.stream()//
-          .map(TexMECSListener::startTag)//
+      String openMarkupString = openMarkup.stream()
+          .map(TexMECSListener::startTag)
           .collect(Collectors.joining(", "));
       String message = "Some markup was not closed: " + openMarkupString;
       errors.add(message);
     }
     if (!suspendedMarkup.isEmpty()) {
-      String suspendedMarkupString = suspendedMarkup.stream()//
-          .map(TexMECSListener::suspendTag)//
+      String suspendedMarkupString = suspendedMarkup.stream()
+          .map(TexMECSListener::suspendTag)
           .collect(Collectors.joining(", "));
       String message = "Some suspended markup was not resumed: " + suspendedMarkupString;
       errors.add(message);

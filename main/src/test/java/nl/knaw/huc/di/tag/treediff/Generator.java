@@ -21,6 +21,7 @@ package nl.knaw.huc.di.tag.treediff;
  */
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.concurrent.*;
@@ -28,8 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provides a Python-style Generator in Java. Subclass this class and
- * implement the run method in subclass. Use {@link Generator#yield(Object)} to
- * return a value and {@link Generator#yield()} to receive a value.
+ * implement the run method in subclass. Use {@link Generator#provide(Object)} to
+ * return a value and {@link Generator#provide()} to receive a value.
  * This class uses Preconditions and AbstractIterator classes from the Google
  * Collections library.
  *
@@ -84,13 +85,14 @@ public abstract class Generator<T> implements Iterable<T> {
   /* (non-Javadoc)
    * @see java.lang.Iterable#iterator()
    */
+  @NotNull
   public final Iterator<T> iterator() {
     return iterator;
   }
 
   /**
    * Gets a value from the generator. The generator must call
-   * {@link Generator#yield(Object)} to return this value inside the
+   * {@link Generator#provide(Object)} to return this value inside the
    * {@link Generator#run()} method.
    *
    * @return The value yielded by the generator.
@@ -110,7 +112,7 @@ public abstract class Generator<T> implements Iterable<T> {
 
   /**
    * Sends a value to the generator. The generator must call
-   * {@link Generator#yield()} to receive this value inside the
+   * {@link Generator#provide()} to receive this value inside the
    * {@link Generator#run()} method.
    *
    * @param sent The value sent to the generator.
@@ -141,7 +143,7 @@ public abstract class Generator<T> implements Iterable<T> {
    * @throws InterruptedException
    * @throws BrokenBarrierException
    */
-  final void yield(final T result)
+  final void provide(final T result)
       throws InterruptedException, BrokenBarrierException {
     barrier.await();
     queue.put(result);
@@ -155,7 +157,7 @@ public abstract class Generator<T> implements Iterable<T> {
    * @throws InterruptedException
    * @throws BrokenBarrierException
    */
-  protected final T yield()
+  protected final T provide()
       throws InterruptedException, BrokenBarrierException {
     barrier.await();
     return queue.take();
@@ -223,7 +225,7 @@ public abstract class Generator<T> implements Iterable<T> {
     private final ThreadFactory defaultThreadFactory =
         Executors.defaultThreadFactory();
 
-    public Thread newThread(final Runnable r) {
+    public Thread newThread(@NotNull final Runnable r) {
       Thread thread = defaultThreadFactory.newThread(r);
       thread.setDaemon(true);
       return thread;

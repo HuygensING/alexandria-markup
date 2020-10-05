@@ -27,6 +27,8 @@ import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.assertj.core.api.AbstractObjectAssert;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -64,12 +66,19 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return myself;
   }
 
+  public static MarkupSketch markupSketch(
+      String tag, List<Annotation> annotations, Boolean optional) {
+    return new MarkupSketch(tag, annotations, optional);
+  }
+
   public TAGMarkupAssert hasMarkupWithTag(String tag) {
     isNotNull();
-    List<TAGMarkup> relevantMarkup = actual.getMarkupStream()
-//        .peek(System.out::println)
-        .filter(m -> m.hasTag(tag))
-        .collect(toList());
+    List<TAGMarkup> relevantMarkup =
+        actual
+            .getMarkupStream()
+            //        .peek(System.out::println)
+            .filter(m -> m.hasTag(tag))
+            .collect(toList());
     if (relevantMarkup.isEmpty()) {
       failWithMessage("No markup found with tag %s", tag);
     }
@@ -78,45 +87,35 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return new TAGMarkupAssert(markup);
   }
 
-  private Set<TextNodeSketch> getActualTextNodeSketches() {
-    return actual.getTextNodeStream()//
-        .map(this::toTextNodeSketch)//
-        .collect(toSet());
-  }
-
   private TextNodeSketch toTextNodeSketch(final TAGTextNode textNode) {
     return textNodeSketch(textNode.getText());
   }
 
+  private Set<TextNodeSketch> getActualTextNodeSketches() {
+    return actual
+        .getTextNodeStream()
+        .map(this::toTextNodeSketch)
+        .collect(toSet());
+  }
+
   //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
-//    isNotNull();
-//    List<String> actualLayerIds = actual.getLayerNames();
-//    return myself;
-//  }
-//
-  public static class TextNodeSketch {
+  //    isNotNull();
+  //    List<String> actualLayerIds = actual.getLayerNames();
+  //    return myself;
+  //  }
 
-    private final String text;
-
-    public TextNodeSketch(final String text) {
-      this.text = text;
+  public TAGDocumentAssert hasSchemaLocation(final URL uri) throws MalformedURLException {
+    isNotNull();
+    Optional<URL> schemaLocation = actual.getSchemaLocation();
+    if (!schemaLocation.isPresent()) {
+      failWithMessage("Expected schemaLocation %s, but no schemaLocation was found", uri);
+    }
+    final URL actualSchemaLocation = schemaLocation.get();
+    if (!actualSchemaLocation.equals(uri)) {
+      failWithMessage("Expected schemaLocation %s, but found %s", uri, actualSchemaLocation);
     }
 
-    @Override
-    public int hashCode() {
-      return text.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      return obj instanceof TextNodeSketch
-          && ((TextNodeSketch) obj).text.equals(text);
-    }
-
-    @Override
-    public String toString() {
-      return text;
-    }
+    return myself;
   }
 
   public static TextNodeSketch textNodeSketch() {
@@ -168,8 +167,11 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     }
   }
 
-  public static MarkupSketch markupSketch(String tag, List<Annotation> annotations, Boolean optional) {
-    return new MarkupSketch(tag, annotations, optional);
+  private Set<MarkupSketch> getActualMarkupSketches() {
+    return actual
+        .getMarkupStream()
+        .map(this::toMarkupSketch)
+        .collect(toSet());
   }
 
   public static MarkupSketch markupSketch(String tag, boolean optional) {
@@ -184,14 +186,31 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
     return markupSketch(tag, new ArrayList<>(), true);
   }
 
-  private Set<MarkupSketch> getActualMarkupSketches() {
-    return actual.getMarkupStream()//
-        .map(this::toMarkupSketch)//
-        .collect(toSet());
+  public static class TextNodeSketch {
+
+    private final String text;
+
+    public TextNodeSketch(final String text) {
+      this.text = text;
+    }
+
+    @Override
+    public int hashCode() {
+      return text.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return obj instanceof TextNodeSketch && ((TextNodeSketch) obj).text.equals(text);
+    }
+
+    @Override
+    public String toString() {
+      return text;
+    }
   }
 
   public MarkupSketch toMarkupSketch(TAGMarkup markup) {
     return markupSketch(markup.getTag(), markup.isOptional());
   }
-
 }

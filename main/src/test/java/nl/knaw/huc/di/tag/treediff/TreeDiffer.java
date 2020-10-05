@@ -94,13 +94,15 @@ class TreeDiffer {
               for (Integer t : targetTree.ancestorIterator(v)) {
                 String key = keyForE(s, u, i, t, v, j);
 
-                if ((Objects.equals(s, u) && u == i) && (Objects.equals(t, v) && v == j)) {
+                final boolean b = Objects.equals(s, u) && u == i;
+                final boolean b1 = Objects.equals(t, v) && v == j;
+                if (b && b1) {
                   Integer distance = r(sourceTree.nodeAt(i), targetTree.nodeAt(j));
                   Mapping mapping = new Mapping();
                   mapping.add(pairOf(i, j));
                   treeDiffMapE.put(key, new TreeMapping(distance, mapping));
 
-                } else if ((Objects.equals(s, u) && u == i) || (t < v && v == j)) {
+                } else if (b || (t < v && v == j)) {
                   int f_j = targetTree.fatherOf(j).preorderPosition();
                   String dependentKey = keyForE(s, u, i, t, f_j, j - 1);
                   TreeMapping dependentTreeMapping = treeDiffMapE.get(dependentKey);
@@ -110,7 +112,7 @@ class TreeDiffer {
                   mapping.add(pairOf(ALPHA, j));
                   treeDiffMapE.put(key, new TreeMapping(distance, mapping));
 
-                } else if ((s < u && u == i) || (Objects.equals(t, v) && v == j)) {
+                } else if ((s < u && u == i) || b1) {
                   int f_i = sourceTree.fatherOf(i).preorderPosition();
                   String dependentKey = keyForE(s, f_i, i - 1, t, v, j);
                   TreeMapping dependentTreeMapping = treeDiffMapE.get(dependentKey);

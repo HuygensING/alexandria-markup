@@ -24,8 +24,8 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   Logger LOG = LoggerFactory.getLogger(MarkupDiffTest.class);
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupDiff0() {
     String originText = "[TAGML|+M>\n" +
@@ -81,7 +81,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 //    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupSplit() {
     String originText = "[TAGML>[l>Sentence one. Sentence two.<l]<TAGML]\n";
@@ -90,7 +90,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     assertThat(markupInfoDiffs).containsExactly("[l](1,2) split in {[l](1,1),[l](2,1)}");
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupJoin() {
     String originText = "[TAGML>[l>Sentence one.<l][l>Sentence two.<l]<TAGML]\n";
@@ -106,7 +106,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
       TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
       TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
-      TAGView tagView = new TAGView(store).setMarkupToExclude(none);
+      TAGView tagView = new TAGView(store).withMarkupToExclude(none);
       TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
       List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
       assertThat(markupInfoLists).hasSize(2);
@@ -131,7 +131,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
       TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
       DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
 //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();

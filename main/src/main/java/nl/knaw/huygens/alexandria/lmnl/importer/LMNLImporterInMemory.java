@@ -33,189 +33,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
 public class LMNLImporterInMemory {
   private static final Logger LOG = LoggerFactory.getLogger(LMNLImporterInMemory.class);
 
-  static class LimenContext {
-    private final Limen limen;
-    private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
-    private final Stack<Markup> openMarkupStack = new Stack<>();
-    private final Stack<Annotation> annotationStack = new Stack<>();
-    private final ImporterContext importerContext;
+  private static void joinDiscontinuedRanges(Limen limen) {
+    Map<String, Markup> markupsToJoin = new HashMap<>();
+    List<Markup> markupsToRemove = new ArrayList<>();
+    limen.markupList.stream()
+        .filter(Markup::hasN)
+        .forEach(
+            markup -> {
+              String tag = markup.getTag();
+              Annotation nAnnotation =
+                  markup
+                      .getAnnotations()
+                      .parallelStream()
+                      .filter(a -> a.getTag().equals("n"))
+                      .findFirst()
+                      .get();
+              String key = tag + "-" + annotationText(nAnnotation);
+              if (markupsToJoin.containsKey(key)) {
+                Markup originalMarkup = markupsToJoin.get(key);
+                markup.getAnnotations().remove(nAnnotation);
+                originalMarkup.joinWith(markup);
+                markupsToRemove.add(markup);
+              } else {
+                markupsToJoin.put(key, markup);
+              }
+            });
 
-    LimenContext(Limen limen, ImporterContext importerContext) {
-      this.limen = limen;
-      this.importerContext = importerContext;
-    }
-
-    void openMarkup(Markup markup) {
-      openMarkupDeque.push(markup);
-      openMarkupStack.push(markup);
-      limen.addMarkup(markup);
-    }
-
-    void pushOpenMarkup(String rangeName) {
-      // LOG.info("currentDocumentContext().openMarkupDeque={}", openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
-      Optional<Markup> findFirst = openMarkupDeque.stream()//
-          .filter(tr -> tr.getExtendedTag().equals(rangeName))//
-          .findFirst();
-      if (findFirst.isPresent()) {
-        Markup markup = findFirst.get();
-        if (markup.textNodes.isEmpty()) {
-          // every markup should have at least one textNode
-          addTextNode(new TextNode(""));
-          closeMarkup();
-        }
-        openMarkupStack.push(markup);
-      } else {
-        importerContext.errors.add("Closing tag {" + rangeName + "] found without corresponding open tag.");
-      }
-    }
-
-    void popOpenMarkup() {
-      openMarkupStack.pop();
-    }
-
-    void closeMarkup() {
-      if (!openMarkupStack.isEmpty()) {
-        Markup markup = openMarkupStack.pop();
-        openMarkupDeque.remove(markup);
-      }
-    }
-
-    void addTextNode(TextNode textNode) {
-      openMarkupDeque.descendingIterator()//
-          .forEachRemaining(tr -> tr.addTextNode(textNode));
-      limen.addTextNode(textNode);
-    }
-
-    private Markup currentMarkup() {
-      return openMarkupDeque.isEmpty() ? null : openMarkupStack.peek();
-    }
-
-    void openAnnotation(Annotation annotation) {
-      if (annotationStack.isEmpty()) {
-        Markup markup = currentMarkup();
-        if (markup != null) {
-          markup.addAnnotation(annotation);
-        }
-      } else {
-        annotationStack.peek().addAnnotation(annotation);
-      }
-      annotationStack.push(annotation);
-    }
-
-    Limen currentAnnotationLimen() {
-      return annotationStack.peek().value();
-    }
-
-    void closeAnnotation() {
-      annotationStack.pop();
-    }
-  }
-
-  static class ImporterContext {
-    private final Deque<LimenContext> limenContextStack = new ArrayDeque<>();
-    private final LMNLLexer lexer;
-    private final List<String> errors = new ArrayList<>();
-
-    ImporterContext(LMNLLexer lexer) {
-      this.lexer = lexer;
-    }
-
-    Token nextToken() {
-      return lexer.nextToken();
-    }
-
-    String getModeName() {
-      return lexer.getModeNames()[lexer._mode];
-    }
-
-    String getRuleName() {
-      return lexer.getRuleNames()[lexer.getToken().getType() - 1];
-    }
-
-    void pushLimenContext(Limen limen) {
-      limenContextStack.push(new LimenContext(limen, this));
-    }
-
-    LimenContext currentLimenContext() {
-      return limenContextStack.peek();
-    }
-
-    LimenContext popLimenContext() {
-      LimenContext limenContext = limenContextStack.pop();
-      if (!limenContext.openMarkupDeque.isEmpty()) {
-        String openRanges = limenContext.openMarkupDeque.stream()//
-            .map(m -> "[" + m.getExtendedTag() + "}")//
-            .collect(Collectors.joining(", "));
-        errors.add("Unclosed LMNL range(s): " + openRanges);
-      }
-      return limenContext;
-    }
-
-    Markup newMarkup(String tagName) {
-      return new Markup(currentLimenContext().limen, tagName);
-    }
-
-    void openMarkup(Markup markup) {
-      currentLimenContext().openMarkup(markup);
-    }
-
-    void pushOpenMarkup(String rangeName) {
-      currentLimenContext().pushOpenMarkup(rangeName);
-    }
-
-    void popOpenMarkup() {
-      currentLimenContext().popOpenMarkup();
-    }
-
-    void closeMarkup() {
-      currentLimenContext().closeMarkup();
-    }
-
-    void addTextNode(TextNode textNode) {
-      currentLimenContext().addTextNode(textNode);
-    }
-
-    void openAnnotation(Annotation annotation) {
-      currentLimenContext().openAnnotation(annotation);
-    }
-
-    Limen currentAnnotationLimen() {
-      return currentLimenContext().currentAnnotationLimen();
-    }
-
-    void closeAnnotation() {
-      currentLimenContext().closeAnnotation();
-    }
-
-    List<String> getErrors() {
-      return errors;
-    }
-
-    boolean hasErrors() {
-      return !errors.isEmpty();
-    }
-  }
-
-  public Document importLMNL(String input) throws LMNLSyntaxError {
-    CharStream antlrInputStream = CharStreams.fromString(input);
-    return importLMNL(antlrInputStream);
-  }
-
-  public Document importLMNL(InputStream input) throws LMNLSyntaxError {
-    try {
-      CharStream antlrInputStream = CharStreams.fromStream(input);
-      return importLMNL(antlrInputStream);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new UncheckedIOException(e);
-    }
+    limen.markupList.removeAll(markupsToRemove);
+    limen.markupList.stream()
+        .map(Markup::getAnnotations)
+        .flatMap(List::stream)
+        .map(Annotation::value)
+        .forEach(LMNLImporterInMemory::joinDiscontinuedRanges);
   }
 
   private Document importLMNL(CharStream antlrInputStream) throws LMNLSyntaxError {
@@ -237,14 +92,28 @@ public class LMNLImporterInMemory {
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (errorListener.hasErrors()) {
-      String errors = String.join("\n", errorListener.getErrors());
-      errorMsg += "\n\nTokenizing errors:\n" + errors;
+      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
     }
     if (!errorMsg.isEmpty()) {
       throw new LMNLSyntaxError(errorMsg);
     }
 
     return document;
+  }
+
+  public Document importLMNL(String input) throws LMNLSyntaxError {
+    CharStream antlrInputStream = CharStreams.fromString(input);
+    return importLMNL(antlrInputStream);
+  }
+
+  public Document importLMNL(InputStream input) throws LMNLSyntaxError {
+    try {
+      CharStream antlrInputStream = CharStreams.fromStream(input);
+      return importLMNL(antlrInputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new UncheckedIOException(e);
+    }
   }
 
   private void handleDefaultMode(ImporterContext context) {
@@ -418,55 +287,201 @@ public class LMNLImporterInMemory {
     }
   }
 
-  private void handleUnexpectedToken(String methodName, Token token, String ruleName, String modeName) {
-    String message = methodName + ": unexpected rule/token: token=" + token + ", ruleName=" + ruleName + ", mode=" + modeName;
+  private void handleUnexpectedToken(
+      String methodName, Token token, String ruleName, String modeName) {
+    String message =
+        methodName
+            + ": unexpected rule/token: token="
+            + token
+            + ", ruleName="
+            + ruleName
+            + ", mode="
+            + modeName;
     LOG.error(message);
     throw new LMNLSyntaxError(message);
+  }
+
+  private void log(
+      String mode, String ruleName, String modeName, Token token, ImporterContext context) {
+    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}",
+    // mode, context.limenContextStack.size(),
+    // token.getText().replace("\n", "\\n"),
+    // ruleName, modeName);
   }
 
   private static void joinDiscontinuedRanges(Document document) {
     joinDiscontinuedRanges(document.value());
   }
 
-  private static void joinDiscontinuedRanges(Limen limen) {
-    Map<String, Markup> markupsToJoin = new HashMap<>();
-    List<Markup> markupsToRemove = new ArrayList<>();
-    limen.markupList.stream()//
-        .filter(Markup::hasN)//
-        .forEach(markup -> {
-          String tag = markup.getTag();
-          Annotation nAnnotation = markup.getAnnotations().parallelStream()//
-              .filter(a -> a.getTag().equals("n"))//
-              .findFirst()//
-              .get();
-          String key = tag + "-" + annotationText(nAnnotation);
-          if (markupsToJoin.containsKey(key)) {
-            Markup originalMarkup = markupsToJoin.get(key);
-            markup.getAnnotations().remove(nAnnotation);
-            originalMarkup.joinWith(markup);
-            markupsToRemove.add(markup);
-          } else {
-            markupsToJoin.put(key, markup);
-          }
-        });
+  static class LimenContext {
+    private final Limen limen;
+    private final Deque<Markup> openMarkupDeque = new ArrayDeque<>();
+    private final Stack<Markup> openMarkupStack = new Stack<>();
+    private final Stack<Annotation> annotationStack = new Stack<>();
+    private final ImporterContext importerContext;
 
-    limen.markupList.removeAll(markupsToRemove);
-    limen.markupList.stream()//
-        .map(Markup::getAnnotations)//
-        .flatMap(List::stream)//
-        .map(Annotation::value)//
-        .forEach(LMNLImporterInMemory::joinDiscontinuedRanges);
+    LimenContext(Limen limen, ImporterContext importerContext) {
+      this.limen = limen;
+      this.importerContext = importerContext;
+    }
+
+    void openMarkup(Markup markup) {
+      openMarkupDeque.push(markup);
+      openMarkupStack.push(markup);
+      limen.addMarkup(markup);
+    }
+
+    void pushOpenMarkup(String rangeName) {
+      // LOG.info("currentDocumentContext().openMarkupDeque={}",
+      // openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
+      Optional<Markup> findFirst =
+          openMarkupDeque.stream()
+              .filter(tr -> tr.getExtendedTag().equals(rangeName))
+              .findFirst();
+      if (findFirst.isPresent()) {
+        Markup markup = findFirst.get();
+        if (markup.textNodes.isEmpty()) {
+          // every markup should have at least one textNode
+          addTextNode(new TextNode(""));
+          closeMarkup();
+        }
+        openMarkupStack.push(markup);
+      } else {
+        importerContext.errors.add(
+            "Closing tag {" + rangeName + "] found without corresponding open tag.");
+      }
+    }
+
+    void popOpenMarkup() {
+      openMarkupStack.pop();
+    }
+
+    void closeMarkup() {
+      if (!openMarkupStack.isEmpty()) {
+        Markup markup = openMarkupStack.pop();
+        openMarkupDeque.remove(markup);
+      }
+    }
+
+    void addTextNode(TextNode textNode) {
+      openMarkupDeque
+          .descendingIterator()
+          .forEachRemaining(tr -> tr.addTextNode(textNode));
+      limen.addTextNode(textNode);
+    }
+
+    private Markup currentMarkup() {
+      return openMarkupDeque.isEmpty() ? null : openMarkupStack.peek();
+    }
+
+    void openAnnotation(Annotation annotation) {
+      if (annotationStack.isEmpty()) {
+        Markup markup = currentMarkup();
+        if (markup != null) {
+          markup.addAnnotation(annotation);
+        }
+      } else {
+        annotationStack.peek().addAnnotation(annotation);
+      }
+      annotationStack.push(annotation);
+    }
+
+    Limen currentAnnotationLimen() {
+      return annotationStack.peek().value();
+    }
+
+    void closeAnnotation() {
+      annotationStack.pop();
+    }
   }
 
   private static String annotationText(Annotation annotation) {
     return annotation.value().textNodeList.stream().map(TextNode::getContent).collect(joining());
   }
 
-  private void log(String mode, String ruleName, String modeName, Token token, ImporterContext context) {
-    // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}", //
-    // mode, context.limenContextStack.size(), //
-    // token.getText().replace("\n", "\\n"), //
-    // ruleName, modeName);
-  }
+  static class ImporterContext {
+    private final Deque<LimenContext> limenContextStack = new ArrayDeque<>();
+    private final LMNLLexer lexer;
+    private final List<String> errors = new ArrayList<>();
 
+    ImporterContext(LMNLLexer lexer) {
+      this.lexer = lexer;
+    }
+
+    Token nextToken() {
+      return lexer.nextToken();
+    }
+
+    String getModeName() {
+      return lexer.getModeNames()[lexer._mode];
+    }
+
+    String getRuleName() {
+      return lexer.getRuleNames()[lexer.getToken().getType() - 1];
+    }
+
+    void pushLimenContext(Limen limen) {
+      limenContextStack.push(new LimenContext(limen, this));
+    }
+
+    LimenContext currentLimenContext() {
+      return limenContextStack.peek();
+    }
+
+    LimenContext popLimenContext() {
+      LimenContext limenContext = limenContextStack.pop();
+      if (!limenContext.openMarkupDeque.isEmpty()) {
+        String openRanges =
+            limenContext.openMarkupDeque.stream()
+                .map(m -> "[" + m.getExtendedTag() + "}")
+                .collect(joining(", "));
+        errors.add("Unclosed LMNL range(s): " + openRanges);
+      }
+      return limenContext;
+    }
+
+    Markup newMarkup(String tagName) {
+      return new Markup(currentLimenContext().limen, tagName);
+    }
+
+    void openMarkup(Markup markup) {
+      currentLimenContext().openMarkup(markup);
+    }
+
+    void pushOpenMarkup(String rangeName) {
+      currentLimenContext().pushOpenMarkup(rangeName);
+    }
+
+    void popOpenMarkup() {
+      currentLimenContext().popOpenMarkup();
+    }
+
+    void closeMarkup() {
+      currentLimenContext().closeMarkup();
+    }
+
+    void addTextNode(TextNode textNode) {
+      currentLimenContext().addTextNode(textNode);
+    }
+
+    void openAnnotation(Annotation annotation) {
+      currentLimenContext().openAnnotation(annotation);
+    }
+
+    Limen currentAnnotationLimen() {
+      return currentLimenContext().currentAnnotationLimen();
+    }
+
+    void closeAnnotation() {
+      currentLimenContext().closeAnnotation();
+    }
+
+    List<String> getErrors() {
+      return errors;
+    }
+
+    boolean hasErrors() {
+      return !errors.isEmpty();
+    }
+  }
 }

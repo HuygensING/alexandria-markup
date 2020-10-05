@@ -81,8 +81,7 @@ class TexMECSImporterInMemory {
       errorMsg = "Parsing errors:\n" + errors;
     }
     if (numberOfSyntaxErrors > 0) {
-      String errors = String.join("\n", errorListener.getErrors());
-      errorMsg += "\n\nTokenizing errors:\n" + errors;
+      errorMsg += "\n\nTokenizing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
     }
     if (!errorMsg.isEmpty()) {
       throw new TexMECSSyntaxError(errorMsg);
@@ -96,10 +95,10 @@ class TexMECSImporterInMemory {
       Markup first = markupList.get(i);
       Markup second = markupList.get(i + 1);
       if (first.textNodes.equals(second.textNodes)) {
-        // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(), second.getExtendedTag());
+        // LOG.info("dominance found: {} dominates {}", first.getExtendedTag(),
+        // second.getExtendedTag());
         first.setDominatedMarkup(second);
       }
     }
   }
-
 }

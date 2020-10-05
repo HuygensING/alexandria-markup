@@ -34,5 +34,4 @@ public class TAGExporter {
     this.store = store;
     this.view = view;
   }
-
 }

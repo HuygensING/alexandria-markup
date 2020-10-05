@@ -1,6 +1,5 @@
 package nl.knaw.huygens.alexandria;
 
-
 /*
  * #%L
  * alexandria-markup-core
@@ -22,11 +21,11 @@ package nl.knaw.huygens.alexandria;
  */
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +40,15 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   private static final Logger LOG = LoggerFactory.getLogger(AlexandriaBaseStoreTest.class);
   private static Path tmpDir;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws IOException {
-//    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
+    //    LOG.info("System.getenv()={}", System.getenv().toString().replace(",", ",\n"));
     tmpDir = Files.createTempDirectory("tmpDir");
     LOG.info("Created tempDirectory {}", tmpDir.toAbsolutePath());
     tmpDir.toFile().deleteOnExit();
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     LOG.info("Deleting tempDirectory {}", tmpDir.toAbsolutePath());
     try {
@@ -80,5 +79,4 @@ public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
   private TAGStore getStore() {
     return new BDBTAGStore(tmpDir.toString(), false);
   }
-
 }

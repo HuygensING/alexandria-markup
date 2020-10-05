@@ -24,7 +24,7 @@ import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
 import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class VariantGraphVisualizerTest extends AlexandriaBaseStoreTest {
       TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
       TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
       Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).setMarkupToExclude(none);
+      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
       DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
 //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();

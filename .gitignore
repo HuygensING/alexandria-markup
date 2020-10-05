@@ -8,3 +8,4 @@
 out/*
 **/dependency-reduced-pom.xml
 main/out
+**/.ipynb_checkpoints

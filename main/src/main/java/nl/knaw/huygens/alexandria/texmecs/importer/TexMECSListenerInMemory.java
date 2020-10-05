@@ -136,15 +136,15 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
   @Override
   public void exitDocument(TexMECSParser.DocumentContext ctx) {
     if (!openMarkup.isEmpty()) {
-      String openMarkupString = openMarkup.stream()//
-          .map(TexMECSListenerInMemory::startTag)//
+      String openMarkupString = openMarkup.stream()
+          .map(TexMECSListenerInMemory::startTag)
           .collect(Collectors.joining(", "));
       String message = "Some markup was not closed: " + openMarkupString;
       errors.add(message);
     }
     if (!suspendedMarkup.isEmpty()) {
-      String suspendedMarkupString = suspendedMarkup.stream()//
-          .map(TexMECSListenerInMemory::suspendTag)//
+      String suspendedMarkupString = suspendedMarkup.stream()
+          .map(TexMECSListenerInMemory::suspendTag)
           .collect(Collectors.joining(", "));
       String message = "Some suspended markup was not resumed: " + suspendedMarkupString;
       errors.add(message);

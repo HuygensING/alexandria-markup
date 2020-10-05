@@ -20,16 +20,12 @@ package nl.knaw.huc.di.tag.tagql.grammar;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLLexer;
-import nl.knaw.huc.di.tag.tagql.grammar.TAGQLParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,20 +39,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class TAGQLStatementTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-  private final String statement;
-  private final Boolean ok;
-
-  public TAGQLStatementTest(String statement, Boolean ok) {
-    this.statement = statement;
-    this.ok = ok;
-  }
-
-  @Parameters
-  public static Collection<Object[]> generateData() throws IOException {
+  public static Collection<Object[]> argsProvider() throws IOException {
     List<Object[]> data = new ArrayList<>();
 
     addLines(data, "correct_statements.tagql", true);
@@ -74,10 +60,11 @@ public class TAGQLStatementTest {
     }
   }
 
-  @Test
-  public void testTAGQLStatementHasExpectedValidity() {
-    LOG.info("TAGQL={}", this.statement);
-    CharStream stream = CharStreams.fromString(this.statement);
+  @ParameterizedTest(name = "#{index} - TAGQL: \"{0}\" valid: {1}")
+  @MethodSource("argsProvider")
+  public void testTAGQLStatementHasExpectedValidity(String statement, Boolean ok) {
+    LOG.info("TAGQL={}", statement);
+    CharStream stream = CharStreams.fromString(statement);
     TAGQLLexer lex = new TAGQLLexer(stream);
     // List<? extends Token> allTokens = lex.getAllTokens();
     // for (Token token : allTokens) {
@@ -95,6 +82,6 @@ public class TAGQLStatementTest {
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
     LOG.info("numberOfSyntaxErrors={}", numberOfSyntaxErrors);
     boolean isOk = numberOfSyntaxErrors == 0;
-    assertThat(isOk).isEqualTo(this.ok);
+    assertThat(isOk).isEqualTo(ok);
   }
 }

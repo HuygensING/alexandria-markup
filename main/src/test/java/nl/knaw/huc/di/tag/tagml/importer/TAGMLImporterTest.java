@@ -25,6 +25,7 @@ import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
 import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
 import nl.knaw.huc.di.tag.tagml.rdf.DotFactory;
 import nl.knaw.huc.di.tag.tagml.rdf.RDFFactory;
+import nl.knaw.huygens.alexandria.ErrorListener;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
@@ -34,8 +35,8 @@ import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.rdf.model.Model;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,24 +49,46 @@ import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
 import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporterTest.class);
 
   @Test
-  public void test_id() {
-    String tagML = "[root|+A>" + "[pers|A id->ell01 id->a >my sisters<pers]" + "<root]";
-    TAGDocument document =
-        runInStoreTransaction(
-            store -> {
-              return parseTAGML(tagML, store);
-            });
-    assertThat(document).isNotNull();
+  public void testReturnedError() {
+    String tagML = "[a>\n[a1 pi=3.14>AAAAA\n<wrong_closing_tag]\n<a]";
     runInStoreTransaction(
         store -> {
-          testRDFConversion(document);
+          try {
+            TAGDocument document = parseTAGML(tagML, store);
+            logDocumentGraph(document, tagML);
+            fail("TAGMLSyntaxError expected!");
+          } catch (TAGMLSyntaxError e) {
+            final List<ErrorListener.TAGError> errors = e.getErrors();
+            assertThat(errors).hasSize(4);
+
+            final ErrorListener.TAGError tagError = errors.get(2);
+            assertThat(tagError).isInstanceOf(ErrorListener.CustomError.class);
+
+            final ErrorListener.CustomError customError = (ErrorListener.CustomError) tagError;
+            assertThat(customError.getMessage())
+                .isEqualTo("Close tag <wrong_closing_tag] found without corresponding open tag.");
+            assertThat(customError.range)
+                .isEqualTo(new Range(new Position(3, 1), new Position(3, 20)));
+          }
+        });
+  }
+
+  @Test
+  public void test_simple() {
+    String tagML =
+        "[s|+T,+D>This is an [del|D>easy<del] example of [add|T,D>the<add] TAGML syntax.<s]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = parseTAGML(tagML, store);
+          assertThat(document).isNotNull();
+          //          testRDFConversion(document);
         });
   }
 
@@ -77,6 +100,18 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
             + " te streng doorgedreven rationalisatie van zijne "
             + "<|[del>opvoeding<del]|[del>[add>prinselijke jeugd<add]<del]|[add>prinsenjeugd [?del>bracht<?del] had dit met zich meegebracht<add]|><s]"
             + "<root]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = parseTAGML(tagML, store);
+          assertThat(document).isNotNull();
+          testRDFConversion(document);
+        });
+  }
+
+  @Test
+  public void test1() {
+    String tagML =
+        "[a>" + "<|[del>We [?del>feel<?del]<del]|[add>How many in England<add]|>" + "<a]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
@@ -245,23 +280,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
             + "<text]\n"
             + "<tagml]";
     final String expectedErrors =
-        "line 9:2 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n"
+        "line 9:1 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n"
             + "parsing aborted!";
-    runInStoreTransaction(
-        store -> {
-          parseWithExpectedErrors(tagML, expectedErrors);
-        });
+    runInStoreTransaction(store -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
   public void testMissingOpenTagLeadsToError() {
     String tagML = "[tagml>Some text<t]<tagml]";
-    String expectedErrors =
-        "line 1:18 : Close tag <t] found without corresponding open tag.\n" + "parsing aborted!";
-    runInStoreTransaction(
-        store -> {
-          parseWithExpectedErrors(tagML, expectedErrors);
-        });
+    String expectedErrors = "line 1:17 : Close tag <t] found without corresponding open tag.";
+    runInStoreTransaction(store -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
@@ -278,12 +306,9 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testNoLayerInfoOnEndTagWithMultipleStartTagsInDifferentLayers() {
     String tagML = "[tagml|+A,+B>[p|A>[p|B>Some text<p]<p]<tagml]";
     String expectedErrors =
-        "line 1:34 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n"
+        "line 1:33 : There are multiple start-tags that can correspond with end-tag <p]; add layer information to the end-tag to solve this ambiguity.\n"
             + "parsing aborted!";
-    runInStoreTransaction(
-        store -> {
-          parseWithExpectedErrors(tagML, expectedErrors);
-        });
+    runInStoreTransaction(store -> parseWithExpectedErrors(tagML, expectedErrors));
   }
 
   @Test
@@ -364,7 +389,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testMissingEndTagThrowsTAGMLSyntaxError() {
     String tagML = "[line>The rain";
-    String expectedErrors = "Missing close tag(s) for: [line>";
+    String expectedErrors = "line 1:1 : Missing close tag(s) for: [line>";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -381,8 +406,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testDifferentOpenAndCloseTAGSThrowsTAGMLSyntaxError() {
     String tagML = "[line>The Spanish rain.<paragraph]";
     String expectedErrors =
-        "line 1:25 : Close tag <paragraph] found without corresponding open tag.\n"
-            + "parsing aborted!";
+        "line 1:1 : Missing close tag(s) for: [line>\n"
+            + "line 1:24 : Close tag <paragraph] found without corresponding open tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -390,9 +415,9 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testNamelessTagsThrowsTAGMLSyntaxError() {
     String tagML = "[>The Spanish rain.<]";
     String expectedErrors =
-        "syntax error: line 1:1 no viable alternative at input '[>'\n"
-            + "syntax error: line 1:20 mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n"
+        "line 1:1 : syntax error: no viable alternative at input '[>'\n"
             + "line 1:3 : No text allowed here, the root markup must be started first.\n"
+            + "line 1:20 : syntax error: mismatched input ']' expecting {IMO_Prefix, IMO_Name, IMC_Prefix, IMC_Name}\n"
             + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -631,7 +656,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
           List<TAGMarkup> markups = document.getMarkupStream().collect(toList());
           assertThat(markups).hasSize(6);
 
-          for (int i : new int[]{1, 2, 3, 4, 5}) {
+          for (int i : new int[] {1, 2, 3, 4, 5}) {
             TAGMarkup t = markups.get(i);
             assertThat(t).hasTag("t");
             List<TAGTextNode> tTAGTextNodes = t.getTextNodeStream().collect(toList());
@@ -646,7 +671,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testUnclosedDiscontinuityLeadsToError() {
     String tagML = "[t>This is<-t], he said...";
     String expectedErrors =
-        "line 1:12 : The root markup [t] cannot be suspended.\n" + "parsing aborted!";
+        "line 1:11 : The root markup [t] cannot be suspended.\n" + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -655,8 +680,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     // There must be text between a pause and a resume tag, so the following example is not allowed:
     String tagML = "[x>[markup>Cookie <-markup][+markup> Monster<markup]<x]";
     String expectedErrors =
-        "line 1:28 : There is no text between this resume tag: [+markup> and its corresponding suspend tag: <-markup]. This is not allowed.\n"
-            + "parsing aborted!";
+        "line 1:28 : There is no text between this resume tag: [+markup> and its corresponding suspend tag: <-markup]. This is not allowed.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -672,7 +696,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  //  @Ignore
+  //  @Disabled
   @Test
   public void testAcceptedMarkupDifferenceInNonLinearity() {
     String tagML = "[t>This [x>is <|a failing|an excellent|><x] test<t]";
@@ -725,7 +749,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testOpenMarkupInNonLinearAnnotatedTextThrowsError() {
     String tagML = "[t>[l>I'm <|done.<l][l>|ready.|finished.|> Let's go!.<l]<t]";
     String expectedErrors =
-        "line 1:19 : Markup [l> opened before branch 1, should not be closed in a branch.\n"
+        "line 1:18 : Markup [l> opened before branch 1, should not be closed in a branch.\n"
             + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -812,7 +836,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testCorrectDiscontinuityNonLinearityCombination() {
     String tagML =
@@ -1019,7 +1043,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
                     //      List<TAGTextNode> annotationTextNodes =
                     // annotationPrimes.getDocument().getTextNodeStream().collect(toList());
                     //      assertThat(annotationTextNodes).hasSize(1);
-                    //
+
                     // assertThat(annotationTextNodes).extracting("text").containsExactly("[1,2,3,5,7,11]");
 
                     return document;
@@ -1033,8 +1057,8 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testUnclosedTextVariationThrowsSyntaxError() {
     String tagML = "[t>This is <|good|bad.<t]";
     String expectedErrors =
-        "syntax error: line 1:25 extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n"
-            + "line 1:24 : Markup [t> opened before branch 2, should not be closed in a branch.\n"
+        "line 1:23 : Markup [t> opened before branch 2, should not be closed in a branch.\n"
+            + "line 1:25 : syntax error: extraneous input '<EOF>' expecting {ITV_EndTextVariation, TextVariationSeparator}\n"
             + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
@@ -1051,8 +1075,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   @Test
   public void testJustAMilestoneIsNotValidTAGML() {
     String tagML = "[miles stone='rock']";
-    String expectedErrors =
-        "line 1:1 : The root markup cannot be a milestone tag.\n" + "parsing aborted!";
+    String expectedErrors = "line 1:1 : The root markup cannot be a milestone tag.";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 
@@ -1069,7 +1092,16 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void testRootMarkupMayNotBeSuspended() {
     String tagML = "[m>foo<-m] fie [+m>bar<m]";
     String expectedErrors =
-        "line 1:8 : The root markup [m] cannot be suspended.\n" + "parsing aborted!";
+        "line 1:7 : The root markup [m] cannot be suspended.\n" + "parsing aborted!";
+    parseWithExpectedErrors(tagML, expectedErrors);
+  }
+
+  @Test
+  public void testLayerNeedsToBeAddedBeforeUse() {
+    String tagML = "[text|W>Lorem Ipsum [w|W>Dolor<w] Dulcet<text]";
+    String expectedErrors =
+        "line 1:6 : Layer W has not been added at this point, use +W to add a layer.\n"
+            + "parsing aborted!";
     parseWithExpectedErrors(tagML, expectedErrors);
   }
 

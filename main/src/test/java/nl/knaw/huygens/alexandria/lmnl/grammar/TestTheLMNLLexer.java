@@ -22,7 +22,7 @@ package nl.knaw.huygens.alexandria.lmnl.grammar;
 
 
 import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +41,13 @@ public class TestTheLMNLLexer extends AlexandriaLMNLBaseTest {
 
   @Test
   public void testLexerComplexExample() {
-    String input = "[excerpt\n"//
-        + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-        + "  [author\n"//
-        + "    [name}Robert Frost{]\n"//
-        + "    [dates}1874-1963{]] }\n"//
-        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
+    String input = "[excerpt\n"
+        + "  [source [date}1915{][title}The Housekeeper{]]\n"
+        + "  [author\n"
+        + "    [name}Robert Frost{]\n"
+        + "    [dates}1874-1963{]] }\n"
+        + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+        + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
         + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n" + "{excerpt]";
     printTokens(input);
   }

@@ -60,6 +60,15 @@ public class TAGMLImporter2 {
     }
   }
 
+  protected static void logDocumentGraph(
+      final TAGKnowledgeModel knowledgeModel, final String input) {
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
+    System.out.println(new DotFactory().toDot(knowledgeModel, input));
+    System.out.println(
+        "\n------------8<------------------------------------------------------------------------------------\n");
+  }
+
   private TAGKnowledgeModel importTAGML(CharStream antlrInputStream) throws TAGMLSyntaxError {
     TAGMLLexer lexer = new TAGMLLexer(antlrInputStream);
     ErrorListener errorListener = new ErrorListener();
@@ -70,13 +79,13 @@ public class TAGMLImporter2 {
     parser.addErrorListener(errorListener);
     parser.setBuildParseTree(true);
     ParseTree parseTree = parser.document();
-//    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
+    //    LOG.debug("parsetree: {}", parseTree.toStringTree(parser));
 
     TAGMLKnowledgeModelListener listener = new TAGMLKnowledgeModelListener(errorListener);
     try {
       ParseTreeWalker.DEFAULT.walk(listener, parseTree);
     } catch (TAGMLBreakingError ignored) {
-        LOG.error("TAGMLBreakingError:{}", ignored);
+      LOG.error("TAGMLBreakingError:{}", ignored);
     }
 
     int numberOfSyntaxErrors = parser.getNumberOfSyntaxErrors();
@@ -84,18 +93,10 @@ public class TAGMLImporter2 {
 
     String errorMsg = "";
     if (errorListener.hasErrors()) {
-//      logDocumentGraph(document,"");
-      String errors = String.join("\n", errorListener.getErrors());
-      errorMsg = "Parsing errors:\n" + errors;
-      throw new TAGMLSyntaxError(errorMsg);
+      //      logDocumentGraph(document,"");
+      errorMsg = "Parsing errors:\n" + errorListener.getPrefixedErrorMessagesAsString();
+      throw new TAGMLSyntaxError(errorMsg, errorListener.getErrors());
     }
     return listener.getKnowledgeModel();
   }
-
-  protected static void logDocumentGraph(final TAGKnowledgeModel knowledgeModel, final String input) {
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-    System.out.println(new DotFactory().toDot(knowledgeModel, input));
-    System.out.println("\n------------8<------------------------------------------------------------------------------------\n");
-  }
-
 }

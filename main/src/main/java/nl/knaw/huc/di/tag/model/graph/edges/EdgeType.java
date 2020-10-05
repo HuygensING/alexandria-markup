@@ -19,6 +19,11 @@ package nl.knaw.huc.di.tag.model.graph.edges;
  * limitations under the License.
  * #L%
  */
+
 public enum EdgeType {
-  hasMarkup, hasText, continuesIn, hasAnnotation, hasItem
+  hasMarkup,
+  hasText,
+  continuesIn,
+  hasAnnotation,
+  hasItem
 }

@@ -98,7 +98,7 @@ public class Limen {
 
   public boolean containsAtLeastHalfOfAllTextNodes(Markup markup) {
     int textNodeSize = textNodeList.size();
-    return textNodeSize > 2 //
+    return textNodeSize > 2
         && markup.textNodes.size() >= textNodeSize / 2d;
   }
 }

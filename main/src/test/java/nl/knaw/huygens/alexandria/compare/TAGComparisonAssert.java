@@ -32,7 +32,7 @@ public class TAGComparisonAssert extends AbstractAssert<TAGComparisonAssert, TAG
   public TAGComparisonAssert hasFoundNoDifference() {
     List<String> diffLines = actual.getDiffLines();
     if (!diffLines.isEmpty()) {
-      failWithMessage("Expected there to be no differences, but found diff lines: %n%s",//
+      failWithMessage("Expected there to be no differences, but found diff lines: %n%s",
           String.join("\n", diffLines));
     }
     return this;

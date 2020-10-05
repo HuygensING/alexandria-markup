@@ -26,8 +26,8 @@ import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,19 +35,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
   private static Path tmpDir;
   DotFactory dotFactory = new DotFactory();
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws IOException {
     tmpDir = mkTmpDir();
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws IOException {
     rmTmpDir(tmpDir);
   }
@@ -76,12 +75,6 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     Files.walk(tmpPath).map(Path::toFile).forEach(File::deleteOnExit);
   }
 
-  public <A> A runInStoreTransaction(Function<TAGStore, A> storeFunction) {
-    try (TAGStore store = getStore()) {
-      return store.runInTransaction(() -> storeFunction.apply(store));
-    }
-  }
-
   private static Path mkTmpDir() throws IOException {
     String sysTmp = System.getProperty("java.io.tmpdir");
     Path tmpPath = Paths.get(sysTmp, ".alexandria");
@@ -98,4 +91,5 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     System.out.println(
         "\n------------8<------------------------------------------------------------------------------------\n");
   }
+
 }

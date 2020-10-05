@@ -1,0 +1,13 @@
+- extract layer hierarchy
+- use '!' to indicate text within markup only visible for this layer: [foo!|A,B>bar<foo] means 'bar' is only shown in layer A and B -> this implicates that [foo!|A,B>bar [x|C>bar<x] bar<foo] is not allowed!?
+- encoding of metadata, especially at the start of the tagml
+- autocomplete for alexandria cli
+- fix: xml export with default layer overlap doesn't create trojan horse xml!
+
+- schema: default layer toevoegen voor tags die niet genoemd zijn
+- schemadefinitie verplichten ( + extract schema-tool)
+- layerinfo uit de tagml halen ( + tool)
+- views uitbreiden: aangeven van welke tags de text inhoud niet getoond moet worden. (bij een layer view aangeven van welke tags de inhoud alleen getoond moet worden)
+- gebruik schema info voor autocomplete
+- parse schema en toon error in ide als het niet parst.
+- kennisdelen over lsp

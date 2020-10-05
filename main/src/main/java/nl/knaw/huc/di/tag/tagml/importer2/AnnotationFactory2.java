@@ -26,7 +26,7 @@ import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
 import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
 import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -147,19 +147,19 @@ public class AnnotationFactory2 {
 //        final Object subValue = map.get(subName);
 //        final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
 //        textGraph.addAnnotationEdge(id, aInfo);
-//
+
 //      } else if (subValueParseTree instanceof IdValueContext) {
 //        IdValueContext idValueContext = (IdValueContext) subValueParseTree;
 //        String idValue = idValueContext.getText();
 //        LOG.warn("TODO: handle idValue {}", idValue);
 //        // TODO: handle idValue
-//
+
 //      } else if (subValueParseTree instanceof RefValueContext) {
 //        RefValueContext refValueContext = (RefValueContext) subValueParseTree;
 //        String refValue = refValueContext.getText();
 //        final AnnotationInfo aInfo = makeReferenceAnnotation(subName, refValue);
 //        textGraph.addAnnotationEdge(id, aInfo);
-//
+
 //      } else {
 //        throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
 //      }
@@ -334,7 +334,7 @@ public class AnnotationFactory2 {
     return null;
   }
 
-  private class KeyValue {
+  private static class KeyValue {
     private String key;
     private Object value;
 

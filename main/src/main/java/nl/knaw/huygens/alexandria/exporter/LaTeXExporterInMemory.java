@@ -29,14 +29,14 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.MessageFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class LaTeXExporterInMemory {
   private static Logger LOG = LoggerFactory.getLogger(LaTeXExporterInMemory.class);
-  private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)//
+  private static final Comparator<MarkupLayer> ON_MAX_RANGE_SIZE = Comparator.comparing(MarkupLayer::getTag)
       .thenComparingInt(MarkupLayer::getMaxRangeSize);
   private List<IndexPoint> indexPoints;
   private final Limen limen;
@@ -49,10 +49,10 @@ public class LaTeXExporterInMemory {
 
   public String exportMarkupOverlap() {
     Map<String, Object> map = new HashMap<>();
-    int maxMarkupsPerTextNode = limen.textNodeList.parallelStream()//
-        .map(limen::getMarkups)//
-        .mapToInt(Set::size)//
-        .max()//
+    int maxMarkupsPerTextNode = limen.textNodeList.parallelStream()
+        .map(limen::getMarkups)
+        .mapToInt(Set::size)
+        .max()
         .getAsInt();
     map.put("maxdepth", maxMarkupsPerTextNode);
     StringBuilder latexBuilder = new StringBuilder();
@@ -93,7 +93,7 @@ public class LaTeXExporterInMemory {
   }
 
   private void appendLimen(StringBuilder latexBuilder, Limen limen) {
-    ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray", //
+    ColorPicker colorPicker = new ColorPicker("blue", "brown", "cyan", "darkgray", "gray", "green", "lightgray",
         "lime", "magenta", "olive", "orange", "pink", "purple", "red", "teal", "violet", "black");
     latexBuilder.append("\n    % TextNodes\n");
     if (limen != null) {
@@ -148,11 +148,10 @@ public class LaTeXExporterInMemory {
     rangeLabels.add(0, "");
     rangeLabels.add("");
     String tabularContent = StringUtils.repeat("l|", rangeLabels.size() - 1) + "l";
-    StringBuilder latexBuilder = new StringBuilder()//
-        .append("\\begin{tabular}{").append(tabularContent).append("}\n")//
-        .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")//
-        .append("\\hline\n")//
-    ;
+    StringBuilder latexBuilder = new StringBuilder()
+        .append("\\begin{tabular}{").append(tabularContent).append("}\n")
+        .append(rangeIndex.stream().map(c -> "$" + c + "$").collect(Collectors.joining(" & "))).append("\\\\\n")
+        .append("\\hline\n");
 
     Iterator<IndexPoint> pointIterator = indexPoints.iterator();
     IndexPoint indexPoint = pointIterator.next();
@@ -177,10 +176,10 @@ public class LaTeXExporterInMemory {
     }
 
     latexBuilder
-        .append(rangeLabels.stream()//
-            .map(c -> "\\rot{$" + c + "$}")//
-            .collect(Collectors.joining(" & ")))//
-        .append("\\\\\n")//
+        .append(rangeLabels.stream()
+            .map(c -> "\\rot{$" + c + "$}")
+            .collect(Collectors.joining(" & ")))
+        .append("\\\\\n")
         .append("\\end{tabular}\n");
     return latexBuilder.toString();
   }
@@ -294,9 +293,9 @@ public class LaTeXExporterInMemory {
   }
 
   private String escapedContent(TextNode tn) {
-    return tn.getContent()//
-        .replaceAll(" ", "\\\\s ")//
-        .replaceAll("&", "\\\\& ")//
+    return tn.getContent()
+        .replaceAll(" ", "\\\\s ")
+        .replaceAll("&", "\\\\& ")
         .replaceAll("\n", "\\\\n ");
   }
 
@@ -373,37 +372,37 @@ public class LaTeXExporterInMemory {
   }
 
   private void appendMarkup(StringBuilder latexBuilder, Markup tr, String rangeLayerIndex, float markupRow, String color, int first, int last) {
-    latexBuilder.append("\n    \\node[label=below right:{$")//
-        .append(tr.getTag())//
-        .append("$}](tr")//
-        .append(rangeLayerIndex)//
-        .append("b)[below left=")//
-        .append(markupRow)//
-        .append(" and 0 of tn")//
-        .append(first)//
+    latexBuilder.append("\n    \\node[label=below right:{$")
+        .append(tr.getTag())
+        .append("$}](tr")
+        .append(rangeLayerIndex)
+        .append("b)[below left=")
+        .append(markupRow)
+        .append(" and 0 of tn")
+        .append(first)
         .append("]{};\n");
-    latexBuilder.append("    \\node[](tr")//
-        .append(rangeLayerIndex)//
-        .append("e)[below right=")//
-        .append(markupRow)//
-        .append(" and 0 of tn")//
-        .append(last)//
+    latexBuilder.append("    \\node[](tr")
+        .append(rangeLayerIndex)
+        .append("e)[below right=")
+        .append(markupRow)
+        .append(" and 0 of tn")
+        .append(last)
         .append("]{};\n");
-    latexBuilder.append("    \\draw[Bar-Bar,thick,color=")//
-        .append(color).append("] (tr")//
-        .append(rangeLayerIndex)//
-        .append("b) -- (tr")//
-        .append(rangeLayerIndex)//
+    latexBuilder.append("    \\draw[Bar-Bar,thick,color=")
+        .append(color).append("] (tr")
+        .append(rangeLayerIndex)
+        .append("b) -- (tr")
+        .append(rangeLayerIndex)
         .append("e);\n");
-    latexBuilder.append("    \\draw[thin,color=lightgray] (tr")//
-        .append(rangeLayerIndex)//
-        .append("b.east) -- (tn")//
-        .append(first)//
+    latexBuilder.append("    \\draw[thin,color=lightgray] (tr")
+        .append(rangeLayerIndex)
+        .append("b.east) -- (tn")
+        .append(first)
         .append(".west);\n");
-    latexBuilder.append("    \\draw[thin,color=lightgray] (tr")//
-        .append(rangeLayerIndex)//
-        .append("e.west) -- (tn")//
-        .append(last)//
+    latexBuilder.append("    \\draw[thin,color=lightgray] (tr")
+        .append(rangeLayerIndex)
+        .append("e.west) -- (tn")
+        .append(last)
         .append(".east);\n");
   }
 

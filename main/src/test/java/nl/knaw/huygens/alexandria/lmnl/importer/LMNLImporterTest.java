@@ -32,8 +32,8 @@ import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +47,13 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
-@Ignore
+@Disabled
 public class LMNLImporterTest extends AlexandriaBaseStoreTest {
   private final Logger LOG = LoggerFactory.getLogger(LMNLImporterTest.class);
 
-  @Ignore
+  @Disabled
   @Test
   public void testMarkupAnnotation() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -90,18 +90,18 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testLexingComplex() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
-      String input = "[excerpt\n"//
-          + "  [source [date}1915{][title}The Housekeeper{]]\n"//
-          + "  [author\n"//
-          + "    [name}Robert Frost{]\n"//
-          + "    [dates}1874-1963{]] }\n"//
-          + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"//
-          + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"//
-          + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"//
+      String input = "[excerpt\n"
+          + "  [source [date}1915{][title}The Housekeeper{]]\n"
+          + "  [author\n"
+          + "    [name}Robert Frost{]\n"
+          + "    [dates}1874-1963{]] }\n"
+          + "[s}[l [n}144{n]}He manages to keep the upper hand{l]\n"
+          + "[l [n}145{n]}On his own farm.{s] [s}He's boss.{s] [s}But as to hens:{l]\n"
+          + "[l [n}146{n]}We fence our flowers in and the hens range.{l]{s]\n"
           + "{excerpt]";
 
       LMNLImporter importer = new LMNLImporter(store);
@@ -129,9 +129,9 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       AnnotationInfo dates = simpleAnnotation("dates", "1874-1963");
       AnnotationInfo author = simpleAnnotation("author")/*.addAnnotation(name).addAnnotation(dates)*/;
 
-      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")//
-          .addAnnotation(source)//
-          .addAnnotation(author)//
+      TAGMarkup excerpt = store.createMarkup(expected, "excerpt")
+          .addAnnotation(source)
+          .addAnnotation(author)
           .setFirstAndLastTextNode(tn00, tn10);
       expected.associateTextNodeWithMarkupForLayer(tn00, excerpt);
       // 3 sentences
@@ -149,23 +149,23 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
       AnnotationInfo n146 = simpleAnnotation("n", "146");
       TAGMarkup l3 = store.createMarkup(expected, "l")/*.addTextNode(tn09)*/.addAnnotation(n146);
 
-      expected.addTextNode(tn00, null)//
-          .addTextNode(tn01, null)//
-          .addTextNode(tn02, null)//
-          .addTextNode(tn03, null)//
-          .addTextNode(tn04, null)//
-          .addTextNode(tn05, null)//
-          .addTextNode(tn06, null)//
-          .addTextNode(tn07, null)//
-          .addTextNode(tn08, null)//
-          .addTextNode(tn09, null)//
-          .addTextNode(tn10, null)//
-          .addMarkup(excerpt)//
-          .addMarkup(s1)//
-          .addMarkup(l1)//
-          .addMarkup(l2)//
-          .addMarkup(s2)//
-          .addMarkup(s3)//
+      expected.addTextNode(tn00, null)
+          .addTextNode(tn01, null)
+          .addTextNode(tn02, null)
+          .addTextNode(tn03, null)
+          .addTextNode(tn04, null)
+          .addTextNode(tn05, null)
+          .addTextNode(tn06, null)
+          .addTextNode(tn07, null)
+          .addTextNode(tn08, null)
+          .addTextNode(tn09, null)
+          .addTextNode(tn10, null)
+          .addMarkup(excerpt)
+          .addMarkup(s1)
+          .addMarkup(l1)
+          .addMarkup(l2)
+          .addMarkup(s2)
+          .addMarkup(s3)
           .addMarkup(l3);
       String layerName = "";
       expected.associateTextNodeWithMarkupForLayer(tn00, excerpt, layerName);
@@ -257,7 +257,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testLMNLOzymandias() throws IOException, LMNLSyntaxError {
     String pathname = "data/lmnl/ozymandias-voices-wap.lmnl";
@@ -281,7 +281,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testDiscontinuousRanges() throws LMNLSyntaxError {
     String input = "'[e [n}1{]}Ai,{e]' riep Piet, '[e [n}1{]}wat doe je, Mien?{e]'";
@@ -304,7 +304,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnnotationTextWithRanges() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -326,25 +326,25 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //      TAGTextNode at2 = store.createTextNode("annotation");
 //      TAGMarkup am1 = store.createMarkup(annotationDocument, "type")/*.addTextNode(at2)*/;
 //      TAGTextNode at3 = store.createTextNode(" text");
-//      annotationDocument//
-//          .addTextNode(at1)//
-//          .addTextNode(at2)//
-//          .addTextNode(at3)//
+//      annotationDocument
+//          .addTextNode(at1)
+//          .addTextNode(at2)
+//          .addTextNode(at3)
 //          .addMarkup(am1);
 //      String layerName = "";
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at2, am1, layerName);
 //      m1.addAnnotation(a1);
-//
+
 //      TAGTextNode t1 = store.createTextNode("This is the main text");
 ////      m1.addTextNode(t1);
 //      expected.addTextNode(t1);
 //      expected.addMarkup(m1);
 //      expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
-//
+
 //      logTAGML(actual);
 //      compareTAGML(expected, actual);
 //      assertThat(compareDocuments(expected, actual)).isTrue();
-//
+
 //      logKdTree(actual);
 //      NodeRangeIndex index = new NodeRangeIndex(store, actual);
 //      List<IndexPoint> indexPoints = index.getIndexPoints();
@@ -355,7 +355,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnnotationTextInAnnotationWithRanges() throws LMNLSyntaxError {
     String input = "[range1 [annotation1}[ra11}[ra12]{ra11]{annotation1]]";
@@ -371,28 +371,28 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
 //      TAGTextNode at1 = store.createTextNode("");
 //      TAGMarkup ar11 = store.createMarkup(annotationDocument, "ra11")/*.addTextNode(at1)*/;
 //      TAGMarkup ar12 = store.createMarkup(annotationDocument, "ra12")/*.addTextNode(at1)*/;
-//      annotationDocument//
-//          .addTextNode(at1)//
-//          .addMarkup(ar11)//
+//      annotationDocument
+//          .addTextNode(at1)
+//          .addMarkup(ar11)
 //          .addMarkup(ar12);
 //      m1.addAnnotation(a1);
 //      String layerName = "";
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at1, ar11, layerName);
 //      annotationDocument.associateTextNodeWithMarkupForLayer(at1, ar12, layerName);
-//
+
 //      TAGTextNode t1 = store.createTextNode("");
 ////      m1.addTextNode(t1);
 //      expected.addTextNode(t1);
 //      expected.addMarkup(m1);
 //      expected.associateTextNodeWithMarkupForLayer(t1, m1, layerName);
-//
+
 //      logTAGML(actual);
 //      compareTAGML(expected, actual);
 //      assertThat(compareDocuments(expected, actual)).isTrue();
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAnonymousAnnotationRangeOpener() throws LMNLSyntaxError {
     String input = "[range1 [}annotation text{]}bla{range1]";
@@ -420,7 +420,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testAtomsAreIgnored() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
@@ -445,7 +445,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testEmptyRange() throws LMNLSyntaxError {
     String input = "[empty}{empty]";
@@ -467,7 +467,7 @@ public class LMNLImporterTest extends AlexandriaBaseStoreTest {
     });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testComments() throws LMNLSyntaxError {
     runInStoreTransaction(store -> {
