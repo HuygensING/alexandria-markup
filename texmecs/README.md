@@ -10,7 +10,7 @@ add this dependency to your `pom.xml`
 <dependency>
   <groupId>nl.knaw.huygens.alexandria</groupId>
   <artifactId>texmecs</artifactId>
-  <version>2.4</version>
+  <version>2.4.1-SNAPSHOT</version>
 </dependency>
 ```
 
