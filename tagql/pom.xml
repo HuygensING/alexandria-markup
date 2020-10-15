@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.knaw.huygens.alexandria</groupId>
         <artifactId>alexandria-markup</artifactId>
-        <version>2.3.3-SNAPSHOT</version>
+        <version>2.4.1-SNAPSHOT</version>
     </parent>
     <artifactId>tagql</artifactId>
     <packaging>jar</packaging>
