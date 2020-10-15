@@ -3,7 +3,7 @@
 
     <groupId>nl.knaw.huygens.alexandria</groupId>
     <artifactId>alexandria-markup</artifactId>
-    <version>2.3.3-SNAPSHOT</version>
+    <version>2.4</version>
     <packaging>pom</packaging>
     <inceptionYear>2016</inceptionYear>
 
