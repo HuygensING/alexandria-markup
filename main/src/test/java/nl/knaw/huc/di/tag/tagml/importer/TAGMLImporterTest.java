@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,31 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
   public void test1() {
     String tagML =
         "[a>" + "<|[del>We [?del>feel<?del]<del]|[add>How many in England<add]|>" + "<a]";
+    runInStoreTransaction(
+        store -> {
+          TAGDocument document = parseTAGML(tagML, store);
+          assertThat(document).isNotNull();
+          testRDFConversion(document);
+        });
+  }
+
+  @Test
+  public void test_trd_641() {
+    // this parses, and leads to a confusing graph.
+    // Is it a bug?
+    // not really, we just haven't dealt with the nagging problem of layers in combination with non-linearity
+    // is the bug allowing this?
+    
+    String tagML =
+        "[TAGML>" +
+            "[a|+M,+T>" +
+            "<|" +
+            "[b|M>bb<b|M]" +
+            "|" +
+            "[c|T>cc<c|T]" +
+            "|>" +
+            "<a|M,T]" +
+            "<TAGML]";
     runInStoreTransaction(
         store -> {
           TAGDocument document = parseTAGML(tagML, store);
