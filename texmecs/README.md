@@ -1,20 +1,23 @@
 # texmecs
 
-This library contains the ANTLR4-generated `TexMECSLexer` and `TexMECSParser` for tokenizing and parsing TexMECS documents.
+This library contains the ANTLR4-generated `TexMECSLexer` and `TexMECSParser` for tokenizing and parsing TexMECS
+documents.
 
 ## maven usage
 
-add this dependency to your `pom.xml` 
+add this dependency to your `pom.xml`
 
 ```xml
+
 <dependency>
-  <groupId>nl.knaw.huygens.alexandria</groupId>
-  <artifactId>texmecs</artifactId>
-  <version>2.3.3-SNAPSHOT</version>
+    <groupId>nl.knaw.huygens.alexandria</groupId>
+    <artifactId>texmecs</artifactId>
+    <version>2.4</version>
 </dependency>
 ```
 
 and this repository definition:
+
 ```xml
 <repository>
   <id>huygens</id>
