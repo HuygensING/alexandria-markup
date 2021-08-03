@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,21 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.view.TAGView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import prioritised_xml_collation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import prioritised_xml_collation.MarkupCloseToken;
+import prioritised_xml_collation.MarkupOpenToken;
+import prioritised_xml_collation.ProvenanceAwareSegmenter;
+import prioritised_xml_collation.Segment;
+import prioritised_xml_collation.SegmenterInterface;
+import prioritised_xml_collation.TAGToken;
+import prioritised_xml_collation.TypeAndContentAligner;
+
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
 import static java.util.stream.Collectors.joining;
 
@@ -41,34 +48,36 @@ public class VariantGraphVisualizer {
   }
 
   public void visualizeVariation(
-      final String witness1, TAGDocument document1,
-      final String witness2, TAGDocument document2,
+      final String witness1,
+      TAGDocument document1,
+      final String witness2,
+      TAGDocument document2,
       TAGView tagView) {
-    List<TAGToken> originalTokens = new Tokenizer(document1, tagView)
-        .getTAGTokens();
-    List<TAGToken> originalTextTokens = originalTokens.stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(Collectors.toList());
+    List<TAGToken> originalTokens = new Tokenizer(document1, tagView).getTAGTokens();
+    List<TAGToken> originalTextTokens =
+        originalTokens.stream()
+            .filter(ExtendedTextToken.class::isInstance)
+            .collect(Collectors.toList());
     LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
-    List<TAGToken> originalMarkupTokens = originalTokens.stream()
-        .filter(this::isMarkupToken)
-        .collect(Collectors.toList());
+    List<TAGToken> originalMarkupTokens =
+        originalTokens.stream().filter(this::isMarkupToken).collect(Collectors.toList());
     LOG.info("originalMarkupTokens={}", serializeTokens(originalMarkupTokens));
 
-    List<TAGToken> editedTokens = new Tokenizer(document2, tagView)
-        .getTAGTokens();
-    List<TAGToken> editedTextTokens = editedTokens
-        .stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(Collectors.toList());
+    List<TAGToken> editedTokens = new Tokenizer(document2, tagView).getTAGTokens();
+    List<TAGToken> editedTextTokens =
+        editedTokens.stream()
+            .filter(ExtendedTextToken.class::isInstance)
+            .collect(Collectors.toList());
     LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
-    List<TAGToken> editedMarkupTokens = editedTokens.stream()
-        .filter(this::isMarkupToken)
-        .collect(Collectors.toList());
+    List<TAGToken> editedMarkupTokens =
+        editedTokens.stream().filter(this::isMarkupToken).collect(Collectors.toList());
     LOG.info("editedMarkupTokens={}", serializeTokens(editedMarkupTokens));
 
-    SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
-    List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
+    SegmenterInterface textSegmenter =
+        new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
+    List<Segment> textSegments =
+        new TypeAndContentAligner()
+            .alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
 
     visualizer.startVisualization();
 
@@ -77,38 +86,39 @@ public class VariantGraphVisualizer {
     visualizer.endOriginal();
 
     visualizer.startDiff(witness1, witness2);
-    textSegments.forEach(segment -> {
-      switch (segment.type) {
-        case aligned:
-          visualizer.startAligned();
-          visualizer.alignedTextTokens(segment.tokensWa, segment.tokensWb);
-          visualizer.endAligned();
-          break;
+    textSegments.forEach(
+        segment -> {
+          switch (segment.type) {
+            case aligned:
+              visualizer.startAligned();
+              visualizer.alignedTextTokens(segment.tokensWa, segment.tokensWb);
+              visualizer.endAligned();
+              break;
 
-        case addition:
-          visualizer.startAddition();
-          segment.tokensWb.forEach(visualizer::addedTextToken);
-          visualizer.endAddition();
-          break;
+            case addition:
+              visualizer.startAddition();
+              segment.tokensWb.forEach(visualizer::addedTextToken);
+              visualizer.endAddition();
+              break;
 
-        case omission:
-          visualizer.startOmission();
-          segment.tokensWa.forEach(visualizer::omittedTextToken);
-          visualizer.endOmission();
-          break;
+            case omission:
+              visualizer.startOmission();
+              segment.tokensWa.forEach(visualizer::omittedTextToken);
+              visualizer.endOmission();
+              break;
 
-        case replacement:
-          visualizer.startReplacement();
-          segment.tokensWa.forEach(visualizer::originalTextToken);
-          visualizer.replacementSeparator();
-          segment.tokensWb.forEach(visualizer::editedTextToken);
-          visualizer.endReplacement();
-          break;
+            case replacement:
+              visualizer.startReplacement();
+              segment.tokensWa.forEach(visualizer::originalTextToken);
+              visualizer.replacementSeparator();
+              segment.tokensWb.forEach(visualizer::editedTextToken);
+              visualizer.endReplacement();
+              break;
 
-        default:
-          throw new RuntimeException("unexpected type:" + segment.type);
-      }
-    });
+            default:
+              throw new RuntimeException("unexpected type:" + segment.type);
+          }
+        });
     visualizer.endDiff();
 
     visualizer.startEdited(witness2);
@@ -119,8 +129,7 @@ public class VariantGraphVisualizer {
   }
 
   private boolean isMarkupToken(final TAGToken tagToken) {
-    return tagToken instanceof MarkupOpenToken
-        || tagToken instanceof MarkupCloseToken;
+    return tagToken instanceof MarkupOpenToken || tagToken instanceof MarkupCloseToken;
   }
 
   private String serializeTokens(final List<TAGToken> originalTextTokens) {
@@ -128,5 +137,4 @@ public class VariantGraphVisualizer {
         .map(t -> "[" + t.toString().replaceAll(" ", "_") + "]")
         .collect(joining(", "));
   }
-
 }

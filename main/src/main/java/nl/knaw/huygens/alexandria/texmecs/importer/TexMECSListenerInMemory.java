@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,15 +20,36 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.*;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.*;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.AttsContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.EidContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.EndTagContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.EndTagSetContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.GiContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.ResumeTagContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.SoleTagContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.StartTagContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.StartTagSetContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.SuspendTagContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.TextContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser.VirtualElementContext;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParserBaseListener;
 
 class TexMECSListenerInMemory extends TexMECSParserBaseListener {
 
@@ -43,8 +64,7 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
   private final HashMap<String, String> idsInUse = new HashMap<>();
   private final List<String> errors = new ArrayList<>();
 
-  public TexMECSListenerInMemory() {
-  }
+  public TexMECSListenerInMemory() {}
 
   public Document getDocument() {
     return document;
@@ -119,33 +139,40 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
     if (identifiedMarkups.containsKey(extendedTag)) {
       Markup ref = identifiedMarkups.get(extendedTag);
       Markup markup = addMarkup(ref.getTag(), ctx.atts());
-      ref.textNodes.forEach(tn -> {
-        TextNode copy = new TextNode(tn.getContent());
-        limen.addTextNode(copy);
-        openMarkup.forEach(m -> linkTextToMarkup(copy, m));
-        linkTextToMarkup(copy, markup);
-      });
+      ref.textNodes.forEach(
+          tn -> {
+            TextNode copy = new TextNode(tn.getContent());
+            limen.addTextNode(copy);
+            openMarkup.forEach(m -> linkTextToMarkup(copy, m));
+            linkTextToMarkup(copy, markup);
+          });
 
     } else {
-      String message = "idref '" + idref + "' not found: No <" + extendedTag.replace("=", "@") + "| tag found that this virtual element refers to.";
+      String message =
+          "idref '"
+              + idref
+              + "' not found: No <"
+              + extendedTag.replace("=", "@")
+              + "| tag found that this virtual element refers to.";
       errors.add(message);
     }
-
   }
 
   @Override
   public void exitDocument(TexMECSParser.DocumentContext ctx) {
     if (!openMarkup.isEmpty()) {
-      String openMarkupString = openMarkup.stream()
-          .map(TexMECSListenerInMemory::startTag)
-          .collect(Collectors.joining(", "));
+      String openMarkupString =
+          openMarkup.stream()
+              .map(TexMECSListenerInMemory::startTag)
+              .collect(Collectors.joining(", "));
       String message = "Some markup was not closed: " + openMarkupString;
       errors.add(message);
     }
     if (!suspendedMarkup.isEmpty()) {
-      String suspendedMarkupString = suspendedMarkup.stream()
-          .map(TexMECSListenerInMemory::suspendTag)
-          .collect(Collectors.joining(", "));
+      String suspendedMarkupString =
+          suspendedMarkup.stream()
+              .map(TexMECSListenerInMemory::suspendTag)
+              .collect(Collectors.joining(", "));
       String message = "Some suspended markup was not resumed: " + suspendedMarkupString;
       errors.add(message);
     }
@@ -181,20 +208,26 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
   }
 
   private void addAttributes(AttsContext attsContext, Markup markup) {
-    attsContext.avs().forEach(avs -> {
-      String attrName = avs.NAME_O().getText();
-      String quotedAttrValue = avs.STRING().getText();
-      String attrValue = quotedAttrValue.substring(1, quotedAttrValue.length() - 1); // remove single||double quotes
-      Annotation annotation = new Annotation(attrName, attrValue);
-      markup.addAnnotation(annotation);
-    });
+    attsContext
+        .avs()
+        .forEach(
+            avs -> {
+              String attrName = avs.NAME_O().getText();
+              String quotedAttrValue = avs.STRING().getText();
+              String attrValue =
+                  quotedAttrValue.substring(
+                      1, quotedAttrValue.length() - 1); // remove single||double quotes
+              Annotation annotation = new Annotation(attrName, attrValue);
+              markup.addAnnotation(annotation);
+            });
   }
 
   private Markup removeFromOpenMarkup(GiContext gi) {
     String tag = gi.getText();
     Markup markup = removeFromMarkupStack(tag, openMarkup);
     if (markup == null) {
-      String message = "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
+      String message =
+          "Closing tag |" + tag + "> found, which has no corresponding earlier opening tag.";
       errors.add(message);
     }
     return markup;
@@ -204,7 +237,12 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
     String tag = ctx.gi().getText();
     Markup markup = removeFromMarkupStack(tag, suspendedMarkup);
     if (markup == null) {
-      String message = "Resuming tag <+" + tag + "| found, which has no corresponding earlier suspending tag |-" + tag + ">.";
+      String message =
+          "Resuming tag <+"
+              + tag
+              + "| found, which has no corresponding earlier suspending tag |-"
+              + tag
+              + ">.";
       errors.add(message);
     }
     return markup;
@@ -232,5 +270,4 @@ class TexMECSListenerInMemory extends TexMECSParserBaseListener {
   private static String startTag(Markup m) {
     return "<" + m.getExtendedTag() + "|";
   }
-
 }

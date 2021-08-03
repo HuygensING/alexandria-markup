@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,17 @@ package nl.knaw.huc.di.tag.model.graph;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Stack;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
@@ -45,11 +51,11 @@ public class DirectedAcyclicGraph<N> extends HyperGraph<N, Edge> {
     this.root = root;
   }
 
-//  // Question: do we want labels here?
-//  public void addDirectedEdge(N source, N target) {
-//    TraditionalEdge edge = new TraditionalEdge(sigils);
-//    super.addDirectedHyperEdge(edge, "", source, target);
-//  }
+  //  // Question: do we want labels here?
+  //  public void addDirectedEdge(N source, N target) {
+  //    TraditionalEdge edge = new TraditionalEdge(sigils);
+  //    super.addDirectedHyperEdge(edge, "", source, target);
+  //  }
 
   public List<N> traverse() {
     Set<N> visitedNodes = new HashSet<>();
@@ -83,5 +89,4 @@ public class DirectedAcyclicGraph<N> extends HyperGraph<N, Edge> {
     }
     return nodes.iterator().next();
   }
-
 }

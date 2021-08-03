@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,16 +20,22 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #L%
  */
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.assertj.core.api.AbstractObjectAssert;
+
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import org.assertj.core.api.AbstractObjectAssert;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -92,10 +98,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   }
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {
-    return actual
-        .getTextNodeStream()
-        .map(this::toTextNodeSketch)
-        .collect(toSet());
+    return actual.getTextNodeStream().map(this::toTextNodeSketch).collect(toSet());
   }
 
   //  public DocumentWrapperAssert hasLayerIds(final String... layerId) {
@@ -168,10 +171,7 @@ public class TAGDocumentAssert extends AbstractObjectAssert<TAGDocumentAssert, T
   }
 
   private Set<MarkupSketch> getActualMarkupSketches() {
-    return actual
-        .getMarkupStream()
-        .map(this::toMarkupSketch)
-        .collect(toSet());
+    return actual.getMarkupStream().map(this::toMarkupSketch).collect(toSet());
   }
 
   public static MarkupSketch markupSketch(String tag, boolean optional) {

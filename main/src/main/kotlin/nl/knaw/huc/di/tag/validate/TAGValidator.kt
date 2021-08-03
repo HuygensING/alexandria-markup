@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.validate
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_STARTCHAR
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGMarkup
 import nl.knaw.huygens.alexandria.storage.TAGStore
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TAGValidator(private val store: TAGStore) {
@@ -39,9 +38,9 @@ class TAGValidator(private val store: TAGStore) {
         val layersInDocument = document.layerNames
         val layersInSchema: List<String> = schema.getLayers()
         layersInSchema
-                .asSequence()
-                .filter { it in layersInDocument }
-                .forEach { validateForLayer(document, it, schema.getLayerHierarchy(it), result) }
+            .asSequence()
+            .filter { it in layersInDocument }
+            .forEach { validateForLayer(document, it, schema.getLayerHierarchy(it), result) }
         val layersMissingInSchema: MutableList<String> = layersInDocument.toMutableList()
         layersMissingInSchema.removeAll(layersInSchema)
         if (layersMissingInSchema.isNotEmpty()) {
@@ -64,16 +63,21 @@ class TAGValidator(private val store: TAGStore) {
     }
 
     private fun validateForLayer(
-            document: TAGDocument,
-            layer: String,
-            layerHierarchyRoot: TreeNode<String>,
-            result: TAGValidationResult) {
+        document: TAGDocument,
+        layer: String,
+        layerHierarchyRoot: TreeNode<String>,
+        result: TAGValidationResult
+    ) {
         val expectedRootMarkup = layerHierarchyRoot.data
         val rootMarkupId = document.dto.textGraph.layerRootMap[layer]
         val markup = store.getMarkup(rootMarkupId)
         val hasErrors = AtomicBoolean(false)
         if (!markup.hasTag(expectedRootMarkup)) {
-            result.errors += "Layer ${layerName(layer)}: expected root markup $expectedRootMarkup, but was ${openTag(markup)}"
+            result.errors += "Layer ${layerName(layer)}: expected root markup $expectedRootMarkup, but was ${
+                openTag(
+                    markup
+                )
+            }"
             hasErrors.set(true)
         }
         val markupIdsToHandle: MutableList<Long?> = ArrayList()
@@ -86,30 +90,35 @@ class TAGValidator(private val store: TAGStore) {
             val layerHierarchyNode = schemaChildNodeMap[parentTag]!!
             val expectedTags: MutableSet<String> = HashSet()
             layerHierarchyNode
-                    .iterator()
-                    .forEachRemaining { childNode: TreeNode<String> ->
-                        val tag = childNode.data
-                        schemaChildNodeMap[tag] = childNode
-                        expectedTags.add(tag)
-                    }
+                .iterator()
+                .forEachRemaining { childNode: TreeNode<String> ->
+                    val tag = childNode.data
+                    schemaChildNodeMap[tag] = childNode
+                    expectedTags.add(tag)
+                }
             document
-                    .getChildMarkupIdStream(parentMarkupId, layer)
-                    .forEach { mId: Long ->
-                        val markup1 = store.getMarkup(mId)
-                        val tag = markup1.tag
-                        if (tag in expectedTags) {
-                            markupIdsToHandle.add(mId)
-                        } else {
-                            val expectedTagString = expectedTags.joinToString(separator = " or ") { openTag(it, layer) }
-                            result.errors += "Layer ${layerName(layer)}: expected $expectedTagString as child markup of ${openTag(parentTag, layer)}, but found ${openTag(markup1)}"
-                            hasErrors.set(true)
-                        }
+                .getChildMarkupIdStream(parentMarkupId, layer)
+                .forEach { mId: Long ->
+                    val markup1 = store.getMarkup(mId)
+                    val tag = markup1.tag
+                    if (tag in expectedTags) {
+                        markupIdsToHandle.add(mId)
+                    } else {
+                        val expectedTagString = expectedTags.joinToString(separator = " or ") { openTag(it, layer) }
+                        result.errors += "Layer ${layerName(layer)}: expected $expectedTagString as child markup of ${
+                            openTag(
+                                parentTag,
+                                layer
+                            )
+                        }, but found ${openTag(markup1)}"
+                        hasErrors.set(true)
                     }
+                }
         }
     }
 
     private fun openTag(markup: TAGMarkup): String =
-            OPEN_TAG_STARTCHAR + markup.extendedTag + OPEN_TAG_ENDCHAR
+        OPEN_TAG_STARTCHAR + markup.extendedTag + OPEN_TAG_ENDCHAR
 
     private fun openTag(parentTag: String, layer: String): String {
         val layerInfo = if (layer == DEFAULT_LAYER) "" else DIVIDER + layer
@@ -117,6 +126,6 @@ class TAGValidator(private val store: TAGStore) {
     }
 
     private fun layerName(layer: String): String =
-            (if (layer == DEFAULT_LAYER) "$ (default)" else layer)
+        (if (layer == DEFAULT_LAYER) "$ (default)" else layer)
 
 }

@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.lmnl.importer
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,7 +227,8 @@ class LMNLImporter(tagStore: TAGStore?) {
     }
 
     private fun handleUnexpectedToken(
-            methodName: String, token: Token, ruleName: String, modeName: String) {
+        methodName: String, token: Token, ruleName: String, modeName: String
+    ) {
         val message = (methodName
                 + ": unexpected rule/token: token="
                 + token
@@ -243,7 +244,8 @@ class LMNLImporter(tagStore: TAGStore?) {
     //    joinDiscontinuedRanges(document.getDocumentId());
     //  }
     private fun log(
-            mode: String, ruleName: String, modeName: String, token: Token, context: ImporterContext) {
+        mode: String, ruleName: String, modeName: String, token: Token, context: ImporterContext
+    ) {
         // LOG.info("{}:\tlevel:{}, <{}> :\t{} ->\t{}",
         // mode, context.limenContextStack.size(),
         // token.getText().replace("\n", "\\n"),
@@ -264,9 +266,9 @@ class LMNLImporter(tagStore: TAGStore?) {
             // LOG.info("currentDocumentContext().openMarkupDeque={}",
             // openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
             val findFirst = openMarkupDeque.stream()
-                    .map { dto: TAGMarkupDTO? -> TAGMarkup(tagStore, dto) }
-                    .filter { m: TAGMarkup -> m.extendedTag == rangeName }
-                    .findFirst()
+                .map { dto: TAGMarkupDTO? -> TAGMarkup(tagStore, dto) }
+                .filter { m: TAGMarkup -> m.extendedTag == rangeName }
+                .findFirst()
             if (findFirst.isPresent) {
                 val markup = findFirst.get()
                 if (!document.markupHasTextNodes(markup)) {
@@ -279,7 +281,8 @@ class LMNLImporter(tagStore: TAGStore?) {
                 openMarkupStack.push(markup.dto)
             } else {
                 importerContext.getErrors().add(
-                        "Closing tag {$rangeName] found without corresponding open tag.")
+                    "Closing tag {$rangeName] found without corresponding open tag."
+                )
             }
         }
 
@@ -297,11 +300,11 @@ class LMNLImporter(tagStore: TAGStore?) {
 
         fun addTextNode(textNode: TAGTextNodeDTO) {
             openMarkupDeque
-                    .descendingIterator()
-                    .forEachRemaining { m: TAGMarkupDTO? ->
-                        //            m.addTextNode(textNode);
-                        document.associateTextWithMarkupForLayer(textNode, m, "")
-                    }
+                .descendingIterator()
+                .forEachRemaining { m: TAGMarkupDTO? ->
+                    //            m.addTextNode(textNode);
+                    document.associateTextWithMarkupForLayer(textNode, m, "")
+                }
             if (!document.hasTextNodes()) {
                 document.firstTextNodeId = textNode.dbId
             }
@@ -364,9 +367,9 @@ class LMNLImporter(tagStore: TAGStore?) {
             update(documentContext.document)
             if (!documentContext.openMarkupDeque.isEmpty()) {
                 val openRanges = documentContext.openMarkupDeque.stream()
-                        .map { dto: TAGMarkupDTO? -> TAGMarkup(tagStore, dto) }
-                        .map { m: TAGMarkup -> "[" + m.extendedTag + "}" }
-                        .collect(Collectors.joining(", "))
+                    .map { dto: TAGMarkupDTO? -> TAGMarkup(tagStore, dto) }
+                    .map { m: TAGMarkup -> "[" + m.extendedTag + "}" }
+                    .collect(Collectors.joining(", "))
                 _errors.add("Unclosed LMNL range(s): $openRanges")
             }
             return documentContext

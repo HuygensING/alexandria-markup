@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.lmnl.modifier
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,12 +125,12 @@ internal class LMNLModifier(private val limen: Limen) {
                         newTailNode.previousTextNode = cursor.currentTextNode
                         cursor.currentTextNode.nextTextNode = newTailNode
                         limen.getMarkups(cursor.currentTextNode)
-                                .stream()
-                                .filter { tr: Markup -> newMarkup != tr }
-                                .forEach { tr: Markup ->
-                                    limen.associateTextWithRange(newTailNode, tr)
-                                    tr.addTextNode(newTailNode)
-                                }
+                            .stream()
+                            .filter { tr: Markup -> newMarkup != tr }
+                            .forEach { tr: Markup ->
+                                limen.associateTextWithRange(newTailNode, tr)
+                                tr.addTextNode(newTailNode)
+                            }
                         limen.textNodeList.add(cursor.textNodeIndex + 1, newTailNode)
                     } else {
                         // limen.associateTextNodeWithMarkupForLayer(cursor.getCurrentTextNode(), newMarkup);

@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,20 +20,21 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
-import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import nl.knaw.huygens.alexandria.lmnl.AlexandriaLMNLBaseTest;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 public class AlexandriaBaseStoreTest extends AlexandriaLMNLBaseTest {
 

@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,13 @@ class TAGMLImporter(private val tagStore: TAGStore) {
 
     @Throws(TAGMLSyntaxError::class)
     fun importTAGML(input: InputStream): TAGDocument =
-            try {
-                val antlrInputStream = CharStreams.fromStream(input)
-                importTAGML(antlrInputStream)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                throw UncheckedIOException(e)
-            }
+        try {
+            val antlrInputStream = CharStreams.fromStream(input)
+            importTAGML(antlrInputStream)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            throw UncheckedIOException(e)
+        }
 
     @Throws(TAGMLSyntaxError::class)
     private fun importTAGML(antlrInputStream: CharStream): TAGDocument {

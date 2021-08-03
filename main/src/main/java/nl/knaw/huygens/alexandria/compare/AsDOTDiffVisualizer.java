@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,21 +20,27 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.apache.commons.text.StringEscapeUtils;
 import prioritised_xml_collation.TAGToken;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
 public class AsDOTDiffVisualizer implements DiffVisualizer {
   private final StringBuilder resultBuilder = new StringBuilder();
   private final AtomicInteger nodeCounter = new AtomicInteger();
   private int startIndex;
   private final Map<Long, String> textNodeVariables = new HashMap<>();
-  private final SetMultimap<Long, String> edges = MultimapBuilder.hashKeys().hashSetValues().build();
+  private final SetMultimap<Long, String> edges =
+      MultimapBuilder.hashKeys().hashSetValues().build();
   private String lastNode;
   private final Stack<List<String>> replacements = new Stack<>();
 
@@ -55,15 +61,20 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
         .append("    node[color=red]\n")
         .append("    edge[color=red]\n")
         .append("    style=invis\n")
-        .append("    O [shape=ellipse;style=bold;label=<").append(witness1).append(">]\n")
-        .append("    O -> tn").append(startIndex).append("\n");
+        .append("    O [shape=ellipse;style=bold;label=<")
+        .append(witness1)
+        .append(">]\n")
+        .append("    O -> tn")
+        .append(startIndex)
+        .append("\n");
   }
 
   @Override
   public void originalTextNode(final TAGTextNode t) {
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     textNodeVariables.put(t.getDbId(), nodeVariable);
-    resultBuilder.append("    ")
+    resultBuilder
+        .append("    ")
         .append(nodeVariable)
         .append(" [label=<")
         .append(escapedText(t.getText()))
@@ -77,9 +88,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
       originalNodes.add("tn" + i);
     }
     String originalTextEdges = String.join("->", originalNodes);
-    resultBuilder
-        .append("    ").append(originalTextEdges).append(" \n")
-        .append("  }\n");
+    resultBuilder.append("    ").append(originalTextEdges).append(" \n").append("  }\n");
   }
 
   @Override
@@ -90,17 +99,21 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
         .append("    node[color=brown]\n")
         .append("    edge[color=brown]\n")
         .append("    style=invis\n")
-        .append("    OE [shape=ellipse;style=bold;label=<").append(witness1).append("/").append(witness2).append(">]\n")
-        .append("    OE -> tn").append(startIndex).append("\n");
+        .append("    OE [shape=ellipse;style=bold;label=<")
+        .append(witness1)
+        .append("/")
+        .append(witness2)
+        .append(">]\n")
+        .append("    OE -> tn")
+        .append(startIndex)
+        .append("\n");
     lastNode = "";
   }
 
   @Override
   public void startAligned() {
     String nodeVariable = "tn" + nodeCounter.get();
-    resultBuilder.append("    ")
-        .append(nodeVariable)
-        .append(" [label=<");
+    resultBuilder.append("    ").append(nodeVariable).append(" [label=<");
   }
 
   @Override
@@ -177,8 +190,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
   public void endOmission() {
     String startOmissionNode = lastNode;
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
-    resultBuilder
-        .append(">]\n");
+    resultBuilder.append(">]\n");
     addEdge(startOmissionNode, nodeVariable);
 
     String endOmissionNodeVariable = "tn" + nodeCounter.getAndIncrement();
@@ -231,10 +243,11 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
     resultBuilder.append("    ").append(endReplacementNode).append(" [shape=point]\n");
 
     List<String> options = replacements.pop();
-    options.forEach(option -> {
-      addEdge(startReplacementNode, option);
-      addEdge(option, endReplacementNode);
-    });
+    options.forEach(
+        option -> {
+          addEdge(startReplacementNode, option);
+          addEdge(option, endReplacementNode);
+        });
     lastNode = endReplacementNode;
   }
 
@@ -251,15 +264,20 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
         .append("    node[color=blue]\n")
         .append("    edge[color=blue]\n")
         .append("    style=invis\n")
-        .append("    E [shape=ellipse;style=bold;label=<").append(witness2).append(">]\n")
-        .append("    E -> tn").append(startIndex).append("\n");
+        .append("    E [shape=ellipse;style=bold;label=<")
+        .append(witness2)
+        .append(">]\n")
+        .append("    E -> tn")
+        .append(startIndex)
+        .append("\n");
   }
 
   @Override
   public void editedTextNode(final TAGTextNode t) {
     String nodeVariable = "tn" + nodeCounter.getAndIncrement();
     textNodeVariables.put(t.getDbId(), nodeVariable);
-    resultBuilder.append("    ")
+    resultBuilder
+        .append("    ")
         .append(nodeVariable)
         .append(" [label=<")
         .append(escapedText(t.getText()))
@@ -273,21 +291,24 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
       editedNodes.add("tn" + i);
     }
     String editedTextEdges = String.join("->", editedNodes);
-    resultBuilder
-        .append("    ").append(editedTextEdges).append("\n")
-        .append("  }\n");
+    resultBuilder.append("    ").append(editedTextEdges).append("\n").append("  }\n");
   }
 
   @Override
   public void endVisualization() {
-    edges.forEach((textNodeId, nodeVariable) -> {
-      String leftNodeVariable = textNodeVariables.get(textNodeId);
-      resultBuilder
-//          .append("  rank=same{").append(leftNodeVariable).append(" ").append(nodeVariable).append("}\n")
-          .append("  ").append(leftNodeVariable).append("->").append(nodeVariable).append(" [style=dashed;arrowhead=none]\n");
-    });
-    resultBuilder.append("rank=same{O OE E}\n")
-        .append("}\n");
+    edges.forEach(
+        (textNodeId, nodeVariable) -> {
+          String leftNodeVariable = textNodeVariables.get(textNodeId);
+          resultBuilder
+              //          .append("  rank=same{").append(leftNodeVariable).append("
+              // ").append(nodeVariable).append("}\n")
+              .append("  ")
+              .append(leftNodeVariable)
+              .append("->")
+              .append(nodeVariable)
+              .append(" [style=dashed;arrowhead=none]\n");
+        });
+    resultBuilder.append("rank=same{O OE E}\n").append("}\n");
   }
 
   @Override
@@ -301,8 +322,7 @@ public class AsDOTDiffVisualizer implements DiffVisualizer {
 
   private String escapedText(final String text) {
     String normalized = text.replace("\n", "\\n");
-    return StringEscapeUtils.escapeHtml3(normalized)
-        .replace(" ", "&nbsp;");
+    return StringEscapeUtils.escapeHtml3(normalized).replace(" ", "&nbsp;");
   }
 
   private void addEdge(final String leftNode, final String rightNode) {

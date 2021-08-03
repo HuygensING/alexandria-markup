@@ -4,7 +4,7 @@ package nl.knaw
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ object AntlrUtils {
     @JvmStatic
     fun makeTokenTable(lexer: Lexer): String {
         val table = AsciiTable()
-                .setTextAlignment(TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         val cwc = CWC_LongestLine()
         table.renderer.cwc = cwc
         table.addRule()

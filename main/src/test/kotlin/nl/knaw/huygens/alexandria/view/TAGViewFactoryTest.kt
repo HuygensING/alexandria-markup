@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.view
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ class TAGViewFactoryTest : AlexandriaBaseStoreTest() {
     }
 
     private fun createView(store: TAGStore, def: TAGViewDefinition): TAGView =
-            TAGViewFactory(store).fromDefinition(def)
+        TAGViewFactory(store).fromDefinition(def)
 
     @Test
     fun fromDefinitionWithMarkupExclusion() {

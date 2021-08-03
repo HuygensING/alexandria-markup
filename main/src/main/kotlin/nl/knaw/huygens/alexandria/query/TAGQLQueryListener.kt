@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.query
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import org.slf4j.LoggerFactory
-import java.util.*
 import java.util.function.Function
 import java.util.function.Predicate
 import java.util.stream.Collectors
@@ -45,8 +44,8 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     private fun toText(markup: TAGMarkup): String {
         val textBuilder = StringBuilder()
         document
-                .getTextNodeStreamForMarkup(markup)
-                .forEach { textNode: TAGTextNode -> textBuilder.append(textNode.text) }
+            .getTextNodeStreamForMarkup(markup)
+            .forEach { textNode: TAGTextNode -> textBuilder.append(textNode.text) }
         return textBuilder.toString()
     }
 
@@ -60,7 +59,8 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     }
 
     private fun handleSelectVariable(
-            statement: TAGQLSelectStatement, selectVariable: SelectVariableContext) {
+        statement: TAGQLSelectStatement, selectVariable: SelectVariableContext
+    ) {
         val part = selectVariable.part()
         if (part != null) {
             when (part) {
@@ -82,7 +82,8 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     }
 
     private fun toAnnotationTextMapper(
-            annotationIdentifier: String): Function<in TAGMarkup, in Any> {
+        annotationIdentifier: String
+    ): Function<in TAGMarkup, in Any> {
         val annotationTags = listOf(*annotationIdentifier.split(":".toRegex()).toTypedArray())
         return Function { markup: TAGMarkup ->
             val annotationTexts: MutableList<String?> = ArrayList()
@@ -91,21 +92,21 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
             while (depth < annotationTags.size - 1) {
                 val filterTag = annotationTags[depth]
                 annotationsToFilter = annotationsToFilter.stream()
-                        .filter(hasTag(filterTag)) //            .flatMap(TAGAnnotation::getAnnotationStream)
-                        .collect(Collectors.toList())
+                    .filter(hasTag(filterTag)) //            .flatMap(TAGAnnotation::getAnnotationStream)
+                    .collect(Collectors.toList())
                 depth += 1
             }
             val filterTag = annotationTags[depth]
             annotationsToFilter.stream()
-                    .filter(hasTag(filterTag))
-                    .map { annotation: AnnotationInfo -> toAnnotationText(annotation) }
-                    .forEach { e: String? -> annotationTexts.add(e) }
+                .filter(hasTag(filterTag))
+                .map { annotation: AnnotationInfo -> toAnnotationText(annotation) }
+                .forEach { e: String? -> annotationTexts.add(e) }
             annotationTexts
         }
     }
 
     private fun hasTag(filterTag: String): Predicate<AnnotationInfo> =
-            Predicate { a: AnnotationInfo -> filterTag == a.name }
+        Predicate { a: AnnotationInfo -> filterTag == a.name }
 
     private fun handleSource(statement: TAGQLSelectStatement, source: SourceContext) {
         when (source) {
@@ -147,13 +148,18 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
                     val annotationIdentifier = getAnnotationName(extendedIdentifier.part())
                     filter = Predicate { markup: TAGMarkup ->
                         markup
-                                .annotationStream
-                                .anyMatch { a: AnnotationInfo -> annotationIdentifier == a.name && value == toAnnotationText(a) }
+                            .annotationStream
+                            .anyMatch { a: AnnotationInfo ->
+                                annotationIdentifier == a.name && value == toAnnotationText(
+                                    a
+                                )
+                            }
                     }
                 } else {
                     unhandled(
-                            extendedIdentifier.part().javaClass.name + " extendedIdentifier.part()",
-                            extendedIdentifier.part().text)
+                        extendedIdentifier.part().javaClass.name + " extendedIdentifier.part()",
+                        extendedIdentifier.part().text
+                    )
                 }
             }
             is JoiningExpressionContext -> {
@@ -178,16 +184,16 @@ internal class TAGQLQueryListener(private val document: TAGDocument) : TAGQLBase
     }
 
     private fun unhandled(variable: String, value: String): Unit =
-            throw RuntimeException("unhandled: $variable = $value")
+        throw RuntimeException("unhandled: $variable = $value")
 
     private fun toInteger(ctx: ParserRuleContext): Int =
-            ctx.text.toInt()
+        ctx.text.toInt()
 
     private fun stringLiteral(ctx: ParserRuleContext): String =
-            ctx.text
+        ctx.text
 
     private fun stringValue(parseTree: ParseTree): String =
-            parseTree.text.replace("'".toRegex(), "")
+        parseTree.text.replace("'".toRegex(), "")
 
     private fun toAnnotationText(annotation: AnnotationInfo): String {
         TODO()

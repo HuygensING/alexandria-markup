@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,78 +53,78 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         openLayers.add(DEFAULT_LAYER)
         val stateRef = AtomicReference(ExporterState())
         document.textNodeStream
-                .forEach { nodeToProcess: TAGTextNode ->
-                    //      logTextNode(nodeToProcess);
-                    if (nodeToProcess !in processedNodes) {
-                        val state = stateRef.get()!!
-                        val markupIds: MutableSet<Long> = LinkedHashSet()
-                        //        Collections.reverse(markupStreamForTextNode);
-                        document.getMarkupStreamForTextNode(nodeToProcess)
-                                .forEach { mw: TAGMarkup ->
-                                    val id = mw.dbId
-                                    markupIds.add(id)
-                                    state.openTags.computeIfAbsent(id) { toOpenTag(mw, openLayers) }
-                                    state.closeTags.computeIfAbsent(id) { toCloseTag(mw) }
-                                    openLayers.addAll(mw.layers)
-                                    if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
-                                        discontinuousMarkupTextNodesToHandle[id]!!.decrementAndGet()
-                                    }
-                                }
-                        val relevantMarkupIds: Set<Long?> = view.filterRelevantMarkup(markupIds)
-
-                        //        if (needsDivider(nodeToProcess)) {
-                        //          tagmlBuilder.append(DIVIDER);
-                        //        }
-                        var variationState = textVariationStates.peek()
-                        if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
-                            tagVisitor.exitTextVariation()
-                            //          tagmlBuilder.append(CONVERGENCE);
-                            textVariationStates.pop()
-                            variationState = textVariationStates.peek()
+            .forEach { nodeToProcess: TAGTextNode ->
+                //      logTextNode(nodeToProcess);
+                if (nodeToProcess !in processedNodes) {
+                    val state = stateRef.get()!!
+                    val markupIds: MutableSet<Long> = LinkedHashSet()
+                    //        Collections.reverse(markupStreamForTextNode);
+                    document.getMarkupStreamForTextNode(nodeToProcess)
+                        .forEach { mw: TAGMarkup ->
+                            val id = mw.dbId
+                            markupIds.add(id)
+                            state.openTags.computeIfAbsent(id) { toOpenTag(mw, openLayers) }
+                            state.closeTags.computeIfAbsent(id) { toCloseTag(mw) }
+                            openLayers.addAll(mw.layers)
+                            if (discontinuousMarkupTextNodesToHandle.containsKey(id)) {
+                                discontinuousMarkupTextNodesToHandle[id]!!.decrementAndGet()
+                            }
                         }
-                        val toClose: MutableList<Long?> = ArrayList(state.openMarkupIds)
-                        toClose.removeAll(relevantMarkupIds)
-                        toClose.reverse()
-                        toClose.forEach { markupId: Long? ->
+                    val relevantMarkupIds: Set<Long?> = view.filterRelevantMarkup(markupIds)
+
+                    //        if (needsDivider(nodeToProcess)) {
+                    //          tagmlBuilder.append(DIVIDER);
+                    //        }
+                    var variationState = textVariationStates.peek()
+                    if (variationState.isFirstNodeAfterConvergence(nodeToProcess)) {
+                        tagVisitor.exitTextVariation()
+                        //          tagmlBuilder.append(CONVERGENCE);
+                        textVariationStates.pop()
+                        variationState = textVariationStates.peek()
+                    }
+                    val toClose: MutableList<Long?> = ArrayList(state.openMarkupIds)
+                    toClose.removeAll(relevantMarkupIds)
+                    toClose.reverse()
+                    toClose.forEach { markupId: Long? ->
 //                            var closeTag = state.closeTags[markupId].toString()
 //                            closeTag = addSuspendPrefixIfRequired(
 //                                    closeTag, markupId, discontinuousMarkupTextNodesToHandle)
-                            val markup = store.getMarkup(markupId)
-                            tagVisitor.exitCloseTag(markup)
-                        }
-                        val toOpen: MutableList<Long?> = ArrayList(relevantMarkupIds)
-                        toOpen.removeAll(state.openMarkupIds)
-                        toOpen.forEach { markupId: Long? ->
-                            val markup = store.getMarkup(markupId)
-                            tagVisitor.enterOpenTag(markup)
+                        val markup = store.getMarkup(markupId)
+                        tagVisitor.exitCloseTag(markup)
+                    }
+                    val toOpen: MutableList<Long?> = ArrayList(relevantMarkupIds)
+                    toOpen.removeAll(state.openMarkupIds)
+                    toOpen.forEach { markupId: Long? ->
+                        val markup = store.getMarkup(markupId)
+                        tagVisitor.enterOpenTag(markup)
 //                            var openTag = state.openTags[markupId].toString()
 //                            openTag = addResumePrefixIfRequired(
 //                                    openTag, markupId, discontinuousMarkupTextNodesToHandle)
-                            markup.annotationStream
-                                    .forEach { a: AnnotationInfo ->
-                                        val value = serializeAnnotation(annotationFactory, a, tagVisitor)
-                                        tagVisitor.addAnnotation(value)
-                                    }
-                            tagVisitor.exitOpenTag(markup)
-                        }
-                        state.openMarkupIds.removeAll(toClose)
-                        state.openMarkupIds.addAll(toOpen)
-                        if (variationState.isBranchStartNode(nodeToProcess)) {
-                            // this node starts a new branch of the current textvariation
-                            stateRef.set(variationState.getStartState())
-                            variationState.incrementBranchesStarted()
-                        }
-                        val textNode = nodeToProcess.dto
-                        val content = nodeToProcess.text
-                        //        String escapedText = variationState.inVariation()
-                        //            ? TAGML.escapeVariantText(content)
-                        //            : TAGML.escapeRegularText(content);
-                        tagVisitor.exitText(content, variationState.inVariation())
-                        processedNodes.add(nodeToProcess)
-                        state.lastTextNodeId = nodeToProcess.dbId
-                        //        LOG.debug("TAGML={}\n", tagmlBuilder);
+                        markup.annotationStream
+                            .forEach { a: AnnotationInfo ->
+                                val value = serializeAnnotation(annotationFactory, a, tagVisitor)
+                                tagVisitor.addAnnotation(value)
+                            }
+                        tagVisitor.exitOpenTag(markup)
                     }
+                    state.openMarkupIds.removeAll(toClose)
+                    state.openMarkupIds.addAll(toOpen)
+                    if (variationState.isBranchStartNode(nodeToProcess)) {
+                        // this node starts a new branch of the current textvariation
+                        stateRef.set(variationState.getStartState())
+                        variationState.incrementBranchesStarted()
+                    }
+                    val textNode = nodeToProcess.dto
+                    val content = nodeToProcess.text
+                    //        String escapedText = variationState.inVariation()
+                    //            ? TAGML.escapeVariantText(content)
+                    //            : TAGML.escapeRegularText(content);
+                    tagVisitor.exitText(content, variationState.inVariation())
+                    processedNodes.add(nodeToProcess)
+                    state.lastTextNodeId = nodeToProcess.dbId
+                    //        LOG.debug("TAGML={}\n", tagmlBuilder);
                 }
+            }
         while (!textVariationStates.isEmpty()) {
             val textVariationState = textVariationStates.pop()
             if (textVariationState.inVariation()) {
@@ -134,14 +134,15 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         }
         val state = stateRef.get()
         state!!.openMarkupIds
-                .descendingIterator()
-                .forEachRemaining { markupId: Long? -> tagVisitor.exitCloseTag(store.getMarkup(markupId)) }
+            .descendingIterator()
+            .forEachRemaining { markupId: Long? -> tagVisitor.exitCloseTag(store.getMarkup(markupId)) }
         //        .forEachRemaining(markupId -> tagmlBuilder.append(state.closeTags.get(markupId)));
         tagVisitor.exitDocument(document)
     }
 
     private fun serializeAnnotation(
-            annotationFactory: AnnotationFactory, a: AnnotationInfo, tagVisitor: TAGVisitor): String {
+        annotationFactory: AnnotationFactory, a: AnnotationInfo, tagVisitor: TAGVisitor
+    ): String {
         val stringBuilder = StringBuilder()
         if (a.hasName()) {
             val annotationAssigner = tagVisitor.serializeAnnotationAssigner(a.name)
@@ -164,15 +165,15 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
             AnnotationType.List -> {
                 val listValue = annotationFactory.getListValue(a)
                 val serializedItems = listValue.stream()
-                        .map { ai: AnnotationInfo -> serializeAnnotation(annotationFactory, ai, tagVisitor) }
-                        .collect(Collectors.toList())
+                    .map { ai: AnnotationInfo -> serializeAnnotation(annotationFactory, ai, tagVisitor) }
+                    .collect(Collectors.toList())
                 tagVisitor.serializeListAnnotationValue(serializedItems)
             }
             AnnotationType.Map -> {
                 val mapValue = annotationFactory.getMapValue(a)
                 val serializedMapItems = mapValue.stream()
-                        .map { ai: AnnotationInfo -> serializeAnnotation(annotationFactory, ai, tagVisitor) }
-                        .collect(Collectors.toList())
+                    .map { ai: AnnotationInfo -> serializeAnnotation(annotationFactory, ai, tagVisitor) }
+                    .collect(Collectors.toList())
                 tagVisitor.serializeMapAnnotationValue(serializedMapItems)
             }
             else -> throw RuntimeException("unhandled annotation type:" + a.type)
@@ -213,13 +214,14 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         }
 
         fun setBranchStartNodes(branchStartNodes: List<TAGTextNode>): TextVariationState {
-            branchStartNodeIds = branchStartNodes.stream().map { obj: TAGTextNode -> obj.dbId }.collect(Collectors.toSet())
+            branchStartNodeIds =
+                branchStartNodes.stream().map { obj: TAGTextNode -> obj.dbId }.collect(Collectors.toSet())
             branchesToTraverse = branchStartNodes.size
             return this
         }
 
         fun isBranchStartNode(node: TAGTextNode): Boolean =
-                node.dbId in branchStartNodeIds
+            node.dbId in branchStartNodeIds
 
         fun setConvergenceSucceedingNodeId(convergenceSucceedingNodeId: Long?): TextVariationState {
             this.convergenceSucceedingNodeId = convergenceSucceedingNodeId
@@ -227,43 +229,43 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         }
 
         fun isFirstNodeAfterConvergence(node: TAGTextNode): Boolean =
-                node.dbId == convergenceSucceedingNodeId
+            node.dbId == convergenceSucceedingNodeId
 
         fun incrementBranchesStarted() {
             branchesToTraverse--
         }
 
         fun allBranchesTraversed(): Boolean =
-                branchesToTraverse == 0
+            branchesToTraverse == 0
 
         fun inVariation(): Boolean =
-                branchStartNodeIds.isNotEmpty()
+            branchStartNodeIds.isNotEmpty()
     }
 
     private fun toCloseTag(markup: TAGMarkup): StringBuilder {
         val suspend = if (markup.isSuspended) SUSPEND_PREFIX else ""
         return if (markup.isAnonymous) StringBuilder() else StringBuilder(CLOSE_TAG_STARTCHAR)
-                .append(suspend)
-                .append(markup.extendedTag)
-                .append(CLOSE_TAG_ENDCHAR)
+            .append(suspend)
+            .append(markup.extendedTag)
+            .append(CLOSE_TAG_ENDCHAR)
     }
 
     private fun toOpenTag(
-            markup: TAGMarkup,
-            openLayers: Set<String>
+        markup: TAGMarkup,
+        openLayers: Set<String>
     ): StringBuilder {
         val resume = if (markup.isResumed) RESUME_PREFIX else ""
         val newLayers: Set<String> = (markup.layers - openLayers).toSet()
         val tagBuilder: StringBuilder = StringBuilder(OPEN_TAG_STARTCHAR)
-                .append(resume)
-                .append(markup.getExtendedTag(newLayers))
+            .append(resume)
+            .append(markup.getExtendedTag(newLayers))
         return if (markup.isAnonymous) tagBuilder.append(MILESTONE_TAG_ENDCHAR) else tagBuilder.append(OPEN_TAG_ENDCHAR)
     }
 
     private fun addResumePrefixIfRequired(
-            openTag: String,
-            markupId: Long?,
-            discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>
+        openTag: String,
+        markupId: Long?,
+        discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>
     ): String {
         var newOpenTag = openTag
         if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
@@ -277,9 +279,10 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
     }
 
     private fun addSuspendPrefixIfRequired(
-            closeTag: String,
-            markupId: Long?,
-            discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>): String {
+        closeTag: String,
+        markupId: Long?,
+        discontinuousMarkupTextNodesToHandle: Map<Long?, AtomicInteger>
+    ): String {
         var newCloseTag = closeTag
         if (discontinuousMarkupTextNodesToHandle.containsKey(markupId)) {
             val textNodesToHandle = discontinuousMarkupTextNodesToHandle[markupId]!!.get()
@@ -294,11 +297,11 @@ class TAGTraverser(private val store: TAGStore, private val view: TAGView, priva
         //    final AnnotationFactory annotationFactory = new AnnotationFactory(store,
         // document.getDTO().textGraph);
         document
-                .markupStream
-                .filter { obj: TAGMarkup -> obj.isDiscontinuous }
-                .forEach { mw: TAGMarkup ->
-                    discontinuousMarkupTextNodesToHandle[mw.dbId] = AtomicInteger(mw.textNodeCount)
-                }
+            .markupStream
+            .filter { obj: TAGMarkup -> obj.isDiscontinuous }
+            .forEach { mw: TAGMarkup ->
+                discontinuousMarkupTextNodesToHandle[mw.dbId] = AtomicInteger(mw.textNodeCount)
+            }
         textVariationStates.push(TextVariationState())
         val layerNames = document.layerNames
         relevantLayers = view.filterRelevantLayers(layerNames)

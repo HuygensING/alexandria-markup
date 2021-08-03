@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.view
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ class TAGViewFactory(private val store: TAGStore) {
 
     fun fromDefinition(definition: TAGViewDefinition): TAGView {
         return createTAGView(
-                definition.includeLayers, definition.excludeLayers,
-                definition.includeMarkup, definition.excludeMarkup
+            definition.includeLayers, definition.excludeLayers,
+            definition.includeMarkup, definition.excludeMarkup
         )
     }
 
@@ -71,7 +71,12 @@ class TAGViewFactory(private val store: TAGStore) {
         return stringSet != null && stringSet.isNotEmpty()
     }
 
-    private fun createTAGView(includeLayers: Set<String>, excludeLayers: Set<String>, includeMarkup: Set<String>, excludeMarkup: Set<String>): TAGView {
+    private fun createTAGView(
+        includeLayers: Set<String>,
+        excludeLayers: Set<String>,
+        includeMarkup: Set<String>,
+        excludeMarkup: Set<String>
+    ): TAGView {
         val tagView = TAGView(store)
         if (notEmpty(includeLayers)) {
             tagView.layersToInclude = includeLayers
@@ -98,9 +103,9 @@ class TAGViewFactory(private val store: TAGStore) {
         const val EXCLUDE_MARKUP = "excludeMarkup"
 
         private fun getElements(jsonArray: JsonArray): Set<String> =
-                jsonArray.getValuesAs(JsonString::class.java)
-                        .map { obj: JsonString -> obj.string }
-                        .toSet()
+            jsonArray.getValuesAs(JsonString::class.java)
+                .map { obj: JsonString -> obj.string }
+                .toSet()
     }
 
 }

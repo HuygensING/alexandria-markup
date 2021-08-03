@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,26 @@ package nl.knaw.huygens.alexandria.storage;
  * limitations under the License.
  * #L%
  */
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.model.graph.edges.Edge;
@@ -29,14 +49,6 @@ import nl.knaw.huc.di.tag.tagml.importer.RangePair;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.*;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
@@ -141,8 +153,7 @@ public class TAGDocument {
   }
 
   public Iterator<TAGTextNodeDTO> getTextNodeIterator() {
-    return getTagTextNodeStream()
-        .iterator();
+    return getTagTextNodeStream().iterator();
   }
 
   public void associateTextNodeWithMarkupForLayer(TAGTextNode tagTextNode, TAGMarkup tagMarkup) {
@@ -262,8 +273,7 @@ public class TAGDocument {
   /* private methods */
 
   private Stream<TAGTextNodeDTO> getTagTextNodeStream() {
-    return documentDTO.getTextNodeIds().stream()
-        .map(store::getTextNodeDTO);
+    return documentDTO.getTextNodeIds().stream().map(store::getTextNodeDTO);
   }
 
   private void update() {

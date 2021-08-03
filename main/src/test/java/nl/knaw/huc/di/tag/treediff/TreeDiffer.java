@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.treediff;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,18 @@ package nl.knaw.huc.di.tag.treediff;
  * limitations under the License.
  * #L%
  */
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.*;
 
 import static java.lang.String.format;
 
@@ -57,9 +65,9 @@ class TreeDiffer {
     if (a != ALPHA
         && b != ALPHA
         && Objects.equals(((TreeNode) a).label(), ((TreeNode) b).label())) // No change
-      return 0;
+    return 0;
     else // Insert, Delete, Change.
-      return 1;
+    return 1;
   }
 
   private static String keyForE(int s, int u, int i, int t, int v, int j) {
@@ -106,7 +114,8 @@ class TreeDiffer {
                   int f_j = targetTree.fatherOf(j).preorderPosition();
                   String dependentKey = keyForE(s, u, i, t, f_j, j - 1);
                   TreeMapping dependentTreeMapping = treeDiffMapE.get(dependentKey);
-                  final Integer distance = dependentTreeMapping.cost + r(ALPHA, targetTree.nodeAt(j));
+                  final Integer distance =
+                      dependentTreeMapping.cost + r(ALPHA, targetTree.nodeAt(j));
                   Mapping mapping = new Mapping();
                   mapping.addAll(dependentTreeMapping.mapping);
                   mapping.add(pairOf(ALPHA, j));
@@ -116,7 +125,8 @@ class TreeDiffer {
                   int f_i = sourceTree.fatherOf(i).preorderPosition();
                   String dependentKey = keyForE(s, f_i, i - 1, t, v, j);
                   TreeMapping dependentTreeMapping = treeDiffMapE.get(dependentKey);
-                  final Integer distance = dependentTreeMapping.cost + r(sourceTree.nodeAt(i), ALPHA);
+                  final Integer distance =
+                      dependentTreeMapping.cost + r(sourceTree.nodeAt(i), ALPHA);
                   Mapping mapping = new Mapping();
                   mapping.addAll(dependentTreeMapping.mapping);
                   mapping.add(pairOf(i, ALPHA));
@@ -134,10 +144,10 @@ class TreeDiffer {
                   TreeMapping dependentTreeMapping2 = treeDiffMapE.get(dependentKey2);
                   TreeMapping dependentTreeMapping3 = treeDiffMapE.get(dependentKey3);
                   TreeMapping dependentTreeMapping4 = treeDiffMapE.get(dependentKey4);
-                  final int distance = Math.min(
-                      Math.min(dependentTreeMapping1.cost, dependentTreeMapping2.cost),
-                      (dependentTreeMapping3.cost + dependentTreeMapping4.cost)
-                  );
+                  final int distance =
+                      Math.min(
+                          Math.min(dependentTreeMapping1.cost, dependentTreeMapping2.cost),
+                          (dependentTreeMapping3.cost + dependentTreeMapping4.cost));
 
                   // Remember the mapping.
                   final Mapping mapping = new Mapping();
@@ -187,7 +197,8 @@ class TreeDiffer {
    * position y in the target tree is inserted. If y is ALPHA, then it shows
    * the node at the preorder position x in the source tree is deleted.
    */
-  private static Map<String, TreeMapping> computeMIN_M(Tree sourceTree, Tree targetTree, Map<String, TreeMapping> treeDiffMapE) {
+  private static Map<String, TreeMapping> computeMIN_M(
+      Tree sourceTree, Tree targetTree, Map<String, TreeMapping> treeDiffMapE) {
     final Map<String, TreeMapping> treeDiffMapMinM = new HashMap<>();
 
     String key = keyForMIN_M(1, 1);
@@ -234,8 +245,10 @@ class TreeDiffer {
             String dependentKeyForM = keyForMIN_M(s, t);
             TreeMapping dependentTreeMappingE = treeDiffMapE.get(dependentKeyForE);
             TreeMapping dependentTreeMappingM = treeDiffMapMinM.get(dependentKeyForM);
-            int temp = dependentTreeMappingM.cost + dependentTreeMappingE.cost
-                - r(sourceTree.nodeAt(s), targetTree.nodeAt(t));
+            int temp =
+                dependentTreeMappingM.cost
+                    + dependentTreeMappingE.cost
+                    - r(sourceTree.nodeAt(s), targetTree.nodeAt(t));
             distance_i_j = Math.min(temp, distance_i_j);
             if (temp == distance_i_j) {
               Set<Pair<Integer, Integer>> tempSet = new HashSet<>();
@@ -277,7 +290,8 @@ class TreeDiffer {
    * position y in the target tree is inserted. If y is ALPHA, then it shows
    * the node at the preorder position x in the source tree is deleted.
    */
-  private static Map<String, TreeMapping> computeD(Tree sourceTree, Tree targetTree, Map<String, TreeMapping> treeDiffMapMinM) {
+  private static Map<String, TreeMapping> computeD(
+      Tree sourceTree, Tree targetTree, Map<String, TreeMapping> treeDiffMapMinM) {
     final Map<String, TreeMapping> treeDiffMapD = new HashMap<>();
 
     String key = keyForD(1, 1);
@@ -352,39 +366,38 @@ class TreeDiffer {
    *
    * @returns list of strings
    */
-  public static List<String> produceHumanFriendlyMapping(Mapping mapping, Tree sourceTree, Tree targetTree) {
+  public static List<String> produceHumanFriendlyMapping(
+      Mapping mapping, Tree sourceTree, Tree targetTree) {
     List<String> humanFriendlyMapping = new ArrayList<>();
     for (Pair pair : mapping) {
       Object i = pair.getLeft();
       Object j = pair.getRight();
       if (i == ALPHA) {
         TreeNode targetNode = targetTree.nodeAt((int) j);
-        humanFriendlyMapping.add(format("Insert %s (@%d)",
-            targetNode.label(),
-            targetNode.preorderPosition()
-        ));
+        humanFriendlyMapping.add(
+            format("Insert %s (@%d)", targetNode.label(), targetNode.preorderPosition()));
       } else if (j == ALPHA) {
         TreeNode sourceNode = sourceTree.nodeAt((int) i);
-        humanFriendlyMapping.add(format("Delete %s (@%d)",
-            sourceNode.label(),
-            sourceNode.preorderPosition()
-        ));
+        humanFriendlyMapping.add(
+            format("Delete %s (@%d)", sourceNode.label(), sourceNode.preorderPosition()));
       } else {
         TreeNode sourceNode = sourceTree.nodeAt((int) i);
         TreeNode targetNode = targetTree.nodeAt((int) j);
         if (Objects.equals(sourceNode.label(), targetNode.label())) {
-          humanFriendlyMapping.add(format("No change for %s (@%d and @%d)",
-              sourceNode.label(),
-              sourceNode.preorderPosition(),
-              targetNode.preorderPosition()
-          ));
+          humanFriendlyMapping.add(
+              format(
+                  "No change for %s (@%d and @%d)",
+                  sourceNode.label(),
+                  sourceNode.preorderPosition(),
+                  targetNode.preorderPosition()));
         } else {
-          humanFriendlyMapping.add(format("Change from %s (@%d) to %s (@%d)",
-              sourceNode.label(),
-              sourceNode.preorderPosition(),
-              targetNode.label(),
-              targetNode.preorderPosition()
-          ));
+          humanFriendlyMapping.add(
+              format(
+                  "Change from %s (@%d) to %s (@%d)",
+                  sourceNode.label(),
+                  sourceNode.preorderPosition(),
+                  targetNode.label(),
+                  targetNode.preorderPosition()));
         }
       }
     }
@@ -417,27 +430,28 @@ class TreeDiffer {
     return treeMapping;
   }
 
-  private static final Comparator<Pair<Integer, Integer>> MAPPING_PAIR_COMPARATOR = new Comparator<Pair<Integer, Integer>>() {
-    @Override
-    public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
-      if (compareHelper(p1.getLeft(), p2.getLeft()) == 1) {
-        return 1;
-      } else if (compareHelper(p1.getLeft(), p2.getLeft()) == -1) {
-        return -1;
-      } else {
-        return compareHelper(p1.getRight(), p2.getRight());
-      }
-    }
+  private static final Comparator<Pair<Integer, Integer>> MAPPING_PAIR_COMPARATOR =
+      new Comparator<Pair<Integer, Integer>>() {
+        @Override
+        public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
+          if (compareHelper(p1.getLeft(), p2.getLeft()) == 1) {
+            return 1;
+          } else if (compareHelper(p1.getLeft(), p2.getLeft()) == -1) {
+            return -1;
+          } else {
+            return compareHelper(p1.getRight(), p2.getRight());
+          }
+        }
 
-    int compareHelper(Object o1, Object o2) {
-      if (o1 == ALPHA) {
-        return 1;
-      } else // if they are integer
-        if (o2 == ALPHA) {
-          return -1;
-        } else return Integer.compare((int) o1, (int) o2);
-    }
-  };
+        int compareHelper(Object o1, Object o2) {
+          if (o1 == ALPHA) {
+            return 1;
+          } else // if they are integer
+          if (o2 == ALPHA) {
+            return -1;
+          } else return Integer.compare((int) o1, (int) o2);
+        }
+      };
 
   static class TreeMapping {
     public final int cost;
@@ -449,7 +463,5 @@ class TreeDiffer {
     }
   }
 
-  static class Mapping extends ArrayList<Pair<Integer, Integer>> {
-  }
-
+  static class Mapping extends ArrayList<Pair<Integer, Integer>> {}
 }

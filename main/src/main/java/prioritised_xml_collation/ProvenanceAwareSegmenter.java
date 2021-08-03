@@ -4,14 +4,14 @@ package prioritised_xml_collation;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@ package prioritised_xml_collation;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.compare.ExtendedTextToken;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import nl.knaw.huygens.alexandria.compare.ExtendedTextToken;
 
 // based on AlignmentAndTypeSegmenter
 public class ProvenanceAwareSegmenter implements SegmenterInterface {
@@ -49,7 +49,8 @@ public class ProvenanceAwareSegmenter implements SegmenterInterface {
       // stateChange if the type of the lastCell is not the same as the currentCell
       Boolean stateChange = lastCell.match != currentCell.match;
 
-      // provenanceChange if the a or b tokens from lastcell have any different textNodeIds compared with the currentCell
+      // provenanceChange if the a or b tokens from lastcell have any different textNodeIds compared
+      // with the currentCell
       boolean provenanceChangeInA = provenanceChanged(tokensA, currentCell.x, lastCell.x);
       boolean provenanceChangeInB = provenanceChanged(tokensB, currentCell.y, lastCell.y);
 
@@ -62,7 +63,8 @@ public class ProvenanceAwareSegmenter implements SegmenterInterface {
         lastCell = currentCell;
       }
     }
-    // process the final cell in de EditGraphTable (additions/omissions at the beginning of the witnesses)
+    // process the final cell in de EditGraphTable (additions/omissions at the beginning of the
+    // witnesses)
     if (lastCell != currentCell) {
       // insert the segment to the superwitness list at the first position (position "0")
       superwitness.add(0, editTable.createSegmentOfCells(currentCell, lastCell));
@@ -81,5 +83,4 @@ public class ProvenanceAwareSegmenter implements SegmenterInterface {
     ExtendedTextToken tagToken1 = (ExtendedTextToken) tokens.get(i1 - 1);
     return !(tagToken0.getTextNodeIds().equals(tagToken1.getTextNodeIds()));
   }
-
 }

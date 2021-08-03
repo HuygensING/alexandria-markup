@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,12 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -34,11 +34,12 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSParser;
 
 public class TexMECSImporter {
   private final Logger LOG = LoggerFactory.getLogger(getClass());

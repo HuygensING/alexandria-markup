@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,21 +20,22 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.model.graph.DotFactory;
-import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
-import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+
+import nl.knaw.huc.di.tag.model.graph.DotFactory;
+import nl.knaw.huc.di.tag.tagml.TAGMLBaseTest;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporter;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 public class TAGBaseStoreTest extends TAGMLBaseTest {
 
@@ -91,5 +92,4 @@ public class TAGBaseStoreTest extends TAGMLBaseTest {
     System.out.println(
         "\n------------8<------------------------------------------------------------------------------------\n");
   }
-
 }

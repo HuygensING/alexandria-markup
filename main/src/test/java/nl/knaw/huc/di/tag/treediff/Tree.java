@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.treediff;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,7 +83,7 @@ class Tree {
    */
   public void setNodeAt(int preorderPosition, TreeNode node) {
     preorderPositionToNode.add(preorderPosition - 1, node);
-    node.setPreorderPosition(preorderPosition);// It handles "-1" inside
+    node.setPreorderPosition(preorderPosition); // It handles "-1" inside
   }
 
   /*
@@ -93,7 +93,8 @@ class Tree {
     try {
       return preorderPositionToNode.get(preorderPosition - 1).father();
     } catch (Exception e) {
-      throw new IllegalArgumentException("No node at the given position " + preorderPosition + ". ");
+      throw new IllegalArgumentException(
+          "No node at the given position " + preorderPosition + ". ");
     }
   }
 
@@ -104,7 +105,8 @@ class Tree {
    */
   public Generator<Integer> ancestorIterator(int startingPreorderPosition) {
     if (startingPreorderPosition > preorderPositionToNode.size()) {
-      throw new IllegalArgumentException("No node at the given position " + startingPreorderPosition + ". ");
+      throw new IllegalArgumentException(
+          "No node at the given position " + startingPreorderPosition + ". ");
     }
     return new Generator<Integer>() {
       @Override
@@ -117,8 +119,7 @@ class Tree {
           if (node != null) {
             preorderPosition = node.preorderPosition();
             provide(preorderPosition);
-          } else
-            break;
+          } else break;
         }
       }
     };

@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.view
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,13 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     //  @Disabled("Should the default layer always be included?")
     @Test
     fun testDefaultLayerIsAlwaysIncludedInInclusiveLayerView() {
-        val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
+        val tagml =
+            "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
         val viewJson = """{
           |"includeLayers" : ["A"]
           |}""".trimMargin()
-        val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
+        val expected =
+            "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
         runInStore { store: TAGStore ->
             val tagViewFactory = TAGViewFactory(store)
             val view = tagViewFactory.fromJsonString(viewJson)
@@ -63,11 +65,13 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     //  @Disabled("Should the default layer always be included?")
     @Test
     fun testDefaultLayerIsAlwaysIncludedInExclusiveLayerView() {
-        val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
+        val tagml =
+            "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] <|saucissons|croissants|>-ci?<layerdef]<tagml]"
         val viewJson = """{
           |"excludeLayers" : ["B"]
           |}""".trimMargin()
-        val expected = "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
+        val expected =
+            "[tagml>[layerdef|+A,+B>[x|A>C'est combien<x|A], cette [b|A>six<b|A] <|saucissons|croissants|>-ci?<layerdef|A,B]<tagml]"
         runInStore { store: TAGStore ->
             val tagViewFactory = TAGViewFactory(store)
             val view = tagViewFactory.fromJsonString(viewJson)
@@ -88,7 +92,8 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
     @Disabled("Should the default layer always be included?")
     @Test // NLA-489
     fun testLayerMarkupCombinationInView() {
-        val tagml = "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
+        val tagml =
+            "[tagml>[layerdef|+A,+B>[x|A>C'est [x|B>combien<x|A], cette [b|A>six<b|A]<x|B] saucissons-ci?<layerdef]<tagml]"
         val viewJson = """{
           |"includeLayers" : ["A"],
           |"excludeMarkup" : ["b"]
@@ -144,15 +149,15 @@ class TAGViewTest : AlexandriaBaseStoreTest() {
             assertThat(tagmlAC).isEqualTo("[tagml|+L1,+L2>[a|L1>ab[c|L1>cda<c|L1]bc<a|L1]d<tagml|L1,L2]")
 
             val viewL1NoC = TAGView(store)
-                    .withLayersToInclude(l1)
-                    .withMarkupToExclude(Sets.newLinkedHashSet(tag3))
+                .withLayersToInclude(l1)
+                .withMarkupToExclude(Sets.newLinkedHashSet(tag3))
             val exporter3 = TAGMLExporter(store, viewL1NoC)
             val tagmlA = exporter3.asTAGML(document1)
             assertThat(tagmlA).isEqualTo("[tagml|+L1,+L2>[a|L1>abcdabc<a|L1]d<tagml|L1,L2]")
 
             val viewNoL1B = TAGView(store)
-                    .withLayersToExclude(l1)
-                    .withMarkupToInclude(Sets.newLinkedHashSet(tag2))
+                .withLayersToExclude(l1)
+                .withMarkupToInclude(Sets.newLinkedHashSet(tag2))
             val exporter4 = TAGMLExporter(store, viewNoL1B)
             val tagmlB = exporter4.asTAGML(document1)
             assertThat(tagmlB).isEqualTo("a[b|L2>bcdabcd<b|L2]")

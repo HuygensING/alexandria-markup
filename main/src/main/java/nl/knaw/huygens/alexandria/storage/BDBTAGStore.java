@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,24 +20,29 @@ package nl.knaw.huygens.alexandria.storage;
  * #L%
  */
 
+import java.io.File;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 import com.google.common.base.Preconditions;
-import com.sleepycat.je.*;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nl.knaw.huygens.alexandria.storage.bdb.LinkedHashSetProxy;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGDocumentDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGMarkupDTO;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

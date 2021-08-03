@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.compare
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,21 @@ package nl.knaw.huygens.alexandria.compare
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.view.TAGView
 import prioritised_xml_collation.*
-import java.util.*
 
 class TAGComparison(originalDocument: TAGDocument?, tagView: TAGView?, otherDocument: TAGDocument?) {
     private val diffLines: MutableList<String> = ArrayList()
 
     fun getDiffLines(): List<String> =
-            diffLines
+        diffLines
 
     fun hasDifferences(): Boolean =
-            diffLines.isNotEmpty()
+        diffLines.isNotEmpty()
 
     private fun handleOmission(segment: Segment) =
-            asLines(segment.tokensWa).forEach { l: String -> diffLines.add("-$l") }
+        asLines(segment.tokensWa).forEach { l: String -> diffLines.add("-$l") }
 
     private fun handleAddition(segment: Segment) =
-            asLines(segment.tokensWb).forEach { l: String -> diffLines.add("+$l") }
+        asLines(segment.tokensWb).forEach { l: String -> diffLines.add("+$l") }
 
     private fun handleReplacement(segment: Segment) {
         handleOmission(segment)
@@ -58,11 +57,11 @@ class TAGComparison(originalDocument: TAGDocument?, tagView: TAGView?, otherDocu
     }
 
     private fun asLines(tagTokens: List<TAGToken>): List<String> =
-            tagTokens.joinToString("", transform = this::tokenContent)
-                    .split("\n".toRegex())
+        tagTokens.joinToString("", transform = this::tokenContent)
+            .split("\n".toRegex())
 
     private fun tokenContent(tagToken: TAGToken): String =
-            (tagToken as? MarkupCloseToken)?.toString()?.replace("/", "") ?: tagToken.toString()
+        (tagToken as? MarkupCloseToken)?.toString()?.replace("/", "") ?: tagToken.toString()
 
     init {
         val originalTokens = Tokenizer(originalDocument, tagView).tagTokens

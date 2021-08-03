@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.schema
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,8 +143,9 @@ class TAGMLSchemaTest {
         val result = parseYAML(schemaYAML)
         LOG.info("errors={}", result.errors)
         assertThat(result)
-                .hasErrors(
-                        "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]")
+            .hasErrors(
+                "expected root markup with list of child markup, found (as json) [{\"boolean\":true},{\"integer\":3},{\"float\":3.14},{\"string\":\"something\"}]"
+            )
     }
 
     @Disabled
@@ -161,8 +162,8 @@ class TAGMLSchemaTest {
         val result = parseYAML(schemaYAML)
         LOG.info("errors={}", result.errors)
         assertThat(result)
-                .hasErrors(
-                        """while scanning a simple key
+            .hasErrors(
+                """while scanning a simple key
             | in 'reader', line 2, column 1:
             |    x
             |    ^
@@ -171,7 +172,8 @@ class TAGMLSchemaTest {
             |    x
             |     ^
             |
-            | at [Source: (StringReader); line: 1, column: 9]""".trimMargin())
+            | at [Source: (StringReader); line: 1, column: 9]""".trimMargin()
+            )
     }
 
     @Disabled("fix tagschemaschema.json first: find 'or' function")

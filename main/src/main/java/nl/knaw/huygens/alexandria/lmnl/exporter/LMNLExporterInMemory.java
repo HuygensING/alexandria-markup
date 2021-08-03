@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,19 +20,22 @@ package nl.knaw.huygens.alexandria.lmnl.exporter;
  * #L%
  */
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.knaw.huygens.alexandria.data_model.Annotation;
 import nl.knaw.huygens.alexandria.data_model.Document;
 import nl.knaw.huygens.alexandria.data_model.Limen;
 import nl.knaw.huygens.alexandria.data_model.Markup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-/**
- * Created by bramb on 07/02/2017.
- */
+/** Created by bramb on 07/02/2017. */
 public class LMNLExporterInMemory {
   private static Logger LOG = LoggerFactory.getLogger(LMNLExporterInMemory.class);
   private boolean useShorthand = false;
@@ -53,24 +56,26 @@ public class LMNLExporterInMemory {
   private void appendLimen(StringBuilder lmnlBuilder, Limen limen) {
     if (limen != null) {
       Deque<Markup> openMarkups = new ArrayDeque<>();
-      limen.getTextNodeIterator().forEachRemaining(tn -> {
-        Set<Markup> markups = limen.getMarkups(tn);
+      limen
+          .getTextNodeIterator()
+          .forEachRemaining(
+              tn -> {
+                Set<Markup> markups = limen.getMarkups(tn);
 
-        List<Markup> toClose = new ArrayList<>(openMarkups);
-        toClose.removeAll(markups);
-        Collections.reverse(toClose);
-        toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
+                List<Markup> toClose = new ArrayList<>(openMarkups);
+                toClose.removeAll(markups);
+                Collections.reverse(toClose);
+                toClose.forEach(tr -> lmnlBuilder.append(toCloseTag(tr)));
 
-        List<Markup> toOpen = new ArrayList<>(markups);
-        toOpen.removeAll(openMarkups);
-        toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
+                List<Markup> toOpen = new ArrayList<>(markups);
+                toOpen.removeAll(openMarkups);
+                toOpen.forEach(tr -> lmnlBuilder.append(toOpenTag(tr)));
 
-        openMarkups.removeAll(toClose);
-        openMarkups.addAll(toOpen);
-        lmnlBuilder.append(tn.getContent());
-      });
-      openMarkups.descendingIterator()
-          .forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
+                openMarkups.removeAll(toClose);
+                openMarkups.addAll(toOpen);
+                lmnlBuilder.append(tn.getContent());
+              });
+      openMarkups.descendingIterator().forEachRemaining(tr -> lmnlBuilder.append(toCloseTag(tr)));
     }
   }
 
@@ -83,9 +88,7 @@ public class LMNLExporterInMemory {
   private StringBuilder toOpenTag(Markup markup) {
     StringBuilder tagBuilder = new StringBuilder("[").append(markup.getExtendedTag());
     markup.getAnnotations().forEach(a -> tagBuilder.append(" ").append(toLMNL(a)));
-    return markup.isAnonymous()
-        ? tagBuilder.append("]")
-        : tagBuilder.append("}");
+    return markup.isAnonymous() ? tagBuilder.append("]") : tagBuilder.append("}");
   }
 
   public StringBuilder toLMNL(Annotation annotation) {
@@ -105,5 +108,4 @@ public class LMNLExporterInMemory {
     }
     return annotationBuilder;
   }
-
 }

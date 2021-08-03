@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.sparql
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.apache.jena.vocabulary.RDF
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
 
@@ -54,7 +53,9 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
             assertQuerySucceeded(result)
 
             val expected: MutableList<String> = ArrayList()
-            expected.add(normalizeLineEndings("""
+            expected.add(
+                normalizeLineEndings(
+                    """
                 ------------------
                 | markup | count |
                 ==================
@@ -62,7 +63,9 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
                 | "x"    | 1     |
                 ------------------
                 
-                """.trimIndent()))
+                """.trimIndent()
+                )
+            )
             assertThat(result.getValues()).containsExactlyElementsOf(expected)
         }
     }
@@ -105,7 +108,8 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
             assertQuerySucceeded(result)
 
             val expected: MutableList<String> = ArrayList()
-            expected.add("""
+            expected.add(
+                """
                 |@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
                 |@prefix tag:   <https://huygensing.github.io/TAG/TAGML/ontology/tagml.ttl#> .
                 |
@@ -123,13 +127,15 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
                 |        tag:elements     ( tag:text7 ) ;
                 |        tag:layer        tag:layer_ ;
                 |        tag:markup_name  "w" .
-                """.trimMargin())
+                """.trimMargin()
+            )
         }
     }
 
     @Test
     fun testSPARQLQueryConstruct() {
-        val tagml = "[l>[person>John<person] went to [country>Spain<country], [person>Rachel<person] went to [country>Peru<country]<l]"
+        val tagml =
+            "[l>[person>John<person] went to [country>Spain<country], [person>Rachel<person] went to [country>Peru<country]<l]"
         runInStoreTransaction { store: TAGStore ->
             val alice = TAGMLImporter(store).importTAGML(tagml)
             val h = SPARQLQueryHandler(alice)
@@ -151,7 +157,7 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
     }
 
     private fun normalizeLineEndings(string: String): String =
-            string.replace("\\n".toRegex(), System.lineSeparator())
+        string.replace("\\n".toRegex(), System.lineSeparator())
 
     private fun assertQuerySucceeded(result: SPARQLResult) {
         if (!result.isOk) {

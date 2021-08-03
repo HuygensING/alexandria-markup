@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,29 +20,31 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #L%
  */
 
+import java.util.List;
+import java.util.Set;
+
+import org.jetbrains.annotations.NotNull;
+
 import nl.knaw.huc.di.tag.TAGVisitor;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Set;
-
-import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_END;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_START;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_END;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_START;
 
 public class TAGMLBuilder implements TAGVisitor {
   String result = "";
   StringBuilder tagmlBuilder = new StringBuilder();
 
   @Override
-  public void setView(final TAGView tagView) {
-  }
+  public void setView(final TAGView tagView) {}
 
   @Override
-  public void enterDocument(final TAGDocument document) {
-  }
+  public void enterDocument(final TAGDocument document) {}
 
   @Override
   public void exitDocument(final TAGDocument document) {
@@ -55,12 +57,10 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterOpenTag(final TAGMarkup markup) {
-  }
+  public void enterOpenTag(final TAGMarkup markup) {}
 
   @Override
-  public void addAnnotation(String serializedAnnotation) {
-  }
+  public void addAnnotation(String serializedAnnotation) {}
 
   @Override
   public String serializeAnnotationAssigner(String name) {
@@ -68,12 +68,10 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void exitOpenTag(final TAGMarkup markup) {
-  }
+  public void exitOpenTag(final TAGMarkup markup) {}
 
   @Override
-  public void exitCloseTag(final TAGMarkup markup) {
-  }
+  public void exitCloseTag(final TAGMarkup markup) {}
 
   @Override
   public void exitText(final String text, final boolean inVariation) {
@@ -83,16 +81,13 @@ public class TAGMLBuilder implements TAGVisitor {
   }
 
   @Override
-  public void enterTextVariation() {
-  }
+  public void enterTextVariation() {}
 
   @Override
-  public void exitTextVariation() {
-  }
+  public void exitTextVariation() {}
 
   @Override
-  public void setRelevantLayers(final Set<String> relevantLayers) {
-  }
+  public void setRelevantLayers(final Set<String> relevantLayers) {}
 
   @NotNull
   @Override

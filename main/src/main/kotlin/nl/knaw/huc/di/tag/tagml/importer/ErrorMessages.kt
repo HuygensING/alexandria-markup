@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ object ErrorMessages {
 
     const val UNSUSPENDED_MARKUP = "Resume tag %s found, which has no corresponding earlier suspend tag <%s%s]."
     const val UNRESUMED_MARKUP = "Some suspended markup was not resumed: %s"
-    const val IMMEDIATE_RESUME = "There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed."
+    const val IMMEDIATE_RESUME =
+        "There is no text between this resume tag: %s and its corresponding suspend tag: %s. This is not allowed."
 
     const val NAMELESS_MARKUP = "Nameless markup is not allowed here."
     const val CLOSE_IN_BRANCH = "Markup [%s> opened before branch %s, should not be closed in a branch."
@@ -41,7 +42,8 @@ object ErrorMessages {
     const val MULTIPLE_OPEN_IN_BRANCH = "Markup %s opened in branch %s must be closed before starting a new branch."
     const val UNEXPECTED_CLOSE = "Close tag <%s] found, expected %s.%s"
     const val ID_IN_USE = "Id '%s' was already used in markup [%s>."
-    const val AMBIGUOUS_CLOSE_TAG = "There are multiple start-tags that can correspond with end-tag <%s]; add layer information to the end-tag to solve this ambiguity."
+    const val AMBIGUOUS_CLOSE_TAG =
+        "There are multiple start-tags that can correspond with end-tag <%s]; add layer information to the end-tag to solve this ambiguity."
     const val TRAILING_TEXT_OR_MARKUP = "No text or markup allowed after the root markup %s has been ended."
     const val SUSPEND_DISCREPANCY = "There is a discrepancy in suspended markup between branches:%s"
     const val OPEN_MARKUP_DISCREPANCY = "There is an open markup discrepancy between the branches:%s"

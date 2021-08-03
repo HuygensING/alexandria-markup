@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,22 +20,31 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import prioritised_xml_collation.ProvenanceAwareSegmenter;
+import prioritised_xml_collation.Segment;
+import prioritised_xml_collation.SegmenterInterface;
+import prioritised_xml_collation.TAGToken;
+import prioritised_xml_collation.TypeAndContentAligner;
+
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGStore;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import prioritised_xml_collation.*;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -49,54 +58,57 @@ public class TAGComparison2 {
   private final List<MarkupInfo>[] markupInfoLists;
 
   public TAGComparison2(TAGDocument original, TAGView tagView, TAGDocument edited, TAGStore store) {
-    List<TAGToken> originalTokens = new Tokenizer(original, tagView)
-        .getTAGTokens();
-    List<TAGToken> originalTextTokens = originalTokens.stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(toList());
-//    LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
+    List<TAGToken> originalTokens = new Tokenizer(original, tagView).getTAGTokens();
+    List<TAGToken> originalTextTokens =
+        originalTokens.stream().filter(ExtendedTextToken.class::isInstance).collect(toList());
+    //    LOG.info("originalTextTokens={}", serializeTokens(originalTextTokens));
 
-    List<TAGToken> editedTokens = new Tokenizer(edited, tagView)
-        .getTAGTokens();
-    List<TAGToken> editedTextTokens = editedTokens
-        .stream()
-        .filter(ExtendedTextToken.class::isInstance)
-        .collect(toList());
-//    LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
+    List<TAGToken> editedTokens = new Tokenizer(edited, tagView).getTAGTokens();
+    List<TAGToken> editedTextTokens =
+        editedTokens.stream().filter(ExtendedTextToken.class::isInstance).collect(toList());
+    //    LOG.info("editedTextTokens={}", serializeTokens(editedTextTokens));
 
-    SegmenterInterface textSegmenter = new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
-    List<Segment> textSegments = new TypeAndContentAligner().alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
+    SegmenterInterface textSegmenter =
+        new ProvenanceAwareSegmenter(originalTextTokens, editedTextTokens);
+    List<Segment> textSegments =
+        new TypeAndContentAligner()
+            .alignTokens(originalTextTokens, editedTextTokens, textSegmenter);
     AtomicInteger rankCounter = new AtomicInteger();
     Map<Long, MarkupInfo> markupInfoMap1 = new HashMap<>();
     Map<Long, MarkupInfo> markupInfoMap2 = new HashMap<>();
-    textSegments.forEach(segment -> {
-      int rank = rankCounter.incrementAndGet();
-      getTextNodeIdsForTokens(segment.tokensWa)
-          .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
-          .forEach(markupId -> {
-            markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-            markupInfoMap1.get(markupId).setEndRank(rank);
-          });
-      getTextNodeIdsForTokens(segment.tokensWb)
-          .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
-          .forEach(markupId -> {
-            markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
-            markupInfoMap2.get(markupId).setEndRank(rank);
-          });
-    });
+    textSegments.forEach(
+        segment -> {
+          int rank = rankCounter.incrementAndGet();
+          getTextNodeIdsForTokens(segment.tokensWa)
+              .flatMap(original.getDTO()::getMarkupIdsForTextNodeId)
+              .forEach(
+                  markupId -> {
+                    markupInfoMap1.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+                    markupInfoMap1.get(markupId).setEndRank(rank);
+                  });
+          getTextNodeIdsForTokens(segment.tokensWb)
+              .flatMap(edited.getDTO()::getMarkupIdsForTextNodeId)
+              .forEach(
+                  markupId -> {
+                    markupInfoMap2.putIfAbsent(markupId, new MarkupInfo(rank, rank));
+                    markupInfoMap2.get(markupId).setEndRank(rank);
+                  });
+        });
     List<MarkupInfo>[] results = new ArrayList[2];
     List<MarkupInfo> listA = new ArrayList<>();
-    markupInfoMap1.forEach((k, v) -> {
-      v.setMarkup(store.getMarkup(k));
-      listA.add(v);
-    });
+    markupInfoMap1.forEach(
+        (k, v) -> {
+          v.setMarkup(store.getMarkup(k));
+          listA.add(v);
+        });
     listA.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[0] = listA;
     List<MarkupInfo> listB = new ArrayList<>();
-    markupInfoMap2.forEach((k, v) -> {
-      v.setMarkup(store.getMarkup(k));
-      listB.add(v);
-    });
+    markupInfoMap2.forEach(
+        (k, v) -> {
+          v.setMarkup(store.getMarkup(k));
+          listB.add(v);
+        });
     listB.sort(BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK);
     results[1] = listB;
     markupInfoLists = results;
@@ -161,10 +173,11 @@ public class TAGComparison2 {
     }
   }
 
-  private static final Comparator<MarkupInfo> BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK = Comparator.comparing(MarkupInfo::getSpan)
-      .reversed()
-      .thenComparing(MarkupInfo::getStartRank)
-      .thenComparing(m -> m.getMarkup().getTag());
+  private static final Comparator<MarkupInfo> BY_DESCENDING_SPAN_AND_ASCENDING_STARTRANK =
+      Comparator.comparing(MarkupInfo::getSpan)
+          .reversed()
+          .thenComparing(MarkupInfo::getStartRank)
+          .thenComparing(m -> m.getMarkup().getTag());
 
   public List<MarkupInfo>[] getMarkupInfoLists() {
     return markupInfoLists;
@@ -184,12 +197,13 @@ public class TAGComparison2 {
         .collect(joining(", "));
   }
 
-//  private boolean isMarkupToken(final TAGToken tagToken) {
-//    return tagToken instanceof MarkupOpenToken
-//        || tagToken instanceof MarkupCloseToken;
-//  }
+  //  private boolean isMarkupToken(final TAGToken tagToken) {
+  //    return tagToken instanceof MarkupOpenToken
+  //        || tagToken instanceof MarkupCloseToken;
+  //  }
 
-  public List<String> diffMarkupInfo(final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
+  public List<String> diffMarkupInfo(
+      final List<MarkupInfo>[] markupInfoLists, final DiffPrinter diffPrinter) {
     final List<String> diff = new ArrayList<>();
     List<MarkupInfo> markupInfoListA = markupInfoLists[0];
     List<MarkupInfo> markupInfoListB = markupInfoLists[1];
@@ -226,20 +240,19 @@ public class TAGComparison2 {
       if (!determinedInA[i]) {
         // check for replacement
         final int finalI = i;
-        List<Pair<Integer, Integer>> matchingPotentialReplacements = potentialReplacements.stream()
-            .filter(p -> p.getLeft() == finalI)
-            .collect(toList());
+        List<Pair<Integer, Integer>> matchingPotentialReplacements =
+            potentialReplacements.stream().filter(p -> p.getLeft() == finalI).collect(toList());
         potentialReplacements.removeAll(matchingPotentialReplacements);
         if (!matchingPotentialReplacements.isEmpty()) {
           Pair<Integer, Integer> replacement = matchingPotentialReplacements.get(0);
           MarkupInfo markupInfoA = markupInfoListA.get(i);
           MarkupInfo markupInfoB = markupInfoListB.get(replacement.getRight());
-//          String markupA = toString(markupInfoA);
-//          String markupB = toString(markupInfoB);
-//          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
-//              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-//              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
-//              )
+          //          String markupA = toString(markupInfoA);
+          //          String markupB = toString(markupInfoB);
+          //          diff.add(String.format("%s (%d-%d) replaced by %s (%d-%d)",
+          //              markupA, markupInfoA.getStartRank(), markupInfoA.getEndRank(),
+          //              markupB, markupInfoB.getStartRank(), markupInfoB.getEndRank()
+          //              )
 
           diff.add(diffPrinter.modification.apply(markupInfoA, markupInfoB));
           determinedInA[i] = true;
@@ -282,46 +295,63 @@ public class TAGComparison2 {
     }
   }
 
-  static DiffPrinter HR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("[%s](%d-%d) added",
-          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setDeletion(markupInfo -> String.format("[%s](%d-%d) deleted",
-          markupInfo.markup.getExtendedTag(), markupInfo.getStartRank(), markupInfo.getEndRank()))
-      .setModification((markupInfoA, markupInfoB) -> String.format("[%s](%d-%d) replaced by [%s](%d-%d)",
-          markupInfoA.markup.getExtendedTag(), markupInfoA.getStartRank(), markupInfoA.getEndRank(),
-          markupInfoB.markup.getExtendedTag(), markupInfoB.getStartRank(), markupInfoB.getEndRank()
-      ));
+  static DiffPrinter HR_DIFFPRINTER =
+      new DiffPrinter()
+          .setAddition(
+              markupInfo ->
+                  String.format(
+                      "[%s](%d-%d) added",
+                      markupInfo.markup.getExtendedTag(),
+                      markupInfo.getStartRank(),
+                      markupInfo.getEndRank()))
+          .setDeletion(
+              markupInfo ->
+                  String.format(
+                      "[%s](%d-%d) deleted",
+                      markupInfo.markup.getExtendedTag(),
+                      markupInfo.getStartRank(),
+                      markupInfo.getEndRank()))
+          .setModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "[%s](%d-%d) replaced by [%s](%d-%d)",
+                      markupInfoA.markup.getExtendedTag(),
+                      markupInfoA.getStartRank(),
+                      markupInfoA.getEndRank(),
+                      markupInfoB.markup.getExtendedTag(),
+                      markupInfoB.getStartRank(),
+                      markupInfoB.getEndRank()));
 
-  static DiffPrinter MR_DIFFPRINTER = new DiffPrinter()
-      .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
-      .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
-      .setModification((markupInfoA, markupInfoB) -> String.format("~[%s,%s]",
-          markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()
-      ));
+  static DiffPrinter MR_DIFFPRINTER =
+      new DiffPrinter()
+          .setAddition(markupInfo -> String.format("+[%s]", markupInfo.markup.getExtendedTag()))
+          .setDeletion(markupInfo -> String.format("-[%s]", markupInfo.markup.getDbId()))
+          .setModification(
+              (markupInfoA, markupInfoB) ->
+                  String.format(
+                      "~[%s,%s]",
+                      markupInfoA.markup.getDbId(), markupInfoB.markup.getExtendedTag()));
 
   private String toString(MarkupInfo markupInfo) {
     TAGMarkup markup = markupInfo.markup;
-    String markedUpText = markup
-        .getTextNodeStream()
-        .map(TAGTextNode::getText)
-        .collect(joining());
+    String markedUpText = markup.getTextNodeStream().map(TAGTextNode::getText).collect(joining());
     int length = markedUpText.length();
     if (length > MAX_MARKEDUP_TEXT_LENGTH) {
       int half = (length - 5) / 2;
       markedUpText = markedUpText.substring(0, half) + " ... " + markedUpText.substring(half + 5);
     }
     String extendedTag = markup.getExtendedTag();
-    return String.format("[%s>%s<%s]",
-        extendedTag,
-        markedUpText,
-        extendedTag);
+    return String.format("[%s>%s<%s]", extendedTag, markedUpText, extendedTag);
   }
 
-  private void removeDeterminedPairs(final boolean[] determinedInA, final boolean[] determinedInB, final List<Pair<Integer, Integer>> potentialReplacements) {
-    List<Pair<Integer, Integer>> potentialReplacementsWithDetermined = potentialReplacements.stream()
-        .filter(p -> determinedInA[p.getLeft()] || determinedInB[p.getRight()])
-        .collect(toList());
+  private void removeDeterminedPairs(
+      final boolean[] determinedInA,
+      final boolean[] determinedInB,
+      final List<Pair<Integer, Integer>> potentialReplacements) {
+    List<Pair<Integer, Integer>> potentialReplacementsWithDetermined =
+        potentialReplacements.stream()
+            .filter(p -> determinedInA[p.getLeft()] || determinedInB[p.getRight()])
+            .collect(toList());
     potentialReplacements.removeAll(potentialReplacementsWithDetermined);
   }
-
 }

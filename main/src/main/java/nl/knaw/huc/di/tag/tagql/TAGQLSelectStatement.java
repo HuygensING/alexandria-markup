@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagql;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,15 @@ package nl.knaw.huc.di.tag.tagql;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.query.TAGQLResult;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
+import nl.knaw.huygens.alexandria.query.TAGQLResult;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 public class TAGQLSelectStatement implements TAGQLStatement {
 
@@ -50,7 +51,8 @@ public class TAGQLSelectStatement implements TAGQLStatement {
   public Function<TAGDocument, TAGQLResult> getLimenProcessor() {
     return (TAGDocument document) -> {
       TAGQLResult result = new TAGQLResult();
-      document.getMarkupStream()
+      document
+          .getMarkupStream()
           .filter(markupFilter)
           .map(markupMapper)
           // .peek(this::logger)
@@ -72,5 +74,4 @@ public class TAGQLSelectStatement implements TAGQLStatement {
   public void setIndex(int index) {
     this.index = index;
   }
-
 }

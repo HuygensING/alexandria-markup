@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.query
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,15 @@ class TAGQLQueryHandler(private val document: TAGDocument) {
         val statements = listener.statements
         val result = TAGQLResult(statement)
         statements
-                .map { this.execute(it) }
-                .forEach { subResult: TAGQLResult -> result.addResult(subResult) }
+            .map { this.execute(it) }
+            .forEach { subResult: TAGQLResult -> result.addResult(subResult) }
         result.errors.addAll(errorListener.errorMessages)
         return result
     }
 
     private fun execute(statement: TAGQLStatement): TAGQLResult =
-            statement
-                    .limenProcessor
-                    .apply(document)
+        statement
+            .limenProcessor
+            .apply(document)
 
 }

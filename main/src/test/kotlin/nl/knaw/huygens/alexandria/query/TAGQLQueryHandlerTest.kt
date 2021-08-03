@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.query
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
     private val LOG = LoggerFactory.getLogger(javaClass)
@@ -153,14 +152,14 @@ class TAGQLQueryHandlerTest : AlexandriaBaseStoreTest() {
             assertQuerySucceeded(result1)
             val expected1: MutableList<String?>? = ImmutableList.of("line 1", "line 3")
             assertThat(result1.getValues())
-                    .containsExactlyElementsOf(expected1)
+                .containsExactlyElementsOf(expected1)
             val statement2 = "select m.text from markup m where m.name='l' and m.annotationText('type')='B'"
             val result2 = h.execute(statement2)
             LOG.info("result2.getValues()={}", result2.getValues())
             assertQuerySucceeded(result2)
             val expected2: MutableList<String?>? = ImmutableList.of("line 2")
             assertThat(result2.getValues())
-                    .containsExactlyElementsOf(expected2)
+                .containsExactlyElementsOf(expected2)
         }
     }
 

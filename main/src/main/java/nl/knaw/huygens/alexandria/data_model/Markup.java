@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.data_model;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,13 @@ package nl.knaw.huygens.alexandria.data_model;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 /**
  * Created by Ronald Haentjens Dekker on 29/12/16.
@@ -40,7 +41,8 @@ public class Markup {
   private String suffix = ""; // TexMECS, doesn't need to be unique
   private final List<Annotation> annotations;
   public final List<TextNode> textNodes; // TODO: move TextNode-Markup hyperEdge to graph
-  private Markup dominatedMarkup; // markup that's dominated by this markup // TODO: move to Markup-Markup Edge
+  private Markup
+      dominatedMarkup; // markup that's dominated by this markup // TODO: move to Markup-Markup Edge
   private Markup dominatingMarkup; // markup that dominates this markup
 
   public Markup(Limen owner, String tag) {
@@ -136,9 +138,7 @@ public class Markup {
   }
 
   public boolean hasN() {
-    return annotations.parallelStream()
-        .map(Annotation::getTag)
-        .anyMatch(t -> t.equals("n"));
+    return annotations.parallelStream().map(Annotation::getTag).anyMatch(t -> t.equals("n"));
   }
 
   public boolean hasSuffix() {
@@ -147,10 +147,11 @@ public class Markup {
 
   public void joinWith(Markup markup) {
     this.textNodes.addAll(markup.textNodes);
-    markup.textNodes.forEach(tn -> {
-      owner.disAssociateTextWithRange(tn, markup);
-      owner.associateTextWithRange(tn, this);
-    });
+    markup.textNodes.forEach(
+        tn -> {
+          owner.disAssociateTextWithRange(tn, markup);
+          owner.associateTextWithRange(tn, this);
+        });
     this.annotations.addAll(markup.getAnnotations());
   }
 
@@ -195,5 +196,4 @@ public class Markup {
   public String toString() {
     return "<" + getExtendedTag() + ">";
   }
-
 }

@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package nl.knaw.huygens.alexandria.storage.dto;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+
 import nl.knaw.huygens.alexandria.storage.AnnotationType;
 import nl.knaw.huygens.alexandria.storage.DataAccessor;
 
@@ -34,14 +35,13 @@ public class TAGAnnotationDTO implements TAGDTO {
   private Object value;
   private AnnotationType type;
 
-//  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
-//  private Long documentId;
+  //  @SecondaryKey(relate = ONE_TO_ONE, relatedEntity = TAGDocumentDTO.class)
+  //  private Long documentId;
 
-//  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
-//  private final List<Long> annotationIds = new ArrayList<>();
+  //  @SecondaryKey(relate = ONE_TO_MANY, relatedEntity = TAGAnnotationDTO.class)
+  //  private final List<Long> annotationIds = new ArrayList<>();
 
-  private TAGAnnotationDTO() {
-  }
+  private TAGAnnotationDTO() {}
 
   public TAGAnnotationDTO(String key) {
     this.key = key;
@@ -79,21 +79,21 @@ public class TAGAnnotationDTO implements TAGDTO {
     this.type = type;
   }
 
-//  public void setDocumentId(long documentId) {
-//    this.documentId = documentId;
-//  }
+  //  public void setDocumentId(long documentId) {
+  //    this.documentId = documentId;
+  //  }
 
-//  public Long getDocumentId() {
-//    return documentId;
-//  }
+  //  public Long getDocumentId() {
+  //    return documentId;
+  //  }
 
-//  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
-//    annotationIds.add(annotation.getResourceId());
-//    return this;
-//  }
+  //  public TAGAnnotationDTO addAnnotation(TAGAnnotationDTO annotation) {
+  //    annotationIds.add(annotation.getResourceId());
+  //    return this;
+  //  }
 
-//  public List<Long> getAnnotationIds() {
-//    return annotationIds;
-//  }
+  //  public List<Long> getAnnotationIds() {
+  //    return annotationIds;
+  //  }
 
 }

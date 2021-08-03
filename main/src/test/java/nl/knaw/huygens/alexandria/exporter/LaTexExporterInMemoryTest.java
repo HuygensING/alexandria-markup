@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,18 @@ package nl.knaw.huygens.alexandria.exporter;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.data_model.Document;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
-import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLImporterInMemory;
+import nl.knaw.huygens.alexandria.lmnl.importer.LMNLSyntaxError;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,7 +61,8 @@ public class LaTexExporterInMemoryTest {
 
   @Test
   public void testLaTeXOutputWithDiscontinuation() throws LMNLSyntaxError {
-    String laTeX = laTeXFromLMNLString("'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'");
+    String laTeX =
+        laTeXFromLMNLString("'[e=e1}Ai,{e=e1]' riep Piet, '[e=e1}wat doe je, Mien?{e=e1]'");
     printLaTeX(laTeX);
     assertThat(laTeX).isNotBlank();
   }
@@ -92,7 +94,8 @@ public class LaTexExporterInMemoryTest {
 
     String coloredText = exporter.exportMarkupOverlap();
     assertThat(coloredText).isNotBlank();
-    FileUtils.writeStringToFile(new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
+    FileUtils.writeStringToFile(
+        new File(outDir + basename + "-colored-text.tex"), coloredText, "UTF-8");
 
     String matrix = exporter.exportMatrix();
     assertThat(matrix).isNotBlank();

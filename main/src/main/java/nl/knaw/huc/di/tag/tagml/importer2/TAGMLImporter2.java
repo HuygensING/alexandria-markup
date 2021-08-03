@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,10 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.model.graph.DotFactory;
-import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
-import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
-import nl.knaw.huygens.alexandria.ErrorListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -34,16 +32,18 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import nl.knaw.huc.di.tag.model.graph.DotFactory;
+import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
+import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
+import nl.knaw.huygens.alexandria.ErrorListener;
 
 public class TAGMLImporter2 {
 
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLImporter2.class);
 
-  public TAGMLImporter2() {
-  }
+  public TAGMLImporter2() {}
 
   public TAGKnowledgeModel importTAGML(final String input) throws TAGMLSyntaxError {
     CharStream antlrInputStream = CharStreams.fromString(input);

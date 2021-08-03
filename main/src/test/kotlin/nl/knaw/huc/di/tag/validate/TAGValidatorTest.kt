@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.validate
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ class TAGValidatorTest : TAGBaseStoreTest() {
       |    - chapter:
       |      - sentence""".trimMargin()
         val expectedErrors = listOf(
-                "Layer $ (default): expected [sentence> as child markup of [chapter>, but found [paragraph>")
+            "Layer $ (default): expected [sentence> as child markup of [chapter>, but found [paragraph>"
+        )
         val expectedWarnings = listOf<String>()
         validateWithErrorsAndWarnings(tagML, schemaYAML, expectedErrors, expectedWarnings)
     }
@@ -103,14 +104,16 @@ class TAGValidatorTest : TAGBaseStoreTest() {
       """.trimMargin()
         val errors = listOf("Layer A: expected [chapter|A> as child markup of [tagml|A>, but found [l|A>")
         val warnings = listOf(
-                "Layers $ (default), V are defined in the schema, but not used in the document.",
-                "Layers B, C are used in the document, but not defined in the schema.")
+            "Layers $ (default), V are defined in the schema, but not used in the document.",
+            "Layers B, C are used in the document, but not defined in the schema."
+        )
         validateWithErrorsAndWarnings(tagML, schemaYAML, errors, warnings)
     }
 
     @Test
     fun testSimpleTAGMLValidation3() {
-        val tagML = "[tagml|+A,+B>[a|A>The rain [b|B>in [aa|A>Spain<aa] falls [bb|B>mainly<bb] on the plain.<b]<a]<tagml]"
+        val tagML =
+            "[tagml|+A,+B>[a|A>The rain [b|B>in [aa|A>Spain<aa] falls [bb|B>mainly<bb] on the plain.<b]<a]<tagml]"
         val schemaYAML = """A:
       |  tagml:
       |    - a:
@@ -152,10 +155,11 @@ class TAGValidatorTest : TAGBaseStoreTest() {
     }
 
     private fun validateWithErrorsAndWarnings(
-            tagML: String,
-            schemaYAML: String,
-            expectedErrors: Collection<String>,
-            expectedWarnings: Collection<String>) {
+        tagML: String,
+        schemaYAML: String,
+        expectedErrors: Collection<String>,
+        expectedWarnings: Collection<String>
+    ) {
         LOG.info("schemaYAML={}", schemaYAML)
         runInStoreTransaction { store: TAGStore ->
             val document = parseTAGML(tagML, store)
@@ -168,9 +172,9 @@ class TAGValidatorTest : TAGBaseStoreTest() {
             val validationResult = validator.validate(document, schemaParseResult.schema)
             LOG.info("validationResult={}", validationResult)
             assertThat(validationResult)
-                    .isNotValid
-                    .hasErrors(expectedErrors)
-                    .hasWarnings(expectedWarnings)
+                .isNotValid
+                .hasErrors(expectedErrors)
+                .hasWarnings(expectedWarnings)
         }
     }
 

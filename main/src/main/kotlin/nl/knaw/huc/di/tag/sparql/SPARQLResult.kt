@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.sparql
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package nl.knaw.huc.di.tag.sparql
  * limitations under the License.
  * #L%
  */
-
-import java.util.*
 
 class SPARQLResult @JvmOverloads constructor(val query: String = "") {
 
@@ -38,15 +36,15 @@ class SPARQLResult @JvmOverloads constructor(val query: String = "") {
     }
 
     fun getValues(): List<Any> =
-            if (!isOk) {
-                ArrayList()
-            } else if (results.isEmpty()) {
-                values
-            } else {
-                if (results.size == 1) results[0].getValues() else results
-                        .map { obj: SPARQLResult -> obj.getValues() }
+        if (!isOk) {
+            ArrayList()
+        } else if (results.isEmpty()) {
+            values
+        } else {
+            if (results.size == 1) results[0].getValues() else results
+                .map { obj: SPARQLResult -> obj.getValues() }
 
-            }
+        }
 
     val isOk: Boolean
         get() = errors.isEmpty()

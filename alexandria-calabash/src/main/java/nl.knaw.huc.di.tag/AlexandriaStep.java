@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag;
  * #%L
  * alexandria-calabash
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,31 +20,6 @@ package nl.knaw.huc.di.tag;
  * #L%
  */
 
-import com.xmlcalabash.core.XMLCalabash;
-import com.xmlcalabash.core.XProcException;
-import com.xmlcalabash.core.XProcRuntime;
-import com.xmlcalabash.io.WritablePipe;
-import com.xmlcalabash.library.DefaultStep;
-import com.xmlcalabash.runtime.XAtomicStep;
-import com.xmlcalabash.util.XProcURIResolver;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
-import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
-import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
-import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
-
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
-import javax.xml.transform.sax.SAXSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +32,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.sax.SAXSource;
+
+import com.xmlcalabash.core.XMLCalabash;
+import com.xmlcalabash.core.XProcException;
+import com.xmlcalabash.core.XProcRuntime;
+import com.xmlcalabash.io.WritablePipe;
+import com.xmlcalabash.library.DefaultStep;
+import com.xmlcalabash.runtime.XAtomicStep;
+import com.xmlcalabash.util.XProcURIResolver;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+
+import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huc.di.tag.tagml.xml.exporter.XMLExporter;
+import nl.knaw.huygens.alexandria.storage.BDBTAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
 
 @XMLCalabash(name = "tag:load", type = "{https://huygensing.github.io/TAG/TAGML/ns/tag}load")
 public class AlexandriaStep extends DefaultStep {

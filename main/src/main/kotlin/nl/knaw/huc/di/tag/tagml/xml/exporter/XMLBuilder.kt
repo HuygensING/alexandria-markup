@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.xml.exporter
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGMarkup
 import nl.knaw.huygens.alexandria.view.TAGView
 import org.apache.commons.text.StringEscapeUtils
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 
@@ -58,7 +57,7 @@ class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
             namespaceDefinitions.add(TH_NAMESPACE)
         }
         document.namespaces
-                .forEach { (ns: String, url: String) -> namespaceDefinitions.add("xmlns:$ns=\"$url\"") }
+            .forEach { (ns: String, url: String) -> namespaceDefinitions.add("xmlns:$ns=\"$url\"") }
         xmlBuilder.append("<xml")
         if (namespaceDefinitions.isNotEmpty()) {
             xmlBuilder.append(" ").append(java.lang.String.join(" ", namespaceDefinitions))
@@ -101,7 +100,7 @@ class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
     }
 
     private fun discontinuityKey(markup: TAGMarkup, markupName: String): String =
-            markup.layers.stream().sorted().collect(Collectors.joining(",", "$markupName|", ""))
+        markup.layers.stream().sorted().collect(Collectors.joining(",", "$markupName|", ""))
 
     private fun getMarkupName(markup: TAGMarkup): String {
         var markupName = markup.tag
@@ -126,14 +125,14 @@ class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
             val thDoc = getThDoc(layers)
             val id = if (markup.isAnonymous) "soleId" else "sId"
             xmlBuilder
-                    .append(" th:doc=\"")
-                    .append(thDoc)
-                    .append("\"")
-                    .append(" th:")
-                    .append(id)
-                    .append("=\"")
-                    .append(thId)
-                    .append("\"/")
+                .append(" th:doc=\"")
+                .append(thDoc)
+                .append("\"")
+                .append(" th:")
+                .append(id)
+                .append("=\"")
+                .append(thId)
+                .append("\"/")
         } else if (markup.isAnonymous) {
             xmlBuilder.append("/")
         }
@@ -158,12 +157,12 @@ class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
             val thDoc = getThDoc(layers)
             val thId = thIds.remove(markup)
             xmlBuilder
-                    .append(" th:doc=\"")
-                    .append(thDoc)
-                    .append("\"")
-                    .append(" th:eId=\"")
-                    .append(thId)
-                    .append("\"/")
+                .append(" th:doc=\"")
+                .append(thDoc)
+                .append("\"")
+                .append(" th:eId=\"")
+                .append(thId)
+                .append("\"/")
         }
         xmlBuilder.append(">")
         //    }
@@ -184,29 +183,30 @@ class XMLBuilder(val leadingLayer: String = DEFAULT_LAYER) : TAGVisitor {
     override fun exitTextVariation() {}
 
     override fun serializeStringAnnotationValue(stringValue: String): String =
-            "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
+        "\"" + StringEscapeUtils.escapeXml11(stringValue) + "\""
 
     override fun serializeNumberAnnotationValue(numberValue: Double): String =
-            serializeStringAnnotationValue(numberValue.toString().replaceFirst(".0$".toRegex(), ""))
+        serializeStringAnnotationValue(numberValue.toString().replaceFirst(".0$".toRegex(), ""))
 
     override fun serializeBooleanAnnotationValue(booleanValue: Boolean): String =
-            serializeStringAnnotationValue(if (booleanValue) "true" else "false")
+        serializeStringAnnotationValue(if (booleanValue) "true" else "false")
 
     override fun serializeListAnnotationValue(serializedItems: List<String>): String =
-            serializeStringAnnotationValue(serializedItems.stream().collect(Collectors.joining(",", "[", "]")))
+        serializeStringAnnotationValue(serializedItems.stream().collect(Collectors.joining(",", "[", "]")))
 
     override fun serializeMapAnnotationValue(serializedMapItems: List<String>): String =
-            serializeStringAnnotationValue(
-                    serializedMapItems.stream().collect(Collectors.joining(",", "{", "}")))
+        serializeStringAnnotationValue(
+            serializedMapItems.stream().collect(Collectors.joining(",", "{", "}"))
+        )
 
     override fun serializeAnnotationAssigner(name: String): String = "$name="
 
     private fun getThDoc(layerNames: Set<String>): String =
-            layerNames
-                    .filter { it != leadingLayer }
-                    .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
-                    .sorted()
-                    .joinToString(" ")
+        layerNames
+            .filter { it != leadingLayer }
+            .map { l: String -> if (DEFAULT_LAYER == l) DEFAULT_DOC else l }
+            .sorted()
+            .joinToString(" ")
 
     companion object {
         const val TH_NAMESPACE = "xmlns:th=\"http://www.blackmesatech.com/2017/nss/trojan-horse\""

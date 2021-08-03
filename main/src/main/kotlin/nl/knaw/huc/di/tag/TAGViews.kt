@@ -7,7 +7,7 @@ import nl.knaw.huygens.alexandria.view.TAGView
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import nl.knaw.huygens.alexandria.view.TAGView
 object TAGViews {
     @JvmStatic
     fun getShowAllMarkupView(store: TAGStore): TAGView =
-            TAGView(store).apply {
-                layersToExclude = emptySet()
-                markupToExclude = emptySet()
-            }
+        TAGView(store).apply {
+            layersToExclude = emptySet()
+            markupToExclude = emptySet()
+        }
 
     @JvmStatic
     fun getShowNoMarkupView(store: TAGStore): TAGView =
-            TAGView(store).apply {
-                layersToInclude = emptySet()
-                markupToInclude = emptySet()
-            }
+        TAGView(store).apply {
+            layersToInclude = emptySet()
+            markupToInclude = emptySet()
+        }
 }

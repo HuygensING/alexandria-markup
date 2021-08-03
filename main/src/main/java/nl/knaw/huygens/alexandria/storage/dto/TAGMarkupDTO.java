@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,15 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #L%
  */
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import nl.knaw.huygens.alexandria.storage.DataAccessor;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
+
+import nl.knaw.huygens.alexandria.storage.DataAccessor;
 
 @Entity(version = 2)
 public class TAGMarkupDTO implements TAGDTO {
@@ -46,8 +47,7 @@ public class TAGMarkupDTO implements TAGDTO {
   private boolean discontinuous = false;
   private Set<String> layers = new TreeSet<>();
 
-  private TAGMarkupDTO() {
-  }
+  private TAGMarkupDTO() {}
 
   public TAGMarkupDTO(TAGDocumentDTO document, String tagName) {
     this(document.getDbId(), tagName);
@@ -154,8 +154,7 @@ public class TAGMarkupDTO implements TAGDTO {
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof TAGMarkupDTO
-        && getDbId().equals(((TAGMarkupDTO) other).getDbId());
+    return other instanceof TAGMarkupDTO && getDbId().equals(((TAGMarkupDTO) other).getDbId());
   }
 
   @Deprecated
@@ -163,5 +162,4 @@ public class TAGMarkupDTO implements TAGDTO {
     // TODO: remove dependency on this method
     return null;
   }
-
 }

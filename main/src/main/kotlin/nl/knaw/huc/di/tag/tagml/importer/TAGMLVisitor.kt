@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import nl.knaw.huygens.alexandria.ErrorListener
 import nl.knaw.huygens.alexandria.storage.TAGDocument
 import nl.knaw.huygens.alexandria.storage.TAGStore
 
-class TAGMLVisitor(private val tagStore: TAGStore, private val errorListener: ErrorListener) : TAGMLParserBaseVisitor<Any?>() {
+class TAGMLVisitor(private val tagStore: TAGStore, private val errorListener: ErrorListener) :
+    TAGMLParserBaseVisitor<Any?>() {
     // TODO
     val document: TAGDocument?
         get() =// TODO

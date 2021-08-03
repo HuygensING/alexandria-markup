@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,19 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
-import nl.knaw.huc.di.tag.tagml.importer.AbstractTAGMLListener;
-import nl.knaw.huygens.alexandria.ErrorListener;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringUtils;
@@ -31,14 +40,29 @@ import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
+import nl.knaw.huc.di.tag.tagml.importer.AbstractTAGMLListener;
+import nl.knaw.huygens.alexandria.ErrorListener;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_ENDCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_STARTCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE;
+import static nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER;
+import static nl.knaw.huc.di.tag.tagml.TAGML.DIVERGENCE;
+import static nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_ENDCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_STARTCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.OPTIONAL_PREFIX;
+import static nl.knaw.huc.di.tag.tagml.TAGML.RESUME_PREFIX;
+import static nl.knaw.huc.di.tag.tagml.TAGML.SUSPEND_PREFIX;
+import static nl.knaw.huc.di.tag.tagml.TAGML.unEscape;
 
 public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   private static final Logger LOG = LoggerFactory.getLogger(TAGMLKnowledgeModelListener.class);
@@ -79,8 +103,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
         checkEOF(ctx);
       }
       if (state.rootMarkupIsNotSet()) {
-        getErrorListener().addBreakingError(
-            "%s No text allowed here, the root markup must be started first.", errorPrefix(ctx));
+        getErrorListener()
+            .addBreakingError(
+                "%s No text allowed here, the root markup must be started first.",
+                errorPrefix(ctx));
       }
       Resource textResource = knowledgeModel.createTextResource(text);
       for (final MarkupResource markupResource : getRelevantOpenMarkup()) {
@@ -108,7 +134,8 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
               .map(this::suspendTag)
               .distinct()
               .collect(joining(", "));
-      getErrorListener().addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
+      getErrorListener()
+          .addError("Some suspended markup was not resumed: %s", suspendedMarkupString);
     }
   }
 
@@ -128,8 +155,8 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   @Override
   public void exitMilestoneTag(TAGMLParser.MilestoneTagContext ctx) {
     if (state.rootMarkupIsNotSet()) {
-      getErrorListener().addBreakingError(
-          "%s The root markup cannot be a milestone tag.", errorPrefix(ctx));
+      getErrorListener()
+          .addBreakingError("%s The root markup cannot be a milestone tag.", errorPrefix(ctx));
     }
     if (tagNameIsValid(ctx)) {
       String markupName = ctx.name().getText();
@@ -281,17 +308,19 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   private void checkLayerIsOpen(final TAGMLParser.StartTagContext ctx, final String layerId) {
     if (state.openMarkup.get(layerId).isEmpty()) {
       String layer = layerId.isEmpty() ? "the default layer" : "layer '" + layerId + "'";
-      getErrorListener().addBreakingError(
-          "%s %s cannot be used here, since the root markup of this layer has closed already.",
-          errorPrefix(ctx), layer);
+      getErrorListener()
+          .addBreakingError(
+              "%s %s cannot be used here, since the root markup of this layer has closed already.",
+              errorPrefix(ctx), layer);
     }
   }
 
   private void checkLayerWasAdded(final TAGMLParser.StartTagContext ctx, final String layerId) {
     if (!state.openMarkup.containsKey(layerId)) {
-      getErrorListener().addBreakingError(
-          "%s Layer %s has not been added at this point, use +%s to add a layer.",
-          errorPrefix(ctx, true), layerId, layerId);
+      getErrorListener()
+          .addBreakingError(
+              "%s Layer %s has not been added at this point, use +%s to add a layer.",
+              errorPrefix(ctx, true), layerId, layerId);
     }
   }
 
@@ -299,8 +328,8 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     if (markupName.contains(":")) {
       String namespace = markupName.split(":", 2)[0];
       if (!namespaces.containsKey(namespace)) {
-        getErrorListener().addError(
-            "%s Namespace %s has not been defined.", errorPrefix(ctx), namespace);
+        getErrorListener()
+            .addError("%s Namespace %s has not been defined.", errorPrefix(ctx), namespace);
       }
     }
   }
@@ -380,9 +409,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
       closedInBranch.removeAll(currentOpenMarkupInLayer);
       if (!closedInBranch.isEmpty()) {
         String openTags = closedInBranch.stream().map(this::openTag).collect(joining(","));
-        getErrorListener().addBreakingError(
-            "%s Markup %s opened before branch %s, should not be closed in a branch.",
-            errorPrefix(ctx), openTags, branch);
+        getErrorListener()
+            .addBreakingError(
+                "%s Markup %s opened before branch %s, should not be closed in a branch.",
+                errorPrefix(ctx), openTags, branch);
       }
       List<MarkupResource> openedInBranch = new ArrayList<>(currentOpenMarkupInLayer);
       openedInBranch.removeAll(openMarkupAtStartInLayer);
@@ -392,9 +422,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
               .map(this::openTag)
               .collect(joining(","));
       if (!openTags.isEmpty()) {
-        getErrorListener().addBreakingError(
-            "%s Markup %s opened in branch %s must be closed before starting a new branch.",
-            errorPrefix(ctx), openTags, branch);
+        getErrorListener()
+            .addBreakingError(
+                "%s Markup %s opened in branch %s must be closed before starting a new branch.",
+                errorPrefix(ctx), openTags, branch);
       }
     }
   }
@@ -419,7 +450,8 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     closeSystemMarkup(BRANCHES, DEFAULT_LAYER_ONLY);
     currentTextVariationState().endStates.add(state.copy());
     checkEndStates(ctx);
-    if (getErrorListener().hasErrors()) { // TODO: check if a breaking error should have been set earlier
+    if (getErrorListener()
+        .hasErrors()) { // TODO: check if a breaking error should have been set earlier
       return;
     }
     textVariationStateStack.pop();
@@ -464,9 +496,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
                 : "suspended markup " + suspendedMarkup + ".";
         branchLines.append("\n\tbranch ").append(i + 1).append(" has ").append(has);
       }
-      getErrorListener().addBreakingError(
-          "%s There is a discrepancy in suspended markup between branches:%s",
-          errorPrefix, branchLines);
+      getErrorListener()
+          .addBreakingError(
+              "%s There is a discrepancy in suspended markup between branches:%s",
+              errorPrefix, branchLines);
     }
   }
 
@@ -504,9 +537,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
             .append(" to be closed after the ")
             .append(CONVERGENCE);
       }
-      getErrorListener().addBreakingError(
-          "%s There is an open markup discrepancy between the branches:%s",
-          errorPrefix, branchLines);
+      getErrorListener()
+          .addBreakingError(
+              "%s There is an open markup discrepancy between the branches:%s",
+              errorPrefix, branchLines);
     }
   }
 
@@ -576,10 +610,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     String foundLayerSuffix =
         layerSuffixNeeded
             ? TAGML.DIVIDER
-            + layers.stream()
-            .filter(l -> !TAGML.DEFAULT_LAYER.equals(l))
-            .sorted()
-            .collect(joining(","))
+                + layers.stream()
+                    .filter(l -> !TAGML.DEFAULT_LAYER.equals(l))
+                    .sorted()
+                    .collect(joining(","))
             : "";
 
     extendedMarkupName += foundLayerSuffix;
@@ -596,21 +630,24 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
                 .map(MarkupResource::getExtendedTag)
                 .anyMatch(et -> emn.get().equals(et));
         if (!markupIsOpen) {
-          getErrorListener().addError(
-              "%s Close tag <%s] found without corresponding open tag.",
-              errorPrefix(ctx), extendedMarkupName);
+          getErrorListener()
+              .addError(
+                  "%s Close tag <%s] found without corresponding open tag.",
+                  errorPrefix(ctx), extendedMarkupName);
           return null;
         } else if (!isSuspend) {
           MarkupResource expected = markupStack.peek();
           if (expected.hasTag(BRANCH)) {
-            getErrorListener().addBreakingError(
-                "%s Markup [%s> opened before branch %s, should not be closed in a branch.",
-                errorPrefix(ctx), extendedMarkupName, currentTextVariationState().branch + 1);
+            getErrorListener()
+                .addBreakingError(
+                    "%s Markup [%s> opened before branch %s, should not be closed in a branch.",
+                    errorPrefix(ctx), extendedMarkupName, currentTextVariationState().branch + 1);
           }
           String hint = l.isEmpty() ? " Use separate layers to allow for overlap." : "";
-          getErrorListener().addBreakingError(
-              "%s Close tag <%s] found, expected %s.%s",
-              errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint);
+          getErrorListener()
+              .addBreakingError(
+                  "%s Close tag <%s] found, expected %s.%s",
+                  errorPrefix(ctx), extendedMarkupName, closeTag(expected), hint);
           return null;
         } else {
           markup = removeFromMarkupStack2(extendedMarkupName, markupStack);
@@ -644,8 +681,9 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
     state.eof = (markup.getResourceId().equals(state.rootMarkupId));
     if (isSuspend && state.eof) {
       MarkupResource rootMarkup = knowledgeModel.getMarkup(state.rootMarkupId);
-      getErrorListener().addBreakingError(
-          "%s The root markup %s cannot be suspended.", errorPrefix(ctx), rootMarkup);
+      getErrorListener()
+          .addBreakingError(
+              "%s The root markup %s cannot be suspended.", errorPrefix(ctx), rootMarkup);
     }
     return markup;
   }
@@ -662,9 +700,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
           state.allOpenMarkup.stream().filter(m -> m.hasTag(markupName)).collect(toList());
       if (correspondingOpenMarkupList.isEmpty()) {
         // nothing found? error!
-        getErrorListener().addBreakingError(
-            "%s Close tag <%s] found without corresponding open tag.",
-            errorPrefix(ctx), extendedMarkupName);
+        getErrorListener()
+            .addBreakingError(
+                "%s Close tag <%s] found without corresponding open tag.",
+                errorPrefix(ctx), extendedMarkupName);
 
       } else if (correspondingOpenMarkupList.size() == 1) {
         // only one? then we found our corresponding start tag, and we can get the layer info from
@@ -769,9 +808,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   private void checkForCorrespondingSuspendTag(
       final TAGMLParser.StartTagContext ctx, final String tag, final MarkupResource markup) {
     if (markup == null) {
-      getErrorListener().addBreakingError(
-          "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
-          errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag);
+      getErrorListener()
+          .addBreakingError(
+              "%s Resume tag %s found, which has no corresponding earlier suspend tag <%s%s].",
+              errorPrefix(ctx), ctx.getText(), SUSPEND_PREFIX, tag);
     }
   }
 
@@ -887,9 +927,10 @@ public class TAGMLKnowledgeModelListener extends AbstractTAGMLListener {
   private void checkEOF(final ParserRuleContext ctx) {
     if (state.eof) {
       MarkupResource rootMarkup = knowledgeModel.getMarkup(state.rootMarkupId);
-      getErrorListener().addBreakingError(
-          "%s No text or markup allowed after the root markup %s has been ended.",
-          errorPrefix(ctx), rootMarkup);
+      getErrorListener()
+          .addBreakingError(
+              "%s No text or markup allowed after the root markup %s has been ended.",
+              errorPrefix(ctx), rootMarkup);
     }
   }
 

@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.treediff;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,15 +20,17 @@ package nl.knaw.huc.di.tag.treediff;
  * #L%
  */
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /*
  * Tests the functionality of Tree
@@ -78,9 +80,9 @@ public class TreeTest {
     TreeNodeVisitor visitor = new TreeNodeVisitor();
     treeOne.performPreorderTraversal(visitor);
     String[] expString = {
-        "label: A, preorderPosition: 1",
-        "label: B, preorderPosition: 2",
-        "label: C, preorderPosition: 3"
+      "label: A, preorderPosition: 1",
+      "label: B, preorderPosition: 2",
+      "label: C, preorderPosition: 3"
     };
     List<String> expected = new ArrayList<>(Arrays.asList(expString));
     assertEquals(expected, visitor.traversal);
@@ -88,10 +90,10 @@ public class TreeTest {
     visitor = new TreeNodeVisitor();
     treeTwo.performPreorderTraversal(visitor);
     String[] expString2 = {
-        "label: A, preorderPosition: 1",
-        "label: B, preorderPosition: 2",
-        "label: C, preorderPosition: 3",
-        "label: D, preorderPosition: 4"
+      "label: A, preorderPosition: 1",
+      "label: B, preorderPosition: 2",
+      "label: C, preorderPosition: 3",
+      "label: D, preorderPosition: 4"
     };
     expected = new ArrayList<>(Arrays.asList(expString2));
     assertEquals(expected.toString(), visitor.traversal.toString());
@@ -140,9 +142,7 @@ public class TreeTest {
    */
   @Test
   public void testFatherOf_when_no_such_node() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> treeTwo.fatherOf(5));
+    assertThrows(IllegalArgumentException.class, () -> treeTwo.fatherOf(5));
   }
 
   /*
@@ -224,8 +224,6 @@ public class TreeTest {
    */
   @Test
   public void testChildOnPathFromDescendant_when_no_such_node() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> treeTwo.childOnPathFromDescendant(1, 1));
+    assertThrows(IllegalArgumentException.class, () -> treeTwo.childOnPathFromDescendant(1, 1));
   }
 }

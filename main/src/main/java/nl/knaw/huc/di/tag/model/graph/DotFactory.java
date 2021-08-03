@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,15 @@ package nl.knaw.huc.di.tag.model.graph;
  * #L%
  */
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.text.StringEscapeUtils;
+
 import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
 import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
 import nl.knaw.huc.di.tag.tagml.importer2.TAGKnowledgeModel;
@@ -27,10 +36,6 @@ import nl.knaw.huygens.alexandria.exporter.ColorPicker;
 import nl.knaw.huygens.alexandria.storage.TAGDocument;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import nl.knaw.huygens.alexandria.storage.TAGTextNode;
-import org.apache.commons.text.StringEscapeUtils;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -134,8 +139,8 @@ public class DotFactory {
 
   private String escape(final String label) {
     return StringEscapeUtils.escapeHtml4(label).replaceAll("\n", "\\\\n")
-        //        .replace(" ", "_")
-        ;
+    //        .replace(" ", "_")
+    ;
   }
 
   private String toTextNodeLine(final TAGTextNode textNode) {

@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,24 @@ package nl.knaw.huygens.alexandria.storage.dto;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.SecondaryKey;
+
 import nl.knaw.huc.di.tag.model.graph.TextGraph;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.RangePair;
 import nl.knaw.huygens.alexandria.storage.DataAccessor;
 import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 import static com.sleepycat.persist.model.Relationship.ONE_TO_MANY;
 
@@ -52,8 +59,7 @@ public class TAGDocumentDTO implements TAGDTO {
   private String schemaLocation;
   private Map<Long, RangePair> markupRangeMap = new HashMap<>();
 
-  public TAGDocumentDTO() {
-  }
+  public TAGDocumentDTO() {}
 
   public void initialize() {
     if (id == null) {
@@ -125,7 +131,7 @@ public class TAGDocumentDTO implements TAGDTO {
     layers.add(TAGML.DEFAULT_LAYER); // TODO: use relevant layers
     return textNodeSize > 2
         && getTextNodeIdStreamForMarkupIdInLayers(markup.getDbId(), layers).count()
-        >= textNodeSize / 2d;
+            >= textNodeSize / 2d;
   }
 
   private Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(

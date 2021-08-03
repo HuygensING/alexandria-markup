@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.view
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import nl.knaw.huc.di.tag.tagml.TAGML.DEFAULT_LAYER
 import nl.knaw.huygens.alexandria.storage.TAGMarkup
 import nl.knaw.huygens.alexandria.storage.TAGStore
 import nl.knaw.huygens.alexandria.view.TAGView.RelevanceStyle.*
-import java.util.*
 
 class TAGView(private val store: TAGStore) {
 
@@ -100,13 +99,13 @@ class TAGView(private val store: TAGStore) {
         when (layerRelevance) {
             INCLUDE -> {
                 val retain = markupIds
-                        .filter { m: Long -> layersToInclude.overlapsWith(getLayersForMarkup(m)) }
+                    .filter { m: Long -> layersToInclude.overlapsWith(getLayersForMarkup(m)) }
                 relevantMarkupIds.retainAll(retain)
             }
             EXCLUDE -> {
                 // remove all markup whose layers are all in the layersToExclude
                 val remove = markupIds
-                        .filter { m: Long -> layersToExclude.containsAll(getLayersForMarkup(m)) }
+                    .filter { m: Long -> layersToExclude.containsAll(getLayersForMarkup(m)) }
                 relevantMarkupIds.removeAll(remove)
             }
             UNDEFINED -> {
@@ -143,14 +142,14 @@ class TAGView(private val store: TAGStore) {
     }
 
     private fun getLayersForMarkup(markupId: Long): Set<String> =
-            store.getMarkup(markupId).layers
+        store.getMarkup(markupId).layers
 
     val definition: TAGViewDefinition
         get() = TAGViewDefinition()
-                .withIncludeLayers(layersToInclude)
-                .withExcludeLayers(layersToExclude)
-                .withIncludeMarkup(markupToInclude)
-                .withExcludeMarkup(markupToExclude)
+            .withIncludeLayers(layersToInclude)
+            .withExcludeLayers(layersToExclude)
+            .withIncludeMarkup(markupToInclude)
+            .withExcludeMarkup(markupToExclude)
 
     fun markupStyleIsInclude() = markupRelevance == INCLUDE
 

@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,17 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * limitations under the License.
  * #L%
  */
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.jena.rdf.model.Model;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.knaw.huc.di.tag.TAGBaseStoreTest;
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError;
@@ -33,22 +44,14 @@ import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
 import nl.knaw.huygens.alexandria.view.TAGViewFactory;
-import org.apache.commons.io.FileUtils;
-import org.apache.jena.rdf.model.Model;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
-import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.markupSketch;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.optionalMarkupSketch;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.textNodeSketch;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TAGMLImporterTest extends TAGBaseStoreTest {

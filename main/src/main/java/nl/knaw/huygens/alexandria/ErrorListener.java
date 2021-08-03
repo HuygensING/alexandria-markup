@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,11 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
-import nl.knaw.huc.di.tag.tagml.importer.Position;
-import nl.knaw.huc.di.tag.tagml.importer.Range;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.List;
+
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
@@ -32,10 +34,9 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.List;
+import nl.knaw.huc.di.tag.tagml.TAGMLBreakingError;
+import nl.knaw.huc.di.tag.tagml.importer.Position;
+import nl.knaw.huc.di.tag.tagml.importer.Range;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -48,7 +49,7 @@ public class ErrorListener implements ANTLRErrorListener {
           (e1, e2) -> {
             if (e1 instanceof CustomError && e2 instanceof CustomError) {
               return Comparator.comparing(
-                  ce -> ((CustomError) ce).range.getStartPosition().getLine())
+                      ce -> ((CustomError) ce).range.getStartPosition().getLine())
                   .thenComparing(ce -> ((CustomError) ce).range.getStartPosition().getCharacter())
                   .thenComparing(ce -> ((CustomError) ce).range.getEndPosition().getLine())
                   .thenComparing(ce -> ((CustomError) ce).range.getEndPosition().getCharacter())

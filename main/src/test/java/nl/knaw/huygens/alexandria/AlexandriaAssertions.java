@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,14 @@ package nl.knaw.huygens.alexandria;
  * #L%
  */
 
+import org.assertj.core.api.Assertions;
+
 import nl.knaw.huygens.alexandria.compare.TAGComparison;
 import nl.knaw.huygens.alexandria.compare.TAGComparisonAssert;
-import org.assertj.core.api.Assertions;
 
 public class AlexandriaAssertions extends Assertions {
 
   public static TAGComparisonAssert assertThat(TAGComparison actual) {
     return new TAGComparisonAssert(actual);
   }
-
 }

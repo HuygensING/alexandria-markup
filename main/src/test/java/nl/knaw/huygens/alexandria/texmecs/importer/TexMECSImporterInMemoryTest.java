@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,13 @@ package nl.knaw.huygens.alexandria.texmecs.importer;
  * #L%
  */
 
-import nl.knaw.AntlrUtils;
-import nl.knaw.huygens.alexandria.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
-import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.apache.commons.io.FileUtils;
@@ -31,12 +34,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
+import nl.knaw.AntlrUtils;
+import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.exporter.LMNLExporterInMemory;
+import nl.knaw.huygens.alexandria.texmecs.grammar.TexMECSLexer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -78,14 +83,16 @@ public class TexMECSImporterInMemoryTest {
   @Test
   public void testExample1WithSoleTag() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|b><empty purpose='test'>|s>";
-    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
+    Document document =
+        testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b][empty [purpose}test{purpose]]{s]");
     assertThat(document.value()).isNotNull();
   }
 
   @Test
   public void testExample1WithSuspendResumeTags() {
     String texMECS = "<s|<a|John <b|loves|a> Mary|-b>, or so he says, <+b|very much|b>|s>";
-    Document document = testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
+    Document document =
+        testTexMECS(texMECS, "[s}[a}John [b}loves{a] Mary{b], or so he says, [b}very much{b]{s]");
     Limen limen = document.value();
     assertThat(limen).isNotNull();
     List<Markup> markupList = limen.markupList;
@@ -94,7 +101,8 @@ public class TexMECSImporterInMemoryTest {
     assertThat(markup.getTag()).isEqualTo("b");
     List<TextNode> textNodes = markup.textNodes;
     assertThat(textNodes).hasSize(3);
-    List<String> textNodeContents = textNodes.stream().map(TextNode::getContent).collect(Collectors.toList());
+    List<String> textNodeContents =
+        textNodes.stream().map(TextNode::getContent).collect(Collectors.toList());
     assertThat(textNodeContents).containsExactly("loves", " Mary", "very much");
   }
 
@@ -136,7 +144,8 @@ public class TexMECSImporterInMemoryTest {
   @Test
   public void testVirtualElement() {
     String texMECS = "<real|<e=e1|Reality|e>|real><virtual|<^e^e1>|virtual>";
-    Document document = testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
+    Document document =
+        testTexMECS(texMECS, "[real}[e=e1}Reality{e=e1]{real][virtual}[e}Reality{e]{virtual]");
     assertThat(document.value()).isNotNull();
   }
 
@@ -182,7 +191,8 @@ public class TexMECSImporterInMemoryTest {
       fail();
     } catch (TexMECSSyntaxError se) {
       LOG.warn(se.getMessage());
-      assertThat(se.getMessage()).contains("Closing tag |bla> found, which has no corresponding earlier opening tag.");
+      assertThat(se.getMessage())
+          .contains("Closing tag |bla> found, which has no corresponding earlier opening tag.");
     }
   }
 
@@ -194,7 +204,9 @@ public class TexMECSImporterInMemoryTest {
       fail();
     } catch (TexMECSSyntaxError se) {
       LOG.warn(se.getMessage());
-      assertThat(se.getMessage()).contains("idref 'v12' not found: No <v@v12| tag found that this virtual element refers to.");
+      assertThat(se.getMessage())
+          .contains(
+              "idref 'v12' not found: No <v@v12| tag found that this virtual element refers to.");
     }
   }
 
@@ -206,7 +218,8 @@ public class TexMECSImporterInMemoryTest {
       fail();
     } catch (TexMECSSyntaxError se) {
       LOG.warn(se.getMessage());
-      assertThat(se.getMessage()).contains("Closing tag |tag> found, which has no corresponding earlier opening tag.");
+      assertThat(se.getMessage())
+          .contains("Closing tag |tag> found, which has no corresponding earlier opening tag.");
     }
   }
 
@@ -218,7 +231,9 @@ public class TexMECSImporterInMemoryTest {
       fail();
     } catch (TexMECSSyntaxError se) {
       LOG.warn(se.getMessage());
-      assertThat(se.getMessage()).contains("Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
+      assertThat(se.getMessage())
+          .contains(
+              "Resuming tag <+tag| found, which has no corresponding earlier suspending tag |-tag>.");
     }
   }
 
@@ -267,7 +282,8 @@ public class TexMECSImporterInMemoryTest {
     System.out.println(input);
     System.out.println("Tokens:");
     printTokens(CharStreams.fromString(input));
-    System.out.println("--------------------------------------------------------------------------------");
+    System.out.println(
+        "--------------------------------------------------------------------------------");
   }
 
   protected void printTokens(InputStream input) throws IOException {
@@ -279,5 +295,4 @@ public class TexMECSImporterInMemoryTest {
     String tokenTable = AntlrUtils.makeTokenTable(lexer);
     System.out.println(tokenTable);
   }
-
 }

@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,19 +20,31 @@ package nl.knaw.huygens.alexandria.lmnl.importer;
  * #L%
  */
 
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.data_model.*;
-import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.util.*;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.data_model.Annotation;
+import nl.knaw.huygens.alexandria.data_model.Document;
+import nl.knaw.huygens.alexandria.data_model.Limen;
+import nl.knaw.huygens.alexandria.data_model.Markup;
+import nl.knaw.huygens.alexandria.data_model.TextNode;
+import nl.knaw.huygens.alexandria.lmnl.grammar.LMNLLexer;
 
 import static java.util.stream.Collectors.joining;
 
@@ -48,9 +60,7 @@ public class LMNLImporterInMemory {
             markup -> {
               String tag = markup.getTag();
               Annotation nAnnotation =
-                  markup
-                      .getAnnotations()
-                      .parallelStream()
+                  markup.getAnnotations().parallelStream()
                       .filter(a -> a.getTag().equals("n"))
                       .findFirst()
                       .get();
@@ -139,11 +149,11 @@ public class LMNLImporterInMemory {
             context.addTextNode(textNode);
             break;
 
-          // case LMNLLexer.TagOpenStartChar:
-          // case LMNLLexer.TagOpenEndChar:
-          // case LMNLLexer.TagCloseStartChar:
-          // case LMNLLexer.TagCloseEndChar:
-          // break;
+            // case LMNLLexer.TagOpenStartChar:
+            // case LMNLLexer.TagOpenEndChar:
+            // case LMNLLexer.TagCloseStartChar:
+            // case LMNLLexer.TagCloseEndChar:
+            // break;
 
           default:
             handleUnexpectedToken(methodName, token, ruleName, modeName);
@@ -180,11 +190,11 @@ public class LMNLImporterInMemory {
           goOn = false;
           break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+          // case LMNLLexer.TagOpenStartChar:
+          // case LMNLLexer.TagOpenEndChar:
+          // case LMNLLexer.TagCloseStartChar:
+          // case LMNLLexer.TagCloseEndChar:
+          // break;
 
         default:
           handleUnexpectedToken(methodName, token, ruleName, modeName);
@@ -238,11 +248,11 @@ public class LMNLImporterInMemory {
           goOn = false;
           break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+          // case LMNLLexer.TagOpenStartChar:
+          // case LMNLLexer.TagOpenEndChar:
+          // case LMNLLexer.TagCloseStartChar:
+          // case LMNLLexer.TagCloseEndChar:
+          // break;
 
         default:
           handleUnexpectedToken(methodName, token, ruleName, modeName);
@@ -273,11 +283,11 @@ public class LMNLImporterInMemory {
           goOn = false;
           break;
 
-        // case LMNLLexer.TagOpenStartChar:
-        // case LMNLLexer.TagOpenEndChar:
-        // case LMNLLexer.TagCloseStartChar:
-        // case LMNLLexer.TagCloseEndChar:
-        // break;
+          // case LMNLLexer.TagOpenStartChar:
+          // case LMNLLexer.TagOpenEndChar:
+          // case LMNLLexer.TagCloseStartChar:
+          // case LMNLLexer.TagCloseEndChar:
+          // break;
 
         default:
           handleUnexpectedToken(methodName, token, ruleName, modeName);
@@ -335,9 +345,7 @@ public class LMNLImporterInMemory {
       // LOG.info("currentDocumentContext().openMarkupDeque={}",
       // openMarkupDeque.stream().map(Markup::getKey).collect(Collectors.toList()));
       Optional<Markup> findFirst =
-          openMarkupDeque.stream()
-              .filter(tr -> tr.getExtendedTag().equals(rangeName))
-              .findFirst();
+          openMarkupDeque.stream().filter(tr -> tr.getExtendedTag().equals(rangeName)).findFirst();
       if (findFirst.isPresent()) {
         Markup markup = findFirst.get();
         if (markup.textNodes.isEmpty()) {
@@ -364,9 +372,7 @@ public class LMNLImporterInMemory {
     }
 
     void addTextNode(TextNode textNode) {
-      openMarkupDeque
-          .descendingIterator()
-          .forEachRemaining(tr -> tr.addTextNode(textNode));
+      openMarkupDeque.descendingIterator().forEachRemaining(tr -> tr.addTextNode(textNode));
       limen.addTextNode(textNode);
     }
 

@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,18 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * limitations under the License.
  * #L%
  */
+
+import java.net.URI;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -28,10 +40,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-
-import java.net.URI;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class TAGKnowledgeModel {
   private final Model model;
@@ -43,12 +51,12 @@ public class TAGKnowledgeModel {
   private final Map<String, Deque<MarkupResource>> openMarkupStackForLayer = new HashMap<>();
 
   TAGKnowledgeModel() {
-    model = ModelFactory.createDefaultModel()
-        .setNsPrefix("rdf", RDF.getURI())
-        .setNsPrefix("rdfs", RDFS.getURI())
-//        .setNsPrefix("dc", DC.getURI())
-        .setNsPrefix("tag", TAG.getURI());
-
+    model =
+        ModelFactory.createDefaultModel()
+            .setNsPrefix("rdf", RDF.getURI())
+            .setNsPrefix("rdfs", RDFS.getURI())
+            //        .setNsPrefix("dc", DC.getURI())
+            .setNsPrefix("tag", TAG.getURI());
   }
 
   public DocumentResource createDocument() {
@@ -97,7 +105,8 @@ public class TAGKnowledgeModel {
     return layerNames;
   }
 
-  public void addLayer(final String layerName, final MarkupResource rootMarkup, final String parentLayer) {
+  public void addLayer(
+      final String layerName, final MarkupResource rootMarkup, final String parentLayer) {
     layerNames.add(layerName);
     openMarkupStackForLayer.put(layerName, new ArrayDeque<>());
     openMarkupStackForLayer.get(layerName).push(rootMarkup);
@@ -107,31 +116,31 @@ public class TAGKnowledgeModel {
     }
   }
 
-  private void linkToParentMarkup(final MarkupResource rootMarkup, final String parentLayer, final Deque<MarkupResource> openMarkupStack) {
+  private void linkToParentMarkup(
+      final MarkupResource rootMarkup,
+      final String parentLayer,
+      final Deque<MarkupResource> openMarkupStack) {
     if (openMarkupStack != null && !openMarkupStack.isEmpty()) {
       Long parentMarkupId = openMarkupStack.peek().getResourceId();
       Long childMarkupId = rootMarkup.getResourceId();
       if (!Objects.equals(parentMarkupId, childMarkupId)) {
-//        boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
-//            .stream()
-//            .filter(LayerEdge.class::isInstance)
-//            .map(LayerEdge.class::cast)
-//            .filter(e -> e.hasLayer(parentLayer))
-//            .anyMatch(e -> {
-//              Collection<Long> targets = textGraph.getTargets(e);
-//              return targets.size() == 1 && targets.contains(childMarkupId);
-//            });
-//        if (!edgeExists) {
-//          textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
-//        }
+        //        boolean edgeExists = textGraph.getOutgoingEdges(parentMarkupId)
+        //            .stream()
+        //            .filter(LayerEdge.class::isInstance)
+        //            .map(LayerEdge.class::cast)
+        //            .filter(e -> e.hasLayer(parentLayer))
+        //            .anyMatch(e -> {
+        //              Collection<Long> targets = textGraph.getTargets(e);
+        //              return targets.size() == 1 && targets.contains(childMarkupId);
+        //            });
+        //        if (!edgeExists) {
+        //          textGraph.addChildMarkup(parentMarkupId, parentLayer, childMarkupId);
+        //        }
       }
     }
-
   }
 
-  public void openMarkupInLayer(final MarkupResource markup, final String layerId) {
-
-  }
+  public void openMarkupInLayer(final MarkupResource markup, final String layerId) {}
 
   public void addAllLayers(final MarkupResource markup, final Set<String> layers) {
     layersForMarkup.putAll(markup, layers);
@@ -141,8 +150,7 @@ public class TAGKnowledgeModel {
     return (MarkupResource) resourceMap.get(resourceId);
   }
 
-  public void closeMarkupInLayer(final MarkupResource markup, final String layerName) {
-  }
+  public void closeMarkupInLayer(final MarkupResource markup, final String layerName) {}
 
   public Long createStringAnnotationValue(final String value) {
     return null;

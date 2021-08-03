@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,11 @@ package nl.knaw.huc.di.tag.tagml.importer;
  * #L%
  */
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
-import nl.knaw.huc.di.tag.TAGBaseStoreTest;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
-import nl.knaw.huygens.alexandria.storage.TAGStore;
-import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -41,15 +35,24 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import nl.knaw.huc.di.tag.TAGBaseStoreTest;
+import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.exporter.TAGMLExporter;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLLexer;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huc.di.tag.TAGAssertions.assertThat;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH;
 import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES;
-import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.*;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.markupSketch;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.optionalMarkupSketch;
+import static nl.knaw.huygens.alexandria.storage.dto.TAGDocumentAssert.textNodeSketch;
 
 public class TAGMLParserTest extends TAGBaseStoreTest {
 
@@ -719,7 +722,8 @@ public class TAGMLParserTest extends TAGBaseStoreTest {
     if (errorListener.hasErrors()) {
       LOG.error("errors: {}", errorListener.getErrors());
     }
-    assertThat(errorListener.getPrefixedErrorMessagesAsString()).contains(expectedSyntaxErrorMessage);
+    assertThat(errorListener.getPrefixedErrorMessagesAsString())
+        .contains(expectedSyntaxErrorMessage);
   }
 
   private void assertExportEqualsInput(String input, TAGDocument doc, final TAGStore store) {

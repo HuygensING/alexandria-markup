@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,15 @@ package nl.knaw.huc.di.tag.tagml.rdf;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.importer2.TAG;
-import org.apache.jena.ontology.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
@@ -29,9 +36,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import nl.knaw.huc.di.tag.tagml.importer2.TAG;
 
 public class OntologyTest {
 
@@ -108,8 +113,8 @@ public class OntologyTest {
     OntProperty elements = createLabeledProperty(model, TAG.elements);
     elements.addDomain(markupNode);
     elements.addRange(elementList);
-//    elements.addRange(markupNode);
-//    elements.addRange(textNode);
+    //    elements.addRange(markupNode);
+    //    elements.addRange(textNode);
 
     OntProperty annotationName = createLabeledProperty(model, TAG.annotationName);
     annotationName.addDomain(annotationNode);
@@ -129,10 +134,10 @@ public class OntologyTest {
     hasbranches.addDomain(branchesNode);
     hasbranches.addRange(branchList);
 
-//    OntProperty next = model.createOntProperty(namespace + "next");
-//    addLabel(next, "next");
-//    next.addDomain(textNode);
-//    next.addRange(textNode);
+    //    OntProperty next = model.createOntProperty(namespace + "next");
+    //    addLabel(next, "next");
+    //    next.addDomain(textNode);
+    //    next.addRange(textNode);
 
     System.out.println(DotFactory.fromModel(model));
     model.write(System.out, "TURTLE");
@@ -161,7 +166,8 @@ public class OntologyTest {
     return ontClass;
   }
 
-  private OntClass createAnnotationSubClass(final OntModel model, final OntClass annotationNode, final Resource resource) {
+  private OntClass createAnnotationSubClass(
+      final OntModel model, final OntClass annotationNode, final Resource resource) {
     OntClass subAnnotationClass = createLabeledClass(model, resource);
     subAnnotationClass.addSuperClass(annotationNode);
     return subAnnotationClass;
@@ -170,5 +176,4 @@ public class OntologyTest {
   private void addLabel(final OntResource resource, final String label) {
     resource.addLabel(label, "en");
   }
-
 }

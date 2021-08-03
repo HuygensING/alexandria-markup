@@ -4,14 +4,14 @@ package nl.knaw.huygens.alexandria.compare;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,18 +20,19 @@ package nl.knaw.huygens.alexandria.compare;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
-import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
-import nl.knaw.huygens.alexandria.storage.TAGDocument;
-import nl.knaw.huygens.alexandria.view.TAGView;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter;
+import nl.knaw.huygens.alexandria.AlexandriaBaseStoreTest;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.view.TAGView;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,19 +42,22 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
   @Disabled
   @Test
   public void testMarkupDiff0() {
-    String originText = "[TAGML|+M>\n" +
-        "[text|M>\n" +
-        "[l|M>\n" +
-        "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n" +
-        "<l]\n" +
-        "<text]<TAGML]\n";
-    String editedText = "[TAGML|+N>\n" +
-        "[text|N>\n" +
-        "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n" +
-        "<s]\n" +
-        "<text]<TAGML]\n";
+    String originText =
+        "[TAGML|+M>\n"
+            + "[text|M>\n"
+            + "[l|M>\n"
+            + "Une [del|M>jolie<del][add|M>belle<add] main de femme, élégante et fine,<l][l|M> malgré l'agrandissement du close-up.\n"
+            + "<l]\n"
+            + "<text]<TAGML]\n";
+    String editedText =
+        "[TAGML|+N>\n"
+            + "[text|N>\n"
+            + "[s|N>Une belle main de femme, élégante et fine.<s][s|N>Malgré l'agrandissement du close-up.\n"
+            + "<s]\n"
+            + "<text]<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
-    assertThat(markupInfoDiffs).containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
+    assertThat(markupInfoDiffs)
+        .containsExactly("[l|M] replaced by [s|N]", "[l|M] replaced by [s|N]");
   }
 
   @Test
@@ -78,7 +82,7 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
     String editedText = "[TAGML>A [b>simple<b] text<TAGML]\n";
     List<String> markupInfoDiffs = getMarkupDiffs(originText, editedText);
     assertThat(markupInfoDiffs).containsExactly("[a](2-2) replaced by [b](2-2)");
-//    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
+    //    assertThat(markupInfoDiffs).containsExactly("[a>simple<a] replaced by [b>simple<b]");
   }
 
   @Disabled
@@ -101,49 +105,54 @@ public class MarkupDiffTest extends AlexandriaBaseStoreTest {
 
   private List<String> getMarkupDiffs(final String originText, final String editedText) {
     visualizeDiff("A", originText, "B", editedText);
-    return runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView tagView = new TAGView(store).withMarkupToExclude(none);
-      TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
-      List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
-      assertThat(markupInfoLists).hasSize(2);
-      for (int i = 0; i < 2; i++) {
-        for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
-          LOG.info("{}: {}", i, mi);
-        }
-      }
-      List<String> diffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
-      LOG.info("{}", diffMarkupInfo);
-      List<String> mrDiffMarkupInfo = differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
-      LOG.info("{}", mrDiffMarkupInfo);
-      return diffMarkupInfo;
-    });
+    return runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(originText.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(editedText.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView tagView = new TAGView(store).withMarkupToExclude(none);
+          TAGComparison2 differ = new TAGComparison2(original, tagView, edited, store);
+          List<TAGComparison2.MarkupInfo>[] markupInfoLists = differ.getMarkupInfoLists();
+          assertThat(markupInfoLists).hasSize(2);
+          for (int i = 0; i < 2; i++) {
+            for (TAGComparison2.MarkupInfo mi : markupInfoLists[i]) {
+              LOG.info("{}: {}", i, mi);
+            }
+          }
+          List<String> diffMarkupInfo =
+              differ.diffMarkupInfo(markupInfoLists, TAGComparison2.HR_DIFFPRINTER);
+          LOG.info("{}", diffMarkupInfo);
+          List<String> mrDiffMarkupInfo =
+              differ.diffMarkupInfo(markupInfoLists, TAGComparison2.MR_DIFFPRINTER);
+          LOG.info("{}", mrDiffMarkupInfo);
+          return diffMarkupInfo;
+        });
   }
 
-  private void visualizeDiff(final String witness1, final String tagml1, final String witness2, final String tagml2) {
+  private void visualizeDiff(
+      final String witness1, final String tagml1, final String witness2, final String tagml2) {
     LOG.info("{}:\n{}", witness1, tagml1);
     LOG.info("{}:\n{}", witness2, tagml2);
-    runInStoreTransaction(store -> {
-      TAGMLImporter importer = new TAGMLImporter(store);
-      TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
-      TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
-      Set<String> none = Collections.EMPTY_SET;
-      TAGView allTags = new TAGView(store).withMarkupToExclude(none);
+    runInStoreTransaction(
+        store -> {
+          TAGMLImporter importer = new TAGMLImporter(store);
+          TAGDocument original = importer.importTAGML(tagml1.replace("\n", ""));
+          TAGDocument edited = importer.importTAGML(tagml2.replace("\n", ""));
+          Set<String> none = Collections.EMPTY_SET;
+          TAGView allTags = new TAGView(store).withMarkupToExclude(none);
 
-      DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
-//      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
-      new VariantGraphVisualizer(visualizer)
-          .visualizeVariation(witness1, original, witness2, edited, allTags);
-      String result = visualizer.getResult();
-      LOG.info("result=\n" +
-          "------8<---------------------------------------\n" +
-          "{}\n" +
-          "------8<---------------------------------------\n", result);
-    });
+          DiffVisualizer visualizer = new AsHTMLDiffVisualizer();
+          //      DiffVisualizer visualizer = new AsDOTDiffVisualizer();
+          new VariantGraphVisualizer(visualizer)
+              .visualizeVariation(witness1, original, witness2, edited, allTags);
+          String result = visualizer.getResult();
+          LOG.info(
+              "result=\n"
+                  + "------8<---------------------------------------\n"
+                  + "{}\n"
+                  + "------8<---------------------------------------\n",
+              result);
+        });
   }
-
 }
-

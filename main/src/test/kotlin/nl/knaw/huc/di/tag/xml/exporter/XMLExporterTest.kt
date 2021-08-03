@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.xml.exporter
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.nio.charset.Charset
-import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
 class XMLExporterTest : TAGBaseStoreTest() {
@@ -137,8 +136,9 @@ class XMLExporterTest : TAGBaseStoreTest() {
 
         @Test
         fun testTAGML2() {
-            val tagML = ("[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]"
-                    + "<line|a,b]")
+            val tagML =
+                ("[line|+a,+b>[a|a>The rain in [country>Spain<country] [b|b>falls<a|a] mainly on the plain.<b|b]"
+                        + "<line|a,b]")
             val expectedXML = """
             <?xml version="1.0" encoding="UTF-8"?>
             <xml xmlns:th="http://www.blackmesatech.com/2017/nss/trojan-horse" th:doc="a b">
@@ -172,7 +172,8 @@ class XMLExporterTest : TAGBaseStoreTest() {
     @Disabled("re-examine after the tagml header has been implemented")
     @Test
     fun testXMLExportWithViewAndDefaultLayer() {
-        val tagML = "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]"
+        val tagML =
+            "[tagml|+A,+B>[phr|A>Cookie Monster [r>really [phr|B>likes<phr|A] [em type=\"CAPS\">cookies<em]<phr|B]<r]<tagml]"
         val a: MutableSet<String> = HashSet()
         a.add("A")
         runInStore { store: TAGStore ->
@@ -486,11 +487,11 @@ class XMLExporterTest : TAGBaseStoreTest() {
         runInStore { store: TAGStore ->
             try {
                 assertXMLExportIsAsExpected(
-                        tagML,
-                        getShowAllMarkupView(store),
-                        leadingLayer,
-                        expectedXML,
-                        store
+                    tagML,
+                    getShowAllMarkupView(store),
+                    leadingLayer,
+                    expectedXML,
+                    store
                 )
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -499,14 +500,14 @@ class XMLExporterTest : TAGBaseStoreTest() {
     }
 
     private fun assertXMLExportIsAsExpected(tagML: String, expectedXML: String) =
-            assertXMLExportWithLeadingLayerIsAsExpected(tagML, TAGML.DEFAULT_LAYER, expectedXML)
+        assertXMLExportWithLeadingLayerIsAsExpected(tagML, TAGML.DEFAULT_LAYER, expectedXML)
 
     private fun assertXMLExportIsAsExpected(
-            tagML: String,
-            view: TAGView,
-            leadingLayer: String,
-            expectedXML: String,
-            store: TAGStore
+        tagML: String,
+        view: TAGView,
+        leadingLayer: String,
+        expectedXML: String,
+        store: TAGStore
     ) {
         val document = store.runInTransaction<TAGDocument> { parseTAGML(tagML, store) }
         assertThat(document).isNotNull

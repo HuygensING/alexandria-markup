@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.tagml.importer
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,9 @@ class Position {
 
         fun endOf(ctx: ParserRuleContext): Position {
             return Position(
-                    ctx.stop.line,
-                    ctx.stop.charPositionInLine + ctx.stop.stopIndex - ctx.stop.startIndex + 2)
+                ctx.stop.line,
+                ctx.stop.charPositionInLine + ctx.stop.stopIndex - ctx.stop.startIndex + 2
+            )
         }
     }
 }

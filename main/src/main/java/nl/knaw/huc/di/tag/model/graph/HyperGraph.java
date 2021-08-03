@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,19 +27,25 @@ package nl.knaw.huc.di.tag.model.graph;
  * @author: Ronald Haentjens Dekker
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-
-import java.util.*;
-import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 
 @Persistent
 public class HyperGraph<N, H> {
   private final GraphType graphType;
-  @NotPersistent
-  private final Function<N, Collection<H>> mappingFunction;
+  @NotPersistent private final Function<N, Collection<H>> mappingFunction;
   private final Set<N> nodes;
   private final Map<N, Collection<H>> incomingEdges;
   private final Map<N, Collection<H>> outgoingEdges;
@@ -145,7 +151,8 @@ public class HyperGraph<N, H> {
   }
 
   public enum GraphType {
-    ORDERED, UNORDERED
+    ORDERED,
+    UNORDERED
   }
 
   protected boolean nodeExists(N node) {

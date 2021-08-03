@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.model.graph;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,35 @@ package nl.knaw.huc.di.tag.model.graph;
  * #L%
  */
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-import nl.knaw.huc.di.tag.model.graph.edges.*;
-import nl.knaw.huc.di.tag.tagml.TAGML;
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.stream.Stream;
+import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.ContinuationEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.Edge;
+import nl.knaw.huc.di.tag.model.graph.edges.EdgeType;
+import nl.knaw.huc.di.tag.model.graph.edges.Edges;
+import nl.knaw.huc.di.tag.model.graph.edges.LayerEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
+import nl.knaw.huc.di.tag.tagml.TAGML;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
 
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
@@ -43,8 +61,7 @@ import static nl.knaw.huygens.alexandria.StreamUtil.stream;
 
 @Persistent
 public class TextGraph extends HyperGraph<Long, Edge> {
-  @NotPersistent
-  Logger LOG = LoggerFactory.getLogger(getClass());
+  @NotPersistent Logger LOG = LoggerFactory.getLogger(getClass());
 
   String id = "";
   Long documentNode;
@@ -58,33 +75,38 @@ public class TextGraph extends HyperGraph<Long, Edge> {
 
   public TextGraph setLayerRootMarkup(final String layerName, final Long markupNodeId) {
     layerRootMap.put(layerName, markupNodeId);
-//    addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, markupNodeId);
+    //    addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, markupNodeId);
     return this;
   }
 
-  public TextGraph addChildMarkup(final Long parentMarkupId, final String layerName, final Long childMarkupId) {
+  public TextGraph addChildMarkup(
+      final Long parentMarkupId, final String layerName, final Long childMarkupId) {
     final LayerEdge edge = Edges.parentMarkupToChildMarkup(layerName);
     addDirectedHyperEdge(edge, edge.label(), parentMarkupId, childMarkupId);
     return this;
   }
 
-  public TextGraph linkMarkupToTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
-//    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
-//    if (existingEdges.isEmpty()) {
+  public TextGraph linkMarkupToTextNodeForLayer(
+      final Long markupId, final Long textNodeId, final String layerName) {
+    //    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId,
+    // layerName);
+    //    if (existingEdges.isEmpty()) {
     final LayerEdge edge = Edges.markupToText(layerName);
     addDirectedHyperEdge(edge, edge.label(), markupId, textNodeId);
 
-//    } else if (existingEdges.size() > 1) {
-//      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
+    //    } else if (existingEdges.size() > 1) {
+    //      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for
+    // this layer!");
 
-//    } else {
-//      final LayerEdge existingEdge = existingEdges.get(0);
-//      addTargetsToHyperEdge(existingEdge, textNodeId);
-//    }
+    //    } else {
+    //      final LayerEdge existingEdge = existingEdges.get(0);
+    //      addTargetsToHyperEdge(existingEdge, textNodeId);
+    //    }
     return this;
   }
 
-  private List<LayerEdge> existingMarkupToTextNodeEdgesForMarkupAndLayer(final Long markupId, final String layerName) {
+  private List<LayerEdge> existingMarkupToTextNodeEdgesForMarkupAndLayer(
+      final Long markupId, final String layerName) {
     return getOutgoingEdges(markupId).stream()
         .filter(LayerEdge.class::isInstance)
         .map(LayerEdge.class::cast)
@@ -93,13 +115,16 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         .collect(toList());
   }
 
-  public void unlinkMarkupFromTextNodeForLayer(final Long markupId, final Long textNodeId, final String layerName) {
-    List<LayerEdge> existingEdges = existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
+  public void unlinkMarkupFromTextNodeForLayer(
+      final Long markupId, final Long textNodeId, final String layerName) {
+    List<LayerEdge> existingEdges =
+        existingMarkupToTextNodeEdgesForMarkupAndLayer(markupId, layerName);
     if (existingEdges.isEmpty()) {
       throw new RuntimeException("No edge found to unlink!");
 
     } else if (existingEdges.size() > 1) {
-      throw new RuntimeException("There should be only one outgoing markupToText hyperedge for this layer!");
+      throw new RuntimeException(
+          "There should be only one outgoing markupToText hyperedge for this layer!");
 
     } else {
       final LayerEdge existingEdge = existingEdges.get(0);
@@ -130,75 +155,78 @@ public class TextGraph extends HyperGraph<Long, Edge> {
         .anyMatch(e -> e.hasLayer(layerName));
   }
 
-  public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId, final String layerName) {
-    return stream(new Iterator<Long>() {
-      Optional<Long> next = getParentMarkup(textNodeId);
+  public Stream<Long> getMarkupIdStreamForTextNodeId(
+      final Long textNodeId, final String layerName) {
+    return stream(
+        new Iterator<Long>() {
+          Optional<Long> next = getParentMarkup(textNodeId);
 
-      private Optional<Long> getParentMarkup(Long nodeId) {
-        return getIncomingEdges(nodeId).stream()
-            .filter(LayerEdge.class::isInstance)
-            .map(LayerEdge.class::cast)
-            .filter(e -> e.hasLayer(layerName))
-            .map(e -> getSource(e))
-            .findFirst();
-      }
+          private Optional<Long> getParentMarkup(Long nodeId) {
+            return getIncomingEdges(nodeId).stream()
+                .filter(LayerEdge.class::isInstance)
+                .map(LayerEdge.class::cast)
+                .filter(e -> e.hasLayer(layerName))
+                .map(e -> getSource(e))
+                .findFirst();
+          }
 
-      @Override
-      public boolean hasNext() {
-        return next.isPresent();
-      }
+          @Override
+          public boolean hasNext() {
+            return next.isPresent();
+          }
 
-      @Override
-      public Long next() {
-        Long nodeId = next.get();
-        next = getParentMarkup(nodeId);
-        return nodeId;
-      }
-    });
+          @Override
+          public Long next() {
+            Long nodeId = next.get();
+            next = getParentMarkup(nodeId);
+            return nodeId;
+          }
+        });
   }
 
   public Stream<Long> getMarkupIdStreamForTextNodeId0(final Long textNodeId) {
-    return stream(new Iterator<Long>() {
-      Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
-      Optional<Long> next = calcNext();
-      Set<Long> markupHandled = initializeMarkupHandled();
+    return stream(
+        new Iterator<Long>() {
+          Deque<Long> markupToProcess = new ArrayDeque<>(getParentMarkupList(textNodeId));
+          Optional<Long> next = calcNext();
+          Set<Long> markupHandled = initializeMarkupHandled();
 
-      private Set<Long> initializeMarkupHandled() {
-        HashSet<Long> set = new HashSet<>();
-        set.add(documentNode);
-        return set;
-      }
+          private Set<Long> initializeMarkupHandled() {
+            HashSet<Long> set = new HashSet<>();
+            set.add(documentNode);
+            return set;
+          }
 
-      private Optional<Long> calcNext() {
-        return markupToProcess.isEmpty()
-            ? Optional.empty()
-            : Optional.of(markupToProcess.pop());
-      }
+          private Optional<Long> calcNext() {
+            return markupToProcess.isEmpty()
+                ? Optional.empty()
+                : Optional.of(markupToProcess.pop());
+          }
 
-      private List<Long> getParentMarkupList(Long nodeId) {
-        return getIncomingEdges(nodeId).stream()
-            .filter(LayerEdge.class::isInstance)
-            .map(LayerEdge.class::cast)
-            .map(e -> getSource(e))
-            .collect(toList());
-      }
+          private List<Long> getParentMarkupList(Long nodeId) {
+            return getIncomingEdges(nodeId).stream()
+                .filter(LayerEdge.class::isInstance)
+                .map(LayerEdge.class::cast)
+                .map(e -> getSource(e))
+                .collect(toList());
+          }
 
-      @Override
-      public boolean hasNext() {
-        return next.isPresent();
-      }
+          @Override
+          public boolean hasNext() {
+            return next.isPresent();
+          }
 
-      @Override
-      public Long next() {
-        Long nodeId = next.get();
-        markupHandled.add(nodeId);
-        List<Long> parentMarkupList = getParentMarkupList(nodeId);
-        parentMarkupList.removeAll(markupHandled);
-        markupToProcess.addAll(parentMarkupList);
-        next = calcNext();
-        return nodeId;
-      }
-    });
+          @Override
+          public Long next() {
+            Long nodeId = next.get();
+            markupHandled.add(nodeId);
+            List<Long> parentMarkupList = getParentMarkupList(nodeId);
+            parentMarkupList.removeAll(markupHandled);
+            markupToProcess.addAll(parentMarkupList);
+            next = calcNext();
+            return nodeId;
+          }
+        });
   }
 
   public Stream<Long> getMarkupIdStreamForTextNodeId(final Long textNodeId) {
@@ -227,7 +255,7 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     nodesHandled.clear();
     while (!nodesToProcess.isEmpty()) {
       Long nodeId = nodesToProcess.pop();
-//      LOG.info("nodeId={}", nodeId);
+      //      LOG.info("nodeId={}", nodeId);
       nodesHandled.add(nodeId);
       int nextDepth = nodeDepth.get(nodeId) + 1;
       getOutgoingEdges(nodeId).stream()
@@ -235,13 +263,14 @@ public class TextGraph extends HyperGraph<Long, Edge> {
           .map(LayerEdge.class::cast)
           .map(this::getTargets)
           .flatMap(Collection::stream)
-//          .peek(System.out::println)
+          //          .peek(System.out::println)
           .filter(id -> !nodesHandled.contains(id))
           .filter(markupIds::contains)
-          .forEach(n -> {
-            nodesToProcess.add(n);
-            nodeDepth.put(n, nextDepth);
-          });
+          .forEach(
+              n -> {
+                nodesToProcess.add(n);
+                nodeDepth.put(n, nextDepth);
+              });
     }
 
     final Comparator<Long> maxDistanceComparator = comparing(nodeDepth::get);
@@ -249,16 +278,19 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return markupIds.stream().sorted(comparator);
   }
 
-  public Stream<Long> getMarkupIdStreamForTextNodeIdOrderedByDistanceFromTextNode(final Long textNodeId) {
+  public Stream<Long> getMarkupIdStreamForTextNodeIdOrderedByDistanceFromTextNode(
+      final Long textNodeId) {
     // TODO: This traversal revisits markup nodes because the maxDistance might have changed.
-    //       The maxDistance is needed for the ordering, to get the markupIds back ordered by the maximum distance from the textnode, closest first
+    //       The maxDistance is needed for the ordering, to get the markupIds back ordered by the
+    // maximum distance from the textnode, closest first
     Set<Long> markupIds = new HashSet<>();
     Map<Long, Integer> maxDistance = new HashMap<>();
-    List<Long> parentMarkupIds = getIncomingEdges(textNodeId).stream()
-        .filter(LayerEdge.class::isInstance)
-        .map(LayerEdge.class::cast)
-        .map(this::getSource)
-        .collect(toList());
+    List<Long> parentMarkupIds =
+        getIncomingEdges(textNodeId).stream()
+            .filter(LayerEdge.class::isInstance)
+            .map(LayerEdge.class::cast)
+            .map(this::getSource)
+            .collect(toList());
     parentMarkupIds.remove(documentNode);
     parentMarkupIds.forEach(m -> maxDistance.put(m, 1));
     Set<Long> markupHandled = new HashSet<>();
@@ -268,19 +300,21 @@ public class TextGraph extends HyperGraph<Long, Edge> {
       Long nodeId = markupToProcess.pop();
       markupIds.add(nodeId);
       markupHandled.add(nodeId);
-      List<Long> parentMarkupList = getIncomingEdges(nodeId).stream()
-          .filter(LayerEdge.class::isInstance)
-          .map(LayerEdge.class::cast)
-          .map(this::getSource)
-          .collect(toList());
+      List<Long> parentMarkupList =
+          getIncomingEdges(nodeId).stream()
+              .filter(LayerEdge.class::isInstance)
+              .map(LayerEdge.class::cast)
+              .map(this::getSource)
+              .collect(toList());
       parentMarkupList.remove(documentNode);
       int currentDistance = maxDistance.get(nodeId);
       int newMaxParentDistance = currentDistance + 1;
-      parentMarkupList.forEach(m -> {
-        if (!maxDistance.containsKey(m) || maxDistance.get(m) < newMaxParentDistance) {
-          maxDistance.put(m, newMaxParentDistance);
-        }
-      });
+      parentMarkupList.forEach(
+          m -> {
+            if (!maxDistance.containsKey(m) || maxDistance.get(m) < newMaxParentDistance) {
+              maxDistance.put(m, newMaxParentDistance);
+            }
+          });
       markupToProcess.addAll(parentMarkupList);
     }
     final Comparator<Long> maxDistanceComparator = comparing(maxDistance::get);
@@ -288,13 +322,15 @@ public class TextGraph extends HyperGraph<Long, Edge> {
     return markupIds.stream().sorted(comparator);
   }
 
-  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(final Long markupId, final String layer) {
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayer(
+      final Long markupId, final String layer) {
     Set<String> layers = new HashSet<>();
     layers.add(layer);
     return getTextNodeIdStreamForMarkupIdInLayers(markupId, layers);
   }
 
-  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(final Long markupId, final Set<String> layers) {
+  public Stream<Long> getTextNodeIdStreamForMarkupIdInLayers(
+      final Long markupId, final Set<String> layers) {
     return stream(new TextNodeIdIterator(this, markupId, layers));
   }
 
@@ -318,7 +354,11 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   public void linkParentlessLayerRootsToDocument() {
     layerRootMap.values().stream()
         .distinct()
-        .filter(r -> getIncomingEdges(r).stream().noneMatch(e -> e instanceof LayerEdge && ((LayerEdge) e).hasType(EdgeType.hasMarkup)))
+        .filter(
+            r ->
+                getIncomingEdges(r).stream()
+                    .noneMatch(
+                        e -> e instanceof LayerEdge && ((LayerEdge) e).hasType(EdgeType.hasMarkup)))
         .forEach(r -> addChildMarkup(documentNode, TAGML.DEFAULT_LAYER, r));
   }
 
@@ -343,15 +383,19 @@ public class TextGraph extends HyperGraph<Long, Edge> {
   }
 
   public void addAnnotationEdge(final Long sourceNode, final AnnotationInfo targetAnnotation) {
-    AnnotationEdge edge = new AnnotationEdge(targetAnnotation.getType(), targetAnnotation.getName(), targetAnnotation.getId().orElse(null));
+    AnnotationEdge edge =
+        new AnnotationEdge(
+            targetAnnotation.getType(),
+            targetAnnotation.getName(),
+            targetAnnotation.getId().orElse(null));
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
 
   public void addListItem(Long sourceNode, AnnotationInfo targetAnnotation) {
-    ListItemEdge edge = new ListItemEdge(targetAnnotation.getType(), targetAnnotation.getId().orElse(null));
+    ListItemEdge edge =
+        new ListItemEdge(targetAnnotation.getType(), targetAnnotation.getId().orElse(null));
     Long annotationValueNode = targetAnnotation.getNodeId();
     addDirectedHyperEdge(edge, edge.getLabel(), sourceNode, annotationValueNode);
   }
-
 }

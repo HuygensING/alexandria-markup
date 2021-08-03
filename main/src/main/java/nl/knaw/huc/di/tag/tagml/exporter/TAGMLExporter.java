@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,23 +20,52 @@ package nl.knaw.huc.di.tag.tagml.exporter;
  * #L%
  */
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nl.knaw.huc.di.tag.TAGExporter;
 import nl.knaw.huc.di.tag.tagml.TAGML;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationFactory;
 import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.storage.*;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
+import nl.knaw.huygens.alexandria.storage.TAGDocument;
+import nl.knaw.huygens.alexandria.storage.TAGMarkup;
+import nl.knaw.huygens.alexandria.storage.TAGStore;
+import nl.knaw.huygens.alexandria.storage.TAGTextNode;
 import nl.knaw.huygens.alexandria.storage.dto.TAGTextNodeDTO;
 import nl.knaw.huygens.alexandria.view.TAGView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huc.di.tag.tagml.TAGML.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_END;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCHES_START;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_END;
+import static nl.knaw.huc.di.tag.tagml.TAGML.BRANCH_START;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_ENDCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CLOSE_TAG_STARTCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.CONVERGENCE;
+import static nl.knaw.huc.di.tag.tagml.TAGML.DIVIDER;
+import static nl.knaw.huc.di.tag.tagml.TAGML.MILESTONE_TAG_ENDCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_ENDCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.OPEN_TAG_STARTCHAR;
+import static nl.knaw.huc.di.tag.tagml.TAGML.RESUME_PREFIX;
+import static nl.knaw.huc.di.tag.tagml.TAGML.SUSPEND_PREFIX;
 
 // TODO: only output layer info on end-tag when needed
 // TODO: only show layer info as defined in view
@@ -228,9 +257,9 @@ public class TAGMLExporter extends TAGExporter {
     return markup.isAnonymous()
         ? new StringBuilder()
         : new StringBuilder(CLOSE_TAG_STARTCHAR)
-        .append(suspend)
-        .append(markup.getExtendedTag())
-        .append(CLOSE_TAG_ENDCHAR);
+            .append(suspend)
+            .append(markup.getExtendedTag())
+            .append(CLOSE_TAG_ENDCHAR);
   }
 
   private StringBuilder toOpenTag(TAGMarkup markup, Set<String> openLayers) {

@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,13 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #L%
  */
 
-import nl.knaw.huc.di.tag.model.graph.TextGraph;
-import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
-import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
-import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.*;
-import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
-import nl.knaw.huygens.alexandria.ErrorListener;
-import nl.knaw.huygens.alexandria.storage.AnnotationType;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -34,7 +34,17 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import nl.knaw.huc.di.tag.model.graph.TextGraph;
+import nl.knaw.huc.di.tag.model.graph.edges.AnnotationEdge;
+import nl.knaw.huc.di.tag.model.graph.edges.ListItemEdge;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.AnnotationValueContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.BasicAnnotationContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.IdentifyingAnnotationContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.ObjectValueContext;
+import nl.knaw.huc.di.tag.tagml.grammar.TAGMLParser.RefAnnotationContext;
+import nl.knaw.huc.di.tag.tagml.importer.AnnotationInfo;
+import nl.knaw.huygens.alexandria.ErrorListener;
+import nl.knaw.huygens.alexandria.storage.AnnotationType;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -47,7 +57,8 @@ public class AnnotationFactory2 {
   private TAGKnowledgeModel model;
   private ErrorListener errorListener;
 
-  public AnnotationFactory2(TAGKnowledgeModel model, TextGraph textGraph, ErrorListener errorListener) {
+  public AnnotationFactory2(
+      TAGKnowledgeModel model, TextGraph textGraph, ErrorListener errorListener) {
     this.model = model;
     this.errorListener = errorListener;
   }
@@ -69,7 +80,8 @@ public class AnnotationFactory2 {
     return annotationInfo;
   }
 
-  private AnnotationInfo makeAnnotation(String aName, AnnotationValueContext annotationValueContext, Object value) {
+  private AnnotationInfo makeAnnotation(
+      String aName, AnnotationValueContext annotationValueContext, Object value) {
     AnnotationInfo annotationInfo = null;
     if (value instanceof String) {
       annotationInfo = makeStringAnnotation(aName, (String) value);
@@ -84,7 +96,8 @@ public class AnnotationFactory2 {
       annotationInfo = makeListAnnotation(aName, annotationValueContext, (List<Object>) value);
 
     } else if (value instanceof HashMap) {
-      annotationInfo = makeMapAnnotation(aName, annotationValueContext, (HashMap<String, Object>) value);
+      annotationInfo =
+          makeMapAnnotation(aName, annotationValueContext, (HashMap<String, Object>) value);
 
     } else {
       annotationInfo = makeOtherAnnotation(aName, annotationValueContext);
@@ -112,12 +125,15 @@ public class AnnotationFactory2 {
     return new AnnotationInfo(id, AnnotationType.Reference, aName);
   }
 
-  private AnnotationInfo makeListAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> value) {
+  private AnnotationInfo makeListAnnotation(
+      final String aName,
+      final AnnotationValueContext annotationValueContext,
+      final List<Object> value) {
     final AnnotationInfo annotationInfo;
     verifyListElementsAreSameType(aName, annotationValueContext, value);
     verifySeparatorsAreCommas(aName, annotationValueContext);
     ListAnnotationValueResource resource = model.createListAnnotationValue();
-//    annotationInfo = new AnnotationInfo(resource, AnnotationType.List, aName);
+    //    annotationInfo = new AnnotationInfo(resource, AnnotationType.List, aName);
     ParseTree valueTree = annotationValueContext.children.get(0);
     int childCount = valueTree.getChildCount();
     for (int i = 1; i < childCount; i += 2) {
@@ -128,63 +144,72 @@ public class AnnotationFactory2 {
       AnnotationInfo listElementInfo = makeAnnotation("", subValueContext, subValue);
       resource.addListItem(listElementInfo);
     }
-//    return annotationInfo;
+    //    return annotationInfo;
     return null;
   }
 
-  private AnnotationInfo makeMapAnnotation(final String aName, final AnnotationValueContext annotationValueContext, final HashMap<String, Object> value) {
+  private AnnotationInfo makeMapAnnotation(
+      final String aName,
+      final AnnotationValueContext annotationValueContext,
+      final HashMap<String, Object> value) {
     //    Long id = store.createMapAnnotationValue();
-//    annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
-//    HashMap<String, Object> map = value;
-//    ParseTree valueTree = annotationValueContext.children.get(0);
-//    int childCount = valueTree.getChildCount(); // children: '{' annotation+ '}'
-//    for (int i = 1; i < childCount - 1; i++) {
-//      ParseTree hashElement = valueTree.getChild(i);
-//      String subName = hashElement.getChild(0).getText();
-//      ParseTree subValueParseTree = hashElement.getChild(2);
-//      if (subValueParseTree instanceof AnnotationValueContext) {
-//        final AnnotationValueContext subValueContext = (AnnotationValueContext) subValueParseTree;
-//        final Object subValue = map.get(subName);
-//        final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
-//        textGraph.addAnnotationEdge(id, aInfo);
+    //    annotationInfo = new AnnotationInfo(id, AnnotationType.Map, aName);
+    //    HashMap<String, Object> map = value;
+    //    ParseTree valueTree = annotationValueContext.children.get(0);
+    //    int childCount = valueTree.getChildCount(); // children: '{' annotation+ '}'
+    //    for (int i = 1; i < childCount - 1; i++) {
+    //      ParseTree hashElement = valueTree.getChild(i);
+    //      String subName = hashElement.getChild(0).getText();
+    //      ParseTree subValueParseTree = hashElement.getChild(2);
+    //      if (subValueParseTree instanceof AnnotationValueContext) {
+    //        final AnnotationValueContext subValueContext = (AnnotationValueContext)
+    // subValueParseTree;
+    //        final Object subValue = map.get(subName);
+    //        final AnnotationInfo aInfo = makeAnnotation(subName, subValueContext, subValue);
+    //        textGraph.addAnnotationEdge(id, aInfo);
 
-//      } else if (subValueParseTree instanceof IdValueContext) {
-//        IdValueContext idValueContext = (IdValueContext) subValueParseTree;
-//        String idValue = idValueContext.getText();
-//        LOG.warn("TODO: handle idValue {}", idValue);
-//        // TODO: handle idValue
+    //      } else if (subValueParseTree instanceof IdValueContext) {
+    //        IdValueContext idValueContext = (IdValueContext) subValueParseTree;
+    //        String idValue = idValueContext.getText();
+    //        LOG.warn("TODO: handle idValue {}", idValue);
+    //        // TODO: handle idValue
 
-//      } else if (subValueParseTree instanceof RefValueContext) {
-//        RefValueContext refValueContext = (RefValueContext) subValueParseTree;
-//        String refValue = refValueContext.getText();
-//        final AnnotationInfo aInfo = makeReferenceAnnotation(subName, refValue);
-//        textGraph.addAnnotationEdge(id, aInfo);
+    //      } else if (subValueParseTree instanceof RefValueContext) {
+    //        RefValueContext refValueContext = (RefValueContext) subValueParseTree;
+    //        String refValue = refValueContext.getText();
+    //        final AnnotationInfo aInfo = makeReferenceAnnotation(subName, refValue);
+    //        textGraph.addAnnotationEdge(id, aInfo);
 
-//      } else {
-//        throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
-//      }
-//    }
+    //      } else {
+    //        throw new RuntimeException("TODO: handle " + subValueParseTree.getClass());
+    //      }
+    //    }
     return null;
   }
 
-  private AnnotationInfo makeOtherAnnotation(final String aName, final AnnotationValueContext annotationValueContext) {
+  private AnnotationInfo makeOtherAnnotation(
+      final String aName, final AnnotationValueContext annotationValueContext) {
     //    String placeholder = annotationValueContext.getText();
-//    Long id = store.createStringAnnotationValue(placeholder);
-//    annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
+    //    Long id = store.createStringAnnotationValue(placeholder);
+    //    annotationInfo = new AnnotationInfo(id, AnnotationType.String, aName);
     return null;
   }
 
-  private void verifyListElementsAreSameType(final String aName, final AnnotationValueContext annotationValueContext, final List<Object> list) {
-    Set<String> valueTypes = list.stream()
-        .map(v -> ((Object) v).getClass().getName())
-        .collect(toSet());
+  private void verifyListElementsAreSameType(
+      final String aName,
+      final AnnotationValueContext annotationValueContext,
+      final List<Object> list) {
+    Set<String> valueTypes =
+        list.stream().map(v -> ((Object) v).getClass().getName()).collect(toSet());
     if (valueTypes.size() > 1) {
-      errorListener.addError("%s All elements of ListAnnotation %s should be of the same type.",
+      errorListener.addError(
+          "%s All elements of ListAnnotation %s should be of the same type.",
           errorPrefix(annotationValueContext), aName);
     }
   }
 
-  private void verifySeparatorsAreCommas(final String aName, final AnnotationValueContext annotationValueContext) {
+  private void verifySeparatorsAreCommas(
+      final String aName, final AnnotationValueContext annotationValueContext) {
     ParseTree valueTree = annotationValueContext.children.get(0);
     int childCount = valueTree.getChildCount(); // children: '[' value (separator value)* ']'
     Set<String> separators = new HashSet<>();
@@ -192,22 +217,24 @@ public class AnnotationFactory2 {
       separators.add(valueTree.getChild(i).getText().trim());
     }
 
-    boolean allSeparatorsAreCommas = separators.isEmpty()
-        || (separators.size() == 1 && separators.contains(","));
+    boolean allSeparatorsAreCommas =
+        separators.isEmpty() || (separators.size() == 1 && separators.contains(","));
     if (!allSeparatorsAreCommas) {
-      errorListener.addError("%s The elements of ListAnnotation %s should be separated by commas.",
+      errorListener.addError(
+          "%s The elements of ListAnnotation %s should be separated by commas.",
           errorPrefix(annotationValueContext), aName);
     }
   }
 
   private Object annotationValue(final AnnotationValueContext annotationValueContext) {
     if (annotationValueContext.AV_StringValue() != null) {
-      return annotationValueContext.AV_StringValue().getText()
+      return annotationValueContext
+          .AV_StringValue()
+          .getText()
           .replaceFirst("^.", "")
           .replaceFirst(".$", "")
           .replace("\\\"", "\"")
-          .replace("\\'", "'")
-          ;
+          .replace("\\'", "'");
 
     } else if (annotationValueContext.booleanValue() != null) {
       return Boolean.valueOf(annotationValueContext.booleanValue().getText());
@@ -216,8 +243,7 @@ public class AnnotationFactory2 {
       return Double.valueOf(annotationValueContext.AV_NumberValue().getText());
 
     } else if (annotationValueContext.listValue() != null) {
-      return annotationValueContext.listValue()
-          .annotationValue().stream()
+      return annotationValueContext.listValue().annotationValue().stream()
           .map(this::annotationValue)
           .collect(toList());
 
@@ -227,7 +253,8 @@ public class AnnotationFactory2 {
     } else if (annotationValueContext.richTextValue() != null) {
       return annotationValueContext.richTextValue().getText();
     }
-    errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+    errorListener.addBreakingError(
+        "%s Cannot determine the type of this annotation: %s",
         errorPrefix(annotationValueContext), annotationValueContext.getText());
     return null;
   }
@@ -237,7 +264,7 @@ public class AnnotationFactory2 {
     objectValueContext.children.stream()
         .filter(c -> !(c instanceof TerminalNode))
         .map(this::parseAttribute)
-//        .peek(System.out::println)
+        //        .peek(System.out::println)
         .forEach(kv -> map.put(kv.key, kv.value));
     return map;
   }
@@ -251,8 +278,9 @@ public class AnnotationFactory2 {
       return new KeyValue(aName, value);
 
     } else if (parseTree instanceof IdentifyingAnnotationContext) {
-      //TODO: deal with this identifier
-      IdentifyingAnnotationContext identifyingAnnotationContext = (IdentifyingAnnotationContext) parseTree;
+      // TODO: deal with this identifier
+      IdentifyingAnnotationContext identifyingAnnotationContext =
+          (IdentifyingAnnotationContext) parseTree;
       String value = identifyingAnnotationContext.idValue().getText();
       return new KeyValue(":id", value);
 
@@ -264,8 +292,8 @@ public class AnnotationFactory2 {
 
     } else {
       throw new RuntimeException("unhandled type " + parseTree.getClass().getName());
-//      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
-//          errorPrefix(parseTree.), parseTree.getText());
+      //      errorListener.addBreakingError("%s Cannot determine the type of this annotation: %s",
+      //          errorPrefix(parseTree.), parseTree.getText());
 
     }
   }
@@ -276,61 +304,64 @@ public class AnnotationFactory2 {
   }
 
   public String getStringValue(final AnnotationInfo annotationInfo) {
-//    StringAnnotationValue stringAnnotationValue = store.getStringAnnotationValue(annotationInfo.getNodeId());
-//    return stringAnnotationValue.getValue();
+    //    StringAnnotationValue stringAnnotationValue =
+    // store.getStringAnnotationValue(annotationInfo.getNodeId());
+    //    return stringAnnotationValue.getValue();
     return null;
   }
 
   public Double getNumberValue(final AnnotationInfo annotationInfo) {
-//    NumberAnnotationValue numberAnnotationValue = store.getNumberAnnotationValue(annotationInfo.getNodeId());
-//    return numberAnnotationValue.getValue();
+    //    NumberAnnotationValue numberAnnotationValue =
+    // store.getNumberAnnotationValue(annotationInfo.getNodeId());
+    //    return numberAnnotationValue.getValue();
     return null;
   }
 
   public Boolean getBooleanValue(final AnnotationInfo annotationInfo) {
-//    BooleanAnnotationValue booleanAnnotationValue = store.getBooleanAnnotationValue(annotationInfo.getNodeId());
-//    return booleanAnnotationValue.getValue();
+    //    BooleanAnnotationValue booleanAnnotationValue =
+    // store.getBooleanAnnotationValue(annotationInfo.getNodeId());
+    //    return booleanAnnotationValue.getValue();
     return null;
   }
 
   public List<AnnotationInfo> getListValue(AnnotationInfo annotationInfo) {
-//    Long nodeId = annotationInfo.getNodeId();
-//    return textGraph.getOutgoingEdges(nodeId).stream()
-//        .filter(ListItemEdge.class::isInstance)
-//        .map(ListItemEdge.class::cast)
-//        .map(this::toAnnotationInfo)
-//        .collect(toList());
+    //    Long nodeId = annotationInfo.getNodeId();
+    //    return textGraph.getOutgoingEdges(nodeId).stream()
+    //        .filter(ListItemEdge.class::isInstance)
+    //        .map(ListItemEdge.class::cast)
+    //        .map(this::toAnnotationInfo)
+    //        .collect(toList());
     return null;
   }
 
   public List<AnnotationInfo> getMapValue(final AnnotationInfo annotationInfo) {
-//    Long nodeId = annotationInfo.getNodeId();
-//    return textGraph.getOutgoingEdges(nodeId).stream()
-//        .filter(AnnotationEdge.class::isInstance)
-//        .map(AnnotationEdge.class::cast)
-//        .map(this::toAnnotationInfo)
-//        .collect(toList());
+    //    Long nodeId = annotationInfo.getNodeId();
+    //    return textGraph.getOutgoingEdges(nodeId).stream()
+    //        .filter(AnnotationEdge.class::isInstance)
+    //        .map(AnnotationEdge.class::cast)
+    //        .map(this::toAnnotationInfo)
+    //        .collect(toList());
     return null;
   }
 
   public String getReferenceValue(final AnnotationInfo annotationInfo) {
-//    Long nodeId = annotationInfo.getNodeId();
-//    return store.getReferenceValue(nodeId).getValue();
+    //    Long nodeId = annotationInfo.getNodeId();
+    //    return store.getReferenceValue(nodeId).getValue();
     return null;
   }
 
   private AnnotationInfo toAnnotationInfo(ListItemEdge listItemEdge) {
-//    Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
-//    AnnotationType type = listItemEdge.getAnnotationType();
-//    return new AnnotationInfo(nodeId, type, "");
+    //    Long nodeId = textGraph.getTargets(listItemEdge).iterator().next();
+    //    AnnotationType type = listItemEdge.getAnnotationType();
+    //    return new AnnotationInfo(nodeId, type, "");
     return null;
   }
 
   private AnnotationInfo toAnnotationInfo(AnnotationEdge annotationEdge) {
-//    Long nodeId = textGraph.getTargets(annotationEdge).iterator().next();
-//    AnnotationType type = annotationEdge.getAnnotationType();
-//    String name = annotationEdge.getField();
-//    return new AnnotationInfo(nodeId, type, name);
+    //    Long nodeId = textGraph.getTargets(annotationEdge).iterator().next();
+    //    AnnotationType type = annotationEdge.getAnnotationType();
+    //    String name = annotationEdge.getField();
+    //    return new AnnotationInfo(nodeId, type, name);
     return null;
   }
 

@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.query
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package nl.knaw.huygens.alexandria.query
  * #L%
  */
 
-import java.util.*
 import java.util.stream.Collectors
 
 class TAGQLResult {
@@ -55,8 +54,8 @@ class TAGQLResult {
         return if (results.size == 1) {
             results[0].getValues()
         } else results.stream()
-                .map { obj: TAGQLResult -> obj.getValues() }
-                .collect(Collectors.toList())
+            .map { obj: TAGQLResult -> obj.getValues() }
+            .collect(Collectors.toList())
     }
 
     fun isOk(): Boolean {

@@ -4,14 +4,14 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,18 @@ package nl.knaw.huc.di.tag.tagml.importer2;
  * limitations under the License.
  * #L%
  */
+
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.AnonId;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFVisitor;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 
 public class TextResource implements Resource {
 
@@ -172,7 +181,8 @@ public class TextResource implements Resource {
   }
 
   @Override
-  public Resource addProperty(final Property p, final String lexicalForm, final RDFDatatype datatype) {
+  public Resource addProperty(
+      final Property p, final String lexicalForm, final RDFDatatype datatype) {
     return delegate.addProperty(p, lexicalForm, datatype);
   }
 
@@ -315,5 +325,4 @@ public class TextResource implements Resource {
   public Node asNode() {
     return delegate.asNode();
   }
-
 }

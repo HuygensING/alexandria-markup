@@ -4,7 +4,7 @@ package nl.knaw.huc.di.tag.schema
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,33 +38,34 @@ object TAGMLSchemaFactory {
         val result = TAGMLSchemaParseResult()
         try {
             mapper
-                    .readTree(schemaYAML)
-                    .fields()
-                    .forEachRemaining { entry: Map.Entry<String, JsonNode> ->
-                        var layerName = entry.key
-                        if (layerName == "$") {
-                            layerName = DEFAULT_LAYER
-                        }
-                        result.schema.addLayer(layerName)
-                        val jsonNode = entry.value
-                        LOG.info("layer={}", layerName)
-                        LOG.info("jsonNode={}", jsonNode)
-                        if (!jsonNode.isObject) {
+                .readTree(schemaYAML)
+                .fields()
+                .forEachRemaining { entry: Map.Entry<String, JsonNode> ->
+                    var layerName = entry.key
+                    if (layerName == "$") {
+                        layerName = DEFAULT_LAYER
+                    }
+                    result.schema.addLayer(layerName)
+                    val jsonNode = entry.value
+                    LOG.info("layer={}", layerName)
+                    LOG.info("jsonNode={}", jsonNode)
+                    if (!jsonNode.isObject) {
+                        result
+                            .errors
+                            .add("expected root markup with list of child markup, found (as json) $jsonNode")
+                    } else {
+                        if (jsonNode.size() > 1) {
                             result
-                                    .errors
-                                    .add("expected root markup with list of child markup, found (as json) $jsonNode")
+                                .errors
+                                .add(
+                                    "only 1 root markup allowed; found ${jsonNode.size()} ${Lists.newArrayList(jsonNode.fieldNames())} in layer $layerName"
+                                )
                         } else {
-                            if (jsonNode.size() > 1) {
-                                result
-                                        .errors
-                                        .add(
-                                                "only 1 root markup allowed; found ${jsonNode.size()} ${Lists.newArrayList(jsonNode.fieldNames())} in layer $layerName")
-                            } else {
-                                val layerHierarchy = buildLayerHierarchy(jsonNode)
-                                result.schema.setLayerHierarchy(layerName, layerHierarchy)
-                            }
+                            val layerHierarchy = buildLayerHierarchy(jsonNode)
+                            result.schema.setLayerHierarchy(layerName, layerHierarchy)
                         }
                     }
+                }
         } catch (e: Exception) {
             result.errors.add(e.message!!)
         }

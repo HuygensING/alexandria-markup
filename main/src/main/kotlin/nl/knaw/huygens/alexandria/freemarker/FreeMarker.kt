@@ -4,7 +4,7 @@ package nl.knaw.huygens.alexandria.freemarker
  * #%L
  * alexandria-markup-core
  * =======
- * Copyright (C) 2016 - 2020 HuC DI (KNAW)
+ * Copyright (C) 2016 - 2021 HuC DI (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,29 +31,29 @@ object FreeMarker {
 
     @JvmStatic
     fun templateToString(fmTemplate: String, fmRootMap: Any, clazz: Class<*>): String =
-            processTemplate(fmTemplate, fmRootMap, clazz, StringWriter())
+        processTemplate(fmTemplate, fmRootMap, clazz, StringWriter())
 
     @JvmStatic
     fun templateToFile(fmTemplate: String, file: File, fmRootMap: Any, clazz: Class<*>): String =
-            try {
-                val out = FileWriter(file)
-                processTemplate(fmTemplate, fmRootMap, clazz, out)
-            } catch (e: IOException) {
-                throw UncheckedIOException(e)
-            }
+        try {
+            val out = FileWriter(file)
+            processTemplate(fmTemplate, fmRootMap, clazz, out)
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
+        }
 
     private fun processTemplate(fmTemplate: String, fmRootMap: Any, clazz: Class<*>, out: Writer): String =
-            try {
-                FREEMARKER.setClassForTemplateLoading(clazz, "")
-                val template = FREEMARKER.getTemplate(fmTemplate)
-                template.outputEncoding = "UTF-8"
-                template.process(fmRootMap, out)
-                out.toString()
-            } catch (e1: IOException) {
-                throw RuntimeException(e1)
-            } catch (e1: TemplateException) {
-                throw RuntimeException(e1)
-            }
+        try {
+            FREEMARKER.setClassForTemplateLoading(clazz, "")
+            val template = FREEMARKER.getTemplate(fmTemplate)
+            template.outputEncoding = "UTF-8"
+            template.process(fmRootMap, out)
+            out.toString()
+        } catch (e1: IOException) {
+            throw RuntimeException(e1)
+        } catch (e1: TemplateException) {
+            throw RuntimeException(e1)
+        }
 
     init {
         FREEMARKER.objectWrapper = DefaultObjectWrapper(VERSION)
