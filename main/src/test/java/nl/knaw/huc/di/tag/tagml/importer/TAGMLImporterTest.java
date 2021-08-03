@@ -141,7 +141,7 @@ public class TAGMLImporterTest extends TAGBaseStoreTest {
         });
   }
 
-  @Test // RD-206
+  @Test // RD-206spar
   public void testRD206_2() {
     String tagML =
         "[root metadata={"

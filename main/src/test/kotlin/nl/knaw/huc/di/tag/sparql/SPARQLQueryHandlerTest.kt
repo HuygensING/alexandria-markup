@@ -36,6 +36,99 @@ class SPARQLQueryHandlerTest : AlexandriaBaseStoreTest() {
     private val LOG = LoggerFactory.getLogger(javaClass)
 
     @Test
+    fun testSPARQLQueryWithDiscontinuity0() {
+        val tagml = "[q>[s>'What do you mean,<-s] he gasped [+s>poisonous?<s]<q]"
+        runInStoreTransaction { store: TAGStore ->
+            val fineDay = TAGMLImporter(store).importTAGML(tagml)
+            val h = SPARQLQueryHandler(fineDay)
+            val statement = """
+                prefix tag: <https://huygensing.github.io/TAG/TAGML/ontology/tagml.ttl#>
+                prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                # Select all markup nodes labeled 'del'
+                # Return the content of the text nodes that are associated with these markup nodes
+                SELECT ?element ?content
+                WHERE {
+                  {
+                    ?element tag:markup_name                              's' ;
+                             tag:elements/rdf:rest*/rdf:first/tag:content ?content 
+                    FILTER NOT EXISTS { ?m tag:continued ?element }
+                  }
+                  UNION 
+                  {
+                    ?element tag:markup_name                              's' ;
+                             tag:continued                                ?c.
+                    ?c       tag:elements/rdf:rest*/rdf:first/tag:content ?content .
+                  }  
+                }
+                ORDER BY ?element ?content
+                """.trimMargin()
+            LOG.info(statement)
+            val result = h.execute(statement)
+            LOG.info("result={}", result)
+            assertQuerySucceeded(result)
+
+            val expected: MutableList<String> = ArrayList()
+            expected.add(normalizeLineEndings("""
+                ------------------
+                | markup | count |
+                ==================
+                | "q"    | 2     |
+                | "x"    | 1     |
+                ------------------
+                
+                """.trimIndent()))
+            assertThat(result.getValues()).containsExactlyElementsOf(expected)
+        }
+    }
+
+    @Test
+    fun testSPARQLQuery() {
+        val tagml = "[TEI|+P,+L>[page|P>[chapter|L n=1>[p|L>[l|P>[s|L n=1>[q|L>If it's a fine day tomorrow<q]" +
+                " said Mrs. Ramsay.<s] [s|L n=2>[q|L>But you'll have to be up with the lark,<q] she added.<s]<l]<p]" +
+                "[p|L>[l|P>[s|L>To her son <|[del|P>these<del]|[del|P>[add|P>her<add]<del]|[add|P>these<add]|> words" +
+                " conveyed an extraordinary impression of<l][l|P>joy.<s] [s|L n=3>It seemed [del|P>indeed<del]" +
+                " as if it were now settled, and the expedition<l][l|P> [del|P>to which he<del] [del|P>with all its<del]" +
+                " certain to take place, and [del|P>the<del]<l] [l|P>the wonders to which he had looked forward " +
+                "[del|P>th<del] [del|P>br<del] [del|P>brought<-del] within touch<l][l|P>[+del|P>so near — " +
+                "only a night & a sail<del] [add|P>with<add] a dazzling, uneasy<l][l|P>disquietude, " +
+                "[del|P>a glittering<del] a night[add|P>'s pains<add], & then a day's sail, between.<l]" +
+                "<s]<p]<chapter]<page|P]<TEI]"
+        runInStoreTransaction { store: TAGStore ->
+            val fineDay = TAGMLImporter(store).importTAGML(tagml)
+            val h = SPARQLQueryHandler(fineDay)
+            val statement = """
+                prefix tag: <https://huygensing.github.io/TAG/TAGML/ontology/tagml.ttl#>
+                prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                # Select all markup nodes labeled 'del'
+                # Return the content of the text nodes that are associated with these markup nodes
+               SELECT ?content
+               WHERE {
+                  ?element tag:markup_name 'del' ;
+                  ?element tag:elements ?text ;
+                  ?text tag:content ?content .
+                  }
+                  ORDER BY ?content
+                """.trimMargin()
+            LOG.info(statement)
+            val result = h.execute(statement)
+            LOG.info("result={}", result)
+            assertQuerySucceeded(result)
+
+            val expected: MutableList<String> = ArrayList()
+            expected.add(normalizeLineEndings("""
+                ------------------
+                | markup | count |
+                ==================
+                | "q"    | 2     |
+                | "x"    | 1     |
+                ------------------
+                
+                """.trimIndent()))
+            assertThat(result.getValues()).containsExactlyElementsOf(expected)
+        }
+    }
+
+    @Test
     fun testSPARQLQuerySelect() {
         val tagml = "[x>[q>and what is the use of a book,<-q] thought Alice[+q>without pictures or conversation?<q]<x]"
         runInStoreTransaction { store: TAGStore ->

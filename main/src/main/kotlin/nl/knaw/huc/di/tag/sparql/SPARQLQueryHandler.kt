@@ -37,15 +37,20 @@ class SPARQLQueryHandler(document: TAGDocument) {
       val query = QueryFactory.create(sparqlQuery)
       //    PrefixMapping prefixMapping = query.getPrefixMapping();
       val qe = QueryExecutionFactory.create(query, model)
-      if (query.isSelectType) {
-        val results = qe.execSelect()
-        result.addValue(asTable(results, query))
-      } else if (query.isAskType) {
-        result.addValue(qe.execAsk())
-      } else if (query.isConstructType) {
-        result.addValue(asTurtle(qe.execConstruct()))
-      } else if (query.isDescribeType) {
-        result.addValue(asTurtle(qe.execDescribe()))
+      when {
+          query.isSelectType -> {
+            val results = qe.execSelect()
+            result.addValue(asTable(results, query))
+          }
+          query.isAskType -> {
+            result.addValue(qe.execAsk())
+          }
+          query.isConstructType -> {
+            result.addValue(asTurtle(qe.execConstruct()))
+          }
+          query.isDescribeType -> {
+            result.addValue(asTurtle(qe.execDescribe()))
+          }
       }
     } catch (qpe: QueryParseException) {
       result.errors.add(qpe.message ?: "no message")
