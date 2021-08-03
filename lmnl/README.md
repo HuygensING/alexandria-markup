@@ -4,19 +4,17 @@ This library contains the ANTLR4-generated `LMNLLexer` for tokenizing LMNL docum
 
 ## maven usage
 
-add this dependency to your `pom.xml`
+add this dependency to your `pom.xml` 
 
 ```xml
-
 <dependency>
-    <groupId>nl.knaw.huygens.alexandria</groupId>
-    <artifactId>lmnl</artifactId>
-    <version>2.4</version>
+  <groupId>nl.knaw.huygens.alexandria</groupId>
+  <artifactId>lmnl</artifactId>
+  <version>2.4.1-SNAPSHOT</version>
 </dependency>
 ```
 
 and this repository definition:
-
 ```xml
 <repository>
   <id>huygens</id>
