@@ -25,7 +25,7 @@
         <java.version>1.8</java.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
-        <antlr.version>4.9.2</antlr.version>
+        <antlr.version>4.9.3</antlr.version>
         <antlr4.visitor>true</antlr4.visitor>
         <asciitable.version>0.3.2</asciitable.version>
         <assertj.version>3.17.2</assertj.version>
